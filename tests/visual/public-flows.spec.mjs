@@ -85,16 +85,16 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
     ['/help', 'Відповіді про реальну роботу сервісу'],
     ['/help/kanban-and-bulk-actions', 'Як змінити багато завдань одразу'],
     ['/news', 'Новини продукту'],
-    ['/terms', 'Умови користування QuickTeam'],
-    ['/privacy', 'Політика конфіденційності QuickTeam'],
-    ['/offer', 'Публічна оферта QuickTeam'],
+    ['/terms', 'Умови користування qTicket'],
+    ['/privacy', 'Політика конфіденційності qTicket'],
+    ['/offer', 'Публічна оферта qTicket'],
   ];
 
   for (const [route, heading] of routes) {
     const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
     expect(response?.status(), route).toBe(200);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(heading);
-    await expect(page.getByRole('link', { name: 'QuickTeam — головна' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'qTicket — головна' })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, `${route} horizontal overflow`).toBeLessThanOrEqual(0);
   }
@@ -142,7 +142,7 @@ test('bulk toolbar remains usable at phone width and opens its confirm flow', as
 
   // The catalogue now shows the toolbar twice — idle, and mid-operation with
   // every control disabled. This flow is about the idle one.
-  const toolbar = page.getByRole('toolbar', { name: 'Дії з вибраними завданнями: 4' });
+  const toolbar = page.getByRole('toolbar', { name: 'Дії з вибраними інцидентами: 4' });
   await expect(toolbar).toBeVisible();
   expect(await toolbar.evaluate(element => element.scrollWidth >= element.clientWidth)).toBe(true);
   // On a phone the less-frequent actions are intentionally reachable by
@@ -156,7 +156,7 @@ test('bulk toolbar remains usable at phone width and opens its confirm flow', as
   const deadlineAction = page.getByRole('menuitem', { name: 'Встановити дедлайн' });
   await expect(deadlineAction).toBeVisible();
   await deadlineAction.click();
-  await expect(page.getByRole('dialog', { name: /Дедлайн для 4 завдань/ })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: /Дедлайн для 4 інцидентів/ })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expectHealthyPage(page, errors);
