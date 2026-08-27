@@ -1,0 +1,123 @@
+name: Scheduled notifications
+
+# Vercel Hobby allows one cron run per day, which is useless for calendar
+# reminders that need to fire minutes before an event, so the sweep is driven
+# from here.
+#
+# GitHub does not honour `*/5 * * * *` either. Measured on this repository, a
+# five-minute schedule actually starts a run roughly once an hour during the day
+# and once every two to three hours overnight. So one run stays alive sweeping
+# on a real interval instead of firing once and exiting, and
+# `cancel-in-progress: true` makes the next scheduled run replace the loop
+# rather than double it.
+#
+# ── Three schedules, because the work is three different costs ──────────────
+#
+# dispatch (every minute, inside the loop) — one indexed query against the
+#   outbox, no state read, no state write. It costs a single Firestore read when
+#   nothing is due, and it is the only thing that decides how late a reminder
+#   is. It is cheap because the rows it reads are written when somebody sets a
+#   deadline, by the route that accepted it — not found by a scan.
+#
+# maintenance (hourly) — two bounded indexed queries: finalising soft-deleted
+#   tasks past their undo window, and expiring read notifications. Hourly rather
+#   than nightly because «Нещодавно видалене» promises twenty-four hours, and a
+#   nightly pass would stretch that to forty-eight.
+#
+# materialise (twice a day) — the safety net. Rebuilds the outbox from the
+#   source data and posts birthday greetings. This is the expensive pass — it
+#   reads deadlines and calendar events rather than an indexed queue — and it
+#   used to run every twenty minutes, which is what made the sweep unaffordable
+#   on a free tier at all.
+#
+#   Twice rather than once because a day-scale reminder belongs to a day in the
+#   organization's timezone: the pass that writes it has to run while it is
+#   still early morning where the workspace is, and one UTC hour cannot be early
+#   morning everywhere. Twelve hours apart covers every timezone, and
+#   MATERIALISE_INTERVAL_MS (12h) is what stops the second run doing the work
+#   again where the first one already did it.
+#
+# Requires the CRON_SECRET repository secret to hold exactly the same value as
+# the CRON_SECRET environment variable in the production deployment.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+    - cron: '7 * * * *'
+    - cron: '11 3 * * *'
+    - cron: '11 15 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Which pass to run once'
+        type: choice
+        options: [dispatch, maintenance, materialise, full]
+        default: full
+
+jobs:
+  dispatch:
+    if: github.event.schedule == '*/5 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    concurrency:
+      group: scheduled-notifications-dispatch
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v5
+      - name: Send what is due, every minute, until the next scheduled run takes over
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          SWEEP_INTERVAL_SECONDS: '60'
+          SWEEP_MINUTES: '50'
+          MODE: dispatch
+        run: bash .github/scripts/sweep-notifications.sh
+
+  maintenance:
+    if: github.event.schedule == '7 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: scheduled-notifications-maintenance
+    steps:
+      - uses: actions/checkout@v5
+      - name: Empty the undo window and expire read records
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          SWEEP_INTERVAL_SECONDS: '60'
+          SWEEP_MINUTES: '0'
+          MODE: maintenance
+        run: bash .github/scripts/sweep-notifications.sh
+
+  materialise:
+    if: github.event.schedule == '11 3 * * *' || github.event.schedule == '11 15 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: scheduled-notifications-materialise
+    steps:
+      - uses: actions/checkout@v5
+      - name: Restock the outbox from the source data, and greet the birthdays
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          SWEEP_INTERVAL_SECONDS: '60'
+          SWEEP_MINUTES: '0'
+          MODE: materialise
+        run: bash .github/scripts/sweep-notifications.sh
+
+  manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run one pass by hand
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          SWEEP_INTERVAL_SECONDS: '60'
+          SWEEP_MINUTES: '0'
+          MODE: ${{ inputs.mode }}
+        run: bash .github/scripts/sweep-notifications.sh

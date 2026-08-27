@@ -1,0 +1,368 @@
+{
+  "generatedBy": "scripts/kit-a11y.mjs",
+  "scope": "authenticated-workspace + src/components/ui",
+  "contract": {
+    "namelessControls": "An icon-only control must carry an accessible name: aria-label, or the kit prop that becomes one.",
+    "imagesWithoutAlt": "Every <img> declares alt, empty when the image is decoration.",
+    "positiveTabIndex": "Tab order is the document order. A positive tabIndex overrides it and strands whatever it forgot.",
+    "fakeButtons": "A click handler belongs on a button or a link. A div needs role, tabIndex and a key handler to be one — and then it should have been a button.",
+    "contrastFailures": "The brand quiet greys stay visible and stay distinct from each other; the sidebar keeps 4.5:1 for what it reads and 3.5:1 for the project list it scans.",
+    "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
+  },
+  "totals": {
+    "files": 385,
+    "elements": 4516,
+    "namelessControls": 0,
+    "imagesWithoutAlt": 0,
+    "positiveTabIndex": 0,
+    "fakeButtons": 0,
+    "contrastFailures": 0,
+    "runtimeNameVerification": 47
+  },
+  "namelessControls": [],
+  "imagesWithoutAlt": [],
+  "positiveTabIndex": [],
+  "fakeButtons": [],
+  "contrastFailures": [],
+  "runtimeNameVerification": [
+    {
+      "element": "Button",
+      "location": "src/app/(app)/settings/page.js:3687",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/app/(app)/settings/page.js:3787",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/app/(app)/settings/page.js:682",
+      "attributes": [
+        "aria-label",
+        "title"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/app/(app)/sprints/page.js:908",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/app/(app)/team/page.js:124",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/components/integrations/IntegrationCard.jsx:106",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/profile/ProfileView.jsx:455",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/profile/ProfileView.jsx:60",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:118",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:145",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:172",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:48",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "IconAction",
+      "location": "src/components/ui/Chat/ChatConversationHeader.jsx:102",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/components/ui/Chat/MessageBubble.jsx:376",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/components/ui/Chat/MessageBubble.jsx:395",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/ChatComposerCore.jsx:197",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/ChatComposerCore.jsx:224",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/ChatComposerCore.jsx:241",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/ContextMenu.jsx:114",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "IconAction",
+      "location": "src/components/ui/DataDisplay/PlanMark.jsx:42",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/DataDisplay/Tag.jsx:70",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/components/ui/ExportMenu.jsx:85",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Feedback/PlanLimitRail.jsx:62",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "IconAction",
+      "location": "src/components/ui/Forms/MarkdownEditor.jsx:49",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Forms/ToggleSwitch.jsx:46",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/ImageUpload.jsx:121",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Layout/TopHeader.jsx:83",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Navigation/Breadcrumb.jsx:98",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Navigation/CommandPalette.jsx:182",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Navigation/MobilePaneBack.jsx:52",
+      "attributes": [
+        "aria-label",
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Select.jsx:296",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Select.jsx:528",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/Tabs.jsx:139",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/TaskManagement/AttachmentRow.jsx:119",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "Button",
+      "location": "src/components/ui/TaskManagement/TaskListView.jsx:238",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/TaskManagement/TaskTableView.jsx:470",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/TaskManagement/TaskTableView.jsx:741",
+      "attributes": [
+        "title",
+        "aria-label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/TaskManagement/TaskTableView.jsx:921",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/ui/TaskManagement/TimeTrackingControl.jsx:41",
+      "attributes": [
+        "aria-label",
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/workspace/HoverCard.jsx:160",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/workspace/IssueMentionChip.jsx:201",
+      "attributes": [
+        "title"
+      ]
+    },
+    {
+      "element": "IconAction",
+      "location": "src/components/workspace/qtplus/cards/AudioCard.jsx:19",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:77",
+      "attributes": [
+        "aria-label"
+      ]
+    },
+    {
+      "element": "IconAction",
+      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:86",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "AvatarButton",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1407",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "AvatarButton",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1427",
+      "attributes": [
+        "label"
+      ]
+    },
+    {
+      "element": "IconAction",
+      "location": "src/components/WorkspaceHeader.jsx:443",
+      "attributes": [
+        "label"
+      ]
+    }
+  ]
+}

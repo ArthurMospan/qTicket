@@ -1,0 +1,52 @@
+# Dependencies
+/node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Build, test and tool output
+/.next/
+/out/
+/build/
+/dist/
+/coverage/
+/test-results/
+/playwright-report/
+/.cache/
+/.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local configuration and secrets
+.env*
+*.pem
+serviceAccountKey.json
+/.vercel/
+/.firebase/
+/.firebase-config/
+/.superpowers/
+/.claude/scheduled_tasks.lock
+
+# Logs, editor backups and temporary files
+*.log
+*.tmp
+*.tmp.*
+*.temp
+*.bak
+*.orig
+*.rej
+*~
+.DS_Store
+
+# Local agent/dev scratch output
+ag-stop-probe.json
+calls.json
+msgs.json
+my_diff.txt
+
+.vercel
+.claude/

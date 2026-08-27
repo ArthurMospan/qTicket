@@ -1,0 +1,744 @@
+{
+  "generatedBy": "scripts/audit-ui-fidelity.mjs",
+  "scope": "authenticated-workspace",
+  "policy": {
+    "sharedComponentContract": "A new reusable UI component must be used by the product, exported from src/components/ui, and rendered in /ui-kit in the same change.",
+    "driftContract": "New native-control fingerprints or shared chrome overrides must be reviewed before the generated audit baseline changes.",
+    "brandingContract": "Custom branding remains limited to the sidebar and its contrast-dependent children.",
+    "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
+  },
+  "totals": {
+    "productFiles": 267,
+    "parsedFiles": 267,
+    "parseErrors": 0,
+    "nativeControls": 21,
+    "structures": {
+      "chat": 2,
+      "analytics": 1,
+      "qtplus": 1,
+      "settings": 1,
+      "shell": 13,
+      "other": 3
+    },
+    "styledNativeControls": 12,
+    "reviewedNativeControls": 8,
+    "manualLabels": 0,
+    "manualModalShells": 0,
+    "manualPills": 0,
+    "manualSurfaces": 0,
+    "localSurfaceExceptions": 45,
+    "manualIconButtons": 0,
+    "headingStyles": 0,
+    "sharedChromeOverrides": 0,
+    "localSharedNameCollisions": 0
+  },
+  "nativeByTag": {
+    "button": 21,
+    "input": 0,
+    "textarea": 0,
+    "select": 0
+  },
+  "kit": {
+    "totals": {
+      "components": 120,
+      "used": 120,
+      "unused": 0,
+      "covered": 115,
+      "uncovered": 0,
+      "routes": 12,
+      "previews": 151,
+      "internal": 5,
+      "unlisted": 0
+    },
+    "unusedComponents": []
+  },
+  "parseErrors": [],
+  "nativeControls": [
+    {
+      "tag": "button",
+      "location": "src/components/AuthLayout.jsx:104",
+      "className": "w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-red-400 hover:bg-white/5 transition-colors text-left",
+      "text": "Вийти",
+      "childElements": [
+        "LogOut"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/AuthLayout.jsx:140",
+      "className": "",
+      "text": "Підтримка",
+      "childElements": [],
+      "ariaLabel": "",
+      "styled": false,
+      "reviewed": "auth-footer-support",
+      "resembles": "",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/AuthLayout.jsx:66",
+      "className": "hidden md:flex items-center gap-2 text-white/70 hover:text-white transition-colors text-[13px] font-medium",
+      "text": "Створити організацію",
+      "childElements": [
+        "Plus"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/AuthLayout.jsx:87",
+      "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/MobileNav.jsx:237",
+      "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
+      "text": "",
+      "childElements": [
+        "Menu",
+        "span"
+      ],
+      "ariaLabel": "",
+      "styled": false,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/MobileNav.jsx:297",
+      "className": "flex items-center gap-[6px] text-[var(--sb-text)] min-w-0",
+      "text": "",
+      "childElements": [
+        "span",
+        "ChevronsUpDown"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/MobileNav.jsx:379",
+      "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
+      "text": "",
+      "childElements": [
+        "Icon",
+        "span"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "navigation-sheet-row",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/OrgSwitcherScreen.jsx:54",
+      "className": "flex flex-col items-center gap-4 transition-all duration-300 group/item w-[160px] group-hover/list:opacity-30 hover:!opacity-100",
+      "text": "",
+      "childElements": [
+        "div"
+      ],
+      "ariaLabel": "",
+      "styled": false,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "settings",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/profile/ProfileView.jsx:455",
+      "className": "ui-native-control",
+      "text": "",
+      "childElements": [
+        "Pill"
+      ],
+      "ariaLabel": "",
+      "styled": false,
+      "reviewed": "profile-project-chip",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": [
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/profile/ProfileView.jsx:60",
+      "className": "cursor-pointer truncate rounded-[4px] text-left text-[13px] font-medium leading-none text-ink outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ink",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "Скопіювати: …",
+      "styled": true,
+      "reviewed": "profile-contact-value",
+      "resembles": "",
+      "structure": "shell",
+      "routes": [
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/UserStatusDialog.jsx:79",
+      "className": "flex items-center gap-[10px] p-[10px] rounded-[12px] hover:bg-canvas transition-all text-left group",
+      "text": "",
+      "childElements": [
+        "span"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "other",
+      "routes": [
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/UserStatusDialog.jsx:95",
+      "className": "w-[36px] h-[36px] rounded-full flex items-center justify-center text-[18px] transition-all ${…}",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "other",
+      "routes": [
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/UserStatusSetter.jsx:17",
+      "className": "flex items-center gap-1.5 mr-1 bg-canvas px-3 py-1.5 rounded-full cursor-pointer hover:bg-line transition-colors",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/workspace/HoverCard.jsx:160",
+      "className": "",
+      "text": "",
+      "childElements": [
+        "span"
+      ],
+      "ariaLabel": "Відкрити профіль …",
+      "styled": false,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "chat",
+      "routes": [
+        "/",
+        "/[projectId]",
+        "/[projectId]/issue/[issueId]",
+        "/analytics",
+        "/analytics/team/[memberId]",
+        "/calendar",
+        "/calendar/event/[eventId]",
+        "/chat",
+        "/my",
+        "/settings",
+        "/sprints",
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/workspace/IssueMentionChip.jsx:201",
+      "className": "",
+      "text": "",
+      "childElements": [
+        "span"
+      ],
+      "ariaLabel": "… : … Завдання …",
+      "styled": false,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "other",
+      "routes": [
+        "/",
+        "/[projectId]",
+        "/[projectId]/issue/[issueId]",
+        "/analytics",
+        "/analytics/team/[memberId]",
+        "/calendar",
+        "/calendar/event/[eventId]",
+        "/chat",
+        "/my",
+        "/settings",
+        "/sprints",
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:77",
+      "className": "absolute inset-0 cursor-pointer",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "Відкрити …",
+      "styled": false,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "qtplus",
+      "routes": [
+        "/[projectId]"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:168",
+      "className": "${…} cursor-pointer transition-colors ${…}",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "Перейти до повідомлення",
+      "styled": false,
+      "reviewed": "chat-reply-quote",
+      "resembles": "",
+      "structure": "chat",
+      "routes": [
+        "/[projectId]/issue/[issueId]",
+        "/sprints"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/workspace/WorkloadTab.jsx:619",
+      "className": "flex min-w-[150px] flex-1 items-center gap-2.5 rounded-[12px] px-3 py-2.5 text-left transition-all ${…}",
+      "text": "",
+      "childElements": [
+        "span"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "analytics",
+      "routes": [
+        "/analytics",
+        "/analytics/team/[memberId]"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:299",
+      "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
+      "text": "",
+      "childElements": [
+        "PanelLeftClose"
+      ],
+      "ariaLabel": "Згорнути бічну панель",
+      "styled": true,
+      "reviewed": "branding-action",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:322",
+      "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
+      "text": "",
+      "childElements": [
+        "PanelLeftOpen"
+      ],
+      "ariaLabel": "Розгорнути бічну панель",
+      "styled": true,
+      "reviewed": "branding-action",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:381",
+      "className": "transition-colors",
+      "text": "",
+      "childElements": [
+        "Plus"
+      ],
+      "ariaLabel": "Новий клієнт",
+      "styled": false,
+      "reviewed": "branding-action",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    }
+  ],
+  "structureLabels": {
+    "chat": "Чат",
+    "calendar": "Календар",
+    "analytics": "Аналітика",
+    "qtplus": "QuickTeam+",
+    "ai-call": "AI-дзвінок",
+    "tasks": "Задачі",
+    "board": "Дошка й проєкт",
+    "sprints": "Спринти",
+    "settings": "Налаштування",
+    "shell": "Оболонка"
+  },
+  "nativeHotspots": [
+    {
+      "file": "src/components/AuthLayout.jsx",
+      "count": 4
+    },
+    {
+      "file": "src/components/MobileNav.jsx",
+      "count": 3
+    },
+    {
+      "file": "src/components/WorkspaceSidebar.jsx",
+      "count": 3
+    },
+    {
+      "file": "src/components/profile/ProfileView.jsx",
+      "count": 2
+    },
+    {
+      "file": "src/components/UserStatusDialog.jsx",
+      "count": 2
+    },
+    {
+      "file": "src/components/OrgSwitcherScreen.jsx",
+      "count": 1
+    },
+    {
+      "file": "src/components/UserStatusSetter.jsx",
+      "count": 1
+    },
+    {
+      "file": "src/components/workspace/HoverCard.jsx",
+      "count": 1
+    },
+    {
+      "file": "src/components/workspace/IssueMentionChip.jsx",
+      "count": 1
+    },
+    {
+      "file": "src/components/workspace/qtplus/cards/FileCard.jsx",
+      "count": 1
+    },
+    {
+      "file": "src/components/workspace/UnifiedTimeline.jsx",
+      "count": 1
+    },
+    {
+      "file": "src/components/workspace/WorkloadTab.jsx",
+      "count": 1
+    }
+  ],
+  "repeatedNativeFingerprints": [],
+  "reviewedNativeControls": [
+    {
+      "location": "src/components/AuthLayout.jsx:140",
+      "tag": "button",
+      "context": "auth-footer-support"
+    },
+    {
+      "location": "src/components/MobileNav.jsx:379",
+      "tag": "button",
+      "context": "navigation-sheet-row"
+    },
+    {
+      "location": "src/components/profile/ProfileView.jsx:455",
+      "tag": "button",
+      "context": "profile-project-chip"
+    },
+    {
+      "location": "src/components/profile/ProfileView.jsx:60",
+      "tag": "button",
+      "context": "profile-contact-value"
+    },
+    {
+      "location": "src/components/workspace/UnifiedTimeline.jsx:168",
+      "tag": "button",
+      "context": "chat-reply-quote"
+    },
+    {
+      "location": "src/components/WorkspaceSidebar.jsx:299",
+      "tag": "button",
+      "context": "branding-action"
+    },
+    {
+      "location": "src/components/WorkspaceSidebar.jsx:322",
+      "tag": "button",
+      "context": "branding-action"
+    },
+    {
+      "location": "src/components/WorkspaceSidebar.jsx:381",
+      "tag": "button",
+      "context": "branding-action"
+    }
+  ],
+  "manualLabels": [],
+  "manualModalShells": [],
+  "manualPills": [],
+  "manualSurfaces": [],
+  "localSurfaceExceptions": [
+    {
+      "location": "src/app/(app)/[projectId]/ProjectBoardClient.jsx:359",
+      "tag": "div",
+      "className": "w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm"
+    },
+    {
+      "location": "src/app/(app)/chat/page.js:393",
+      "tag": "div",
+      "className": "relative z-10 flex h-[56px] shrink-0 items-center justify-between border-b border-line/70 bg-canvas/90 px-5 backdrop-blur-xl md:rounded-t-[var(--ui-radius-surface)]"
+    },
+    {
+      "location": "src/app/(app)/error.js:37",
+      "tag": "div",
+      "className": "w-full max-w-[420px] bg-white border border-line rounded-[16px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center"
+    },
+    {
+      "location": "src/app/(app)/page.js:182",
+      "tag": "div",
+      "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
+    },
+    {
+      "location": "src/app/(app)/page.js:194",
+      "tag": "div",
+      "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
+    },
+    {
+      "location": "src/app/(app)/settings/page.js:537",
+      "tag": "div",
+      "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
+    },
+    {
+      "location": "src/app/(app)/settings/page.js:557",
+      "tag": "div",
+      "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
+    },
+    {
+      "location": "src/app/(app)/settings/page.js:601",
+      "tag": "div",
+      "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
+    },
+    {
+      "location": "src/app/(app)/settings/page.js:720",
+      "tag": "div",
+      "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group"
+    },
+    {
+      "location": "src/app/(app)/sprints/page.js:1038",
+      "tag": "div",
+      "className": "py-12 text-center text-[13px] text-faint bg-canvas rounded-[16px]"
+    },
+    {
+      "location": "src/app/(app)/sprints/page.js:1052",
+      "tag": "div",
+      "className": "flex w-[48px] shrink-0 cursor-pointer flex-col items-center justify-start rounded-[16px] bg-canvas pb-2 pt-4 transition-colors hover:bg-line"
+    },
+    {
+      "location": "src/app/(app)/sprints/page.js:883",
+      "tag": "div",
+      "className": "bg-canvas rounded-[16px] border border-transparent shadow-none overflow-hidden shrink-0"
+    },
+    {
+      "location": "src/components/AudioTaskPanel.jsx:211",
+      "tag": "div",
+      "className": "flex items-center gap-3 rounded-[14px] bg-canvas px-4 py-3"
+    },
+    {
+      "location": "src/components/AudioTaskPanel.jsx:253",
+      "tag": "div",
+      "className": "rounded-[14px] bg-canvas p-4"
+    },
+    {
+      "location": "src/components/AudioTaskPanel.jsx:259",
+      "tag": "div",
+      "className": "rounded-[14px] bg-canvas p-4"
+    },
+    {
+      "location": "src/components/AudioTaskPanel.jsx:288",
+      "tag": "div",
+      "className": "rounded-[14px] border border-line bg-white p-4 transition-opacity ${…}"
+    },
+    {
+      "location": "src/components/integrations/IntegrationCard.jsx:36",
+      "tag": "div",
+      "className": "rounded-[10px] border border-line bg-canvas p-3 ${…}"
+    },
+    {
+      "location": "src/components/integrations/IntegrationCard.jsx:95",
+      "tag": "div",
+      "className": "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-white"
+    },
+    {
+      "location": "src/components/integrations/YouTrackImportCard.jsx:579",
+      "tag": "div",
+      "className": "rounded-[10px] bg-white p-2"
+    },
+    {
+      "location": "src/components/integrations/YouTrackImportCard.jsx:675",
+      "tag": "div",
+      "className": "grid items-center gap-2 rounded-[10px] bg-white p-2 sm:grid-cols-[minmax(180px,1fr)_minmax(220px,1fr)]"
+    },
+    {
+      "location": "src/components/InviteLinkSection.jsx:98",
+      "tag": "div",
+      "className": "mt-4 rounded-[12px] border border-dashed border-faint bg-white p-2"
+    },
+    {
+      "location": "src/components/migrations/DataMigrationSettings.jsx:91",
+      "tag": "div",
+      "className": "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border border-line bg-white"
+    },
+    {
+      "location": "src/components/SearchModal.jsx:43",
+      "tag": "div",
+      "className": "bg-white rounded-[16px] shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-line w-full sm:w-[480px] max-h-[480px] overflow-hidden flex flex-col"
+    },
+    {
+      "location": "src/components/SearchModal.jsx:88",
+      "tag": "div",
+      "className": "w-5 h-5 flex items-center justify-center rounded-[6px] shrink-0 bg-white border border-line shadow-sm"
+    },
+    {
+      "location": "src/components/workspace/AgileBoard.jsx:471",
+      "tag": "div",
+      "className": "flex flex-col items-center justify-start w-[48px] shrink-0 pt-4 pb-2 bg-canvas rounded-t-[12px] cursor-pointer hover:bg-zone-hover transition-colors"
+    },
+    {
+      "location": "src/components/workspace/AgileBoard.jsx:558",
+      "tag": "div",
+      "className": "sticky left-0 flex items-center bg-canvas rounded-[6px] px-3 py-[6px] mb-2 w-max min-w-[200px]"
+    },
+    {
+      "location": "src/components/workspace/BillingTab.jsx:588",
+      "tag": "div",
+      "className": "bg-canvas rounded-[10px] px-4 py-3 mb-6"
+    },
+    {
+      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:283",
+      "tag": "div",
+      "className": "overflow-hidden rounded-[18px] border border-black/[0.05] bg-white"
+    },
+    {
+      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:294",
+      "tag": "div",
+      "className": "flex items-start gap-2 rounded-[12px] bg-white p-3 ring-1 ring-black/[0.04]"
+    },
+    {
+      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:299",
+      "tag": "div",
+      "className": "flex items-start gap-2 rounded-[12px] bg-white p-3 ring-1 ring-black/[0.04]"
+    },
+    {
+      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:334",
+      "tag": "div",
+      "className": "flex items-center gap-2.5 rounded-[12px] border border-black/[0.05] bg-white p-2.5"
+    },
+    {
+      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:778",
+      "tag": "div",
+      "className": "overflow-hidden rounded-[14px] border border-line bg-white"
+    },
+    {
+      "location": "src/components/workspace/calendar/CalendarEventPage.jsx:289",
+      "tag": "div",
+      "className": "rounded-[14px] bg-canvas px-4 py-8 text-center"
+    },
+    {
+      "location": "src/components/workspace/EventModal.jsx:16",
+      "tag": "div",
+      "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
+    },
+    {
+      "location": "src/components/workspace/IssueModal.jsx:11",
+      "tag": "div",
+      "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
+    },
+    {
+      "location": "src/components/workspace/qtplus/cards/ChecklistCard.jsx:9",
+      "tag": "div",
+      "className": "rounded-[12px] border border-line bg-surface flex flex-col overflow-hidden"
+    },
+    {
+      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:62",
+      "tag": "div",
+      "className": "group overflow-hidden rounded-[12px] border border-line bg-surface transition-shadow hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+    },
+    {
+      "location": "src/components/workspace/qtplus/cards/LinkCard.jsx:19",
+      "tag": "div",
+      "className": "rounded-[12px] border border-line bg-surface px-3 py-2"
+    },
+    {
+      "location": "src/components/workspace/qtplus/cards/PollCard.jsx:9",
+      "tag": "div",
+      "className": "rounded-[12px] border border-line bg-surface flex flex-col overflow-hidden"
+    },
+    {
+      "location": "src/components/workspace/qtplus/chat/ChatMessage.jsx:96",
+      "tag": "div",
+      "className": "rounded-[16px] rounded-bl-none bg-white p-3 text-ink"
+    },
+    {
+      "location": "src/components/workspace/TimesheetTab.jsx:887",
+      "tag": "div",
+      "className": "flex items-center gap-2 bg-canvas rounded-full pl-[4px] pr-[6px] py-[4px]"
+    },
+    {
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1631",
+      "tag": "div",
+      "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
+    },
+    {
+      "location": "src/components/workspace/WorkloadTab.jsx:542",
+      "tag": "div",
+      "className": "mb-4 flex flex-wrap items-center gap-2 rounded-[14px] bg-white p-2"
+    },
+    {
+      "location": "src/components/WorkspaceHeader.jsx:529",
+      "tag": "div",
+      "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
+    },
+    {
+      "location": "src/components/WorkspaceOrganizationRouteGuard.jsx:50",
+      "tag": "div",
+      "className": "w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm"
+    }
+  ],
+  "manualIconButtons": [],
+  "headingStyles": [],
+  "sharedChromeOverrides": [],
+  "localSharedNameCollisions": []
+}

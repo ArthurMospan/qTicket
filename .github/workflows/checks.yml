@@ -1,0 +1,139 @@
+name: Checks
+
+# What AGENTS.md already says must hold, actually asked on every change.
+#
+# The repository is written around commands that fail: `npm run test:unit`
+# fails while a component in src/components/ui is unreachable, while a variant
+# has no preview, while a colour is not a token, while a documented `npm run …`
+# does not exist. Every one of those was true — and none of them was ever asked
+# unless somebody remembered to ask. 1090 assertions and five generated reports
+# were an honour system, on a repository whose own working practice is to ship
+# verified work straight to main.
+#
+# Nothing here touches the product: no deploy, no database, no writes. It runs
+# the same commands a person would run and reports what they said. Actions
+# minutes are free and unmetered on a public repository.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A second push replaces the run in flight rather than queueing behind it.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Next.js does not run lint as part of the build, which is why this is
+      # its own step rather than something the build would have caught.
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      # Placeholders, not secrets. Static prerendering evaluates
+      # src/lib/firebase.js, and the Firebase SDK refuses to construct an auth
+      # instance from an empty apiKey — so /help, /errors and /_not-found fail
+      # to export with no configuration at all. Nothing here reaches a network:
+      # the build is checking that the code compiles and every page renders, and
+      # the real values are supplied by Vercel at deploy time. Inline rather than
+      # in repository secrets on purpose — a NEXT_PUBLIC_* value is shipped to
+      # every browser anyway, so hiding one would only make this workflow
+      # something to set up before it works.
+      - name: Build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: build-only-placeholder
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: example.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: example
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: example.appspot.com
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '000000000000'
+          NEXT_PUBLIC_FIREBASE_APP_ID: '1:000000000000:web:0000000000000000000000'
+        run: npm run build
+
+  reports:
+    name: Generated reports match the code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Every script that writes one of the seven committed reports, in the
+      # order AGENTS.md gives: drift and audit read what scan produced. The
+      # first version of this list had five of the seven, and the two it left
+      # out — props and states — were found the usual way, by a red mark on a
+      # change that touched a component's props.
+      - name: Regenerate
+        run: |
+          npm run kit:scan
+          npm run kit:drift
+          npm run kit:audit
+          npm run kit:colors
+          npm run kit:a11y
+          npm run kit:props
+          npm run kit:states
+
+      # A report is committed alongside the change that moved it. A difference
+      # here means somebody changed the UI and did not re-run the scans, so the
+      # committed reports describe a product that no longer exists.
+      - name: Committed reports are current
+        run: |
+          if ! git diff --exit-code --stat; then
+            echo "::error::Generated reports are out of date. Run npm run kit:scan && npm run kit:drift && npm run kit:audit && npm run kit:colors && npm run kit:a11y, then commit the result."
+            exit 1
+          fi
+
+  rules:
+    name: Firestore rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # The Firestore emulator is a Java program, and firebase-tools 15 refuses
+      # to start it on anything below JDK 21 — «no longer supports Java version
+      # before 21», which is what the runner said while this was pinned to 17.
+      # Naming the version here is also what makes that a sentence rather than a
+      # rules suite that mysteriously stopped passing.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - run: npm ci
+
+      # Still two steps rather than one. The emulator is fetched from Google on
+      # first use, and folded into the run below a download problem and a rules
+      # failure would be the same red mark.
+      - name: Fetch the Firestore emulator
+        run: npx firebase setup:emulators:firestore
+
+      - name: Rules against the emulator
+        env:
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+        run: npm run test:rules:emulator

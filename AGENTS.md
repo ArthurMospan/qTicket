@@ -1,0 +1,93 @@
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
+
+# qTicket repository instructions
+
+This is a single Next.js 16.3.0 App Router application with React 19 and Firebase. Read [README.md](README.md) before changing the project.
+
+## Where things are written down
+
+Six documents, and nothing else. A plan, a session report or a description of
+work already done is not one of them — that history belongs in Git.
+
+| Document | What it answers |
+| --- | --- |
+| [README.md](README.md) | Setup, environment, commands, data model, security model |
+| **AGENTS.md** (this file) | The rules a change must obey |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the task model, view state, read state and notification delivery actually work |
+| [docs/UI_KIT_CONTRACT.md](docs/UI_KIT_CONTRACT.md) | The shared-UI contract and its generated reports |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Product guardrails and confirmed open work |
+| [docs/MIGRATIONS.md](docs/MIGRATIONS.md) | Runbooks for the one-time data migration scripts |
+
+Cross-repository contracts live in `docs/integrations/` (QuickTeam+, Telegram,
+YouTrack). Add a seventh document only when a subject genuinely has no home
+above — a new file is a place for the next reader not to look.
+
+## Framework and commands
+
+- This is not the older Next.js API you may remember. Before changing routes, rendering, caching, metadata, proxy behavior, or other framework APIs, read the relevant guide in `node_modules/next/dist/docs/` and heed deprecations.
+- Authenticated routes live under `src/app/(app)`. API routes live under `src/app/api`. Request interception lives in `src/proxy.js`; do not reintroduce `middleware.js`.
+- Use `npm run lint`, `npm run test:unit`, and `npm run build` as separate checks. Next.js does not run lint as part of the build.
+- `.github/workflows/checks.yml` asks all of them on every push and pull request, together with the rules suite and a check that the generated reports match the code. Every "`npm run test:unit` fails while…" in this file is a claim that workflow now makes true; before it existed they held only while somebody remembered to run the command.
+- Firestore rule changes require `npm run test:rules:emulator`.
+- After changing shared UI usage, run `npm run kit:scan` and commit the generated report when it changes.
+
+## Architecture and security invariants
+
+- `issues` is the canonical task collection. `tasks` is legacy/read-only; do not build new functionality on it.
+- Archiving, cancelling and deleting a task are three mechanisms and must stay three: `archivedAt` (reversible, no expiry, `src/lib/utils/issueArchive.mjs`), `cancelledAt` (reversible, no expiry, `src/lib/utils/issueCancel.mjs`) and the `deletedIssues` tombstone (24-hour window, `src/lib/utils/issueTrash.mjs`). In user-facing copy the third one is «Нещодавно видалене», never «Кошик».
+- An archived task leaves the present and stays in the past. Anything counting open work — boards, lists, My Tasks, workload, project progress, search, deadline reminders — excludes it. Anything describing work already done — the timesheet, the invoice, a task's own page — must still include it, or hours vanish from a bill. `useWorkspaceAnalytics` publishes both: `issues` is the working set, `allIssues` is the whole record. Pick deliberately; a new reader of issues that picks neither is a bug.
+- A cancelled task leaves both. Work that is not going to happen is not open and did not happen, so it is filtered out at every stream that publishes issues — `useIssues`, `useAllMyTasks`, `useWorkspaceAnalytics`, the home screen, search, reminders, calendar deadlines — and never reaches a reader that would have to remember to subtract it. The two readers that do see one are the task's own screen (its link must keep working) and «Налаштування» → «Архів» → «Скасовані», through `cancelledIssues`. Cancelling is refused for a task whose hours are already fixed into an invoice: that work is settled and can only be archived.
+- A sprint belongs to the organization, not to a project: it has `organizationId` and no project field, and tasks from any project may point at it through `issue.sprintId`. Any number of sprints may be active at once. Do not add a rule about how many, or about which projects a sprint may contain — how a team runs its sprints is the team's decision.
+- A status has a local label and a shared `category` (`backlog` | `todo` | `in-progress` | `review` | `done`). Cancelling is deliberately not among them — it is a property of the task, not a place in the workflow, because a task in a column is still one of the tasks the numbers are about. `src/lib/utils/statusCategories.mjs` is the only place that decides what a category means, which statuses close a task, and which status a category resolves to in a given project. Never re-derive any of that: do not read `isDone` directly, do not compare against the id `'backlog'`, `'in-progress'` or `'done'`, and do not infer meaning from a status's position in the list. `isDone` is written as a consequence of the category, never as a second opinion about it.
+- Anything that spans projects groups by category, never by status name: a status one project has hidden is not a column another project's cards can be dropped into. A drop on a category column writes a status of that category from the task's own project.
+- The organization roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. `owner`, `admin`, and `member` are the tenant's internal support team; the two client roles are project-scoped external users. A `client_admin` may invite only `client_member` users into exactly one client project. Client roles may see that project's incidents, create incidents, and use the incident discussion, but may not change workflow state, priority, assignee, organization settings, or internal support chat.
+- `src/lib/utils/can.js` is the permission matrix and it describes what the product enforces, not what someone intended. A change to a Firestore rule or a route's `allowedRoles` updates the matrix in the same change; an entry no call site reads is a claim nothing tests.
+- Access is `orgMemberships` plus `project.team`, and nothing else. Removing someone closes both and archives the seat under `orgMembershipArchive` — never edit `assigneeIds`, `watcherIds`, comments or time logs to "clean up" after a person. That is the record of what happened, and rewriting it is how a workspace loses its own history.
+- Reaching a project and being on it are two different facts, and `src/lib/utils/projectAccess.mjs` keeps them apart. Access is `project.team` OR an owner/admin role (`hasProjectAccess`, `assigneesOutsideProject`). The roster is `project.team` alone (`isOnProjectTeam`, `assigneesOffProjectTeam`), and it is what the product *shows*: the faces on a project card, the «Команда» tab, a profile's project list, who a picker offers. An admin reaches every project of the organization and is on none of them until somebody puts them there. Ask the question you actually mean — asking about access where the screen is about the roster is how an admin ended up assigned to a task in a project whose card drew an empty seat for them.
+- `project.team` is never written as a side effect. Assigning a task or inviting somebody to an event may *offer* to add them, but the write happens only when the request carries the explicit consent flag (`addAssigneesToProjectTeam`, `addParticipantsToProjectTeam`) and the actor holds `manage:team`; without it the assignment is refused, not performed half-way. A grant leaves a trace — `project-team-granted` in the task's audit. Edits to the roster are sent as a change against the baseline they were made on, never as the whole array: a full replace overwrites whoever was added while the dialog was open.
+- Firestore rules are authoritative. Client permission checks and hidden UI are only defensive.
+- Privileged creation/deletion of organizations, projects, issues, memberships, invitations, and API keys must go through authenticated server routes. An organization and its owner's seat are written together by `/api/organizations`; `firestore.rules` refuses `create` on both collections, because «one free workspace per account» is a count and a rule cannot count anything.
+- A plan is enforced where something is *created or let in*, never where something already exists. A downgrade deletes nothing: projects past the ceiling keep working and refuse a new one, an issued API key stops opening the door and is not revoked, a logo stops being drawn and stays in the database. Anything that draws a paid feature or answers on its behalf calls `planAllows` — the two that did not were the sidebar's logo and `/api/v1`, and both were invisible until somebody paid for one month.
+- Keep all organization-scoped reads and writes constrained by membership and organization/project scope.
+- Run data migrations only through reviewed, idempotent Admin SDK scripts against an explicit Firebase project. Never trigger migrations during browser login.
+- Keep organization deletion disabled until a tested owner-only server cascade safely handles Firestore and external assets.
+- Drag-and-drop writes must update the optimistic overlay before awaiting Firestore and must roll back on failure.
+- Use the shared UI in `src/components/ui`. `Dialog` is the common modal shell; the live `/ui-kit` route and its generated usage report are the component source of truth.
+- Treat the authenticated workspace and `/ui-kit` as one UI contract. A change to a shared component must update its live workspace usage and its `/ui-kit` preview in the same change.
+- A new reusable visual component must be created under `src/components/ui`, exported from `src/components/ui/index.js`, used by the product, and rendered in `/ui-kit` in the same change. Do not add unused showcase-only components.
+- The catalogue is a directory: `src/app/ui-kit/page.js` is the shell (navigation and `SECTION_MAP`), and every section is a story file at `src/app/ui-kit/sections/<section-id>.jsx` whose name matches its navigation id. A preview counts when the component is imported and rendered inside that story file — helpers in the same file count too. Shared preview furniture lives in `preview.jsx` and `demo-data.js` and grants no coverage on its own. `scripts/ui-kit-showcase.mjs` is the only place that knows this layout.
+- `/ui-kit` is the only reference page, and it is a catalogue of components. A report is a generated JSON file and a failing test, never a screen in the catalogue.
+- A component the product does not use is deleted, not kept for later. `npm run test:unit` fails while anything in `src/components/ui` is unreachable. A component reached only through another kit component (TopHeader renders Breadcrumb) counts as used and is previewed by its host.
+- A screen whose layout differs is a named context on a shared layout component, not hand-written markup. Settings, Team and Chat all render `SidebarLayout` with `context="settings" | "team" | "chat"`; the gutter, the rail width and the 56px header offset live in `CONTEXTS` and nowhere else.
+- Do not introduce a local component or visual pattern that is merely similar to an existing UI Kit component. Reuse the shared component, add an explicit named context/size/preset, or mark and document the intentional local exception in `docs/UI_KIT_CONTRACT.md`.
+- After changing product UI, shared UI, or UI Kit previews, run `npm run kit:scan`, then `npm run kit:drift`, then `npm run kit:audit` (that order — the later two read the earlier output), and commit all three generated reports when they change.
+- Every colour that is styling comes from a token in `@theme`: the brand scale (`ink`, `ink-hover`, `canvas`, `surface`, `line`, `line-strong`, `selected`, `muted`, `placeholder`, `faint`, `ink-soft`, `surface-dark`), the four status scales (`success`, `warning`, `danger`, `info`, each in three roles — the ink that carries text and clears AA on white, the `-solid` fill, the `-soft` wash), or the chart tokens. Never a raw hex, never a Tailwind palette colour, and inside the sidebar never a brand token — a rail is branded by the organization, so everything in it reads `--sb-bg`/`--sb-text`/`--sb-muted`/`--sb-hover`/`--sb-active`. `npm run kit:colors` enforces this and `npm run test:unit` fails on a single hardcoded colour. The scan walks the kit as well as the screens (`includeSharedUi: true`) and a test holds it there — it read only the screens once, and reported zero while fifty-nine raw colours shipped inside `src/components/ui`. Each status scale also has an `-on-dark` role for the sidebar, the toast and the dark counters, where the ink and the solid are both mixed for white and go muddy. Colour that is *data* — a palette offered to somebody, a status/type/priority colour out of the database, a `canvas` fill, a generated QR, the invoice print document — is legal and listed by file with its reason in `scripts/kit-colors.mjs`.
+- A variant is declared by the implementation, never by a list. `scripts/kit-variants.mjs` derives the manifest from component lookup maps and `data-ui-*` rules in `globals.css`; `/ui-kit` → «Матриця варіантів» renders every declared value. Adding a variant therefore means adding a map entry or a CSS rule — never a hand-written preview.
+- `kit:drift` enforces three zeros: no variant value the manifest does not declare, no component prop outside the manifest, and no `className` on a kit component that redefines its geometry or typography. `npm run test:unit` fails if any becomes non-zero.
+- `kit:drift` enforces a fourth zero: every variant the product ships is visible in the catalogue. «Матриця варіантів» renders each declared value from the manifest, so adding a variant creates its preview; a component that cannot stand alone must be listed in `VARIANT_ELSEWHERE` with the section that does show it.
+- Do not document a command, report, or screen that does not exist. `npm run test:unit` resolves every `npm run …` named in this file and in `docs/UI_KIT_CONTRACT.md` against `package.json`.
+- The reports cannot see that a control moved four pixels. `npm run test:visual` photographs every `/ui-kit` section and diffs it against a committed baseline. Baselines live in `tests/visual/__screenshots__`, are rendered by the `UI Kit screenshots` workflow on Linux, and are never written from a developer machine — locally the same command runs as a smoke test with pixel comparison off. Accept a deliberate visual change by running that workflow with `update_baselines`, which commits the new PNGs.
+- Geometry, spacing and type scales belong in `globals.css` behind a named `composition`; do not reintroduce a free-value prop (`iconSize`, a raw avatar pixel size) that lets a call site hold its own copy of a kit decision.
+- Positioning a component in its parent (`flex-1`, `h-full`, margins) is legitimate composition and is reported as benign. Redefining the component itself is not.
+- qTicket is a separate SaaS add-on to QuickTeam and QuickTeam+; all three may exist in parallel. Do not couple their primary Firebase sessions or databases. Staff identity and later incident-to-task transfer integrate with QuickTeam through explicit server-side contracts; external qTicket clients authenticate through qTicket's own invitation/email flow.
+
+## Repository hygiene
+
+- Будь-яка зміна видимої користувачеві поведінки, назви, дозволів або workflow оновлює відповідну статтю довідки в тому самому PR. Довідка не може описувати функцію, якої продукт не має.
+- Новини (`NEWS_ARTICLES`) НЕ оновлюються з кожною зміною. Список навмисно порожній, поки продукт у беті: це матеріал для читача, а не журнал комітів. Додавати запис — тільки коли про це попросили явно.
+- Контакти підтримки беруться лише з перевірених даних OneB (`supportContacts.mjs`). Не вигадувати username, Viber URI чи адресу — «контакт скоро» теж не варіант.
+- Юридичні сторінки (Terms, Privacy, Offer) не заповнюються вигаданими реквізитами. Немає реальних даних — сторінка не публікується.
+- Масовими не робляться дії, що залежать від контексту однієї задачі: перенесення між проєктами, зміна ієрархії, створення звʼязків, списання часу, редагування опису чи коментарів. `ISSUE_BULK_ACTIONS` — єдиний реєстр того, що є масовим, і він живить UI, серверну валідацію й довідку одночасно.
+
+- Never commit `.env*`, service-account keys, build output, logs, or local agent scratch data.
+- A scratch worktree that links this checkout's `node_modules` (a Windows junction, to run the generators against a clean tree) must have that link removed before the worktree is — `cmd /c rmdir "<worktree>\node_modules"` deletes the link, `git worktree remove --force` follows it and deletes the real `node_modules` for everyone working in this directory.
+- Keep durable setup and architecture documentation under `docs/`. Do not add generated reports, session notes, or temporary plans to the repository root.
+- Preserve user changes and verify references before deleting source files.

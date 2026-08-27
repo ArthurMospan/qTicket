@@ -1,0 +1,998 @@
+{
+  "generatedBy": "scripts/kit-states.mjs",
+  "contract": {
+    "derivation": "A state exists because the implementation declares it: a destructured prop, a rest spread onto a native control, a hover/focus utility, or a text-bearing prop.",
+    "shown": "Every stateful component appears in /ui-kit → «Матриця станів»; ones that render standalone appear live, the rest point at the section that shows them."
+  },
+  "stateOrder": [
+    "hover",
+    "focus",
+    "disabled",
+    "loading",
+    "error",
+    "long-text"
+  ],
+  "totals": {
+    "components": 120,
+    "stateful": 107,
+    "hover": 72,
+    "focus": 69,
+    "disabled": 35,
+    "loading": 7,
+    "error": 6,
+    "long-text": 74
+  },
+  "components": {
+    "Alert": {
+      "hover": "own",
+      "focus": "own",
+      "long-text": "children, description, title"
+    },
+    "AttachmentRow": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "AttachmentViewer": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "AttributeTrigger": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "AudioPlayer": {
+      "long-text": "title"
+    },
+    "AvatarButton": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "BarList": {},
+    "Breadcrumb": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "BulkActionBar": {
+      "hover": "own"
+    },
+    "Button": {
+      "disabled": "prop",
+      "loading": "prop",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "CalendarDayCell": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "CalendarDayNumber": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "CalendarEntry": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "title"
+    },
+    "CalendarHourSlot": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "Card": {
+      "hover": "own",
+      "long-text": "children"
+    },
+    "ChannelInfoPanel": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "ChannelRail": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "ChartCard": {
+      "long-text": "children, title"
+    },
+    "ChatAttachmentList": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "ChatComposerCore": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "own",
+      "long-text": "placeholder"
+    },
+    "ChatComposerDock": {
+      "long-text": "children"
+    },
+    "ChatConversationHeader": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "subtitle, title"
+    },
+    "ChatMessageList": {
+      "loading": "prop",
+      "hover": "own",
+      "focus": "global"
+    },
+    "ChatSearchBanner": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "Checkbox": {
+      "disabled": "prop",
+      "error": "prop",
+      "hover": "own",
+      "focus": "own",
+      "long-text": "label"
+    },
+    "ColorSwatch": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "ColumnChart": {},
+    "CommandPalette": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "ConfirmProvider": {
+      "long-text": "children"
+    },
+    "ConnectionBanner": {
+      "long-text": "message"
+    },
+    "ContextMenu": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "Counter": {},
+    "DataTable": {
+      "hover": "own"
+    },
+    "DatePicker": {
+      "disabled": "prop",
+      "error": "prop",
+      "hover": "own",
+      "focus": "own",
+      "long-text": "placeholder"
+    },
+    "DescriptionPlaceholder": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "DetailLayout": {
+      "long-text": "children"
+    },
+    "DetailSection": {
+      "long-text": "children, title"
+    },
+    "Dialog": {
+      "long-text": "children, description, title"
+    },
+    "EmptyState": {
+      "long-text": "children, description, title"
+    },
+    "ExportMenu": {
+      "disabled": "prop",
+      "long-text": "label"
+    },
+    "FileInput": {
+      "disabled": "native",
+      "focus": "global",
+      "long-text": "value"
+    },
+    "FileThumb": {},
+    "FilterBar": {
+      "long-text": "children"
+    },
+    "FormGroup": {
+      "error": "prop",
+      "long-text": "children, label"
+    },
+    "HeaderSearch": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "own",
+      "long-text": "placeholder"
+    },
+    "IconAction": {
+      "hover": "own",
+      "long-text": "label"
+    },
+    "ImageUpload": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "InnerNavigation": {
+      "hover": "own"
+    },
+    "Input": {
+      "error": "prop",
+      "disabled": "native",
+      "focus": "own",
+      "long-text": "value"
+    },
+    "IssueLinkRow": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children, label"
+    },
+    "IssueMentionMenu": {
+      "loading": "prop",
+      "hover": "own",
+      "focus": "own"
+    },
+    "KeyboardShortcutsDialog": {
+      "long-text": "children"
+    },
+    "KpiCard": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "Label": {
+      "long-text": "children"
+    },
+    "ListRow": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "LoadOlderButton": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "LoadingSpinner": {
+      "long-text": "label"
+    },
+    "MarkdownEditor": {
+      "disabled": "prop",
+      "loading": "prop",
+      "focus": "global",
+      "long-text": "label, placeholder"
+    },
+    "MarkdownViewer": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children, content"
+    },
+    "MediaPlayButton": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "global"
+    },
+    "MemberRail": {
+      "loading": "prop",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "title"
+    },
+    "MentionMenu": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global"
+    },
+    "MessageBubble": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "MetaTrigger": {
+      "disabled": "native",
+      "hover": "css",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "Meter": {
+      "long-text": "label"
+    },
+    "MobilePaneBack": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "MultiSelect": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "own",
+      "long-text": "placeholder"
+    },
+    "NotificationBell": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "NotificationCard": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "title"
+    },
+    "OptionCard": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "description, title"
+    },
+    "PageHeader": {
+      "long-text": "title"
+    },
+    "PendingChatAttachments": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "Pill": {
+      "hover": "css",
+      "long-text": "children, label"
+    },
+    "PlanCards": {},
+    "PlanDowngradeDialog": {
+      "hover": "css"
+    },
+    "PlanGate": {
+      "hover": "css",
+      "long-text": "children"
+    },
+    "PlanLimitRail": {
+      "hover": "css",
+      "focus": "global"
+    },
+    "PlanMark": {
+      "long-text": "label"
+    },
+    "PlanUpgradeDialog": {},
+    "Popover": {
+      "focus": "global",
+      "long-text": "children"
+    },
+    "PresenceDot": {
+      "long-text": "label"
+    },
+    "PriorityBadge": {},
+    "PriorityIcon": {},
+    "ProjectSettingsForm": {
+      "loading": "prop",
+      "long-text": "description"
+    },
+    "RefreshStamp": {
+      "loading": "prop",
+      "long-text": "label"
+    },
+    "ResponseChoice": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "global"
+    },
+    "Segmented": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "Select": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "own",
+      "long-text": "placeholder"
+    },
+    "SelectableChip": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "SidebarLayout": {
+      "long-text": "children"
+    },
+    "SignalList": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "Skeleton": {},
+    "Sparkline": {},
+    "StatusPill": {
+      "long-text": "label"
+    },
+    "StatusTransitionPicker": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "StatusVisibilityPicker": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "global"
+    },
+    "Surface": {
+      "hover": "css",
+      "long-text": "children"
+    },
+    "Tabs": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "Tag": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "label"
+    },
+    "TaskAttributesPanel": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children"
+    },
+    "TaskCounters": {},
+    "TaskIdentity": {},
+    "TaskListCard": {
+      "long-text": "title"
+    },
+    "TaskListView": {
+      "hover": "own"
+    },
+    "TaskRow": {
+      "hover": "own"
+    },
+    "TaskTableView": {
+      "hover": "own",
+      "focus": "global"
+    },
+    "TextAction": {
+      "disabled": "native",
+      "hover": "own",
+      "focus": "global",
+      "long-text": "children, label"
+    },
+    "Textarea": {
+      "error": "prop",
+      "disabled": "native",
+      "focus": "own",
+      "long-text": "placeholder"
+    },
+    "TimeLogRow": {
+      "hover": "own",
+      "focus": "own",
+      "long-text": "description"
+    },
+    "TimePicker": {
+      "disabled": "prop",
+      "error": "prop",
+      "focus": "own",
+      "long-text": "value"
+    },
+    "TimeTrackingControl": {
+      "disabled": "prop",
+      "hover": "own",
+      "focus": "global"
+    },
+    "TitleInput": {
+      "disabled": "native",
+      "focus": "global",
+      "long-text": "value"
+    },
+    "Toast": {
+      "hover": "own",
+      "focus": "global",
+      "long-text": "message"
+    },
+    "ToggleSwitch": {
+      "disabled": "prop",
+      "focus": "own",
+      "long-text": "label"
+    },
+    "Tooltip": {
+      "long-text": "children, content"
+    },
+    "TopHeader": {
+      "hover": "own",
+      "focus": "own"
+    },
+    "TypeBadge": {
+      "long-text": "label"
+    },
+    "UnreadDivider": {
+      "long-text": "label"
+    },
+    "UserAvatar": {},
+    "UserMenu": {
+      "hover": "own",
+      "focus": "global"
+    }
+  },
+  "parseErrors": [],
+  "previewSections": {
+    "Alert": [
+      "feedback",
+      "variant-matrix",
+      "states"
+    ],
+    "AttachmentRow": [
+      "task-elements"
+    ],
+    "AttachmentViewer": [
+      "task-elements"
+    ],
+    "AttributeTrigger": [
+      "task-attributes",
+      "task-elements",
+      "variant-matrix"
+    ],
+    "AudioPlayer": [
+      "task-elements"
+    ],
+    "AvatarButton": [
+      "chat-elements",
+      "variant-matrix",
+      "states"
+    ],
+    "BarList": [
+      "charts"
+    ],
+    "BulkActionBar": [
+      "task-elements"
+    ],
+    "Button": [
+      "buttons",
+      "inputs",
+      "surfaces",
+      "tooltips",
+      "filters",
+      "navigation-overlays",
+      "feedback",
+      "chat-composer",
+      "chat-elements",
+      "task-crm",
+      "task-elements",
+      "dialogs",
+      "page-headers",
+      "inner-nav-layout",
+      "variant-matrix",
+      "states"
+    ],
+    "CalendarDayCell": [
+      "calendar",
+      "variant-matrix"
+    ],
+    "CalendarDayNumber": [
+      "calendar",
+      "variant-matrix"
+    ],
+    "CalendarEntry": [
+      "calendar",
+      "variant-matrix"
+    ],
+    "CalendarHourSlot": [
+      "calendar"
+    ],
+    "Card": [
+      "surfaces",
+      "variant-matrix",
+      "states"
+    ],
+    "ChannelInfoPanel": [
+      "chat-elements"
+    ],
+    "ChannelRail": [
+      "inner-nav-layout"
+    ],
+    "ChartCard": [
+      "charts"
+    ],
+    "ChatAttachmentList": [
+      "chat-elements"
+    ],
+    "ChatComposerCore": [
+      "chat-composer",
+      "inner-nav-layout",
+      "variant-matrix",
+      "states"
+    ],
+    "ChatComposerDock": [
+      "chat-composer",
+      "inner-nav-layout"
+    ],
+    "ChatConversationHeader": [
+      "inner-nav-layout"
+    ],
+    "ChatMessageList": [
+      "inner-nav-layout"
+    ],
+    "ChatSearchBanner": [
+      "chat-elements"
+    ],
+    "Checkbox": [
+      "inputs",
+      "states"
+    ],
+    "ColorSwatch": [
+      "inputs",
+      "variant-matrix"
+    ],
+    "ColumnChart": [
+      "charts"
+    ],
+    "CommandPalette": [
+      "navigation-overlays"
+    ],
+    "ConfirmProvider": [
+      "dialogs",
+      "inner-nav-layout"
+    ],
+    "ConnectionBanner": [
+      "feedback"
+    ],
+    "ContextMenu": [
+      "navigation-overlays"
+    ],
+    "Counter": [
+      "badges",
+      "variant-matrix"
+    ],
+    "DataTable": [
+      "charts"
+    ],
+    "DatePicker": [
+      "inputs",
+      "task-attributes",
+      "states"
+    ],
+    "DescriptionPlaceholder": [
+      "task-elements"
+    ],
+    "DetailLayout": [
+      "detail-layout"
+    ],
+    "DetailSection": [
+      "detail-layout",
+      "variant-matrix"
+    ],
+    "Dialog": [
+      "dialogs"
+    ],
+    "EmptyState": [
+      "feedback",
+      "chat-composer",
+      "variant-matrix",
+      "states"
+    ],
+    "ExportMenu": [
+      "navigation-overlays"
+    ],
+    "FileInput": [
+      "chat-elements"
+    ],
+    "FileThumb": [
+      "task-elements",
+      "variant-matrix"
+    ],
+    "FilterBar": [
+      "selects",
+      "filters",
+      "page-headers"
+    ],
+    "FormGroup": [
+      "form-groups",
+      "variant-matrix",
+      "states"
+    ],
+    "IconAction": [
+      "surfaces",
+      "calendar",
+      "inner-nav-layout",
+      "variant-matrix",
+      "states"
+    ],
+    "ImageUpload": [
+      "inputs"
+    ],
+    "InnerNavigation": [
+      "inner-nav-layout"
+    ],
+    "Input": [
+      "inputs",
+      "form-groups",
+      "dialogs",
+      "variant-matrix",
+      "states"
+    ],
+    "IssueLinkRow": [
+      "task-elements"
+    ],
+    "IssueMentionMenu": [
+      "chat-elements"
+    ],
+    "KeyboardShortcutsDialog": [
+      "navigation-overlays"
+    ],
+    "KpiCard": [
+      "progress",
+      "charts",
+      "states"
+    ],
+    "Label": [
+      "inputs",
+      "form-groups",
+      "variant-matrix",
+      "states"
+    ],
+    "ListRow": [
+      "surfaces",
+      "variant-matrix"
+    ],
+    "LoadOlderButton": [
+      "chat-elements"
+    ],
+    "LoadingSpinner": [
+      "feedback",
+      "variant-matrix"
+    ],
+    "MarkdownEditor": [
+      "task-elements"
+    ],
+    "MarkdownViewer": [
+      "task-elements",
+      "variant-matrix",
+      "states"
+    ],
+    "MediaPlayButton": [
+      "buttons"
+    ],
+    "MemberRail": [
+      "inner-nav-layout"
+    ],
+    "MentionMenu": [
+      "chat-elements",
+      "variant-matrix"
+    ],
+    "MetaTrigger": [
+      "navigation-overlays"
+    ],
+    "Meter": [
+      "charts",
+      "variant-matrix"
+    ],
+    "MobilePaneBack": [
+      "inner-nav-layout",
+      "variant-matrix"
+    ],
+    "MultiSelect": [
+      "selects",
+      "page-headers",
+      "variant-matrix",
+      "states"
+    ],
+    "NotificationBell": [
+      "headers"
+    ],
+    "NotificationCard": [
+      "headers"
+    ],
+    "OptionCard": [
+      "form-groups"
+    ],
+    "PageHeader": [
+      "filters",
+      "page-headers"
+    ],
+    "PendingChatAttachments": [
+      "chat-elements"
+    ],
+    "Pill": [
+      "badges",
+      "charts",
+      "chat-elements",
+      "detail-layout",
+      "variant-matrix",
+      "states"
+    ],
+    "PlanCards": [
+      "surfaces"
+    ],
+    "PlanDowngradeDialog": [
+      "feedback"
+    ],
+    "PlanGate": [
+      "feedback"
+    ],
+    "PlanLimitRail": [
+      "feedback"
+    ],
+    "PlanMark": [
+      "feedback"
+    ],
+    "PlanUpgradeDialog": [
+      "feedback"
+    ],
+    "Popover": [
+      "task-attributes",
+      "navigation-overlays",
+      "variant-matrix"
+    ],
+    "PresenceDot": [
+      "avatars"
+    ],
+    "PriorityBadge": [
+      "badges"
+    ],
+    "PriorityIcon": [
+      "badges"
+    ],
+    "ProjectSettingsForm": [
+      "dialogs"
+    ],
+    "RefreshStamp": [
+      "charts"
+    ],
+    "ResponseChoice": [
+      "inputs",
+      "variant-matrix"
+    ],
+    "Segmented": [
+      "tabs",
+      "variant-matrix",
+      "states"
+    ],
+    "Select": [
+      "selects",
+      "task-attributes",
+      "filters",
+      "feedback",
+      "page-headers",
+      "variant-matrix",
+      "states"
+    ],
+    "SelectableChip": [
+      "task-elements",
+      "variant-matrix",
+      "states"
+    ],
+    "SidebarLayout": [
+      "inner-nav-layout"
+    ],
+    "SignalList": [
+      "charts"
+    ],
+    "Skeleton": [
+      "skeletons",
+      "variant-matrix"
+    ],
+    "Sparkline": [
+      "charts"
+    ],
+    "StatusPill": [
+      "badges",
+      "inner-nav-layout",
+      "states"
+    ],
+    "StatusTransitionPicker": [
+      "task-crm"
+    ],
+    "StatusVisibilityPicker": [
+      "inputs",
+      "states"
+    ],
+    "Surface": [
+      "surfaces",
+      "feedback",
+      "dialogs",
+      "inner-nav-layout",
+      "variant-matrix",
+      "states"
+    ],
+    "Tabs": [
+      "tabs",
+      "page-headers",
+      "variant-matrix",
+      "states"
+    ],
+    "Tag": [
+      "badges",
+      "variant-matrix",
+      "states"
+    ],
+    "TaskAttributesPanel": [
+      "task-attributes"
+    ],
+    "TaskCounters": [
+      "task-crm"
+    ],
+    "TaskIdentity": [
+      "task-crm"
+    ],
+    "TaskListCard": [
+      "task-crm"
+    ],
+    "TaskListView": [
+      "task-crm"
+    ],
+    "TaskRow": [
+      "task-crm"
+    ],
+    "TaskTableView": [
+      "task-crm"
+    ],
+    "TextAction": [
+      "chat-elements",
+      "variant-matrix",
+      "states"
+    ],
+    "Textarea": [
+      "inputs",
+      "dialogs",
+      "variant-matrix",
+      "states"
+    ],
+    "TimeLogRow": [
+      "task-elements"
+    ],
+    "TimePicker": [
+      "inputs",
+      "states"
+    ],
+    "TimeTrackingControl": [
+      "task-elements",
+      "states"
+    ],
+    "TitleInput": [
+      "task-elements"
+    ],
+    "Toast": [
+      "feedback"
+    ],
+    "ToggleSwitch": [
+      "inputs",
+      "variant-matrix",
+      "states"
+    ],
+    "Tooltip": [
+      "tooltips",
+      "navigation-overlays"
+    ],
+    "TopHeader": [
+      "headers"
+    ],
+    "TypeBadge": [
+      "badges"
+    ],
+    "UnreadDivider": [
+      "chat-elements"
+    ],
+    "UserAvatar": [
+      "badges",
+      "avatars",
+      "charts",
+      "chat-elements",
+      "task-elements",
+      "inner-nav-layout",
+      "detail-layout",
+      "variant-matrix"
+    ],
+    "UserMenu": [
+      "headers"
+    ],
+    "Breadcrumb": [
+      "headers"
+    ],
+    "HeaderSearch": [
+      "headers"
+    ],
+    "MessageBubble": [
+      "inner-nav-layout"
+    ]
+  }
+}

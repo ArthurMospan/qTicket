@@ -1,0 +1,131 @@
+name: UI Kit screenshots
+
+# Pixel diff for /ui-kit, one screenshot per section. The three generated
+# reports (kit:scan, kit:drift, kit:audit) can tell that the product takes a
+# component from the kit and passes it declared values; none of them can tell
+# that the component moved four pixels or lost its border. This is that check.
+#
+# Baselines are committed PNGs under tests/visual/__screenshots__ and are
+# written by this workflow only: font rasterisation on the Linux runner does
+# not match a developer's Windows or macOS machine, so a locally generated
+# baseline would fail here forever. Run the workflow by hand with
+# "update_baselines" to accept a deliberate visual change.
+
+# The paths list is spelled out twice on purpose: the workflow parser does not
+# understand YAML anchors.
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/visual/**'
+      - 'playwright.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ui-kit-visual.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/visual/**'
+      - 'playwright.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ui-kit-visual.yml'
+  workflow_dispatch:
+    inputs:
+      update_baselines:
+        description: 'Regenerate every baseline and commit the result'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ui-kit-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+  # The catalogue never talks to Firebase — no screen on /ui-kit subscribes to
+  # a collection — but src/lib/firebase.js is imported through the root layout
+  # and builds its config at module scope. These placeholders keep that import
+  # quiet; no real project, and no credentials, are involved.
+  NEXT_PUBLIC_FIREBASE_API_KEY: ui-kit-visual-tests
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: localhost
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-quickteam
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: demo-quickteam.appspot.com
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '0'
+  NEXT_PUBLIC_FIREBASE_APP_ID: '1:0:web:0'
+
+jobs:
+  diff:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.update_baselines }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Compare every section against its baseline
+        run: npm run test:visual
+      - name: Upload the diff
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-kit-screenshot-diff
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  update:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.update_baselines }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history, because the push below may have to be replayed on top
+          # of whatever landed while the screenshots were being taken, and a
+          # shallow clone has no merge base to rebase onto.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Rewrite every baseline
+        run: npm run test:visual:update
+      - name: Commit the new baselines
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests/visual/__screenshots__
+          if git diff --cached --quiet; then
+            echo 'Every baseline already matches the current UI.'
+            exit 0
+          fi
+          git commit -m 'Update /ui-kit screenshot baselines'
+          # Taking forty screenshots takes minutes, and the branch can move
+          # while it happens — which is exactly how this step failed the first
+          # time somebody accepted a deliberate visual change. A plain push then
+          # loses the whole run to a race that has nothing to do with the
+          # pixels. These are PNGs no other commit touches, so replaying them on
+          # top of what landed is always the right answer; if it ever is not,
+          # the rebase conflicts and the job says so.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              exit 0
+            fi
+            echo "Push rejected — ${{ github.ref_name }} moved. Replaying the baselines on top of it (attempt $attempt)."
+            git fetch origin ${{ github.ref_name }}
+            git rebase origin/${{ github.ref_name }}
+          done
+          echo "Could not push the baselines after three attempts."
+          exit 1

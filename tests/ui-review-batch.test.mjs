@@ -1,0 +1,447 @@
+// QUI-129…QUI-142 plus the project-settings unification.
+//
+// One batch of reported UI issues. They are kept together rather than folded
+// into issue-fixes.test.mjs because most of them are the same kind of finding:
+// a decision that lived at a call site instead of in the kit, so the same thing
+// looked different depending on where you opened it.
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { readShowcase } from '../scripts/ui-kit-showcase.mjs';
+
+const read = path => readFile(new URL(path, import.meta.url), 'utf8');
+
+// The catalogue is a directory of story files; these assertions ask whether it
+// shows something at all, not which file it lives in.
+const readKitShowcase = () => readShowcase().everything;
+
+test('QUI-129 renders the project status chart the same way as global analytics', async () => {
+  const [tab, global] = await Promise.all([
+    read('../src/components/workspace/AnalyticsTab.jsx'),
+    read('../src/app/(app)/analytics/page.js'),
+  ]);
+  // The tab squeezed each status label into a fixed 100px column and truncated
+  // every name; the global page put the label above its bar. They then agreed
+  // by copying each other, which is an agreement that lasts until the next
+  // edit — so it is one component now, and "the same way" is structural.
+  const barList = await read('../src/components/ui/Charts/BarList.jsx');
+  assert.match(barList, /<span className="h-2 w-2 shrink-0 rounded-full" style=\{\{ background: item\.color \}\} \/>/);
+  assert.match(barList, /truncate text-\[13px\] font-semibold text-ink/);
+  assert.match(barList, /ui-type-figure shrink-0 text-ink/);
+  for (const source of [tab, global]) {
+    assert.match(source, /<BarList/);
+  }
+  assert.doesNotMatch(tab, /w-\[100px\] text-\[11px\] font-medium text-muted/);
+  // The priority bar multiplied its share by three "to make small bars
+  // visible", which is a chart that misstates its own values.
+  assert.doesNotMatch(tab, /\* 100 \* 3/);
+});
+
+test('QUI-129 and QUI-139 keep the project header free of team avatars', async () => {
+  const [topHeader, workspaceHeader, kit] = await Promise.all([
+    read('../src/components/ui/Layout/TopHeader.jsx'),
+    read('../src/components/WorkspaceHeader.jsx'),
+    readKitShowcase(),
+  ]);
+  for (const source of [topHeader, workspaceHeader, kit]) {
+    assert.doesNotMatch(source, /projectMembers/, 'the project team avatar strip is gone');
+  }
+  assert.doesNotMatch(topHeader, /ProjectMembersMenu/);
+  // Chat keeps its online strip: a different list answering a different question.
+  assert.match(topHeader, /renderOnlineUsers/);
+  // The preview also stopped reaching for a third-party avatar host, which had
+  // been failing on every page load.
+  assert.doesNotMatch(kit, /pravatar/);
+});
+
+test('QUI-130 drops the epic copy and leads the type list with Задача', async () => {
+  const [settings, workflow, taskTypes] = await Promise.all([
+    read('../src/app/(app)/settings/page.js'),
+    read('../src/lib/hooks/useWorkflowConfig.js'),
+    read('../src/lib/utils/taskTypes.mjs'),
+  ]);
+  assert.doesNotMatch(settings, /Старі Епіки лишаються видимими/);
+  assert.doesNotMatch(settings, /legacy-дані/);
+  assert.match(workflow, /export const DEFAULT_TYPES = DEFAULT_TASK_TYPES/);
+  const types = taskTypes.slice(
+    taskTypes.indexOf('export const DEFAULT_TASK_TYPES'),
+    taskTypes.indexOf('export const BUILT_IN_TASK_TYPE_ICON_KEYS'),
+  );
+  assert.ok(types.indexOf("id: 'task'") < types.indexOf("id: 'feature'"), 'Задача leads the list');
+});
+
+// QUI-131 approved "several statuses may close a task, but the board must keep
+// somewhere for new work to land". The control that says so is now the status's
+// category — `isDone` was the same idea with a single value — so the invariant is
+// stated over categories and no longer over a position in the list.
+test('QUI-131 allows several closing statuses but never a workflow without an open one', async () => {
+  const settings = await read('../src/app/(app)/settings/page.js');
+  const guard = settings.slice(
+    settings.indexOf('const statusGroupsBreakInvariant'),
+    settings.indexOf('const handleStatusDragEnd'),
+  );
+  // Something has to close a task…
+  assert.match(guard, /if \(closing === 0\) \{/);
+  // …and something has to stay open for new tasks to land in.
+  assert.match(guard, /if \(closing === next\.length\) \{/);
+  // Every path that could break either one asks the same guard: dragging a
+  // status into another category, and deleting one.
+  assert.match(settings, /if \(source\.droppableId !== destination\.droppableId\) \{\s*\n\s*const problem = statusGroupsBreakInvariant\(next\);/);
+  assert.match(settings, /const problem = statusGroupsBreakInvariant\(statuses\.filter\(s => s\.id !== id\)\);/);
+  // And the delete control is disabled rather than refusing after the click.
+  assert.match(settings, /const canDeleteStatus = status => \(/);
+  assert.match(settings, /Налаштуйте етапи, через які проходять завдання/);
+});
+
+// The editor is a list per category, the way Linear and Shortcut do it: a status
+// belongs to the section it sits in, so the two-layer model is visible instead of
+// explained, and the saved array always comes out in the order work flows.
+test('the workflow editor groups statuses by category and moves them by dragging', async () => {
+  const settings = await read('../src/app/(app)/settings/page.js');
+
+  assert.match(settings, /STATUS_CATEGORY_IDS\.map\(\(categoryId, categoryIndex\) => \{/);
+  assert.match(settings, /<Droppable droppableId=\{categoryId\}>/);
+  assert.match(settings, /statusAnnouncements\.onDragEnd\(result, provided\);\s*handleStatusDragEnd\(result\)/);
+  assert.match(settings, /handleAddStatus\(categoryId\)/);
+  // The row carries no category control of its own any more — where it sits is
+  // the answer, and two ways to say one thing is how they drift apart.
+  assert.doesNotMatch(settings, /onCategoryChange/);
+  assert.doesNotMatch(settings, /STATUS_CATEGORY_OPTIONS/);
+  // Saved in canonical category order, so a project board's columns follow the
+  // flow of work rather than the order somebody happened to add them in.
+  assert.match(settings, /flattenStatusGroups\(groups\)/);
+  // Dragging is the only category-changing action; a second arrow/menu beside
+  // every row duplicated the gesture and consumed the action space.
+  assert.doesNotMatch(settings, /onMoveToCategory|handleStatusMoveToCategory|MoveRight/);
+  // No id is special any more: what may be deleted is decided by the invariants.
+  assert.doesNotMatch(settings, /!\['backlog', 'done'\]\.includes/);
+});
+
+test('QUI-132 leaves one clock on the time field, and only on touch', async () => {
+  const [timePicker, globals] = await Promise.all([
+    read('../src/components/ui/Forms/TimePicker.jsx'),
+    read('../src/app/globals.css'),
+  ]);
+  assert.match(timePicker, /ui-time-input/);
+  assert.match(globals, /@media \(pointer: fine\)/);
+  assert.match(globals, /\.ui-time-input::-webkit-calendar-picker-indicator/);
+});
+
+test('QUI-133 gives the money input its currency instead of bare padding', async () => {
+  const [input, billing, kit] = await Promise.all([
+    read('../src/components/ui/Input.jsx'),
+    read('../src/components/workspace/BillingTab.jsx'),
+    readKitShowcase(),
+  ]);
+  assert.match(input, /money: 'text-right font-bold tabular-nums'/);
+  assert.doesNotMatch(input, /pr-\[54px\]/, 'the hardcoded suffix gutter is gone');
+  assert.match(input, /suffixText && \(/);
+  // Both call sites hand-drew the suffix, at two different sizes and offsets.
+  assert.match(billing, /suffix=\{`\$\{currency\}\/г`\}/);
+  assert.match(billing, /suffix=\{currency\}/);
+  assert.doesNotMatch(billing, /absolute right-[\d.]+ top-1\/2 -translate-y-1\/2 text-\[(?:9|10)px\]/);
+  assert.match(kit, /preset="money" suffix=/);
+});
+
+test('QUI-134 gives the neutral dot the surface opposite, not a brand hue', async () => {
+  const counter = await read('../src/components/ui/DataDisplay/Counter.jsx');
+  assert.doesNotMatch(counter, /818cf8|6366f1/, 'the indigo dot and its glow are gone');
+  assert.match(counter, /info: 'bg-white shadow-\[0_0_8px_rgba\(255,255,255,0\.45\)\]'/);
+  assert.match(counter, /info: 'bg-ink'/);
+  // Colours that mean something keep meaning it.
+  assert.match(counter, /danger: 'bg-danger-solid'/);
+  assert.match(counter, /success: 'bg-success-solid'/);
+});
+
+test('QUI-135 keeps every status pill readable against its own tint', async () => {
+  const [sprints, kit] = await Promise.all([
+    read('../src/app/(app)/sprints/page.js'),
+    readKitShowcase(),
+  ]);
+  // `#cbd5e1` text on a 9% tint of itself scored about 1.5:1.
+  for (const source of [sprints, kit]) {
+    assert.doesNotMatch(source, /label="Завершено" color="#cbd5e1"/);
+    assert.match(source, /label="Завершено" color="#1f1f1f"/);
+  }
+});
+
+test('QUI-136 gives every tooltip the same seamless arrow', async () => {
+  const tooltip = await read('../src/components/ui/Navigation/Tooltip.jsx');
+  // A border triangle butted against the bubble showed its seam on `top` — the
+  // one side that lands inside the bubble's own downward-offset shadow.
+  assert.doesNotMatch(tooltip, /border-[tblr]-\[4px\]/);
+  assert.match(tooltip, /absolute h-\[6px\] w-\[6px\] rotate-45 bg-ink/);
+  for (const offset of ['bottom-\\[-3px\\]', 'top-\\[-3px\\]', 'right-\\[-3px\\]', 'left-\\[-3px\\]']) {
+    assert.match(tooltip, new RegExp(offset), `all four sides use the same offset (${offset})`);
+  }
+});
+
+// The decision is unchanged; where it is written had to move. The rule below
+// declared the grey and the ink and delivered neither: `Button` writes both as
+// utilities for whichever `style` it is given, and Tailwind emits the utility
+// layer after the components layer, so layer order beat the more specific
+// selector. The control went on reading as a bare link with the fix sitting in
+// the stylesheet. `style="secondary"` is the same pair, in the place the kit
+// already keeps colour — and it is the only one of the two that reaches the
+// screen.
+test('QUI-137 makes the inline add control look like a button', async () => {
+  const globals = await read('../src/app/globals.css');
+  const issueDetail = await read('../src/components/workspace/IssueDetail.jsx');
+  const kit = await readKitShowcase();
+  const rule = globals.slice(
+    globals.indexOf(".ui-control[data-ui-composition='inline-add-action'] {"),
+    globals.indexOf(".ui-control[data-ui-composition='inline-add-action'] {") + 220,
+  );
+
+  // Size only: it is what a custom property can carry past the utility layer.
+  assert.match(rule, /--ui-control-height: 26px/);
+  assert.doesNotMatch(rule, /background:/, 'a background here cannot beat the utility that Button writes');
+  assert.doesNotMatch(rule, /color: var\(--color-ink\)/);
+
+  for (const source of [issueDetail, kit]) {
+    for (const match of source.matchAll(/composition="inline-add-action"/g)) {
+      const call = source.slice(Math.max(0, match.index - 260), match.index);
+      assert.match(call, /style="secondary"/, 'the add control carries the grey the decision asked for');
+      assert.doesNotMatch(call.slice(call.lastIndexOf('<Button')), /style="ghost"/);
+    }
+  }
+});
+
+test('QUI-138 says where each rare Dialog variant actually lives', async () => {
+  const kit = await readKitShowcase();
+  const list = kit.slice(kit.indexOf('const DIALOG_VARIANTS'), kit.indexOf('function DialogsSection'));
+  for (const id of ['flush', 'responsive', 'spacious', 'invite', 'horizontal', 'sheet', 'status']) {
+    assert.match(list, new RegExp(`id: '${id}'`), `${id} must stay listed`);
+  }
+  // Bare buttons labelled with prop syntax read as options invented for the
+  // catalogue; each one now names the screen it ships on and how to open it —
+  // every one of them, however many there are.
+  const declared = [...list.matchAll(/\bid: '/g)].length;
+  assert.equal([...list.matchAll(/\bwhere:/g)].length, declared);
+  assert.equal([...list.matchAll(/\bopen:/g)].length, declared);
+  assert.match(kit, /Де на сайті:/);
+});
+
+test('QUI-140 removes the unreachable portal route and the variant it kept alive', async () => {
+  const [pageHeader, variants] = await Promise.all([
+    read('../src/components/ui/Layout/PageHeader.jsx'),
+    read('../scripts/kit-variants.mjs'),
+  ]);
+  await assert.rejects(
+    read('../src/app/(app)/[projectId]/portal/page.js'),
+    'the orphan route is gone',
+  );
+  assert.doesNotMatch(pageHeader, /variant === 'alt'/);
+  assert.doesNotMatch(variants, /PageHeader: \{ variant/);
+});
+
+// QUI-141 / QUI-142. The previews were hand-copies of the two rails, and the
+// copies were wrong in five ways at once — 8px radius drawn as 10px, the
+// `bg-line` selected row drawn as white-with-a-shadow, a 32px avatar drawn at
+// 24px, a muted name drawn as bold ink, no presence dot. A copy will always
+// drift; the fix is that there is no copy. One component, three call sites.
+test('the chat and team rails exist once, and the pages and catalogue all render it', async () => {
+  const [rail, memberRail, chat, team, kit] = await Promise.all([
+    read('../src/components/ui/Navigation/ChannelRail.jsx'),
+    read('../src/components/ui/Navigation/MemberRail.jsx'),
+    read('../src/app/(app)/chat/page.js'),
+    read('../src/app/(app)/team/page.js'),
+    readKitShowcase(),
+  ]);
+
+  // The markup lives in the components and nowhere else.
+  assert.match(rail, /data-ui-control="chat-list-action"/);
+  assert.match(rail, /bg-line text-ink font-semibold/);
+  assert.match(memberRail, /rounded-\[8px\][\s\S]{0,80}isSelected \? 'bg-line'/);
+  assert.match(memberRail, /<UserAvatar user=\{member\} size="md" \/>/);
+  assert.match(memberRail, /text-\[13px\] font-medium truncate/);
+  // The presence mark is one component now: it was drawn four different ways
+  // at four sizes, and on a profile it was a 28px green disc over the face.
+  assert.match(memberRail, /<PresenceDot size="md" collar="canvas" \/>/);
+
+  for (const [name, source] of [['chat', chat], ['team', team], ['kit', kit]]) {
+    assert.doesNotMatch(
+      source,
+      /data-ui-control="chat-list-action"|isSelected \? 'bg-line'/,
+      `${name} must render the shared rail, not its own copy of the markup`,
+    );
+  }
+  assert.match(chat, /<ChannelRail/);
+  assert.match(team, /<MemberRail/);
+  assert.match(kit, /<ChannelRail/);
+  assert.match(kit, /<MemberRail/);
+});
+
+test('both entry points to project settings offer the same capabilities', async () => {
+  const [projectPage, list] = await Promise.all([
+    read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
+    read('../src/app/(app)/page.js'),
+  ]);
+  // Opening "Налаштування проєкту" from the kebab included archive, delete and
+  // invites; opening it inside the project silently dropped all three.
+  for (const source of [projectPage, list]) {
+    const at = source.indexOf('<BoardConfigModal');
+    const call = source.slice(at, at + 600);
+    for (const prop of ['canInvite', 'onArchive', 'onUnarchive', 'onDelete']) {
+      assert.match(call, new RegExp(`${prop}=`), `BoardConfigModal must receive ${prop}`);
+    }
+  }
+  // Archiving or deleting the project you are standing in has to leave it.
+  assert.match(projectPage, /handleArchiveProject[\s\S]{0,220}router\.push\('\/'\)/);
+  assert.match(projectPage, /handleDeleteProject[\s\S]{0,220}router\.push\('\/'\)/);
+});
+
+// A colleague's profile offered two labelled buttons and hid the rest behind an
+// admin-only menu. Four actions with four words beside them read as a sentence
+// rather than a toolbar, and the loudest thing on the screen was the emergency
+// call — the one action nobody performs casually.
+test('a member profile offers four icon actions, with the emergency call in the menu', async () => {
+  const profile = await read('../src/components/profile/ProfileView.jsx');
+  const composer = await read('../src/components/CreateTaskModal.jsx');
+  const myTasks = await read('../src/app/(app)/my/page.js');
+  const calendar = await read('../src/app/(app)/calendar/page.js');
+  const eventDialog = await read('../src/components/workspace/calendar/CalendarEventDialog.jsx');
+
+  // Icons only: no labelled Button survives in the action row.
+  assert.doesNotMatch(profile, />\s*Написати\s*</);
+  assert.doesNotMatch(profile, />\s*Виклик\s*</);
+  for (const label of [
+    'Написати повідомлення',
+    'Створити завдання для учасника',
+    'Створити подію з учасником',
+    'Інші дії з учасником',
+  ]) {
+    assert.match(profile, new RegExp(`label="${label}"`), `${label} must be an icon action`);
+  }
+  // The call is still reachable, one level down, and marked as destructive.
+  assert.match(profile, /label: 'Екстрений виклик', icon: Zap, isDanger: true/);
+  // The menu is no longer admin-only, because it now carries an action every
+  // member has.
+  assert.match(profile, /\.\.\.\(isAdminOrOwner \? \[/);
+
+  // Both new actions land somewhere that knows what to do with them.
+  assert.match(profile, /\/my\?new=1&assignee=/);
+  assert.match(myTasks, /searchParams\.get\('assignee'\)/);
+  assert.match(composer, /assignees: clientMode[\s\S]{0,180}: initialAssignees\?\.length[\s\S]{0,80}\? initialAssignees[\s\S]{0,100}currentUser/);
+  assert.match(profile, /\/calendar\?new=1&with=/);
+  assert.match(calendar, /searchParams\.get\('with'\)/);
+  assert.match(eventDialog, /initialParticipantIds/);
+});
+
+// The same count was drawn four different ways for the same question: a
+// `Counter` in the board's collapsed and swimlane headers, a `Pill` with
+// `opacity-60` in the header that actually ships, another `Pill` for swimlane
+// totals, and an outline `Pill` in the team rail. Reaching for `Counter` in the
+// rail matched two of the board's headers and not the one anybody sees.
+test('one count chip answers "how many are in this list"', async () => {
+  const board = await read('../src/components/workspace/AgileBoard.jsx');
+  const rail = await read('../src/components/ui/Navigation/MemberRail.jsx');
+  const globals = await read('../src/app/globals.css');
+
+  assert.match(globals, /data-ui-pill-tone='count'\]/);
+  assert.doesNotMatch(board, /<Counter/, 'the board no longer has a second kind of count');
+  assert.doesNotMatch(board, /opacity-60/, 'the 60% white lives in the tone, not at the call site');
+  assert.equal((board.match(/<Pill tone="count" size="md"/g) || []).length, 5);
+  assert.match(rail, /<Pill tone="count" size="md">\{members\.length\}<\/Pill>/);
+});
+
+// The three feature glyphs were copied into two dozen files by hand, so
+// "change the calendar icon" meant finding every import and hoping none had
+// been missed — and some had.
+test('the sidebar, the mobile bar, the palette and a profile show the same three icons', async () => {
+  const icons = await read('../src/lib/design/icons.js');
+  const sidebar = await read('../src/components/WorkspaceSidebar.jsx');
+  const mobile = await read('../src/components/MobileNav.jsx');
+  const palette = await read('../src/components/ui/Navigation/CommandPalette.jsx');
+  const profile = await read('../src/components/profile/ProfileView.jsx');
+
+  assert.match(icons, /export const TaskIcon = SquareCheckBig/);
+  assert.match(icons, /export const CalendarIcon = Calendar\b/);
+  assert.match(icons, /export const ChatIcon = MessageCircle/);
+
+  for (const source of [sidebar, mobile, palette, profile]) {
+    assert.match(source, /from '@\/lib\/design\/icons'/);
+    // Nobody reaches past the names for the glyph they replaced.
+    assert.doesNotMatch(source, /\bCalendarDays\b/);
+    assert.doesNotMatch(source, /\bMessageSquare\b/);
+  }
+  assert.match(sidebar, /icon: TaskIcon/);
+  assert.match(mobile, /icon: TaskIcon/);
+  // A found task looks like every other task rather than a bullseye nobody
+  // else uses.
+  assert.match(palette, /issue: TaskIcon/);
+});
+
+// «Нічого не знайдено» while the request is still in flight is a wrong answer,
+// not a slow one — and it was the answer for the whole debounce plus round trip.
+test('the palette says it is searching rather than that it found nothing', async () => {
+  const palette = await read('../src/components/ui/Navigation/CommandPalette.jsx');
+  assert.match(palette, /searching \? 'Шукаємо…' : `Нічого не знайдено за «\$\{query\}»`/);
+});
+
+// Four 56px circles, on the shared icons, with the emergency call one level
+// down. `xl` and `contrast` are kit variants rather than a className each.
+test('the member profile actions are one declared size and one declared appearance', async () => {
+  const profile = await read('../src/components/profile/ProfileView.jsx');
+  const button = await read('../src/components/ui/Button.jsx');
+  const iconAction = await read('../src/components/ui/IconAction.jsx');
+  const globals = await read('../src/app/globals.css');
+
+  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 4);
+  assert.match(button, /'icon-xl': 'w-\[56px\] p-0'/);
+  assert.match(iconAction, /xl: 'icon-xl'/);
+  assert.match(iconAction, /contrast: '!bg-selected !text-ink/);
+  assert.match(globals, /data-ui-size='icon-56'\] \{[\s\S]{0,120}--ui-control-height: 56px;/);
+});
+
+// Icons alone name nothing, and these four are the whole action row — there is
+// no text anywhere near them.
+test('every profile action circle carries a tooltip as well as a label', async () => {
+  const profile = await read('../src/components/profile/ProfileView.jsx');
+  for (const content of ['Написати повідомлення', 'Створити завдання', 'Створити подію', 'Ще дії']) {
+    assert.match(profile, new RegExp(`<Tooltip content="${content}">`), content);
+  }
+  // The menu is wrapped, not its trigger: ContextMenu clones the trigger to
+  // attach its own onClick, and Tooltip forwards nothing to what it wraps — so
+  // a Tooltip in the trigger slot would swallow the click that opens the menu.
+  assert.match(profile, /<Tooltip content="Ще дії">\s*<ContextMenu/);
+  assert.doesNotMatch(profile, /trigger=\{\s*<Tooltip/);
+});
+
+// The sprint accordion, the board column and the task list section are three
+// places that fold a group of tasks away. They are one control.
+test('every collapse control that folds a group of tasks is the same button', async () => {
+  const [sprints, board, listView] = await Promise.all([
+    readFile(new URL('../src/app/(app)/sprints/page.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/workspace/AgileBoard.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/ui/TaskManagement/TaskListView.jsx', import.meta.url), 'utf8'),
+  ]);
+
+  for (const [name, source] of [['sprints', sprints], ['board', board], ['list view', listView]]) {
+    assert.match(
+      source,
+      /style="ghost"\s*\r?\n\s*size="icon-xs"/,
+      `${name} must fold with the shared ghost icon-xs control`,
+    );
+    // A bigger box pushed longer status names onto a second row and broke the
+    // rank of column headers. The controls stay miniature; what changed is the
+    // kebab's glyph and its optical weight beside the plus.
+    assert.doesNotMatch(source, /size="icon-sm"/, `${name} must keep the miniature control`);
+  }
+  // The sprint header specifically: it used to be `icon`, a 32px box against
+  // the other two.
+  assert.doesNotMatch(sprints, /size="icon"\s*\r?\n\s*icon=\{isExpanded \? ChevronDown : ChevronRight\}/);
+  assert.match(sprints, /size="icon-xs"\s*\r?\n\s*icon=\{isExpanded \? ChevronDown : ChevronRight\}/);
+});
+
+test('the sidebar theme picker never nests a ColorSwatch button in another button', async () => {
+  const settings = await read('../src/app/(app)/settings/page.js');
+  const themePicker = settings.slice(
+    settings.indexOf('const buttonNode = ('),
+    settings.indexOf("if (opt.id === 'custom')"),
+  );
+  assert.match(themePicker, /<label[\s\S]*group\/theme/);
+  assert.doesNotMatch(themePicker, /<button[\s\S]*group\/theme/);
+  assert.match(themePicker, /<ColorSwatch/);
+});

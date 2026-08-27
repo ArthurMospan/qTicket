@@ -1,0 +1,1982 @@
+{
+  "generatedBy": "scripts/check-kit-drift.mjs",
+  "scope": "authenticated-workspace",
+  "contract": {
+    "undeclaredValues": "A variant value the implementation does not declare must not reach the product.",
+    "unknownProps": "A variant-shaped prop the manifest does not know must not reach the product.",
+    "chromeOverrides": "A kit component must not be handed a className that redefines its own geometry or typography.",
+    "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
+  },
+  "totals": {
+    "componentsWithVariants": 46,
+    "declaredValues": 379,
+    "undeclaredValues": 0,
+    "unknownProps": 0,
+    "chromeOverrides": 0,
+    "usedAndPreviewed": 237,
+    "usedWithoutPreview": 0,
+    "declaredUnused": 112
+  },
+  "undeclaredValues": [],
+  "unknownProps": [],
+  "chromeOverrides": [],
+  "usedWithoutPreview": [],
+  "declaredUnused": [
+    {
+      "component": "Alert",
+      "prop": "variant",
+      "value": "success",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "chat-inline",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "chat-mention",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "chat-message",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "hero",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "sm",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "xl",
+      "namespace": null
+    },
+    {
+      "component": "AvatarButton",
+      "prop": "size",
+      "value": "xs",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "color",
+      "value": "dark",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "color",
+      "value": "red",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
+      "value": "metric-editor",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "shape",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "shape",
+      "value": "micro",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "shape",
+      "value": "tight",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "size",
+      "value": "icon-24",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "size",
+      "value": "icon-30",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "size",
+      "value": "icon-xl",
+      "namespace": null
+    },
+    {
+      "component": "Button",
+      "prop": "surface",
+      "value": "danger-subtle",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayCell",
+      "prop": "density",
+      "value": "roomy",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayCell",
+      "prop": "state",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayCell",
+      "prop": "state",
+      "value": "outside",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayCell",
+      "prop": "state",
+      "value": "selected",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayCell",
+      "prop": "state",
+      "value": "today",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayCell",
+      "prop": "state",
+      "value": "weekend",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayNumber",
+      "prop": "state",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayNumber",
+      "prop": "state",
+      "value": "outside",
+      "namespace": null
+    },
+    {
+      "component": "CalendarDayNumber",
+      "prop": "state",
+      "value": "today",
+      "namespace": null
+    },
+    {
+      "component": "Card",
+      "prop": "preset",
+      "value": "elevated",
+      "namespace": null
+    },
+    {
+      "component": "Counter",
+      "prop": "size",
+      "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "Counter",
+      "prop": "status",
+      "value": "danger",
+      "namespace": null
+    },
+    {
+      "component": "Counter",
+      "prop": "status",
+      "value": "success",
+      "namespace": null
+    },
+    {
+      "component": "Counter",
+      "prop": "variant",
+      "value": "count",
+      "namespace": null
+    },
+    {
+      "component": "DataTable",
+      "prop": "density",
+      "value": "compact",
+      "namespace": null
+    },
+    {
+      "component": "DetailSection",
+      "prop": "density",
+      "value": "section",
+      "namespace": null
+    },
+    {
+      "component": "EmptyState",
+      "prop": "context",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "EmptyState",
+      "prop": "density",
+      "value": "comfortable",
+      "namespace": null
+    },
+    {
+      "component": "EmptyState",
+      "prop": "surface",
+      "value": "transparent",
+      "namespace": null
+    },
+    {
+      "component": "FileThumb",
+      "prop": "density",
+      "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "FilterBar",
+      "prop": "context",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "FormGroup",
+      "prop": "gap",
+      "value": "sm",
+      "namespace": null
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
+      "value": "metric-editor",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "shape",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "IconAction",
+      "prop": "shape",
+      "value": "tight",
+      "namespace": null
+    },
+    {
+      "component": "Input",
+      "prop": "composition",
+      "value": "metric-editor",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Label",
+      "prop": "context",
+      "value": "field",
+      "namespace": null
+    },
+    {
+      "component": "LoadingSpinner",
+      "prop": "size",
+      "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "MarkdownViewer",
+      "prop": "size",
+      "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "Meter",
+      "prop": "layout",
+      "value": "stack",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "date",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "member",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "priority",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "sort",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "sprint",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "status",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "filterRole",
+      "value": "type",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "size",
+      "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "size",
+      "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "size",
+      "value": "sm",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "variant",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "MultiSelect",
+      "prop": "variant",
+      "value": "inline",
+      "namespace": null
+    },
+    {
+      "component": "Pill",
+      "prop": "shape",
+      "value": "capsule",
+      "namespace": "*[data-ui-pill-shape]"
+    },
+    {
+      "component": "Pill",
+      "prop": "tone",
+      "value": "accent",
+      "namespace": "*[data-ui-pill-tone]"
+    },
+    {
+      "component": "Pill",
+      "prop": "tone",
+      "value": "info",
+      "namespace": "*[data-ui-pill-tone]"
+    },
+    {
+      "component": "Pill",
+      "prop": "tone",
+      "value": "overlay",
+      "namespace": "*[data-ui-pill-tone]"
+    },
+    {
+      "component": "Pill",
+      "prop": "weight",
+      "value": "bold",
+      "namespace": null
+    },
+    {
+      "component": "Popover",
+      "prop": "align",
+      "value": "center",
+      "namespace": null
+    },
+    {
+      "component": "Popover",
+      "prop": "align",
+      "value": "end",
+      "namespace": null
+    },
+    {
+      "component": "Popover",
+      "prop": "padding",
+      "value": "tight",
+      "namespace": null
+    },
+    {
+      "component": "ResponseChoice",
+      "prop": "surface",
+      "value": "canvas",
+      "namespace": null
+    },
+    {
+      "component": "Segmented",
+      "prop": "surface",
+      "value": "transparent",
+      "namespace": null
+    },
+    {
+      "component": "Select",
+      "prop": "size",
+      "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "Select",
+      "prop": "variant",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "Select",
+      "prop": "variant",
+      "value": "inline",
+      "namespace": null
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "avatar",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "card",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "chart",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "chip",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "control",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "dot",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "field",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "heading",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "icon",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "panel",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "text",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "tile",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "preset",
+      "value": "title",
+      "namespace": "*[data-ui-skeleton-preset]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "tone",
+      "value": "default",
+      "namespace": "*[data-ui-skeleton-tone]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "width",
+      "value": "full",
+      "namespace": "*[data-ui-skeleton-width]"
+    },
+    {
+      "component": "Skeleton",
+      "prop": "width",
+      "value": "short",
+      "namespace": "*[data-ui-skeleton-width]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "compact",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "compact-md",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "compact-row",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "row",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "wide",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "xl",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "xs",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "xxl",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "padding",
+      "value": "xxs",
+      "namespace": ".ui-surface[data-ui-padding]"
+    },
+    {
+      "component": "Surface",
+      "prop": "preset",
+      "value": "bordered-card",
+      "namespace": null
+    },
+    {
+      "component": "Surface",
+      "prop": "preset",
+      "value": "compact-bordered-panel",
+      "namespace": null
+    },
+    {
+      "component": "Surface",
+      "prop": "preset",
+      "value": "inset",
+      "namespace": null
+    },
+    {
+      "component": "Surface",
+      "prop": "preset",
+      "value": "nested-panel",
+      "namespace": null
+    },
+    {
+      "component": "Surface",
+      "prop": "preset",
+      "value": "popover",
+      "namespace": null
+    },
+    {
+      "component": "Tag",
+      "prop": "size",
+      "value": "default",
+      "namespace": null
+    },
+    {
+      "component": "TextAction",
+      "prop": "size",
+      "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "TextAction",
+      "prop": "tone",
+      "value": "ink",
+      "namespace": null
+    },
+    {
+      "component": "Textarea",
+      "prop": "composition",
+      "value": "transcript",
+      "namespace": ".ui-textarea[data-ui-composition]"
+    },
+    {
+      "component": "Textarea",
+      "prop": "surface",
+      "value": "canvas",
+      "namespace": null
+    },
+    {
+      "component": "ToggleSwitch",
+      "prop": "size",
+      "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "UserAvatar",
+      "prop": "size",
+      "value": "chat-member",
+      "namespace": null
+    }
+  ],
+  "manifest": {
+    "Button": {
+      "size": [
+        "icon",
+        "icon-24",
+        "icon-30",
+        "icon-lg",
+        "icon-sm",
+        "icon-xl",
+        "icon-xs",
+        "lg",
+        "md",
+        "sm"
+      ],
+      "style": [
+        "ghost",
+        "outline",
+        "primary",
+        "secondary"
+      ],
+      "shape": [
+        "circle",
+        "compact",
+        "default",
+        "micro",
+        "tight"
+      ],
+      "surface": [
+        "canvas",
+        "danger-subtle",
+        "default"
+      ],
+      "color": [
+        "dark",
+        "red"
+      ],
+      "composition": [
+        "auth-close",
+        "chat-composer-action",
+        "chat-composer-cancel",
+        "chat-message-action",
+        "chat-micro-action",
+        "chat-panel-action",
+        "color-hex",
+        "duration-hours",
+        "duration-minutes",
+        "inline-add-action",
+        "inline-edit",
+        "metric-editor",
+        "metric-text",
+        "project-name",
+        "section-kebab",
+        "settings-row-action",
+        "sidebar-help-action",
+        "status-entry",
+        "status-submit",
+        "table-cell",
+        "workspace-guard"
+      ]
+    },
+    "IconAction": {
+      "size": [
+        "compact",
+        "lg",
+        "md",
+        "micro",
+        "sm",
+        "xl",
+        "xs"
+      ],
+      "appearance": [
+        "auth-close",
+        "contrast",
+        "danger",
+        "inverse",
+        "overlay",
+        "plan",
+        "primary",
+        "quiet",
+        "quiet-danger",
+        "soft",
+        "surface",
+        "surface-danger",
+        "surface-plain"
+      ],
+      "shape": [
+        "circle",
+        "compact",
+        "default",
+        "micro",
+        "tight"
+      ],
+      "composition": [
+        "auth-close",
+        "chat-composer-action",
+        "chat-composer-cancel",
+        "chat-message-action",
+        "chat-micro-action",
+        "chat-panel-action",
+        "color-hex",
+        "duration-hours",
+        "duration-minutes",
+        "inline-add-action",
+        "inline-edit",
+        "metric-editor",
+        "metric-text",
+        "project-name",
+        "section-kebab",
+        "settings-row-action",
+        "sidebar-help-action",
+        "status-entry",
+        "status-submit",
+        "table-cell",
+        "workspace-guard"
+      ]
+    },
+    "Input": {
+      "size": [
+        "lg",
+        "md",
+        "sm"
+      ],
+      "composition": [
+        "color-hex",
+        "duration-hours",
+        "duration-minutes",
+        "inline-add-action",
+        "inline-edit",
+        "metric-editor",
+        "metric-text",
+        "project-name",
+        "settings-row-action",
+        "status-entry",
+        "status-submit",
+        "table-cell",
+        "workspace-guard"
+      ],
+      "preset": [
+        "money"
+      ]
+    },
+    "Textarea": {
+      "composition": [
+        "audio-transcript",
+        "long-form",
+        "project-description",
+        "settings-note",
+        "transcript"
+      ],
+      "surface": [
+        "canvas",
+        "white"
+      ]
+    },
+    "Select": {
+      "size": [
+        "lg",
+        "md",
+        "sm"
+      ],
+      "variant": [
+        "default",
+        "ghost",
+        "inline"
+      ],
+      "filterRole": [
+        "date",
+        "member",
+        "priority",
+        "project",
+        "sort",
+        "sprint",
+        "status",
+        "type"
+      ]
+    },
+    "MultiSelect": {
+      "size": [
+        "lg",
+        "md",
+        "sm"
+      ],
+      "variant": [
+        "default",
+        "ghost",
+        "inline"
+      ],
+      "filterRole": [
+        "date",
+        "member",
+        "priority",
+        "project",
+        "sort",
+        "sprint",
+        "status",
+        "type"
+      ]
+    },
+    "Surface": {
+      "preset": [
+        "bordered-card",
+        "bordered-panel",
+        "card",
+        "compact-bordered-card",
+        "compact-bordered-panel",
+        "inset",
+        "nested-card",
+        "nested-panel",
+        "panel",
+        "popover"
+      ],
+      "padding": [
+        "compact",
+        "compact-md",
+        "compact-row",
+        "lg",
+        "md",
+        "none",
+        "row",
+        "sm",
+        "wide",
+        "xl",
+        "xs",
+        "xxl",
+        "xxs"
+      ],
+      "composition": [
+        "chart-panel",
+        "member-chart-panel",
+        "scroll-pane"
+      ]
+    },
+    "Pill": {
+      "tone": [
+        "accent",
+        "count",
+        "danger",
+        "danger-strong",
+        "dark",
+        "info",
+        "ink-subtle",
+        "neutral",
+        "overlay",
+        "success",
+        "surface",
+        "surface-ink",
+        "warning"
+      ],
+      "size": [
+        "chat-day",
+        "chat-day-wide",
+        "lg",
+        "md",
+        "sm",
+        "wide-sm"
+      ],
+      "shape": [
+        "badge",
+        "capsule"
+      ],
+      "appearance": [
+        "outline",
+        "soft-outline"
+      ],
+      "preset": [
+        "avatar-counter",
+        "avatar-counter-xs"
+      ],
+      "weight": [
+        "bold",
+        "medium"
+      ]
+    },
+    "UserAvatar": {
+      "size": [
+        "chat-inline",
+        "chat-member",
+        "chat-mention",
+        "chat-message",
+        "hero",
+        "lg",
+        "md",
+        "sm",
+        "xl",
+        "xs"
+      ]
+    },
+    "AvatarButton": {
+      "size": [
+        "chat-inline",
+        "chat-member",
+        "chat-mention",
+        "chat-message",
+        "hero",
+        "lg",
+        "md",
+        "sm",
+        "xl",
+        "xs"
+      ]
+    },
+    "TextAction": {
+      "tone": [
+        "danger",
+        "danger-quiet",
+        "ink",
+        "muted"
+      ],
+      "size": [
+        "lg",
+        "md",
+        "sm",
+        "xs"
+      ]
+    },
+    "SelectableChip": {
+      "shape": [
+        "label",
+        "person"
+      ]
+    },
+    "MarkdownViewer": {
+      "size": [
+        "lg",
+        "md"
+      ]
+    },
+    "FileThumb": {
+      "density": [
+        "lg",
+        "md",
+        "sm"
+      ]
+    },
+    "MentionMenu": {
+      "density": [
+        "composer",
+        "timeline"
+      ]
+    },
+    "Counter": {
+      "size": [
+        "lg",
+        "md",
+        "sm",
+        "xs"
+      ],
+      "variant": [
+        "count",
+        "dot"
+      ],
+      "status": [
+        "danger",
+        "info",
+        "muted",
+        "success"
+      ],
+      "appearance": [
+        "inverse-outline",
+        "sidebar",
+        "solid",
+        "subtle"
+      ]
+    },
+    "Dialog": {
+      "size": [
+        "lg",
+        "md",
+        "sm",
+        "status"
+      ],
+      "bodyPadding": [
+        "default",
+        "flush",
+        "horizontal",
+        "invite",
+        "responsive",
+        "spacious",
+        "sticky-head"
+      ],
+      "titleContext": [
+        "dialog",
+        "eyebrow"
+      ],
+      "presentation": [
+        "dialog",
+        "sheet"
+      ]
+    },
+    "Alert": {
+      "variant": [
+        "danger",
+        "error",
+        "info",
+        "success",
+        "warning"
+      ]
+    },
+    "EmptyState": {
+      "context": [
+        "centered",
+        "default",
+        "flexible",
+        "inset",
+        "page"
+      ],
+      "density": [
+        "comfortable",
+        "compact"
+      ],
+      "surface": [
+        "card",
+        "transparent"
+      ]
+    },
+    "LoadingSpinner": {
+      "size": [
+        "lg",
+        "md",
+        "sm"
+      ]
+    },
+    "Skeleton": {
+      "preset": [
+        "avatar",
+        "caption",
+        "card",
+        "chart",
+        "chip",
+        "control",
+        "dot",
+        "field",
+        "heading",
+        "icon",
+        "logo",
+        "panel",
+        "text",
+        "tile",
+        "title"
+      ],
+      "width": [
+        "full",
+        "half",
+        "short",
+        "wide"
+      ],
+      "tone": [
+        "default",
+        "sidebar"
+      ]
+    },
+    "ToggleSwitch": {
+      "size": [
+        "lg",
+        "md",
+        "sm"
+      ]
+    },
+    "Segmented": {
+      "surface": [
+        "canvas",
+        "transparent"
+      ],
+      "composition": [
+        "billing-selection",
+        "dialog-tabs"
+      ]
+    },
+    "Card": {
+      "padding": [
+        "lg",
+        "md",
+        "none",
+        "sm"
+      ],
+      "preset": [
+        "bordered",
+        "bordered-compact",
+        "borderless",
+        "elevated"
+      ]
+    },
+    "AttributeTrigger": {
+      "variant": [
+        "cell",
+        "details"
+      ]
+    },
+    "CalendarEntry": {
+      "tone": [
+        "deadline",
+        "event"
+      ]
+    },
+    "ColorSwatch": {
+      "size": [
+        "choice",
+        "theme",
+        "trigger"
+      ]
+    },
+    "ListRow": {
+      "density": [
+        "compact",
+        "roomy"
+      ]
+    },
+    "CalendarDayNumber": {
+      "state": [
+        "default",
+        "outside",
+        "today"
+      ]
+    },
+    "CalendarDayCell": {
+      "state": [
+        "default",
+        "outside",
+        "selected",
+        "today",
+        "weekend"
+      ],
+      "density": [
+        "compact",
+        "roomy"
+      ]
+    },
+    "ResponseChoice": {
+      "size": [
+        "md",
+        "sm",
+        "tile"
+      ],
+      "surface": [
+        "canvas",
+        "surface"
+      ]
+    },
+    "FormGroup": {
+      "gap": [
+        "md",
+        "sm"
+      ]
+    },
+    "Tabs": {
+      "variant": [
+        "raised",
+        "underline"
+      ],
+      "composition": [
+        "pane-switch"
+      ]
+    },
+    "Label": {
+      "context": [
+        "field",
+        "inline"
+      ]
+    },
+    "Tag": {
+      "size": [
+        "default",
+        "small"
+      ]
+    },
+    "ChatComposerCore": {
+      "variant": [
+        "qtplus",
+        "timeline",
+        "workspace"
+      ]
+    },
+    "ChatComposerDock": {
+      "composition": [
+        "timeline-composer"
+      ]
+    },
+    "TaskAttributesPanel": {
+      "context": [
+        "calendar",
+        "task"
+      ]
+    },
+    "SidebarLayout": {
+      "context": [
+        "chat",
+        "settings",
+        "team"
+      ]
+    },
+    "MobilePaneBack": {
+      "context": [
+        "level",
+        "pane"
+      ]
+    },
+    "DetailLayout": {
+      "context": [
+        "event",
+        "task"
+      ]
+    },
+    "DetailSection": {
+      "density": [
+        "group",
+        "section"
+      ]
+    },
+    "DataTable": {
+      "density": [
+        "comfortable",
+        "compact"
+      ]
+    },
+    "Meter": {
+      "tone": [
+        "danger",
+        "neutral",
+        "warning"
+      ],
+      "layout": [
+        "inline",
+        "stack"
+      ]
+    },
+    "FilterBar": {
+      "context": [
+        "default",
+        "detail",
+        "projects",
+        "stacked"
+      ]
+    },
+    "Popover": {
+      "align": [
+        "center",
+        "end",
+        "start"
+      ],
+      "padding": [
+        "default",
+        "tight"
+      ]
+    }
+  },
+  "namespaces": {
+    "Button.composition": ".ui-control[data-ui-composition]",
+    "IconAction.composition": ".ui-control[data-ui-composition]",
+    "Input.composition": ".ui-control[data-ui-composition]",
+    "Textarea.composition": ".ui-textarea[data-ui-composition]",
+    "Surface.padding": ".ui-surface[data-ui-padding]",
+    "Surface.composition": ".ui-surface[data-ui-composition]",
+    "Pill.tone": "*[data-ui-pill-tone]",
+    "Pill.size": "*[data-ui-pill-size]",
+    "Pill.shape": "*[data-ui-pill-shape]",
+    "Pill.appearance": "*[data-ui-pill-appearance]",
+    "Pill.preset": "*[data-ui-pill-preset]",
+    "Skeleton.preset": "*[data-ui-skeleton-preset]",
+    "Skeleton.width": "*[data-ui-skeleton-width]",
+    "Skeleton.tone": "*[data-ui-skeleton-tone]",
+    "Segmented.composition": ".ui-segmented[data-ui-composition]",
+    "Tabs.composition": ".ui-tabs[data-ui-composition]",
+    "ChatComposerDock.composition": ".chat-composer-dock[data-ui-composition]"
+  },
+  "usage": {
+    "LoadingSpinner.size.md": 22,
+    "Button.size.lg": 29,
+    "Button.composition.workspace-guard": 4,
+    "Pill.tone.neutral": 23,
+    "Pill.size.lg": 11,
+    "Pill.shape.badge": 22,
+    "Pill.tone.warning": 5,
+    "Button.size.icon-lg": 10,
+    "Button.style.secondary": 77,
+    "Button.style.primary": 48,
+    "Select.filterRole.sprint": 2,
+    "Select.variant.ghost": 23,
+    "Select.filterRole.member": 7,
+    "Select.filterRole.priority": 5,
+    "Select.filterRole.type": 7,
+    "Meter.layout.inline": 2,
+    "Select.filterRole.project": 1,
+    "MultiSelect.filterRole.project": 7,
+    "MultiSelect.variant.ghost": 7,
+    "Button.style.ghost": 84,
+    "Button.size.icon-sm": 21,
+    "Button.size.sm": 56,
+    "Button.size.icon": 21,
+    "Surface.preset.panel": 11,
+    "Surface.padding.lg": 6,
+    "Surface.composition.chart-panel": 2,
+    "Surface.composition.member-chart-panel": 1,
+    "FilterBar.context.detail": 1,
+    "CalendarEntry.tone.event": 1,
+    "CalendarEntry.tone.deadline": 1,
+    "IconAction.size.xs": 7,
+    "IconAction.appearance.quiet": 14,
+    "TextAction.tone.muted": 9,
+    "TextAction.size.xs": 4,
+    "CalendarDayCell.density.compact": 1,
+    "EmptyState.density.compact": 3,
+    "Surface.padding.sm": 2,
+    "MentionMenu.density.composer": 1,
+    "ChatComposerCore.variant.workspace": 1,
+    "IconAction.appearance.soft": 9,
+    "IconAction.composition.chat-composer-action": 2,
+    "Counter.size.sm": 11,
+    "Counter.appearance.subtle": 3,
+    "IconAction.composition.chat-panel-action": 3,
+    "UserAvatar.size.md": 6,
+    "IconAction.shape.compact": 3,
+    "IconAction.appearance.quiet-danger": 4,
+    "IconAction.composition.chat-micro-action": 6,
+    "Dialog.size.md": 9,
+    "Button.size.md": 63,
+    "SidebarLayout.context.chat": 1,
+    "Button.size.icon-xs": 20,
+    "Alert.variant.error": 7,
+    "Dialog.titleContext.dialog": 5,
+    "Dialog.size.sm": 12,
+    "Dialog.presentation.sheet": 1,
+    "Dialog.bodyPadding.spacious": 3,
+    "Pill.preset.avatar-counter": 2,
+    "IconAction.size.md": 4,
+    "Pill.size.md": 28,
+    "UserAvatar.size.xs": 12,
+    "EmptyState.context.page": 6,
+    "FilterBar.context.projects": 1,
+    "Select.filterRole.date": 1,
+    "Select.filterRole.sort": 1,
+    "Surface.padding.md": 5,
+    "MobilePaneBack.context.level": 1,
+    "MobilePaneBack.context.pane": 1,
+    "Input.composition.inline-edit": 1,
+    "IconAction.appearance.primary": 2,
+    "IconAction.size.compact": 5,
+    "ColorSwatch.size.trigger": 1,
+    "ColorSwatch.size.choice": 1,
+    "Input.size.sm": 5,
+    "Pill.weight.medium": 17,
+    "Card.preset.borderless": 21,
+    "Card.padding.lg": 16,
+    "Label.context.inline": 1,
+    "Textarea.composition.settings-note": 1,
+    "ToggleSwitch.size.sm": 6,
+    "ToggleSwitch.size.md": 2,
+    "ColorSwatch.size.theme": 1,
+    "Input.composition.color-hex": 1,
+    "Input.size.md": 4,
+    "Card.preset.bordered": 5,
+    "Card.padding.md": 4,
+    "Pill.tone.dark": 6,
+    "Pill.appearance.soft-outline": 4,
+    "Surface.preset.card": 1,
+    "Surface.padding.none": 4,
+    "UserAvatar.size.lg": 2,
+    "Pill.size.sm": 28,
+    "Pill.tone.ink-subtle": 3,
+    "Button.composition.settings-row-action": 4,
+    "Tabs.variant.underline": 2,
+    "SidebarLayout.context.settings": 1,
+    "Dialog.presentation.dialog": 8,
+    "Dialog.size.lg": 10,
+    "Dialog.bodyPadding.sticky-head": 1,
+    "Button.composition.section-kebab": 4,
+    "Pill.tone.count": 8,
+    "Surface.composition.scroll-pane": 1,
+    "SidebarLayout.context.team": 1,
+    "Surface.preset.nested-card": 1,
+    "FormGroup.gap.md": 8,
+    "IconAction.size.sm": 10,
+    "Textarea.composition.audio-transcript": 1,
+    "IconAction.composition.auth-close": 1,
+    "IconAction.appearance.auth-close": 1,
+    "IconAction.shape.circle": 8,
+    "Dialog.bodyPadding.flush": 5,
+    "Tabs.composition.pane-switch": 2,
+    "Alert.variant.warning": 11,
+    "SelectableChip.shape.person": 1,
+    "SelectableChip.shape.label": 1,
+    "TextAction.size.sm": 4,
+    "Dialog.bodyPadding.invite": 1,
+    "Input.size.lg": 9,
+    "Alert.variant.info": 4,
+    "IconAction.appearance.danger": 2,
+    "Counter.variant.dot": 6,
+    "Counter.appearance.sidebar": 3,
+    "Button.composition.sidebar-help-action": 2,
+    "Counter.size.md": 2,
+    "Counter.appearance.inverse-outline": 1,
+    "ListRow.density.compact": 1,
+    "ListRow.density.roomy": 1,
+    "UserAvatar.size.xl": 1,
+    "Pill.tone.surface": 5,
+    "Button.style.outline": 2,
+    "Dialog.titleContext.eyebrow": 1,
+    "Dialog.size.status": 1,
+    "Input.composition.status-entry": 1,
+    "Button.composition.status-submit": 1,
+    "ResponseChoice.size.sm": 1,
+    "Button.shape.compact": 2,
+    "Button.surface.canvas": 3,
+    "Segmented.surface.canvas": 5,
+    "IconAction.appearance.surface": 2,
+    "IconAction.appearance.surface-danger": 1,
+    "TextAction.tone.danger-quiet": 2,
+    "Card.preset.bordered-compact": 4,
+    "Card.padding.sm": 3,
+    "Button.shape.circle": 2,
+    "EmptyState.context.inset": 5,
+    "EmptyState.surface.card": 10,
+    "Dialog.bodyPadding.responsive": 3,
+    "Segmented.composition.dialog-tabs": 2,
+    "Skeleton.preset.logo": 1,
+    "Skeleton.tone.sidebar": 3,
+    "Skeleton.preset.caption": 2,
+    "Skeleton.width.wide": 1,
+    "Skeleton.width.half": 1,
+    "Counter.status.info": 3,
+    "Alert.variant.danger": 1,
+    "Pill.appearance.outline": 2,
+    "IconAction.size.lg": 3,
+    "IconAction.appearance.surface-plain": 2,
+    "UserAvatar.size.hero": 1,
+    "IconAction.size.xl": 4,
+    "IconAction.appearance.contrast": 4,
+    "Tabs.variant.raised": 1,
+    "Pill.tone.surface-ink": 3,
+    "Textarea.surface.white": 1,
+    "Meter.tone.danger": 1,
+    "Meter.tone.warning": 1,
+    "Meter.tone.neutral": 1,
+    "UserAvatar.size.sm": 10,
+    "Select.size.md": 1,
+    "Input.preset.money": 2,
+    "Pill.preset.avatar-counter-xs": 3,
+    "Surface.preset.bordered-panel": 2,
+    "Segmented.composition.billing-selection": 1,
+    "Select.filterRole.status": 1,
+    "Pill.tone.danger": 4,
+    "Tag.size.small": 3,
+    "DetailSection.density.group": 5,
+    "TextAction.size.lg": 1,
+    "DetailLayout.context.task": 1,
+    "Popover.align.start": 1,
+    "Popover.padding.default": 1,
+    "TaskAttributesPanel.context.task": 1,
+    "Input.composition.duration-hours": 4,
+    "Input.composition.duration-minutes": 4,
+    "Input.composition.metric-text": 1,
+    "MarkdownViewer.size.lg": 1,
+    "Surface.preset.compact-bordered-card": 3,
+    "Button.composition.inline-add-action": 3,
+    "EmptyState.context.flexible": 2,
+    "UserAvatar.size.chat-mention": 2,
+    "Pill.size.chat-day": 1,
+    "IconAction.size.micro": 6,
+    "IconAction.shape.micro": 6,
+    "AvatarButton.size.chat-member": 2,
+    "ChatComposerDock.composition.timeline-composer": 2,
+    "MentionMenu.density.timeline": 1,
+    "IconAction.composition.chat-composer-cancel": 1,
+    "ChatComposerCore.variant.timeline": 1,
+    "Button.composition.chat-composer-action": 1,
+    "Pill.tone.success": 1,
+    "DataTable.density.comfortable": 1,
+    "Pill.size.wide-sm": 5,
+    "ResponseChoice.size.tile": 1,
+    "LoadingSpinner.size.sm": 3,
+    "DetailLayout.context.event": 1,
+    "TaskAttributesPanel.context.calendar": 1,
+    "AttributeTrigger.variant.cell": 2,
+    "AttributeTrigger.variant.details": 1,
+    "Textarea.composition.long-form": 1,
+    "ResponseChoice.size.md": 1,
+    "ResponseChoice.surface.surface": 1,
+    "IconAction.appearance.inverse": 1,
+    "FileThumb.density.lg": 2,
+    "IconAction.appearance.overlay": 1,
+    "FileThumb.density.sm": 3,
+    "Card.padding.none": 2,
+    "ChatComposerCore.variant.qtplus": 1,
+    "TextAction.tone.danger": 2,
+    "Pill.size.chat-day-wide": 1,
+    "EmptyState.context.centered": 1,
+    "UserAvatar.size.chat-inline": 1,
+    "UserAvatar.size.chat-message": 2,
+    "IconAction.composition.chat-message-action": 1,
+    "Button.composition.chat-message-action": 2,
+    "Button.surface.default": 1,
+    "Dialog.bodyPadding.default": 1,
+    "Dialog.bodyPadding.horizontal": 1,
+    "IconAction.appearance.plan": 1,
+    "Counter.size.xs": 1,
+    "FilterBar.context.stacked": 1,
+    "Counter.status.muted": 1,
+    "Pill.tone.danger-strong": 1,
+    "Counter.appearance.solid": 1,
+    "Select.size.sm": 6,
+    "Input.composition.project-name": 1,
+    "Textarea.composition.project-description": 1,
+    "Input.composition.table-cell": 1
+  },
+  "previewedValues": [
+    "Alert.variant.danger",
+    "Alert.variant.error",
+    "Alert.variant.info",
+    "Alert.variant.success",
+    "Alert.variant.warning",
+    "AttributeTrigger.variant.cell",
+    "AttributeTrigger.variant.details",
+    "AvatarButton.size.chat-inline",
+    "AvatarButton.size.chat-member",
+    "AvatarButton.size.chat-mention",
+    "AvatarButton.size.chat-message",
+    "AvatarButton.size.hero",
+    "AvatarButton.size.lg",
+    "AvatarButton.size.md",
+    "AvatarButton.size.sm",
+    "AvatarButton.size.xl",
+    "AvatarButton.size.xs",
+    "Button.color.dark",
+    "Button.color.red",
+    "Button.composition.auth-close",
+    "Button.composition.chat-composer-action",
+    "Button.composition.chat-composer-cancel",
+    "Button.composition.chat-message-action",
+    "Button.composition.chat-micro-action",
+    "Button.composition.chat-panel-action",
+    "Button.composition.color-hex",
+    "Button.composition.duration-hours",
+    "Button.composition.duration-minutes",
+    "Button.composition.inline-add-action",
+    "Button.composition.inline-edit",
+    "Button.composition.metric-editor",
+    "Button.composition.metric-text",
+    "Button.composition.project-name",
+    "Button.composition.section-kebab",
+    "Button.composition.settings-row-action",
+    "Button.composition.sidebar-help-action",
+    "Button.composition.status-entry",
+    "Button.composition.status-submit",
+    "Button.composition.table-cell",
+    "Button.composition.workspace-guard",
+    "Button.shape.circle",
+    "Button.shape.compact",
+    "Button.shape.default",
+    "Button.shape.micro",
+    "Button.shape.tight",
+    "Button.size.icon",
+    "Button.size.icon-24",
+    "Button.size.icon-30",
+    "Button.size.icon-lg",
+    "Button.size.icon-sm",
+    "Button.size.icon-xl",
+    "Button.size.icon-xs",
+    "Button.size.lg",
+    "Button.size.md",
+    "Button.size.sm",
+    "Button.style.ghost",
+    "Button.style.outline",
+    "Button.style.primary",
+    "Button.style.secondary",
+    "Button.surface.canvas",
+    "Button.surface.danger-subtle",
+    "Button.surface.default",
+    "CalendarDayCell.density.compact",
+    "CalendarDayCell.density.roomy",
+    "CalendarDayCell.state.default",
+    "CalendarDayCell.state.outside",
+    "CalendarDayCell.state.selected",
+    "CalendarDayCell.state.today",
+    "CalendarDayCell.state.weekend",
+    "CalendarDayNumber.state.default",
+    "CalendarDayNumber.state.outside",
+    "CalendarDayNumber.state.today",
+    "CalendarEntry.tone.deadline",
+    "CalendarEntry.tone.event",
+    "Card.padding.lg",
+    "Card.padding.md",
+    "Card.padding.none",
+    "Card.padding.sm",
+    "Card.preset.bordered",
+    "Card.preset.bordered-compact",
+    "Card.preset.borderless",
+    "Card.preset.elevated",
+    "ChatComposerCore.variant.qtplus",
+    "ChatComposerCore.variant.timeline",
+    "ChatComposerCore.variant.workspace",
+    "ChatComposerDock.composition.timeline-composer",
+    "ColorSwatch.size.choice",
+    "ColorSwatch.size.theme",
+    "ColorSwatch.size.trigger",
+    "Counter.appearance.inverse-outline",
+    "Counter.appearance.sidebar",
+    "Counter.appearance.solid",
+    "Counter.appearance.subtle",
+    "Counter.size.lg",
+    "Counter.size.md",
+    "Counter.size.sm",
+    "Counter.size.xs",
+    "Counter.status.danger",
+    "Counter.status.info",
+    "Counter.status.muted",
+    "Counter.status.success",
+    "Counter.variant.count",
+    "Counter.variant.dot",
+    "DataTable.density.comfortable",
+    "DataTable.density.compact",
+    "DetailLayout.context.event",
+    "DetailLayout.context.task",
+    "DetailSection.density.group",
+    "DetailSection.density.section",
+    "Dialog.bodyPadding.default",
+    "Dialog.bodyPadding.flush",
+    "Dialog.bodyPadding.horizontal",
+    "Dialog.bodyPadding.invite",
+    "Dialog.bodyPadding.responsive",
+    "Dialog.bodyPadding.spacious",
+    "Dialog.bodyPadding.sticky-head",
+    "Dialog.presentation.dialog",
+    "Dialog.presentation.sheet",
+    "Dialog.size.lg",
+    "Dialog.size.md",
+    "Dialog.size.sm",
+    "Dialog.size.status",
+    "Dialog.titleContext.dialog",
+    "Dialog.titleContext.eyebrow",
+    "EmptyState.context.centered",
+    "EmptyState.context.default",
+    "EmptyState.context.flexible",
+    "EmptyState.context.inset",
+    "EmptyState.context.page",
+    "EmptyState.density.comfortable",
+    "EmptyState.density.compact",
+    "EmptyState.surface.card",
+    "EmptyState.surface.transparent",
+    "FileThumb.density.lg",
+    "FileThumb.density.md",
+    "FileThumb.density.sm",
+    "FilterBar.context.default",
+    "FilterBar.context.detail",
+    "FilterBar.context.projects",
+    "FilterBar.context.stacked",
+    "FormGroup.gap.md",
+    "FormGroup.gap.sm",
+    "IconAction.appearance.auth-close",
+    "IconAction.appearance.contrast",
+    "IconAction.appearance.danger",
+    "IconAction.appearance.inverse",
+    "IconAction.appearance.overlay",
+    "IconAction.appearance.plan",
+    "IconAction.appearance.primary",
+    "IconAction.appearance.quiet",
+    "IconAction.appearance.quiet-danger",
+    "IconAction.appearance.soft",
+    "IconAction.appearance.surface",
+    "IconAction.appearance.surface-danger",
+    "IconAction.appearance.surface-plain",
+    "IconAction.composition.auth-close",
+    "IconAction.composition.chat-composer-action",
+    "IconAction.composition.chat-composer-cancel",
+    "IconAction.composition.chat-message-action",
+    "IconAction.composition.chat-micro-action",
+    "IconAction.composition.chat-panel-action",
+    "IconAction.composition.color-hex",
+    "IconAction.composition.duration-hours",
+    "IconAction.composition.duration-minutes",
+    "IconAction.composition.inline-add-action",
+    "IconAction.composition.inline-edit",
+    "IconAction.composition.metric-editor",
+    "IconAction.composition.metric-text",
+    "IconAction.composition.project-name",
+    "IconAction.composition.section-kebab",
+    "IconAction.composition.settings-row-action",
+    "IconAction.composition.sidebar-help-action",
+    "IconAction.composition.status-entry",
+    "IconAction.composition.status-submit",
+    "IconAction.composition.table-cell",
+    "IconAction.composition.workspace-guard",
+    "IconAction.shape.circle",
+    "IconAction.shape.compact",
+    "IconAction.shape.default",
+    "IconAction.shape.micro",
+    "IconAction.shape.tight",
+    "IconAction.size.compact",
+    "IconAction.size.lg",
+    "IconAction.size.md",
+    "IconAction.size.micro",
+    "IconAction.size.sm",
+    "IconAction.size.xl",
+    "IconAction.size.xs",
+    "Input.composition.color-hex",
+    "Input.composition.duration-hours",
+    "Input.composition.duration-minutes",
+    "Input.composition.inline-add-action",
+    "Input.composition.inline-edit",
+    "Input.composition.metric-editor",
+    "Input.composition.metric-text",
+    "Input.composition.project-name",
+    "Input.composition.settings-row-action",
+    "Input.composition.status-entry",
+    "Input.composition.status-submit",
+    "Input.composition.table-cell",
+    "Input.composition.workspace-guard",
+    "Input.preset.money",
+    "Input.size.lg",
+    "Input.size.md",
+    "Input.size.sm",
+    "Label.context.field",
+    "Label.context.inline",
+    "ListRow.density.compact",
+    "ListRow.density.roomy",
+    "LoadingSpinner.size.lg",
+    "LoadingSpinner.size.md",
+    "LoadingSpinner.size.sm",
+    "MarkdownViewer.size.lg",
+    "MarkdownViewer.size.md",
+    "MentionMenu.density.composer",
+    "MentionMenu.density.timeline",
+    "Meter.layout.inline",
+    "Meter.layout.stack",
+    "Meter.tone.danger",
+    "Meter.tone.neutral",
+    "Meter.tone.warning",
+    "MobilePaneBack.context.level",
+    "MobilePaneBack.context.pane",
+    "MultiSelect.filterRole.date",
+    "MultiSelect.filterRole.member",
+    "MultiSelect.filterRole.priority",
+    "MultiSelect.filterRole.project",
+    "MultiSelect.filterRole.sort",
+    "MultiSelect.filterRole.sprint",
+    "MultiSelect.filterRole.status",
+    "MultiSelect.filterRole.type",
+    "MultiSelect.size.lg",
+    "MultiSelect.size.md",
+    "MultiSelect.size.sm",
+    "MultiSelect.variant.default",
+    "MultiSelect.variant.ghost",
+    "MultiSelect.variant.inline",
+    "Pill.appearance.outline",
+    "Pill.appearance.soft-outline",
+    "Pill.preset.avatar-counter",
+    "Pill.preset.avatar-counter-xs",
+    "Pill.shape.badge",
+    "Pill.shape.capsule",
+    "Pill.size.chat-day",
+    "Pill.size.chat-day-wide",
+    "Pill.size.lg",
+    "Pill.size.md",
+    "Pill.size.sm",
+    "Pill.size.wide-sm",
+    "Pill.tone.accent",
+    "Pill.tone.count",
+    "Pill.tone.danger",
+    "Pill.tone.danger-strong",
+    "Pill.tone.dark",
+    "Pill.tone.info",
+    "Pill.tone.ink-subtle",
+    "Pill.tone.neutral",
+    "Pill.tone.overlay",
+    "Pill.tone.success",
+    "Pill.tone.surface",
+    "Pill.tone.surface-ink",
+    "Pill.tone.warning",
+    "Pill.weight.bold",
+    "Pill.weight.medium",
+    "Popover.align.center",
+    "Popover.align.end",
+    "Popover.align.start",
+    "Popover.padding.default",
+    "Popover.padding.tight",
+    "ResponseChoice.size.md",
+    "ResponseChoice.size.sm",
+    "ResponseChoice.size.tile",
+    "ResponseChoice.surface.canvas",
+    "ResponseChoice.surface.surface",
+    "Segmented.composition.billing-selection",
+    "Segmented.composition.dialog-tabs",
+    "Segmented.surface.canvas",
+    "Segmented.surface.transparent",
+    "Select.filterRole.date",
+    "Select.filterRole.member",
+    "Select.filterRole.priority",
+    "Select.filterRole.project",
+    "Select.filterRole.sort",
+    "Select.filterRole.sprint",
+    "Select.filterRole.status",
+    "Select.filterRole.type",
+    "Select.size.lg",
+    "Select.size.md",
+    "Select.size.sm",
+    "Select.variant.default",
+    "Select.variant.ghost",
+    "Select.variant.inline",
+    "SelectableChip.shape.label",
+    "SelectableChip.shape.person",
+    "SidebarLayout.context.chat",
+    "SidebarLayout.context.settings",
+    "SidebarLayout.context.team",
+    "Skeleton.preset.avatar",
+    "Skeleton.preset.caption",
+    "Skeleton.preset.card",
+    "Skeleton.preset.chart",
+    "Skeleton.preset.chip",
+    "Skeleton.preset.control",
+    "Skeleton.preset.dot",
+    "Skeleton.preset.field",
+    "Skeleton.preset.heading",
+    "Skeleton.preset.icon",
+    "Skeleton.preset.logo",
+    "Skeleton.preset.panel",
+    "Skeleton.preset.text",
+    "Skeleton.preset.tile",
+    "Skeleton.preset.title",
+    "Skeleton.tone.default",
+    "Skeleton.tone.sidebar",
+    "Skeleton.width.full",
+    "Skeleton.width.half",
+    "Skeleton.width.short",
+    "Skeleton.width.wide",
+    "Surface.composition.chart-panel",
+    "Surface.composition.member-chart-panel",
+    "Surface.composition.scroll-pane",
+    "Surface.padding.compact",
+    "Surface.padding.compact-md",
+    "Surface.padding.compact-row",
+    "Surface.padding.lg",
+    "Surface.padding.md",
+    "Surface.padding.none",
+    "Surface.padding.row",
+    "Surface.padding.sm",
+    "Surface.padding.wide",
+    "Surface.padding.xl",
+    "Surface.padding.xs",
+    "Surface.padding.xxl",
+    "Surface.padding.xxs",
+    "Surface.preset.bordered-card",
+    "Surface.preset.bordered-panel",
+    "Surface.preset.card",
+    "Surface.preset.compact-bordered-card",
+    "Surface.preset.compact-bordered-panel",
+    "Surface.preset.inset",
+    "Surface.preset.nested-card",
+    "Surface.preset.nested-panel",
+    "Surface.preset.panel",
+    "Surface.preset.popover",
+    "Tabs.composition.pane-switch",
+    "Tabs.variant.raised",
+    "Tabs.variant.underline",
+    "Tag.size.default",
+    "Tag.size.small",
+    "TaskAttributesPanel.context.calendar",
+    "TaskAttributesPanel.context.task",
+    "TextAction.size.lg",
+    "TextAction.size.md",
+    "TextAction.size.sm",
+    "TextAction.size.xs",
+    "TextAction.tone.danger",
+    "TextAction.tone.danger-quiet",
+    "TextAction.tone.ink",
+    "TextAction.tone.muted",
+    "Textarea.composition.audio-transcript",
+    "Textarea.composition.long-form",
+    "Textarea.composition.project-description",
+    "Textarea.composition.settings-note",
+    "Textarea.composition.transcript",
+    "Textarea.surface.canvas",
+    "Textarea.surface.white",
+    "ToggleSwitch.size.lg",
+    "ToggleSwitch.size.md",
+    "ToggleSwitch.size.sm",
+    "UserAvatar.size.chat-inline",
+    "UserAvatar.size.chat-member",
+    "UserAvatar.size.chat-mention",
+    "UserAvatar.size.chat-message",
+    "UserAvatar.size.hero",
+    "UserAvatar.size.lg",
+    "UserAvatar.size.md",
+    "UserAvatar.size.sm",
+    "UserAvatar.size.xl",
+    "UserAvatar.size.xs"
+  ]
+}

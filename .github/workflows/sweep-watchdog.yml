@@ -1,0 +1,84 @@
+name: Sweep watchdog
+
+# Somebody has to notice when the notification sweep stops.
+#
+# It stopped once already, between 3 and 27 August 2026, and it stopped
+# completely: no deadline reminders, no calendar reminders, no birthday
+# greetings, no emptying of «Нещодавно видалене». Twenty-four days. Every part
+# of the system behaved correctly the entire time — the sweep writes down when
+# it last ran, and that record was accurate to the minute. It simply had no
+# reader. The outage was found by hand, three and a half weeks later.
+#
+# This is the reader. It asks the deployment one question — «how long since
+# anything came to run you?» — and goes red when the answer is longer than
+# `SWEEP_SILENCE_LIMIT_MS`. GitHub emails a failed scheduled run to the
+# repository owner, which is the whole delivery mechanism and needs nothing set
+# up beyond the secret the sweep already uses.
+#
+# ── Why this is its own file ────────────────────────────────────────────────
+#
+# Because what happened was that the sweep's workflow was switched off. A check
+# living inside that same workflow would have been switched off with it and
+# reported nothing, which is the failure mode it exists to catch. Disabling one
+# workflow here leaves the other running, and the next morning it is red.
+#
+# ── Why it does not use sweep-notifications.sh ──────────────────────────────
+#
+# That script treats 503 as «Firestore's daily quota is spent», warns, and
+# carries on — correct for a sweep, exactly wrong here, where 503 is the alarm.
+
+on:
+  schedule:
+    # Four times a day. The endpoint answers from one Firestore read, so the
+    # frequency costs nothing; what it buys is finding an outage inside a day
+    # instead of inside a month.
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  watchdog:
+    name: Is the notification sweep still running
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ask the deployment how long it has been silent
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+        run: |
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::error title=Watchdog cannot run::The CRON_SECRET repository secret is not set, so the endpoint would answer 401."
+            exit 1
+          fi
+
+          status=$(curl --silent --show-error --location \
+            --max-time 60 \
+            --output health.json \
+            --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL}/api/cron/notifications?mode=health") || status="000"
+
+          body=$(head -c 600 health.json)
+          echo "HTTP ${status} ${body}"
+
+          case "${status}" in
+            200)
+              echo "Розсилка сповіщень жива. ${body}"
+              ;;
+            503)
+              echo "::error title=Розсилка сповіщень зупинилась::${body} — нагадування, дедлайни й привітання зараз нікому не доставляються. Перевірте, чи ввімкнений розклад «Scheduled notifications» і чи відповідає прод."
+              exit 1
+              ;;
+            401|403)
+              echo "::error title=Сторож не має доступу::HTTP ${status}. CRON_SECRET у секретах репозиторію і в проді на Vercel — різні значення."
+              exit 1
+              ;;
+            000)
+              echo "::error title=Прод недоступний::${APP_URL} не відповів узагалі."
+              exit 1
+              ;;
+            *)
+              echo "::error title=Несподівана відповідь::HTTP ${status} ${body}"
+              exit 1
+              ;;
+          esac

@@ -1,0 +1,1900 @@
+/* src/app/globals.css — QuickTeam Workspace: light theme, same tokens as qt/ */
+@import "tailwindcss";
+
+@theme {
+  --font-inter: var(--font-inter-loaded), sans-serif;
+  --font-roboto: var(--font-roboto-loaded), sans-serif;
+
+  /* ── Brand tokens — single source of truth for the workspace palette.
+     Utilities: bg-ink / text-ink / bg-canvas / bg-surface / border-line /
+     text-muted / text-faint / bg-ink-hover. Change a value here → propagates
+     everywhere (product code references these, not raw hex). ── */
+  --color-ink:        #1f1f1f;  /* primary dark: text, buttons, sidebar */
+  --color-ink-hover:  #303030;  /* dark hover / pill */
+  --color-canvas:     #f4f4f5;  /* app canvas / element grey */
+  --color-surface:    #ffffff;  /* cards, modals, content bg */
+  --color-line:       #e9e9e9;  /* borders */
+  /* Three weights of grey, not two. Pushed to #666 / #6f6f6f these two landed
+     nine points apart — the same colour to any eye — and the whole product went
+     heavy: every timestamp, count and placeholder shouted as loudly as the text
+     it was supposed to sit behind. The brand keeps the light scale; the sidebar
+     themes, which are generated rather than chosen, keep the hard AA gate. */
+  --color-muted:      #9a9a9a;  /* secondary text, placeholders */
+  --color-faint:      #cfcfcf;  /* disabled / very light text */
+
+  /* ── Four more the kit was already painting ──────────────────────────
+     These are not new colours. They were in src/components/ui all along,
+     written as raw hex, invisible to `kit:colors` because it stopped its walk
+     at the kit boundary and never looked inside the directory that draws most
+     of the product. Naming them here is what that scan was supposed to force;
+     the values are exactly what was on screen, so nothing moved.
+
+     Each earns its name by being a state the three greys above cannot express:
+     a border has to darken under the pointer without becoming text, a selected
+     row has to sit a step below `canvas` so that hovering it still reads, and a
+     placeholder sits between `muted` and `faint` because at `muted` it competes
+     with the value it is standing in for. */
+  --color-line-strong:  #d4d4d4;  /* border under the pointer */
+  --color-selected:     #f1f1f1;  /* a row or control held selected */
+  --color-placeholder:  #b0b0b0;  /* placeholder text, disabled label */
+  --color-ink-soft:     #6b6b6b;  /* body copy inside a dialog */
+  /* A whole zone under the pointer — a board column, a lane, a drop target.
+     Not `line`, and the difference is the whole point: `line` is what a card's
+     hover ring is drawn in, and a column that hovers to the same value paints
+     the ring out. The board did exactly that. A zone tints by one step and the
+     ring stays two steps darker, so the card is still the thing you are
+     pointing at. */
+  --color-zone-hover:   #f0f0f2;  /* a column or drop zone under the pointer */
+  /* The dark shell behind login and onboarding, reached from two kit controls
+     that serve those screens. Named rather than excused, because a value two
+     components share is a token whatever screen it is on. */
+  --color-surface-dark: #2a2a2a;
+
+  /* ── Status tokens ───────────────────────────────────────────────────
+     Success, warning, danger and info — the four things the product says about
+     a state, in the three roles each of them is actually drawn in.
+
+     They existed already; they just had no names. Sixty-six places picked their
+     own: eleven different reds (`text-red-500`, `text-red-600`, `#ef4444`,
+     `#dc2626`), six greens (`#10b981`, `emerald-600`, `green-600`, a
+     hand-mixed `#e6f2ea`/`#2f6b4b` pair in the timesheet), six ambers and three
+     blues. Nothing meant anything twice, so "this failed" was a different red
+     on the settings screen than in a dialog, and the only place the set was
+     written down at all was the `Pill` tone rules below — which is why these
+     are exactly those values, promoted rather than re-chosen.
+
+     Three roles, because a status colour is genuinely drawn three ways and one
+     value cannot do all three: the ink is what text and icons take and it is
+     the only one that has to clear AA on white (all four do, 4.8–5.5:1); the
+     solid is a fill — a dot, a bar, an indicator square — where a saturated
+     mid-tone reads better than the darker ink; the soft is the wash behind a
+     line of that ink. Reach for `text-danger`, `bg-danger-solid`,
+     `bg-danger-soft`, and never for a hue. */
+  --color-success:        #047857;
+  --color-success-solid:  #10b981;
+  --color-success-soft:   #ecfdf5;
+  --color-warning:        #b45309;
+  --color-warning-solid:  #f59e0b;
+  --color-warning-soft:   #fffbeb;
+  --color-danger:         #dc2626;
+  --color-danger-solid:   #ef4444;
+  --color-danger-soft:    #fef2f2;
+  --color-info:           #2f6fd0;
+  --color-info-solid:     #3b82f6;
+  --color-info-soft:      #eff6ff;
+
+  /* ── The plan violet ─────────────────────────────────────────────────
+     One colour, for one meaning: «this is on another plan». It is not a status
+     — nothing failed, nothing is late, nothing needs care — and it is not the
+     brand either, because a crown drawn in the product's own ink is a black
+     glyph among black glyphs and says nothing.
+
+     It was a gold, `#b8860b`, and gold is the obvious choice for a crown and
+     the wrong one here: at fourteen pixels dark goldenrod reads brown, not
+     gold, and at 3.25:1 on white it clears the bar for a graphic and misses it
+     for text — so it needed a second, darker value for anything that had to be
+     read. Violet is one value for both. It clears AA at 5.7:1, so the crown,
+     the badge and the sentence beside them are the same colour, and it is the
+     only colour in the workspace that means nothing else.
+
+     Two roles, not three: the colour, and the wash it sits on. */
+  --color-plan:       #7c3aed;
+  --color-plan-soft:  #f5f3ff;
+
+  /* A fourth role, for the one surface the three above cannot serve: dark.
+     The ink clears AA on white and the solid is mixed to read on white, so on
+     the sidebar or a dark counter both go muddy — which is why the dark dots in
+     Counter carried their own lightened pair, and why Toast is excused from the
+     colour scan entirely with the note that light-on-dark status colours are a
+     set the kit does not have. This is that set, at the values already in use. */
+  --color-success-on-dark: #4ade80;
+  --color-danger-on-dark:  #f87171;
+  --color-muted-on-dark:   #a3a3a3;
+
+  /* ── Chart tokens ────────────────────────────────────────────────────
+     Analytics used to pick a colour per chart, and there were eleven of them:
+     emerald for "done", cyan for "logged", #0891b2 for "open", a hand-mixed
+     #7ba98d/#c96a5a/#b8b8b8 workload bar, yellow-400 for a budget nearing its
+     limit, ink for a project bar. Nothing meant anything twice, and four cards
+     side by side read as four unrelated widgets.
+
+     Three slots, in a fixed order, assigned in sequence and never cycled. They
+     were not chosen by eye: this trio clears the lightness band, the chroma
+     floor, all-pairs separation under protanopia and deuteranopia, and 3:1
+     against white — the checks are what makes the set safe to change.
+
+     `chart-1` is the measure and carries almost everything on its own; a second
+     and third slot appear only where two or three series genuinely share a
+     plot. Magnitude is one hue, never a value-ramp across nominal categories:
+     colouring a project bar darker because it is longer spends the identity
+     channel re-encoding what the bar length already says.
+
+     Status keeps its own reserved scale (success/warning/danger/info) and never
+     stands in for "series 2". Entity colours — a status, a type, a priority —
+     come from the workspace's own configuration and are the entity's, not the
+     chart's.
+
+     The measure is the product's own ink, and that is the point: a progress
+     bar, a meter, a sparkline and a trend line are the workspace measuring
+     itself, not a series that needs a hue to be told from another one. It used
+     to be a blue nothing else on any screen was, which read as a second primary
+     colour the product does not have. The two slots below stay hues, because
+     they only ever appear where two or three series share one plot. */
+  --color-chart-1:       var(--color-ink);  /* the measure */
+  --color-chart-2:       #cf7a22;
+  --color-chart-3:       #0e8f74;
+  /* Grey, not blue-grey: under an ink bar the old #eef2f6 track was the only
+     cool thing left in the picture. */
+  --color-chart-track:   #ededee;  /* the unfilled half of a bar or a meter */
+  --color-chart-context: #bcbcbc;  /* the series that is context, not the point */
+  --color-chart-grid:    #f0f0f0;  /* hairline axes and rules */
+}
+
+@layer base {
+  :root {
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+
+    /* Mobile bottom navigation geometry, declared once.
+       The bar floats: it is inset from all three edges rather than welded to
+       the bottom of the viewport, so the rounded corners are real and nothing
+       ever has to sit flush against system UI.
+
+       The page deliberately does *not* opt into `viewport-fit=cover`. With the
+       default fit the browser keeps the home indicator and the gesture bar
+       outside the layout viewport itself, which is why a fixed bar simply
+       cannot end up underneath them — the approach retromagaz.com uses, and the
+       reason its bottom menu never fights the browser chrome. `env()` is still
+       read through `max()` below so the geometry stays correct if the fit ever
+       changes; today those values resolve to 0 and the gap is what shows.
+
+       `--qt-nav-space` is the only number a screen needs: it is the bar's whole
+       footprint. Nothing *reserves* it any more — the shell used to, and below
+       md the shell is white, so the reserve read as a dead band under the bar
+       that no page could reach into. A screen ends its own scroller with that
+       much room instead (`.qt-nav-scroll`), which lets the page run to the
+       bottom of the glass while its last row still comes out from under it. */
+    --qt-nav-height: 58px;
+    --qt-nav-gap: 10px;
+    --qt-nav-inset: max(var(--qt-nav-gap), env(safe-area-inset-bottom));
+    --qt-nav-space: calc(var(--qt-nav-height) + var(--qt-nav-inset) + var(--qt-nav-gap));
+    /* As round as a 58px bar can be: a capsule. Anything less is a rectangle
+       with the corners taken off, and this one is not holding a rectangle. */
+    --qt-nav-radius: calc(var(--qt-nav-height) / 2);
+    /* The page the bar floats over. Below md the shell, every content pane and
+       the settings canvas are all this, which is why the scrim can be one
+       colour rather than a per-screen decision. Channels, not a hex, because
+       the scrim needs the same colour at three different alphas. */
+    --qt-nav-veil-color: 255 255 255;
+
+    /* UI Kit semantic contract.
+       Components, authenticated workspace screens and /ui-kit consume these
+       exact values. Context names are stable; their values may evolve. */
+    --ui-control-sm: 28px;
+    --ui-control-md: 32px;
+    --ui-control-lg: 36px;
+    --ui-composition-guard: 40px;
+    --ui-composition-metric: 42px;
+
+    /* One row of the projects bento, and the gap between rows. Every height on
+       that screen is one of these two numbers or arithmetic over them, so the
+       featured card and the small ones cannot drift apart. */
+    --ui-project-card-row: 176px;
+    --ui-project-card-gap: 16px;
+
+    --ui-radius-action: 10px;
+    --ui-radius-field: 10px;
+    --ui-radius-inset: 12px;
+    --ui-radius-surface: 16px;
+    --ui-radius-dialog: 24px;
+
+    --ui-type-display-title-size: 32px;
+    --ui-type-metric-title-size: 28px;
+    --ui-type-page-title-size: 24px;
+    --ui-type-detail-title-size: 20px;
+    --ui-type-section-title-size: 18px;
+    --ui-type-feature-title-size: 17px;
+    --ui-type-dialog-title-size: 16px;
+    --ui-type-compact-title-size: 15px;
+    --ui-type-card-title-size: 14px;
+    --ui-type-item-title-size: 12px;
+    --ui-type-micro-title-size: 11px;
+    --ui-type-eyebrow-size: 11px;
+    /* The two sizes analytics needs and had been spelling by hand: the headline
+       figure on a stat tile, and every number that sits in a column under
+       another number. */
+    --ui-type-metric-value-size: 26px;
+    /* A stat tile is half a phone wide. The same figure at 26px overflowed the
+       tile it leads, so the scale has a phone step instead of every KPI row
+       inventing one. */
+    --ui-type-metric-value-mobile-size: 20px;
+    --ui-type-figure-size: 13px;
+  }
+  body {
+    font-family: var(--font-inter);
+    @apply antialiased bg-canvas text-ink;
+    width: 100%;
+    /* `dvh` accounts for every piece of browser chrome except the one that
+       matters to a chat. The keyboard does not shorten the layout viewport on
+       iOS — it covers it — so a full-height shell with `overflow: hidden` puts
+       whatever is last in the column, which in a conversation is the composer,
+       under the keys with no way to scroll to it. `--qt-keyboard-inset` is the
+       measured overlap, published by useKeyboardOpen and 0px everywhere else,
+       including on every desktop. */
+    height: calc(100dvh - var(--qt-keyboard-inset, 0px));
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* App shell — children scroll individually */
+  }
+
+  /* While the on-screen keyboard is open there is no room for a tab bar and no
+     reason for one: the reader is typing, not navigating. The attribute is set
+     from visualViewport, so this also covers the Android case where a fixed
+     element would otherwise float on top of the keyboard. */
+  body[data-keyboard='open'] {
+    --qt-nav-space: 0px;
+  }
+
+  /* And on the two screens that do without the bar entirely — a task, an event
+     — nothing should reserve room for it either. Set from the workspace layout,
+     which is the one place that knows which route is on screen. */
+  body[data-mobile-nav='hidden'] {
+    --qt-nav-space: 0px;
+  }
+
+  /* A hand on anything that can be pressed.
+     Tailwind v4 dropped `cursor: pointer` from its button reset, so every
+     control in the product has been an arrow ever since unless somebody
+     remembered to write `cursor-pointer` — which forty-two call sites did and
+     the rest did not. A table header that sorts on click looked like a header
+     that does nothing. One rule, and the exception it needs: a disabled
+     control says so instead. */
+  :where(button, summary, [role='button'], label[for]):not(:disabled):not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+  :where(button, [role='button']):disabled,
+  :where(button, [role='button'])[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /* A visible focus ring, everywhere, by default.
+     Three components styled their own and everything else fell back to whatever
+     the browser draws — which on a dark sidebar is frequently nothing at all,
+     leaving a keyboard user with no idea where they are. `:focus-visible` only
+     fires for keyboard and assistive navigation, so pointer users see no change.
+     Anything that genuinely needs a different ring overrides it locally. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: max(4px, var(--ui-radius-action));
+  }
+  /* On the dark sidebar and bottom bar the ink ring is invisible; the surface
+     there declares its own text colour, so borrow it. */
+  [data-app-sb] :where(a, button, [tabindex]):focus-visible {
+    outline-color: var(--sb-text, #ffffff);
+  }
+
+  /* The first thing Tab reaches, and the only thing that is invisible until it
+     is. Without it every navigation costs a keyboard user a walk through the
+     entire sidebar before they reach the page they just opened. */
+  .qt-skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    transform: translateY(-200%);
+    transition: transform 150ms ease;
+  }
+  .qt-skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  /* A sheet that appears instantly reads as a rendering glitch; one that rises
+     reads as a drawer. Two hundred milliseconds is the whole effect. */
+  @keyframes qt-sheet-in {
+    from { transform: translateY(12px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .qt-sheet-in {
+    animation: qt-sheet-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .qt-sheet-in { animation: none; }
+  }
+}
+
+@layer components {
+  @keyframes qt-toast-slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .ui-toast {
+    animation: qt-toast-slide-up 200ms ease-out;
+  }
+
+  /* On a phone the bottom of the screen already belongs to the tab bar. The
+     toast clears it rather than landing on it; with the keyboard open
+     `--qt-nav-space` is 0 and the toast drops back to the bottom edge, which is
+     where there is room. */
+  @media (max-width: 767px) {
+    .ui-toast-layer {
+      bottom: calc(var(--qt-nav-space) + 8px);
+    }
+  }
+
+  /* ── The bottom bar, and the page that runs under it ──────────────────
+
+     Glass, not paint. The bar is the organization's colour at
+     `--qt-nav-opacity` over a blur of whatever is scrolling beneath it, which
+     is what allows the page to end at the bottom of the screen instead of at a
+     reserved strip. `MobileNav` publishes both the colour and the opacity: the
+     opacity is decided per brand colour, because a mid-tone thinned too far
+     stops being able to carry its own label colour at AA.
+
+     Where `backdrop-filter` is missing the bar stays fully opaque. A
+     translucent panel with nothing blurred behind it is not glass, it is a
+     smear, and the text on it is the thing that pays. */
+  .qt-nav-bar {
+    border: 1px solid var(--sb-border);
+    border-radius: var(--qt-nav-radius);
+    background-color: var(--sb-bg);
+    box-shadow: 0 6px 16px -10px rgb(0 0 0 / 45%);
+  }
+  /* A bar the reader sees as light is a white pill on a white page: the blur
+     has nothing to separate, so the edge has to. A short dense shadow and a
+     firmer border, rather than the deep soft one that only reads on dark. */
+  .qt-nav-bar[data-nav-tone='light'] {
+    border-color: rgb(31 31 31 / 14%);
+    box-shadow:
+      0 1px 2px rgb(31 31 31 / 10%),
+      0 6px 14px -8px rgb(31 31 31 / 24%);
+  }
+  @supports (background-color: color-mix(in srgb, red 50%, transparent))
+        and ((backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))) {
+    .qt-nav-bar {
+      background-color: color-mix(in srgb, var(--sb-bg) var(--qt-nav-opacity, 88%), transparent);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+    }
+  }
+
+  /* The page does not stop at the bar, it dissolves into it. Full width,
+     because the bar is inset from both sides and a list row was otherwise
+     still sharp in the 10px beside it, cut off flat at the screen edge. The
+     gradient is strongest at the very bottom and gone by the time it clears
+     the bar's top edge, so there is still something for the blur to blur.
+     Never a touch target: it covers the last of the content. */
+  .qt-nav-veil {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 39;
+    height: calc(var(--qt-nav-space) + 16px);
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgb(var(--qt-nav-veil-color) / 95%) 0%,
+      rgb(var(--qt-nav-veil-color) / 72%) 30%,
+      rgb(var(--qt-nav-veil-color) / 0%) 100%
+    );
+  }
+
+  @media (max-width: 767px) {
+    /* What a screen does instead of having room reserved for it: its own
+       scroller ends with the bar's footprint after the content.
+
+       A spacer rather than a padding, because several of these scrollers
+       already carry a padding-bottom of their own and the chat list is handed
+       one from JavaScript — a tail that *adds* to whatever is there cannot be
+       overwritten by any of them. `scroll-padding-bottom` makes the same
+       promise to `scrollIntoView` and to the focus ring following a keyboard. */
+    .qt-nav-scroll {
+      scroll-padding-bottom: var(--qt-nav-space);
+    }
+    .qt-nav-scroll::after {
+      content: '';
+      display: block;
+      flex: 0 0 auto;
+      height: var(--qt-nav-space);
+    }
+    /* An overlay covers the bar, so a scroller inside one has nothing to clear.
+       This is what lets the tail live in shared views — a profile, a task's
+       timeline, a rail — that are read both as a screen and inside a dialog. */
+    [role='dialog'] .qt-nav-scroll::after,
+    [data-ui-overlay] .qt-nav-scroll::after {
+      height: 0;
+    }
+    /* And a screen that ends in a dock rather than in a list clears the bar
+       with the dock itself: there is nothing to scroll past a composer. */
+    .qt-nav-dock {
+      margin-bottom: var(--qt-nav-space);
+    }
+  }
+
+  /* Named geometry: the same contract is used by Button/Input/Select and by
+     exceptional compositions. Avoid anonymous h-[Npx] control overrides. */
+  /* One variable drives the box and the line box. A control states its height
+     once, as `--ui-control-height`; `height` and `line-height` both read it.
+
+     The line box matters as much as the box. `leading-none` at the call site
+     made the line box exactly one font-size tall, and Inter's ascent and
+     descent are not symmetric about that, so the glyphs landed ~2px above the
+     middle of every control. At 100% zoom that reads as "tight"; at 90% the
+     border box also snaps to a whole device pixel and the same 2px reads as a
+     crooked button with its label riding the top edge. A line box as tall as
+     the control lets the browser centre the text, which stays exact at any
+     zoom. `--ui-control-line` is the escape hatch for the two compositions
+     that add vertical padding, where the content box is shorter than the box. */
+  /* Horizontal padding travels the same way the height does, and for the same
+     reason. Written as a utility inside Button or Input it lands in Tailwind's
+     last layer, where it beats every composition rule here however specific —
+     which is how the invite field came to declare 150px of room for the button
+     inside it and render 12px for months. (That composition is gone — the row
+     is two standard controls now — but the mechanism it broke on is not.)
+     A custom property has no such fight:
+     nothing in the utility layer can set one, so a composition that wants the
+     padding simply takes it.
+     `--ui-control-px` is both sides; `--ui-control-pl`/`--ui-control-pr` are
+     the one-sided overrides. Icon buttons keep `p-0` as a utility on purpose:
+     a square box has no padding for anybody to claim. */
+  .ui-control {
+    --ui-control-height: var(--ui-control-lg);
+    height: var(--ui-control-height);
+    line-height: var(--ui-control-line, var(--ui-control-height));
+    border-radius: var(--ui-radius-field);
+    padding-left: var(--ui-control-pl, var(--ui-control-px, 0px));
+    padding-right: var(--ui-control-pr, var(--ui-control-px, 0px));
+  }
+  .ui-button { --ui-control-px: 18px; }
+  .ui-button[data-ui-size='sm'] { --ui-control-px: 12px; }
+  .ui-button[data-ui-size='md'] { --ui-control-px: 16px; }
+  .ui-field { --ui-control-px: 12px; }
+  .ui-field[data-ui-leading='icon'] { --ui-control-pl: 36px; }
+  /* Native number spinners are a browser widget in the middle of a kit field:
+     they sit where the unit label goes, they change the value on a stray
+     scroll, and nothing in this product is entered by clicking an arrow twenty
+     times. Six call sites had already turned them off with the same pair of
+     utilities and fourteen had not, which is the whole reason «год / хв» looked
+     like a different control in the timesheet than in a task. Off once, here. */
+  .ui-field[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  .ui-field[type='number']::-webkit-outer-spin-button,
+  .ui-field[type='number']::-webkit-inner-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .ui-control[data-ui-size='sm'] { --ui-control-height: var(--ui-control-sm); }
+  .ui-control[data-ui-size='md'] { --ui-control-height: var(--ui-control-md); }
+  .ui-control[data-ui-size='lg'] { --ui-control-height: var(--ui-control-lg); }
+  .ui-control[data-ui-size='icon-xs'] {
+    --ui-control-height: 20px;
+    border-radius: 6px;
+  }
+  .ui-control[data-ui-size='icon-24'] {
+    --ui-control-height: 24px;
+    border-radius: 7px;
+  }
+  .ui-control[data-ui-size='icon-30'] {
+    --ui-control-height: 30px;
+    border-radius: 8px;
+  }
+  /* The profile action circles. Big enough to be the only thing naming the
+     action — there is no label beside them — and round, because at 56px a
+     rounded square reads as a card rather than a button. */
+  .ui-control[data-ui-size='icon-56'] {
+    --ui-control-height: 56px;
+    border-radius: 999px;
+  }
+  /* Cascade layers, not specificity, decide these rules.
+     A class plus an attribute selector is 0,2,0 and outranks `.px-4` at
+     0,1,0 — and loses anyway, because Tailwind emits
+     `@layer theme, base, components, utilities;` and layer order beats
+     specificity outright. So any property the owning component also writes as a
+     utility is dead here, however specific this selector looks.
+     A custom property is the exception: no utility sets one, which is why
+     `--ui-control-height` is the part of these presets that has always worked.
+     `npm run kit:composition` keeps the count of shadowed declarations at zero;
+     50 of them had accumulated before anything was measuring. */
+  .ui-control[data-ui-composition='workspace-guard'] {
+    --ui-control-height: var(--ui-composition-guard);
+  }
+  /* Hex colour entry: a monospace field so the value does not shift width as
+     the user types. Previously `font-mono` at the call site. */
+  .ui-control[data-ui-composition='color-hex'] {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* Surface size contracts.
+     These replace `min-h-[420px]` / `min-h-[520px]` / `max-h-[60vh]` written
+     directly onto Surface at four call sites. The heights live here so the kit
+     owns them; how the surface shares its row stays composition at the call
+     site. */
+  .ui-surface[data-ui-composition='chart-panel'] {
+    min-height: 420px;
+  }
+  .ui-surface[data-ui-composition='member-chart-panel'] {
+    min-height: 520px;
+  }
+  .ui-surface[data-ui-composition='scroll-pane'] {
+    max-height: 60vh;
+    min-height: 0;
+  }
+  @media (min-width: 1024px) {
+    .ui-surface[data-ui-composition='scroll-pane'] {
+      max-height: none;
+    }
+  }
+
+  /* Timeline/QuickTeam+ chat composer padding. */
+  .chat-composer-dock[data-ui-composition='timeline-composer'] {
+    padding: 12px 16px calc(20px + var(--sab));
+  }
+  /* The four duration presets and the metric fields declared their own right
+     padding to keep the value clear of the unit label. `Input` has carried the
+     `suffix` prop since — it measures the label and writes the room as an
+     inline style, which beats every layer there is. The declarations here were
+     the older mechanism and had stopped applying long before this was noticed;
+     the height is what still travels. */
+  .ui-control[data-ui-composition='metric-editor'],
+  .ui-control[data-ui-composition='duration-hours'],
+  .ui-control[data-ui-composition='duration-minutes'] {
+    --ui-control-height: var(--ui-composition-metric);
+  }
+  .ui-control[data-ui-composition='metric-text'] {
+    --ui-control-height: var(--ui-composition-metric);
+  }
+  .ui-control[data-ui-composition='project-name'] {
+    --ui-control-height: var(--ui-composition-metric);
+  }
+  /* Vertical padding shortens the content box, so the line box has to follow it
+     down rather than stay as tall as the control. */
+  .ui-control[data-ui-composition='settings-row-action'] {
+    --ui-control-line: calc(var(--ui-control-height) - 24px);
+    width: 100%;
+  }
+  .ui-control[data-ui-composition='status-entry'] {
+    --ui-control-height: 44px;
+    border-radius: var(--ui-radius-inset);
+  }
+  .ui-control[data-ui-composition='status-submit'] {
+    --ui-control-height: 44px;
+    border-radius: var(--ui-radius-inset);
+  }
+  /* Room for the trailing edit affordance — the other declaration that had been
+     written down and never applied. */
+  .ui-control[data-ui-composition='inline-edit'] {
+    --ui-control-pr: 54px;
+  }
+  /* The table's own scrollport. `custom-scrollbar` reserves a track down the
+     whole pane, and the top of that track lands beside the sticky header — a
+     grey band in the one row with no room for one. This scrollbar is thin and
+     has no track at all, so the header keeps its full width and the bar only
+     appears over the rows it is scrolling. */
+  .ui-table-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(0 0 0 / 18%) transparent;
+  }
+  .ui-table-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .ui-table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .ui-table-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+    background-color: rgb(0 0 0 / 18%);
+  }
+  .ui-table-scroll::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* A control living inside a table cell. The row is 36px, and the standard
+     small control is 34 with its own padding — so opening a cell for editing
+     shoved every row below it down the screen and the table jumped under the
+     cursor. This is the row's own height, minus the breathing room the cell
+     already has. */
+  .ui-control[data-ui-composition='table-cell'] {
+    --ui-control-height: 26px;
+    --ui-control-line: 16px;
+    --ui-control-px: 6px;
+    border-radius: 6px;
+  }
+  /* `menu-item` lived here: it made a Button look like a row of a menu, for the
+     two popovers that were hand-building a menu out of ghost buttons. Both open
+     the real `ContextMenu` now, so the vocabulary for faking one is gone with
+     them — keeping it declared is an invitation to build the lookalike again. */
+  /* QUI-132. `<input type="time">` draws its own clock button on the right,
+     next to the Clock icon the component already draws on the left — two
+     clocks on one field, and the browser's one opens a dropdown nobody asked
+     for. On a mouse the segments are typed directly, so the native control is
+     hidden; on touch it is the better way to pick a time, so it stays. */
+  @media (pointer: fine) {
+    .ui-time-input::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+    .ui-time-input::-webkit-inner-spin-button,
+    .ui-time-input::-webkit-clear-button {
+      display: none;
+    }
+  }
+
+  /* QUI-137. This read as a bare link: white on white, grey text. An "add"
+     control is a button, so it takes the standard element grey and the primary
+     ink, the same pair every secondary button uses. */
+  /* QUI-137 asked for the standard element grey and the primary ink, and this
+     rule declared both — into the void: `Button` writes its own background and
+     text colour as utilities for whichever `style` it is given, and the utility
+     layer is emitted last. The control kept reading as a bare link for months
+     with the fix sitting right here.
+     The colour now comes from `style="secondary"`, which is the same pair in
+     the place the kit already keeps it. What stays here is the size, which no
+     utility on this element sets. */
+  .ui-control[data-ui-composition='inline-add-action'] {
+    --ui-control-height: 26px;
+    --ui-control-line: 14px;
+    border-radius: 8px;
+  }
+  /* All this preset ever delivered was `flex: 1` on the tabs — Segmented writes
+     its own gap, padding, radius and height as utilities, and the utility layer
+     is emitted last. The rest is removed rather than left looking authoritative. */
+  .ui-segmented[data-ui-composition='dialog-tabs'] > button {
+    flex: 1;
+  }
+  /* A tab strip as wide as the sheet it sits in, rather than as wide as its own
+     labels: the pane switch above a task, and the mode switch at the top of the
+     new-task sheet. On a phone that strip is the whole navigation of the screen,
+     so the tabs divide the width between them instead of huddling into the left
+     third of it. */
+  .ui-tabs[data-ui-composition='pane-switch'] {
+    width: 100%;
+  }
+  .ui-tabs[data-ui-composition='pane-switch'] > [role='tab'] {
+    flex: 1;
+    min-width: 0;
+  }
+  /* A dialog's actions are a row that ends at the right edge, which is a row
+     built for a cursor: on a phone it leaves two 90px targets in the corner and
+     a wrapped switch above them. Below md the same actions become a stack of
+     full-width rows, the primary one closest to the thumb because it is last in
+     the markup. Nothing here is per-dialog — every sheet in the product draws
+     its footer through this one element. */
+  @media (max-width: 767px) {
+    .ui-dialog-footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .ui-dialog-footer > * {
+      width: 100%;
+      margin-right: 0;
+    }
+  }
+  .ui-native-control[data-ui-control='identity-meta-trigger'] {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    padding: 2px 6px;
+    transition: background-color 150ms;
+  }
+  .ui-native-control[data-ui-control='identity-meta-trigger']:hover {
+    background: #f0f0f0;
+  }
+  /* Above the phone the whole row is the capsule, label included, and the 6px
+     it is inset by is invisible against a wide column. On a phone that inset is
+     the first thing under the title, and the metadata line starts six pixels to
+     the right of the heading it belongs to. So below md the capsule starts at
+     the face instead: the label sits flush with the title, and the part that
+     lights up is the part that opens a person. `display: contents` above it
+     keeps the wider layout byte-for-byte what it was. */
+  .ui-native-control[data-ui-control='identity-meta-trigger'] > [data-ui-part='identity'] {
+    display: contents;
+  }
+  @media (max-width: 767px) {
+    .ui-native-control[data-ui-control='identity-meta-trigger'] {
+      padding-left: 0;
+    }
+    .ui-native-control[data-ui-control='identity-meta-trigger']:hover {
+      background: transparent;
+    }
+    .ui-native-control[data-ui-control='identity-meta-trigger'] > [data-ui-part='identity'] {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 6px;
+      padding: 2px 6px;
+      margin-block: -2px;
+      transition: background-color 150ms;
+    }
+    .ui-native-control[data-ui-control='identity-meta-trigger']:hover > [data-ui-part='identity'] {
+      background: #f0f0f0;
+    }
+  }
+  /* «Проєкти» on a profile: a wrapped row of capsules, each of which opens
+     one. The capsule itself is a `Pill`, so the radius, the padding and the
+     type live where every other chip's do; this rule carries only the part a
+     Pill has no business knowing — that this one is pressable, and what it does
+     under a cursor. */
+  .ui-native-control[data-ui-control='profile-project-chip'] {
+    display: inline-flex;
+    max-width: 100%;
+    border-radius: 999px;
+  }
+  .ui-native-control[data-ui-control='profile-project-chip'] .ui-pill {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 150ms, border-color 150ms;
+  }
+  .ui-native-control[data-ui-control='profile-project-chip']:hover .ui-pill {
+    border-color: var(--color-line-strong);
+    background: var(--color-canvas);
+  }
+  /* ── The rail's own notice ───────────────────────────────────────────────
+     A ceiling of the plan that has run out, at the foot of the sidebar.
+
+     Every value in it is mixed out of `--sb-text`, which is the rail's own type
+     colour: the wash, the outline and the counter follow whatever an
+     organization has painted its sidebar, black, white or otherwise, and there
+     is no second palette to keep in step with a brand nobody here has seen. The
+     one colour that is not the rail's own is the glyph, and it is a fill rather
+     than text — the words beside it carry the meaning. */
+  .ui-rail-notice {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--sb-text, #ffffff) 8%, transparent);
+    padding: 8px 10px;
+    text-align: left;
+    transition: background-color 150ms;
+  }
+  .ui-rail-notice:hover {
+    background: color-mix(in srgb, var(--sb-text, #ffffff) 15%, transparent);
+  }
+  .ui-rail-notice[data-ui-rail-notice='collapsed'] {
+    width: 32px;
+    height: 32px;
+    justify-content: center;
+    margin-inline: auto;
+    padding: 0;
+  }
+  .ui-rail-notice__mark {
+    flex-shrink: 0;
+    color: var(--color-warning-solid);
+  }
+  .ui-rail-notice__body {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .ui-rail-notice__title {
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--sb-text, #ffffff);
+  }
+  .ui-rail-notice__detail {
+    overflow: hidden;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--sb-muted, #a3a3a3);
+  }
+  .ui-rail-notice__extra {
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--sb-text, #ffffff) 14%, transparent);
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--sb-text, #ffffff);
+  }
+  .ui-native-control[data-ui-control='choice-card'] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-width: 1px;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: left;
+    transition: border-color 150ms, background-color 150ms, opacity 150ms;
+  }
+  .ui-native-control[data-ui-control='chat-list-action'] {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 8px 12px;
+    text-align: left;
+    transition: all 150ms;
+  }
+  /* On a phone the rail is the whole screen and every row in it is a target for
+     a thumb, not for a cursor. 34px is a comfortable row in a 280px sidebar and
+     a miss on a phone; 44px is the smallest thing a finger reliably hits. */
+  @media (max-width: 767px) {
+    .ui-native-control[data-ui-control='chat-list-action'] {
+      gap: 10px;
+      padding: 12px;
+    }
+  }
+  .ui-textarea[data-ui-composition='settings-note'] {
+    height: 80px;
+    margin-top: 4px;
+  }
+  .ui-textarea[data-ui-composition='long-form'] {
+    min-height: 180px;
+  }
+  /* `Textarea` writes its own padding, radius and `resize-none` as utilities,
+     so of these three presets only the line height was ever reaching the
+     screen. The rest is removed rather than left reading as the source. */
+  .ui-textarea[data-ui-composition='transcript'] {
+    line-height: 20px;
+  }
+  .ui-textarea[data-ui-composition='audio-transcript'] {
+    line-height: 20px;
+  }
+  .ui-textarea[data-ui-composition='project-description'] {}
+
+  /* A surface name describes product meaning, not a one-off collection of
+     radius/background utilities. Layout-only classes remain local. */
+  .ui-surface { border: 0 solid transparent; }
+  .ui-surface[data-ui-surface='panel'] {
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-canvas);
+  }
+  .ui-surface[data-ui-surface='card'] {
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-surface);
+  }
+  .ui-surface[data-ui-surface='nested-card'] {
+    border-radius: var(--ui-radius-inset);
+    background: var(--color-surface);
+  }
+  .ui-surface[data-ui-surface='nested-panel'] {
+    border-radius: var(--ui-radius-inset);
+    background: var(--color-canvas);
+  }
+  .ui-surface[data-ui-surface='inset'] {
+    border-radius: var(--ui-radius-inset);
+    background: #f0f0f0;
+  }
+  .ui-surface[data-ui-surface='bordered-card'] {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-surface);
+  }
+  .ui-surface[data-ui-surface='compact-bordered-card'] {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ui-radius-inset);
+    background: var(--color-surface);
+  }
+  .ui-surface[data-ui-surface='compact-bordered-panel'] {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ui-radius-inset);
+    background: var(--color-canvas);
+  }
+  .ui-surface[data-ui-surface='elevated-card'] {
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-surface);
+    box-shadow: 0 4px 24px rgb(0 0 0 / 2%);
+  }
+  .ui-surface[data-ui-surface='bordered-panel'] {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-canvas);
+  }
+  .ui-surface[data-ui-surface='popover'] {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ui-radius-inset);
+    background: var(--color-surface);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 12%);
+  }
+  /* A stadium radius is right for one line and wrong for three: a wrapped
+     change read as a lozenge with its corners bulging past the text. 14px is
+     the radius of everything else this size and holds at any height. */
+  .ui-surface[data-ui-surface='system-message'] {
+    border-radius: 14px;
+    background: rgb(0 0 0 / 4.5%);
+    padding: 6px 10px 6px 8px;
+  }
+  /* The bento: one featured card two columns and two rows wide, and small
+     cards filling the 2×2 beside it. That arrangement only reads as an
+     arrangement if the small card is exactly half the tall one — otherwise the
+     grid decides the row height from whatever the featured card's activity
+     list happens to contain, the small card stretches to match, and what you
+     get is a short card blown up to 215px with 70px of nothing under the name.
+
+     So the row is a fixed track (`--ui-project-card-row`) and the two cards are
+     told the same number: one row for the small one, two rows plus the grid gap
+     for the featured one. 176 + 16 + 176 = 368. */
+  .ui-surface[data-ui-surface='project-card'] {
+    min-height: var(--ui-project-card-row);
+    gap: 20px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-surface);
+    padding: 24px 24px 28px;
+  }
+  .ui-surface[data-ui-surface='project-card'][data-ui-density='large'] {
+    min-height: calc(var(--ui-project-card-row) * 2 + var(--ui-project-card-gap));
+    gap: 32px;
+    padding: 32px 32px 40px;
+  }
+  /* The grid the two heights above are measured against. Only from `md`: below
+     it the grid is one column, no card is featured, and a fixed track would
+     just crop a long project name. */
+  .ui-grid[data-ui-grid='project-cards'] {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--ui-project-card-gap);
+  }
+  @media (width >= 48rem) {
+    .ui-grid[data-ui-grid='project-cards'] {
+      grid-auto-rows: var(--ui-project-card-row);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (width >= 80rem) {
+    .ui-grid[data-ui-grid='project-cards'] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (width >= 96rem) {
+    .ui-grid[data-ui-grid='project-cards'] {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .ui-surface[data-ui-surface='project-card']:hover {
+    box-shadow: 0 0 0 4px #ececec;
+  }
+  .ui-surface[data-ui-surface='billing-item'] {
+    border: 1px solid #efefef;
+    border-radius: 18px;
+    background: var(--color-surface);
+    padding: 16px;
+  }
+  .ui-surface[data-ui-surface='billing-item']:hover {
+    border-color: #dfdfdf;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 2%);
+  }
+  .ui-surface[data-ui-surface='billing-item'][data-ui-muted='true'] {
+    background: rgb(250 250 250 / 50%);
+    opacity: 0.65;
+  }
+  .ui-surface[data-ui-surface='notification'] {
+    border: 1px solid #f0f0f0;
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-surface);
+    box-shadow: 0 8px 40px rgb(0 0 0 / 12%);
+  }
+  .ui-surface[data-ui-surface='notification'][data-ui-tone='emergency'] {
+    border: 2px solid var(--color-danger-solid);
+  }
+  .ui-surface[data-ui-padding='none'] { padding: 0; }
+  .ui-surface[data-ui-padding='xxs'] { padding: 4px; }
+  .ui-surface[data-ui-padding='xs'] { padding: 8px; }
+  .ui-surface[data-ui-padding='compact'] { padding: 10px; }
+  .ui-surface[data-ui-padding='sm'] { padding: 12px; }
+  .ui-surface[data-ui-padding='compact-md'] { padding: 14px; }
+  .ui-surface[data-ui-padding='md'] { padding: 16px; }
+  .ui-surface[data-ui-padding='lg'] { padding: 20px; }
+  .ui-surface[data-ui-padding='xl'] { padding: 24px; }
+  .ui-surface[data-ui-padding='xxl'] { padding: 32px; }
+  .ui-surface[data-ui-padding='row'] { padding: 10px 12px; }
+  .ui-surface[data-ui-padding='wide'] { padding: 12px 16px; }
+  .ui-surface[data-ui-padding='compact-row'] { padding: 8px 10px; }
+
+  /* ── The detail page shell ────────────────────────────────────────────────
+     A task and a calendar event are the same screen with different contents,
+     and they had drifted into two different screens. The numbers that made them
+     behave differently live here now, once.
+
+     `--ui-detail-header` is the allowance for the fixed WorkspaceHeader, which
+     is absolutely positioned over the main area and reserves nothing. The task
+     put that allowance *above* its scroll container and the event put it *on*
+     it — one line apart, and the reason the two pages scrolled differently:
+     padding on the scroller is inside the scrollport, so `sticky top-0` parked
+     the event's title underneath the header instead of below it.
+
+     `--ui-detail-viewport-inset` is what the scrollport is shorter than the
+     window: the header allowance plus the 12px the workspace shell insets the
+     main pane by, top and bottom. The conversation rail is sized from it so it
+     fills its column exactly and scrolls itself instead of the page.
+
+     `--ui-detail-bottom` is the room the page leaves under itself. It is one
+     number because two things measure from it and must not disagree: the
+     scroller's bottom padding, and the rail's height. */
+  .ui-detail-shell {
+    --ui-detail-header: 56px;
+    --ui-detail-viewport-inset: calc(var(--ui-detail-header) + 24px);
+    --ui-detail-bottom: 20px;
+    display: flex;
+    flex: 1 1 0%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: var(--ui-detail-header);
+  }
+  /* An event is one column of prose and gives its end more air. */
+  .ui-detail-shell[data-ui-context='event'] {
+    --ui-detail-bottom: 40px;
+  }
+  /* Inside a dialog there is no fixed header above and no window height to
+     borrow: the dialog owns both, and paints white behind the shell. */
+  .ui-detail-shell[data-ui-density='embedded'] {
+    --ui-detail-header: 0px;
+
+    background: var(--color-surface);
+  }
+  /* The room at the end of a detail page belongs to the document, not to the
+     scrollport. As the scroller's own bottom padding it sat *below* the floor —
+     a sticky `bottom: 0` lands on the scroller's content edge — so the last
+     `--ui-detail-bottom` pixels of the reading area kept showing content under
+     a line that claimed to be the bottom. It is the floor's own height now:
+     blank at the end of the scroll, and the gradient's ground for as long as
+     there is still something coming. */
+  .ui-detail-scroll .scroll-shadow--bottom {
+    height: var(--ui-detail-bottom);
+  }
+  .ui-detail-aside {
+    min-height: 0;
+  }
+  @media (max-width: 1023px) {
+    /* One pane at a time down here, and when it is the rail the reading column
+       is not rendered — so its floor is not there to leave room at the end
+       either, and the rail asks for that room itself. */
+    .ui-detail-aside {
+      padding-bottom: var(--ui-detail-bottom);
+    }
+  }
+  @media (min-width: 1024px) {
+    /* The rail holds still, and the number that makes it hold still is the room
+       at the end of the page.
+
+       A sticky box cannot leave its containing block, which here is the grid
+       area — and the grid ends where the content ends, while the scroll goes on
+       for `--ui-detail-bottom` more pixels after it. A rail as tall as the whole
+       scrollport therefore ran out of room in exactly that last stretch and got
+       shoved up by it: 20px of drift at the end of every task, and on a task
+       only a little taller than the window that "end" is the last quarter of the
+       scroll. So the rail is the scrollport minus the room it is not allowed
+       into, and the gap it would otherwise pad itself with is that same room,
+       counted once.
+
+       And the scrollport is measured, not guessed. It used to be derived from
+       the window — `100dvh` minus a written-down allowance for the header and
+       the shell's inset — which is true only for as long as nothing else is
+       ever put above the content panel. Something was: a strip announcing a
+       spent plan ceiling, which pushed the panel down by its own height plus a
+       gutter. The rail then stood some seventy pixels taller than the column it
+       lives in, so its composer hung below the bottom edge, and the reading
+       column's floor — which is the last item of a flex column stretched to the
+       grid row — floated up into the middle of the page. Two visible faults,
+       one cause: a height taken from the window by a box that does not start at
+       the top of it. `DetailLayout` publishes what the scrollport actually
+       measures; the old expression stays as the value before the first
+       measurement, which is one frame long. */
+    .ui-detail-aside {
+      position: sticky;
+      top: 0;
+      height: calc(
+        var(--ui-detail-scrollport, calc(100dvh - var(--ui-detail-viewport-inset)))
+        - var(--ui-detail-bottom)
+      );
+    }
+  }
+
+  /* ── The typed file square ────────────────────────────────────────────────
+     One geometry and one colour per family of file, so a PDF looks like a PDF
+     wherever it is attached — a task, a channel, a thread, the viewer's header.
+     Before this, every one of those places drew the same grey page glyph and a
+     reader had to read the extension to tell a spreadsheet from a zip.
+
+     The tint is `currentColor` mixed into the surface rather than a second
+     declared colour, so a family is one hex here and the chip follows it. Two
+     sizes: the list square, and the small one a chat tile puts over a preview.
+     The hues are identity, not status — they never mean good or bad. */
+  .ui-file-glyph {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: var(--ui-radius-action);
+    background: color-mix(in oklab, currentcolor 12%, transparent);
+    color: var(--color-muted);
+  }
+  .ui-file-glyph[data-ui-density='sm'] {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .ui-file-glyph[data-ui-density='lg'] {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--ui-radius-inset);
+  }
+  /* On the dark side of a chat bubble the mixed tint disappears into the
+     bubble, so the chip borrows the bubble's own light instead. The hue stays:
+     it is what makes the family recognisable, and every one of them clears
+     contrast on #303030. */
+  .ui-file-glyph[data-ui-tone='dark'] {
+    background: rgb(255 255 255 / 14%);
+  }
+  .ui-file-glyph[data-ui-file-kind='image']   { color: #0e8f96; }
+  .ui-file-glyph[data-ui-file-kind='video']   { color: #4a5bd0; }
+  .ui-file-glyph[data-ui-file-kind='audio']   { color: #b5468f; }
+  .ui-file-glyph[data-ui-file-kind='pdf']     { color: #d64545; }
+  .ui-file-glyph[data-ui-file-kind='sheet']   { color: #1a8a5a; }
+  .ui-file-glyph[data-ui-file-kind='doc']     { color: #2f6fd0; }
+  .ui-file-glyph[data-ui-file-kind='slides']  { color: #dd7a2f; }
+  .ui-file-glyph[data-ui-file-kind='text']    { color: #6a6a6a; }
+  .ui-file-glyph[data-ui-file-kind='code']    { color: #6b53c9; }
+  .ui-file-glyph[data-ui-file-kind='archive'] { color: #9a7b2f; }
+  .ui-file-glyph[data-ui-file-kind='file']    { color: #8a8a8a; }
+
+  /* Semantic pill family. Status, type, metadata and counters share geometry
+     while keeping their distinct data meaning through wrapper components. */
+  .ui-pill {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .ui-pill[data-ui-pill-size='sm'] {
+    min-height: 18px;
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+  .ui-pill[data-ui-pill-size='md'] {
+    min-height: 20px;
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+  .ui-pill[data-ui-pill-size='lg'] {
+    min-height: 24px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  /* Chat-only pill sizes: the date separators between message groups. These
+     were folded into sm/wide-sm during the variant consolidation, which made
+     them narrower and their text a pixel larger — visible on every chat day
+     break. Chat keeps its own rhythm. */
+  .ui-pill[data-ui-pill-size='chat-day'] {
+    min-height: 18px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+  .ui-pill[data-ui-pill-size='chat-day-wide'] {
+    min-height: 24px;
+    padding: 4px 12px;
+    font-size: 10px;
+  }
+  .ui-pill[data-ui-pill-size='wide-sm'] {
+    min-height: 24px;
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+  .ui-pill[data-ui-pill-preset='avatar-counter'] {
+    position: relative;
+    z-index: 10;
+    height: 22px;
+    min-width: 22px;
+    padding: 0 4px;
+    font-size: 9px;
+    box-shadow: 0 0 0 2px var(--color-surface);
+  }
+  /* The same counter beside `xs` faces. One size fitted the 24px avatars it was
+     written for and stood six pixels taller than the 16px ones it was also used
+     with — a stack of three heads and one lump. It is the fourth face in the
+     row, so it is the size of a face; a two-digit remainder widens it and
+     nothing else moves. */
+  .ui-pill[data-ui-pill-preset='avatar-counter-xs'] {
+    position: relative;
+    z-index: 10;
+    height: 16px;
+    /* The size token sets `min-height: 20px`, and a min-height beats a height.
+       Without this line the counter stayed 20px tall however short it was told
+       to be — which is the whole bug, four pixels at a time. */
+    min-height: 16px;
+    min-width: 16px;
+    padding: 0 3px;
+    font-size: 8px;
+    box-shadow: 0 0 0 2px var(--color-surface);
+  }
+  .ui-pill[data-ui-pill-shape='badge'] { border-radius: 5px; }
+  .ui-pill[data-ui-pill-shape='capsule'] { border-radius: 999px; }
+  .ui-pill[data-ui-pill-tone='neutral'] {
+    background: var(--color-canvas);
+    color: var(--color-muted);
+  }
+  .ui-pill[data-ui-pill-tone='dark'] {
+    background: var(--color-ink);
+    color: var(--color-surface);
+  }
+  .ui-pill[data-ui-pill-tone='ink-subtle'] {
+    background: rgb(31 31 31 / 8%);
+    color: var(--color-ink);
+  }
+  /* These four rules were the only written-down copy of the product's status
+     palette, which is why the tokens above carry exactly their values. The two
+     that moved are the texts: `#ef4444` on `#fef2f2` was 3.4:1 and `#3b82f6` on
+     `#eff6ff` was 2.6:1 — a pill saying "danger" in a voice you cannot read.
+     Both take the ink token now, the same red and the same blue the rest of the
+     product uses, at 4.4 and 4.5:1. */
+  .ui-pill[data-ui-pill-tone='success'] {
+    background: var(--color-success-soft);
+    color: var(--color-success);
+  }
+  .ui-pill[data-ui-pill-tone='warning'] {
+    background: var(--color-warning-soft);
+    color: var(--color-warning);
+  }
+  .ui-pill[data-ui-pill-tone='danger'] {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+  }
+  /* The filled red beside `dark`'s filled black, for the one place a badge is a
+     pair: the plan a workspace is on, in the settings menu. A wash would not
+     read as the other half of that pair, and the fill is the ink rather than
+     the solid because this one carries a word — `danger-solid` is mixed to sit
+     under text, not behind it, and white on it is 3.7:1. */
+  .ui-pill[data-ui-pill-tone='danger-strong'] {
+    background: var(--color-danger);
+    color: var(--color-surface);
+  }
+  .ui-pill[data-ui-pill-tone='info'] {
+    background: var(--color-info-soft);
+    color: var(--color-info);
+  }
+  .ui-pill[data-ui-pill-tone='surface'] {
+    background: var(--color-surface);
+    color: var(--color-muted);
+  }
+  .ui-pill[data-ui-pill-tone='surface-ink'] {
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+  /* "How many are in this list" — the count beside a column title or a rail
+     heading. It was written four different ways for the same question: a
+     `Counter` in the collapsed and swimlane column headers, a `Pill` with
+     `opacity-60` in the header that actually ships, another `Pill` for swimlane
+     totals, and an outline `Pill` in the team rail. The 60% white is the one
+     the product has always shown, so it is the one that became a tone — and
+     nothing carries an opacity utility to get it any more. */
+  .ui-pill[data-ui-pill-tone='count'] {
+    background: rgb(255 255 255 / 60%);
+    color: var(--color-muted);
+  }
+  .ui-pill[data-ui-pill-tone='accent'] {
+    background: #fdf4ff;
+    color: #c026d3;
+  }
+  .ui-pill[data-ui-pill-tone='overlay'] {
+    background: rgb(0 0 0 / 40%);
+    color: var(--color-surface);
+    backdrop-filter: blur(4px);
+  }
+  .ui-pill[data-ui-pill-appearance='outline'] {
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+  }
+  .ui-pill[data-ui-pill-appearance='soft-outline'] {
+    background: var(--color-surface);
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 5%);
+  }
+
+  /* ── Skeletons ──────────────────────────────────────────────────────────
+     Every loading placeholder in the product is one of these, and every
+     dimension it can take is named here.
+
+     What was there before was a `bg-canvas` rectangle with `animate-pulse` on
+     it, written out again at each call site. Two things were wrong with that.
+     `bg-canvas` is #f4f4f5 — four units off the white panels it was drawn on —
+     so it read as nothing at all, and a slow fade in opacity is what a disabled
+     control does, not what loading looks like. A skeleton has to say "content
+     is coming", and the thing that says it is a sweep across a block you can
+     actually see.
+
+     Geometry travels as custom properties for the same reason the controls' does
+     (see `.ui-control`): a utility written at a call site is emitted in
+     Tailwind's last layer and would beat anything declared here. Roles come
+     after widths on purpose — a square avatar has to keep its own inline size
+     against whatever width it is handed. */
+  .ui-skeleton {
+    display: block;
+    flex: none;
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+    height: var(--ui-skeleton-height, 12px);
+    width: var(--ui-skeleton-inline-size, 100%);
+    border-radius: var(--ui-skeleton-radius, 8px);
+    background: var(--ui-skeleton-bg, #e3e3e6);
+  }
+  .ui-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--ui-skeleton-sheen, rgb(255 255 255 / 75%)) 55%,
+      transparent 100%
+    );
+    animation: ui-skeleton-sweep 1.5s ease-in-out infinite;
+  }
+  /* The block stays; only the sweep goes. A skeleton that vanishes under
+     reduced motion would leave the screen looking empty rather than busy. */
+  @media (prefers-reduced-motion: reduce) {
+    .ui-skeleton::after { animation: none; opacity: 0; }
+  }
+  @keyframes ui-skeleton-sweep {
+    to { transform: translateX(100%); }
+  }
+
+  [data-ui-skeleton-width='full']  { --ui-skeleton-inline-size: 100%; }
+  [data-ui-skeleton-width='wide']  { --ui-skeleton-inline-size: 72%; }
+  [data-ui-skeleton-width='half']  { --ui-skeleton-inline-size: 50%; }
+  [data-ui-skeleton-width='short'] { --ui-skeleton-inline-size: 34%; }
+
+  [data-ui-skeleton-preset='caption'] { --ui-skeleton-height: 10px; --ui-skeleton-radius: 999px; }
+  [data-ui-skeleton-preset='text']    { --ui-skeleton-height: 12px; --ui-skeleton-radius: 999px; }
+  [data-ui-skeleton-preset='title']   { --ui-skeleton-height: 18px; --ui-skeleton-radius: 6px; }
+  [data-ui-skeleton-preset='heading'] { --ui-skeleton-height: 26px; --ui-skeleton-radius: 8px; }
+  [data-ui-skeleton-preset='control'] { --ui-skeleton-height: 32px; --ui-skeleton-radius: 10px; }
+  [data-ui-skeleton-preset='field']   { --ui-skeleton-height: 36px; --ui-skeleton-radius: 10px; }
+  [data-ui-skeleton-preset='avatar']  {
+    --ui-skeleton-height: 32px;
+    --ui-skeleton-inline-size: 32px;
+    --ui-skeleton-radius: 999px;
+  }
+  [data-ui-skeleton-preset='icon'] {
+    --ui-skeleton-height: 20px;
+    --ui-skeleton-inline-size: 20px;
+    --ui-skeleton-radius: 6px;
+  }
+  /* The colour dot beside a board column's title. */
+  [data-ui-skeleton-preset='dot'] {
+    --ui-skeleton-height: 8px;
+    --ui-skeleton-inline-size: 8px;
+    --ui-skeleton-radius: 999px;
+  }
+  /* The count beside it — a `Pill` at rest is 20px tall and about this wide. */
+  [data-ui-skeleton-preset='chip'] {
+    --ui-skeleton-height: 20px;
+    --ui-skeleton-inline-size: 26px;
+    --ui-skeleton-radius: 999px;
+  }
+  /* The sidebar's organization mark, before the organization is known. */
+  [data-ui-skeleton-preset='logo'] {
+    --ui-skeleton-height: 32px;
+    --ui-skeleton-inline-size: 32px;
+    --ui-skeleton-radius: 8px;
+  }
+  [data-ui-skeleton-preset='card']  { --ui-skeleton-height: 76px;  --ui-skeleton-radius: 14px; }
+  [data-ui-skeleton-preset='tile']  { --ui-skeleton-height: 104px; --ui-skeleton-radius: 16px; }
+  [data-ui-skeleton-preset='chart'] { --ui-skeleton-height: 240px; --ui-skeleton-radius: 16px; }
+  [data-ui-skeleton-preset='panel'] {
+    --ui-skeleton-height: 100%;
+    --ui-skeleton-radius: 18px;
+    flex: 1 1 auto;
+    min-height: 120px;
+  }
+
+  [data-ui-skeleton-tone='default'] {
+    --ui-skeleton-bg: #e3e3e6;
+    --ui-skeleton-sheen: rgb(255 255 255 / 75%);
+  }
+  /* The sidebar is themed: dark by default, light or a custom colour when the
+     organization sets one. A fixed white tint was invisible on half of those —
+     which is the "занадто прозорий" complaint — so the tint is mixed from the
+     sidebar's own text colour and follows whatever theme is on. */
+  [data-ui-skeleton-tone='sidebar'] {
+    --ui-skeleton-bg: color-mix(in srgb, var(--sb-text, #ffffff) 24%, transparent);
+    --ui-skeleton-sheen: color-mix(in srgb, var(--sb-text, #ffffff) 18%, transparent);
+  }
+}
+
+@layer utilities {
+  *:focus:not(:focus-visible) { outline: none; }
+  :where(button, a, [role='button'], [role='tab']):focus-visible {
+    outline: 2px solid rgb(31 31 31 / 35%);
+    outline-offset: 2px;
+  }
+  /* Named workspace typography contexts. These intentionally win over legacy
+     utility fragments while call sites are migrated, so one token change
+     updates both the product and /ui-kit. */
+  .ui-type-display-title {
+    font-size: var(--ui-type-display-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-metric-title {
+    font-size: var(--ui-type-metric-title-size) !important;
+    font-weight: 900 !important;
+  }
+  .ui-type-page-title {
+    font-size: var(--ui-type-page-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-profile-title {
+    font-size: var(--ui-type-page-title-size) !important;
+    font-weight: 900 !important;
+  }
+  .ui-type-detail-title {
+    font-size: var(--ui-type-detail-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-section-title {
+    font-size: var(--ui-type-section-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-feature-title {
+    font-size: var(--ui-type-feature-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-dialog-title {
+    font-size: var(--ui-type-dialog-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-compact-title {
+    font-size: var(--ui-type-compact-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-card-title {
+    font-size: var(--ui-type-card-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-card-title-strong {
+    font-size: var(--ui-type-card-title-size) !important;
+    font-weight: 900 !important;
+  }
+  .ui-type-item-title {
+    font-size: var(--ui-type-item-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-micro-title {
+    font-size: var(--ui-type-micro-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-column-title {
+    font-size: var(--ui-type-item-title-size) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+  .ui-type-project-card-title {
+    font-size: var(--ui-type-section-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-project-card-title[data-ui-density='large'] {
+    font-size: var(--ui-type-metric-title-size) !important;
+  }
+  .ui-type-member-title {
+    font-size: var(--ui-type-detail-title-size) !important;
+    font-weight: 700 !important;
+  }
+  .ui-type-member-title[data-ui-density='standalone'] {
+    font-size: 26px !important;
+  }
+  /* The figure a stat tile leads with. Proportional digits on purpose: with
+     `tabular-nums` every digit takes the width of a zero, and at this size a
+     number like 121 comes out visibly loose. Tabular is for columns. */
+  .ui-type-metric-value {
+    font-size: var(--ui-type-metric-value-size) !important;
+    font-weight: 700 !important;
+    font-variant-numeric: proportional-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  @media (max-width: 767px) {
+    .ui-type-metric-value {
+      font-size: var(--ui-type-metric-value-mobile-size) !important;
+    }
+  }
+  /* A number that sits under another number: a table cell, an axis tick, the
+     value beside a bar. Here equal-width digits are the point — they are what
+     makes a column of figures line up. */
+  .ui-type-figure {
+    font-size: var(--ui-type-figure-size) !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
+  }
+  /* A whole column of figures, under a whole column of names. 600 is right for
+     one number on a card, where it is the loudest thing on purpose; down a
+     table it is not, because lining tabular digits stand at cap height while a
+     name is mostly x-height — equal weight is not equal presence, and the
+     numbers were reading as the larger thing on every row. One step back is
+     enough to let the row's own name lead it. */
+  .ui-type-figure[data-ui-density='column'] {
+    font-weight: 500 !important;
+  }
+  .ui-type-eyebrow,
+  .ui-label {
+    font-size: var(--ui-type-eyebrow-size) !important;
+    font-weight: 700 !important;
+    line-height: 1.35;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .ui-label-inline {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-ink);
+  }
+
+  /* Sidebar glass (dark) */
+  .sidebar-glass {
+    background-color: var(--color-ink);
+  }
+
+  /* Card surface */
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+  }
+
+  /* Composer overlaps the scroll area by half its live height.
+     Its lower half is the solid chat surface; the upper half stays transparent. */
+  .chat-composer-dock {
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+    margin-top: calc(0px - var(--chat-composer-overlap, 48px));
+    background: linear-gradient(
+      to bottom,
+      transparent 0 50%,
+      var(--chat-composer-surface, var(--color-canvas)) 50% 100%
+    );
+  }
+
+  /* Multi-select actions float above every board and remain reachable above
+     the mobile navigation. The composition owns the fixed geometry; callers
+     only provide the available actions. */
+  /* The bar used to be one non-wrapping row inside a scroller with no visible
+     scrollbar: past four or five actions the last controls were simply cut off
+     mid-word with nothing on screen saying they could be reached. It wraps
+     instead — a toolbar that grows upward is legible at any width, and every
+     action stays whole. */
+  .ui-bulk-actions[data-ui-composition='bulk-actions'] {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 900;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: max-content;
+    max-width: min(calc(100vw - 32px), 960px);
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    color: white;
+    background: var(--color-ink);
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 14px;
+    box-shadow: 0 18px 48px rgb(0 0 0 / 24%);
+    transform: translateX(-50%);
+  }
+  .ui-bulk-actions__count {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    padding-inline: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  /* The bar's own spinner. It is drawn on the dark bar, so it borrows the
+     bar's light rather than the ink the rest of the product spins in. */
+  @keyframes qt-spin {
+    to { transform: rotate(360deg); }
+  }
+  .ui-bulk-actions__spinner {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border: 2px solid rgb(255 255 255 / 25%);
+    border-top-color: white;
+    border-radius: 9999px;
+    animation: qt-spin 720ms linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-bulk-actions__spinner { animation-duration: 2s; }
+  }
+  .ui-bulk-actions__divider {
+    width: 1px;
+    height: 22px;
+    flex-shrink: 0;
+    background: rgb(255 255 255 / 16%);
+  }
+  /* The attribute pickers belong to the dark bar, so they are drawn on it —
+     a translucent chip with a hairline. Solid white blocks read as pieces of
+     another surface dropped on top of this one. */
+  .ui-bulk-actions__control {
+    flex-shrink: 0;
+    max-width: 100%;
+  }
+  /* Width belongs to the pickers alone. This used to sit on the shared
+     `__trigger` class as well, and the overflow kebab wears that class only for
+     its colours — so `width: auto` beat its `w-[28px]` and collapsed a square
+     button onto its 14px glyph with `p-0` around it. A sliver of a button
+     between two full-width pickers. The pickers keep `auto`; the kebab keeps
+     the square every other icon button in the product has. */
+  .ui-bulk-actions__control > button {
+    width: auto;
+    min-width: 0;
+  }
+  .ui-bulk-actions__control > button,
+  .ui-bulk-actions[data-ui-composition='bulk-actions'] .ui-bulk-actions__trigger {
+    background: rgb(255 255 255 / 10%);
+    border: 1px solid rgb(255 255 255 / 14%);
+    color: white;
+  }
+  .ui-bulk-actions__control > button:hover:not(:disabled),
+  .ui-bulk-actions[data-ui-composition='bulk-actions'] .ui-bulk-actions__trigger:hover:not(:disabled) {
+    background: rgb(255 255 255 / 20%);
+  }
+  .ui-bulk-actions__control > button span,
+  .ui-bulk-actions__control > button svg {
+    color: white;
+  }
+  .ui-bulk-actions__control > button svg {
+    opacity: 0.7;
+  }
+  @media (max-width: 767px) {
+    .ui-bulk-actions[data-ui-composition='bulk-actions'] {
+      /* `--qt-nav-bottom-height` was never declared anywhere, so this had been
+         silently falling back to 64px and clearing a 78px bar by guesswork. */
+      bottom: calc(var(--qt-nav-space) + 16px);
+      max-width: calc(100vw - 16px);
+    }
+  }
+
+  /* ── Page gutter — single source of truth for page horizontal padding.
+     Pages apply .page-gutter (instead of px-[24px] md:px-[32px]); rows that
+     must scroll edge-to-edge (kanban, tabs, timesheet) apply .full-bleed and
+     automatically match whatever gutter their page declares. ── */
+  .page-gutter,
+  .workspace-page-layout {
+    --page-px: 16px;
+    padding-left: var(--page-px);
+    padding-right: var(--page-px);
+  }
+  .workspace-page-layout {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 56px;
+  }
+  @media (min-width: 640px) {
+    .page-gutter,
+    .workspace-page-layout { --page-px: 24px; }
+  }
+  @media (min-width: 768px) {
+    .page-gutter,
+    .workspace-page-layout { --page-px: 32px; }
+  }
+  .full-bleed {
+    margin-left: calc(var(--page-px, 16px) * -1);
+    margin-right: calc(var(--page-px, 16px) * -1);
+    padding-left: var(--page-px, 16px);
+    padding-right: var(--page-px, 16px);
+    width: calc(100% + var(--page-px, 16px) * 2);
+  }
+  /* The two halves of `.full-bleed`, for the case where they belong to
+     different boxes. A kanban needs its *clipping* box to reach the panel edge
+     and its *scrolling* box to keep the gutter — putting both on one element
+     inside an `overflow: hidden` parent means the parent crops away exactly the
+     bleed the padding was compensating for, and the gutter comes back as a
+     blank strip lying across the outer columns while the board scrolls. */
+  .bleed-edges {
+    margin-left: calc(var(--page-px, 16px) * -1);
+    margin-right: calc(var(--page-px, 16px) * -1);
+    width: calc(100% + var(--page-px, 16px) * 2);
+  }
+  .bleed-gutter {
+    padding-left: var(--page-px, 16px);
+    padding-right: var(--page-px, 16px);
+    /* Snap points land at the gutter, not under it. */
+    scroll-padding-left: var(--page-px, 16px);
+    scroll-padding-right: var(--page-px, 16px);
+  }
+
+  /* The edge scrolling content disappears under. Without it a card simply
+     stopped existing against the same colour it was drawn on; this is the
+     lightest possible hint that there is more past the panel. An edge is lit
+     only while something is actually hidden behind it — the screen that owns
+     the scroller sets the data attribute from its own scroll position.
+
+     One depth and one duration for every edge in the product: the board's two
+     walls and the detail page's floor are the same gesture, and the board's
+     were here first. */
+  .scroll-shadow {
+    --scroll-shadow-depth: 20px;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+  .scroll-shadow--start,
+  .scroll-shadow--end {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--scroll-shadow-depth);
+  }
+  .scroll-shadow--start {
+    left: 0;
+    background: linear-gradient(to right, rgb(0 0 0 / 7%), rgb(0 0 0 / 0%));
+  }
+  .scroll-shadow--end {
+    right: 0;
+    background: linear-gradient(to left, rgb(0 0 0 / 7%), rgb(0 0 0 / 0%));
+  }
+  /* The floor is sticky rather than absolute because it belongs to one column
+     of a scrolling grid, not to the scrollport: it has to end where its column
+     ends and leave the neighbouring rail alone.
+
+     It is also the room at the end of the document rather than a zero-height
+     line above it. That is what puts it on the true bottom edge with nothing
+     showing underneath, and what makes it stand perfectly still: pinned it
+     covers the last stretch of the scrollport, and at the end of the scroll it
+     arrives at exactly the blank it was holding. */
+  .scroll-shadow--bottom {
+    position: sticky;
+    bottom: 0;
+    flex: none;
+    height: var(--scroll-shadow-depth);
+  }
+  .scroll-shadow--bottom::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: var(--scroll-shadow-depth);
+    background: linear-gradient(to top, rgb(0 0 0 / 7%), rgb(0 0 0 / 0%));
+  }
+  [data-scrolled-start='true'] > .scroll-shadow--start,
+  [data-scrolled-end='true'] > .scroll-shadow--end,
+  [data-scrolled-below='true'] .scroll-shadow--bottom {
+    opacity: 1;
+  }
+  /* Same bleed, but only below md (e.g. timesheet grids that fit on desktop) */
+  @media (max-width: 767px) {
+    .full-bleed-mobile {
+      margin-left: calc(var(--page-px, 16px) * -1);
+      margin-right: calc(var(--page-px, 16px) * -1);
+      padding-left: var(--page-px, 16px);
+      padding-right: var(--page-px, 16px);
+    }
+  }
+}
+
+/* Button's own colour utilities live in Tailwind's last layer, so this
+   composition has to be written after them to win. A 32px circle that stays
+   quiet until it is pointed at — the placement is in `WorkspaceHelpMenu`.
+   Round, not a squircle: the glyph inside it is a circled question mark, and a
+   rounded square around a circle reads as two shapes disagreeing. It is also
+   the one control in the rail that is not a destination, and the shape is what
+   says so before the colour does. */
+.ui-button[data-ui-composition='sidebar-help-action'] {
+  width: 32px;
+  border-radius: 9999px;
+  color: var(--sb-muted, var(--color-muted)) !important;
+  background: transparent !important;
+  opacity: 0.75;
+}
+.ui-button[data-ui-composition='sidebar-help-action']:hover {
+  color: var(--sb-text, var(--color-ink)) !important;
+  background: var(--sb-hover, var(--color-canvas)) !important;
+  opacity: 1;
+}
+
+/* Respect the OS "reduce motion" setting across the app — drag & drop, modal
+   transitions and the timer pulse all animate by default. Kept near-zero rather
+   than 0 so transitionend/animationend handlers still fire. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thin scrollbars globally — outside @layer to avoid Turbopack specificity issues */
+* { scrollbar-width: thin; scrollbar-color: #e9e9e9 transparent; }
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #e9e9e9; border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: #d0d0d0; }
+
+/* Scroll without a scrollbar, for areas whose content must not reflow when they
+   cross the overflow threshold. A classic scrollbar is laid out inside the
+   padding box, so the moment a kanban column overflows it takes those 5px out
+   of the content width and every card in it visibly shifts left; it shifts back
+   when the column empties. Removing the scrollbar keeps the layout identical in
+   both states. Wheel, trackpad, touch and keyboard scrolling are unaffected.
+   `scrollbar-gutter: stable` is not the answer here — it only makes the loss
+   permanent instead of intermittent.
+
+   Must stay outside @layer: the `*` rules above are unlayered, and unlayered
+   declarations beat layered ones whatever their specificity, so a layered
+   version of this silently lost `scrollbar-width` on Firefox. */
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* iOS Safari zooms the whole page in whenever a focused form control's computed
+   font-size is under 16px, and it never zooms back out — the reason a tap on
+   any field on a phone shoves the layout sideways with the header cut off.
+   `maximum-scale=1` (see IOS_FOCUS_ZOOM_SCRIPT in app/layout.js) suppresses the
+   zoom, but only for as long as that meta survives, and it says nothing about
+   the actual cause. The cause is the type size, and 16px is the threshold the
+   browser reads.
+
+   So below md every control you can type into is 16px. Nothing else changes:
+   `.ui-control` states its height and its line box as `--ui-control-height`, so
+   the boxes are exactly the boxes they were and only the glyphs inside them
+   grow — which on a phone is the size that field text should have been anyway.
+   Desktop keeps the product's own scale untouched.
+
+   Must stay outside @layer, and for the reason the block above gives: the size
+   classes are Tailwind utilities, and only an unlayered rule beats them. The
+   :not() chain skips the controls that are not text entry — a checkbox or a
+   range slider never triggers the zoom and would only be resized for nothing. */
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']),
+  textarea,
+  select,
+  [contenteditable]:not([contenteditable='false']) {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,711 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────
+// QuickTeam Firestore rules
+//
+// Multi-tenant model: every org-scoped collection is guarded by membership
+// in `orgMemberships/{orgId}_{uid}` (role: owner|admin|member). That
+// collection is the single source of truth for roles — see CLAUDE.md. Taking
+// access away deletes that document and archives it under
+// `orgMembershipArchive`; the person's work is never touched, which is what
+// separates deactivating someone from erasing them.
+//
+// Field-name note: `orgMemberships` docs use `orgId`; every other org-scoped
+// collection (projects, issues, tasks, sprints, timeLogs, issueLinks,
+// invitations) uses `organizationId`. This is intentional (confirmed by
+// code audit), not a bug — don't "fix" it by renaming one of them without
+// updating every hook that reads it.
+//
+// Membership invitations, project/issue creation and deletion, API keys,
+// profile sharing, and notification delivery go through authenticated server
+// routes. Client rules intentionally deny those privileged write/read paths.
+// ─────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function membershipDoc(orgId) {
+      return get(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + request.auth.uid));
+    }
+
+    function isOrgMember(orgId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + request.auth.uid));
+    }
+
+    function orgRole(orgId) {
+      return membershipDoc(orgId).data.role;
+    }
+
+    function isOrgAdminOrOwner(orgId) {
+      return isOrgMember(orgId) && orgRole(orgId) in ['owner', 'admin'];
+    }
+
+    // qTicket keeps QuickTeam's `member` role as the internal support-agent
+    // role. Client identities are deliberately separate: they may open an
+    // incident and write in its conversation, but they never mutate the
+    // incident workflow or enter the organization's internal chat.
+    function isInternalContributor(orgId) {
+      return isOrgMember(orgId) && orgRole(orgId) in ['owner', 'admin', 'member'];
+    }
+
+    function isOrgOwner(orgId) {
+      return isOrgMember(orgId) && orgRole(orgId) == 'owner';
+    }
+
+    function userIsOrgMember(orgId, uid) {
+      return exists(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + uid));
+    }
+
+    function projectAcceptsNestedWrites(projectId) {
+      return exists(/databases/$(database)/documents/projects/$(projectId)) &&
+        get(/databases/$(database)/documents/projects/$(projectId))
+          .data.get('deletionPending', false) != true;
+    }
+
+    function issueAcceptsNestedWrites(issueId) {
+      let issuePath = /databases/$(database)/documents/issues/$(issueId);
+      let projectId = get(issuePath).data.get('projectId', '');
+      return exists(issuePath) &&
+        get(issuePath).data.get('deletionPending', false) != true &&
+        (
+          projectId == '' ||
+          projectId == null ||
+          projectAcceptsNestedWrites(projectId)
+        );
+    }
+
+    // The organization a comment or a project message belongs to, so that
+    // moderation can be authorized without duplicating the scope walk. Each
+    // costs one document read and is used only on delete, which is rare.
+    function issueOrg(issueId) {
+      return get(/databases/$(database)/documents/issues/$(issueId)).data.organizationId;
+    }
+
+    function projectOrg(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data.organizationId;
+    }
+
+    function canAccessProject(projectId, orgId) {
+      let projectPath = /databases/$(database)/documents/projects/$(projectId);
+      let project = get(projectPath).data;
+      return exists(projectPath) &&
+        project.organizationId == orgId && (
+        isOrgAdminOrOwner(orgId) ||
+        request.auth.uid in project.team
+      );
+    }
+
+    function canAccessProjectById(projectId) {
+      let projectPath = /databases/$(database)/documents/projects/$(projectId);
+      return exists(projectPath) &&
+        canAccessProject(projectId, get(projectPath).data.organizationId);
+    }
+
+    function canAccessIssueData(data) {
+      let projectId = data.get('projectId', '');
+      return (
+        (projectId == '' || projectId == null) &&
+        isOrgAdminOrOwner(data.organizationId)
+      ) || (
+        projectId != '' &&
+        projectId != null &&
+        canAccessProject(projectId, data.organizationId)
+      );
+    }
+
+    function canMutateIssueData(data) {
+      return isInternalContributor(data.organizationId) && canAccessIssueData(data);
+    }
+
+    function canAccessIssueProject(issueId) {
+      let issuePath = /databases/$(database)/documents/issues/$(issueId);
+      return exists(issuePath) &&
+        canAccessIssueData(get(issuePath).data);
+    }
+
+    function isCalendarEventTimeLog(data) {
+      return data.get('issueId', '') == '' &&
+        data.get('sourceType', '') == 'calendar_event';
+    }
+
+    function isTeamCalendarTimeLog(data) {
+      return isCalendarEventTimeLog(data) &&
+        data.get('eventVisibility', '') == 'team';
+    }
+
+    function canAccessTimeLog(data) {
+      return (
+        isTeamCalendarTimeLog(data) && (
+          data.get('projectId', '') == '' ||
+          canAccessProject(data.projectId, data.organizationId)
+        )
+      ) || (
+        data.get('issueId', '') != '' &&
+        canAccessProject(data.projectId, data.organizationId)
+      );
+    }
+
+    // ── organizations/{orgId} ──────────────────────────────────────────
+    match /organizations/{orgId} {
+      allow read: if signedIn() && (isOrgMember(orgId) || resource.data.ownerId == request.auth.uid);
+      // Created by /api/organizations, and it has to be: «one free workspace per
+      // account» is a count of the documents somebody already owns, and a rule
+      // cannot count anything. The check this replaces — «the new document names
+      // you as its owner» — is true of every second, third and tenth free
+      // workspace as well, so it was never the rule the product meant.
+      allow create: if false;
+      // `plan` and `limits` joined `apiKeys` here the day a plan change stopped
+      // being one field: moving down a plan also decides which projects the new
+      // ceiling no longer has room for, and marks them, in the same write.
+      // /api/organizations/{id} with action 'set-plan' is that write.
+      allow update: if isOrgAdminOrOwner(orgId) &&
+        request.resource.data.ownerId == resource.data.ownerId &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['apiKeys', 'plan', 'limits']);
+      allow delete: if false; // Requires a future server-side cascading delete.
+
+      match /presence/{uid} {
+        allow read: if isInternalContributor(orgId);
+        allow create, update: if isOrgMember(orgId) && request.auth.uid == uid;
+        allow delete: if false;
+      }
+    }
+
+    // ── orgMemberships/{orgId}_{uid} — RBAC source of truth ────────────
+    match /orgMemberships/{membershipId} {
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || isOrgAdminOrOwner(resource.data.orgId));
+
+      // Nothing writes a seat from a browser any more. The one exception was
+      // the first owner of a freshly created organization, and that seat is now
+      // written by /api/organizations in the same batch as the organization
+      // itself — the only place that can hold «one free workspace per account».
+      // What the bootstrap allowed, once the organization document could no
+      // longer be forged, was narrow; what it cost to keep was a second path
+      // into the collection that decides every permission in the product.
+      //
+      // Roles, positions, rates and removals were already privileged
+      // multi-document mutations. The Admin SDK routes validate them and
+      // perform their cascades; no browser write may bypass those routes.
+      allow create, update, delete: if false;
+    }
+
+    // ── orgMembershipArchive/{orgId}_{uid} ─────────────────────────────
+    // Where a membership goes when someone is deactivated or leaves. It holds
+    // the seat — role, position, the projects they were on — so that access can
+    // be restored exactly, and it grants nothing while it sits here: every rule
+    // proves membership against `orgMemberships`, and this document is not
+    // there. Read and written by the Admin SDK only, like the invitation flow
+    // it shares its lifecycle with.
+    match /orgMembershipArchive/{archivedId} {
+      allow read, write: if false;
+    }
+
+    // ── users/{uid} — private self profile. Organization-visible profile
+    //    fields are returned by /api/organizations/:id/members. ─────────
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid;
+      allow delete: if false;
+
+      match /settings/{settingsDoc} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+
+      // Written only by the Admin SDK in /api/integrations/qtplus/*. Holds the
+      // sealed QuickTeam+ refresh token: readable by nobody, including the
+      // account's own owner, who has no use for it. Default-deny already covers
+      // this — stated explicitly so a future wildcard under users/{uid} cannot
+      // silently expose a live credential. Mirrors organizations/{orgId}/private.
+      match /private/{privateDoc} {
+        allow read, write: if false;
+      }
+    }
+
+    // ── invitations/{id} ────────────────────────────────────────────────
+    match /invitations/{id} {
+      allow read: if signedIn() &&
+        (resource.data.email == request.auth.token.email || isOrgAdminOrOwner(resource.data.organizationId));
+      allow create: if false; // Created by the authenticated invitation API.
+      allow update: if isOrgAdminOrOwner(resource.data.organizationId);
+      allow delete: if isOrgAdminOrOwner(resource.data.organizationId);
+    }
+
+    // ── projects/{projectId} — created only via Admin SDK (/api/projects,
+    //    which enforces plan limits); client can read/update/delete ──────
+    match /projects/{projectId} {
+      // Per-project access: owners/admins see everything; a plain member may
+      // only read a project they are a `team` member of. `team is list` guards
+      // legacy docs written before the field existed (the backfill migration
+      // stamps them). Rules are not filters, so the member client query must
+      // use `where('team','array-contains', uid)` to match this exactly.
+      allow read: if isOrgMember(resource.data.organizationId) && (
+        isOrgAdminOrOwner(resource.data.organizationId) ||
+        request.auth.uid in resource.data.team
+      );
+      allow create: if false;
+      allow update: if resource.data.get('deletionPending', false) != true &&
+        request.resource.data.organizationId == resource.data.organizationId && (
+        (
+          isOrgAdminOrOwner(resource.data.organizationId) &&
+          request.resource.data.status == resource.data.status &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            'issueCounter',
+            // How many tasks the project has, how many are delivered and how
+            // many are late. Written by the server routes that write the tasks
+            // themselves and by the twice-daily recount, and by nothing else:
+            // a browser that could set these could draw any progress bar it
+            // liked on a screen that no longer reads the tasks behind it.
+            'issueCounts',
+            'issueLinkVersion',
+            'issueHierarchyVersion',
+            'issueStatusVersion',
+            'invoiceMutationVersion',
+            'timeLogImportVersion',
+            'deletionPending',
+            // Which projects the plan's ceiling no longer has room for. Written
+            // by the plan switch and by nothing else — a browser that could
+            // clear it could write into a project the plan has closed.
+            'overPlanLimit'
+          ])
+        ) ||
+        (isOrgMember(resource.data.organizationId) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt']))
+      );
+      allow delete: if false; // Cascading deletion is handled by /api/projects/[projectId].
+
+      // Portal chat — client + workspace side, scoped via parent project.
+      match /messages/{msgId} {
+        allow read: if canAccessProjectById(projectId);
+        allow create: if projectAcceptsNestedWrites(projectId) &&
+          canAccessProjectById(projectId) &&
+          request.resource.data.senderId == request.auth.uid;
+        allow update: if projectAcceptsNestedWrites(projectId) &&
+          canAccessProjectById(projectId) &&
+          resource.data.senderId == request.auth.uid &&
+          request.resource.data.senderId == resource.data.senderId;
+        allow delete: if projectAcceptsNestedWrites(projectId) &&
+          canAccessProjectById(projectId) && (
+          resource.data.senderId == request.auth.uid ||
+          isOrgAdminOrOwner(projectOrg(projectId))
+        );
+      }
+    }
+
+    // ── stages/{stageId} — created only via Admin SDK, no organizationId
+    //    field (scoped through the parent project) ──────────────────────
+    match /stages/{stageId} {
+      allow read: if canAccessProjectById(resource.data.projectId);
+      allow create, delete: if false;
+      allow update: if projectAcceptsNestedWrites(resource.data.projectId) &&
+        canAccessProjectById(resource.data.projectId) &&
+        request.resource.data.projectId == resource.data.projectId;
+
+      match /materials/{materialId} {
+        allow read: if canAccessProjectById(
+          get(/databases/$(database)/documents/stages/$(stageId)).data.projectId
+        );
+        allow create, update, delete: if projectAcceptsNestedWrites(
+          get(/databases/$(database)/documents/stages/$(stageId)).data.projectId
+        ) && canAccessProjectById(
+          get(/databases/$(database)/documents/stages/$(stageId)).data.projectId
+        );
+      }
+    }
+
+    // ── issues/{issueId} ─────────────────────────────────────────────────
+    match /issues/{issueId} {
+      allow read: if canAccessIssueData(resource.data);
+      allow create: if false; // Created through /api/issues or trusted integrations.
+      allow update: if issueAcceptsNestedWrites(issueId) &&
+        canMutateIssueData(resource.data) &&
+        request.resource.data.organizationId == resource.data.organizationId &&
+        (
+          resource.data.get('type', '') == 'epic' ||
+          request.resource.data.get('type', '') != 'epic'
+        ) &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny([
+            'organizationId',
+            'projectId',
+            'issueKey',
+            'createdAt',
+            'createdBy',
+            'parentIssueId',
+            'parentEpicId',
+            'subtasks',
+            'deletionPending',
+            'spentMinutes',
+            'spentMinutesMirrorVersion',
+            'spentMinutesReconciledAt',
+            'timeLogMutationVersion',
+            'status',
+            'columnId',
+            'completedAt',
+            'order',
+            'archivedAt',
+            'archivedBy',
+            'cancelledAt',
+            'cancelledBy'
+          ]);
+      allow delete: if false; // Server route enforces hierarchy and cascades.
+
+      match /comments/{commentId} {
+        allow read: if canAccessIssueProject(issueId);
+        allow create: if issueAcceptsNestedWrites(issueId) &&
+          canAccessIssueProject(issueId) &&
+          request.resource.data.authorId == request.auth.uid;
+        // The author may edit their own comment; any org member may mark it read
+        // (read receipts) — that write touches only `readBy` and the `readAt`
+        // stamp beside it, and nothing else.
+        allow update: if issueAcceptsNestedWrites(issueId) &&
+          canAccessIssueProject(issueId) && (
+          (resource.data.authorId == request.auth.uid &&
+           request.resource.data.authorId == resource.data.authorId) ||
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'readAt'])
+        );
+        // Moderation: the author, or an owner/admin of the organization. Editing
+        // is deliberately NOT extended — an edited comment still carries the
+        // author's name, so nobody else may put words in their mouth; removing
+        // something that should not stand is the moderation the product needs.
+        allow delete: if issueAcceptsNestedWrites(issueId) &&
+          canAccessIssueProject(issueId) && (
+          resource.data.authorId == request.auth.uid ||
+          isOrgAdminOrOwner(issueOrg(issueId))
+        );
+      }
+
+      // Who is typing in the task's chat, as one document rather than two
+      // fields on the task: the task itself is subscribed to by every board and
+      // every card that shows it, and a heartbeat written there every three
+      // seconds would cost each of them a read. Anyone who can read the
+      // conversation can see it, and anyone who can write in it can say they
+      // are typing — the document holds nothing else, which is what the key
+      // check enforces.
+      match /presence/typing {
+        allow read: if canAccessIssueProject(issueId);
+        allow create, update: if issueAcceptsNestedWrites(issueId) &&
+          canAccessIssueProject(issueId) &&
+          request.resource.data.keys().hasOnly(['typing', 'typingAt']);
+        allow delete: if false;
+      }
+
+      // Append-only activity log.
+      match /audit/{auditId} {
+        allow read: if canAccessIssueProject(issueId);
+        allow create: if issueAcceptsNestedWrites(issueId) &&
+          canAccessIssueProject(issueId) &&
+          request.resource.data.userId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // ── issueLinks/{id} ──────────────────────────────────────────────────
+    // Soft-deleted snapshots contain the full issue record. Only authenticated
+    // server routes may read them for Undo or retention cleanup.
+    match /deletedIssues/{tombstoneId} {
+      allow read, write: if false;
+    }
+
+    match /issueLinks/{id} {
+      // Same accessor as issues/{issueId}: reading `resource.data.projectId`
+      // directly makes every list query fail, not just the rows it cannot
+      // authorize, which silently emptied dependencies across the workspace.
+      allow read: if canAccessIssueData(resource.data);
+      allow create, update, delete: if false; // Canonicalized by the authenticated server API.
+    }
+
+    // ── tasks/{taskId} — legacy/parallel collection to issues ───────────
+    //
+    // Closed to browsers entirely. Nothing in the product reads this collection
+    // any more — every screen uses `issues` — and the rule it used to carry was
+    // the last org-wide read path left in the workspace: it authorized any
+    // member of the organization, without asking which project the row belonged
+    // to. Access here is `orgMemberships` *and* `project.team`, and a legacy
+    // collection is not a reason to keep an exception to that. A migration
+    // needing this data reads it through the Admin SDK, like every other one.
+    match /tasks/{taskId} {
+      allow read, write: if false;
+
+      match /taskComments/{commentId} {
+        allow read, write: if false;
+      }
+    }
+
+    // ── sprints/{id} ─────────────────────────────────────────────────────
+    match /sprints/{id} {
+      allow read: if isOrgMember(resource.data.organizationId);
+      allow create: if isOrgAdminOrOwner(request.resource.data.organizationId);
+      allow update: if isOrgAdminOrOwner(resource.data.organizationId) &&
+        request.resource.data.organizationId == resource.data.organizationId;
+      allow delete: if isOrgAdminOrOwner(resource.data.organizationId);
+    }
+
+    // ── timeLogs/{id} ────────────────────────────────────────────────────
+    match /timeLogs/{id} {
+      allow read: if isOrgMember(resource.data.organizationId) &&
+        canAccessTimeLog(resource.data);
+      allow create, update, delete: if false; // Server APIs own logs and accounting mirrors.
+    }
+
+    // ── analyticsRollups/{organizationId}_{projectId}_{day} ──────────────
+    // Denormalized daily totals of logged time, written only by the server
+    // transactions that write the logs themselves (and rebuilt from those logs
+    // by scripts/backfill-analytics-rollups.mjs). Derived data, never a source
+    // of truth — and never money: an invoice reads exact sourceTimeLogIds.
+    //
+    // Read access repeats the raw log's rule rather than relaxing it. A rollup
+    // carries per-person minutes for one project, so whoever may not see that
+    // project's time logs may not see its totals either; a summary of data you
+    // cannot read is still that data. Project-less rollups hold team calendar
+    // time, which any member may already read one log at a time.
+    match /analyticsRollups/{id} {
+      allow read: if isOrgMember(resource.data.organizationId) && (
+        resource.data.get('projectId', '') == '' ||
+        canAccessProject(resource.data.projectId, resource.data.organizationId)
+      );
+      allow create, update, delete: if false;
+    }
+
+    // ── invoices/{id} ────────────────────────────────────────────────────
+    match /invoices/{id} {
+      allow read: if isOrgAdminOrOwner(resource.data.organizationId);
+      allow create, update, delete: if false; // Created by the authenticated invoice API.
+    }
+
+    // One deterministic reservation per billed time log. These documents are
+    // an internal transaction lock and must never be trusted to a client.
+    match /invoiceTimeLogReservations/{id} {
+      allow read, write: if false;
+    }
+
+    // Source-less estimate/manual invoice rows reserve the billing item itself.
+    match /invoiceEstimateReservations/{id} {
+      allow read, write: if false;
+    }
+
+    // Organization/year invoice counters are server-only transaction locks.
+    match /invoiceNumberSequences/{id} {
+      allow read, write: if false;
+    }
+
+    // ── notifications/{id} — created by the authenticated server route;
+    //    recipients may only read, delete, or toggle `read`. ──────────────
+    match /notifications/{id} {
+      allow read, delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow update: if signedIn() && resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create: if false;
+    }
+
+    // One server-owned timer state per account. Every tab and device listens
+    // to this same document; clients may read their own state but every
+    // mutation goes through the transactional timer APIs.
+    match /timerStates/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update, delete: if false;
+    }
+
+    // ── presence/{uid} ───────────────────────────────────────────────────
+    match /presence/{uid} {
+      allow read, write: if false;
+    }
+
+    // YouTrack migration state and external identity/link tables are only
+    // accessed through authenticated Admin SDK routes. Nested import queue
+    // documents inherit the same explicit deny.
+    match /imports/{importId} {
+      allow read, write: if false;
+      match /{document=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /externalObjectLinks/{linkId} {
+      allow read, write: if false;
+    }
+
+    match /externalActors/{actorId} {
+      allow read, write: if false;
+    }
+
+    // ── organizations/{orgId}/channels/... — chat, scoped via path ──────
+    //
+    // Direct messages live in the same collection but their CONTENT is not
+    // org-visible. A DM room id is the deterministic `uidA_uidB` pair built by
+    // directMessageRoomId(); both halves are Firebase uids (28 alphanumeric
+    // chars), so the shape below matches DM rooms exactly and never a human
+    // channel slug or a legacy `project_*` / numeric room. Membership is
+    // therefore provable from the document id alone: no get() is needed, so the
+    // check also holds while a brand-new DM room is created in the same batch
+    // as its first message. Keep in sync with isDirectRoomId() in
+    // src/lib/utils/workspaceChat.mjs.
+    //
+    // IMPORTANT — why `list` is not gated: on a query the {channelId} wildcard
+    // is unbound (null), so any id-based condition raises a null-value error and
+    // rejects every listing, including the caller's own channels. Per-document
+    // gating of a collection the app must enumerate is therefore not expressible
+    // here. The room documents stay listable (id, participants and unread
+    // counters — no message text: sendMessage deliberately omits
+    // lastMessageText/lastMessageSender for DM rooms), while everything under
+    // messages/ is addressed by a concrete channel id and IS gated.
+    match /organizations/{orgId}/channels/{channelId} {
+      function isDirectRoom() {
+        return channelId.matches('^[A-Za-z0-9]{20,}_[A-Za-z0-9]{20,}$');
+      }
+
+      function isDirectRoomMember() {
+        return request.auth.uid in channelId.split('_');
+      }
+
+      function canAccessRoom() {
+        return isInternalContributor(orgId) && (!isDirectRoom() || isDirectRoomMember());
+      }
+
+      // A DM room document is enumerable by the whole org (see above), so it
+      // must never hold message content. Enforced here rather than trusted to
+      // the client, because this is the only thing keeping the listing safe.
+      //
+      // Rooms created before this rule still carry a stale lastMessageText.
+      // Testing only the resulting document would reject every write to those
+      // rooms — including the typing heartbeat — and lock them up until someone
+      // sent a message. So a write is allowed when it does not touch the
+      // fields, and separately when it removes them; only writing a *new*
+      // preview is refused. sendMessage deletes them on the next DM sent,
+      // which clears the historical previews as conversations continue.
+      function keepsDirectRoomContentOut(touched) {
+        return !isDirectRoom() ||
+          !touched.hasAny(['lastMessageText', 'lastMessageSender']) ||
+          !request.resource.data.keys().hasAny(['lastMessageText', 'lastMessageSender']);
+      }
+
+      allow get: if canAccessRoom();
+      allow list: if isInternalContributor(orgId);
+      allow create: if isInternalContributor(orgId) &&
+        keepsDirectRoomContentOut(request.resource.data.keys()) && (
+        isDirectRoom()
+          ? (isDirectRoomMember() &&
+             request.resource.data.type == 'dm' &&
+             // `participants` is an optional mirror of the pair the id already
+             // encodes. The client does not write it (membership is provable
+             // from the id alone); this clause exists so that if anything ever
+             // does, it can never name someone outside the pair.
+             request.resource.data.get('participants', []).hasOnly(channelId.split('_')))
+          : (isOrgAdminOrOwner(orgId) ||
+             (channelId == 'general' && request.resource.data.type == 'public'))
+      );
+      allow update: if canAccessRoom() &&
+        keepsDirectRoomContentOut(request.resource.data.diff(resource.data).affectedKeys()) && (
+        isOrgAdminOrOwner(orgId) || (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'typing',
+              'typingAt',
+              'lastMessageAt',
+              'lastMessageText',
+              'lastMessageSender',
+              'lastMessageSenderId',
+              'messageCount',
+              'participants'
+            ]) &&
+          // `participants` backfills legacy DM rooms, but it can never name
+          // anyone outside the id-encoded pair.
+          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['participants']) ||
+           (isDirectRoom() && request.resource.data.get('participants', []).hasOnly(channelId.split('_'))))
+        )
+      );
+      allow delete: if isOrgAdminOrOwner(orgId) && !isDirectRoom();
+
+      match /messages/{msgId} {
+        allow read: if canAccessRoom();
+        allow create: if canAccessRoom() && request.resource.data.senderId == request.auth.uid;
+        allow update: if canAccessRoom() &&
+          request.resource.data.senderId == resource.data.senderId && (
+            resource.data.senderId == request.auth.uid ||
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['reactions', 'replyCount', 'isPinned'])
+          );
+        // A direct message is not moderatable: an owner cannot read that room,
+        // and must not be able to reach into it to delete either.
+        allow delete: if canAccessRoom() && (
+          resource.data.senderId == request.auth.uid ||
+          (!isDirectRoom() && isOrgAdminOrOwner(orgId))
+        );
+
+        match /replies/{replyId} {
+          allow read: if canAccessRoom();
+          allow create: if canAccessRoom() && request.resource.data.senderId == request.auth.uid;
+          allow update: if canAccessRoom() &&
+            resource.data.senderId == request.auth.uid &&
+            request.resource.data.senderId == resource.data.senderId;
+          allow delete: if canAccessRoom() && (
+            resource.data.senderId == request.auth.uid ||
+            (!isDirectRoom() && isOrgAdminOrOwner(orgId))
+          );
+        }
+      }
+    }
+
+    match /organizations/{orgId}/readState/{stateId} {
+      allow read, delete: if isInternalContributor(orgId) && resource.data.userId == request.auth.uid;
+      allow create: if isInternalContributor(orgId) &&
+        request.resource.data.userId == request.auth.uid &&
+        stateId == request.auth.uid + '_' + request.resource.data.channelId;
+      allow update: if isInternalContributor(orgId) &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.channelId == resource.data.channelId;
+    }
+
+    match /organizations/{orgId}/issueReadState/{stateId} {
+      allow read, delete: if isOrgMember(orgId) && resource.data.userId == request.auth.uid;
+      allow create: if isOrgMember(orgId) &&
+        request.resource.data.keys().hasOnly(['userId', 'issueId', 'lastSeenAt']) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.issueId is string &&
+        request.resource.data.lastSeenAt is timestamp &&
+        stateId == request.auth.uid + '_' + request.resource.data.issueId;
+      allow update: if isOrgMember(orgId) &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.issueId == resource.data.issueId &&
+        request.resource.data.lastSeenAt is timestamp &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeenAt']);
+    }
+
+    match /organizations/{orgId}/activeDMs/{uid} {
+      allow read: if isInternalContributor(orgId);
+      allow create, update: if isInternalContributor(orgId) && userIsOrgMember(orgId, uid) &&
+        request.auth.uid in request.resource.data.partners;
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId}/settings/{settingsDoc} {
+      // Workflow positions used to contain salary rates. The authenticated API
+      // now returns a role-filtered view and is the only reader of this document.
+      allow read: if settingsDoc != 'workflow' && isOrgMember(orgId);
+      // Workflow changes can alter completion semantics for every issue and
+      // therefore always go through the transactional workflow API.
+      allow write: if settingsDoc != 'workflow' && isOrgAdminOrOwner(orgId);
+    }
+
+    // Secrets are never stored on the member-readable organization document.
+    // They are managed by authenticated Admin SDK routes only.
+    match /organizations/{orgId}/private/{privateDoc} {
+      allow read, write: if false;
+    }
+
+    // Per-member rates are server-only. Keeping them out of orgMemberships
+    // lets members list their colleagues without exposing payroll data.
+    match /organizations/{orgId}/memberRates/{uid} {
+      allow read, write: if false;
+    }
+  }
+}
