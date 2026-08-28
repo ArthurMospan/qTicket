@@ -27,13 +27,19 @@ export function generateEmailTemplate({
   const fullLink = baseUrl + link;
 
   const templates = {
+    // `commented` is the one template an external client receives: they are a
+    // participant of the incident they opened, so every support reply can mail
+    // them. It therefore names the record by its key and nothing else — support
+    // reads «інцидент» here and the client reads «звернення», and one HTML body
+    // cannot say both. (It said «до завданьи», which said neither.) The two
+    // below only ever reach an assignee, and qTicket has no external assignees.
     commented: `
       <h2>${title}</h2>
-      <p><strong>${userName}</strong> написав коментар до завданьи <code>${issueKey}</code>:</p>
+      <p><strong>${userName}</strong> написав коментар до <code>${issueKey}</code>:</p>
       <blockquote style="border-left: 4px solid #e9e9e9; padding-left: 16px; margin: 16px 0; color: #666;">
         ${body}
       </blockquote>
-      <p><a href="${fullLink}" style="display: inline-block; padding: 12px 24px; background: #1f1f1f; color: white; border-radius: 8px; text-decoration: none;">Переглянути завдання</a></p>
+      <p><a href="${fullLink}" style="display: inline-block; padding: 12px 24px; background: #1f1f1f; color: white; border-radius: 8px; text-decoration: none;">Відкрити обговорення</a></p>
     `,
     assigned: `
       <h2>${title}</h2>

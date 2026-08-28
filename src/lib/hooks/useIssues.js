@@ -420,7 +420,10 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
         sendNotification({
           userIds: recipients,
           type: 'status_changed',
-          title: `${issue.issueKey || 'Задача'}: статус змінено`,
+          // The key names the record for both readers. Without one there is
+          // nothing neutral left to call it — support says «інцидент», the
+          // client says «звернення» — so the title says only what happened.
+          title: issue.issueKey ? `${issue.issueKey}: статус змінено` : 'Статус змінено',
           body: `${issue.title || ''} → ${statusLabel(newColumnId, statuses)}`,
           link: issuePath(issue, projectId),
           issueId,

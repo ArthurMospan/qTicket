@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 import { can, invitedRoleFor, rolesFor } from '../src/lib/utils/can.js';
 import { isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
+import { INCIDENT_TERMS } from '../src/lib/content/incidentTerms.mjs';
 
 const read = relativePath => readFile(new URL(relativePath, import.meta.url), 'utf8');
 
@@ -132,7 +133,11 @@ test('клієнтський інтерфейс створює інцидент 
   ]);
   assert.match(root, /<ClientIncidentPortal/);
   assert.match(portal, /title="Мої звернення"/);
-  assert.match(portal, /Створити інцидент/);
+  // The portal is «Мої звернення», so what it offers to create is a
+  // «звернення» — one word for the record on the client's own screen.
+  assert.match(portal, /CLIENT_TERMS\.composerSubmit/);
+  assert.equal(INCIDENT_TERMS.client.composerSubmit, 'Створити звернення');
+  assert.doesNotMatch(portal, /інцидент/i);
   assert.match(portal, /clientMode/);
   assert.doesNotMatch(portal, /Пріоритет|Виконавці|Спринт|Дедлайн/);
   assert.match(board, /if \(clientViewer\) router\.replace\('\/'\)/);

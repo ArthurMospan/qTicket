@@ -282,9 +282,26 @@ workflow or security gap.
   rules emulator covers the boundary; this is the first real invitation/session
   smoke test. During the initial rollout no email provider is connected: the
   client administrator copies the generated login instruction into a messenger.
-- Finish the user-facing terminology pass on qTicket routes. The canonical
-  collection and inherited internal code may remain `issues`/task-oriented,
-  but a client must never be asked to create, edit or filter a «завдання».
+- **Completed:** the user-facing terminology pass on qTicket routes. The
+  canonical collection and the inherited internal code stay `issues`/task-oriented
+  and were not touched; what changed is what a client can read. A client's
+  surfaces now say **«звернення»** throughout — the portal was already «Мої
+  звернення» and the composer, the incident page, the palette and the toasts
+  said «інцидент» beside it, which is two names for one record on the one
+  screen that had already given the reader the first. Internal support keeps
+  «інцидент». `src/lib/content/incidentTerms.mjs` holds both halves, a shared
+  screen picks the reader's by role, and `tests/client-terminology.test.mjs`
+  fails on the first task-manager word that comes back into the client copy,
+  the client portal file, the client palette, the client tab title, the
+  notification labels or the published help. Copy on a surface both audiences
+  read at once and whose reader cannot be known when it is written — a
+  notification title, a digest subject, an emailed comment, the shortcut sheet —
+  names the conversation or the incident key instead of the record.
+- Still open in the same area, and not terminology: a `client_admin` who opens
+  «Налаштування» → «Акаунт» is offered «Вийти з організації» and account
+  deletion, and a client's incident breadcrumb is drawn by the internal detail
+  screen. Both now use client wording; whether a client should be offered them
+  at all is a product question for the acceptance flow.
 - **Completed:** incident conversation now has explicit «Відповідь клієнту» and
   staff-only «Внутрішня нотатка» modes. The latter is stored under separately
   ruled `internalNotes`; clients cannot subscribe to it or the support audit.

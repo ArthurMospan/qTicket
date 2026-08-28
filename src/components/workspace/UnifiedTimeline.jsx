@@ -20,6 +20,7 @@ import { IconAction, Pill, Popover, Segmented, useConfirm } from '@/components/u
 import EmptyState from '@/components/ui/Feedback/EmptyState';
 import { useAppContext } from '@/lib/context/AppContext';
 import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
+import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { COMMENT_WINDOW, useComments } from '@/lib/hooks/useComments';
 import { useIssueTyping } from '@/lib/hooks/useIssueTyping';
 import { useSearch } from '@/lib/hooks/useSearch';
@@ -333,6 +334,10 @@ export default function UnifiedTimeline({
   // re-derived here, so the screen and `firestore.rules` cannot drift apart
   // about what a client role may open.
   const internalViewer = can(orgRole, 'access:internal_notes');
+  // The conversation is the one surface both sides of the desk read at the same
+  // time, so the record it belongs to has two names in it — «інцидент» for
+  // support, «звернення» for the client whose portal is «Мої звернення».
+  const terms = incidentTerms(isClientRole(orgRole));
   // Owners and admins may remove a comment that should not stand; editing one
   // stays with its author, because an edited comment still carries their name.
   const canModerateComments = can(orgRole, 'moderate:content');
@@ -683,7 +688,7 @@ export default function UnifiedTimeline({
 
   const unreadLabel = unreadChangeIds.length === 0
     ? 'Нові повідомлення'
-    : (unreadCommentIds.length === 0 ? 'Нові зміни' : 'Нове в інциденті');
+    : (unreadCommentIds.length === 0 ? 'Нові зміни' : terms.unreadDivider);
   const renderUnreadBoundary = itemKey => (itemKey === sessionBoundary && !boundary.dismissed ? (
     <div
       ref={unreadMarkerRef}
@@ -1220,6 +1225,13 @@ export default function UnifiedTimeline({
       // out and back in — and the id is how the two are recognised as one.
       patchDraft({ serverId: commentId, status: 'sent' });
       const incidentChatLink = `${issuePath(issue, project || projectId)}?view=chat`;
+      // A public notification is written once and read by both sides of the
+      // desk: the client who opened the «звернення» and the support person
+      // working the «інцидент». Naming the record here would pick one of them
+      // and be wrong for the other, and the recipient list is not the place to
+      // fork the copy — so the title names the thing they genuinely share, the
+      // conversation, and the link says which one. The internal-note titles
+      // below can be specific: nobody outside support ever receives them.
       if (mentionedUserIds.length > 0) {
         try {
           const result = await sendNotification({
@@ -1227,7 +1239,7 @@ export default function UnifiedTimeline({
             type: 'mentioned',
             title: isInternalNote
               ? `${currentUser?.name || 'Колега'} згадав вас у внутрішній нотатці`
-              : `${currentUser?.name || 'Колега'} згадав вас в інциденті`,
+              : `${currentUser?.name || 'Колега'} згадав вас у розмові`,
             body: draft.text.slice(0, 500),
             link: incidentChatLink,
             issueId,
@@ -1239,7 +1251,10 @@ export default function UnifiedTimeline({
           // мовчазно проковтнута згадка виглядає як доставлена.
           if (result?.skippedNoProjectAccess > 0) {
             showToast(
-              `Не сповіщено ${result.skippedNoProjectAccess} ${plural(result.skippedNoProjectAccess, ['учасника', 'учасників', 'учасників'])}: немає доступу до проєкту`,
+              // «немає доступу до проєкту» named a thing the client who just
+              // wrote the message has never been shown and cannot act on. The
+              // fact they need is that the mention did not arrive, and why.
+              `Не сповіщено ${result.skippedNoProjectAccess} ${plural(result.skippedNoProjectAccess, ['учасника', 'учасників', 'учасників'])}: немає доступу до цієї розмови`,
               'warning',
             );
           }
@@ -1271,7 +1286,7 @@ export default function UnifiedTimeline({
           type: 'chat_message',
           title: isInternalNote
             ? `${currentUser?.name || 'Колега'} відповів у внутрішній нотатці`
-            : `${currentUser?.name || 'Колега'} відповів вам в інциденті`,
+            : `${currentUser?.name || 'Колега'} відповів вам у розмові`,
           body: draft.text.slice(0, 500) || 'Вкладення',
           link: incidentChatLink,
           issueId,
@@ -1297,7 +1312,7 @@ export default function UnifiedTimeline({
           type: 'commented',
           title: isInternalNote
             ? `${currentUser?.name || 'Колега'} додав внутрішню нотатку`
-            : `${currentUser?.name || 'Колега'} відповів в інциденті`,
+            : `${currentUser?.name || 'Колега'} відповів у розмові`,
           body: draft.text.slice(0, 500) || 'Вкладення',
           link: incidentChatLink,
           issueId,
@@ -1705,6 +1720,7 @@ export default function UnifiedTimeline({
               issues={issueResults}
               projects={projects}
               loading={issueSearchLoading}
+              heading={terms.mentionMenuHeading}
               onSelect={selectIssueMention}
               className="absolute bottom-full left-3 right-3 z-[60] mb-2"
             />

@@ -4,7 +4,7 @@ import { canonicalUrl } from '@/lib/content/product.mjs';
 
 export const metadata = {
   title: 'Довідка',
-  description: 'Український довідковий центр qTicket: інциденти, клієнтські проєкти, обговорення, доступ та безпека.',
+  description: 'Український довідковий центр qTicket: інциденти, клієнтські простори, обговорення, доступ та безпека.',
   alternates: { canonical: canonicalUrl('/help') },
 };
 

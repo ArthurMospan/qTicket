@@ -2114,12 +2114,15 @@ export default function SettingsPage() {
   // Leaving is the same server call as being deactivated — the route tells the
   // two apart by the id — so the person keeps everything they did here and an
   // administrator can hand the seat back if they return.
+  // «Налаштування» → «Акаунт» is one of the five sections an external client
+  // can open, so this dialog and the deletion one below are read by somebody
+  // who has never been shown a «проєкт» or a «задача» and never will be.
   const handleLeaveOrganization = async () => {
     const uid = currentUser?.uid || currentUser?.id;
     if (!uid || leavingOrganization) return;
     const typed = await confirmDialog({
       title: `Вийти з «${org?.name || 'організації'}»?`,
-      message: 'Ви втратите доступ до організації та її проєктів. Задачі, коментарі й записаний час залишаться за вами. Щоб повернутися, потрібне буде запрошення або відновлення доступу адміністратором.\n\nВведіть ВИЙТИ, щоб підтвердити.',
+      message: 'Ви втратите доступ до організації та її просторів. Повідомлення, коментарі й історія залишаться за вами. Щоб повернутися, потрібне буде запрошення або відновлення доступу адміністратором.\n\nВведіть ВИЙТИ, щоб підтвердити.',
       confirmText: 'Вийти з організації',
       cancelText: 'Скасувати',
       danger: true,
@@ -2462,9 +2465,9 @@ export default function SettingsPage() {
       accountDeletion.organizationCount > 0
         && `${accountDeletion.organizationCount} ${plural(accountDeletion.organizationCount, ['організації', 'організацій', 'організацій'])}`,
       accountDeletion.projectCount > 0
-        && `${accountDeletion.projectCount} ${plural(accountDeletion.projectCount, ['проєкту', 'проєктів', 'проєктів'])}`,
+        && `${accountDeletion.projectCount} ${plural(accountDeletion.projectCount, ['простору', 'просторів', 'просторів'])}`,
       accountDeletion.assignedIssueCount > 0
-        && `${accountDeletion.assignedIssueCount} ${plural(accountDeletion.assignedIssueCount, ['завдання', 'завдань', 'завдань'])}`,
+        && `${accountDeletion.assignedIssueCount} ${plural(accountDeletion.assignedIssueCount, ['інциденту', 'інцидентів', 'інцидентів'])}`,
     ].filter(Boolean);
 
     // Typed confirmation, not a second «Ви впевнені?». Nothing here can be
@@ -2472,7 +2475,7 @@ export default function SettingsPage() {
     const typed = await confirmDialog({
       title: 'Видалити обліковий запис назавжди?',
       message: scope.length > 0
-        ? `Вас буде прибрано з ${scope.join(', ')}. Створені вами завдання й коментарі залишаться в історії команди, але профіль, налаштування та доступ зникнуть назавжди. Введіть ВИДАЛИТИ, щоб підтвердити.`
+        ? `Вас буде прибрано з ${scope.join(', ')}. Створені вами записи й коментарі залишаться в історії, але профіль, налаштування та доступ зникнуть назавжди. Введіть ВИДАЛИТИ, щоб підтвердити.`
         : 'Профіль, налаштування та доступ буде видалено назавжди. Введіть ВИДАЛИТИ, щоб підтвердити.',
       confirmText: 'Видалити назавжди',
       cancelText: 'Скасувати',
@@ -2658,7 +2661,9 @@ export default function SettingsPage() {
         // switches a customer can turn on.
         const eventRows = [
           { key: 'assigned',      label: 'Інцидент призначено мені', desc: 'Хтось призначив інцидент на тебе або створив новий одразу з тобою' },
-          { key: 'commented',     label: 'Нове повідомлення',        desc: 'В інцидентах, де ти виконавець або автор' },
+          // «Сповіщення» is client-visible too, and a client is never a
+          // «виконавець» — that word describes a seat they cannot hold.
+          { key: 'commented',     label: 'Нове повідомлення',        desc: 'Там, де ти автор або учасник розмови' },
           { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в розмові інциденту' },
           { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли інцидент переходить на інший етап' },
           { key: 'deadline',      label: 'Терміни вирішення',        desc: 'Нагадування про наближення або прострочення терміну' },
@@ -4007,7 +4012,7 @@ export default function SettingsPage() {
               label="Вийти з організації"
               desc={isOwner
                 ? 'Ви власник. Спершу передайте права власника комусь із команди'
-                : 'Ви втратите доступ до організації та її проєктів. Задачі, коментарі й записаний час залишаться за вами, а адміністратор зможе повернути доступ'}
+                : 'Ви втратите доступ до організації та її просторів. Повідомлення, коментарі й історія залишаться за вами, а адміністратор зможе повернути доступ'}
             >
               <Button
                 onClick={handleLeaveOrganization}

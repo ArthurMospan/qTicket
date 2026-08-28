@@ -53,7 +53,9 @@ export async function deliverBulkNotifications({
   organizationId,
   actor,
   events = [],
-  digestTitle = 'Масове оновлення задач',
+  // The digest is delivered to whoever the events name, and that includes the
+  // external client who opened the record. Nothing here names it.
+  digestTitle = 'Кілька оновлень',
 }) {
   const actorId = actor?.uid || '';
   // Nobody is told about their own action — the same guarantee the notifications

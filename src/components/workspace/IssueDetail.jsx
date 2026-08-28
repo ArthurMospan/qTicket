@@ -45,6 +45,7 @@ import { plural } from '@/lib/utils/plural.mjs';
 import DatePicker from '@/components/ui/Forms/DatePicker';
 
 import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
+import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { isArchivedIssue, withoutArchivedIssues } from '@/lib/utils/issueArchive.mjs';
 import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCancel.mjs';
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
@@ -166,11 +167,14 @@ function makeAttachmentId() {
 }
 function nowMs() { return Date.now(); }
 
-async function copyIssueUrl(path, showToast) {
+// `copiedMessage` rather than a literal: this screen is one of the two an
+// external client reaches, and the record it copies a link to is a «звернення»
+// to them and an «інцидент» to support. See `incidentTerms`.
+async function copyIssueUrl(path, showToast, copiedMessage) {
   const issueUrl = `${window.location.origin}${path}`;
   try {
     await navigator.clipboard.writeText(issueUrl);
-    showToast('Посилання на інцидент скопійовано');
+    showToast(copiedMessage);
   } catch {
     showToast('Не вдалося скопіювати посилання', 'error');
   }
@@ -269,6 +273,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const { projects, currentUser, activeOrg, activeOrgId, orgRole } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const internalViewer = Boolean(orgRole) && !clientViewer;
+  // This screen is shared: support works an «інцидент» here and the client
+  // whose portal is «Мої звернення» reads about a «звернення». Every string
+  // about the record itself comes from here so neither word can leak into the
+  // other's screen.
+  const terms = incidentTerms(clientViewer);
   const canEditIssue = can(orgRole, 'edit:issue');
   const timeZone = organizationTimeZone(activeOrg);
   const {
@@ -370,8 +379,10 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // navigation of this screen — and QuickTeam+ was not on it. It was a second
   // pair of tabs *inside* the chat pane, which meant reaching the portal
   // conversation on a phone took two switches on two different strips. One
-  // strip now: Завдання · Чат · QuickTeam+, the last only when the project is
-  // actually linked.
+  // strip now: the record · Чат · QuickTeam+, the last only when the project is
+  // actually linked. The first tab is named by `terms.record` — «Інцидент» for
+  // support, «Звернення» for the client — because the strip is this screen's
+  // whole navigation and it is the first word either of them reads on it.
   const compactTaskTab = taskPane === 'chat' && chatView === 'qtplus' && qtplusLink?.projectId
     ? 'qtplus'
     : taskPane;
@@ -564,7 +575,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         activityMillis: issueActivityAt,
         currentSeenMillis: lastSeenMillis,
       });
-      showToast('Інцидент позначено непрочитаним');
+      showToast(terms.markedUnread);
     } catch (error) {
       consumeRef.current.suppressed = false;
       reportLoadError('[IssueDetail] mark issue unread', error);
@@ -656,7 +667,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     setLogForm(null);
   };
 
-  const copyIssueLink = () => copyIssueUrl(canonicalIssuePath, showToast);
+  const copyIssueLink = () => copyIssueUrl(canonicalIssuePath, showToast, terms.linkCopied);
 
   const copyAiPrompt = async () => {
     if (!issue) return;
@@ -693,17 +704,30 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   };
 
   // ── Breadcrumbs ───────────────────────────────────────────────────
+  // The trail is where you came from, and the two readers came from different
+  // places. Support walked «Клієнти» → this client → this incident. A client
+  // has exactly one space and cannot open either of those routes, so their
+  // trail was two crumbs that bounced them back to the portal, the first of
+  // them labelled with somebody else's word for their own company.
   useEffect(() => {
     if (isModal) return;
+    const leaf = {
+      label: issue?.issueKey || '...',
+      href: null,
+      onClick: () => copyIssueUrl(canonicalIssuePath, showToast, terms.linkCopied),
+      title: terms.copyLink,
+    };
     useWorkspaceStore.setState({
-      breadcrumbs: [
-        { label: 'Клієнти', href: '/clients' },
-        { label: project?.name || '...', href: `/${projectId}` },
-        { label: issue?.issueKey || '...', href: null, onClick: () => copyIssueUrl(canonicalIssuePath, showToast), title: 'Копіювати посилання на інцидент' },
-      ]
+      breadcrumbs: clientViewer
+        ? [{ label: 'Мої звернення', href: '/' }, leaf]
+        : [
+          { label: 'Клієнти', href: '/clients' },
+          { label: project?.name || '...', href: `/${projectId}` },
+          leaf,
+        ]
     });
     return () => useWorkspaceStore.setState({ breadcrumbs: [] });
-  }, [canonicalIssuePath, project?.name, issue?.issueKey, projectId, isModal, showToast]);
+  }, [canonicalIssuePath, clientViewer, project?.name, issue?.issueKey, projectId, isModal, showToast, terms.copyLink, terms.linkCopied]);
 
   // Whether the open draft says anything the task does not. Everything that can
   // be edited in place (status, sprint, labels…) writes straight through, so the
@@ -785,11 +809,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         ) : issuesError ? (
           <div className="max-w-[360px] px-6 text-center">
             <p className="text-[16px] font-bold text-ink mb-2">
-              {issueAccessFailure ? 'Немає доступу до інциденту' : 'Не вдалося завантажити інцидент'}
+              {issueAccessFailure ? terms.accessDeniedTitle : terms.loadFailedTitle}
             </p>
             <p className={`text-[13px] text-muted ${issueAccessFailure ? '' : 'mb-4'}`}>
               {issueAccessFailure
-                ? 'Інцидент видалено або у вас більше немає доступу до клієнтського простору.'
+                ? terms.accessDeniedText
                 : 'Дані не видалені. Сервіс бази тимчасово недоступний.'}
             </p>
             {!issueAccessFailure && (
@@ -798,8 +822,10 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
           </div>
         ) : (
           <div className="text-center">
-            <p className="text-[16px] font-bold text-ink mb-2">Інцидент не знайдено</p>
-            <Link href={`/${projectId}`} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
+            <p className="text-[16px] font-bold text-ink mb-2">{terms.notFound}</p>
+            {/* Back to where this reader actually came from: a client has no
+                board to return to, and the route would only bounce them. */}
+            <Link href={clientViewer ? '/' : `/${projectId}`} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
           </div>
         )}
       </div>
@@ -1369,7 +1395,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 style="secondary"
                 size="icon-lg"
                 icon={MoreHorizontal}
-                aria-label="Опції інциденту"
+                aria-label={terms.options}
                 title="Опції"
               />
             )}
@@ -1458,7 +1484,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             <Tabs
               composition="pane-switch"
               tabs={[
-                { id: 'task', label: 'Інцидент', icon: TaskIcon },
+                { id: 'task', label: terms.record, icon: TaskIcon },
                 { id: 'chat', label: 'Чат', icon: MessageCircle, count: unreadTaskChatCount },
                 ...(qtplusLink?.projectId ? [{ id: 'qtplus', label: 'QuickTeam+' }] : []),
               ]}
@@ -1526,9 +1552,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 is what made the old «Архівувати» feel like a loss. */}
             {isIssueArchived && (
               <div className="mt-3">
-                <Alert variant="info" title="Інцидент в архіві">
+                <Alert variant="info" title={terms.archivedTitle}>
                   <div className="flex flex-wrap items-center gap-3">
-                    <span>Інцидент прибрано з активної черги. Історія звернення, чат і файли збережені без обмеження строку.</span>
+                    <span>{terms.archivedText}</span>
                     {canWhileRoleLoads(orgRole, 'edit:issue') && (
                       <Button
                         style="primary"
@@ -1550,9 +1576,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 task, rather than left to be inferred from an empty chart. */}
             {isIssueCancelled && (
               <div className="mt-3">
-                <Alert variant="warning" title="Інцидент скасовано">
+                <Alert variant="warning" title={terms.cancelledTitle}>
                   <div className="flex flex-wrap items-center gap-3">
-                    <span>Інцидент не рахується як вирішений і не показується в активній черзі. Історія звернення збережена без обмеження строку.</span>
+                    <span>{terms.cancelledText}</span>
                     {canWhileRoleLoads(orgRole, 'edit:issue') && (
                       <Button
                         style="primary"
@@ -2157,7 +2183,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     </>
                   ) : (
                     <DescriptionPlaceholder onClick={canEditIssue ? enterEdit : undefined} disabled={!canEditIssue}>
-                      {canEditIssue ? 'Натисни Редагувати щоб додати опис...' : 'Опис звернення ще не додано.'}
+                      {canEditIssue ? 'Натисни Редагувати щоб додати опис...' : terms.descriptionEmpty}
                     </DescriptionPlaceholder>
                   )}
 

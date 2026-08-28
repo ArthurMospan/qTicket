@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = fileURLToPath(new URL('../src', import.meta.url));
+import { INCIDENT_TERMS } from '../src/lib/content/incidentTerms.mjs';
+
 const read = file => readFile(fileURLToPath(new URL(file, import.meta.url)), 'utf8');
 
 async function sourceFiles(directory) {
@@ -45,8 +47,15 @@ test('a create dialog reports the missing field instead of disabling its submit'
   // typing — here, an organization with no creatable issue types at all.
   assert.match(modal, /disabled=\{!clientMode && creatableTypes\.length === 0\}/);
   assert.doesNotMatch(modal, /disabled=\{!form\.title\.trim\(\)/);
-  assert.match(modal, /nextErrors\.title = incidentComposer \? 'Вкажіть тему інциденту' : 'Вкажіть назву завдання'/);
-  assert.match(modal, /<FormGroup label=\{incidentComposer \? 'Тема інциденту' : 'Назва'\} required error=\{fieldErrors\.title\}/);
+  // The subject's label and its missing-field message come from the vocabulary
+  // the composer's reader speaks — an external client is asked for the тема of
+  // a «звернення», internal support for the тема of an «інцидент».
+  assert.match(modal, /nextErrors\.title = incidentComposer \? terms\.composerSubjectRequired : 'Вкажіть назву завдання'/);
+  assert.match(modal, /<FormGroup label=\{incidentComposer \? terms\.composerSubjectLabel : 'Назва'\} required error=\{fieldErrors\.title\}/);
+  for (const voice of Object.values(INCIDENT_TERMS)) {
+    assert.match(voice.composerSubjectRequired, /^Вкажіть тему /);
+    assert.match(voice.composerSubjectLabel, /^Тема /);
+  }
 });
 
 test('every dialog that requires a name says so in the same place', async () => {

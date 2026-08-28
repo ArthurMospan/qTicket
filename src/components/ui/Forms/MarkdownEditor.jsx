@@ -90,7 +90,9 @@ function cleanFileName(name = 'file') {
 export default function MarkdownEditor({
   value = '',
   onChange,
-  placeholder = 'Напишіть опис завдання...',
+  // Neutral by default: this editor writes the description of an «інцидент»
+  // for support and of a «звернення» for the client, and both callers say so.
+  placeholder = 'Напишіть опис...',
   minHeight = '150px',
   defaultTab = 'write',
   frame = 'card',
