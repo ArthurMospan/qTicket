@@ -87,15 +87,18 @@ test('сервер приймає від клієнта лише тему та �
 });
 
 test('клієнтське запрошення завжди прив’язане рівно до одного проєкту', async () => {
-  const [route, acceptRoute, dialog] = await Promise.all([
+  const [route, scope, acceptRoute, dialog] = await Promise.all([
     read('../src/app/api/invitations/route.js'),
+    read('../src/lib/server/invitationScope.mjs'),
     read('../src/app/api/invitations/accept/route.js'),
     read('../src/components/InviteMemberDialog.jsx'),
   ]);
-  assert.match(route, /const clientInvitee = isClientRole\(safeRole\)/);
-  assert.match(route, /exactlyOne: clientInvitee/);
-  assert.match(route, /scope: clientInvitee \? 'client-project' : 'organization'/);
-  assert.match(route, /restoreArchivedProjects: !clientInvitee/);
+  assert.match(route, /resolveInvitationScope\(db, \{/);
+  assert.match(route, /projectIds: invitedProjectIds/);
+  assert.match(route, /restoreArchivedProjects,/);
+  assert.match(scope, /if \(clientInvitee && ids\.length !== 1\)/);
+  assert.match(scope, /clientScopedInvitation && !snapshot\.data\(\)\.team\?\.includes\(inviterUid\)/);
+  assert.match(scope, /scope: clientInvitee \? 'client-project' : 'organization'/);
   assert.match(acceptRoute, /isClientRole\(invitation\.role\) \? invitation\.role : 'client_member'/);
   assert.match(dialog, /value: 'client_admin'/);
   assert.match(dialog, /internalClientInvite \? \[selectedProjectId\] : \[\]/);

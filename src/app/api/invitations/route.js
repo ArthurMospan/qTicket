@@ -5,13 +5,14 @@ import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { deliverEmail, invitationEmailHtml } from '@/lib/server/email';
 import { reactivateMembership } from '@/lib/server/orgMembership';
 import { seedChatReadState } from '@/lib/server/chatReadState';
+import { readInvitationSeatState, resolveInvitationScope } from '@/lib/server/invitationScope.mjs';
 import {
   countActiveMembers,
   organizationPlan,
   planLimitRefusalResponse,
   recordPlanUsage,
 } from '@/lib/server/planLimits';
-import { invitedRoleFor, isClientRole, rolesFor } from '@/lib/utils/can';
+import { rolesFor } from '@/lib/utils/can';
 import {
   isQuickTeamManagedOrganization,
   QUICKTEAM_MANAGED_MESSAGE,
@@ -46,33 +47,6 @@ async function sendInvitationEmail(db, { email, organizationId, inviterUid, role
   }
 }
 
-// Projects an invitation may pre-assign. Every id has to belong to the same
-// organization the caller was authorized for, otherwise a project id from
-// another workspace would add the invitee to a project nobody vetted.
-async function resolveInvitedProjectIds(
-  db,
-  requested,
-  organizationId,
-  { requiredTeamMemberId = '', exactlyOne = false } = {},
-) {
-  const ids = [...new Set(
-    (Array.isArray(requested) ? requested : [])
-      .filter(id => typeof id === 'string' && id.trim())
-      .map(id => id.trim()),
-  )].slice(0, 20);
-  if (exactlyOne && ids.length !== 1) throw new Error('CLIENT_PROJECT_REQUIRED');
-  if (!ids.length) return [];
-  const snapshots = await db.getAll(...ids.map(id => db.collection('projects').doc(id)));
-  if (snapshots.some(snapshot => (
-    !snapshot.exists
-    || snapshot.data().organizationId !== organizationId
-    || (requiredTeamMemberId && !snapshot.data().team?.includes(requiredTeamMemberId))
-  ))) {
-    throw new Error('INVALID_PROJECT_SCOPE');
-  }
-  return snapshots.map(snapshot => snapshot.id);
-}
-
 export async function POST(request) {
   try {
     const { organizationId, email, role, projectIds } = await readJsonBody(request);
@@ -92,14 +66,25 @@ export async function POST(request) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
     }
-    const clientScopedInvitation = authorization.membership.role === 'client_admin';
-    const safeRole = invitedRoleFor(role, authorization.membership.role);
-    const clientInvitee = isClientRole(safeRole);
     const db = getAdminDb();
     const organizationSnapshot = await db.collection('organizations').doc(organizationId).get();
     if (!organizationSnapshot.exists) {
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
+    const invitationScope = await resolveInvitationScope(db, {
+      requestedProjectIds: projectIds,
+      organizationId,
+      inviterUid: authorization.user.uid,
+      inviterRole: authorization.membership.role,
+      requestedRole: role,
+    });
+    const {
+      role: safeRole,
+      clientInvitee,
+      projectIds: invitedProjectIds,
+      scope,
+      restoreArchivedProjects,
+    } = invitationScope;
     if (isQuickTeamManagedOrganization(organizationSnapshot.data()) && !clientInvitee) {
       return NextResponse.json({
         error: QUICKTEAM_MANAGED_MESSAGE,
@@ -119,16 +104,12 @@ export async function POST(request) {
     // команді», which is what happened, rather than a refusal about a ceiling
     // their invitation was never going to cross.
     const refuseWithoutSeat = async () => {
-      const [organizationSnapshot, seatsTaken, pendingSeats] = await Promise.all([
-        Promise.resolve(organizationSnapshot),
-        countActiveMembers(db, organizationId),
-        db.collection('invitations')
-          .where('organizationId', '==', organizationId)
-          .where('status', '==', 'pending')
-          .count()
-          .get()
-          .then(snapshot => snapshot.data().count),
-      ]);
+      const { seatsTaken, pendingSeats } = await readInvitationSeatState(
+        db,
+        organizationId,
+        organizationSnapshot,
+        countActiveMembers,
+      );
       await recordPlanUsage(db, organizationId, { members: seatsTaken });
       return planLimitRefusalResponse(
         organizationPlan(organizationSnapshot),
@@ -136,15 +117,6 @@ export async function POST(request) {
         seatsTaken + pendingSeats,
       );
     };
-
-    const invitedProjectIds = await resolveInvitedProjectIds(db, projectIds, organizationId, {
-      requiredTeamMemberId: clientScopedInvitation ? authorization.user.uid : '',
-      // Every external account belongs to one client workspace, regardless of
-      // whether the invitation was sent by the tenant or by that client's
-      // administrator. Otherwise an internal admin could accidentally create
-      // an organization-wide client seat through the same endpoint.
-      exactlyOne: clientInvitee,
-    });
 
     const userSnap = await db.collection('users').where('email', '==', normalizedEmail).limit(1).get();
     if (!userSnap.empty) {
@@ -166,7 +138,7 @@ export async function POST(request) {
         userId,
         role: safeRole,
         extraProjectIds: invitedProjectIds,
-        restoreArchivedProjects: !clientInvitee,
+        restoreArchivedProjects,
         actorId: authorization.user.uid,
       });
       if (reactivated.restored) {
@@ -236,7 +208,7 @@ export async function POST(request) {
       invitedBy: authorization.user.uid,
       role: safeRole,
       projectIds: invitedProjectIds,
-      scope: clientInvitee ? 'client-project' : 'organization',
+      scope,
       status: 'pending',
       createdAt: FieldValue.serverTimestamp(),
     });

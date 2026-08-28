@@ -94,6 +94,11 @@ Completed product slice on 2026-08-28:
   `POST /api/organizations` refuses standalone creation, organization-switcher
   UI has no create action, and an account without a verified invitation or
   QuickTeam-managed membership receives an explicit no-access screen.
+- Client invitation scope now has executable server-domain coverage: staff can
+  invite the first `client_admin` into one tenant project, that administrator
+  can invite only `client_member` users into their own project, and a foreign
+  project id is refused. The invitation capacity read also reuses the verified
+  organization snapshot instead of failing through a shadowed binding.
 - The default incident lifecycle is **Новий → Прийнято → У роботі → Очікує
   відповіді → Вирішено**. The default types are **Звернення**, **Побажання** and
   **Помилка**; historical built-in labels are localized on read without

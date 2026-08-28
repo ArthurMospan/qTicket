@@ -590,12 +590,16 @@ test('усе, що створює проєкт, питає одну стелю',
 });
 
 test('усі три стелі мають роут, який справді рахує', async () => {
-  const invitations = withoutComments(await read('src/app/api/invitations/route.js'));
+  const [invitations, invitationScope] = await Promise.all([
+    read('src/app/api/invitations/route.js'),
+    read('src/lib/server/invitationScope.mjs'),
+  ]).then(sources => sources.map(withoutComments));
   const ai = withoutComments(await read('src/app/api/ai/call-to-tasks/route.js'));
 
   // Місця рахуються агрегатом, а не вичиткою всієї колекції: у продукту денний
   // бюджет читань, і «порахувати команду» не має його з'їдати.
-  assert.match(invitations, /countActiveMembers\(db, organizationId\)/);
+  assert.match(invitations, /readInvitationSeatState\([\s\S]{0,140}countActiveMembers/);
+  assert.match(invitationScope, /countActiveMembers\(db, organizationId\)/);
   assert.match(invitations, /planLimitRefusalResponse\([\s\S]{0,120}?'members'/);
   // Запрошення, яке ще висить, — це вже зайняте місце. Інакше можна було б
   // нарозсилати їх скільки завгодно й дізнатись про стелю, коли всі приймуть.
