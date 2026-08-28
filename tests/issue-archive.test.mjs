@@ -31,10 +31,10 @@ test('archiving and deleting are two actions, not one wearing two names', async 
   assert.match(route, /actionId === 'delete'[\s\S]{0,400}'DELETE'/);
   assert.match(registry, /id: 'archive'[^}]*permission: 'edit:issue'/);
   assert.match(registry, /id: 'delete'[^}]*permission: 'delete:issue'/);
-  // The confirmations have to say which of the three is about to happen, and
-  // the difference that matters is what happens to the numbers.
-  assert.match(bar, /У звітах, таймшиті та рахунках вони лишаються/);
-  assert.match(bar, /з усього обліку/);
+  // The confirmations say which customer record survives and distinguish a
+  // cancelled incident from one the support team resolved.
+  assert.match(bar, /історія, чат і файли залишаться/);
+  assert.match(bar, /не рахуватимуться як вирішені/);
   assert.match(bar, /«Нещодавно видалене»/);
 });
 

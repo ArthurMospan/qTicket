@@ -125,5 +125,7 @@ test('клієнтська сесія не підписується на вну�
   assert.match(bridge, /useUserTimerState\(internalViewer \? userId : null\)/);
   assert.match(sprints, /export function useSprints\(\{ enabled = true \} = \{\}\)/);
   assert.match(detail, /const internalViewer = Boolean\(orgRole\) && !clientViewer/);
-  assert.match(detail, /useSprints\(\{ enabled: internalViewer \}\)/);
+  assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
+  assert.match(detail, /useSprints\(\{ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer \}\)/);
+  assert.match(detail, /SHOW_INHERITED_TASK_PLANNING && internalViewer \? issueId : null/);
 });

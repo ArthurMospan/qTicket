@@ -63,6 +63,10 @@ export default function IncidentQueuePage() {
   const { labels, types, priorities, statuses, categoryColumns } = useWorkflowConfig();
   const uid = currentUser?.uid || currentUser?.id;
   const clientViewer = isClientRole(orgRole);
+  const supportMembers = useMemo(
+    () => (members || []).filter(member => !isClientRole(member.role)),
+    [members],
+  );
   const hiddenCategoriesStorageKey = `qt:incident-queue:hidden-categories:${uid || 'anonymous'}:${activeOrgId || 'none'}`;
   const {
     tasks: sourceTasks,
@@ -457,7 +461,7 @@ export default function IncidentQueuePage() {
         initialAssignees={composerAssignees}
         onSubmit={async (formData) => {
           if (!formData.projectId) {
-            throw new Error('Будь ласка, оберіть проєкт');
+            throw new Error('Будь ласка, оберіть клієнта');
           }
           const created = await createIssueViaApi({
             organizationId: activeOrgId,
@@ -492,7 +496,7 @@ export default function IncidentQueuePage() {
         }}
         projects={projects}
         stages={[]}
-        teamMembers={members}
+        teamMembers={supportMembers}
         sprints={[]}
       />
 

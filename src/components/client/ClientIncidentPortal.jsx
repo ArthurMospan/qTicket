@@ -116,7 +116,7 @@ export default function ClientIncidentPortal({
             <EmptyState
               icon={Inbox}
               title="Простір підтримки ще не налаштовано"
-              description="Адміністратор має запросити вас до підготовленого клієнтського проєкту."
+              description="Адміністратор має запросити вас до підготовленого клієнтського простору."
               context="page"
             />
           </Surface>

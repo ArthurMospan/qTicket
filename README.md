@@ -299,7 +299,7 @@ Archiving, cancelling and deleting a task are separate, and mean three different
 
 **Видалити** moves the record into a `deletedIssues` tombstone with a 24-hour `purgeAfter`, after which the sweep removes it.
 
-All three are reversible until the tombstone is purged; «Налаштування» → «Архів» lists projects, archived tasks, cancelled tasks and still-restorable deletions.
+All three are reversible until the tombstone is purged; «Налаштування» → «Архів і видалене» lists client spaces, archived incidents, cancelled incidents and still-restorable deletions.
 
 `tasks` is a legacy collection and is closed to browsers entirely — nothing in the product reads it, and its old rule was the last org-wide read path that ignored project scope. New development must use `issues`.
 
@@ -324,13 +324,13 @@ the selected `#ENG-12` reference renders as a task preview and opens the issue.
 
 ### Statuses have two layers
 
-`organizations/{orgId}/settings/workflow` holds the organization's statuses. Each one carries a free label and a `category`, which is one of exactly five fixed values: `backlog`, `todo`, `in-progress`, `review`, `done`. Labels are local — an organization may have as many as it likes, named whatever it likes. Categories are shared, and every surface that spans projects reads them: «Мої завдання» builds its columns from categories, and `done` is what closes a task, so `completedAt`, progress, velocity, overdue and invoices all follow the category and nothing else. `isDone` is still written, derived from the category, for documents and clients that predate it.
+`organizations/{orgId}/settings/workflow` holds the organization's statuses. Each one carries a free label and a `category`, which is one of exactly five fixed values: `backlog`, `todo`, `in-progress`, `review`, `done`. The qTicket defaults are «Новий», «Прийнято», «У роботі», «Очікує відповіді» and «Вирішено». Labels are local — an organization may add or rename statuses — while categories are shared. The global «Інциденти» queue builds its columns from categories, and `done` is the only category that resolves an incident. `isDone` is still written, derived from the category, for legacy documents and clients.
 
-`review` — «На перевірці» — is work handed over and waiting on somebody else: a review, a QA pass, a client's approval. It neither closes a task nor delivers anything, which is the point of having it. A task sitting there is still open, still blocks whatever it blocked, and can still run past its deadline, while the person who wrote it is no longer the one it is waiting on. Dropped work is not a category at all: see «Скасувати» above.
+`review` — «Очікує відповіді» — is an open incident waiting on the client or on an internal clarification. It is not resolved and may still pass its resolution target. Dropped work is not a category at all: see «Скасувати» above.
 
 The rules live in [src/lib/utils/statusCategories.mjs](src/lib/utils/statusCategories.mjs) and are shared by the client and the server routes. A workflow saved before categories existed needs no migration: its category is derived from what it already says (an explicit `isDone`, a built-in id, the entry column), and the terminal set it had is preserved exactly. The next save through `/api/organizations/{organizationId}/workflow` writes the resolved categories out, and that API refuses a workflow with nothing to finish in or nothing to start in.
 
-A project board's columns are that project's statuses, and `projects/{id}.hiddenColumns` may switch some off. A board that spans projects cannot use status names as columns for that reason, which is what categories are for: a drop on a category column writes a status of that category belonging to the task's own project, so no cross-project drop can be refused by a project setting.
+`projects/{id}.hiddenColumns` may switch local statuses off for one client space. A queue that spans client spaces therefore uses categories rather than local labels: a drop on a category column writes a status of that category belonging to the incident's own client space.
 
 ## Development rules
 

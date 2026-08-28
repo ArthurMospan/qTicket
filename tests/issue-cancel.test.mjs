@@ -51,16 +51,16 @@ test('the difference between the two is stated where the choice is made', async 
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/app/(app)/settings/page.js'),
   ]);
-  // Archiving keeps the work in the record — the sentence people actually need,
-  // because "it disappears" is what stops them using the archive at all.
-  assert.match(detail, /Записаний час нікуди не дінеться/);
-  assert.match(bar, /У звітах, таймшиті та рахунках вони лишаються/);
-  // Cancelling does not, and says so in the same breath as the way back.
-  assert.match(detail, /з усього обліку/);
-  assert.match(detail, /Якщо робота відбулася і просто завершена — архівуйте/);
-  assert.match(bar, /Якщо робота відбулася — архівуйте/);
+  // Archiving preserves the customer record and says exactly what survives.
+  assert.match(detail, /Історія звернення, чат і файли/);
+  assert.match(bar, /історія, чат і файли залишаться/);
+  // Cancelling stays distinct from resolving and says where the record goes.
+  assert.match(detail, /не рахується як вирішений/);
+  assert.match(bar, /не рахуватимуться як вирішені/);
+  assert.match(detail, /«Архіві» → «Скасовані»/);
   // And the archive screen says which list means which.
-  assert.match(settings, /Архівоване лишається у звітах і рахунках, скасоване не рахується ніде/);
+  assert.match(settings, /Архівовані інциденти зникають з активної черги, але зберігають історію та показники/);
+  assert.match(settings, /Скасовані не рахуються як робота/);
 });
 
 test('the cancelled state is written by the server, never by the browser', async () => {

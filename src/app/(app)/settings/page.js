@@ -137,6 +137,11 @@ const CLIENT_SETTINGS_SECTIONS = new Set([
   'team',
 ]);
 
+// qTicket is a support add-on, not a second task manager. The inherited
+// migration, rates and organization-deletion surfaces remain in code until
+// their data paths can be removed safely, but they are not qTicket settings.
+const HIDDEN_QTICKET_SETTINGS_SECTIONS = new Set(['integrations', 'migration', 'positions', 'danger']);
+
 const NAV = [
   { id: 'profile',       label: 'Особистий профіль',icon: User,          group: 'Особисте' },
   // «Способи входу» is not a section of its own any more. It answers half of
@@ -153,17 +158,17 @@ const NAV = [
   // person does about themselves. They used to live inside «Видалення даних»,
   // which is `adminOnly` — so a plain member had no way to reach any of them.
   { id: 'account',       label: 'Безпека',          icon: ShieldCheck,   group: 'Особисте' },
-  { id: 'workspace',     label: 'Загальні',         icon: Building,      group: 'Організація', adminOnly: true },
+  { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
   { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
-  { id: 'billing',       label: 'Тарифний план',    icon: CreditCard,    group: 'Організація', adminOnly: true },
+  { id: 'billing',       label: 'Підписка qTicket', icon: CreditCard,    group: 'Організація', adminOnly: true },
   { id: 'integrations',  label: 'Інтеграції',       icon: PlugZap,       group: 'Організація', adminOnly: true },
   { id: 'migration',     label: 'Перенесення даних', icon: DatabaseBackup, group: 'Організація', adminOnly: true },
-  { id: 'statuses',      label: 'Статуси завдань',    icon: GitBranch,     group: 'Налаштування процесів', adminOnly: true },
-  { id: 'types',         label: 'Типи завдань',       icon: Shapes,        group: 'Налаштування процесів', adminOnly: true },
-  { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Налаштування процесів', adminOnly: true },
-  { id: 'labels',        label: 'Мітки',            icon: TagIcon,       group: 'Налаштування процесів', adminOnly: true },
+  { id: 'statuses',      label: 'Статуси інцидентів', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
+  { id: 'types',         label: 'Типи інцидентів',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
+  { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
+  { id: 'labels',        label: 'Мітки',            icon: TagIcon,       group: 'Процес підтримки', adminOnly: true },
   { id: 'positions',     label: 'Посади та ставки', icon: Briefcase,     group: 'Налаштування процесів', adminOnly: true },
-  { id: 'archives',      label: 'Архів',            icon: Archive,       group: 'Інше' },
+  { id: 'archives',      label: 'Архів і видалене', icon: Archive,       group: 'Інше' },
   { id: 'danger',        label: 'Видалення даних',  icon: Shield,        group: 'Інше', danger: false, adminOnly: true },
 ];
 
@@ -816,6 +821,9 @@ export default function SettingsPage() {
   const isOwner = myRole === 'owner';
   const clientViewer = isClientRole(myRole);
   const clientAdmin = myRole === 'client_admin';
+  const quickTeamManaged = Boolean(
+    org?.quickTeam?.sourceOrganizationId || org?.portalBranding?.source === 'quickteam',
+  );
   const currentUserId = currentUser?.uid || currentUser?.id;
   const clientProjectIds = useMemo(() => (
     clientViewer
@@ -877,7 +885,7 @@ export default function SettingsPage() {
   const [deletedIssues, setDeletedIssues] = useState({ items: [], loading: false });
   const { formatDate, timeFormat: savedTimeFormat } = useLocalization();
   const projectNameById = useCallback(id => (
-    (projects || []).find(project => project.id === id)?.name || 'Проєкт видалено'
+    (projects || []).find(project => project.id === id)?.name || 'Клієнтський простір видалено'
   ), [projects]);
 
   const loadDeletedIssues = useCallback(async () => {
@@ -905,18 +913,18 @@ export default function SettingsPage() {
   const handleUnarchiveIssue = async (issue) => {
     try {
       await setIssueArchived(issue.id, false);
-      showToast(`${issue.issueKey || 'Завдання'} повернуто з архіву`);
+      showToast(`${issue.issueKey || 'Інцидент'} повернуто з архіву`);
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося повернути завдання'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося повернути інцидент'), 'error');
     }
   };
 
   const handleUncancelIssue = async (issue) => {
     try {
       await setIssueCancelled(issue.id, false);
-      showToast(`${issue.issueKey || 'Завдання'} повернуто в роботу`);
+      showToast(`${issue.issueKey || 'Інцидент'} повернуто в роботу`);
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося повернути завдання'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося повернути інцидент'), 'error');
     }
   };
 
@@ -926,7 +934,7 @@ export default function SettingsPage() {
       showToast(`${item.issueKey} відновлено`);
       await loadDeletedIssues();
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося відновити завдання'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося відновити інцидент'), 'error');
     }
   };
   // Системний «назад» на телефоні повертає до списку розділів
@@ -940,9 +948,12 @@ export default function SettingsPage() {
       const MERGED_SECTIONS = { 'auth-methods': 'account' };
       const rawSection = currentSearchParams.get('section');
       const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
-      const sec = clientViewer && !CLIENT_SETTINGS_SECTIONS.has(requestedSection)
-        ? 'profile'
+      const qTicketSection = HIDDEN_QTICKET_SETTINGS_SECTIONS.has(requestedSection)
+        ? (clientViewer ? 'profile' : 'workspace')
         : requestedSection;
+      const sec = clientViewer && !CLIENT_SETTINGS_SECTIONS.has(qTicketSection)
+        ? 'profile'
+        : qTicketSection;
       const authSuccess = currentSearchParams.get('auth');
       const authError = currentSearchParams.get('authError');
       if (sec) {
@@ -2260,9 +2271,9 @@ export default function SettingsPage() {
   const unarchiveProject = async (id) => {
     try {
       await restoreProject(id);
-      showToast('Проєкт розархівовано');
+      showToast('Клієнта повернуто з архіву');
     } catch (err) {
-      showToast(userFacingErrorMessage(err, 'Не вдалося розархівувати проєкт'), 'error');
+      showToast(userFacingErrorMessage(err, 'Не вдалося повернути клієнта з архіву'), 'error');
       return false;
     }
     return true;
@@ -2316,7 +2327,7 @@ export default function SettingsPage() {
         + 'без нього не рахуються прогрес, швидкість і рахунок';
     }
     if (closing === next.length) {
-      return 'Потрібен щонайменше один відкритий статус — інакше нові завдання '
+      return 'Потрібен щонайменше один відкритий статус — інакше нові інциденти '
         + 'одразу вважатимуться закритими';
     }
     return null;
@@ -2389,7 +2400,7 @@ export default function SettingsPage() {
     if (!target) return;
     if (!(await confirmDialog({
       title: 'Видалити статус?',
-      message: `Усі завдання зі статусом «${targetStatus.label}» буде атомарно переміщено в «${target.label}». Продовжити?`,
+      message: `Усі інциденти зі статусом «${targetStatus.label}» буде атомарно переміщено в «${target.label}». Продовжити?`,
       confirmText: 'Видалити й перемістити',
       danger: true,
     }))) return;
@@ -2463,15 +2474,15 @@ export default function SettingsPage() {
       .filter(Boolean)
       .map(status => `«${status.label}»`);
     const scope = everything
-      ? 'Статуси, типи, пріоритети та мітки буде замінено стандартним набором QuickTeam.'
-      : 'Усі ваші статуси в цій секції буде замінено стандартним набором QuickTeam.';
+      ? 'Статуси, типи, пріоритети та мітки буде замінено стандартним набором qTicket.'
+      : 'Усі ваші статуси в цій секції буде замінено стандартним набором qTicket.';
 
     if (!(await confirmDialog({
       title: everything ? 'Скинути налаштування процесів?' : 'Скинути статуси?',
       message: movedLabels.length > 0
         // Naming them is the whole point: this is the only reset in settings
         // that moves tasks, and the person pressing it should know which.
-        ? `${scope} Стандартний набір не містить ${movedLabels.join(', ')} — завдання з цих статусів буде переміщено у стандартний статус тієї самої категорії. Цю дію не можна скасувати.`
+        ? `${scope} Стандартний набір не містить ${movedLabels.join(', ')} — інциденти з цих статусів буде переміщено у стандартний статус тієї самої категорії. Цю дію не можна скасувати.`
         : `${scope} Цю дію не можна скасувати.`,
       confirmText: movedLabels.length > 0 ? 'Скинути й перемістити' : 'Скинути',
       cancelText: 'Залишити',
@@ -2638,7 +2649,7 @@ export default function SettingsPage() {
   const workflowResetConfig = {
     statuses: {
       noun: 'статуси',
-      hint: 'Перетягуйте статуси між категоріями. Категорія визначає поведінку завдання на спільних дошках, у прогресі та звітах.',
+      hint: 'Перетягуйте статуси між категоріями. Категорія визначає поведінку інциденту в загальній черзі та показниках підтримки.',
       // Statuses are the one section whose reset moves real work, so it does
       // not go through the debounced autosave. The handler is called from the
       // button below rather than held on this object: a closure stored on a
@@ -2658,7 +2669,7 @@ export default function SettingsPage() {
     },
     labels: {
       noun: 'мітки',
-      hint: 'Мітки доступні в усіх проєктах організації.',
+      hint: 'Мітки доступні в усіх клієнтських просторах організації.',
       apply: () => setLabels(DEFAULT_LABELS),
     },
     positions: {
@@ -2674,7 +2685,7 @@ export default function SettingsPage() {
       <div className="mt-2 flex flex-col items-start gap-1 px-4 py-3">
         <p className="text-[12px] text-muted leading-relaxed">{cfg.hint}</p>
         <p className="text-[12px] text-muted leading-relaxed">
-          Повернути {cfg.noun} до стандартного набору QuickTeam. Ваші поточні зміни в цій секції буде замінено.
+          Повернути {cfg.noun} до стандартного набору qTicket. Ваші поточні зміни в цій секції буде замінено.
         </p>
         <Button
           style="ghost"
@@ -2689,7 +2700,7 @@ export default function SettingsPage() {
             const resetOrganizationId = activeOrgId;
             if (!(await confirmDialog({
               title: `Скинути ${cfg.noun}?`,
-              message: `Усі ваші ${cfg.noun} в цій секції буде замінено стандартним набором QuickTeam. Цю дію не можна скасувати.`,
+              message: `Усі ваші ${cfg.noun} в цій секції буде замінено стандартним набором qTicket. Цю дію не можна скасувати.`,
               confirmText: 'Скинути', cancelText: 'Залишити', danger: true,
             }))) return;
             if (
@@ -2710,7 +2721,7 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'profile': return (
-        <Section title="Особистий профіль" desc="Ваша інформація відображається у профілі команди, завданнях та чаті" rightAction={saveButton}>
+        <Section title="Особистий профіль" desc="Ваша інформація відображається у профілі команди, інцидентах та внутрішньому чаті" rightAction={saveButton}>
           <Card preset="borderless" padding="lg">
             <Row label="Аватар" desc="Квадратне зображення виглядає найкраще — інші обрізаються по центру">
               <ImageUpload
@@ -2725,7 +2736,7 @@ export default function SettingsPage() {
                 showHint={false}
               />
             </Row>
-            <Row label="Ім'я" desc="Показується в завданнях і чаті">
+            <Row label="Ім'я" desc="Показується в інцидентах і внутрішньому чаті">
               <InlineEditField value={displayName} onChange={setDisplayName} saved={currentUser?.name || ''} onSave={() => saveProfileField('name', displayName)} className="w-[260px]" />
             </Row>
             <Row label="Email" desc="Використовується для входу та запрошень">
@@ -2777,10 +2788,10 @@ export default function SettingsPage() {
         // in another, and which event reached which channel was written nowhere —
         // it was hardcoded in the senders, and they disagreed with each other.
         const eventRows = [
-          { key: 'assigned',      label: 'Завдання призначено мені', desc: 'Хтось призначив завдання на тебе або створив нове одразу з тобою' },
-          { key: 'commented',     label: 'Новий коментар',           desc: 'У завданнях, де ти виконавець або автор' },
+          { key: 'assigned',      label: 'Інцидент призначено мені', desc: 'Хтось призначив інцидент на тебе або створив новий одразу з тобою' },
+          { key: 'commented',     label: 'Нове повідомлення',        desc: 'В інцидентах, де ти виконавець або автор' },
           { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в коментарі' },
-          { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли твоє завдання рухається по дошці' },
+          { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли інцидент переходить на інший етап' },
           { key: 'deadline',      label: 'Дедлайни',                 desc: 'За 24 години до дедлайну; для прострочених — у день дедлайну, наступного дня і далі щотижня' },
           { key: 'chatMessage',   label: 'Повідомлення в чаті',      desc: 'Нові повідомлення в каналах і особистих чатах' },
         ].filter(row => NOTIFICATION_EVENTS.some(event => event.key === row.key));
@@ -3019,6 +3030,47 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'workspace': {
+        if (quickTeamManaged) {
+          const syncedLogo = org?.portalBranding?.logo || org?.logo || '';
+          const syncedTheme = {
+            dark: 'Темна',
+            light: 'Світла',
+            custom: 'Колір організації',
+          }[org?.portalBranding?.sidebarTheme] || 'Темна';
+          return (
+            <Section
+              title="Організація і бренд"
+              desc="Назва та оформлення клієнтського порталу синхронізуються з QuickTeam"
+            >
+              <Alert
+                variant="info"
+                title="Брендинг керується в QuickTeam"
+                description="Змініть назву, логотип або тему в QuickTeam, а потім синхронізуйте qTicket у налаштуваннях інтеграції. Тут ці дані доступні тільки для перегляду."
+                className="mb-4"
+              />
+              <Card preset="borderless" padding="lg">
+                <Row label="Назва організації" desc="Її бачить внутрішня команда та клієнти">
+                  <p className="text-[13px] font-semibold text-ink">{org?.name || 'Без назви'}</p>
+                </Row>
+                <Row label="Логотип клієнтського порталу" desc="Надходить із брендингу QuickTeam">
+                  {syncedLogo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={syncedLogo} alt="Логотип організації" className="h-[44px] w-[44px] rounded-[10px] border border-line object-cover" />
+                  ) : (
+                    <Pill tone="neutral" size="md">Не встановлено</Pill>
+                  )}
+                </Row>
+                <Row label="Тема порталу" desc="Застосовується у бічній панелі клієнта">
+                  <Pill tone="ink-subtle" size="md">{syncedTheme}</Pill>
+                </Row>
+                <Row label="Джерело даних" desc="qTicket не створює окрему копію налаштувань бренду">
+                  <Pill tone="success" size="md">Синхронізовано з QuickTeam</Pill>
+                </Row>
+              </Card>
+            </Section>
+          );
+        }
+
         // The plan decides whether this can be turned on. It deliberately does
         // not turn off branding a workspace already has: downgrading should
         // stop somebody changing how the product looks, not repaint it under
@@ -3569,6 +3621,32 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'billing': {
+        if (quickTeamManaged) {
+          const entitlementActive = org?.quickTeam?.entitlement === 'active';
+          return (
+            <Section
+              title="Підписка qTicket"
+              desc="Додаткова послуга до підписки QuickTeam"
+            >
+              <Alert
+                variant="info"
+                title="Підписка керується в QuickTeam"
+                description="Активація, тариф і склад внутрішньої команди змінюються у QuickTeam. qTicket отримує готове право доступу та не дозволяє перемикати тариф окремо."
+                className="mb-4"
+              />
+              <Card preset="borderless" padding="lg">
+                <Row label="Стан доповнення" desc="Доступ qTicket для цієї організації">
+                  <Pill tone={entitlementActive ? 'success' : 'warning'} size="md">
+                    {entitlementActive ? 'Активовано' : 'Неактивне'}
+                  </Pill>
+                </Row>
+                <Row label="Поточний рівень" desc="Ліміти, які qTicket застосовує до клієнтських просторів">
+                  <Pill tone="ink-subtle" size="md">{planName(orgPlan)}</Pill>
+                </Row>
+              </Card>
+            </Section>
+          );
+        }
 
         return (
           <Section
@@ -3614,9 +3692,11 @@ export default function SettingsPage() {
         // Deactivated people stay listed, below the active ones: their tasks,
         // comments and hours are still in the workspace under their name, and a
         // directory that hides them turns all of that into an unknown id.
-        const directoryMembers = [...members].sort((left, right) => (
-          Number(!isActiveMember(left)) - Number(!isActiveMember(right))
-        ));
+        const directoryMembers = members
+          .filter(member => clientViewer ? isClientRole(member.role) : !isClientRole(member.role))
+          .sort((left, right) => (
+            Number(!isActiveMember(left)) - Number(!isActiveMember(right))
+          ));
         return (
         <Section
           title={clientViewer ? 'Співробітники клієнта' : 'Команда підтримки'}
@@ -3644,7 +3724,8 @@ export default function SettingsPage() {
             <div className="flex flex-col divide-y divide-line rounded-[16px]">
               {directoryMembers.map((member, i) => {
                 const isMe = member.id === (currentUser?.uid || currentUser?.id);
-                const positionLabel = positions.find(position => position.id === member.positionId)?.label || 'Без посади';
+                const positionLabel = positions.find(position => position.id === member.positionId)?.label
+                  || organizationRoleLabel(member.role);
                 const deactivated = !isActiveMember(member);
                 return (
                   <div key={member.id} className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-canvas transition-colors ${i === 0 ? 'rounded-t-[16px]' : ''} ${i === directoryMembers.length - 1 ? 'rounded-b-[16px]' : ''} ${deactivated ? 'opacity-60' : ''}`}>
@@ -3689,7 +3770,7 @@ export default function SettingsPage() {
           && !(!isClosingCategory(status.category) && openStatuses.length === 1)
         );
         return (
-        <Section title="Статуси завдань" desc="Налаштуйте етапи, через які проходять завдання.">
+        <Section title="Статуси інцидентів" desc="Налаштуйте етапи, через які проходять звернення клієнтів.">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -3787,7 +3868,7 @@ export default function SettingsPage() {
           },
         ]);
         return (
-        <Section title="Типи завдань" desc="Налаштуйте доступні типи завдань.">
+        <Section title="Типи інцидентів" desc="Налаштуйте, як команда класифікує звернення клієнтів.">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -3832,7 +3913,7 @@ export default function SettingsPage() {
           listLabel: () => 'Пріоритети',
         });
         return (
-        <Section title="Пріоритети завдань" desc="Налаштуйте рівні важливості завдань.">
+        <Section title="Пріоритети інцидентів" desc="Налаштуйте рівні терміновості клієнтських звернень.">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -3902,7 +3983,7 @@ export default function SettingsPage() {
       }
 
       case 'labels': return (
-        <Section title="Мітки завдань" desc="Глобальні мітки для маркування завдань">
+        <Section title="Мітки інцидентів" desc="Спільні мітки для класифікації звернень">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -4229,15 +4310,15 @@ export default function SettingsPage() {
         // a wall of text. The stepper shape also gives «Нещодавно видалене» the
         // width it needs instead of squeezing it into a section header.
         const archiveTabs = [
-          { id: 'projects', label: 'Проєкти', count: archivedProjects.length },
-          { id: 'issues', label: 'Завдання', count: archivedIssueList.length },
+          { id: 'projects', label: 'Клієнти', count: archivedProjects.length },
+          { id: 'issues', label: 'Інциденти', count: archivedIssueList.length },
           { id: 'cancelled', label: 'Скасовані', count: cancelledIssueList.length },
           { id: 'deleted', label: 'Нещодавно видалене', count: deletedIssues.items.length },
         ];
         return (
           <Section
-            title="Архів"
-            desc="Те, що прибрано з роботи, але не втрачено. Архівоване лишається у звітах і рахунках, скасоване не рахується ніде, і те й те лежить тут без строку — а видалене чекає, доки не спливе доба"
+            title="Архів і видалене"
+            desc="Архівовані інциденти зникають з активної черги, але зберігають історію та показники. Скасовані не рахуються як робота. Обидва типи зберігаються без строку, а нещодавно видалені можна відновити протягом доби"
           >
             <div className="w-full overflow-x-auto">
               <Tabs
@@ -4251,8 +4332,8 @@ export default function SettingsPage() {
               {archiveTab === 'projects' && (
                 archivedProjects.length === 0 ? (
                   <ArchiveEmpty
-                    title="Немає архівованих проєктів"
-                    hint="Тут відображатимуться всі архівовані проєкти організації"
+                    title="Немає архівованих клієнтів"
+                    hint="Тут відображатимуться всі архівовані клієнтські простори"
                   />
                 ) : (
                   <div className="flex flex-col divide-y divide-canvas -my-3">
@@ -4284,8 +4365,8 @@ export default function SettingsPage() {
                   <div className="flex justify-center py-12"><LoadingSpinner size="md" /></div>
                 ) : archivedIssueList.length === 0 ? (
                   <ArchiveEmpty
-                    title="Немає архівованих завдань"
-                    hint="Архівують завершене: завдання йде з дошки й зі списків, але лишається у звітах, у таймшиті та в рахунках — записаний час і далі рахується як зроблена робота"
+                    title="Немає архівованих інцидентів"
+                    hint="Архівуйте завершені інциденти: вони зникнуть з активної черги, але вся історія та розмова збережуться"
                   />
                 ) : (
                   <ArchiveIssueRows
@@ -4307,8 +4388,8 @@ export default function SettingsPage() {
                   <div className="flex justify-center py-12"><LoadingSpinner size="md" /></div>
                 ) : cancelledIssueList.length === 0 ? (
                   <ArchiveEmpty
-                    title="Немає скасованих завдань"
-                    hint="Скасовують те, чого не буде: завдання перестає рахуватися будь-де — у прогресі, у звітах, у навантаженні та в рахунках — але лишається тут, і його можна повернути"
+                    title="Немає скасованих інцидентів"
+                    hint="Скасовані інциденти не входять до активної черги, але лишаються тут і можуть бути повернуті"
                   />
                 ) : (
                   <ArchiveIssueRows
@@ -4331,7 +4412,7 @@ export default function SettingsPage() {
                 ) : deletedIssues.items.length === 0 ? (
                   <ArchiveEmpty
                     title="Нічого не видаляли"
-                    hint="Видалене завдання лежить тут добу, і його можна повернути. Щоб прибрати завдання назовсім без строку — архівуйте його"
+                    hint="Видалений інцидент зберігається тут одну добу, протягом якої його можна відновити"
                   />
                 ) : (
                   <div className="flex flex-col divide-y divide-canvas -my-3">
@@ -4384,6 +4465,7 @@ export default function SettingsPage() {
   // where somebody decides which of eleven entries to open, so the crown has to
   // be there rather than only inside the section.
   const allowedNav = NAV
+    .filter(item => !HIDDEN_QTICKET_SETTINGS_SECTIONS.has(item.id))
     .filter(item => clientViewer ? CLIENT_SETTINGS_SECTIONS.has(item.id) : (!item.adminOnly || isAdmin))
     .map(item => {
     if (item.id === 'billing') {

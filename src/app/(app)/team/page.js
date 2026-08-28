@@ -4,7 +4,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
-import { activeMembers } from '@/lib/utils/orgMembership.mjs';
+import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
+import { isClientRole } from '@/lib/utils/can';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useMobilePaneBack } from '@/lib/hooks/useMobilePaneBack';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
@@ -52,7 +53,9 @@ export default function TeamPage() {
   // Системний «назад» на телефоні повертає до списку команди
   const requestPaneClose = useMobilePaneBack(mobilePane === 'detail', () => setMobilePane('list'));
 
-  const membersWithPresence = useMemo(() => activeMembers(members).map(member => {
+  const membersWithPresence = useMemo(() => activeMembers(members)
+    .filter(member => !isClientRole(member.role))
+    .map(member => {
     const memberId = member.id || member.uid;
     const currentUserId = currentUser?.id || currentUser?.uid;
     const lastActive = memberId === currentUserId
@@ -66,7 +69,7 @@ export default function TeamPage() {
       presenceLabel: formatLastSeenUk(lastActive, { now, online }),
       positionName: positions.find(position => position.id === member.positionId)?.label
         || member.title
-        || 'Посада не вказана',
+        || organizationRoleLabel(member.role),
     };
   }), [currentUser, members, now, positions, presenceByUserId]);
 
@@ -78,19 +81,19 @@ export default function TeamPage() {
 
   useEffect(() => {
     if (loading || !requestedMemberId) return;
-    if (!members.some(member => (member.id || member.uid) === requestedMemberId)) return;
+    if (!membersWithPresence.some(member => (member.id || member.uid) === requestedMemberId)) return;
     queueMicrotask(() => {
       setSelectedUid(requestedMemberId);
       setMobilePane('detail');
     });
-  }, [loading, members, requestedMemberId]);
+  }, [loading, membersWithPresence, requestedMemberId]);
 
   // Auto-select first member on initial load
   useEffect(() => {
-    if (!loading && members.length > 0 && !selectedUid) {
+    if (!loading && membersWithPresence.length > 0 && !selectedUid) {
       queueMicrotask(() => setSelectedUid(filteredMembers[0]?.id || filteredMembers[0]?.uid));
     }
-  }, [loading, members, selectedUid, filteredMembers]);
+  }, [loading, membersWithPresence.length, selectedUid, filteredMembers]);
 
   const selectedMember = membersWithPresence.find(m => (m.id || m.uid) === selectedUid);
 

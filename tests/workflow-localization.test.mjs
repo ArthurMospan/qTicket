@@ -20,13 +20,13 @@ test('built-in workflow labels localize by stable id without changing ids', () =
       { id: 'done', label: 'Done', isDone: true },
     ]),
     [
-      { id: 'backlog', label: 'Беклог' },
-      { id: 'todo', label: 'До виконання' },
+      { id: 'backlog', label: 'Новий' },
+      { id: 'todo', label: 'Прийнято' },
       { id: 'in-progress', label: 'У роботі' },
-      { id: 'done', label: 'Готово', isDone: true },
+      { id: 'done', label: 'Вирішено', isDone: true },
     ],
   );
-  assert.equal(STATUS_LABELS.backlog, 'Беклог');
+  assert.equal(STATUS_LABELS.backlog, 'Новий');
   assert.deepEqual(DEFAULT_TYPE_IDS, ['task', 'feature', 'bug']);
 });
 

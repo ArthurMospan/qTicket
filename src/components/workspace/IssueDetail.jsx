@@ -96,6 +96,12 @@ import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 
 const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || '';
 
+// qTicket keeps the inherited task records and migration readers, but its
+// incident screen is a support workspace, not a second project-management
+// screen. These readers stay dormant until their old data paths are removed in
+// a reviewed migration.
+const SHOW_INHERITED_TASK_PLANNING = false;
+
 // The same wording Settings uses when you walk away from an unsaved field.
 const UNSAVED_EDIT_PROMPT = {
   title: 'Незбережені зміни',
@@ -340,12 +346,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const isArchived = project?.status === 'archived' || isIssueArchived || isIssueCancelled;
 
   const { stages }   = useStagesForProject(projectId);
-  const { sprints = [] } = useSprints({ enabled: internalViewer });
+  const { sprints = [] } = useSprints({ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer });
 
   // Чат завдання отримує другий таб «QuickTeam+», коли проєкт звʼязано з
   // проєктом порталу — портальний чат просто як додатковий (IssueQtPlusChat
   // монтується лише при відкритті таба, щоб не смикати сесію QT+ даремно).
-  const qtplusLink = clientViewer ? null : project?.qtplusLink || null;
+  const qtplusLink = null;
   const [chatView, setChatView] = useState('chat');
   const requestedTaskPane = searchParams.get('view') === 'chat' ? 'chat' : 'task';
   const [taskPaneSelection, setTaskPaneSelection] = useState(null);
@@ -387,7 +393,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   };
 
   const { logs: timeLogs, totalMinutes: loggedMinutes, addTimeLog, updateTimeLog, deleteTimeLog } = useTimeLogs(
-    internalViewer ? issueId : null,
+    SHOW_INHERITED_TASK_PLANNING && internalViewer ? issueId : null,
     projectId,
   );
   const {
@@ -395,7 +401,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     refresh: refreshLinks,
     addLink,
     removeLink,
-  } = useIssueLinks(internalViewer ? issueId : null);
+  } = useIssueLinks(SHOW_INHERITED_TASK_PLANNING && internalViewer ? issueId : null);
 
   const {
     types: rawTypes, priorities: rawPriorities, statuses: STATUSES, labels: availableLabels = [], closedStatusIds
@@ -489,19 +495,20 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     if (uids.length === 0) return;
     try {
       await updateDoc(doc(db, 'projects', projectId), { team: arrayUnion(...uids) });
-      showToast('Додано до складу проєкту');
+      showToast('Додано до команди підтримки клієнта');
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося додати до складу проєкту'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося додати до команди підтримки клієнта'), 'error');
     }
   };
   // Deactivated colleagues stay in `members` so their name and face still
   // render on everything they did; they are simply not people you can hand new
   // work to, here or in any other picker.
+  const supportDirectory = activeMembers(members).filter(member => !isClientRole(member.role));
   const assignableMembers = assignableIds.size === 0
     // A project with no team recorded at all is legacy data, not a project
     // nobody may be assigned to.
-    ? activeMembers(members)
-    : activeMembers(members).filter(member => assignableIds.has(member.id || member.uid));
+    ? supportDirectory
+    : supportDirectory.filter(member => assignableIds.has(member.id || member.uid));
 
   // Leaving a task consumes it, not opening it.
   //
@@ -690,7 +697,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     if (isModal) return;
     useWorkspaceStore.setState({
       breadcrumbs: [
-        { label: 'Проєкти', href: '/' },
+        { label: 'Клієнти', href: '/clients' },
         { label: project?.name || '...', href: `/${projectId}` },
         { label: issue?.issueKey || '...', href: null, onClick: () => copyIssueUrl(canonicalIssuePath, showToast), title: 'Копіювати посилання на інцидент' },
       ]
@@ -782,7 +789,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             </p>
             <p className={`text-[13px] text-muted ${issueAccessFailure ? '' : 'mb-4'}`}>
               {issueAccessFailure
-                ? 'Інцидент видалено або у вас більше немає доступу до його проєкту.'
+                ? 'Інцидент видалено або у вас більше немає доступу до клієнтського простору.'
                 : 'Дані не видалені. Сервіс бази тимчасово недоступний.'}
             </p>
             {!issueAccessFailure && (
@@ -897,10 +904,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // reading there is always the description or its placeholder; while writing
   // the padded half of the panel is drawn only when something is actually in it,
   // so an empty task edits as the editor alone with no grey strip under it.
-  const hasSecondaryBlocks = issueLabels.length > 0
-    || childIssues.length > 0 || showSubInput
-    || checklistAll > 0
-    || currentIssueLinks.length > 0 || showLinkInput;
+  const hasSecondaryBlocks = issueLabels.length > 0 || (
+    SHOW_INHERITED_TASK_PLANNING && (
+      childIssues.length > 0 || showSubInput
+      || checklistAll > 0
+      || currentIssueLinks.length > 0 || showLinkInput
+    )
+  );
   const hasPanelBody = !isEditing || visibleAttachments.length > 0 || hasSecondaryBlocks;
 
   const spentMin  = loggedMinutes;
@@ -996,29 +1006,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     const added = next.filter(uid => !cur.includes(uid));
     if (added.length === 0 && next.length === cur.length) return;
     await update({ assigneeIds: next });
-
-    // Under team-gated project visibility, an assignee who isn't on the
-    // project team could not open the task they were just given. Add them to
-    // the team so the assignment is actually usable.
-    //
-    // And say which of the two happened. Only owners and admins may write
-    // `team` (Firestore rules), so a member's grant is refused — and it used to
-    // be refused into a `catch {}`, which left the assignment standing beside a
-    // person who still could not open it and nobody told either of them. Both
-    // outcomes are now something the assigner reads.
-    const missingFromTeam = added.filter(uid => !teamUids.includes(uid));
-    if (missingFromTeam.length > 0) {
-      const named = missingFromTeam
-        .map(uid => members.find(m => (m.id || m.uid) === uid))
-        .map((member, index) => member?.name || member?.email || missingFromTeam[index])
-        .join(', ');
-      try {
-        await updateDoc(doc(db, 'projects', projectId), { team: arrayUnion(...missingFromTeam) });
-        showToast(`${named} — додано до команди проєкту`);
-      } catch {
-        showToast(`${named} не входить до команди проєкту — попросіть власника або адміністратора додати`, 'warning');
-      }
-    }
 
     const myId = currentUser?.id || currentUser?.uid;
     const notifyIds = added.filter(uid => uid !== myId);
@@ -1280,7 +1267,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const handleArchive = async (archived) => {
     if (archived && !(await confirmDialog({
       title: `Архівувати ${issue.issueKey}?`,
-      message: 'Інцидент зникне з дошки, списків і підрахунку відкритої роботи, але лишиться в «Архіві» — без строку і без втрати даних. Записаний час нікуди не дінеться: він і далі буде в таймшиті та в рахунках. Повернути можна будь-коли.',
+      message: 'Інцидент зникне з активної черги, але вся історія звернення, чат і файли залишаться в «Архіві». Повернути його можна будь-коли.',
       confirmText: 'Архівувати',
     }))) return;
     try {
@@ -1294,7 +1281,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const handleCancel = async (cancelled) => {
     if (cancelled && !(await confirmDialog({
       title: `Скасувати ${issue.issueKey}?`,
-      message: 'Скасування означає, що цієї роботи не буде. Інцидент зникне не лише з дошки й списків, а й з усього обліку: з прогресу проєкту, зі звітів, з навантаження, з рахунків і з дедлайнів — так, ніби його не планували. Дані лишаються, він чекає в «Архіві» → «Скасовані», і повернути можна будь-коли. Якщо робота відбулася і просто завершена — архівуйте, тоді вона лишиться у звітах.',
+      message: 'Скасований інцидент зникає з активної черги й не рахується як вирішений. Історія звернення зберігається у «Архіві» → «Скасовані», а повернути його можна будь-коли.',
       confirmText: 'Так, скасувати',
       // The dismiss button is «Скасувати» everywhere else, and here that is the
       // name of the action itself — two buttons side by side, one meaning "do
@@ -1389,8 +1376,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             dropdownClassName="w-[210px]"
             items={[
               { label: 'Копіювати посилання', icon: Copy, onClick: copyIssueLink },
-              ...(!isArchived && canEditIssue ? [{ label: 'Дублювати', icon: CopyPlus, onClick: handleDuplicate }] : []),
-              ...(canEditIssue ? [{ label: 'Скопіювати AI-промпт', icon: Sparkles, onClick: copyAiPrompt }] : []),
+              ...(SHOW_INHERITED_TASK_PLANNING && !isArchived && canEditIssue
+                ? [{ label: 'Дублювати', icon: CopyPlus, onClick: handleDuplicate }]
+                : []),
+              ...(SHOW_INHERITED_TASK_PLANNING && canEditIssue
+                ? [{ label: 'Скопіювати AI-промпт', icon: Sparkles, onClick: copyAiPrompt }]
+                : []),
               // Only offered when there is somebody else's activity to un-see.
               // Marking a task you were the last to touch as unread would light
               // no dot: your own change is never new to you, on a card or here.
@@ -1479,7 +1470,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         header={(
              <div className="flex w-full flex-col gap-[10px] pb-[12px] pt-[12px] sm:flex-row sm:items-start sm:justify-between sm:gap-[16px]">
                <div className="flex flex-col gap-[4px] flex-1 min-w-0">
-            {!clientViewer && parentIssueId && (
+            {SHOW_INHERITED_TASK_PLANNING && !clientViewer && parentIssueId && (
               <div className="mb-1 flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted">
                 {/* The same arrow the board card and the list row draw for this
                     relation. This line used to be `Layers`, so the one fact
@@ -1537,7 +1528,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
               <div className="mt-3">
                 <Alert variant="info" title="Інцидент в архіві">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span>Воно прибране з дошки, списків і підрахунку відкритої роботи. У звітах, таймшиті та рахунках лишається — записаний час нікуди не дівся. Строку немає.</span>
+                    <span>Інцидент прибрано з активної черги. Історія звернення, чат і файли збережені без обмеження строку.</span>
                     {canWhileRoleLoads(orgRole, 'edit:issue') && (
                       <Button
                         style="primary"
@@ -1561,7 +1552,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
               <div className="mt-3">
                 <Alert variant="warning" title="Інцидент скасовано">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span>Цієї роботи не буде. Інцидент не рахується ніде: ні в прогресі, ні у звітах, ні в навантаженні, ні в рахунках. Дані збережені — строку немає.</span>
+                    <span>Інцидент не рахується як вирішений і не показується в активній черзі. Історія звернення збережена без обмеження строку.</span>
                     {canWhileRoleLoads(orgRole, 'edit:issue') && (
                       <Button
                         style="primary"
@@ -1592,12 +1583,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 <Alert
                   variant="warning"
                   title={assigneesOffProjectRoster.length === 1
-                    ? 'Цього учасника немає в проєкті'
-                    : 'Цих учасників немає в проєкті'}
+                    ? 'Цього працівника немає в команді підтримки клієнта'
+                    : 'Цих працівників немає в команді підтримки клієнта'}
                 >
                   <div className="flex flex-wrap items-center gap-3">
                     <span>
-                      {assigneesOffProjectRoster.map(member => member.name || member.email).join(', ')} — не у складі проєкту
+                      {assigneesOffProjectRoster.map(member => member.name || member.email).join(', ')} — не в команді підтримки клієнта
                       {project?.name ? ` «${project.name}»` : ''}.
                     </span>
                     {can(orgRole, 'manage:team') && (
@@ -1607,7 +1598,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         icon={Users}
                         onClick={handleGrantProjectAccess}
                       >
-                        Додати до проєкту
+                        Додати до підтримки клієнта
                       </Button>
                     )}
                   </div>
@@ -1751,7 +1742,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                   {/* Assignees — the task model has always been multi-assignee;
                       the single Select silently hid everyone past the first. */}
                   <div className={attributeItemClass} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-                    <span className={attributeLabelClass}>Виконавці</span>
+                    <span className={attributeLabelClass}>Відповідальні</span>
                     <MultiSelect
                       compact
                       showSelectedAvatars
@@ -1761,14 +1752,14 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       onChange={setAssignees}
                       options={assignableMembers.map(m => ({ value: m.id || m.uid, label: m.name, user: m }))}
                       placeholder="Не призначено"
-                      searchPlaceholder="Знайти учасника..."
+                      searchPlaceholder="Знайти працівника підтримки..."
                       buttonClassName={compactSelectClass}
                       dropdownClassName="w-[260px]"
                     />
                   </div>
 
                   {/* Sprint */}
-                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                  {SHOW_INHERITED_TASK_PLANNING && <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
                     <span className={attributeLabelClass}>Спринт</span>
                       <Select
                         compact
@@ -1781,11 +1772,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       ]}
                       buttonClassName={compactSelectClass}
                     />
-                  </div>
+                  </div>}
 
                   {/* Due date */}
                   <div className={`max-sm:hidden ${attributeItemClass}`}>
-                    <span className={attributeLabelClass}>Дедлайн</span>
+                    <span className={attributeLabelClass}>Термін вирішення</span>
                     <DatePicker
                       compact
                       disabled={isArchived}
@@ -1800,12 +1791,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             : null,
                         });
                       }}
-                      placeholder="Без дедлайну"
+                      placeholder="Без терміну"
                     />
                   </div>
 
                   {/* Time tracking */}
-                  <div
+                  {SHOW_INHERITED_TASK_PLANNING && <div
                     className={`${attributeItemClass} max-sm:px-1.5`}
                     onClick={event => {
                       if (isArchived || event.target.closest('button')) return;
@@ -1837,7 +1828,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       }}
                       estimateLabel={estimMin > 0 ? fmtMin(estimMin) : null}
                     />
-                  </div>
+                  </div>}
 
                   {/* Less frequently changed fields */}
                   <Popover
@@ -1869,7 +1860,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     )}
                   >
                       <div className="flex w-[248px] max-w-full flex-col gap-4">
-                        <div className="flex flex-col gap-1.5 sm:hidden">
+                        {SHOW_INHERITED_TASK_PLANNING && <div className="flex flex-col gap-1.5 sm:hidden">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Спринт</span>
                           <Select
                             disabled={isArchived}
@@ -1877,9 +1868,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             onChange={val => update({ sprintId: val || null })}
                             options={[{ value: '', label: 'Без спринта' }, ...sprints.map(item => ({ value: item.id, label: item.name }))]}
                           />
-                        </div>
+                        </div>}
                         <div className="flex flex-col gap-1.5 sm:hidden">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Дедлайн</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
                           <DatePicker
                             compact
                             disabled={isArchived}
@@ -1893,7 +1884,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                                   : null,
                               });
                             }}
-                            placeholder="Без дедлайну"
+                            placeholder="Без терміну"
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
@@ -1920,7 +1911,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
                           />
                         </div>
-                        <div className="flex flex-col gap-1.5">
+                        {SHOW_INHERITED_TASK_PLANNING && <div className="flex flex-col gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Основний інцидент</span>
                           <Select
                             disabled={isArchived || childIssues.length > 0 || parentSaving}
@@ -1940,7 +1931,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                               Спершу відв’яжіть дочірні інциденти, щоб змінити рівень.
                             </span>
                           )}
-                        </div>
+                        </div>}
                       </div>
                   </Popover>
                 </>
@@ -2002,7 +1993,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       >
 
             {/* LOG TIME FORM MODAL */}
-            {!clientViewer && logForm && (
+            {SHOW_INHERITED_TASK_PLANNING && !clientViewer && logForm && (
               <Dialog
                 isOpen
                 onClose={closeLogForm}
@@ -2186,7 +2177,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 )}
 
               {/* REAL CHILD ISSUES */}
-              {!clientViewer && (childIssues.length > 0 || showSubInput) && (
+              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (childIssues.length > 0 || showSubInput) && (
                 <DetailSection
                   density="group"
                   icon={TaskIcon}
@@ -2267,7 +2258,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
               )}
 
               {/* LEGACY CHECKLIST — new lightweight steps live in description Markdown */}
-              {!clientViewer && checklistAll > 0 && (
+              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && checklistAll > 0 && (
               <DetailSection
                 density="group"
                 icon={CheckSquare}
@@ -2313,7 +2304,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
               </DetailSection>
               )}
               {/* ISSUE LINKS */}
-              {!clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
+              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
               <DetailSection density="group" icon={Link2} title="Зв’язки" count={currentIssueLinks.length} className="pt-2">
               <div className="flex flex-col gap-[6px]">
                 {currentIssueLinks.map(({ link, perspective }) => {
@@ -2442,7 +2433,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         };
                       })}
                     />
-                    {!parentIssueId && <Button
+                    {SHOW_INHERITED_TASK_PLANNING && !parentIssueId && <Button
                       aria-label="Додати дочірній інцидент"
                       style="secondary"
                       size="sm"
@@ -2452,7 +2443,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     >
                       <span className="sm:hidden">Дочірній</span><span className="hidden sm:inline">Додати дочірній інцидент</span>
                     </Button>}
-                    <Button
+                    {SHOW_INHERITED_TASK_PLANNING && <Button
                       aria-label="Додати зв’язок"
                       style="secondary"
                       size="sm"
@@ -2464,7 +2455,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       }}
                     >
                       <span className="sm:hidden">Зв’язок</span><span className="hidden sm:inline">Додати зв’язок</span>
-                    </Button>
+                    </Button>}
                   </div>
                 )}
             </DetailSection>

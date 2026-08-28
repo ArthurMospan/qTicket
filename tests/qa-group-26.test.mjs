@@ -82,7 +82,7 @@ test('group 26 copy and layout contracts stay role-aware and concise', async () 
     read('../src/app/ui-kit/sections/filters.jsx'),
   ]);
 
-  assert.match(projects, /Попросіть адміністратора створити перший проєкт/);
+  assert.match(projects, /Попросіть адміністратора створити перший клієнтський простір/);
   assert.match(projects, /<FilterBar context="projects">/);
   assert.match(sprints, /Попросіть адміністратора створити спринт/);
   // The empty sprint names both ways in, because on a phone only one of them

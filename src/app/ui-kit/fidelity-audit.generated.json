@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 242,
-    "parsedFiles": 242,
+    "productFiles": 240,
+    "parsedFiles": 240,
     "parseErrors": 0,
     "nativeControls": 21,
     "structures": {
@@ -174,7 +174,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:455",
+      "location": "src/components/profile/ProfileView.jsx:395",
       "className": "ui-native-control",
       "text": "",
       "childElements": [
@@ -191,7 +191,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:60",
+      "location": "src/components/profile/ProfileView.jsx:47",
       "className": "cursor-pointer truncate rounded-[4px] text-left text-[13px] font-medium leading-none text-ink outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ink",
       "text": "",
       "childElements": [],
@@ -476,12 +476,12 @@
       "context": "navigation-sheet-row"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:455",
+      "location": "src/components/profile/ProfileView.jsx:395",
       "tag": "button",
       "context": "profile-project-chip"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:60",
+      "location": "src/components/profile/ProfileView.jsx:47",
       "tag": "button",
       "context": "profile-contact-value"
     },
@@ -522,32 +522,32 @@
       "className": "w-full max-w-[420px] bg-white border border-line rounded-[16px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center"
     },
     {
-      "location": "src/app/(app)/page.js:183",
+      "location": "src/app/(app)/page.js:176",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/page.js:195",
+      "location": "src/app/(app)/page.js:188",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/settings/page.js:543",
+      "location": "src/app/(app)/settings/page.js:548",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     },
     {
-      "location": "src/app/(app)/settings/page.js:563",
+      "location": "src/app/(app)/settings/page.js:568",
       "tag": "div",
       "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
     },
     {
-      "location": "src/app/(app)/settings/page.js:607",
+      "location": "src/app/(app)/settings/page.js:612",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
     {
-      "location": "src/app/(app)/settings/page.js:726",
+      "location": "src/app/(app)/settings/page.js:731",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group"
     },

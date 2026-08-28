@@ -339,10 +339,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
     e.preventDefault();
     const nextErrors = {};
     if (!form.title.trim()) nextErrors.title = incidentComposer ? 'Вкажіть тему інциденту' : 'Вкажіть назву завдання';
-    const estimateError = clientMode ? '' : issueEstimateHoursError(form.estimateHours);
+    const estimateError = clientMode || incidentComposer ? '' : issueEstimateHoursError(form.estimateHours);
     if (estimateError) nextErrors.estimateHours = estimateError;
     if (projects && projects.length > 0 && !form.projectId) {
-      nextErrors.projectId = 'Оберіть проєкт';
+      nextErrors.projectId = incidentComposer ? 'Оберіть клієнта' : 'Оберіть проєкт';
     }
     if (Object.keys(nextErrors).length) {
       setFieldErrors(nextErrors);
@@ -354,8 +354,12 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
     if (!clientMode && assigneesLockedOut.length > 0 && !addToProjectTeam) {
       setFieldErrors({});
       setError(mayGrantProjectAccess
-        ? 'Позначте «Додати до складу проєкту» або приберіть виконавця, який не має доступу.'
-        : 'Приберіть виконавця, який не входить до складу проєкту.');
+        ? incidentComposer
+          ? 'Позначте «Додати до команди підтримки клієнта» або приберіть відповідального, який не має доступу.'
+          : 'Позначте «Додати до складу проєкту» або приберіть виконавця, який не має доступу.'
+        : incidentComposer
+          ? 'Приберіть відповідального, який не входить до команди підтримки клієнта.'
+          : 'Приберіть виконавця, який не входить до складу проєкту.');
       return;
     }
     setFieldErrors({});
@@ -442,7 +446,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
         </>
       ) : undefined}
     >
-        {!clientMode && (
+        {!clientMode && !incidentComposer && (
         <div className="border-b border-line px-5 py-3 sm:px-7">
           <Tabs
             tabs={[
@@ -485,7 +489,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
           )}
 
           {/* Title */}
-          <FormGroup label="Назва" required error={fieldErrors.title} className="lg:col-span-2">
+          <FormGroup label={incidentComposer ? 'Тема інциденту' : 'Назва'} required error={fieldErrors.title} className="lg:col-span-2">
             <Input
               ref={titleInputRef}
               autoFocus
@@ -498,12 +502,12 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
 
           {/* Project Selector (if projects passed) */}
           {projects && projects.length > 0 && (
-            <FormGroup label="Проєкт" required error={fieldErrors.projectId}>
+            <FormGroup label={incidentComposer ? 'Клієнт' : 'Проєкт'} required error={fieldErrors.projectId}>
               <Select
                 value={form.projectId}
                 onChange={val => set('projectId', val)}
                 options={projects.map(p => ({ value: p.id, label: p.name }))}
-                placeholder="Оберіть проєкт..."
+                placeholder={incidentComposer ? 'Оберіть клієнта...' : 'Оберіть проєкт...'}
               />
             </FormGroup>
           )}
@@ -524,12 +528,17 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
               <Alert
                 variant="warning"
                 title={assigneesJoiningProject.length === 1
-                  ? 'Цього учасника немає в проєкті'
-                  : 'Цих учасників немає в проєкті'}
+                  ? incidentComposer
+                    ? 'Цього працівника немає в команді підтримки клієнта'
+                    : 'Цього учасника немає в проєкті'
+                  : incidentComposer
+                    ? 'Цих працівників немає в команді підтримки клієнта'
+                    : 'Цих учасників немає в проєкті'}
               >
                 <div className="flex flex-col gap-2">
                   <span>
-                    {assigneesJoiningProject.map(m => m.name || m.email).join(', ')} — не у складі проєкту
+                    {assigneesJoiningProject.map(m => m.name || m.email).join(', ')} — не у
+                    {incidentComposer ? ' команді підтримки клієнта' : ' складі проєкту'}
                     {selectedProject?.name ? ` «${selectedProject.name}»` : ''}.
                   </span>
                   {mayGrantProjectAccess ? (
@@ -537,10 +546,14 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                       size="sm"
                       checked={addToProjectTeam}
                       onChange={setAddToProjectTeam}
-                      label={`Додати до проєкту${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`}
+                      label={`${incidentComposer ? 'Додати до команди підтримки клієнта' : 'Додати до проєкту'}${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`}
                     />
                   ) : (
-                    <span>Призначити не вдасться — попросіть власника або адміністратора додати до проєкту.</span>
+                    <span>
+                      {incidentComposer
+                        ? 'Призначити не вдасться — попросіть власника або адміністратора додати працівника до підтримки цього клієнта.'
+                        : 'Призначити не вдасться — попросіть власника або адміністратора додати до проєкту.'}
+                    </span>
                   )}
                 </div>
               </Alert>
@@ -593,7 +606,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                 }))}
               />
             </div>
-            {availableSprints.length > 0 && (
+            {!incidentComposer && availableSprints.length > 0 && (
               <div className="flex flex-col gap-[6px]">
                 <Label>Спринт</Label>
                 <Select
@@ -608,14 +621,14 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
               </div>
             )}
             <div className="flex flex-col gap-[6px]">
-              <Label>Дедлайн</Label>
+                <Label>{incidentComposer ? 'Термін вирішення' : 'Дедлайн'}</Label>
               <DatePicker
                 value={form.dueDate}
                 onChange={value => set('dueDate', value)}
-                placeholder="Без дедлайну"
+                placeholder={incidentComposer ? 'Без терміну' : 'Без дедлайну'}
               />
             </div>
-            <FormGroup label="Оцінка (год)" error={fieldErrors.estimateHours}>
+            {!incidentComposer && <FormGroup label="Оцінка (год)" error={fieldErrors.estimateHours}>
               <Input
                 type="number"
                 min="0"
@@ -631,7 +644,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                 placeholder="0"
                 error={Boolean(fieldErrors.estimateHours)}
               />
-            </FormGroup>
+            </FormGroup>}
           </div>
           )}
 
@@ -639,7 +652,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
           {!clientMode && assignableMembers.length > 0 && (
             <div className="flex flex-col gap-[6px] lg:col-span-2">
               <div className="flex items-center justify-between gap-3">
-                <Label>Виконавці</Label>
+                <Label>{incidentComposer ? 'Відповідальні' : 'Виконавці'}</Label>
                 <span className="text-[10px] font-medium text-muted">Можна вибрати кількох</span>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -660,7 +673,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                       selected={selected}
                       disabled={lockedOut && !mayGrantProjectAccess}
                       title={joining
-                        ? `Не входить до складу проєкту${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`
+                        ? incidentComposer
+                          ? `Не входить до команди підтримки клієнта${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`
+                          : `Не входить до складу проєкту${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`
                         : undefined}
                       onClick={() => toggleAssignee(uid)}
                     >
@@ -671,9 +686,11 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                   );
                 })}
               </div>
-              <p className="text-[10px] leading-[1.4] text-muted">
-                У персональній аналітиці завдання врахується кожному вибраному виконавцю.
-              </p>
+              {!incidentComposer && (
+                <p className="text-[10px] leading-[1.4] text-muted">
+                  У персональній аналітиці завдання врахується кожному вибраному виконавцю.
+                </p>
+              )}
             </div>
           )}
 

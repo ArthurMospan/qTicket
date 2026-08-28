@@ -59,12 +59,12 @@ export const STATUS_CATEGORY_ICONS = {
 // See src/lib/utils/statusCategories.mjs.
 export const DEFAULT_STATUSES = [{
   id: 'backlog',
-  label: 'Беклог',
+  label: 'Новий',
   color: '#9a9a9a',
   category: 'backlog',
 }, {
   id: 'todo',
-  label: 'До виконання',
+  label: 'Прийнято',
   color: '#6366f1',
   category: 'todo',
 }, {
@@ -74,12 +74,12 @@ export const DEFAULT_STATUSES = [{
   category: 'in-progress',
 }, {
   id: 'review',
-  label: 'На перевірці',
+  label: 'Очікує відповіді',
   color: '#8b5cf6',
   category: 'review',
 }, {
   id: 'done',
-  label: 'Готово',
+  label: 'Вирішено',
   color: '#10b981',
   category: 'done',
   isDone: true,

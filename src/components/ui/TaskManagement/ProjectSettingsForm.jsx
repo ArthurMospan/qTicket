@@ -9,11 +9,11 @@ import Label from '@/components/ui/Forms/Label';
 import { MultiSelect } from '@/components/ui/Select';
 import StatusVisibilityPicker from './StatusVisibilityPicker';
 
-// Shared body for "Новий проєкт" and "Налаштування проєкту". Both dialogs edit
+// Shared body for creating and configuring a client space. Both dialogs edit
 // exactly the same project fields, so they render the same form — only the title,
 // the footer buttons and the optional danger zone differ.
 /**
- * Shared body for «Новий проєкт» and «Налаштування проєкту». Both dialogs edit
+ * Shared body for «Новий клієнт» and «Налаштування клієнтського простору». Both dialogs edit
  * the same project fields, so they render the same form — only the title, the
  * footer buttons and the optional danger zone differ.
  *
@@ -53,8 +53,8 @@ export default function ProjectSettingsForm({
   teamMemberIds = [],
   onTeamMemberIdsChange,
   ownerId,
-  teamHint = 'Ви як автор проєкту будете додані автоматично.',
-  teamPlaceholder = 'Оберіть учасників проєкту',
+  teamHint = 'Власник простору буде доданий до команди підтримки автоматично.',
+  teamPlaceholder = 'Оберіть працівників підтримки',
   // Inline invitations, one email per line, sent when the surrounding form is
   // submitted. This is the only way either dialog invites anybody. Project
   // settings used to open the full invite dialog on top of itself instead — so
@@ -64,7 +64,7 @@ export default function ProjectSettingsForm({
   inviteEmails,
   onInviteEmailsChange,
   inviteEmailsError = '',
-  inviteEmailsHint = 'Кожен рядок — окрема адреса. Хто прийме запрошення — одразу потрапить і в організацію, і в цей проєкт.',
+  inviteEmailsHint = 'Клієнтів запрошують після створення простору у вкладці «Люди».',
   loading = false,
   dangerZone = null,
 }) {
@@ -93,28 +93,28 @@ export default function ProjectSettingsForm({
 
   return (
     <div className="flex flex-col gap-[16px]">
-      <FormGroup label="Назва проєкту" required error={nameError}>
+      <FormGroup label="Назва клієнта" required error={nameError}>
         <Input
           value={name}
           onChange={event => onNameChange?.(event.target.value)}
-          placeholder="Наприклад: Редизайн сайту"
+          placeholder="Наприклад: ТОВ «Альфа»"
           composition="project-name"
           error={Boolean(nameError)}
         />
       </FormGroup>
 
-      <FormGroup label="Опис">
+      <FormGroup label="Контекст клієнта">
         <Textarea
           value={description}
           onChange={event => onDescriptionChange?.(event.target.value)}
           rows={3}
-          placeholder="Короткий опис проєкту..."
+          placeholder="Коротко про клієнта, його продукт і домовленості підтримки..."
           composition="project-description"
         />
       </FormGroup>
 
       {showTeamSettings ? (
-        <FormGroup label="Команда проєкту">
+        <FormGroup label="Команда підтримки">
           <div className="flex items-center gap-2">
             <MultiSelect
               value={teamMemberIds}
@@ -148,10 +148,10 @@ export default function ProjectSettingsForm({
         </FormGroup>
       ) : null}
 
-      <FormGroup label="Колонки проєкту">
+      <FormGroup label="Етапи інцидентів">
         <p className="text-[11px] text-muted">
-          Оберіть потрібні колонки. Беклог залишається видимим завжди. Інциденти зі
-          статусів, які ви приховаєте, будуть перенесені в Беклог після підтвердження.
+          Оберіть етапи, потрібні цьому клієнту. «Новий» залишається видимим завжди.
+          Інциденти з прихованих етапів будуть перенесені у «Новий» після підтвердження.
         </p>
         {loading ? (
           <div className="flex justify-center py-4">

@@ -200,7 +200,7 @@ export default function SupportOverviewPage() {
                 icon={Inbox}
                 value={metrics.open}
                 label="Відкриті інциденти"
-                sub={`у ${activeProjects.length} клієнтських проєктах`}
+                sub={`у ${activeProjects.length} клієнтських просторах`}
               />
               <KpiCard
                 icon={AlertTriangle}
@@ -238,7 +238,7 @@ export default function SupportOverviewPage() {
                   <EmptyState
                     icon={Inbox}
                     title="Інцидентів ще немає"
-                    description="Створіть перший інцидент або запросіть клієнта до підготовленого для нього проєкту."
+                    description="Створіть перший інцидент або запросіть клієнта до підготовленого для нього простору."
                     action="Створити інцидент"
                     onAction={() => router.push('/my?new=1')}
                     density="compact"
@@ -309,7 +309,7 @@ export default function SupportOverviewPage() {
                   <EmptyState
                     icon={UsersRound}
                     title="Клієнтів ще немає"
-                    description="Створіть окремий проєкт для першого клієнта."
+                    description="Створіть окремий простір для першого клієнта."
                     action="Додати клієнта"
                     onAction={() => router.push('/clients?new=1')}
                     density="compact"

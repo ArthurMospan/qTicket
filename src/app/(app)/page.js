@@ -46,13 +46,6 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { createIssueViaApi } from '@/lib/services/issues';
 import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
-import { sendProjectInvitations } from '@/lib/services/projectInvitations';
-import {
-  failedInvitesMessage,
-  malformedEmailsMessage,
-  parseInviteEmails,
-  undeliveredEmailsMessage,
-} from '@/lib/utils/inviteEmails';
 import { planLimitNotice } from '@/lib/utils/plans.mjs';
 import { PROJECT_OVER_PLAN_LIMIT } from '@/lib/utils/projectAccess.mjs';
 import { usePlanLimits } from '@/lib/hooks/usePlanLimits';
@@ -123,7 +116,7 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
     ...(canEditProject
       ? [
         !isArchived
-          ? { icon: Archive, label: 'Архівувати', onClick: () => archive(project.id) }
+          ? { icon: Archive, label: 'Архівувати клієнта', onClick: () => archive(project.id) }
           : { icon: ArchiveRestore, label: 'Розархівувати', onClick: () => unarchive(project.id), color: '#10b981' },
       ]
       : []),
@@ -135,16 +128,16 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
           isDanger: true,
           onClick: async () => {
             if (await confirmDialog({
-              title: 'Видалити проєкт?',
+              title: 'Видалити клієнтський простір?',
               message: `Ви видаляєте «${project.name}». Цю дію неможливо скасувати.`,
               confirmText: 'Видалити',
               danger: true,
             })) {
               try {
                 await deleteProject(project.id);
-                showToast('Проєкт видалено');
+                showToast('Клієнтський простір видалено');
               } catch (error) {
-                showToast(userFacingErrorMessage(error, 'Не вдалося видалити проєкт'), 'error');
+                showToast(userFacingErrorMessage(error, 'Не вдалося видалити клієнтський простір'), 'error');
               }
             }
           },
@@ -178,9 +171,9 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
       >
         {/* Top row: the original project-team identity plus the kebab. */}
         <div className={`flex items-center justify-between ${menuOpen ? 'z-20' : 'z-10'}`}>
-          <div className={`flex ${stackOverlap}`} aria-label={`Учасників проєкту: ${teamCount}`}>
+          <div className={`flex ${stackOverlap}`} aria-label={`Учасників клієнтського простору: ${teamCount}`}>
             {teamCount === 0 && (
-              <div title="У проєкті ще немає учасників" data-ui-surface="local" style={{ width: stackChip, height: stackChip }} className="rounded-full bg-white flex items-center justify-center border-2 border-canvas">
+              <div title="До клієнтського простору ще нікого не додано" data-ui-surface="local" style={{ width: stackChip, height: stackChip }} className="rounded-full bg-white flex items-center justify-center border-2 border-canvas">
                 <Users size={isLarge ? 13 : 11} className="text-muted" />
               </div>
             )}
@@ -222,7 +215,7 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
                 // small target forgivable — `sm` is the size for dense toolbars,
                 // which this is the opposite of.
                 trigger={
-                  <IconAction label="Дії з проєктом" icon={MoreVertical} size="md" appearance="quiet" />
+                  <IconAction label="Дії з клієнтом" icon={MoreVertical} size="md" appearance="quiet" />
                 }
                 items={projectMenuItems}
               />
@@ -292,7 +285,6 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
           project={project}
           organizationMembers={allOrgMembers}
           canManageTeam={can(orgRole, 'manage:team')}
-          canInvite={can(orgRole, 'manage:team')}
           onArchive={archive}
           onUnarchive={unarchive}
           onDelete={deleteProject}
@@ -532,7 +524,7 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
 }
 
 // ── New Internal Project Modal ───────────────────────────────────────────────
-function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members = [], statuses = [], canInvite = false }) {
+function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members = [], statuses = [] }) {
   const router = useRouter();
   const [name,        setName]        = useState('');
   const [description, setDescription] = useState('');
@@ -541,9 +533,6 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
   const [team,        setTeam]        = useState([]);
   const [hiddenColumns, setHiddenColumns] = useState([]);
   const [nameError, setNameError] = useState('');
-  const [inviteEmails, setInviteEmails] = useState('');
-  const [inviteEmailsError, setInviteEmailsError] = useState('');
-  const { inviteMember } = useOrganization();
 
   // Read from the plan registry rather than restated — the ceiling, and the two
   // sentences that go with it. This screen used to word its own refusal («На
@@ -559,15 +548,9 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
     // A disabled primary button gave no reason why, so the form now says what
     // is missing and marks the field instead of silently refusing the click.
     if (!name.trim()) {
-      setNameError('Вкажіть назву проєкту');
+      setNameError('Вкажіть назву клієнта');
       return;
     }
-    const { emails: invitees, malformed } = parseInviteEmails(inviteEmails);
-    if (malformed.length) {
-      setInviteEmailsError(malformedEmailsMessage(malformed));
-      return;
-    }
-    setInviteEmailsError('');
     setSaving(true);
     setError(null);
     try {
@@ -598,28 +581,11 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
         // sentence — which is what it used to do, and what stopped working the
         // moment the refusal named a cheaper plan.
         setError({
-          message: result.error || 'Не вдалося створити проєкт',
+          message: result.error || 'Не вдалося створити клієнтський простір',
           limitId: result.planLimit?.id || '',
         });
         setSaving(false);
         return;
-      }
-
-      // Invitations are sent after the project exists so each one can carry its
-      // id: accepting then joins the organization and this project in one step.
-      // The project is already created, so a failing address is reported rather
-      // than thrown — it must not read as "the project was not created".
-      if (invitees.length) {
-        const { failures, undelivered } = await sendProjectInvitations(inviteMember, {
-          emails: invitees,
-          projectId: result.id,
-        });
-        const problem = failedInvitesMessage(failures) || undeliveredEmailsMessage(undelivered);
-        if (problem) {
-          setInviteEmailsError(`Проєкт створено. ${problem}`);
-          setSaving(false);
-          return;
-        }
       }
 
       onClose();
@@ -631,7 +597,7 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
   };
 
   return (
-    <Dialog isOpen={true} onClose={onClose} title="Новий проєкт" size="sm" footer={
+    <Dialog isOpen={true} onClose={onClose} title="Новий клієнт" size="sm" footer={
       limitReached ? (
         <div className="flex flex-col gap-2 w-full">
           {/* The price list, not a route to a settings section — and not «Pro»,
@@ -643,7 +609,7 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
       ) : (
         <>
           <Button onClick={onClose} style="secondary" size="md">Скасувати</Button>
-          <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити проєкт</Button>
+          <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити клієнта</Button>
         </>
       )
     }>
@@ -694,15 +660,8 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
             teamMembers={members}
             teamMemberIds={team}
             onTeamMemberIdsChange={setTeam}
-            teamPlaceholder="Оберіть учасників проєкту"
-            teamHint="Ви як автор проєкту будете додані автоматично."
-            inviteEmails={inviteEmails}
-            onInviteEmailsChange={canInvite ? value => {
-              setInviteEmails(value);
-              if (inviteEmailsError) setInviteEmailsError('');
-            } : undefined}
-            inviteEmailsError={inviteEmailsError}
-            inviteEmailsHint="Кожен рядок — окрема адреса. Запрошення підуть після створення проєкту; хто прийме — одразу потрапить і в організацію, і в цей проєкт."
+            teamPlaceholder="Оберіть працівників підтримки"
+            teamHint="Після створення відкрийте клієнта → «Люди», щоб окремо запросити адміністратора клієнта."
           />
         </div>
       )}
@@ -839,7 +798,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const archive = async (id) => {
     try {
       await archiveProject(id);
-      showToast('Проєкт архівовано', 'success', {
+      showToast('Клієнта архівовано', 'success', {
         duration: 5000,
         action: {
           label: 'Скасувати',
@@ -847,7 +806,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
         }
       });
     } catch (err) {
-      showToast(userFacingErrorMessage(err, 'Не вдалося архівувати проєкт'), 'error');
+      showToast(userFacingErrorMessage(err, 'Не вдалося архівувати клієнта'), 'error');
       return false;
     }
     return true;
@@ -856,9 +815,9 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const unarchive = async (id) => {
     try {
       await restoreProject(id);
-      showToast('Проєкт розархівовано');
+      showToast('Клієнта повернуто з архіву');
     } catch (err) {
-      showToast(userFacingErrorMessage(err, 'Не вдалося розархівувати проєкт'), 'error');
+      showToast(userFacingErrorMessage(err, 'Не вдалося повернути клієнта з архіву'), 'error');
       return false;
     }
     return true;
@@ -869,28 +828,31 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     return { total: active.length };
   }, [projects]);
 
+  const supportMembers = useMemo(
+    () => (members || []).filter(member => !isClientRole(member.role)),
+    [members],
+  );
+
   const memberOptions = useMemo(() => {
     return [
-      { value: 'all', label: 'Всі учасники' },
-      ...(members || []).map(m => ({
+      { value: 'all', label: 'Уся команда підтримки' },
+      ...supportMembers.map(m => ({
         value: m.id || m.uid,
         label: m.name || m.email?.split('@')[0] || 'Учасник',
         user: m,
       }))
     ];
-  }, [members]);
+  }, [supportMembers]);
 
   const dateOptions = [
     { value: 'all', label: 'За весь час' },
-    { value: '7days', label: 'Створено за 7 днів' },
-    { value: '30days', label: 'Створено за 30 днів' }
+    { value: '7days', label: 'Додано за 7 днів' },
+    { value: '30days', label: 'Додано за 30 днів' }
   ];
 
   const sortOptions = [
     { value: 'updated', label: 'Нещодавно оновлені' },
-    { value: 'name', label: 'За назвою (А-Я)' },
-    { value: 'progress-desc', label: 'Прогрес (за спаданням)' },
-    { value: 'progress-asc', label: 'Прогрес (за зростанням)' }
+    { value: 'name', label: 'За назвою (А-Я)' }
   ];
 
   const workspaceLoadError = projectsError;
@@ -925,7 +887,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
       <div className="workspace-page-layout min-h-full">
 
         <PageHeader
-          title="Проєкти"
+          title="Клієнти"
           actions={
             can(orgRole, 'create:project') && (
               <Button
@@ -941,9 +903,9 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
                 // submitted — and it says so before it is pressed.
                 icon={projectsBlocked ? PlanCrownIcon : Plus}
                 collapseAt="sm"
-                title={projectsBlocked ? planLimits.notice('projects').title : 'Новий проєкт'}
+                title={projectsBlocked ? planLimits.notice('projects').title : 'Новий клієнт'}
               >
-                Новий проєкт
+                Новий клієнт
               </Button>
             )
           }
@@ -963,7 +925,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
               title={workspaceScopeFailure
                 ? 'Не вдалося прочитати частину робочого простору'
                 : projectsError
-                  ? 'Не вдалося завантажити проєкти'
+                  ? 'Не вдалося завантажити клієнтів'
                   : 'Не вдалося завантажити інциденти'}
               description={workspaceScopeFailure
                 ? 'Дані організації на місці. Оновіть доступ і спробуйте ще раз.'
@@ -991,13 +953,13 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
             <Surface preset="panel" padding="md" className="w-full">
               <EmptyState
                 icon={Folder}
-                title={(projects || []).filter(project => project.status !== 'archived').length === 0 ? 'Ще немає проєктів' : 'Проєкти не знайдені'}
+                title={(projects || []).filter(project => project.status !== 'archived').length === 0 ? 'Ще немає клієнтів' : 'Клієнтів не знайдено'}
                 description={(projects || []).filter(project => project.status !== 'archived').length === 0
                   ? can(orgRole, 'create:project')
-                    ? 'Створіть перший клієнтський проєкт, щоб організувати інциденти та роботу команди підтримки.'
-                    : 'Попросіть адміністратора створити перший проєкт для команди.'
+                    ? 'Створіть простір першого клієнта, призначте підтримку та запросіть представника клієнта.'
+                    : 'Попросіть адміністратора створити перший клієнтський простір.'
                   : 'Спробуйте змінити параметри фільтрації.'}
-                action={(projects || []).filter(project => project.status !== 'archived').length === 0 && can(orgRole, 'create:project') ? 'Створити проєкт' : null}
+                action={(projects || []).filter(project => project.status !== 'archived').length === 0 && can(orgRole, 'create:project') ? 'Створити клієнта' : null}
                 onAction={(projects || []).filter(project => project.status !== 'archived').length === 0 && can(orgRole, 'create:project') ? () => setShowNewProject(true) : null}
                 context="page"
               />
@@ -1042,9 +1004,8 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
         orgId={activeOrgId}
         orgPlan={activeOrg?.plan}
         activeProjectsCount={stats.total}
-        members={members}
+        members={supportMembers}
         statuses={statuses}
-        canInvite={can(orgRole, 'manage:team')}
       />
     )}
 

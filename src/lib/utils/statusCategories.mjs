@@ -37,7 +37,7 @@ export const STATUS_CATEGORY_IDS = Object.freeze([
 ]);
 
 // Two flags, because "finished" is two different questions. Today one category
-// answers both — «Готово» is the only end a status has — and the split is kept
+// answers both — «Вирішено» is the only end a status has — and the split is kept
 // because the callers are not asking the same thing:
 //
 // `closes` — there is no work left here. Overdue, blockers, a parent waiting on
@@ -45,22 +45,20 @@ export const STATUS_CATEGORY_IDS = Object.freeze([
 // `delivers` — something was actually produced. Completion percentage, velocity,
 // "closed in this period" and the invoice preset read this.
 //
-// «На перевірці» carries neither. Work handed over for review is not finished
-// and has produced nothing yet: a task sitting there is still open, still
-// blocks whatever it blocked, and can still run past its deadline. That is the
-// reason it is its own category rather than a shade of «У роботі» — the two are
-// the same question to a board and different ones to a person's workload.
+// «Очікує відповіді» carries neither. An incident waiting on a client or on an
+// internal clarification is still open, can still run past its deadline and
+// must remain visible in the support queue.
 export const STATUS_CATEGORIES = Object.freeze({
   backlog: Object.freeze({
     id: 'backlog',
-    label: 'Беклог',
+    label: 'Новий',
     color: '#9a9a9a',
     closes: false,
     delivers: false,
   }),
   todo: Object.freeze({
     id: 'todo',
-    label: 'До виконання',
+    label: 'Прийнято',
     color: '#6366f1',
     closes: false,
     delivers: false,
@@ -74,14 +72,14 @@ export const STATUS_CATEGORIES = Object.freeze({
   }),
   review: Object.freeze({
     id: 'review',
-    label: 'На перевірці',
+    label: 'Очікує відповіді',
     color: '#8b5cf6',
     closes: false,
     delivers: false,
   }),
   done: Object.freeze({
     id: 'done',
-    label: 'Готово',
+    label: 'Вирішено',
     color: '#10b981',
     closes: true,
     delivers: true,

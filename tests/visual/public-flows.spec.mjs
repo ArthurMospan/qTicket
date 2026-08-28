@@ -11,7 +11,7 @@ const DEV_SERVER_NOISE = /webpack-hmr|WebSocket connection to 'ws:/;
 // hand — only a person can pick one worth typing — but what it must find comes
 // from the same function the page searches with, so a rewritten article moves
 // the expectation with it.
-const HELP_QUERY = 'багато завдань';
+const HELP_QUERY = 'багато інцидентів';
 
 async function preparePage(page) {
   const errors = [];
@@ -83,7 +83,7 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
   await page.setViewportSize({ width: 390, height: 844 });
   const routes = [
     ['/help', 'Відповіді про реальну роботу сервісу'],
-    ['/help/kanban-and-bulk-actions', 'Як змінити багато завдань одразу'],
+    ['/help/kanban-and-bulk-actions', 'Як змінити багато інцидентів одразу'],
     ['/news', 'Новини продукту'],
     ['/terms', 'Умови користування qTicket'],
     ['/privacy', 'Політика конфіденційності qTicket'],
@@ -153,10 +153,10 @@ test('bulk toolbar remains usable at phone width and opens its confirm flow', as
   const moreActions = toolbar.getByRole('button', { name: 'Інші масові дії' });
   await expect(moreActions).toBeInViewport();
   await moreActions.click();
-  const deadlineAction = page.getByRole('menuitem', { name: 'Встановити дедлайн' });
+  const deadlineAction = page.getByRole('menuitem', { name: 'Встановити термін вирішення' });
   await expect(deadlineAction).toBeVisible();
   await deadlineAction.click();
-  await expect(page.getByRole('dialog', { name: /Дедлайн для 4 інцидентів/ })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: /Термін вирішення для 4 інцидентів/ })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expectHealthyPage(page, errors);

@@ -5,8 +5,6 @@ import {
   Ban,
   CalendarDays,
   CircleDot,
-  Clock3,
-  Copy,
   Flag,
   Archive,
   MoreHorizontal,
@@ -95,28 +93,18 @@ export default function BulkActionBar({
 
   const askDeadline = async () => {
     const value = await confirm({
-      title: `Дедлайн для ${count} інцидентів`,
-      message: 'Оберіть дату, яку буде встановлено для всіх вибраних інцидентів.',
+      title: `Термін вирішення для ${count} інцидентів`,
+      message: 'Оберіть дату вирішення для всіх вибраних інцидентів.',
       confirmText: 'Встановити',
       input: { type: 'date' },
     });
     if (value) await apply('deadline', value);
   };
 
-  const askEstimate = async () => {
-    const value = await confirm({
-      title: `Оцінка для ${count} інцидентів`,
-      message: 'Вкажіть оцінку в хвилинах від 0 до 525600.',
-      confirmText: 'Встановити',
-      input: { type: 'number', min: 0, max: 525600, step: 1, placeholder: '60', suffix: 'хв' },
-    });
-    if (value !== null && value !== '') await apply('estimate', Number(value));
-  };
-
   const askArchive = async () => {
     const accepted = await confirm({
       title: `Архівувати ${count} інцидентів?`,
-      message: 'Інциденти зникнуть з дошки, списків і підрахунку відкритої роботи. У звітах, таймшиті та рахунках вони лишаються — записаний час і далі рахується як зроблена робота. Лежатимуть в «Архіві» без строку, повернути можна будь-коли.',
+      message: 'Інциденти зникнуть з активної черги, але їхня історія, чат і файли залишаться в «Архіві». Повернути їх можна будь-коли.',
       confirmText: 'Архівувати',
     });
     if (accepted) await apply('archive');
@@ -125,7 +113,7 @@ export default function BulkActionBar({
   const askCancel = async () => {
     const accepted = await confirm({
       title: `Скасувати ${count} інцидентів?`,
-      message: 'Скасування означає, що цієї роботи не буде. Інциденти зникнуть не лише з дошки й списків, а й з усього обліку: з прогресу, зі звітів, з навантаження, з рахунків і з дедлайнів. Лежатимуть в «Архіві» → «Скасовані» без строку, повернути можна будь-коли. Якщо робота відбулася — архівуйте, тоді вона лишиться у звітах.',
+      message: 'Скасовані інциденти зникнуть з активної черги й не рахуватимуться як вирішені. Історія звернень залишиться в «Архіві» → «Скасовані», а повернути їх можна будь-коли.',
       confirmText: 'Так, скасувати',
       // See IssueDetail: «Скасувати» is the dismiss label on every dialog, and
       // here it is also the action, so the two buttons would have read the same.
@@ -137,7 +125,7 @@ export default function BulkActionBar({
   const askDelete = async () => {
     const accepted = await confirm({
       title: `Видалити ${count} інцидентів?`,
-      message: 'Інциденти потраплять у «Нещодавно видалене» і за кілька днів зникнуть назавжди. Залежності або дочірні інциденти можуть заблокувати окремі елементи.',
+      message: 'Інциденти потраплять у «Нещодавно видалене» і через 24 години зникнуть назавжди.',
       confirmText: 'Видалити',
       danger: true,
     });
@@ -291,12 +279,9 @@ export default function BulkActionBar({
           />
         )}
         items={[
-          { label: 'Встановити дедлайн', icon: CalendarDays, onClick: askDeadline },
-          { label: 'Очистити дедлайн', icon: CalendarDays, onClick: () => apply('deadline-clear') },
-          { label: 'Встановити оцінку', icon: Clock3, onClick: askEstimate },
-          { label: 'Очистити оцінку', icon: Clock3, onClick: () => apply('estimate-clear') },
+          { label: 'Встановити термін вирішення', icon: CalendarDays, onClick: askDeadline },
+          { label: 'Очистити термін вирішення', icon: CalendarDays, onClick: () => apply('deadline-clear') },
           { isDivider: true },
-          { label: `Дублювати (${count})`, icon: Copy, onClick: () => apply('duplicate') },
           { label: `Архівувати (${count})`, icon: Archive, onClick: askArchive },
           { label: `Скасувати (${count})`, icon: Ban, onClick: askCancel },
           {

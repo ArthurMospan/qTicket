@@ -40,11 +40,11 @@ test('missing workflow replaces every section from the previous organization wit
   // so resolving it here is also what keeps opening Settings from writing.
   assert.deepEqual(
     organizationB.statuses,
-    [{ id: 'backlog', label: 'Беклог', category: 'backlog', isDone: false }],
+    [{ id: 'backlog', label: 'Новий', category: 'backlog', isDone: false }],
   );
   assert.deepEqual(
     organizationB.types,
-    [{ id: 'task', label: 'Задача' }],
+    [{ id: 'task', label: 'Звернення' }],
   );
   assert.deepEqual(
     organizationB.priorities,

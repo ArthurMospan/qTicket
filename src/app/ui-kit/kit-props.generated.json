@@ -4934,7 +4934,7 @@
     },
     "ProjectSettingsForm": {
       "file": "src/components/ui/TaskManagement/ProjectSettingsForm.jsx",
-      "summary": "Shared body for «Новий проєкт» and «Налаштування проєкту».",
+      "summary": "Shared body for «Новий клієнт» and «Налаштування клієнтського простору».",
       "props": [
         {
           "name": "backlogStatusId",
@@ -4980,7 +4980,7 @@
         },
         {
           "name": "inviteEmailsHint",
-          "default": "'Кожен рядок — окрема адреса. Хто прийме запр…",
+          "default": "'Клієнтів запрошують після створення простору…",
           "type": "string",
           "values": [],
           "description": "Sentence under that list; says when the invitations go out."
@@ -5057,7 +5057,7 @@
         },
         {
           "name": "teamHint",
-          "default": "'Ви як автор проєкту будете додані автоматично.'",
+          "default": "'Власник простору буде доданий до команди під…",
           "type": "string",
           "values": [],
           "description": "Sentence under the team picker."
@@ -5078,7 +5078,7 @@
         },
         {
           "name": "teamPlaceholder",
-          "default": "'Оберіть учасників проєкту'",
+          "default": "'Оберіть працівників підтримки'",
           "type": "string",
           "values": [],
           "description": "Placeholder for that picker."

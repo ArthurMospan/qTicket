@@ -14,15 +14,8 @@ import {
 } from '@/components/ui';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
-import { useOrganization } from '@/lib/hooks/useOrganization';
+import { isClientRole } from '@/lib/utils/can';
 import { updateProjectSettings } from '@/lib/services/projects';
-import { sendProjectInvitations } from '@/lib/services/projectInvitations';
-import {
-  failedInvitesMessage,
-  malformedEmailsMessage,
-  parseInviteEmails,
-  undeliveredEmailsMessage,
-} from '@/lib/utils/inviteEmails';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
 
 // How many tasks are sitting in the columns about to be hidden.
@@ -54,7 +47,6 @@ export default function BoardConfigModal({
   project,
   organizationMembers = [],
   canManageTeam = false,
-  canInvite = false,
   onArchive,
   onUnarchive,
   onDelete,
@@ -63,15 +55,27 @@ export default function BoardConfigModal({
   const showToast = useWorkspaceStore(state => state.showToast);
   const confirm = useConfirm();
   const { statuses, loading } = useWorkflowConfig();
-  const { inviteMember } = useOrganization();
   const [name, setName] = useState(project?.name || '');
   const [nameError, setNameError] = useState('');
   const [description, setDescription] = useState(project?.description || '');
   const [hiddenColumns, setHiddenColumns] = useState(
     (project?.hiddenColumns || []).filter(statusId => statusId !== 'backlog'),
   );
+  const initialTeam = useMemo(
+    () => (Array.isArray(project?.team) ? project.team : []),
+    [project],
+  );
+  const memberById = useMemo(() => new Map(
+    organizationMembers.map(member => [member.id || member.uid, member]),
+  ), [organizationMembers]);
+  const clientMemberIds = useMemo(() => initialTeam.filter(memberId => (
+    isClientRole(memberById.get(memberId)?.role)
+  )), [initialTeam, memberById]);
+  const supportMembers = useMemo(() => activeMembers(organizationMembers).filter(member => (
+    !isClientRole(member.role)
+  )), [organizationMembers]);
   const [teamMemberIds, setTeamMemberIds] = useState(
-    Array.isArray(project?.team) ? project.team : [],
+    () => initialTeam.filter(memberId => !isClientRole(memberById.get(memberId)?.role)),
   );
   // What the roster was when this dialog opened, kept so the save can be sent
   // as the change it is rather than as the whole list. Both are read once, at
@@ -81,8 +85,6 @@ export default function BoardConfigModal({
     () => (Array.isArray(project?.team) ? project.team : []),
   );
   const [saving, setSaving] = useState(false);
-  const [inviteEmails, setInviteEmails] = useState('');
-  const [inviteEmailsError, setInviteEmailsError] = useState('');
   const isArchived = project?.status === 'archived';
   const backlogStatusId = statuses.some(status => status.id === 'backlog')
     ? 'backlog'
@@ -93,20 +95,13 @@ export default function BoardConfigModal({
   );
   const handleSave = async () => {
     if (!name.trim()) {
-      setNameError('Вкажіть назву проєкту');
+      setNameError('Вкажіть назву клієнта');
       return;
     }
     if (statuses.length > 0 && statusesToHide.length >= statuses.length) {
       showToast('Дошка повинна мати хоча б одну видиму колонку', 'error');
       return;
     }
-    const { emails: invitees, malformed } = parseInviteEmails(inviteEmails);
-    if (malformed.length) {
-      setInviteEmailsError(malformedEmailsMessage(malformed));
-      return;
-    }
-    setInviteEmailsError('');
-
     const newlyHidden = statusesToHide.filter(
       statusId => !(project?.hiddenColumns || []).includes(statusId),
     );
@@ -125,10 +120,10 @@ export default function BoardConfigModal({
         .map(status => status.label)
         .join(', ');
       const accepted = await confirm({
-        title: 'Приховати колонки проєкту?',
+        title: 'Приховати етапи інцидентів?',
         message: affectedCount > 0
-          ? `${affectedCount} завд. із прихованих колонок буде перенесено в Беклог. ${hiddenLabels ? `Колонки: ${hiddenLabels}.` : ''}`
-          : `Колонки ${hiddenLabels || 'буде приховано'}. Нові завдання з них не залишатимуться поза дошкою.`,
+          ? `${affectedCount} інцидентів із прихованих етапів буде перенесено у «Новий». ${hiddenLabels ? `Етапи: ${hiddenLabels}.` : ''}`
+          : `Етапи ${hiddenLabels || 'буде приховано'}. Інциденти з них не залишаться поза робочою чергою.`,
         confirmText: affectedCount > 0 ? 'Приховати й перенести' : 'Приховати',
       });
       if (!accepted) return;
@@ -145,28 +140,16 @@ export default function BoardConfigModal({
         // opened, so anybody added to the project in the meantime — from a task
         // that just granted them access, or by somebody else in another tab —
         // was silently dropped by a save that never meant to touch them.
-        ...(canManageTeam ? { team: teamMemberIds, teamBaseline } : {}),
+        ...(canManageTeam ? {
+          team: [...new Set([...clientMemberIds, ...teamMemberIds])],
+          teamBaseline,
+        } : {}),
       });
-
-      // Settings are already saved, so a refused address is reported in place
-      // rather than thrown — it must never read as "the changes were not saved".
-      if (invitees.length) {
-        const { failures, undelivered } = await sendProjectInvitations(inviteMember, {
-          emails: invitees,
-          projectId: project.id,
-        });
-        const problem = failedInvitesMessage(failures) || undeliveredEmailsMessage(undelivered);
-        if (problem) {
-          setInviteEmailsError(problem);
-          setSaving(false);
-          return;
-        }
-      }
 
       showToast(
         result.movedIssues > 0
-          ? `Налаштування збережено, ${result.movedIssues} завд. перенесено в Беклог ✓`
-          : 'Налаштування проєкту збережено ✓',
+          ? `Налаштування збережено, ${result.movedIssues} інцидентів перенесено у «Новий» ✓`
+          : 'Налаштування клієнта збережено ✓',
       );
       onClose();
     } catch (error) {
@@ -179,7 +162,7 @@ export default function BoardConfigModal({
 
   const handleDelete = async () => {
     const accepted = await confirm({
-      title: 'Видалити проєкт?',
+      title: 'Видалити клієнтський простір?',
       message: `Ви видаляєте «${project?.name}». Цю дію неможливо скасувати.`,
       confirmText: 'Видалити',
       danger: true,
@@ -189,7 +172,7 @@ export default function BoardConfigModal({
       await onDelete(project.id);
       onClose();
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося видалити проєкт'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося видалити клієнтський простір'), 'error');
     }
   };
 
@@ -200,7 +183,7 @@ export default function BoardConfigModal({
     <section className="mt-2 border-t border-line pt-4">
       <div className="mb-1"><Label>Небезпечна зона</Label></div>
       <p className="mb-3 text-[11px] leading-relaxed text-muted">
-        Архівований проєкт зникає зі списків, але його завдання та історія зберігаються.
+        Архівований клієнт зникає з активного списку, але його інциденти та історія зберігаються.
         Видалення незворотне.
       </p>
       <div className="flex flex-wrap gap-2">
@@ -230,7 +213,7 @@ export default function BoardConfigModal({
         ) : null}
         {onDelete ? (
           <Button style="secondary" color="red" size="md" icon={Trash2} onClick={handleDelete}>
-            Видалити проєкт
+            Видалити простір
           </Button>
         ) : null}
       </div>
@@ -242,7 +225,7 @@ export default function BoardConfigModal({
       <Dialog
         isOpen
         onClose={onClose}
-        title="Налаштування проєкту"
+        title="Налаштування клієнта"
         size="sm"
         footer={(
           <>
@@ -271,18 +254,11 @@ export default function BoardConfigModal({
           hiddenStatusIds={statusesToHide}
           onHiddenStatusIdsChange={setHiddenColumns}
           backlogStatusId={backlogStatusId}
-          teamMembers={canManageTeam ? activeMembers(organizationMembers) : []}
+          teamMembers={canManageTeam ? supportMembers : []}
           teamMemberIds={teamMemberIds}
           onTeamMemberIdsChange={canManageTeam ? setTeamMemberIds : undefined}
           ownerId={project?.createdBy}
-          teamHint="Учасники поза цим списком не бачитимуть проєкт."
-          inviteEmails={inviteEmails}
-          onInviteEmailsChange={canManageTeam && canInvite ? value => {
-            setInviteEmails(value);
-            if (inviteEmailsError) setInviteEmailsError('');
-          } : undefined}
-          inviteEmailsError={inviteEmailsError}
-          inviteEmailsHint="Кожен рядок — окрема адреса. Запрошення підуть при збереженні; хто прийме — одразу потрапить і в організацію, і в цей проєкт."
+          teamHint="Тут обирається тільки внутрішня команда підтримки. Доступ клієнтів керується окремо у вкладці «Люди»."
           loading={loading}
           dangerZone={dangerZone}
         />

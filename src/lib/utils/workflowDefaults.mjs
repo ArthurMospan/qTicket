@@ -24,14 +24,14 @@ export const DEFAULT_LABEL_IDS = [];
 // own label in the org's workflow document; this is the fallback for the
 // defaults and for legacy ids that predate configurable workflows.
 export const STATUS_LABELS = {
-  backlog: 'Беклог',
-  todo: 'До виконання',
+  backlog: 'Новий',
+  todo: 'Прийнято',
   'in-progress': 'У роботі',
-  review: 'На перевірці',
+  review: 'Очікує відповіді',
   'code-review': 'Код-ревʼю',
   qa: 'QA',
   'client-approval': 'Погодження клієнтом',
-  done: 'Готово',
+  done: 'Вирішено',
 };
 
 // Existing organizations can still have the original English defaults saved in
@@ -39,19 +39,19 @@ export const STATUS_LABELS = {
 // and renamed built-ins remain untouched.
 const BUILT_IN_LABEL_TRANSLATIONS = {
   statuses: {
-    backlog: { Backlog: 'Беклог' },
-    todo: { 'To Do': 'До виконання' },
+    backlog: { Backlog: 'Новий', 'Беклог': 'Новий' },
+    todo: { 'To Do': 'Прийнято', 'До виконання': 'Прийнято' },
     'in-progress': { 'In Progress': 'У роботі' },
-    review: { Review: 'На перевірці', 'In Review': 'На перевірці' },
+    review: { Review: 'Очікує відповіді', 'In Review': 'Очікує відповіді', 'На перевірці': 'Очікує відповіді' },
     'code-review': { 'Code Review': 'Код-ревʼю' },
     'client-approval': { 'Client Approval': 'Погодження клієнтом' },
-    done: { Done: 'Готово' },
+    done: { Done: 'Вирішено', 'Готово': 'Вирішено' },
   },
   types: {
     epic: { Epic: 'Епік (legacy)' },
-    feature: { Feature: 'Фіча' },
-    task: { Task: 'Задача' },
-    bug: { Bug: 'Баг' },
+    feature: { Feature: 'Побажання', 'Фіча': 'Побажання' },
+    task: { Task: 'Звернення', 'Задача': 'Звернення', 'Інцидент': 'Звернення' },
+    bug: { Bug: 'Помилка', 'Баг': 'Помилка' },
   },
   priorities: {
     blocker: { Blocker: 'Критичний', 'Блокер': 'Критичний' },

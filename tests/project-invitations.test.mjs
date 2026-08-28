@@ -61,19 +61,23 @@ test('one bad address does not abandon the rest of the list', async () => {
   assert.ok(seen.every(call => call.role === 'member' && call.projectIds[0] === 'project-1'));
 });
 
-test('creating and editing a project offer the same invite affordance', async () => {
+test('client spaces never turn client invitations into internal QuickTeam seats', async () => {
   const dashboard = await read('../src/app/(app)/page.js');
   const settings = await read('../src/components/workspace/BoardConfigModal.jsx');
   const form = await read('../src/components/ui/TaskManagement/ProjectSettingsForm.jsx');
+  const clientWorkspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
 
-  // Both dialogs collect the list inline and send it through the one service.
+  // Client access is deliberately absent from the create/settings forms: the
+  // old inline path defaulted to role `member`, which is an internal support
+  // role managed by QuickTeam.
   for (const source of [dashboard, settings]) {
-    assert.match(source, /parseInviteEmails\(inviteEmails\)/);
-    assert.match(source, /sendProjectInvitations\(inviteMember, \{/);
-    assert.match(source, /onInviteEmailsChange=\{[^}]*canInvite/);
+    assert.doesNotMatch(source, /parseInviteEmails\(inviteEmails\)/);
+    assert.doesNotMatch(source, /sendProjectInvitations\(inviteMember, \{/);
+    assert.doesNotMatch(source, /onInviteEmailsChange=/);
   }
-  // And the shared form no longer has a second way to invite that only one of
-  // them rendered.
-  assert.doesNotMatch(form, /onInvite\b/);
+  assert.match(settings, /!isClientRole\(member\.role\)/);
+  assert.match(settings, /\.\.\.clientMemberIds, \.\.\.teamMemberIds/);
+  assert.match(form, /Клієнтів запрошують після створення простору у вкладці «Люди»/);
+  assert.match(clientWorkspace, /<InviteMemberDialog[\s\S]{0,320}clientAdminMode/);
   assert.doesNotMatch(settings, /InviteMemberDialog/);
 });

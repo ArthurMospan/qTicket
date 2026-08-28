@@ -46,7 +46,7 @@ test('a create dialog reports the missing field instead of disabling its submit'
   assert.match(modal, /disabled=\{!clientMode && creatableTypes\.length === 0\}/);
   assert.doesNotMatch(modal, /disabled=\{!form\.title\.trim\(\)/);
   assert.match(modal, /nextErrors\.title = incidentComposer \? 'Вкажіть тему інциденту' : 'Вкажіть назву завдання'/);
-  assert.match(modal, /<FormGroup label="Назва" required error=\{fieldErrors\.title\}/);
+  assert.match(modal, /<FormGroup label=\{incidentComposer \? 'Тема інциденту' : 'Назва'\} required error=\{fieldErrors\.title\}/);
 });
 
 test('every dialog that requires a name says so in the same place', async () => {

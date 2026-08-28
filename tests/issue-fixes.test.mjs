@@ -301,18 +301,18 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(projectPage, /<BoardConfigModal[\s\S]{0,160}project=\{project\}[\s\S]{0,240}canManageTeam=\{can\(orgRole, 'manage:team'\)\}/);
   assert.match(settingsDialog, /size="sm"/);
   assert.doesNotMatch(settingsDialog, /presentation="dialog"/);
-  assert.match(settingsDialog, /title: 'Приховати колонки проєкту\?'/);
+  assert.match(settingsDialog, /title: 'Приховати етапи інцидентів\?'/);
   assert.match(settingsDialog, /updateProjectSettings\(project\.id/);
   assert.match(settingsDialog, /<ProjectSettingsForm/);
   // QUI-98: settings and create render the same shared form, and archiving or
   // deleting the project is reachable from the settings dialog itself.
   assert.match(settingsDialog, /dangerZone=\{dangerZone\}/);
   assert.match(settingsDialog, /Небезпечна зона/);
-  // Inviting is the inline list the create dialog already used, not a second
-  // dialog stacked on this one: the same form must not offer two different
-  // affordances for the same act depending on who is hosting it.
+  // Client invitation is not an inline project-setting field: that path used
+  // the internal `member` role. It lives in the client's «Люди» tab instead.
   assert.doesNotMatch(settingsDialog, /<InviteMemberDialog/);
-  assert.match(settingsDialog, /inviteEmails=\{inviteEmails\}/);
+  assert.doesNotMatch(settingsDialog, /inviteEmails=\{inviteEmails\}/);
+  assert.match(settingsDialog, /\.\.\.clientMemberIds, \.\.\.teamMemberIds/);
   assert.match(workspace, /<ProjectSettingsForm/);
   assert.match(settingsForm, /<StatusVisibilityPicker/);
   assert.match(settingsForm, /<MultiSelect/);

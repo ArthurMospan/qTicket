@@ -605,7 +605,6 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
           project={project}
           organizationMembers={members}
           canManageTeam={can(orgRole, 'manage:team')}
-          canInvite={can(orgRole, 'manage:team')}
           onArchive={handleArchiveProject}
           onUnarchive={handleRestoreProject}
           onDelete={handleDeleteProject}

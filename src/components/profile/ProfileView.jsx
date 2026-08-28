@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
-import { CakeSlice, Clock3, LockKeyhole, Mail, MapPin, Phone, Zap, Send, MoreVertical, Shield, BarChart2, X } from 'lucide-react';
-import { CalendarIcon, ChatIcon, TaskIcon } from '@/lib/design/icons';
-import { Surface, Card, Badge, StatusBadge, Button, IconAction, Pill, PresenceDot, Tabs, ContextMenu, EmptyState, LoadingSpinner, Tooltip } from '@/components/ui';
+import { CakeSlice, Mail, MapPin, Phone, Send, MoreVertical, Shield, X } from 'lucide-react';
+import { ChatIcon, TaskIcon } from '@/lib/design/icons';
+import { Button, IconAction, Pill, PresenceDot, Tabs, ContextMenu, EmptyState, Tooltip } from '@/components/ui';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
@@ -12,22 +12,9 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useOrganization } from '@/lib/hooks/useOrganization';
-import { sendNotification } from '@/lib/hooks/useNotifications';
-import { useCalendarEvents } from '@/lib/hooks/useCalendarEvents';
 import { formatLastSeenUk, isPresenceOnline } from '@/lib/utils/presence.mjs';
 import { isOnProjectTeam, isPrivilegedRole } from '@/lib/utils/projectAccess.mjs';
-
-const EVENT_TYPE_LABELS = {
-  meeting: 'Мітинг',
-  event: 'Подія',
-  focus: 'Фокус-час',
-  absence: 'Відсутність',
-  release: 'Реліз / етап',
-  note: 'Нотатка',
-  reminder: 'Нагадування',
-  milestone: 'Подія',
-  birthday: 'День народження',
-};
+import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 
 const getRealProfileDetails = (member) => {
   const skills = member.profile?.skills || member.skills;
@@ -100,14 +87,12 @@ export default function ProfileView({ user, onClose }) {
   }, []);
   const router = useRouter();
   const openIssueQuickView = useWorkspaceStore(state => state.openIssueQuickView);
-  const openEventQuickView = useWorkspaceStore(state => state.openEventQuickView);
-  const { currentUser, projects, orgRole, activeOrgId } = useAppContext();
+  const { currentUser, projects, orgRole } = useAppContext();
   const {
     tasks,
   } = useAllMyTasks(user?.id || user?.uid);
   const { positions = [], closedStatusIds } = useWorkflowConfig();
   const { members: orgMembers } = useOrganization();
-  const { events: calendarEvents, loading: calendarLoading } = useCalendarEvents();
   const [activeTab, setActiveTab] = useState('profile');
   const [statusOpen, setStatusOpen] = useState(false);
 
@@ -132,7 +117,9 @@ export default function ProfileView({ user, onClose }) {
   const statusText = (isMe ? currentUser?.status : user.statusText) || null;
   const statusEmoji = (isMe ? currentUser?.statusEmoji : user.statusEmoji) || null;
 
-  const positionName = positions.find(p => p.id === user.positionId)?.label || user.positionId || user.title || user.email;
+  const positionName = positions.find(p => p.id === user.positionId)?.label
+    || user.title
+    || organizationRoleLabel(memberRecord?.role || user.role);
 
   const allActiveTasks = tasks.filter(task => {
     const project = projects.find(item => item.id === task.projectId);
@@ -157,18 +144,6 @@ export default function ProfileView({ user, onClose }) {
   // being on it, so a short list under their name is not the whole story.
   const viewedReachesEveryProject = isPrivilegedRole(memberRecord?.role || user.role || null);
 
-  const nowTime = now;
-  const agendaEvents = calendarEvents
-    .filter(event => {
-      const endTime = new Date(event.endAt).getTime();
-      if (!Number.isFinite(endTime) || endTime < nowTime) return false;
-      return event.birthdayUserId === uid ||
-        event.organizerId === uid ||
-        event.participantIds?.includes(uid);
-    })
-    .sort((a, b) => new Date(a.startAt) - new Date(b.startAt))
-    .slice(0, 30);
-
   // A profile is a place you look somebody up from. Opening one of their tasks
   // used to close the profile and land you on a task page — two navigations to
   // answer «what is this one».
@@ -182,40 +157,14 @@ export default function ProfileView({ user, onClose }) {
     navigateAfterOverlayClose(() => router.push(href));
   };
 
-  const handleEmergencyCall = async () => {
-    try {
-      const emergencyText = `🆘 ЕКСТРЕННИЙ ВИКЛИК від ${currentUser?.name || 'Учасника'}!`;
-      const link = `/chat?dm=${encodeURIComponent(currentUser?.id || currentUser?.uid || '')}`;
-
-      await sendNotification({
-        userIds: [uid],
-        type: 'emergency',
-        title: '🆘 Екстрений виклик',
-        body: emergencyText,
-        link,
-        organizationId: activeOrgId,
-      });
-
-      useWorkspaceStore.getState().showToast(`Виклик надіслано ${user.name || 'користувачу'}`, 'success');
-      if (onClose) onClose();
-    } catch (e) {
-      console.error(e);
-      useWorkspaceStore.getState().showToast('Помилка при надсиланні виклику', 'error');
-    }
-  };
-
   const tabsConfig = [
     { id: 'profile', label: 'Профіль' },
-    { id: 'tasks', label: `Задачі (${allActiveTasks.length})` },
-    { id: 'events', label: `Події (${agendaEvents.length})` },
+    { id: 'tasks', label: `Інциденти (${allActiveTasks.length})` },
   ];
 
   const memberMenu = [
-    { label: 'Екстрений виклик', icon: Zap, isDanger: true, onClick: handleEmergencyCall },
     ...(isAdminOrOwner ? [
-      { isDivider: true },
       { label: 'Керування доступом', icon: Shield, onClick: () => leaveFor(`/settings?section=team&user=${uid}`) },
-      { label: 'Аналітика учасника', icon: BarChart2, onClick: () => leaveFor(`/analytics?tab=workload&teamMember=${uid}`) },
     ] : []),
   ];
 
@@ -285,36 +234,27 @@ export default function ProfileView({ user, onClose }) {
                   onClick={() => leaveFor(`/chat?dm=${encodeURIComponent(uid)}`)}
                 />
               </Tooltip>
-              <Tooltip content="Створити завдання">
+              <Tooltip content="Створити інцидент">
                 <IconAction
-                  label="Створити завдання для учасника"
+                  label="Створити інцидент і призначити учасника"
                   icon={TaskIcon}
                   size="xl"
                   appearance="contrast"
                   onClick={() => leaveFor(`/my?new=1&assignee=${encodeURIComponent(uid)}`)}
                 />
               </Tooltip>
-              <Tooltip content="Створити подію">
-                <IconAction
-                  label="Створити подію з учасником"
-                  icon={CalendarIcon}
-                  size="xl"
-                  appearance="contrast"
-                  onClick={() => leaveFor(`/calendar?new=1&with=${encodeURIComponent(uid)}`)}
-                />
-              </Tooltip>
               {/* The tooltip goes around the menu, not around its trigger:
                   ContextMenu clones the trigger to attach its own onClick, and
                   Tooltip does not forward props to what it wraps — so a Tooltip
                   as the trigger would swallow the click that opens the menu. */}
-              <Tooltip content="Ще дії">
+              {memberMenu.length > 0 && <Tooltip content="Ще дії">
                 <ContextMenu
                   trigger={
                     <IconAction label="Інші дії з учасником" icon={MoreVertical} size="xl" appearance="contrast" />
                   }
                   items={memberMenu}
                 />
-              </Tooltip>
+              </Tooltip>}
             </div>
           )}
         </div>
@@ -430,16 +370,16 @@ export default function ProfileView({ user, onClose }) {
               </div>
             </div>
 
-            {/* Проєкти */}
+            {/* Client spaces */}
             <div className="flex flex-col gap-3">
               <h3 className="ui-type-column-title text-muted uppercase tracking-wider">
-                {projectListIsComplete ? 'Проєкти' : 'Спільні проєкти'}
+                {projectListIsComplete ? 'Клієнтські простори' : 'Спільні клієнти'}
               </h3>
               {memberProjects.length === 0 ? (
                 <p className="text-[14px] text-faint italic">
                   {projectListIsComplete
-                    ? 'Не входить до жодного проєкту.'
-                    : 'Спільних проєктів немає.'}
+                    ? 'Не закріплений за жодним клієнтом.'
+                    : 'Спільних клієнтів немає.'}
                 </p>
               ) : (
                 // A wrapped row of capsules, not a stack of full-width panels.
@@ -472,12 +412,12 @@ export default function ProfileView({ user, onClose }) {
                   access to anything», which is the opposite of the truth. */}
               {viewedReachesEveryProject && (
                 <p className="text-[11px] leading-[1.4] text-muted">
-                  Має доступ до всіх проєктів організації за роллю — тут лише ті, до складу яких входить.
+                  Має доступ до всіх клієнтів організації за роллю — тут лише ті, за якими закріплений.
                 </p>
               )}
               {!projectListIsComplete && (
                 <p className="text-[11px] leading-[1.4] text-muted">
-                  Показані лише проєкти, до яких маєте доступ ви.
+                  Показані лише клієнти, до яких маєте доступ ви.
                 </p>
               )}
             </div>
@@ -489,20 +429,15 @@ export default function ProfileView({ user, onClose }) {
         {activeTab === 'tasks' && (
           <div className="flex flex-col gap-2">
             {allActiveTasks.length === 0 ? (
-              // The «Події» tab one panel over says the same kind of thing with
-              // `EmptyState` — a glyph, a title and a sentence. This one was a
-              // hand-written grey box with a single line of muted text, so two
-              // tabs of the same profile answered "nothing here" in two
-              // different shapes.
               <EmptyState
                 icon={TaskIcon}
-                title="Немає активних задач"
-                description="Задачі, призначені на учасника, з’являться тут автоматично"
+                title="Немає активних інцидентів"
+                description="Інциденти, призначені на учасника, з’являться тут автоматично"
               />
             ) : (
               <>
                 {allActiveTasks.map(task => {
-                  const projectName = projects.find(p => p.id === task.projectId)?.name || 'Проєкт';
+                  const projectName = projects.find(p => p.id === task.projectId)?.name || 'Клієнт';
                   return (
                     <TaskRow
                       key={task.id}
@@ -515,69 +450,6 @@ export default function ProfileView({ user, onClose }) {
                   );
                 })}
               </>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'events' && (
-          <div className="flex flex-col gap-3">
-            {calendarLoading ? (
-              <div className="flex min-h-[180px] items-center justify-center">
-                <LoadingSpinner size="md" />
-              </div>
-            ) : agendaEvents.length === 0 ? (
-              <EmptyState
-                icon={CalendarIcon}
-                title="Найближчих подій немає"
-                description="Нові події з календаря з’являться тут автоматично"
-              />
-            ) : (
-              <div className="flex flex-col gap-2">
-                {agendaEvents.map(event => {
-                  const start = new Date(event.startAt);
-                  return (
-                    // `Card` with an onClick renders a real button, so the row
-                    // keeps its keyboard and screen-reader behaviour while the
-                    // border, radius and hover come from the kit. The flex row
-                    // moves inside: Card sets `block` on the button itself, and
-                    // a `flex` from here would be the same property in the same
-                    // layer, decided by emission order rather than intent.
-                    <Card
-                      key={event.id}
-                      preset="bordered"
-                      padding="sm"
-                      interactive
-                      onClick={() => {
-                        if (onClose) onClose();
-                        openEventQuickView(event);
-                      }}
-                    >
-                      <span className="flex items-center gap-3">
-                      <span className="flex h-[46px] w-[46px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-canvas">
-                        <span className="text-[10px] font-bold uppercase text-muted">
-                          {start.toLocaleDateString('uk-UA', { month: 'short' })}
-                        </span>
-                        <span className="text-[17px] font-black leading-none text-ink">{start.getDate()}</span>
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5">
-                          <span className="truncate text-[13px] font-bold text-ink">{event.title}</span>
-                          {event.visibility === 'private' && <LockKeyhole size={11} className="shrink-0 text-muted" />}
-                        </span>
-                        <span className="mt-1 flex items-center gap-1.5 text-[11px] text-muted">
-                          <Clock3 size={11} />
-                          {event.allDay
-                            ? 'Весь день'
-                            : start.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
-                          <span>·</span>
-                          {EVENT_TYPE_LABELS[event.type] || 'Подія'}
-                        </span>
-                      </span>
-                      </span>
-                    </Card>
-                  );
-                })}
-              </div>
             )}
           </div>
         )}

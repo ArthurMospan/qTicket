@@ -13,15 +13,12 @@ This file contains current owner guardrails and confirmed open work. Completed i
   authority for client projects, external invitations, incidents and workflow.
 - `issues` is the canonical incident collection. `tasks` is legacy/read-only and must not receive new features. The internal collection name stays stable during the fork; user-facing qTicket copy calls these records incidents.
 - Subscription billing will be supplied by the wider product ecosystem. The
-  owner has since made the product decision the old wording was waiting for:
-  two plans, `free` and `pro`, described once in `src/lib/utils/plans.mjs` and
-  rendered by «Налаштування» → «Тарифний план» rather than restated there.
-  Branding and the project ceiling are enforced; everything else the registry
-  lists carries `enforced: false` and the screen shows it under «Скоро», which
-  is the whole point of the flag. Do not add a capability without deciding which
-  of the two it is — a pricing page listing something nobody is stopped from
-  using is a bug with a price beside it, and `tests/plans.test.mjs` holds every
-  `enforced: true` to a named place in the code.
+  plan registry remains the single source for `free` and `pro`, but a
+  QuickTeam-managed organization sees its qTicket entitlement read-only under
+  «Налаштування» → «Підписка qTicket» and cannot switch it locally. Branding
+  and the client-space ceiling are enforced; every other listed capability is
+  marked `enforced: false` until a real boundary exists. Do not publish or sell
+  a capability that the server does not enforce.
 - Money is not connected. qTicket entitlement is provisioned manually until the
   wider QuickTeam billing system exposes an add-on entitlement contract. No
   client-visible plan field is a security boundary; when billing is connected,
@@ -38,11 +35,10 @@ Git commits once the corresponding slice is accepted.
 
 ### Current product state
 
-The application is a working, isolated QuickTeam fork whose qTicket product
-conversion is now in progress. Infrastructure readiness must not be described
-as product readiness: the first role-aware qTicket navigation, internal support
-overview and global incident queue are implemented, while the client journey
-and several inherited project screens still expose too much task-manager UI.
+The application is a working, isolated qTicket beta built from the QuickTeam
+foundation. Infrastructure readiness is not product acceptance: the primary
+support and client journeys are qTicket-native, while the complete two-account
+acceptance flow still has to be executed against the deployed test project.
 
 Completed foundation:
 
@@ -100,11 +96,24 @@ Completed product slice on 2026-08-28:
 - A plain qTicket `/login` is now the external client portal. Native staff login
   is disabled by default and exists only behind an explicit development/recovery
   environment switch.
+- The default incident lifecycle is **Новий → Прийнято → У роботі → Очікує
+  відповіді → Вирішено**. The default types are **Звернення**, **Побажання** and
+  **Помилка**; historical built-in labels are localized on read without
+  overwriting custom organization labels.
+- Creating a client no longer turns an email entered in the setup dialog into
+  an internal QuickTeam seat. Support staff are selected only from synchronized
+  internal members, while external users are invited from the client space's
+  **Люди** tab with `client_admin`/`client_member` scope.
+- QuickTeam-managed organization, branding, entitlement and support seats are
+  read-only in qTicket. Inherited migration, rates, deletion and unrelated
+  integration panels are removed from qTicket settings navigation.
+- The incident composer and detail view no longer expose audio tasks, sprints,
+  time tracking, estimates, task hierarchy, task links or QuickTeam+ chat.
+  Internal support keeps status, responsible staff, priority, type, resolution
+  target, labels, description, attachments and the shared client conversation.
 
 Product work still required:
 
-- Complete the user-facing terminology pass; inherited internal identifiers may
-  remain task-oriented, but qTicket screens may not ask users to manage tasks.
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
 - Add the explicit, idempotent server-side transfer from an incident to a
@@ -150,18 +159,19 @@ surfaces first, then delete only when references and migrations are understood.
 4. **Completed:** rework the internal client-project entry reached from
    **Клієнти** around customer context, incidents, people and settings instead
    of a task board.
-5. **Completed in code:** implement QuickTeam activation, staff selection,
+5. **Completed:** implement QuickTeam activation, staff selection,
    branding synchronization and one-time staff launch without sharing Firebase
    sessions or databases.
-6. **In progress:** configure both deployments with the shared secret, deploy
-   both checked slices, then execute the internal/client acceptance flow.
-7. Only after that flow is accepted, implement the incident-to-QuickTeam-task
+6. **Completed:** configure both deployments with the shared secret and verify
+   the first synchronized staff launch against the test deployment.
+7. **In progress:** deploy the qTicket product-fit pass, then execute the full
+   internal/client acceptance flow with separate accounts.
+8. Only after that flow is accepted, implement the incident-to-QuickTeam-task
    transfer contract and connect the existing entitlement field to billing.
 
-The exact next implementation task is step 6: finish all local checks, deploy
-both repositories with the shared secret, then execute the internal/client
-acceptance flow with separate accounts and fix every concrete failure it
-reveals. Every completed
+The exact next implementation task is step 7: finish all local checks, deploy
+the qTicket product-fit slice, then execute the internal/client acceptance flow
+with separate accounts and fix every concrete failure it reveals. Every completed
 slice should be a reviewable Git commit and this checkpoint should be updated
 in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
@@ -212,56 +222,30 @@ credentials, service-account JSON, `.env` values or session notes here.
 - Provide a reconnect path for revoked/invalid grants on already linked projects.
 - Tighten provider rules and add live cross-repository smoke coverage before a broad client rollout.
 
-### Status categories — the remaining step
+### Status categories
 
-A status has a local label and a shared category (see the README). Two notes and
-one follow-up.
+A status has a local label and a shared category (see the README). qTicket's
+five built-in category labels are «Новий», «Прийнято», «У роботі», «Очікує
+відповіді» and «Вирішено». An organization may add local statuses inside those
+categories without changing what the global queue counts.
 
 **«Скасовано» is no longer a category.** Dropped work is `cancelledAt` on the
 task, because a status puts a task in a column and a task in a column is still
 one of the tasks every report has to remember to subtract. An organization that
 had created a status under the old «Скасовано» section keeps it as an ordinary
-open status — deliberately visible rather than silently re-read as «Готово»,
+open status — deliberately visible rather than silently re-read as «Вирішено»,
 which is what its stored `isDone: true` would otherwise have meant. The one-time
 cleanup is by hand and takes a minute: cancel those tasks with the new action,
-then delete the status in «Налаштування» → «Статуси завдань». No script.
+then delete the status in «Налаштування» → «Статуси інцидентів». No script.
 
-**«На перевірці» is new**, and it is not added to a workflow anybody has already
-saved: the editor shows an empty section instead, so nobody's board grows a
-column overnight. The three ids the product shipped for it — `code-review`,
-`qa`, `client-approval` — move into the category automatically, which is the
-meaning they always had.
+**«Очікує відповіді» is the shared waiting category.** Historical built-in
+labels «На перевірці», `Review` and `In Review` are presented with the qTicket
+label on read. Custom labels remain untouched. The historical ids
+`code-review`, `qa` and `client-approval` still resolve to this category.
 
-One follow-up is deliberately not built:
-
-- Let one column of a project board hold several statuses, mapped explicitly. That
-  is what "hidden columns" are really reaching for: today a status a project does
-  not want is switched off per project, and a column that could gather «Код-ревʼю»
-  and «QA» under one heading would express it directly. `hiddenColumns` and its
-  server-side refusal stay correct in the meantime.
-
-A project board briefly offered a per-person "group by category" toggle instead,
-and it was removed rather than moved into project settings. Grouping is not a
-view preference there: a drop on a category column lets the category pick the
-status, so two people looking at one board would mean different things by the
-same gesture. A project board has a shared status vocabulary — that is what makes
-it a project board — and «fewer columns» is what hiding a column is for, at no
-cost in precision. Only «Мої завдання» groups by category, because across
-projects no shared vocabulary exists.
-
-### Table view — what it deliberately does not do
-
-The project board's third view shipped (see
-[ARCHITECTURE.md](ARCHITECTURE.md)). Three omissions are choices, not gaps:
-
-- **Column order is not in the address.** The picker says which columns, never
-  where they sit. Reordering is a drag interaction whose whole value is local,
-  and a link that carried a layout would be a second thing to keep in sync.
-- **«Мої завдання» has no table.** That list spans projects, so its rows have no
-  shared status vocabulary and a cell edit would write into whichever project
-  owns the row. Both are solvable; neither is solved by copying this component.
-- **Time logged is not a column.** It lives in `timeLogs`, and a table that read
-  it would be one query per row.
+The global «Інциденти» board groups by these categories. Moving a card resolves
+the matching local status from that incident's client space, so a global drop
+never writes a status that the client space does not own.
 
 ### Product polish
 

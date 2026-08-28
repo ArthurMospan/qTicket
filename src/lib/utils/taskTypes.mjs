@@ -2,17 +2,17 @@ export const SYSTEM_TASK_TYPE_ID = 'task';
 
 export const DEFAULT_TASK_TYPES = Object.freeze([{
   id: SYSTEM_TASK_TYPE_ID,
-  label: 'Інцидент',
+  label: 'Звернення',
   color: '#059669',
   icon: 'task',
 }, {
   id: 'feature',
-  label: 'Фіча',
+  label: 'Побажання',
   color: '#f59e0b',
   icon: 'sparkles',
 }, {
   id: 'bug',
-  label: 'Баг',
+  label: 'Помилка',
   color: '#dc2626',
   icon: 'bug',
 }]);

@@ -91,7 +91,7 @@ test('QUI-131 allows several closing statuses but never a workflow without an op
   assert.match(settings, /const problem = statusGroupsBreakInvariant\(statuses\.filter\(s => s\.id !== id\)\);/);
   // And the delete control is disabled rather than refusing after the click.
   assert.match(settings, /const canDeleteStatus = status => \(/);
-  assert.match(settings, /Налаштуйте етапи, через які проходять завдання/);
+  assert.match(settings, /Налаштуйте етапи, через які проходять звернення клієнтів/);
 });
 
 // The editor is a list per category, the way Linear and Shortcut do it: a status
@@ -283,50 +283,41 @@ test('both entry points to project settings offer the same capabilities', async 
   for (const source of [projectPage, list]) {
     const at = source.indexOf('<BoardConfigModal');
     const call = source.slice(at, at + 600);
-    for (const prop of ['canInvite', 'onArchive', 'onUnarchive', 'onDelete']) {
+    for (const prop of ['onArchive', 'onUnarchive', 'onDelete']) {
       assert.match(call, new RegExp(`${prop}=`), `BoardConfigModal must receive ${prop}`);
     }
+    assert.doesNotMatch(call, /canInvite=/);
   }
   // Archiving or deleting the project you are standing in has to leave it.
   assert.match(projectPage, /handleArchiveProject[\s\S]{0,240}router\.push\('\/clients'\)/);
   assert.match(projectPage, /handleDeleteProject[\s\S]{0,240}router\.push\('\/clients'\)/);
 });
 
-// A colleague's profile offered two labelled buttons and hid the rest behind an
-// admin-only menu. Four actions with four words beside them read as a sentence
-// rather than a toolbar, and the loudest thing on the screen was the emergency
-// call — the one action nobody performs casually.
-test('a member profile offers four icon actions, with the emergency call in the menu', async () => {
+// qTicket profiles expose only support work. Calendar planning and emergency
+// calls belong to QuickTeam and must not leak into this product.
+test('a member profile offers qTicket actions only', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
   const composer = await read('../src/components/CreateTaskModal.jsx');
   const myTasks = await read('../src/app/(app)/my/page.js');
-  const calendar = await read('../src/app/(app)/calendar/page.js');
-  const eventDialog = await read('../src/components/workspace/calendar/CalendarEventDialog.jsx');
 
   // Icons only: no labelled Button survives in the action row.
   assert.doesNotMatch(profile, />\s*Написати\s*</);
   assert.doesNotMatch(profile, />\s*Виклик\s*</);
   for (const label of [
     'Написати повідомлення',
-    'Створити завдання для учасника',
-    'Створити подію з учасником',
+    'Створити інцидент і призначити учасника',
     'Інші дії з учасником',
   ]) {
     assert.match(profile, new RegExp(`label="${label}"`), `${label} must be an icon action`);
   }
-  // The call is still reachable, one level down, and marked as destructive.
-  assert.match(profile, /label: 'Екстрений виклик', icon: Zap, isDanger: true/);
-  // The menu is no longer admin-only, because it now carries an action every
-  // member has.
+  assert.doesNotMatch(profile, /Екстрений виклик|Створити подію|\/calendar\?new=1/);
+  // Access management stays in the admin-only menu.
   assert.match(profile, /\.\.\.\(isAdminOrOwner \? \[/);
 
-  // Both new actions land somewhere that knows what to do with them.
+  // Incident creation lands somewhere that knows what to do with it.
   assert.match(profile, /\/my\?new=1&assignee=/);
   assert.match(myTasks, /searchParams\.get\('assignee'\)/);
   assert.match(composer, /assignees: clientMode[\s\S]{0,180}: initialAssignees\?\.length[\s\S]{0,80}\? initialAssignees[\s\S]{0,100}currentUser/);
-  assert.match(profile, /\/calendar\?new=1&with=/);
-  assert.match(calendar, /searchParams\.get\('with'\)/);
-  assert.match(eventDialog, /initialParticipantIds/);
 });
 
 // The same count was drawn four different ways for the same question: a
@@ -380,26 +371,25 @@ test('the palette says it is searching rather than that it found nothing', async
   assert.match(palette, /searching \? 'Шукаємо…' : `Нічого не знайдено за «\$\{query\}»`/);
 });
 
-// Four 56px circles, on the shared icons, with the emergency call one level
-// down. `xl` and `contrast` are kit variants rather than a className each.
+// The two qTicket actions and the optional admin menu share one kit treatment.
 test('the member profile actions are one declared size and one declared appearance', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
   const button = await read('../src/components/ui/Button.jsx');
   const iconAction = await read('../src/components/ui/IconAction.jsx');
   const globals = await read('../src/app/globals.css');
 
-  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 4);
+  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 3);
   assert.match(button, /'icon-xl': 'w-\[56px\] p-0'/);
   assert.match(iconAction, /xl: 'icon-xl'/);
   assert.match(iconAction, /contrast: '!bg-selected !text-ink/);
   assert.match(globals, /data-ui-size='icon-56'\] \{[\s\S]{0,120}--ui-control-height: 56px;/);
 });
 
-// Icons alone name nothing, and these four are the whole action row — there is
+// Icons alone name nothing, and these actions are the whole action row — there is
 // no text anywhere near them.
 test('every profile action circle carries a tooltip as well as a label', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
-  for (const content of ['Написати повідомлення', 'Створити завдання', 'Створити подію', 'Ще дії']) {
+  for (const content of ['Написати повідомлення', 'Створити інцидент', 'Ще дії']) {
     assert.match(profile, new RegExp(`<Tooltip content="${content}">`), content);
   }
   // The menu is wrapped, not its trigger: ContextMenu clones the trigger to

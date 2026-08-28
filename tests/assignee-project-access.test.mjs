@@ -128,7 +128,7 @@ test('the composer scopes assignees to the project selected inside it', async ()
   // Beside the project, not at the bottom of the form: the block used to sit
   // under the assignee chips, which is past the fold of a form somebody is
   // still filling in.
-  const projectField = modal.indexOf('label="Проєкт"');
+  const projectField = modal.indexOf("label={incidentComposer ? 'Клієнт' : 'Проєкт'}");
   const consent = modal.indexOf('assigneesJoiningProject.length > 0 && (');
   const description = modal.indexOf('<MarkdownEditor');
   assert.ok(projectField > 0 && consent > projectField && consent < description,
@@ -186,7 +186,9 @@ test('saving project settings applies the change to the team, not the snapshot',
 
   const modal = await read('../src/components/workspace/BoardConfigModal.jsx');
   assert.match(modal, /const \[teamBaseline\] = useState\(/);
-  assert.match(modal, /\{ team: teamMemberIds, teamBaseline \}/);
+  assert.match(modal, /team: \[\.\.\.new Set\(\[\.\.\.clientMemberIds, \.\.\.teamMemberIds\]\)\]/);
+  assert.match(modal, /teamBaseline,/);
+  assert.match(modal, /!isClientRole\(member\.role\)/);
 });
 
 test('every composer forwards the consent to the API, or the box does nothing', async () => {
@@ -222,17 +224,18 @@ test('a customer incident row no longer loses the face of someone outside the pr
   // One colour and one sentence, whatever the person's role. The branch that
   // said «доступ є за роллю, але на картці проєкту його не видно» explained our
   // data model to somebody who had asked to give a colleague a task.
-  assert.match(detail, /Цього учасника немає в проєкті/);
+  assert.match(detail, /Цього працівника немає в команді підтримки клієнта/);
   assert.doesNotMatch(detail, /доступ є за роллю/);
   assert.doesNotMatch(detail, /Виконавець не у складі проєкту/);
   // And the control on the coloured wash is ink, not the near-white secondary
   // fill, which stopped reading as a button at all on the four washes.
   assert.ok(detail.includes('style="primary"'), 'кнопка в алерті має бути чорнильною');
-  // The grant the task screen has always performed stopped being silent, in
-  // both directions: it used to succeed without a word and fail into a `catch {}`.
+  // The explicit grant button reports both outcomes. Assignment itself never
+  // mutates the client-support roster as a side effect.
   assert.doesNotMatch(detail, /catch \{ \/\* member assigner lacks team-write permission — non-fatal \*\/ \}/);
-  assert.match(detail, /Додано до складу проєкту/);
-  assert.match(detail, /Не вдалося додати до складу проєкту/);
+  assert.match(detail, /Додано до команди підтримки клієнта/);
+  assert.match(detail, /Не вдалося додати до команди підтримки клієнта/);
+  assert.doesNotMatch(detail, /team: arrayUnion\(\.\.\.missingFromTeam\)/);
 });
 
 // «В яких він проєктах» had no answer anywhere in the product: you opened each
@@ -244,8 +247,8 @@ test('a profile says which projects name the person', async () => {
   // A member holds only their own projects, so the list they see is the
   // intersection — and says so, rather than reading as the whole answer.
   assert.match(profile, /const projectListIsComplete = isAdminOrOwner \|\| isMe;/);
-  assert.match(profile, /Спільні проєкти/);
-  assert.match(profile, /Показані лише проєкти, до яких маєте доступ ви\./);
+  assert.match(profile, /Спільні клієнти/);
+  assert.match(profile, /Показані лише клієнти, до яких маєте доступ ви\./);
   // And an owner or an admin being looked at reaches every project without
   // being on it, so a short list under their name is not the whole story.
   assert.match(profile, /const viewedReachesEveryProject = isPrivilegedRole\(/);
