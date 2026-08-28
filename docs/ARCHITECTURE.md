@@ -59,7 +59,10 @@ The authenticated shell follows the same rule. Desktop and mobile navigation
 do not subscribe to or render the inherited QuickTeam timer. Client settings
 are role-scoped: `client_member` receives personal settings only, while
 `client_admin` additionally receives the employee directory for the single
-client space it may administer.
+client space it may administer. The layout also enforces the external route
+boundary before rendering: client roles may open the portal root, settings and
+an accessible incident detail; direct staff overview, queue, team, client-board
+or project-board URLs are canonicalized back to that portal root.
 
 `Ctrl+K` follows that same boundary rather than acting as a hidden second
 sidebar. Internal users receive overview, incident, client, support-team and

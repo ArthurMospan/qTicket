@@ -3,6 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
 import { can, invitedRoleFor, rolesFor } from '../src/lib/utils/can.js';
+import { isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
 
 const read = relativePath => readFile(new URL(relativePath, import.meta.url), 'utf8');
 
@@ -167,4 +168,18 @@ test('лише client_admin бачить керування співробітн
   assert.match(settings, /clientAdmin\s*\? CLIENT_ADMIN_SETTINGS_SECTIONS\s*:\s*CLIENT_SETTINGS_SECTIONS/);
   assert.match(settings, /clientViewer && !clientSettingsSections\.has\(qTicketSection\)/);
   assert.match(settings, /label: 'Співробітники клієнта', group: 'Клієнтський простір'/);
+});
+
+test('клієнтська сесія не може відкрити внутрішній workspace прямим URL', async () => {
+  for (const allowed of ['/', '/settings', '/settings/profile', '/client-a/issue/INC-12']) {
+    assert.equal(isClientPortalRoute(allowed), true, `${allowed} має лишатися клієнтським маршрутом`);
+  }
+  for (const denied of ['/overview', '/my', '/team', '/clients', '/client-a', '/analytics', '/chat']) {
+    assert.equal(isClientPortalRoute(denied), false, `${denied} не має відкриватися клієнту`);
+  }
+
+  const layout = await read('../src/app/(app)/layout.js');
+  assert.match(layout, /const clientRouteDenied = isClientRole\(orgRole\) && !isClientPortalRoute\(pathname\)/);
+  assert.match(layout, /router\.replace\(`\/\?org=\$\{encodeURIComponent\(activeOrgId\)\}`\)/);
+  assert.match(layout, /if \(clientRouteDenied\) \{[\s\S]{0,360}Повертаємо до порталу підтримки/);
 });

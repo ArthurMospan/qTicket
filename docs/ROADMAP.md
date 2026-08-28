@@ -83,7 +83,7 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,173 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,174 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -133,6 +133,10 @@ Completed product slice on 2026-08-28:
   desktop or mobile. Client settings now keep the employee directory exclusive
   to `client_admin`, use client-facing labels, and send a direct `client_member`
   deep link back to personal settings.
+- External client routes are now contained by the authenticated layout, not
+  only hidden navigation. Client roles may open their portal, personal settings
+  and accessible incident details; direct staff overview, queue, team and board
+  URLs return to the client portal before the internal screen renders.
 
 Product work still required:
 

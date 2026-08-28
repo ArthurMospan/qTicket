@@ -28,6 +28,8 @@ import { CloudOff, DatabaseZap, LockKeyhole } from 'lucide-react';
 import { organizationLoadErrorKind } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaExceededError } from '@/lib/utils/errors';
 import { isQuotaRefused, QUOTA_FAILURE_COPY } from '@/lib/utils/quotaState.mjs';
+import { isClientRole } from '@/lib/utils/can';
+import { isClientPortalRoute } from '@/lib/utils/clientPortalRoutes.mjs';
 
 // A spinner is a promise that something is coming. When nothing is, it is the
 // worst screen the product has: it asks the reader to keep waiting and never
@@ -149,6 +151,7 @@ export default function WorkspaceLayout({ children }) {
   const signOutAndReturn = async () => { await signOut(); router.replace('/login'); };
 
   const pathname = usePathname();
+  const clientRouteDenied = isClientRole(orgRole) && !isClientPortalRoute(pathname);
   const isChat = pathname?.startsWith('/chat');
   const isSettings = pathname?.startsWith('/settings');
   const hideHeader = isSettings;
@@ -178,6 +181,16 @@ export default function WorkspaceLayout({ children }) {
       router.replace(`/login?next=${encodeURIComponent(returnTo)}`);
     }
   }, [currentUser, authLoading, pathname, router]);
+
+  // A client role owns a portal session, not a reduced staff workspace. Menu
+  // visibility is not an access boundary: a pasted `/overview`, `/my`, `/team`
+  // or project-board URL must be canonicalized before that screen can paint.
+  // Incident detail stays reachable because the client portal links to it and
+  // the page/server still enforce the exact project scope.
+  useEffect(() => {
+    if (authLoading || orgLoading || !currentUser || !activeOrgId || !clientRouteDenied) return;
+    router.replace(`/?org=${encodeURIComponent(activeOrgId)}`);
+  }, [activeOrgId, authLoading, clientRouteDenied, currentUser, orgLoading, router]);
 
   // Onboarding redirect: if owner/admin and org not yet onboarded
   useEffect(() => {
@@ -244,6 +257,14 @@ export default function WorkspaceLayout({ children }) {
   if (noOrg) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-canvas">
+        <div className="w-8 h-8 border-[3px] border-line border-t-ink rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (clientRouteDenied) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-canvas" role="status" aria-label="Повертаємо до порталу підтримки">
         <div className="w-8 h-8 border-[3px] border-line border-t-ink rounded-full animate-spin" />
       </div>
     );
