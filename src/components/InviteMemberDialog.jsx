@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Link2, Mail } from 'lucide-react';
 import Dialog from '@/components/ui/Dialog';
+import Tabs from '@/components/ui/Tabs';
+import InviteLinkSection from '@/components/InviteLinkSection';
 import Alert from '@/components/ui/Feedback/Alert';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -31,6 +33,7 @@ export default function InviteMemberDialog({
   clientMode = false,
   clientAdminMode = false,
   projectIds = [],
+  spaceName = '',
 }) {
   const { activeOrg, currentUser, orgRole } = useAppContext();
   const clientInvite = clientMode || isClientRole(orgRole);
@@ -45,12 +48,19 @@ export default function InviteMemberDialog({
   const [sent, setSent] = useState(false);
   const [undelivered, setUndelivered] = useState(false);
   const [pendingAccessEmail, setPendingAccessEmail] = useState('');
+  // Two ways to hand somebody the same access, and they are two halves of one
+  // dialog rather than a dialog and a panel somewhere else on the page: you
+  // either know the person's address or you do not, and that is a choice made
+  // in the moment of inviting them.
+  const [tab, setTab] = useState('email');
 
   const invitedRole = clientInvite ? 'client_member' : 'client_admin';
+  const linkProjectId = Array.isArray(projectIds) ? projectIds[0] : '';
 
   useEffect(() => {
     if (!isOpen) return;
     queueMicrotask(() => {
+      setTab('email');
       setEmail('');
       setEmailError('');
       setSent(false);
@@ -121,6 +131,18 @@ export default function InviteMemberDialog({
       bodyPadding="invite"
     >
       <div className="flex flex-col gap-6">
+        <Tabs
+          tabs={[
+            { id: 'email', label: 'Електронна пошта', icon: Mail },
+            { id: 'link', label: 'Посилання', icon: Link2 },
+          ]}
+          activeTab={tab}
+          onTabChange={setTab}
+        />
+
+        {tab === 'link' ? (
+          <InviteLinkSection role={invitedRole} projectId={linkProjectId} spaceName={spaceName} />
+        ) : (
         <form noValidate onSubmit={handleInvite} className="flex flex-col gap-3">
           <Label required>
             {clientInvite ? 'Email співробітника' : 'Email адміністратора клієнта'}
@@ -180,6 +202,7 @@ export default function InviteMemberDialog({
             </p>
           )}
         </form>
+        )}
       </div>
     </Dialog>
   );

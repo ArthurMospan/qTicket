@@ -7,16 +7,33 @@
 // стають джерелом правди і оновлюють кеш.
 import { useEffect, useState } from 'react';
 import { SIDEBAR_THEME_VERSION } from '@/lib/utils/sidebarTheme';
+import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
 const cacheKey = orgId => `qt_sidebar_brand_${orgId}`;
 
+// One tenant, one brand.
+//
+// This used to read the organization's own `customBranding`/`logo`/
+// `sidebarTheme`/`sidebarColor` — the fields the inherited task manager wrote
+// when somebody set a colour inside it. The client portal, meanwhile, reads
+// `portalBranding`, the snapshot QuickTeam signs and sends. Two fields, one
+// company: the same organization was white in QuickTeam and purple in
+// qTicket's staff rail, and nothing on either screen said which was wrong.
+//
+// QuickTeam owns the brand. `resolveOrganizationPortalBrand` is that single
+// answer — it prefers the synced snapshot and falls back to the organization's
+// own fields for a tenant that predates the sync — and both surfaces read it.
+// The `customBranding` gate is gone with it: it was a paid plan's switch, and
+// qTicket has no plans to switch.
 function normalizeBrand(org) {
-  if (!org?.customBranding || !org?.logo) return null;
+  if (!org) return null;
+  const brand = resolveOrganizationPortalBrand(org);
+  if (!brand.logo) return null;
   return {
     customBranding: true,
-    logo: org.logo,
-    sidebarTheme: org.sidebarTheme || 'dark',
-    sidebarColor: org.sidebarColor || null,
+    logo: brand.logo,
+    sidebarTheme: brand.sidebarTheme,
+    sidebarColor: brand.sidebarColor || null,
   };
 }
 
