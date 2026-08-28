@@ -134,6 +134,10 @@ const CLIENT_SETTINGS_SECTIONS = new Set([
   'notifications',
   'localization',
   'account',
+]);
+
+const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set([
+  ...CLIENT_SETTINGS_SECTIONS,
   'team',
 ]);
 
@@ -821,6 +825,9 @@ export default function SettingsPage() {
   const isOwner = myRole === 'owner';
   const clientViewer = isClientRole(myRole);
   const clientAdmin = myRole === 'client_admin';
+  const clientSettingsSections = clientAdmin
+    ? CLIENT_ADMIN_SETTINGS_SECTIONS
+    : CLIENT_SETTINGS_SECTIONS;
   const quickTeamManaged = Boolean(
     org?.quickTeam?.sourceOrganizationId || org?.portalBranding?.source === 'quickteam',
   );
@@ -951,7 +958,7 @@ export default function SettingsPage() {
       const qTicketSection = HIDDEN_QTICKET_SETTINGS_SECTIONS.has(requestedSection)
         ? (clientViewer ? 'profile' : 'workspace')
         : requestedSection;
-      const sec = clientViewer && !CLIENT_SETTINGS_SECTIONS.has(qTicketSection)
+      const sec = clientViewer && !clientSettingsSections.has(qTicketSection)
         ? 'profile'
         : qTicketSection;
       const authSuccess = currentSearchParams.get('auth');
@@ -991,7 +998,7 @@ export default function SettingsPage() {
         queueMicrotask(() => showToast(message, 'error'));
       }
     }
-  }, [clientViewer, settingsQuery, showToast]);
+  }, [clientSettingsSections, clientViewer, settingsQuery, showToast]);
 
   // ── Workflow ──
   const [statuses,   setStatuses]   = useState(DEFAULT_STATUSES);
@@ -4416,8 +4423,11 @@ export default function SettingsPage() {
   // be there rather than only inside the section.
   const allowedNav = NAV
     .filter(item => !HIDDEN_QTICKET_SETTINGS_SECTIONS.has(item.id))
-    .filter(item => clientViewer ? CLIENT_SETTINGS_SECTIONS.has(item.id) : (!item.adminOnly || isAdmin))
+    .filter(item => clientViewer ? clientSettingsSections.has(item.id) : (!item.adminOnly || isAdmin))
     .map(item => {
+    if (clientViewer && item.id === 'team') {
+      return { ...item, label: 'Співробітники клієнта', group: 'Клієнтський простір' };
+    }
     if (item.id === 'billing') {
       // No badge until the document has actually been read: a red «Free»
       // beside the plan section is exactly the wrong thing to guess.

@@ -55,6 +55,12 @@ same boundary: it describes only workflows reachable in qTicket, even while
 legacy implementation remains in the repository for a later reference-safe
 removal.
 
+The authenticated shell follows the same rule. Desktop and mobile navigation
+do not subscribe to or render the inherited QuickTeam timer. Client settings
+are role-scoped: `client_member` receives personal settings only, while
+`client_admin` additionally receives the employee directory for the single
+client space it may administer.
+
 `Ctrl+K` follows that same boundary rather than acting as a hidden second
 sidebar. Internal users receive overview, incident, client, support-team and
 settings destinations plus incident/client creation. Client roles receive only

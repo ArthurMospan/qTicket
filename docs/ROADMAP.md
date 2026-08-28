@@ -83,7 +83,7 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,171 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,173 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -129,6 +129,10 @@ Completed product slice on 2026-08-28:
   sprint, analytics and timer commands are gone. Search no longer reads
   calendar events, and client people results are restricted to their accessible
   client-space teams.
+- The authenticated shell no longer renders the inherited global timer on
+  desktop or mobile. Client settings now keep the employee directory exclusive
+  to `client_admin`, use client-facing labels, and send a direct `client_member`
+  deep link back to personal settings.
 
 Product work still required:
 

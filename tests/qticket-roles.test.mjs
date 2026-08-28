@@ -141,3 +141,30 @@ test('клієнтський глобальний пошук не відкрив
   assert.match(route, /const events = \[\]/);
   assert.match(paletteHost, /clientViewer[\s\S]{0,80}\? EMPTY_MATCHES/);
 });
+
+test('qTicket shell не повертає таймер QuickTeam у desktop або mobile навігацію', async () => {
+  const [sidebar, mobile] = await Promise.all([
+    read('../src/components/WorkspaceSidebar.jsx'),
+    read('../src/components/MobileNav.jsx'),
+  ]);
+
+  for (const source of [sidebar, mobile]) {
+    assert.doesNotMatch(source, /timerTargetHref|activeTimer|timerElapsed|stopTimer/);
+    assert.doesNotMatch(source, /Зупинити та зберегти|активним таймером/);
+  }
+  assert.doesNotMatch(mobile, /SheetTimerCapsule/);
+});
+
+test('лише client_admin бачить керування співробітниками у налаштуваннях', async () => {
+  const settings = await read('../src/app/(app)/settings/page.js');
+
+  assert.match(settings, /const CLIENT_SETTINGS_SECTIONS = new Set\(\[[\s\S]{0,180}'account',[\s\S]{0,20}\]\);/);
+  assert.doesNotMatch(
+    settings.match(/const CLIENT_SETTINGS_SECTIONS = new Set\(\[[\s\S]*?\]\);/)?.[0] || '',
+    /'team'/,
+  );
+  assert.match(settings, /const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set\(\[[\s\S]{0,100}'team'/);
+  assert.match(settings, /clientAdmin\s*\? CLIENT_ADMIN_SETTINGS_SECTIONS\s*:\s*CLIENT_SETTINGS_SECTIONS/);
+  assert.match(settings, /clientViewer && !clientSettingsSections\.has\(qTicketSection\)/);
+  assert.match(settings, /label: 'Співробітники клієнта', group: 'Клієнтський простір'/);
+});

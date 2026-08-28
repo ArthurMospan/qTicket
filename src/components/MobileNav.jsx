@@ -2,7 +2,7 @@
 // src/components/MobileNav.jsx — mobile bottom tab bar + «Ще» sheet
 // Renders only below md (the wrapper in workspace/layout.js is md:hidden).
 // Primary destinations live in the bar; everything else from the desktop
-// sidebar (команда, налаштування, список клієнтів, таймер) —
+// sidebar (команда, налаштування, список клієнтів) —
 // у висувній шторці «Ще».
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ import { Button, Counter, IconAction, OrganizationMark } from '@/components/ui';
 import { can, isClientRole } from '@/lib/utils/can';
 import {
   Folder, LayoutDashboard, Menu, X,
-  Users, Settings, Plus, Clock, Square as StopIcon, ChevronsUpDown, CircleHelp, UserRound,
+  Users, Settings, Plus, ChevronsUpDown, CircleHelp, UserRound,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
@@ -21,7 +21,6 @@ import { useWorkspaceHelp } from '@/components/WorkspaceHelpMenu';
 import WorkspacePlanLimitRail from '@/components/WorkspacePlanLimitRail';
 import { computeSidebarTheme, computeTranslucentSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
-import { timerTargetHref } from '@/lib/utils/timerNavigation.mjs';
 import { useModalFocus } from '@/lib/hooks/useModalFocus';
 import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
@@ -42,48 +41,6 @@ const MORE_NAV = [
   { href: '/team',     icon: Users,    label: 'Команда' },
   { href: '/settings', icon: Settings, label: 'Налаштування' },
 ];
-
-// Separate component so the store's 1-second timerElapsed tick re-renders
-// only this capsule (rendered only inside the open sheet), not the whole nav.
-function SheetTimerCapsule({ onNavigate, onStop }) {
-  const activeTimer = useWorkspaceStore(s => s.activeTimer);
-  const timerElapsed = useWorkspaceStore(s => s.timerElapsed);
-  const formatElapsed = useWorkspaceStore(s => s.formatElapsed);
-  if (!activeTimer) return null;
-  return (
-    <div className="px-[16px] pb-[8px]">
-      <div
-        onClick={() => onNavigate(activeTimer)}
-        // The strip carries the stop button, so it is not a `<button>` itself.
-        role="button"
-        tabIndex={0}
-        onKeyDown={event => {
-          if (event.target !== event.currentTarget) return;
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          onNavigate(activeTimer);
-        }}
-        // The bar paints itself from the sidebar's own tokens, so a brand
-        // colour reaches the sheet too. `#333333` was a dark grey chosen when
-        // the only rail was the dark one, and on a light brand it was a black
-        // slab with white text sitting in a white sheet.
-        className="bg-[var(--sb-active)] rounded-[12px] flex items-center justify-between pl-[12px] pr-[6px] py-[6px] cursor-pointer">
-        <div className="flex items-center gap-[8px]">
-          <Clock size={14} className="animate-pulse text-[var(--sb-text)]" />
-          <span className="text-[var(--sb-text)] text-[13px] font-mono font-medium">{formatElapsed(timerElapsed)}</span>
-        </div>
-        <IconAction
-          label="Зупинити та зберегти"
-          icon={StopIcon}
-          size="compact"
-          appearance="danger"
-          shape="compact"
-          onClick={onStop}
-        />
-      </div>
-    </div>
-  );
-}
 
 /**
  * @param {boolean} props.keyboardOpen The on-screen keyboard is covering part of
@@ -117,9 +74,6 @@ export default function MobileNav({ keyboardOpen = false }) {
   // закривається від дотику, а діалог має лишитися на екрані.
   const { items: helpItems, overlays: helpOverlays } = useWorkspaceHelp();
 
-  const activeTimer = useWorkspaceStore(s => s.activeTimer);
-  const stopTimer = useWorkspaceStore(s => s.stopTimer);
-  const showToast = useWorkspaceStore(s => s.showToast);
   const unreadByOrganization = useWorkspaceStore(s => s.notificationUnreadByOrg);
   const otherOrgUnreadCount = Object.entries(unreadByOrganization).reduce(
     (total, [organizationId, count]) => organizationId === activeOrgId ? total : total + count,
@@ -183,26 +137,6 @@ export default function MobileNav({ keyboardOpen = false }) {
   };
   // «Ще» is highlighted when the current page lives in the sheet
   const moreActive = visibleMoreNav.some(i => isActive(i.href, i.exact, i.section));
-
-  const handleStopTimer = async e => {
-    e.stopPropagation();
-    // The minutes ride in the store, not in the URL — see `stopTimer`.
-    try {
-      const result = await stopTimer();
-      if (result?.queued) showToast('Зупинку таймера збережено до відновлення мережі', 'warning');
-      setMoreOpen(false);
-      const targetHref = timerTargetHref(result);
-      if (targetHref) router.push(targetHref);
-    } catch (error) {
-      showToast(error.message || 'Не вдалося зупинити таймер', 'error');
-    }
-  };
-
-  const handleTimerNavigate = (timer) => {
-    setMoreOpen(false);
-    const targetHref = timerTargetHref(timer);
-    if (targetHref) router.push(targetHref);
-  };
 
   return (
     <>
@@ -271,10 +205,7 @@ export default function MobileNav({ keyboardOpen = false }) {
           }`}>
           <Menu size={20} />
           <span className="text-[10px] font-semibold leading-none">Ще</span>
-          {!clientViewer && activeTimer && (
-            <span className="absolute top-[8px] left-[calc(50%+6px)] w-[8px] h-[8px] bg-danger-solid rounded-full animate-pulse" />
-          )}
-          {otherOrgUnreadCount > 0 && !activeTimer && (
+          {otherOrgUnreadCount > 0 && (
             <span className="absolute top-[6px] left-[calc(50%+4px)]">
               <Counter variant="dot" size="sm" appearance="sidebar" />
             </span>
@@ -348,11 +279,6 @@ export default function MobileNav({ keyboardOpen = false }) {
                 <IconAction label="Закрити" icon={X} size="sm" appearance="quiet" onClick={() => setMoreOpen(false)} className="-mr-[6px]" />
               </div>
             </div>
-
-            {/* Active timer capsule (subscribes to the 1s tick internally) */}
-            {!clientViewer && (
-              <SheetTimerCapsule onNavigate={handleTimerNavigate} onStop={handleStopTimer} />
-            )}
 
             {/* The rail's ceiling notice, in the drawer that stands in for the
                 rail on a phone. The sheet already carries every `--sb-*` the

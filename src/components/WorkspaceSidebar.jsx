@@ -9,8 +9,7 @@ import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui';
 import {
   Folder, Users, Settings, ChevronsUpDown,
-  Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen,
-  Clock, Square as StopIcon, UserRound,
+  Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen, UserRound,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
@@ -18,7 +17,6 @@ import { useProjectUnreadIndicators } from '@/lib/hooks/useProjectUnreadIndicato
 import Tooltip from '@/components/ui/Navigation/Tooltip';
 import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
-import { timerTargetHref } from '@/lib/utils/timerNavigation.mjs';
 import WorkspaceHelpMenu from '@/components/WorkspaceHelpMenu';
 import WorkspacePlanLimitRail from '@/components/WorkspacePlanLimitRail';
 
@@ -121,28 +119,6 @@ export default function WorkspaceSidebar() {
       markProjectRead(projectId).catch(error => console.error('[WorkspaceSidebar] mark project read', error));
     }
   }, [pathname, projects, markProjectRead]);
-
-  const activeTimer = useWorkspaceStore(s => s.activeTimer);
-  const timerElapsed = useWorkspaceStore(s => s.timerElapsed);
-  const formatElapsed = useWorkspaceStore(s => s.formatElapsed);
-  const stopTimer = useWorkspaceStore(s => s.stopTimer);
-  const showToast = useWorkspaceStore(s => s.showToast);
-
-  const handleStopGlobalTimer = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // The minutes ride in the store, not in the URL — see `stopTimer`. A query
-    // param was stripped by the task page's own canonical redirect before the
-    // user could confirm it, and the tracked time went with it.
-    try {
-      const result = await stopTimer();
-      if (result?.queued) showToast('Зупинку таймера збережено до відновлення мережі', 'warning');
-      const targetHref = timerTargetHref(result);
-      if (targetHref) router.push(targetHref);
-    } catch (error) {
-      showToast(error.message || 'Не вдалося зупинити таймер', 'error');
-    }
-  };
 
   const isActive = (href, exact, section) => {
     const targetPath = href.split('?')[0];
@@ -511,57 +487,6 @@ export default function WorkspaceSidebar() {
       {!clientViewer && <WorkspacePlanLimitRail collapsed={collapsed} />}
 
       <WorkspaceHelpMenu collapsed={collapsed} />
-
-      {/* Global Timer Capsule */}
-      {!clientViewer && activeTimer && (
-        <div className={`shrink-0 ${collapsed ? 'p-[12px]' : 'p-[16px]'}`} style={{ borderTop: '1px solid var(--sb-border)', backgroundColor: theme.bg }}>
-          <div
-            onClick={() => {
-              const targetHref = timerTargetHref(activeTimer);
-              if (targetHref) router.push(targetHref);
-            }}
-            // The capsule carries the stop button, so it is not a `<button>`.
-            role="button"
-            tabIndex={0}
-            aria-label="Відкрити задачу з активним таймером"
-            onKeyDown={event => {
-              if (event.target !== event.currentTarget) return;
-              if (event.key !== 'Enter' && event.key !== ' ') return;
-              event.preventDefault();
-              const targetHref = timerTargetHref(activeTimer);
-              if (targetHref) router.push(targetHref);
-            }}
-            className={`transition-colors rounded-[12px] flex items-center cursor-pointer ${collapsed ? 'justify-center flex-col gap-1 py-2' : 'justify-between pl-[12px] pr-[4px] py-[4px]'}`}
-            style={{ backgroundColor: 'var(--sb-active)' }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--sb-hover)'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--sb-active)'; }}
-          >
-            {!collapsed && (
-              <div className="flex items-center gap-[8px]">
-                <Clock size={14} style={{ color: 'var(--sb-text)' }} />
-                <span className="text-[13px] font-mono font-medium" style={{ color: 'var(--sb-text)' }}>{formatElapsed(timerElapsed)}</span>
-              </div>
-            )}
-            {collapsed && (
-              <span className="text-[10px] font-mono font-medium" style={{ color: 'var(--sb-text)' }}>{formatElapsed(timerElapsed)}</span>
-            )}
-            {/* The kit's danger action, not a hand-drawn copy of it: the fill,
-                the hover and the box all came from the same three utilities
-                `IconAction appearance="danger"` already resolves, and the 28px
-                box was a number this call site held on its own. */}
-            <IconAction
-              label="Зупинити та зберегти"
-              title="Зупинити та зберегти"
-              icon={StopIcon}
-              appearance="danger"
-              shape="compact"
-              size={collapsed ? 'xs' : 'compact'}
-              onClick={handleStopGlobalTimer}
-              className={collapsed ? 'mt-1' : ''}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Org switcher modal */}
       {showOrgSwitcher && (

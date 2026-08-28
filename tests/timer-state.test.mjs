@@ -51,7 +51,7 @@ test('expected timer conflicts are warnings, while actual failures remain report
   assert.equal(timerFeedbackVariant(new Error('network failed')), 'error');
 });
 
-test('a running board card shows live time as a red badge, not a blinking dot', async () => {
+test('legacy board cards keep their timer badge, while the qTicket shell exposes no timer', async () => {
   const [card, sidebar] = await Promise.all([
     read('../src/components/workspace/IssueCard.jsx'),
     read('../src/components/WorkspaceSidebar.jsx'),
@@ -61,8 +61,7 @@ test('a running board card shows live time as a red badge, not a blinking dot', 
   assert.match(card, /isTimerActive && <ActiveTimerBadge \/>/);
   assert.doesNotMatch(card, /bg-ink rounded-full animate-pulse ml-1/);
   assert.doesNotMatch(card, /isTimerActive \? 'ring-2 ring-ink\/20'/);
-  assert.doesNotMatch(sidebar, /text-\[#3b82f6\] animate-pulse/);
-  assert.match(sidebar, /<Clock size=\{14\} style=\{\{ color: 'var\(--sb-text\)' \}\} \/>/);
+  assert.doesNotMatch(sidebar, /activeTimer|timerElapsed|timerTargetHref|<Clock/);
 });
 
 test('a timer-backed form expires with its authoritative pending session', () => {

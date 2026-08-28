@@ -71,8 +71,9 @@ test('requested navigation and readability regressions stay fixed', async () => 
   // 36px, not 32: the old pseudo-element inset already gave the glyph a 36px
   // target, and shrinking it to fit a hover box would undo the enlargement.
   assert.equal((sidebar.match(/h-\[36px\] w-\[36px\][^"]*cursor-pointer/g) || []).length, 2);
-  // The running timer is a quiet capsule in the rail, not a floating card.
-  assert.doesNotMatch(sidebar, /shadow-\[0_4px_12px_rgba\(0,0,0,0\.2\)\]/);
+  // qTicket is not the task manager: the workspace rail never grows an
+  // inherited timer capsule, regardless of timer state left in legacy data.
+  assert.doesNotMatch(sidebar, /activeTimer|timerElapsed|timerTargetHref/);
   assert.doesNotMatch(help, />\s*Допомога\s*</);
   assert.doesNotMatch(help, /<Tooltip/);
   // Help is a square, not a rail-wide slab.
