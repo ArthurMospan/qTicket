@@ -37,7 +37,7 @@ test('the workspace has exactly one route loader and no page skeletons', async (
   for (const path of ['../src/app/(app)/[projectId]/ProjectBoardClient.jsx', '../src/app/(app)/my/page.js', '../src/app/(app)/page.js']) {
     const source = await read(path);
     assert.doesNotMatch(source, /PageSkeleton/, `${path} must not use PageSkeleton`);
-    assert.match(source, /<LoadingSpinner size="md" \/>/, `${path} must show the shared loader`);
+    assert.match(source, /<LoadingSpinner size="md"(?:\s+label="[^"]+")?\s*\/>/, `${path} must show the shared loader`);
   }
 
   // The sidebar keeps its skeleton: it waits on organisation data inside a
@@ -66,11 +66,13 @@ test('losing the connection is visible, persistently', async () => {
 });
 
 test('failed drag writes explain that the optimistic move did not persist', async () => {
-  const projectBoard = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+  const clientWorkspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
   const myTasks = await read('../src/app/(app)/my/page.js');
   const sprints = await read('../src/app/(app)/sprints/page.js');
 
-  assert.match(projectBoard, /Відновлено попередній стан/);
+  // The customer workspace no longer has a local drag surface. Status drag is
+  // organization-wide and belongs to the global incident queue only.
+  assert.doesNotMatch(clientWorkspace, /AgileBoard|onMoveIssue/);
   assert.match(myTasks, /зміни не збережено/);
   assert.match(sprints, /відновлено попередній стан/);
   assert.match(sprints, /'error'/);

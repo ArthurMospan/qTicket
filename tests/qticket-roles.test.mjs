@@ -64,8 +64,9 @@ test('клієнтське запрошення завжди прив’язан
   assert.match(dialog, /value: 'client_admin'/);
   assert.match(dialog, /internalClientInvite \? \[selectedProjectId\] : \[\]/);
   assert.match(dialog, /ariaLabel="Клієнтський проєкт"/);
-  assert.match(dialog, /!clientInvite && !internalClientInvite && <Tabs/);
+  assert.match(dialog, /!clientInvite && !internalClientInvite && !clientAdminMode && <Tabs/);
   assert.match(dialog, /clientInvite \|\| internalClientInvite \|\| tab === 'email'/);
+  assert.match(dialog, /clientAdminMode \? presetProjectId : ''/);
 });
 
 test('без поштового провайдера клієнт отримує ручну інструкцію, а не недоступну вкладку', async () => {
@@ -96,9 +97,12 @@ test('клієнтський інтерфейс створює інцидент 
   assert.match(portal, /clientMode/);
   assert.doesNotMatch(portal, /Пріоритет|Виконавці|Спринт|Дедлайн/);
   assert.match(board, /if \(clientViewer\) router\.replace\('\/'\)/);
-  assert.match(board, /readOnly=\{!canEditIncidents\}/);
+  assert.match(board, /const PROJECT_TABS = \[[\s\S]{0,240}Інциденти[\s\S]{0,120}Люди[\s\S]{0,120}Налаштування/);
+  assert.match(board, /clientAdminMode/);
+  assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
+  assert.doesNotMatch(board, /useSprints|AgileBoard|AnalyticsTab|QtPlusProjectTab/);
   assert.match(board, /entity="incident"/);
-  assert.match(board, /clientMode=\{clientViewer\}/);
+  assert.doesNotMatch(board, /clientMode=\{clientViewer\}/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
   assert.match(detail, /internalViewer \? issueId : null/);
   const clientAttributesStart = detail.indexOf('primaryChildren={clientViewer ? (');

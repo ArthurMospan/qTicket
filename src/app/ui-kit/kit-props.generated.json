@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 120,
-    "props": 889,
-    "documentedProps": 889,
+    "components": 119,
+    "props": 867,
+    "documentedProps": 867,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -559,7 +559,6 @@
             "sidebar-help-action",
             "status-entry",
             "status-submit",
-            "table-cell",
             "workspace-guard"
           ],
           "description": "Named size contract for a specific place, resolved in globals.css."
@@ -2865,8 +2864,6 @@
             "auth-close",
             "contrast",
             "danger",
-            "inverse",
-            "overlay",
             "plan",
             "primary",
             "quiet",
@@ -2876,7 +2873,7 @@
             "surface-danger",
             "surface-plain"
           ],
-          "description": "Fill and hover treatment; the dark ones exist for overlays and dark surfaces."
+          "description": "Fill and hover treatment."
         },
         {
           "name": "buttonRef",
@@ -3094,7 +3091,6 @@
             "settings-row-action",
             "status-entry",
             "status-submit",
-            "table-cell",
             "workspace-guard"
           ],
           "description": "Named size contract for a specific place, resolved in globals.css."
@@ -3849,17 +3845,6 @@
           "type": "React.ReactNode",
           "values": [],
           "description": "The figure, printed opposite the label."
-        },
-        {
-          "name": "tone",
-          "default": "'neutral'",
-          "type": "'neutral'|'warning'|'danger'",
-          "values": [
-            "danger",
-            "neutral",
-            "warning"
-          ],
-          "description": "What the level means. `neutral` is the default because most progress means nothing beyond itself."
         },
         {
           "name": "value",
@@ -6508,159 +6493,6 @@
           "type": "object[]",
           "values": [],
           "description": "Sprint definitions."
-        }
-      ]
-    },
-    "TaskTableView": {
-      "file": "src/components/ui/TaskManagement/TaskTableView.jsx",
-      "summary": "A board's tasks as an editable grid: chosen columns, sorted by any of them, with every value changeable in its own cell.",
-      "props": [
-        {
-          "name": "activeTimerIssueId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The task whose timer is running, if any."
-        },
-        {
-          "name": "allIssues",
-          "default": "issues",
-          "type": "object[]",
-          "values": [],
-          "description": "Every task in scope, for resolving blockers."
-        },
-        {
-          "name": "bulkProgress",
-          "default": "null",
-          "type": "{done: number, total: number}",
-          "values": [],
-          "description": "How far the running bulk action has got."
-        },
-        {
-          "name": "canArchive",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether the current role may archive selected tasks."
-        },
-        {
-          "name": "columns",
-          "default": "[]",
-          "type": "string[]",
-          "values": [],
-          "description": "Which columns are on; empty means the default set."
-        },
-        {
-          "name": "dir",
-          "default": "'asc'",
-          "type": "'asc'|'desc'",
-          "values": [],
-          "description": "Direction of that sort."
-        },
-        {
-          "name": "emptyDescription",
-          "default": "'Змініть фільтри або створіть новий інцидент.'",
-          "type": "string",
-          "values": [],
-          "description": "Sentence under it."
-        },
-        {
-          "name": "emptyTitle",
-          "default": "'Інцидентів не знайдено'",
-          "type": "string",
-          "values": [],
-          "description": "Headline of the empty state."
-        },
-        {
-          "name": "issueLinks",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Relations between tasks, for the blocked column."
-        },
-        {
-          "name": "issues",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "The tasks to show, already filtered."
-        },
-        {
-          "name": "labels",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Label definitions, for the labels column."
-        },
-        {
-          "name": "members",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "People who can be assigned."
-        },
-        {
-          "name": "onBulkUpdate",
-          "default": "",
-          "type": "(action: string, value: unknown, issues: object[]) => Promise<unknown>",
-          "values": [],
-          "description": "Applies one bulk action to the selected rows."
-        },
-        {
-          "name": "onColumnsChange",
-          "default": "",
-          "type": "(columnId: string) => void",
-          "values": [],
-          "description": "Toggles one column on or off. Omit to hide the columns control."
-        },
-        {
-          "name": "onOpenIssue",
-          "default": "",
-          "type": "(issue: object) => void",
-          "values": [],
-          "description": "Opens a task for reading — the quick modal. Falls back to a link to its page."
-        },
-        {
-          "name": "onSortChange",
-          "default": "",
-          "type": "(next: {sort: string, dir: string}) => void",
-          "values": [],
-          "description": "Fires when a column header is clicked."
-        },
-        {
-          "name": "onUpdateIssue",
-          "default": "",
-          "type": "(issueId: string, patch: object) => Promise<unknown>",
-          "values": [],
-          "description": "Saves one cell. Omit to make the table read-only."
-        },
-        {
-          "name": "projectId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The project these tasks belong to."
-        },
-        {
-          "name": "selectionScopeKey",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Clears selection when a route or filter scope changes."
-        },
-        {
-          "name": "sort",
-          "default": "'manual'",
-          "type": "string",
-          "values": [],
-          "description": "Column the rows are ordered by, or `manual` for the board's own order."
-        },
-        {
-          "name": "sprints",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Sprint definitions, for the sprint column."
         }
       ]
     },

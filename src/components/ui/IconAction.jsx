@@ -18,8 +18,6 @@ export const APPEARANCES = {
   // row's «прочитано» and «видалити» — read as two different controls.
   'surface-danger': '!border !border-line !bg-white !text-muted hover:!bg-danger-soft hover:!text-danger',
   'surface-plain': '!bg-white !text-faint hover:!text-ink',
-  overlay: '!bg-black/50 !text-white hover:!bg-black/70',
-  inverse: '!bg-white/10 !text-white hover:!bg-white/20',
   'auth-close': '!border !border-white/10 !bg-surface-dark !text-white/70 hover:!bg-white/10 hover:!text-white',
   danger: '!bg-danger-solid !text-white hover:!bg-danger',
   'quiet-danger': '!bg-transparent !text-muted hover:!bg-danger-soft hover:!text-danger',
@@ -50,7 +48,7 @@ export const BUTTON_SIZES = {
  *   tooltip instead of the browser's. `true` means «top».
  * @param {React.ComponentType} props.icon lucide icon; its pixel size comes from `size`, never from the call site.
  * @param {'micro'|'xs'|'sm'|'compact'|'md'|'lg'|'xl'} props.size Box size, mapped onto Button's icon sizes.
- * @param {string} props.appearance Fill and hover treatment; the dark ones exist for overlays and dark surfaces.
+ * @param {string} props.appearance Fill and hover treatment.
  * @param {string} props.shape Corner radius token.
  * @param {React.Ref} props.buttonRef Ref to the underlying button, for popovers anchored to it.
  * @param {string} props.className Placement in the parent only.

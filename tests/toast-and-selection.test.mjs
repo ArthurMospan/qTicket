@@ -90,25 +90,6 @@ test('a failure can be reported, and the report has somewhere to land', () => {
   assert.doesNotMatch(page, /type="password"/);
 });
 
-// The table draws a page at a time, so a header box that claimed «всі» would
-// select fifty of three hundred and say otherwise.
-test('the table header selects what is on screen, and asks about the rest', () => {
-  const table = read('components/ui/TaskManagement/TaskTableView.jsx');
-  const checkbox = read('components/ui/Forms/Checkbox.jsx');
-
-  assert.match(table, /const drawnAllSelected = drawnRows\.length > 0/);
-  assert.match(table, /onChange=\{\(\) => toggleIssueScope\(drawnRows\.map\(issue => issue\.id\)\)\}/);
-  assert.match(table, /indeterminate=\{drawnSomeSelected\}/);
-  // The whole list is a second, explicit step — and only while something is
-  // actually out of sight and unselected.
-  assert.match(table, /drawnAllSelected && hiddenRowCount > 0/);
-  assert.match(table, /Вибрати всі \{rows\.length\}/);
-  assert.match(table, /toggleIssueScope\(rows\.map\(issue => issue\.id\)\)/);
-  // `indeterminate` is a DOM property with no attribute, so it is written onto
-  // the node; and it is not a third value a caller can be handed back.
-  assert.match(checkbox, /inputRef\.current\.indeterminate = Boolean\(indeterminate\) && !checked/);
-});
-
 // A subtask names the task it hangs under. That slot is for an identifier, and
 // a noun phrase in it does not read as «unknown» — it reads as the number. Nor
 // does an empty slot: an arrow pointing at nothing is a relation that is

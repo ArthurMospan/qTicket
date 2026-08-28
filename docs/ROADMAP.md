@@ -77,15 +77,18 @@ Completed product slice on 2026-08-28:
   звернення**. The client incident detail keeps the visible status, description,
   attachments and shared conversation while removing internal assignee, roster,
   label, deadline and direct-chat surfaces.
-- The slice passes lint, production build, all 1,179 unit tests and the UI Kit
-  usage, drift, fidelity, colour and accessibility contracts. Public browser
-  verification found no framework overlay or console error; authenticated
-  two-role verification remains part of acceptance below.
+- The internal client-project route now opens a qTicket customer workspace
+  instead of the inherited project board. It has a focused incident queue and
+  support metrics, separate client/support rosters, a project-scoped client
+  administrator invitation, and an internal-only settings summary. It no
+  longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
+- The slice passes lint, production build, all 1,158 unit tests, all 42 local
+  visual scenarios, and the UI Kit usage, drift, fidelity, colour and
+  accessibility contracts. Authenticated two-role verification remains part of
+  acceptance below.
 
 Product work still required:
 
-- Rework the client-project entry screen reached from **Клієнти** so it reads as
-  customer support administration instead of an inherited task project.
 - Complete the user-facing terminology pass; inherited internal identifiers may
   remain task-oriented, but qTicket screens may not ask users to manage tasks.
 - Run the complete tenant/client acceptance flow and correct every permission or
@@ -130,17 +133,19 @@ surfaces first, then delete only when references and migrations are understood.
 3. **Completed:** rebuild the external client entry and incident
    creation/detail around the simple client journey above while preserving the
    rule-enforced permission boundary.
-4. Rework the internal client-project entry reached from **Клієнти** around
-   customer context, incidents, people and settings instead of a task board.
-5. Run local checks, deploy the slice, then execute the two-sided acceptance
-   flow with separate internal and client accounts.
+4. **Completed:** rework the internal client-project entry reached from
+   **Клієнти** around customer context, incidents, people and settings instead
+   of a task board.
+5. **In progress:** local checks are green; deploy the slice, then execute the
+   two-sided acceptance flow with separate internal and client accounts.
 6. Only after the qTicket workflow is accepted, implement the QuickTeam transfer
    contract and later the add-on entitlement contract.
 
-The exact next implementation task is step 4: rework the internal client-project
-page reached from `/clients` while keeping the organization-wide queue at
-`/my`. Every completed slice should be a reviewable Git commit and this
-checkpoint should be updated in the same commit.
+The exact next implementation task is step 5: deploy the checked client
+workspace, then execute the internal/client acceptance flow with separate
+accounts and fix every concrete failure it reveals. Every completed
+slice should be a reviewable Git commit and this checkpoint should be updated
+in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
 `docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
 credentials, service-account JSON, `.env` values or session notes here.

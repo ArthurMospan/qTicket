@@ -222,7 +222,8 @@ test('only the cross-project board groups by category', async () => {
   // board must mean the same thing by dropping a card in the same place.
   assert.doesNotMatch(projectPage, /groupBy=/);
   assert.doesNotMatch(projectPage, /resolveCategoryStatusId/);
-  assert.match(projectPage, /hiddenGroupIds=\{project\?\.hiddenColumns \|\| \[\]\}/);
+  assert.doesNotMatch(projectPage, /<AgileBoard|groupBy=|hiddenGroupIds=/);
+  assert.match(projectPage, /statusCategoryOf\(issue\.columnId \|\| issue\.status, statuses\)/);
 
   // The board still remembers folded columns per grouping — a category id and a
   // status id are different columns even when they share a name.

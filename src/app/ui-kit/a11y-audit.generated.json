@@ -10,14 +10,14 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 388,
-    "elements": 4592,
+    "files": 359,
+    "elements": 4323,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 47
+    "runtimeNameVerification": 41
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -243,14 +243,14 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/Select.jsx:296",
+      "location": "src/components/ui/Select.jsx:294",
       "attributes": [
         "aria-label"
       ]
     },
     {
       "element": "button",
-      "location": "src/components/ui/Select.jsx:528",
+      "location": "src/components/ui/Select.jsx:526",
       "attributes": [
         "aria-label"
       ]
@@ -280,28 +280,6 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/TaskManagement/TaskTableView.jsx:470",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/TaskManagement/TaskTableView.jsx:741",
-      "attributes": [
-        "title",
-        "aria-label"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/TaskManagement/TaskTableView.jsx:921",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
-      "element": "button",
       "location": "src/components/ui/TaskManagement/TimeTrackingControl.jsx:41",
       "attributes": [
         "aria-label",
@@ -320,27 +298,6 @@
       "location": "src/components/workspace/IssueMentionChip.jsx:201",
       "attributes": [
         "title"
-      ]
-    },
-    {
-      "element": "IconAction",
-      "location": "src/components/workspace/qtplus/cards/AudioCard.jsx:19",
-      "attributes": [
-        "label"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:77",
-      "attributes": [
-        "aria-label"
-      ]
-    },
-    {
-      "element": "IconAction",
-      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:86",
-      "attributes": [
-        "label"
       ]
     },
     {

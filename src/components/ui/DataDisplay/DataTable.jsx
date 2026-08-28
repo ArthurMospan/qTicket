@@ -29,13 +29,10 @@ import Surface from '@/components/ui/Surface';
 
 const ALIGN = { left: 'text-left', right: 'text-right', center: 'text-center' };
 
-// The chrome is the task table's, and deliberately so. Two tables in one
-// product that look like two products is the complaint this answers: the grid
-// on a project's «Таблиця» sits in a bordered panel with a canvas header band
-// and 36px rows, while this one drew hairlines straight onto the card with
-// nothing around it and rows a third taller. The behaviour stays different —
-// that is the part `TaskTableView` was built for — but a row of figures is now
-// read at the same weight in both places.
+// A data table belongs to the same restrained workspace chrome as incident
+// lists: a bordered surface, a canvas header band and compact rows. It remains
+// presentation-only; editable incident workflow belongs to the dedicated
+// incident surfaces rather than a second table organism.
 const HEADER_CELL = 'h-9 bg-canvas px-[10px] shadow-[inset_0_-1px_0_var(--color-line)]';
 const BODY_CELL = 'px-[10px] py-0 align-middle';
 

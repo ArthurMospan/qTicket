@@ -13,10 +13,10 @@
     "long-text"
   ],
   "totals": {
-    "components": 120,
-    "stateful": 107,
-    "hover": 72,
-    "focus": 69,
+    "components": 119,
+    "stateful": 106,
+    "hover": 71,
+    "focus": 68,
     "disabled": 35,
     "loading": 7,
     "error": 6,
@@ -447,10 +447,6 @@
     },
     "TaskRow": {
       "hover": "own"
-    },
-    "TaskTableView": {
-      "hover": "own",
-      "focus": "global"
     },
     "TextAction": {
       "disabled": "native",
@@ -921,9 +917,6 @@
       "task-crm"
     ],
     "TaskRow": [
-      "task-crm"
-    ],
-    "TaskTableView": [
       "task-crm"
     ],
     "TextAction": [

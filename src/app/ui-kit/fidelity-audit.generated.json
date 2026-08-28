@@ -8,14 +8,13 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 270,
-    "parsedFiles": 270,
+    "productFiles": 242,
+    "parsedFiles": 242,
     "parseErrors": 0,
-    "nativeControls": 21,
+    "nativeControls": 20,
     "structures": {
       "chat": 2,
       "analytics": 1,
-      "qtplus": 1,
       "settings": 1,
       "shell": 13,
       "other": 3
@@ -26,28 +25,28 @@
     "manualModalShells": 0,
     "manualPills": 0,
     "manualSurfaces": 0,
-    "localSurfaceExceptions": 45,
+    "localSurfaceExceptions": 40,
     "manualIconButtons": 0,
     "headingStyles": 0,
     "sharedChromeOverrides": 0,
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 21,
+    "button": 20,
     "input": 0,
     "textarea": 0,
     "select": 0
   },
   "kit": {
     "totals": {
-      "components": 120,
-      "used": 120,
+      "components": 119,
+      "used": 119,
       "unused": 0,
-      "covered": 115,
+      "covered": 112,
       "uncovered": 0,
       "routes": 14,
-      "previews": 151,
-      "internal": 5,
+      "previews": 149,
+      "internal": 7,
       "unlisted": 0
     },
     "unusedComponents": []
@@ -312,21 +311,6 @@
     },
     {
       "tag": "button",
-      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:77",
-      "className": "absolute inset-0 cursor-pointer",
-      "text": "",
-      "childElements": [],
-      "ariaLabel": "Відкрити …",
-      "styled": false,
-      "reviewed": "",
-      "resembles": "",
-      "structure": "qtplus",
-      "routes": [
-        "/[projectId]"
-      ]
-    },
-    {
-      "tag": "button",
       "location": "src/components/workspace/UnifiedTimeline.jsx:168",
       "className": "${…} cursor-pointer transition-colors ${…}",
       "text": "",
@@ -455,10 +439,6 @@
       "count": 1
     },
     {
-      "file": "src/components/workspace/qtplus/cards/FileCard.jsx",
-      "count": 1
-    },
-    {
       "file": "src/components/workspace/UnifiedTimeline.jsx",
       "count": 1
     },
@@ -515,11 +495,6 @@
   "manualPills": [],
   "manualSurfaces": [],
   "localSurfaceExceptions": [
-    {
-      "location": "src/app/(app)/[projectId]/ProjectBoardClient.jsx:374",
-      "tag": "div",
-      "className": "w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm"
-    },
     {
       "location": "src/app/(app)/chat/page.js:393",
       "tag": "div",
@@ -689,26 +664,6 @@
       "location": "src/components/workspace/IssueModal.jsx:11",
       "tag": "div",
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
-    },
-    {
-      "location": "src/components/workspace/qtplus/cards/ChecklistCard.jsx:9",
-      "tag": "div",
-      "className": "rounded-[12px] border border-line bg-surface flex flex-col overflow-hidden"
-    },
-    {
-      "location": "src/components/workspace/qtplus/cards/FileCard.jsx:62",
-      "tag": "div",
-      "className": "group overflow-hidden rounded-[12px] border border-line bg-surface transition-shadow hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
-    },
-    {
-      "location": "src/components/workspace/qtplus/cards/LinkCard.jsx:19",
-      "tag": "div",
-      "className": "rounded-[12px] border border-line bg-surface px-3 py-2"
-    },
-    {
-      "location": "src/components/workspace/qtplus/cards/PollCard.jsx:9",
-      "tag": "div",
-      "className": "rounded-[12px] border border-line bg-surface flex flex-col overflow-hidden"
     },
     {
       "location": "src/components/workspace/qtplus/chat/ChatMessage.jsx:96",

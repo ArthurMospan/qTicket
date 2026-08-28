@@ -1,190 +1,171 @@
 'use client';
-// src/app/workspace/[projectId]/page.js
-// Project page: Board | Backlog | Аналітика
-// Portal tab — shown only when project.visibility === 'shared' (synced to QT)
-import { useState, useCallback, useEffect, useMemo } from 'react';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppContext }  from '@/lib/context/AppContext';
-import { useIssues }     from '@/lib/hooks/useIssues';
-import { useSprints }    from '@/lib/hooks/useSprints';
-import { useTeamMembers } from '@/lib/hooks/useTeamMembers';
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  FilterBar,
+  KpiCard,
+  ListRow,
+  LoadingSpinner,
+  PageHeader,
+  Pill,
+  PriorityBadge,
+  Select,
+  StatusPill,
+  Surface,
+  TaskIdentity,
+  UserAvatar,
+} from '@/components/ui';
+import {
+  ArrowRight,
+  CheckCircle2,
+  CircleDotDashed,
+  Inbox,
+  Plus,
+  Settings2,
+  UserPlus,
+  UsersRound,
+} from 'lucide-react';
+import BoardConfigModal from '@/components/workspace/BoardConfigModal';
+import CreateTaskModal from '@/components/CreateTaskModal';
+import InviteMemberDialog from '@/components/InviteMemberDialog';
+import { useAppContext } from '@/lib/context/AppContext';
+import { useIssues } from '@/lib/hooks/useIssues';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
-import { issueDisplayParticipants } from '@/lib/utils/issueParticipants.mjs';
-import useWorkspaceStore  from '@/store/useWorkspaceStore';
-import AgileBoard    from '@/components/workspace/AgileBoard';
-import BoardConfigModal from '@/components/workspace/BoardConfigModal';
-import AnalyticsTab  from '@/components/workspace/AnalyticsTab';
-import { PageHeader, Pill, TaskListView, TaskTableView, Tabs } from '@/components/ui';
-import CreateTaskModal from '@/components/CreateTaskModal';
-import LoadingSpinner from '@/components/ui/Feedback/LoadingSpinner';
-import { LayoutGrid, BarChart2, Plus, Settings2, List, Plug, Kanban, Table2 } from 'lucide-react';
-import { ChatIcon } from '@/lib/design/icons';
-import Button from '@/components/ui/Button';
-import { Select } from '@/components/ui/Select';
-import FilterBar from '@/components/ui/FilterBar';
-import Link from 'next/link';
-import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
-import { planAllows } from '@/lib/utils/plans.mjs';
+import { can, isClientRole } from '@/lib/utils/can';
+import { issuePath } from '@/lib/utils/issueKeys.mjs';
+import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
+import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
+import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { PROJECT_OVER_PLAN_LIMIT } from '@/lib/utils/projectAccess.mjs';
-import { useQtPlusEnabled } from '@/lib/hooks/useQtPlusEnabled';
-import QtPlusProjectTab from '@/components/workspace/QtPlusProjectTab';
+import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
+import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
+import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
-import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
-import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
-import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
-import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
-import { useViewState } from '@/lib/hooks/useViewState';
-import { useIsMobile } from '@/lib/hooks/useIsMobile';
-import { BOARD_VIEW_SCHEMA } from '@/lib/utils/viewState.mjs';
-import { serializeTaskTableColumns, visibleTaskTableColumns } from '@/lib/utils/taskTable.mjs';
+import useWorkspaceStore from '@/store/useWorkspaceStore';
 
 const PROJECT_TABS = [
-  { id: 'board',      label: 'Дошка',     icon: LayoutGrid },
-  { id: 'analytics',  label: 'Аналітика', icon: BarChart2  },
+  { id: 'incidents', label: 'Інциденти' },
+  { id: 'people', label: 'Люди' },
+  { id: 'settings', label: 'Налаштування' },
 ];
 
-// One switcher, three readings of the same tasks. It is not a filter — nothing
-// is hidden by choosing one — which is why it sits outside `FilterBar`.
-//
-// A desktop control. It used to be mirrored into the header's mobile slot so a
-// phone could still reach the list; below md there is now only the board, so
-// the mirror would offer two ways to a screen that no longer exists.
-const BOARD_VIEW_TABS = [
-  { id: 'kanban', icon: Kanban, title: 'Дошка', ariaLabel: 'Дошка' },
-  { id: 'list', icon: List, title: 'Список', ariaLabel: 'Список' },
-  { id: 'table', icon: Table2, title: 'Таблиця', ariaLabel: 'Таблиця' },
+const SCOPE_OPTIONS = [
+  { value: 'open', label: 'Відкриті' },
+  { value: 'all', label: 'Усі інциденти' },
+  { value: 'resolved', label: 'Вирішені' },
 ];
-const QTPLUS_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_QTPLUS_URL);
+
+function assigneeIdsOf(issue) {
+  if (Array.isArray(issue?.assigneeIds)) return issue.assigneeIds.filter(Boolean);
+  if (Array.isArray(issue?.assignees)) return issue.assignees.filter(Boolean);
+  return issue?.assigneeId ? [issue.assigneeId] : [];
+}
+
+function formatUpdatedAt(value) {
+  const millis = timestampMillis(value);
+  if (!millis) return 'дату не вказано';
+  return new Intl.DateTimeFormat('uk-UA', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(millis));
+}
+
+function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
+  if (members.length === 0) {
+    return (
+      <EmptyState
+        icon={UsersRound}
+        title={emptyTitle}
+        description={emptyDescription}
+        density="compact"
+        surface="card"
+      />
+    );
+  }
+
+  return (
+    <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+      {members.map(member => {
+        const memberId = member.id || member.uid;
+        return (
+          <ListRow
+            key={memberId}
+            density="roomy"
+            onClick={() => onOpen(memberId)}
+            className="flex items-center gap-3"
+          >
+            <UserAvatar user={member} size="md" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-bold text-ink">
+                {member.name || member.displayName || member.email || 'Учасник'}
+              </p>
+              <p className="mt-1 truncate text-[11px] text-muted">
+                {member.email || 'Email не вказано'}
+              </p>
+            </div>
+            <Pill tone="neutral" size="sm" shape="badge">
+              {organizationRoleLabel(member.role)}
+            </Pill>
+            <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
+          </ListRow>
+        );
+      })}
+    </Card>
+  );
+}
 
 export default function ProjectBoardClient({ projectId, resourceOrganizationId }) {
+  const router = useRouter();
+  const showToast = useWorkspaceStore(state => state.showToast);
   const {
     projects,
     projectsLoading,
+    projectsError,
     currentUser,
-    activeOrg,
     activeOrgId,
     orgRole,
     switchOrg,
   } = useAppContext();
   const clientViewer = isClientRole(orgRole);
-  const canEditIncidents = can(orgRole, 'edit:issue');
   const resourceContextReady = !resourceOrganizationId || activeOrgId === resourceOrganizationId;
   const scopedProjectId = resourceContextReady ? projectId : null;
+  const project = projects?.find(candidate => candidate.id === projectId);
   const {
-    issues: sourceIssues,
-    issueLinks,
+    issues,
     loading: issuesLoading,
+    error: issuesError,
     createIssue,
-    updateIssue,
-    moveIssue,
-  } = useIssues(scopedProjectId);
+  } = useIssues(scopedProjectId, { includeLinks: false });
   const {
-    sprints,
-    loading: sprintsLoading,
-    startSprint,
-    completeSprint,
-  } = useSprints({ enabled: Boolean(orgRole) && !clientViewer });
-  const loading = issuesLoading || sprintsLoading;
-  const router      = useRouter();
-  const showToast   = useWorkspaceStore(s => s.showToast);
-  const activeTimer = useWorkspaceStore(s => s.activeTimer);
-  const openIssueQuickView = useWorkspaceStore(s => s.openIssueQuickView);
-  const projectSearch = useWorkspaceStore(s => s.projectSearch);
-  const resolveBulkStatusId = useCallback((issue, value) => (
-    value?.mode === 'status' ? value.id : null
-  ), []);
-  const { issues, applyBulkAction, bulkProgress } = useBulkIssueActions({
-    issues: sourceIssues,
-    organizationId: activeOrgId,
-    showToast,
-    resolveStatusId: resolveBulkStatusId,
-  });
-
-  const project  = projects?.find(p => p.id === projectId);
-  // The project's team, plus anyone actually standing on one of these tasks.
-  //
-  // The team alone is who may be *given* work here. It is not who is *on* the
-  // work: a task assigned before somebody left the team — or, until the server
-  // started refusing it, assigned to somebody who was never on it — still
-  // carries their name, and a card that resolves faces from the team dropped
-  // them without a word. A face is a record of who is on a task; a picker is a
-  // question about who may be handed one. The union answers both, which is the
-  // same rule the task screen has always used for its own assignee list.
-  const teamUids = useMemo(() => {
-    const uids = new Set(Array.isArray(project?.team) ? project.team : []);
-    for (const issue of sourceIssues || []) {
-      for (const participant of issueDisplayParticipants(issue)) uids.add(participant.id);
-    }
-    return [...uids];
-  }, [project, sourceIssues]);
-  const { members } = useTeamMembers(teamUids);
-  const { members: organizationMembers } = useOrganization();
-  const { labels, priorities, types } = useWorkflowConfig();
-
-  // Portal tab visible only when project is shared (synced to QT)
-  const isShared = project?.visibility === 'shared';
-  const isArchived = project?.status === 'archived';
-
-  const [activeTab, setActiveTab] = useState('board');
-  // Board filters and the kanban/list choice live in the address, so this board
-  // can be bookmarked, sent to somebody, and stepped back out of.
-  const [boardViewState, setBoardViewState] = useViewState(BOARD_VIEW_SCHEMA, {
-    storageKey: `qt:view:${resourceOrganizationId || activeOrgId}:board:${projectId}`,
-    ready: resourceContextReady,
-  });
+    members,
+    loading: membersLoading,
+    error: membersError,
+    inviteMember,
+  } = useOrganization();
   const {
-    view: boardView,
-    sprint: boardSprintFilter,
-    assignee: boardAssigneeFilter,
-    priority: boardPriorityFilter,
-    type: boardTypeFilter,
-    sort: tableSort,
-    dir: tableSortDirection,
-    cols: tableColumns,
-  } = boardViewState;
-  const setBoardView = useCallback(value => setBoardViewState({ view: value }), [setBoardViewState]);
-  // Below md there is one view, so there is one switcher entry, so there is no
-  // switcher: the list and the table are both built around a track a phone does
-  // not have — the table scrolls sideways behind a pinned column, and the list
-  // is a board without the one thing a board is for.
-  //
-  // Read, never written. Somebody who chose «Таблиця» on a laptop and then
-  // opened the project on a phone would otherwise have that choice quietly
-  // overwritten with `kanban` by the very screen that cannot show it, and find
-  // the board waiting for them when they got back to the laptop.
-  const isMobile = useIsMobile();
-  const effectiveBoardView = isMobile === true ? 'kanban' : boardView;
-  const setTableSort = useCallback(next => setBoardViewState(next), [setBoardViewState]);
-  const visibleTableColumnIds = useMemo(
-    () => visibleTaskTableColumns(tableColumns).map(column => column.id),
-    [tableColumns],
-  );
-  const toggleTableColumn = useCallback(columnId => {
-    const current = new Set(visibleTableColumnIds);
-    if (current.has(columnId)) current.delete(columnId);
-    else current.add(columnId);
-    setBoardViewState({ cols: serializeTaskTableColumns([...current]) });
-  }, [setBoardViewState, visibleTableColumnIds]);
-  const [analyticsPriorityFilter, setAnalyticsPriorityFilter] = useState('all');
-  const [analyticsTypeFilter, setAnalyticsTypeFilter] = useState('all');
+    statuses,
+    priorities,
+    loading: workflowLoading,
+    error: workflowError,
+  } = useWorkflowConfig();
 
-  const canManageQtPlus = can(orgRole, 'edit:project_settings');
-  const { enabled: qtEnabled } = useQtPlusEnabled(canManageQtPlus ? project?.organizationId : null);
-  const qtplusLinked = Boolean(project?.qtplusLink?.projectId);
-  // «Портал для клієнтів» is a paid line on the price list, so a workspace on
-  // Free does not get the tab — not even on a project linked before the plan
-  // changed. The link itself is untouched; it comes back with the plan.
-  const portalAllowed = planAllows(activeOrg?.plan, 'portal');
-  const showQtPlusTab = QTPLUS_CONFIGURED && portalAllowed
-    && ((canManageQtPlus && qtEnabled) || qtplusLinked);
-  const tabs = useMemo(() => {
-    if (clientViewer) return [];
-    return showQtPlusTab
-      ? [...PROJECT_TABS, { id: 'qtplus', label: 'QuickTeam+', icon: Plug }]
-      : PROJECT_TABS;
-  }, [clientViewer, showQtPlusTab]);
+  const [activeTab, setActiveTab] = useState('incidents');
+  const [scope, setScope] = useState('open');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [showComposer, setShowComposer] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showClientInvite, setShowClientInvite] = useState(false);
 
   useEffect(() => {
     if (resourceOrganizationId && resourceOrganizationId !== activeOrgId) {
@@ -192,497 +173,468 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     }
   }, [activeOrgId, resourceOrganizationId, switchOrg]);
 
-  // External clients have their own incident list at `/`. The inherited
-  // project board exposes support-team concepts even when its controls are
-  // read-only, so a direct or bookmarked project URL returns to that portal.
+  // External users have the focused «Мої звернення» portal at `/`. This route
+  // is the tenant's customer-administration surface and must never expose it.
   useEffect(() => {
     if (clientViewer) router.replace('/');
   }, [clientViewer, router]);
 
-  // If the qtplus tab was active and just became hidden (e.g. unlinked), fall back.
-  useEffect(() => {
-    if (activeTab === 'qtplus' && !showQtPlusTab) {
-      queueMicrotask(() => setActiveTab('board'));
-    }
-  }, [activeTab, showQtPlusTab]);
+  const memberById = useMemo(
+    () => new Map((members || []).map(member => [member.id || member.uid, member])),
+    [members],
+  );
+  const statusById = useMemo(
+    () => new Map((statuses || []).map(status => [status.id, status])),
+    [statuses],
+  );
+  const projectMembers = useMemo(() => {
+    const roster = new Set(Array.isArray(project?.team) ? project.team : []);
+    return activeMembers(members).filter(member => roster.has(member.id || member.uid));
+  }, [members, project]);
+  const clientMembers = useMemo(
+    () => projectMembers.filter(member => isClientRole(member.role)),
+    [projectMembers],
+  );
+  const supportMembers = useMemo(
+    () => projectMembers.filter(member => !isClientRole(member.role)),
+    [projectMembers],
+  );
+  const supportAssigneeOptions = useMemo(() => supportMembers.map(member => ({
+    value: member.id || member.uid,
+    label: member.name || member.displayName || member.email || 'Учасник',
+    user: member,
+  })), [supportMembers]);
 
-  const [showConfigModal, setShowConfigModal] = useState(false);
-  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
+  const categorizedIssues = useMemo(() => (issues || []).map(issue => ({
+    issue,
+    category: statusCategoryOf(issue.columnId || issue.status, statuses),
+  })), [issues, statuses]);
+  const metrics = useMemo(() => {
+    const open = categorizedIssues.filter(item => item.category !== 'done');
+    return {
+      open: open.length,
+      new: open.filter(item => item.category === 'backlog' || item.category === 'todo').length,
+      active: open.filter(item => item.category === 'in-progress' || item.category === 'review').length,
+      resolved: categorizedIssues.filter(item => item.category === 'done').length,
+      unassigned: open.filter(item => assigneeIdsOf(item.issue).length === 0).length,
+    };
+  }, [categorizedIssues]);
+  const visibleIssues = useMemo(() => categorizedIssues
+    .filter(({ issue, category }) => {
+      if (scope === 'open' && category === 'done') return false;
+      if (scope === 'resolved' && category !== 'done') return false;
+      const assignees = assigneeIdsOf(issue);
+      if (assigneeFilter === 'unassigned' && assignees.length > 0) return false;
+      if (assigneeFilter !== 'all' && assigneeFilter !== 'unassigned' && !assignees.includes(assigneeFilter)) return false;
+      return priorityFilter === 'all' || (issue.priority || NO_PRIORITY_ID) === priorityFilter;
+    })
+    .map(item => item.issue)
+    .sort((left, right) => (
+      timestampMillis(right.updatedAt || right.createdAt)
+      - timestampMillis(left.updatedAt || left.createdAt)
+    )), [assigneeFilter, categorizedIssues, priorityFilter, scope]);
 
-  const activeSprints = sprints.filter(s => s.status === 'active');
-  const boardIssues = issues.filter(i => {
-    const normalizedSearch = projectSearch.trim().toLowerCase();
-    if (normalizedSearch && ![i.issueKey, i.title, i.description]
-      .some(value => String(value || '').toLowerCase().includes(normalizedSearch))) return false;
-    // Sprint
-    if (boardSprintFilter !== 'all') {
-      if (boardSprintFilter === 'active') {
-        if (activeSprints.length > 0 && !activeSprints.some(s => s.id === i.sprintId)) return false;
-      } else {
-        if (i.sprintId !== boardSprintFilter) return false;
-      }
-    }
-    // Assignee
-    if (boardAssigneeFilter !== 'all') {
-      if (!i.assigneeIds || !i.assigneeIds.includes(boardAssigneeFilter)) return false;
-    }
-    // Priority
-    if (boardPriorityFilter !== 'all' && (i.priority || NO_PRIORITY_ID) !== boardPriorityFilter) return false;
-    // Type
-    if (boardTypeFilter !== 'all' && i.type !== boardTypeFilter) return false;
+  const actor = useMemo(() => ({
+    userId: currentUser?.uid || currentUser?.id,
+    userName: currentUser?.name || currentUser?.displayName || currentUser?.email || '',
+  }), [currentUser]);
 
-    return true;
-  });
-  const selectionScopeKey = [
-    projectId,
-    projectSearch,
-    boardSprintFilter,
-    boardAssigneeFilter,
-    boardPriorityFilter,
-    boardTypeFilter,
-  ].join('|');
-  usePublishLocalSearchResults(projectSearch, boardIssues.length);
+  const handleCreateIssue = useCallback(async formData => {
+    const created = await createIssue({
+      title: formData.title,
+      description: formData.description || '',
+      columnId: formData.status || 'backlog',
+      priority: formData.priority || NO_PRIORITY_ID,
+      type: formData.type || 'task',
+      assigneeIds: formData.assignees || [],
+      labelIds: formData.labelIds || [],
+      dueDate: formData.dueDate || null,
+      estimateMinutes: formData.estimateMinutes || 0,
+      addAssigneesToProjectTeam: formData.addAssigneesToProjectTeam === true,
+    }, actor);
+    showToast('Інцидент створено');
+    return { ...created, projectId };
+  }, [actor, createIssue, projectId, showToast]);
 
-  const actor = {
-    userId:   currentUser?.id   || currentUser?.uid,
-    userName: currentUser?.name || '',
-  };
-
-  const handleAddIssue = useCallback(async (columnId, title) => {
-    try {
-      const data = { title, columnId };
-
-      await createIssue(data, actor);
-      showToast('Інцидент додано');
-    } catch (err) {
-      showToast('Помилка: ' + err.message, 'error');
-    }
-  }, [createIssue, showToast]); // eslint-disable-line
-
-  // Archiving or deleting the project you are standing in has to leave it —
-  // the projects list does not, because it stays on the list either way.
-  const handleArchiveProject = useCallback(async (id) => {
+  const handleArchiveProject = useCallback(async id => {
     try {
       await archiveProject(id);
-      showToast('Проєкт архівовано', 'success');
-      router.push('/');
+      showToast('Клієнтський простір архівовано', 'success');
+      router.push('/clients');
       return true;
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося архівувати проєкт'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося архівувати клієнтський простір'), 'error');
       return false;
     }
   }, [router, showToast]);
 
-  const handleRestoreProject = useCallback(async (id) => {
+  const handleRestoreProject = useCallback(async id => {
     try {
       await restoreProject(id);
-      showToast('Проєкт розархівовано');
+      showToast('Клієнтський простір відновлено');
       return true;
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося розархівувати проєкт'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося відновити клієнтський простір'), 'error');
       return false;
     }
   }, [showToast]);
 
-  const handleDeleteProject = useCallback(async (id) => {
+  const handleDeleteProject = useCallback(async id => {
     await deleteProject(id);
-    showToast('Проєкт видалено');
-    router.push('/');
+    showToast('Клієнтський простір видалено');
+    router.push('/clients');
   }, [router, showToast]);
 
-  const handleCreateFullIssue = useCallback(async (formData) => {
-    const created = await createIssue(clientViewer
-      ? {
-          title: formData.title,
-          description: formData.description || '',
-        }
-      : {
-          title: formData.title,
-          description: formData.description || '',
-          columnId: formData.status || 'backlog',
-          priority: formData.priority || NO_PRIORITY_ID,
-          type: formData.type || 'task',
-          assigneeIds: formData.assignees || [],
-          labelIds: formData.labelIds || [],
-          dueDate: formData.dueDate,
-          estimateMinutes: formData.estimateMinutes || 0,
-          sprintId: formData.sprintId || null,
-          addAssigneesToProjectTeam: formData.addAssigneesToProjectTeam === true,
-        }, actor);
-    showToast('Інцидент створено');
-    return { ...created, projectId };
-  }, [clientViewer, createIssue, showToast]); // eslint-disable-line
+  const loading = !resourceContextReady
+    || projectsLoading
+    || issuesLoading
+    || membersLoading
+    || workflowLoading;
+  const loadError = projectsError || issuesError || membersError || workflowError;
+  const failure = loadError ? workspaceDataFailureCopy(loadError, isQuotaRefused()) : null;
+  const canManageProject = can(orgRole, 'edit:project_settings');
+  const canInviteClient = can(orgRole, 'manage:team');
+  const isArchived = project?.status === 'archived';
+  const isReadOnly = isArchived || project?.overPlanLimit === true;
+  const tabs = PROJECT_TABS.map(tab => ({
+    ...tab,
+    count: tab.id === 'incidents'
+      ? visibleIssues.length
+      : tab.id === 'people'
+        ? projectMembers.length
+        : 0,
+  }));
 
-  const handleMoveIssue = useCallback(async (issueId, newColumnId, position, updateFields = null) => {
-    // Both writes are kicked off synchronously so each paints its optimistic
-    // result before the first await. Awaiting them in sequence also chained two
-    // full round-trips onto a swimlane drop, which is what made the card sit
-    // there for about a second before settling.
-    const move = moveIssue(issueId, newColumnId, position, actor);
-    const fields = updateFields
-      ? updateIssue(issueId, updateFields, actor)
-      : Promise.resolve();
+  if (clientViewer) return null;
 
-    const results = await Promise.allSettled([move, fields]);
-    const failed = results.find(r => r.status === 'rejected');
-    if (failed) {
-      showToast(`Помилка переміщення. Відновлено попередній стан: ${failed.reason?.message || failed.reason}`, 'error');
-    }
-  }, [moveIssue, updateIssue, showToast]); // eslint-disable-line
-
-  const handleBulkUpdate = useCallback(async (action, value, selectedIssues) => {
-    await applyBulkAction(action, value, selectedIssues);
-  }, [applyBulkAction]);
-
-  // One cell of the table, saved. `updateIssue` already owns the optimistic
-  // overlay and the rollback, including the status route — so a cell edit and a
-  // drag on the board take exactly the same path to Firestore.
-  const handleUpdateIssue = useCallback(async (issueId, patch) => {
-    try {
-      await updateIssue(issueId, patch, actor);
-    } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося зберегти зміну'), 'error');
-    }
-  }, [updateIssue, showToast]); // eslint-disable-line
-
-  // The kanban and the table both fill the screen and scroll inside themselves:
-  // the table's header row and its identity column are pinned to its own scroll
-  // container, and a page that scrolled instead would leave both behind.
-  const isBoard = activeTab === 'board' && (effectiveBoardView === 'kanban' || effectiveBoardView === 'table');
-  const isQtPlusWorkspace = activeTab === 'qtplus' && showQtPlusTab;
-
-  if (!resourceContextReady || projectsLoading) {
+  if (loading) {
     return (
-      <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
-        <LoadingSpinner size="md" />
-        <span className="sr-only">Завантаження проєкту…</span>
-      </div>
-    );
-  }
-
-  if (clientViewer) {
-    return (
-      <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
-        <LoadingSpinner size="md" label="Відкриваємо ваші звернення…" />
+      <div role="status" aria-busy="true" className="flex min-h-[420px] flex-1 items-center justify-center">
+        <LoadingSpinner size="md" label="Завантажуємо клієнтський простір…" />
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="flex min-h-[320px] flex-1 items-center justify-center p-6">
-        <div data-ui-surface="local" className="w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm">
-          <h1 className="ui-type-section-title mb-2 text-ink">Проєкт не знайдено</h1>
-          <p className="mb-5 text-[13px] text-muted">
-            Проєкт видалено або у вас більше немає до нього доступу.
-          </p>
-          <Button onClick={() => router.replace('/')} size="lg" composition="workspace-guard">
-            На головну
-          </Button>
-        </div>
+      <div className="flex min-h-[420px] flex-1 items-center justify-center p-6">
+        <Surface preset="panel" padding="lg" className="w-full max-w-[460px]">
+          <EmptyState
+            icon={Inbox}
+            title="Клієнтський простір не знайдено"
+            description="Його видалено або у вас більше немає доступу."
+            action="До клієнтів"
+            onAction={() => router.replace('/clients')}
+            context="page"
+          />
+        </Surface>
       </div>
     );
   }
 
   return (
-    <div className={`flex-1 h-full bg-transparent ${
-      isBoard
-        ? 'overflow-hidden'
-        : isQtPlusWorkspace
-          ? 'qt-nav-scroll overflow-y-auto overflow-x-hidden custom-scrollbar lg:overflow-hidden'
-          : 'qt-nav-scroll overflow-y-auto overflow-x-hidden custom-scrollbar'
-    }`}>
-      <div className={`workspace-page-layout ${
-        isBoard
-          ? 'h-full pb-0'
-          : isQtPlusWorkspace
-            ? 'min-h-full pb-[120px] lg:h-full lg:min-h-0 lg:pb-0'
-            : 'min-h-full pb-[120px]'
-      }`}>
-
-      {/* ── PageHeader ── */}
-      <PageHeader
-        title={
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="min-w-0 truncate">{project?.name}</span>
-            {isArchived && <Pill tone="neutral" size="lg" shape="badge" uppercase>В архіві</Pill>}
-            {/* The plan's ceiling no longer has room for this project. Said
-                beside its name, where «В архіві» is said, because it is the same
-                kind of fact: the project is here, it opens, and nothing new goes
-                into it. The routes refuse the writes; this is so nobody finds
-                that out by being refused. */}
-            {project?.overPlanLimit === true && (
-              <Pill tone="warning" size="lg" shape="badge" uppercase title={PROJECT_OVER_PLAN_LIMIT}>
-                Тільки читання
-              </Pill>
-            )}
-          </div>
-        }
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        actions={
-          <>
-            {!clientViewer && isShared && (
-              <Link
-                href={`/${projectId}/portal`}
-                className={`relative flex items-center justify-center gap-[6px] w-[36px] h-[36px] p-0 sm:w-auto sm:h-auto sm:px-[14px] sm:py-[7px] rounded-[10px] text-[12px] font-semibold transition-all whitespace-nowrap bg-canvas text-muted hover:text-ink hover:bg-ink/8`}
-                title="QuickTeam+"
-              >
-                <ChatIcon size={13} />
-                <span className="hidden sm:inline">QuickTeam+</span>
-                {project?.hasUnreadPortal && (
-                  <span className="absolute -top-[3px] -right-[3px] w-[10px] h-[10px] rounded-full bg-danger-solid border-2 border-white" />
+    <>
+      <div className="qt-nav-scroll flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent">
+        <div className="workspace-page-layout min-h-full pb-[120px]">
+          <PageHeader
+            title={project.name}
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            actions={(
+              <div className="flex items-center gap-2">
+                {canManageProject && (
+                  <Button
+                    onClick={() => setShowSettings(true)}
+                    icon={Settings2}
+                    size="icon-lg"
+                    style="secondary"
+                    title="Налаштування клієнта"
+                    aria-label="Налаштування клієнта"
+                  />
                 )}
-              </Link>
+                {!isReadOnly && (
+                  <Button
+                    onClick={() => setShowComposer(true)}
+                    icon={Plus}
+                    size="lg"
+                    style="primary"
+                    color="dark"
+                    collapseAt="sm"
+                  >
+                    Створити інцидент
+                  </Button>
+                )}
+              </div>
             )}
-            {!isArchived && can(orgRole, 'edit:project_settings') && (
-              <Button
-                onClick={() => setShowConfigModal(true)}
-                icon={Settings2}
-                size="icon-lg"
-                style="secondary"
-                title="Налаштування проєкту"
-                aria-label="Налаштування проєкту"
-              />
-            )}
-            {!isArchived && (
-              <Button
-                onClick={() => setShowCreateTaskModal(true)}
-                style="primary"
-                size="lg"
-                icon={Plus}
-                collapseAt="sm"
-                title="Створити інцидент"
-              >
-                Створити інцидент
-              </Button>
-            )}
-          </>
-        }
-        filters={
-          activeTab === 'board' ? (
-            <>
+            filters={activeTab === 'incidents' ? (
               <FilterBar>
                 <Select
-                  filterRole="sprint"
-                  ariaLabel="Фільтр за спринтом"
-                  value={boardSprintFilter}
-                  onChange={value => setBoardViewState({ sprint: value })}
-                  options={[
-                    { value: 'all', label: 'Всі спринти' },
-                    { value: 'active', label: 'Активний спринт' },
-                    ...sprints.map(s => ({ value: s.id, label: s.name }))
-                  ]}
+                  filterRole="status"
+                  ariaLabel="Стан інцидентів"
                   variant="ghost"
+                  value={scope}
+                  onChange={setScope}
+                  options={SCOPE_OPTIONS}
                 />
                 <Select
                   filterRole="member"
                   ariaLabel="Фільтр за виконавцем"
-                  value={boardAssigneeFilter}
-                  onChange={value => setBoardViewState({ assignee: value })}
-                  options={[
-                    { value: 'all', label: 'Всі виконавці' },
-                    ...members.map(m => ({ value: m.id || m.uid, label: m.name || m.email, user: m }))
-                  ]}
                   variant="ghost"
+                  value={assigneeFilter}
+                  onChange={setAssigneeFilter}
+                  options={[
+                    { value: 'all', label: 'Усі виконавці' },
+                    { value: 'unassigned', label: 'Без виконавця' },
+                    ...supportAssigneeOptions,
+                  ]}
                 />
                 <Select
                   filterRole="priority"
                   ariaLabel="Фільтр за пріоритетом"
-                  value={boardPriorityFilter}
-                  onChange={value => setBoardViewState({ priority: value })}
+                  variant="ghost"
+                  value={priorityFilter}
+                  onChange={setPriorityFilter}
                   options={[
-                    { value: 'all', label: 'Всі пріоритети' },
+                    { value: 'all', label: 'Усі пріоритети' },
                     ...prioritySelectOptions(priorities),
                   ]}
-                  variant="ghost"
-                />
-                <Select
-                  filterRole="type"
-                  ariaLabel="Фільтр за типом інциденту"
-                  value={boardTypeFilter}
-                  onChange={value => setBoardViewState({ type: value })}
-                  options={[
-                    { value: 'all', label: 'Всі типи' },
-                    ...types.map(taskTypeSelectOption),
-                  ]}
-                  variant="ghost"
                 />
               </FilterBar>
-              <div className="ml-auto flex items-center gap-2 max-md:hidden">
-                <Tabs
-                  tabs={BOARD_VIEW_TABS}
-                  activeTab={boardView}
-                  onTabChange={setBoardView}
-                />
-              </div>
-            </>
-          ) : activeTab === 'analytics' ? (
-            <FilterBar>
-              <Select
-                filterRole="priority"
-                variant="ghost"
-                value={analyticsPriorityFilter}
-                onChange={setAnalyticsPriorityFilter}
-                options={[
-                  { value: 'all', label: 'Всі пріоритети' },
-                  ...prioritySelectOptions(priorities),
-                ]}
-              />
-              <Select
-                filterRole="type"
-                variant="ghost"
-                value={analyticsTypeFilter}
-                onChange={setAnalyticsTypeFilter}
-                options={[
-                  { value: 'all', label: 'Всі типи' },
-                  ...types.map(taskTypeSelectOption),
-                ]}
-              />
-            </FilterBar>
-          ) : null
-        }
-      />
-
-      {/* ── Tab content ── */}
-      {activeTab === 'board' && (
-        // Only spin while there is genuinely nothing to show. Swapping a
-        // populated board for the spinner unmounts it, and it comes back
-        // through a blank frame — so any brief `loading` blip read as the
-        // board reloading itself.
-        loading && boardIssues.length === 0 ? (
-          <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
-            <LoadingSpinner size="md" />
-            <span className="sr-only">Завантаження…</span>
-          </div>
-        ) : effectiveBoardView === 'kanban' ? (
-          <div className="flex-1 min-h-[500px] flex flex-col">
-            <AgileBoard
-              issues={boardIssues}
-              allIssues={issues}
-              members={members}
-              projectId={projectId}
-              project={project}
-              activeTimerIssueId={activeTimer?.issueId}
-              onAddIssue={handleAddIssue}
-              onMoveIssue={canEditIncidents ? handleMoveIssue : undefined}
-              onBulkUpdate={canEditIncidents ? handleBulkUpdate : undefined}
-              issueLinks={issueLinks}
-              sprints={sprints}
-              isArchived={isArchived}
-              readOnly={!canEditIncidents}
-              canArchive={canWhileRoleLoads(orgRole, 'delete:issue')}
-              selectionScopeKey={selectionScopeKey}
-            />
-          </div>
-        ) : effectiveBoardView === 'table' ? (
-          <div className="flex min-h-0 flex-1 flex-col">
-            <TaskTableView
-              issues={boardIssues}
-              allIssues={issues}
-              issueLinks={issueLinks}
-              members={members}
-              labels={labels}
-              sprints={sprints}
-              projectId={projectId}
-              columns={tableColumns}
-              sort={tableSort}
-              dir={tableSortDirection}
-              onSortChange={setTableSort}
-              onColumnsChange={toggleTableColumn}
-              onOpenIssue={openIssueQuickView}
-              activeTimerIssueId={activeTimer?.issueId}
-              // An archived project is read-only, and so is a role without
-              // `edit:issue`. Hidden UI is not the guard — the server route and
-              // the rules are — but a cell that opens and then refuses is worse
-              // than one that does not open.
-              onUpdateIssue={isArchived || !canWhileRoleLoads(orgRole, 'edit:issue') ? undefined : handleUpdateIssue}
-              onBulkUpdate={canEditIncidents ? handleBulkUpdate : undefined}
-              bulkProgress={bulkProgress}
-              canArchive={canWhileRoleLoads(orgRole, 'delete:issue')}
-              selectionScopeKey={selectionScopeKey}
-              emptyTitle="Інцидентів не знайдено"
-              emptyDescription="Змініть фільтри або створіть новий інцидент."
-            />
-          </div>
-        ) : (
-          <TaskListView
-            issues={boardIssues}
-            allIssues={issues}
-            issueLinks={issueLinks}
-            members={members}
-            labels={labels}
-            sprints={sprints}
-            projectId={projectId}
-            projectName={project?.name}
-            hiddenGroupIds={project?.hiddenColumns || []}
-            activeTimerIssueId={activeTimer?.issueId}
-            onBulkUpdate={canEditIncidents ? handleBulkUpdate : undefined}
-            bulkProgress={bulkProgress}
-            canArchive={canWhileRoleLoads(orgRole, 'delete:issue')}
-            selectionScopeKey={selectionScopeKey}
-            emptyTitle="Інцидентів не знайдено"
-            emptyDescription="Змініть фільтри або створіть новий інцидент."
+            ) : null}
           />
-        )
-      )}
 
+          {loadError ? (
+            <div className="mx-auto flex min-h-[420px] max-w-[520px] flex-col justify-center gap-3">
+              <Alert variant="error" title={failure.title} description={failure.description} />
+              <Button onClick={() => window.location.reload()} style="secondary" size="md">
+                Спробувати ще раз
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-[20px]">
+              {(isArchived || project.overPlanLimit === true) && (
+                <Alert
+                  variant={isArchived ? 'info' : 'warning'}
+                  title={isArchived ? 'Клієнтський простір в архіві' : 'Режим тільки для читання'}
+                  description={isArchived
+                    ? 'Історія та інциденти доступні, але нові звернення тут не створюються.'
+                    : PROJECT_OVER_PLAN_LIMIT}
+                />
+              )}
 
-      {showConfigModal && project && (
-        // The kebab on the projects list opened this same dialog with archive,
-        // delete and invites; opening it from inside the project left all three
-        // out, so the same "Налаштування проєкту" showed two different things
-        // depending on where you clicked. One dialog, one set of capabilities.
+              {activeTab === 'incidents' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    <KpiCard icon={Inbox} value={metrics.open} label="Відкриті" sub={`${metrics.unassigned} без виконавця`} />
+                    <KpiCard icon={Plus} value={metrics.new} label="Нові" sub="очікують першої реакції" />
+                    <KpiCard icon={CircleDotDashed} value={metrics.active} label="У роботі" sub="разом із перевіркою" />
+                    <KpiCard icon={CheckCircle2} value={metrics.resolved} label="Вирішені" sub="у цьому просторі" />
+                  </div>
+
+                  <Surface preset="panel" padding="md">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="ui-type-section-title text-ink">Інциденти клієнта</h2>
+                        <p className="mt-1 text-[12px] text-muted">
+                          Окрема черга цього клієнта. Загальна черга підтримки залишається у розділі «Інциденти».
+                        </p>
+                      </div>
+                      <Pill tone={metrics.open ? 'info' : 'success'} size="sm" shape="badge">
+                        {metrics.open ? `${metrics.open} відкритих` : 'Усе вирішено'}
+                      </Pill>
+                    </div>
+
+                    {visibleIssues.length === 0 ? (
+                      <EmptyState
+                        icon={Inbox}
+                        title={issues.length === 0 ? 'Інцидентів ще немає' : 'За цими фільтрами нічого немає'}
+                        description={issues.length === 0
+                          ? 'Створіть перший інцидент від імені підтримки або запросіть адміністратора клієнта.'
+                          : 'Змініть стан, виконавця або пріоритет у фільтрах.'}
+                        action={!isReadOnly && issues.length === 0 ? 'Створити інцидент' : null}
+                        onAction={!isReadOnly && issues.length === 0 ? () => setShowComposer(true) : null}
+                        density="compact"
+                        surface="card"
+                      />
+                    ) : (
+                      <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                        {visibleIssues.map(issue => {
+                          const status = statusById.get(issue.columnId || issue.status);
+                          const category = statusCategoryOf(issue.columnId || issue.status, statuses);
+                          const assigneeId = assigneeIdsOf(issue)[0];
+                          const assignee = assigneeId ? memberById.get(assigneeId) : null;
+                          return (
+                            <ListRow
+                              key={issue.id}
+                              density="roomy"
+                              onClick={() => {
+                                const href = issuePath(issue, project);
+                                if (href) router.push(href);
+                              }}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <TaskIdentity issue={issue} project={project} done={category === 'done'} />
+                                <p className="mt-1 truncate text-[13px] font-bold text-ink">
+                                  {issue.title || 'Інцидент без назви'}
+                                </p>
+                                <p className="mt-1 text-[11px] text-faint">
+                                  Оновлено {formatUpdatedAt(issue.updatedAt || issue.createdAt)}
+                                </p>
+                              </div>
+                              <div className="hidden shrink-0 items-center gap-2 md:flex">
+                                <PriorityBadge priority={issue.priority} priorities={priorities} />
+                                <StatusPill label={status?.label || 'Без статусу'} color={status?.color} />
+                              </div>
+                              {assignee ? (
+                                <UserAvatar user={assignee} size="sm" tooltip />
+                              ) : (
+                                <Pill tone="warning" size="sm" shape="badge">Без виконавця</Pill>
+                              )}
+                              <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
+                            </ListRow>
+                          );
+                        })}
+                      </Card>
+                    )}
+                  </Surface>
+                </>
+              )}
+
+              {activeTab === 'people' && (
+                <div className="grid items-start gap-[20px] xl:grid-cols-2">
+                  <Surface preset="panel" padding="md">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="ui-type-section-title text-ink">Команда клієнта</h2>
+                        <p className="mt-1 text-[12px] text-muted">
+                          Зовнішні користувачі бачать тільки цей простір і його інциденти.
+                        </p>
+                      </div>
+                      {canInviteClient && (
+                        <Button
+                          onClick={() => setShowClientInvite(true)}
+                          icon={UserPlus}
+                          style="secondary"
+                          size="md"
+                          collapseAt="sm"
+                        >
+                          Запросити клієнта
+                        </Button>
+                      )}
+                    </div>
+                    <MemberList
+                      members={clientMembers}
+                      emptyTitle="Клієнта ще не запрошено"
+                      emptyDescription="Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників."
+                      onOpen={memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
+                    />
+                  </Surface>
+
+                  <Surface preset="panel" padding="md">
+                    <div className="mb-4">
+                      <h2 className="ui-type-section-title text-ink">Команда підтримки</h2>
+                      <p className="mt-1 text-[12px] text-muted">
+                        Внутрішні працівники, закріплені за цим клієнтським простором.
+                      </p>
+                    </div>
+                    <MemberList
+                      members={supportMembers}
+                      emptyTitle="Підтримку ще не призначено"
+                      emptyDescription="Додайте внутрішніх працівників у налаштуваннях клієнта."
+                      onOpen={memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
+                    />
+                  </Surface>
+                </div>
+              )}
+
+              {activeTab === 'settings' && (
+                <Surface preset="panel" padding="lg">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="max-w-[680px]">
+                        <h2 className="ui-type-section-title text-ink">Клієнтський простір</h2>
+                        <p className="mt-2 text-[13px] leading-6 text-muted">
+                          Тут зберігається контекст клієнта, його команда та всі звернення. Налаштування доступні тільки внутрішнім адміністраторам qTicket.
+                        </p>
+                      </div>
+                      {canManageProject && (
+                        <Button onClick={() => setShowSettings(true)} icon={Settings2} style="primary" size="md">
+                          Редагувати
+                        </Button>
+                      )}
+                    </div>
+
+                    <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
+                        <p className="text-[12px] font-semibold text-muted">Назва клієнта</p>
+                        <p className="text-[13px] font-semibold text-ink">{project.name}</p>
+                      </div>
+                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
+                        <p className="text-[12px] font-semibold text-muted">Контекст</p>
+                        <p className="whitespace-pre-line text-[13px] leading-6 text-ink">
+                          {project.description || 'Опис клієнта ще не додано.'}
+                        </p>
+                      </div>
+                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
+                        <p className="text-[12px] font-semibold text-muted">Доступ</p>
+                        <p className="text-[13px] text-ink">
+                          {clientMembers.length} клієнтських · {supportMembers.length} внутрішніх користувачів
+                        </p>
+                      </div>
+                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
+                        <p className="text-[12px] font-semibold text-muted">Стан</p>
+                        <div>
+                          <Pill tone={isArchived ? 'neutral' : 'success'} size="sm" shape="badge">
+                            {isArchived ? 'В архіві' : 'Активний'}
+                          </Pill>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                </Surface>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showSettings && project && (
         <BoardConfigModal
           project={project}
-          issues={issues}
-          organizationMembers={organizationMembers}
+          organizationMembers={members}
           canManageTeam={can(orgRole, 'manage:team')}
           canInvite={can(orgRole, 'manage:team')}
           onArchive={handleArchiveProject}
           onUnarchive={handleRestoreProject}
           onDelete={handleDeleteProject}
-          onClose={() => setShowConfigModal(false)}
+          onClose={() => setShowSettings(false)}
         />
       )}
 
       <CreateTaskModal
-        isOpen={showCreateTaskModal}
-        onClose={() => setShowCreateTaskModal(false)}
-        onSubmit={handleCreateFullIssue}
+        isOpen={showComposer}
+        onClose={() => setShowComposer(false)}
+        onSubmit={handleCreateIssue}
         stages={project?.stages || []}
-        teamMembers={members}
-        projectContext={project ? {
+        teamMembers={supportMembers}
+        projectContext={{
           id: project.id,
           name: project.name,
           hiddenColumns: project.hiddenColumns || [],
-        } : null}
-        sprints={sprints}
+        }}
         entity="incident"
-        clientMode={clientViewer}
       />
-      {activeTab === 'analytics' && (
-        <AnalyticsTab
-          issues={issues}
-          members={members}
-          project={project}
-          projectId={projectId}
-          issueLinks={issueLinks}
-          priorityFilter={analyticsPriorityFilter}
-          typeFilter={analyticsTypeFilter}
-        />
-      )}
 
-      {activeTab === 'qtplus' && showQtPlusTab && (
-        <QtPlusProjectTab
-          project={project}
-          orgRole={orgRole}
-          currentUser={currentUser}
-          allProjects={projects}
-        />
-      )}
-      </div>
-    </div>
+      <InviteMemberDialog
+        isOpen={showClientInvite}
+        onClose={() => setShowClientInvite(false)}
+        inviteMember={inviteMember}
+        projects={[project]}
+        projectIds={[project.id]}
+        clientAdminMode
+      />
+    </>
   );
 }

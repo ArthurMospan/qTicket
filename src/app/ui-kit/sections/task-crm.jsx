@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Button, StatusTransitionPicker, TaskCounters, TaskIdentity, TaskListCard, TaskListView, TaskTableView } from '@/components/ui';
+import { Button, StatusTransitionPicker, TaskCounters, TaskIdentity, TaskListCard, TaskListView } from '@/components/ui';
 import AgileBoard from '@/components/workspace/AgileBoard';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import { DEFAULT_STATUSES, useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
@@ -9,15 +9,6 @@ import { PreviewBlock } from '../preview';
 
 export default function TaskCRMSection() {
   const [statusPickerOpen, setStatusPickerOpen] = useState(false);
-  // The catalogue holds the table's arrangement the same way the address does
-  // in the product: the component never keeps a copy of it.
-  const [tableSort, setTableSort] = useState({ sort: 'manual', dir: 'asc' });
-  const [tableColumns, setTableColumns] = useState(['key', 'title', 'status', 'assignees', 'priority', 'due']);
-  const toggleTableColumn = columnId => setTableColumns(current => (
-    current.includes(columnId)
-      ? current.filter(id => id !== columnId)
-      : [...current, columnId]
-  ));
   const { statuses } = useWorkflowConfig();
   const firstStatusId = statuses[0]?.id || DEFAULT_STATUSES[0].id;
   const secondStatusId = statuses[1]?.id || firstStatusId;
@@ -280,56 +271,6 @@ export default function TaskCRMSection() {
           onBulkUpdate={() => {}}
           canArchive
         />
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="Task Table View — таблиця з редагуванням у клітинці"
-        description="Третє прочитання тих самих задач. Шапка сіра з лінією-тінню — межа клітинки при border-collapse належить таблиці й не їде разом із примерзлою шапкою, тому лінія зникала при скролі. Колонка ID і назва примерзають ліворуч. Клік по заголовку: ▲ → ▼ → назад до порядку дошки; шеврон поруч (видно на наведенні) групує саме за цією колонкою — групування належить колонці, а не рядку фільтрів. Іконка в кутовій клітинці вмикає колонки. Клітинка відкриває той самий kit-контрол, що і всюди, з композицією table-cell, щоб рядок не підстрибував; рівно один за раз — контрол у кожній клітинці повісив би по слухачу документа на клітинку. Клік по ID відкриває модалку швидкого перегляду."
-        filePath="src/components/ui/TaskManagement/TaskTableView.jsx"
-        component="TaskTableView"
-        fullWidth
-      >
-        <div className="h-[420px] min-w-0">
-          <TaskTableView
-            issues={demoIssues}
-            allIssues={demoIssues}
-            members={demoMembers}
-            labels={demoLabels}
-            sprints={demoSprints}
-            projectId="ui-kit-project"
-            columns={tableColumns}
-            sort={tableSort.sort}
-            dir={tableSort.dir}
-            onSortChange={setTableSort}
-            onColumnsChange={toggleTableColumn}
-            onOpenIssue={() => {}}
-            onUpdateIssue={async () => {}}
-            onBulkUpdate={() => {}}
-            canArchive
-          />
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="Task Table View — без групування, свій набір колонок"
-        description="group=&quot;none&quot; знімає смуги й лишає одне полотно — вигляд для масової чистки беклогу. columns задає видимі колонки; «ID» і «Назву» вимкнути не можна, бо рядок, який неможливо впізнати, — не рядок. Порядок колонок канонічний, а не той, у якому їх перелічили: у посиланні їде набір, а не розкладка. Таблиця без права на запис (архівний проєкт) просто не відкриває клітинок."
-        filePath="src/components/ui/TaskManagement/TaskTableView.jsx"
-        fullWidth
-      >
-        <div className="h-[340px] min-w-0">
-          <TaskTableView
-            issues={demoIssues}
-            allIssues={demoIssues}
-            members={demoMembers}
-            labels={demoLabels}
-            sprints={demoSprints}
-            projectId="ui-kit-project"
-            sort="priority"
-            dir="asc"
-            columns={['type', 'title', 'labels', 'estimate', 'subtasks', 'due']}
-            onSortChange={() => {}}
-          />
-        </div>
       </PreviewBlock>
 
       <PreviewBlock

@@ -200,8 +200,10 @@ export const PLAN_CAPABILITIES = [
       'Ви вирішуєте, що саме показано клієнту',
     ],
     plans: ['lite', 'pro'],
-    enforced: true,
-    enforcedAt: 'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
+    // qTicket's own client portal is the product, not a QuickTeam plan gate.
+    // Add-on entitlement is provisioned manually until the explicit billing
+    // contract exists, so no browser-visible plan field may pretend to enforce it.
+    enforced: false,
   },
   {
     id: 'ai-calls',

@@ -1,9 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BOARD_VIEW_SCHEMA,
   INCIDENT_QUEUE_VIEW_SCHEMA,
-  MY_TASKS_VIEW_SCHEMA,
   SPRINTS_VIEW_SCHEMA,
   defaultViewState,
   hasViewStateParams,
@@ -129,66 +127,13 @@ test('serializing ignores keys the schema does not declare', () => {
   assert.equal(next.get('rogue'), null);
 });
 
-// The board's `view` key is what the table view extended, and `/my` carries
-// `assignee` for the composer rather than as a filter. Both are contract, not
-// incidental, so they are asserted here.
+// The incident queue carries `assignee` for the composer rather than as a
+// filter. That separation is contract, not incidental, so it is asserted here.
 test('the shipped schemas keep their agreed keys', () => {
-  assert.deepEqual(
-    Object.keys(BOARD_VIEW_SCHEMA),
-    ['view', 'sprint', 'assignee', 'priority', 'type', 'sort', 'dir', 'cols'],
-  );
-  assert.deepEqual(BOARD_VIEW_SCHEMA.view.values, ['kanban', 'list', 'table']);
-  assert.deepEqual(Object.keys(MY_TASKS_VIEW_SCHEMA), ['view', 'projects', 'sprint', 'priority', 'type']);
-  assert.equal(MY_TASKS_VIEW_SCHEMA.assignee, undefined);
   assert.deepEqual(
     Object.keys(INCIDENT_QUEUE_VIEW_SCHEMA),
     ['view', 'projects', 'status', 'assigned', 'priority', 'type', 'period'],
   );
   assert.equal(INCIDENT_QUEUE_VIEW_SCHEMA.assignee, undefined);
   assert.deepEqual(Object.keys(SPRINTS_VIEW_SCHEMA), ['projects', 'assignee', 'priority', 'type']);
-});
-
-// The table's whole point is that its arrangement is somebody else's link.
-test('a configured table is one address', () => {
-  const state = {
-    ...defaultViewState(BOARD_VIEW_SCHEMA),
-    view: 'table',
-    sort: 'due',
-    dir: 'desc',
-    cols: ['key', 'title', 'due'],
-  };
-  const query = viewStateQuery(BOARD_VIEW_SCHEMA, state);
-  assert.deepEqual(parseViewState(BOARD_VIEW_SCHEMA, query), state);
-  assert.match(query, /view=table/);
-  assert.match(query, /cols=key%2Ctitle%2Cdue/);
-});
-
-test('an untouched table says only that it is a table', () => {
-  assert.equal(
-    viewStateQuery(BOARD_VIEW_SCHEMA, { ...defaultViewState(BOARD_VIEW_SCHEMA), view: 'table' }),
-    'view=table',
-  );
-});
-
-// The columns you chose are not thrown away by looking at the kanban, because
-// the keys stay declared whichever view is showing.
-test('the table’s arrangement survives a trip through another view', () => {
-  const configured = 'view=table&sort=due&cols=key%2Ctitle%2Cestimate';
-  const asKanban = serializeViewState(
-    BOARD_VIEW_SCHEMA,
-    { ...parseViewState(BOARD_VIEW_SCHEMA, configured), view: 'kanban' },
-    configured,
-  );
-  assert.equal(asKanban.get('view'), null);
-  assert.equal(asKanban.get('sort'), 'due');
-  assert.equal(asKanban.get('cols'), 'key,title,estimate');
-});
-
-// The table does not group, so the address has no key for it either.
-test('a sort the build no longer has opens the table anyway', () => {
-  const state = parseViewState(BOARD_VIEW_SCHEMA, 'view=table&sort=moon-phase&dir=sideways&group=weather');
-  assert.equal(state.view, 'table');
-  assert.equal(state.sort, 'manual');
-  assert.equal(state.dir, 'asc');
-  assert.equal(state.group, undefined);
 });

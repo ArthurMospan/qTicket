@@ -132,11 +132,13 @@ test('QUI-80 gives every FilterBar selector a semantic icon role', async () => {
     read('../src/app/(app)/analytics/page.js'),
   ]);
 
-  for (const role of ['type', 'priority', 'sprint', 'date', 'member', 'project', 'sort']) {
+  for (const role of ['type', 'priority', 'date', 'member', 'project', 'sort']) {
     assert.match(select, new RegExp(`${role}:\\s*[A-Z]`));
   }
-  assert.match(project, /filterRole="sprint"[\s\S]{0,100}value=\{boardSprintFilter\}/);
-  assert.match(project, /filterRole="priority"[\s\S]{0,100}value=\{boardPriorityFilter\}/);
+  assert.match(project, /filterRole="status"[\s\S]{0,120}value=\{scope\}/);
+  assert.match(project, /filterRole="member"[\s\S]{0,120}value=\{assigneeFilter\}/);
+  assert.match(project, /filterRole="priority"[\s\S]{0,120}value=\{priorityFilter\}/);
+  assert.doesNotMatch(project, /filterRole="sprint"/);
   assert.match(my, /filterRole="status"[\s\S]{0,100}value=\{filters\.status\}/);
   assert.match(my, /filterRole="member"[\s\S]{0,100}value=\{filters\.assigned\}/);
   assert.match(my, /filterRole="priority"[\s\S]{0,100}value=\{filters\.priority\}/);
@@ -290,13 +292,13 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(workspace, /<BoardConfigModal[\s\S]{0,400}canManageTeam=\{can\(orgRole, 'manage:team'\)\}/);
   const sharedProjectFormCall = workspace.match(/<ProjectSettingsForm[\s\S]*?\/>/)?.[0] || '';
   assert.match(sharedProjectFormCall, /onHiddenStatusIdsChange=\{setHiddenColumns\}/);
-  assert.match(projectPage, /title="Налаштування проєкту"/);
+  assert.match(projectPage, /title="Налаштування клієнта"/);
   assert.ok(
-    projectPage.indexOf('title="Налаштування проєкту"')
-      < projectPage.indexOf('title="Створити інцидент"'),
+    projectPage.indexOf('title="Налаштування клієнта"')
+      < projectPage.indexOf('Створити інцидент'),
     'project settings must be immediately available before incident creation',
   );
-  assert.match(projectPage, /<BoardConfigModal[\s\S]{0,160}project=\{project\}[\s\S]{0,160}issues=\{issues\}/);
+  assert.match(projectPage, /<BoardConfigModal[\s\S]{0,160}project=\{project\}[\s\S]{0,240}canManageTeam=\{can\(orgRole, 'manage:team'\)\}/);
   assert.match(settingsDialog, /size="sm"/);
   assert.doesNotMatch(settingsDialog, /presentation="dialog"/);
   assert.match(settingsDialog, /title: 'Приховати колонки проєкту\?'/);

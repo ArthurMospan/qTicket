@@ -22,10 +22,12 @@ test('every project restore surface shows the actionable API error', async () =>
     read('../src/components/workspace/BoardConfigModal.jsx'),
   ]);
 
-  for (const source of [workspace, settings, project]) {
+  for (const source of [workspace, settings]) {
     assert.match(source, /userFacingErrorMessage\(.*'Не вдалося розархівувати проєкт'/);
     assert.doesNotMatch(source, /showToast\('Помилка розархівування'/);
   }
+  assert.match(project, /userFacingErrorMessage\(.*'Не вдалося відновити клієнтський простір'/);
+  assert.doesNotMatch(project, /showToast\('Помилка розархівування'/);
   assert.match(project, /const handleRestoreProject[\s\S]{0,500}catch \(error\)/);
   assert.match(modal, /await onUnarchive\(project\.id\) !== false/);
   assert.match(modal, /await onArchive\(project\.id\) !== false/);

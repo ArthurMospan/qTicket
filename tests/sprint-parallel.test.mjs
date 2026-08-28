@@ -15,12 +15,13 @@ test('nothing limits how many sprints run at once', async () => {
 });
 
 test('a sprint belongs to the organization and holds tasks from any project', async () => {
-  const [hook, issuesRoute, bulkRoute, detail, board] = await Promise.all([
+  const [hook, issuesRoute, bulkRoute, detail, customerWorkspace, composer] = await Promise.all([
     read('../src/lib/hooks/useSprints.js'),
     read('../src/app/api/issues/route.js'),
     read('../src/app/api/issues/bulk/route.js'),
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
+    read('../src/components/CreateTaskModal.jsx'),
   ]);
   // No project field on the document, and no scope check anywhere: a sprint is
   // a named set of tasks, and which projects those come from is not the
@@ -31,10 +32,11 @@ test('a sprint belongs to the organization and holds tasks from any project', as
     ['issues route', issuesRoute],
     ['bulk route', bulkRoute],
     ['issue detail', detail],
-    ['project board', board],
+    ['customer workspace', customerWorkspace],
   ]) {
     assert.doesNotMatch(source, /sprintScope|sprintCoversProject|sprintsForProject/, `${name} still scopes sprints`);
   }
   // Every non-completed sprint stays offered, wherever the task lives.
-  assert.match(board, /\.\.\.sprints\.map\(s => \(\{ value: s\.id, label: s\.name \}\)\)/);
+  assert.match(composer, /\.\.\.availableSprints\.map\(s => \(\{ value: s\.id, label: s\.name \}\)\)/);
+  assert.doesNotMatch(customerWorkspace, /useSprints|sprintId|sprints=/);
 });

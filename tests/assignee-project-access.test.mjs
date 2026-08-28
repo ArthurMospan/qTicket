@@ -205,12 +205,13 @@ test('every composer forwards the consent to the API, or the box does nothing', 
   }
 });
 
-test('a board card no longer loses the face of someone outside the project team', async () => {
-  const board = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
-  // A face is a record of who is on a task; a picker is a question about who
-  // may be handed one. The union answers both, which is the rule the task
-  // screen already used for its own assignee list.
-  assert.match(board, /for \(const participant of issueDisplayParticipants\(issue\)\) uids\.add\(participant\.id\);/);
+test('a customer incident row no longer loses the face of someone outside the project team', async () => {
+  const workspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+  // The picker is restricted to the project roster, but resolving an existing
+  // incident uses the organization map. Historical assignment therefore keeps
+  // its face even after the person leaves this customer roster.
+  assert.match(workspace, /new Map\(\(members \|\| \[\]\)\.map\(member => \[member\.id \|\| member\.uid, member\]\)\)/);
+  assert.match(workspace, /const assignee = assigneeId \? memberById\.get\(assigneeId\) : null;/);
   const detail = await read('../src/components/workspace/IssueDetail.jsx');
   assert.match(detail, /const assignableIds = new Set\(\[\.\.\.teamUids, \.\.\.\(issue\?\.assigneeIds \|\| \[\]\)\]\);/);
   // And the task itself says so for the tasks that already exist in this state
@@ -299,12 +300,13 @@ test('the comment composer is on the task screen before the membership arrives',
 
   // qTicket has external client roles, so mutation controls must wait for the
   // resolved role instead of flashing internal controls during membership load.
-  for (const path of [
-    '../src/components/workspace/IssueDetail.jsx',
-    '../src/app/(app)/[projectId]/ProjectBoardClient.jsx',
-  ]) {
-    const source = await read(path);
-    assert.match(source, /isClientRole\(orgRole\)/, path);
-    assert.match(source, /can\(orgRole, 'edit:issue'\)/, path);
-  }
+  const detail = await read('../src/components/workspace/IssueDetail.jsx');
+  assert.match(detail, /isClientRole\(orgRole\)/);
+  assert.match(detail, /can\(orgRole, 'edit:issue'\)/);
+
+  // The client workspace has no inline mutation controls at all; internal
+  // changes happen on the incident detail or the global incident board.
+  const workspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+  assert.match(workspace, /isClientRole\(orgRole\)/);
+  assert.doesNotMatch(workspace, /updateIssue|moveIssue|onMoveIssue/);
 });

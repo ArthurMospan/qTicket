@@ -80,11 +80,6 @@ test('the greys the kit was already painting keep their own names and values', a
     assert.match(css, new RegExp(String.raw`--color-${token}:\s*${value};`), token);
   }
 
-  // A selected row and a hovered row must stay two different greys. Collapsing
-  // `selected` onto `canvas` — they are four levels apart — would make the
-  // table's selection invisible under the pointer.
-  const table = await read('../src/components/ui/TaskManagement/TaskTableView.jsx');
-  assert.match(table, /selected \? 'bg-selected' : 'hover:bg-canvas'/);
 });
 
 test('the status scale is declared once, in three roles, and clears AA on white', async () => {

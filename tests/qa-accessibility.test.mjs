@@ -88,20 +88,15 @@ test('the known board controls, tab icons, headings and breadcrumbs carry access
   ]);
 
   for (const label of [
-    'Фільтр за спринтом',
+    'Стан інцидентів',
     'Фільтр за виконавцем',
     'Фільтр за пріоритетом',
-    'Фільтр за типом інциденту',
   ]) assert.match(project, new RegExp(`ariaLabel="${label}"`));
 
-  for (const source of [project, mine]) {
-    assert.match(source, /title: 'Дошка', ariaLabel: 'Дошка'/);
-    assert.match(source, /title: 'Список', ariaLabel: 'Список'/);
-  }
-  // The third reading of a project's tasks. `/my` deliberately has no table:
-  // it spans projects, so its rows share no status vocabulary and a cell edit
-  // would write into whichever project owns the row.
-  assert.match(project, /title: 'Таблиця', ariaLabel: 'Таблиця'/);
+  assert.match(mine, /title: 'Дошка', ariaLabel: 'Дошка'/);
+  assert.match(mine, /title: 'Список', ariaLabel: 'Список'/);
+  // The customer page is a focused list, not a second board/table surface.
+  assert.doesNotMatch(project, /ariaLabel: 'Дошка'|ariaLabel: 'Таблиця'/);
   assert.doesNotMatch(mine, /ariaLabel: 'Таблиця'/);
   assert.match(topHeader, /aria-label=\{unreadCount > 0/);
   assert.match(topHeader, /aria-label="Відкрити меню користувача"/);

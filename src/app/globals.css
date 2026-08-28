@@ -615,17 +615,6 @@
     background: transparent;
   }
 
-  /* A control living inside a table cell. The row is 36px, and the standard
-     small control is 34 with its own padding — so opening a cell for editing
-     shoved every row below it down the screen and the table jumped under the
-     cursor. This is the row's own height, minus the breathing room the cell
-     already has. */
-  .ui-control[data-ui-composition='table-cell'] {
-    --ui-control-height: 26px;
-    --ui-control-line: 16px;
-    --ui-control-px: 6px;
-    border-radius: 6px;
-  }
   /* `menu-item` lived here: it made a Button look like a row of a menu, for the
      two popovers that were hand-building a menu out of ghost buttons. Both open
      the real `ContextMenu` now, so the vocabulary for faking one is gone with

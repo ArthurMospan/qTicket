@@ -251,7 +251,7 @@ test('role-filtered organization caches are isolated by organization, user and r
 });
 
 test('remembered workspace filters are scoped to the organization', async () => {
-  const [myTasks, sprints, projectBoard] = await Promise.all([
+  const [myTasks, sprints, clientWorkspace] = await Promise.all([
     read('../src/app/(app)/my/page.js'),
     read('../src/app/(app)/sprints/page.js'),
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
@@ -260,7 +260,11 @@ test('remembered workspace filters are scoped to the organization', async () => 
   assert.match(myTasks, /storageKey: `qt:view:\$\{activeOrgId\}:incident-queue`/);
   assert.match(myTasks, /qt:incident-queue:hidden-categories:\$\{uid \|\| 'anonymous'\}:\$\{activeOrgId \|\| 'none'\}/);
   assert.match(sprints, /storageKey: `qt:view:\$\{activeOrgId\}:sprints`/);
-  assert.match(projectBoard, /storageKey: `qt:view:\$\{resourceOrganizationId \|\| activeOrgId\}:board:\$\{projectId\}`/);
+  // The qTicket client workspace is a short customer queue, not another board
+  // with a second remembered view contract. Its three filters reset when the
+  // customer changes, while the organization-wide queue remains bookmarkable.
+  assert.doesNotMatch(clientWorkspace, /useViewState|storageKey:/);
+  assert.match(clientWorkspace, /const \[scope, setScope\] = useState\('open'\)/);
 });
 
 test('membership signatures ignore snapshot order but notice access changes', () => {

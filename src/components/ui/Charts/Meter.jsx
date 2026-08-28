@@ -26,21 +26,10 @@ const LAYOUTS = {
   inline: 'flex-row items-center gap-3',
 };
 
-// Three tones, not four. A `good` step was declared and never reached: a meter
-// that is fine says so by being neutral, and colouring "nothing is wrong" green
-// spends the reader's attention on the one thing that did not need it.
-const TONES = {
-  // Ordinary progress. Nothing is wrong, so nothing is coloured as though it is.
-  neutral: { fill: 'var(--color-chart-1)', text: 'text-ink' },
-  warning: { fill: 'var(--color-warning)', text: 'text-warning' },
-  danger: { fill: '#ef4444', text: 'text-danger' },
-};
-
 /**
  * A share of a whole, drawn as one bar.
  *
  * @param {number} props.value How much of the limit is used, 0–1. Values above 1 fill the bar and are still reported in the label.
- * @param {'neutral'|'warning'|'danger'} props.tone What the level means. `neutral` is the default because most progress means nothing beyond itself.
  * @param {string} props.label What is being measured, above the bar.
  * @param {React.ReactNode} props.reading The figure, printed opposite the label.
  * @param {'stack'|'inline'} props.layout Reading above the bar, or beside it. `inline` is for a table cell, where the row is one line.
@@ -49,14 +38,12 @@ const TONES = {
  */
 export default function Meter({
   value = 0,
-  tone = 'neutral',
   label,
   reading,
   layout = 'stack',
   height = 8,
   className = '',
 }) {
-  const level = TONES[tone] || TONES.neutral;
   const share = Math.max(0, Math.min(1, Number(value) || 0));
   const inline = layout === 'inline';
 
@@ -72,7 +59,7 @@ export default function Meter({
     >
       <div
         className="h-full rounded-full transition-[width] duration-300"
-        style={{ width: `${share * 100}%`, background: level.fill }}
+        style={{ width: `${share * 100}%`, background: 'var(--color-chart-1)' }}
       />
     </div>
   );
@@ -86,7 +73,7 @@ export default function Meter({
             takes the same step back the rest of that row takes — otherwise the
             one figure that came with its own bar is also the loudest. */}
         {reading && (
-          <span data-ui-density="column" className={`ui-type-figure shrink-0 ${level.text}`}>{reading}</span>
+          <span data-ui-density="column" className="ui-type-figure shrink-0 text-ink">{reading}</span>
         )}
       </div>
     );
@@ -102,7 +89,7 @@ export default function Meter({
               reading and no label — and a lone child of a `justify-between` row
               sits at its *start*, so the one figure on the line was hugging the
               left edge of a bar it belongs to the end of. */}
-          {reading && <span className={`ui-type-figure ml-auto shrink-0 ${level.text}`}>{reading}</span>}
+          {reading && <span className="ui-type-figure ml-auto shrink-0 text-ink">{reading}</span>}
         </div>
       )}
       {track}

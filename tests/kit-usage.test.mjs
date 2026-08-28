@@ -178,7 +178,9 @@ test('the approved follow-up decisions stay encoded in the product', () => {
   const taskIdentity = readFileSync(new URL('../src/components/ui/TaskManagement/TaskIdentity.jsx', import.meta.url), 'utf8');
   assert.match(taskIdentity, /showProjectName && Boolean\(projectName\)/);
   assert.match(myTasks, /hiddenGroupIds=\{hiddenCategories\}/);
-  assert.match(project, /hiddenGroupIds=\{project\?\.hiddenColumns \|\| \[\]\}/);
+  // The customer workspace is a simple queue. Per-project board columns still
+  // exist in settings and the global board, but this route renders neither.
+  assert.doesNotMatch(project, /hiddenGroupIds=|<AgileBoard/);
   assert.match(myTasks, /<AgileBoard[\s\S]{0,500}showHiddenLane/);
   assert.match(myTasks, /<AgileBoard[\s\S]{0,600}onRequestAddIssue=/);
   assert.doesNotMatch(project, /<AgileBoard[\s\S]{0,700}showHiddenLane/);

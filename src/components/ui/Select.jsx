@@ -11,7 +11,6 @@ import {
   Search,
   Shapes,
   Users,
-  Zap,
 } from 'lucide-react';
 import { CalendarIcon } from '@/lib/design/icons';
 import { getFilterControlWidth } from './FilterBar';
@@ -36,7 +35,6 @@ const DROPDOWN_MAX_WIDTH = 360;
 const FILTER_ROLE_ICONS = {
   type: Shapes,
   priority: Flag,
-  sprint: Zap,
   status: CircleDot,
   date: CalendarIcon,
   member: Users,

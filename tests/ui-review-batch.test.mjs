@@ -288,8 +288,8 @@ test('both entry points to project settings offer the same capabilities', async 
     }
   }
   // Archiving or deleting the project you are standing in has to leave it.
-  assert.match(projectPage, /handleArchiveProject[\s\S]{0,220}router\.push\('\/'\)/);
-  assert.match(projectPage, /handleDeleteProject[\s\S]{0,220}router\.push\('\/'\)/);
+  assert.match(projectPage, /handleArchiveProject[\s\S]{0,240}router\.push\('\/clients'\)/);
+  assert.match(projectPage, /handleDeleteProject[\s\S]{0,240}router\.push\('\/clients'\)/);
 });
 
 // A colleague's profile offered two labelled buttons and hid the rest behind an

@@ -43,6 +43,7 @@ export default function InviteMemberDialog({
   onClose,
   inviteMember,
   clientMode = false,
+  clientAdminMode = false,
   projectIds = [],
   projects = [],
 }) {
@@ -62,7 +63,11 @@ export default function InviteMemberDialog({
   const [projectError, setProjectError] = useState('');
 
   const availableProjects = projects.filter(project => project.status !== 'archived');
-  const internalClientInvite = !clientInvite && role === 'client_admin';
+  const presetProjectId = projectIds[0] || '';
+  // The client-project page already names both the role and the project. Its
+  // invite action opens this focused mode so an administrator does not have to
+  // answer the same two questions again in a generic team dialog.
+  const internalClientInvite = !clientInvite && (clientAdminMode || role === 'client_admin');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -70,15 +75,15 @@ export default function InviteMemberDialog({
       setTab('email');
       setEmail('');
       setEmailError('');
-      setRole(clientInvite ? 'client_member' : 'member');
+      setRole(clientInvite ? 'client_member' : (clientAdminMode ? 'client_admin' : 'member'));
       setSent(false);
       setUndelivered(false);
       setPendingAccessEmail('');
       setPendingAccessClient(false);
-      setSelectedProjectId('');
+      setSelectedProjectId(clientAdminMode ? presetProjectId : '');
       setProjectError('');
     });
-  }, [clientInvite, isOpen]);
+  }, [clientAdminMode, clientInvite, isOpen, presetProjectId]);
 
   const copyLoginInstructions = async () => {
     const loginPath = pendingAccessClient ? '/login?mode=client' : '/login';
@@ -153,12 +158,16 @@ export default function InviteMemberDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={clientInvite ? 'Запросити співробітника' : 'Запросити нового учасника'}
+      title={clientInvite
+        ? 'Запросити співробітника'
+        : clientAdminMode
+          ? 'Запросити клієнта'
+          : 'Запросити нового учасника'}
       size="lg"
       bodyPadding="invite"
     >
       <div className="flex flex-col gap-6">
-        {!clientInvite && <section>
+        {!clientInvite && !clientAdminMode && <section>
           <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-muted">Роль у команді</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {ROLE_OPTIONS.map(option => (
@@ -200,7 +209,7 @@ export default function InviteMemberDialog({
           )}
         </section>}
 
-        {!clientInvite && !internalClientInvite && <Tabs
+        {!clientInvite && !internalClientInvite && !clientAdminMode && <Tabs
           tabs={[
             { id: 'email', label: 'Електронна пошта', icon: Mail },
             { id: 'link', label: 'Посилання та QR' },
@@ -212,7 +221,13 @@ export default function InviteMemberDialog({
 
         {(clientInvite || internalClientInvite || tab === 'email') ? (
           <form noValidate onSubmit={handleInvite} className="flex flex-col gap-3">
-            <Label required>{clientInvite ? 'Email співробітника' : 'Email учасника'}</Label>
+            <Label required>
+              {clientInvite
+                ? 'Email співробітника'
+                : clientAdminMode
+                  ? 'Email адміністратора клієнта'
+                  : 'Email учасника'}
+            </Label>
             <div className="flex gap-2">
               {/* The kit's standard large control, both halves. They used to
                   share an `invite-*` composition that made them 52px tall with
