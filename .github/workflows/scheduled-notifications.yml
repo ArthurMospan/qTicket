@@ -67,7 +67,7 @@ jobs:
       - name: Send what is due, every minute, until the next scheduled run takes over
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}
           SWEEP_INTERVAL_SECONDS: '60'
           SWEEP_MINUTES: '50'
           MODE: dispatch
@@ -84,7 +84,7 @@ jobs:
       - name: Empty the undo window and expire read records
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}
           SWEEP_INTERVAL_SECONDS: '60'
           SWEEP_MINUTES: '0'
           MODE: maintenance
@@ -101,7 +101,7 @@ jobs:
       - name: Restock the outbox from the source data, and greet the birthdays
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}
           SWEEP_INTERVAL_SECONDS: '60'
           SWEEP_MINUTES: '0'
           MODE: materialise
@@ -116,7 +116,7 @@ jobs:
       - name: Run one pass by hand
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}
           SWEEP_INTERVAL_SECONDS: '60'
           SWEEP_MINUTES: '0'
           MODE: ${{ inputs.mode }}

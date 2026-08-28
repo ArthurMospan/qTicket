@@ -44,7 +44,7 @@ jobs:
       - name: Ask the deployment how long it has been silent
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          APP_URL: ${{ vars.APP_URL || 'https://qt-workspace.vercel.app' }}
+          APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}
         run: |
           if [ -z "${CRON_SECRET}" ]; then
             echo "::error title=Watchdog cannot run::The CRON_SECRET repository secret is not set, so the endpoint would answer 401."
