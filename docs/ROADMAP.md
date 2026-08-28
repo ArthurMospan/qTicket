@@ -125,6 +125,14 @@ Completed product slice on 2026-08-28:
 
 Product work still required:
 
+- Rebuild the `Ctrl+K` command palette as a qTicket surface. Its inherited
+  catalogue still offers calendar, sprint, analytics, timer and generic
+  project actions even though those routes are no longer part of the product.
+  The qTicket palette must expose only overview, incidents, clients, support
+  team, settings, new incident/client and organization switching; external
+  client roles need their own smaller catalogue. The global empty-search copy
+  in `SearchModal` still says «завдання» and belongs in the same terminology
+  pass. This audit is recorded but no command-palette code has been changed yet.
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
 - Add the explicit, idempotent server-side transfer from an incident to a
@@ -175,16 +183,18 @@ surfaces first, then delete only when references and migrations are understood.
    sessions or databases.
 6. **Completed:** configure both deployments with the shared secret and verify
    the first synchronized staff launch against the test deployment.
-7. **In progress:** deploy the qTicket product-fit pass, then execute the full
-   internal/client acceptance flow with separate accounts.
+7. **In progress:** continue the qTicket product-fit pass with the command
+   palette and global search, then execute the full internal/client acceptance
+   flow with separate accounts.
 8. Only after that flow is accepted, implement the incident-to-QuickTeam-task
    transfer contract and connect the existing entitlement field to billing.
 
-The exact next implementation task is step 7: finish all local checks, deploy
-the qTicket product-fit slice, then execute the internal/client acceptance flow
-with separate accounts and fix every concrete failure it reveals. Every completed
-slice should be a reviewable Git commit and this checkpoint should be updated
-in the same commit.
+The exact next implementation task is step 7: replace the inherited command
+palette catalogue and global empty-search copy with the role-aware qTicket
+surface described above. Then run the local checks, deploy, and continue the
+internal/client acceptance flow with separate accounts. Every completed slice
+should be a reviewable Git commit and this checkpoint should be updated in the
+same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
 `docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
 credentials, service-account JSON, `.env` values or session notes here.
