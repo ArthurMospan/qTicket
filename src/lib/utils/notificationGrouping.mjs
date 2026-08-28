@@ -66,7 +66,11 @@ export function notificationCountTitle(count, sample, key = '') {
   const what = `${count} ${plural(count, ['нове повідомлення', 'нові повідомлення', 'нових повідомлень'])}`;
   const issueKey = notificationIssueKey(sample);
   if (issueKey) return `${what} в ${issueKey}`;
-  return String(key).startsWith('chat:') ? `${what} в розмові` : `${what} у завданні`;
+  // Neither branch names the record: the bell is shared with the external
+  // client, whose word for it is «звернення» and never «завдання». The key
+  // above names it exactly when it can, and «обговорення» is what the
+  // messages are in when it cannot.
+  return String(key).startsWith('chat:') ? `${what} в розмові` : `${what} в обговоренні`;
 }
 
 /**

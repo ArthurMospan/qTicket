@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 111,
-    "props": 820,
-    "documentedProps": 820,
+    "props": 821,
+    "documentedProps": 821,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -3062,6 +3062,13 @@
           "description": "Placement in the composer."
         },
         {
+          "name": "heading",
+          "default": "'Згадати інцидент'",
+          "type": "string",
+          "values": [],
+          "description": "What the sheet is offering to mention. Supplied"
+        },
+        {
           "name": "issues",
           "default": "[]",
           "type": "object[]",
@@ -3339,7 +3346,7 @@
         },
         {
           "name": "placeholder",
-          "default": "'Напишіть опис завдання...'",
+          "default": "'Напишіть опис...'",
           "type": "string",
           "values": [],
           "description": "Text shown while empty."

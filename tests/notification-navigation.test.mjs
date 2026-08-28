@@ -71,15 +71,21 @@ test('keeps a calendar event deep link scoped to the right organization', () => 
 // The card's button names its destination, and that is where the notification's
 // type now lives.
 test('a notification names its destination in words', () => {
-  assert.equal(notificationOpenLabel({ type: 'commented', issueId: 'issue-1' }), 'Відкрити чат завдання');
-  assert.equal(notificationOpenLabel({ type: 'assigned', issueId: 'issue-1' }), 'Відкрити завдання');
-  assert.equal(notificationOpenLabel({ type: 'deadline', issueId: 'issue-1' }), 'Відкрити завдання');
+  // The bell is shared with the external client, so a label either names the
+  // destination without naming the record, or takes the reader's word for it.
+  assert.equal(notificationOpenLabel({ type: 'commented', issueId: 'issue-1' }), 'Відкрити обговорення');
+  assert.equal(notificationOpenLabel({ type: 'assigned', issueId: 'issue-1' }), 'Відкрити інцидент');
+  assert.equal(notificationOpenLabel({ type: 'deadline', issueId: 'issue-1' }), 'Відкрити інцидент');
+  assert.equal(
+    notificationOpenLabel({ type: 'status_changed', issueId: 'issue-1' }, { record: 'звернення' }),
+    'Відкрити звернення',
+  );
   assert.equal(notificationOpenLabel({ type: 'chat_message' }), 'Відкрити розмову');
   assert.equal(notificationOpenLabel({ type: 'calendar_reminder' }), 'Відкрити подію');
   assert.equal(notificationOpenLabel({ type: 'emergency' }), 'Відкрити профіль');
   // The same type reaches two different places; the task id is what tells them
   // apart, because a mention in the workspace chat has none.
-  assert.equal(notificationOpenLabel({ type: 'mentioned', issueId: 'issue-1' }), 'Відкрити чат завдання');
+  assert.equal(notificationOpenLabel({ type: 'mentioned', issueId: 'issue-1' }), 'Відкрити обговорення');
   assert.equal(notificationOpenLabel({ type: 'mentioned' }), 'Відкрити розмову');
   // Nothing recognisable still gets a usable name.
   assert.equal(notificationOpenLabel({ type: 'test' }), 'Перейти');

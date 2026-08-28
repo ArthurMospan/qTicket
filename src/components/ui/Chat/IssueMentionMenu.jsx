@@ -10,6 +10,12 @@ import { TaskIcon } from '@/lib/design/icons';
  * @param {object[]} props.projects Visible projects, used only for their names.
  * @param {(issue: object) => void} props.onSelect Inserts the selected key.
  * @param {boolean} props.loading Whether the server search is in flight.
+ * @param {string} props.heading What the sheet is offering to mention. Supplied
+ *   by the caller, because the same composer sits in front of two audiences:
+ *   internal support mentions an «інцидент», the external client whose portal
+ *   is «Мої звернення» mentions a «звернення», and the kit cannot know which of
+ *   them is reading. The default is the support wording, which is what the
+ *   catalogue previews.
  * @param {string} props.className Placement in the composer.
  */
 export default function IssueMentionMenu({
@@ -17,6 +23,7 @@ export default function IssueMentionMenu({
   projects = [],
   onSelect,
   loading = false,
+  heading = 'Згадати інцидент',
   className = '',
 }) {
   if (!loading && issues.length === 0) return null;
@@ -25,7 +32,7 @@ export default function IssueMentionMenu({
     <div className={`max-h-[240px] overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-white shadow-xl [clip-path:inset(0_round_1rem)] ${className}`}>
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-white/95 px-4 py-2 backdrop-blur">
         <span className="flex items-center gap-1.5 text-[11px] font-bold text-muted">
-          <Hash size={12} /> Згадати завдання
+          <Hash size={12} /> {heading}
         </span>
         {loading ? (
           <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-line border-t-ink" />

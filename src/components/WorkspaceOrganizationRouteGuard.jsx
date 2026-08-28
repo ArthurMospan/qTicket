@@ -50,7 +50,7 @@ export default function WorkspaceOrganizationRouteGuard({ children }) {
       <div data-ui-surface="local" className="w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm">
         <h1 className="ui-type-section-title text-ink mb-2">Немає доступу до організації</h1>
         <p className="text-[13px] text-muted mb-5">
-          Сповіщення веде до організації, учасником якої ви більше не є. Задачу не було видалено через цю помилку.
+          Сповіщення веде до організації, учасником якої ви більше не є. Через цю помилку нічого не було видалено.
         </p>
         <Button
           onClick={() => router.replace('/')}

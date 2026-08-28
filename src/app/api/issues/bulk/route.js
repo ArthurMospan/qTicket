@@ -168,19 +168,23 @@ function noticeForAction({ issue, nextIssue, actionId, organizationId, actorId }
   if (actionId === 'status') {
     userIds = issueParticipants(issue, { actorId });
     type = 'status_changed';
-    title = `${issue.issueKey || 'Задача'}: статус змінено`;
+    // Neutral without a key: a status change reaches the external client who
+    // opened the record, and «Задача» is the one word they must never read.
+    title = issue.issueKey ? `${issue.issueKey}: статус змінено` : 'Статус змінено';
   } else if (actionId.startsWith('assignees-')) {
     const previous = new Set(issue.assigneeIds || []);
     userIds = (nextIssue.assigneeIds || []).filter(id => !previous.has(id) && id !== actorId);
     type = 'assigned';
-    title = `${issue.issueKey || 'Задача'}: вас призначено відповідальним`;
+    title = issue.issueKey
+      ? `${issue.issueKey}: вас призначено відповідальним`
+      : 'Вас призначено відповідальним';
   }
   if (!userIds.length) return null;
   return {
     userIds,
     type,
     title,
-    body: issue.title || issue.issueKey || 'Завдання',
+    body: issue.title || issue.issueKey || 'Без назви',
     link: issuePath(issue, issue.projectId),
     issueId: issue.id,
     projectId: issue.projectId,
@@ -487,7 +491,7 @@ export async function POST(request) {
           avatar: authorization.user.picture || '',
         },
         events: notices,
-        digestTitle: actionId === 'status' ? 'Змінено статус задач' : 'Вас призначено відповідальним',
+        digestTitle: actionId === 'status' ? 'Статуси змінено' : 'Вас призначено відповідальним',
       }).catch(error => console.warn('[issue-bulk] notification delivery failed:', error.message));
     }
 

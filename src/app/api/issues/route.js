@@ -72,7 +72,7 @@ export async function POST(request) {
       || projectId.length > 256
     ) {
       return NextResponse.json({
-        error: 'Потрібні коректні організація та проєкт',
+        error: 'Потрібні коректні організація та клієнтський простір',
         code: 'INVALID_SCOPE',
       }, { status: 400 });
     }
@@ -94,7 +94,9 @@ export async function POST(request) {
         }
       : submittedData;
     if (!projectId || typeof data.title !== 'string' || !data.title.trim() || data.title.trim().length > 240) {
-      return NextResponse.json({ error: 'Потрібні коректний проєкт і назва завдання' }, { status: 400 });
+      // Shown verbatim to whoever posted it, and an external client posts here
+      // too: «назва завдання» is the one vocabulary their screen must not have.
+      return NextResponse.json({ error: 'Потрібні коректний клієнтський простір і тема' }, { status: 400 });
     }
     if (data.parentEpicId) {
       return NextResponse.json({
@@ -148,7 +150,7 @@ export async function POST(request) {
     // project/workflow reads below: 60 attempts per user per 60 seconds.
     if (!(await enforceRateLimit('issue-create', authorization.user.uid, 60, 60))) {
       return NextResponse.json({
-        error: 'Забагато запитів на створення завдань',
+        error: 'Забагато запитів на створення',
         code: 'RATE_LIMITED',
       }, { status: 429 });
     }
@@ -158,7 +160,7 @@ export async function POST(request) {
     const projectSnap = await projectRef.get();
     if (!projectSnap.exists || projectSnap.data().organizationId !== organizationId) {
       return NextResponse.json({
-        error: 'Проєкт не належить цій організації',
+        error: 'Клієнтський простір не належить цій організації',
         code: 'INVALID_PROJECT_SCOPE',
       }, { status: 400 });
     }
@@ -172,7 +174,7 @@ export async function POST(request) {
     const isPrivileged = role === 'owner' || role === 'admin';
     const projectTeam = projectData.team;
     if (!isPrivileged && !(Array.isArray(projectTeam) && projectTeam.includes(authorization.user.uid))) {
-      return NextResponse.json({ error: 'Ви не входите до команди цього проєкту' }, { status: 403 });
+      return NextResponse.json({ error: 'Ви не входите до команди цього клієнтського простору' }, { status: 403 });
     }
     const assigneeIds = Array.isArray(data.assigneeIds) ? [...new Set(data.assigneeIds)].slice(0, 20) : [];
     // Adding somebody to a project is a thing the caller asks for, never a side
@@ -276,7 +278,7 @@ export async function POST(request) {
         throw hierarchyTransactionError({
           code: 'PROJECT_DELETING',
           status: 409,
-          message: 'Проєкт уже видаляється',
+          message: 'Клієнтський простір уже видаляється',
         });
       }
       const freshWorkflow = freshWorkflowSnap.data() || {};
@@ -497,11 +499,14 @@ export async function POST(request) {
       }, { status: error.hierarchy.status });
     }
     if (error?.message === 'PROJECT_NOT_FOUND') {
-      return NextResponse.json({ error: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ error: 'Клієнтський простір не знайдено', code: 'PROJECT_NOT_FOUND' }, { status: 404 });
     }
     return routeErrorResponse(error, {
       context: 'Issue POST',
-      fallbackMessage: 'Не вдалося створити завдання',
+      // The composer supplies the noun in its own title — «інцидент» or
+      // «звернення», depending on who is looking. This is the sentence under
+      // it, so it says what went wrong and names nothing.
+      fallbackMessage: 'Не вдалося зберегти. Спробуйте ще раз',
     });
   }
 }

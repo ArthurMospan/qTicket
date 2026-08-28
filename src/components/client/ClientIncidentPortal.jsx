@@ -25,7 +25,14 @@ import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchR
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
+// This screen is read by an external client and by nobody else, so there is no
+// branch on it: the client half of the vocabulary is the only one this file is
+// allowed to speak. `tests/client-terminology.test.mjs` scans the file for the
+// task-manager words it inherited.
+import { INCIDENT_TERMS } from '@/lib/content/incidentTerms.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
+
+const CLIENT_TERMS = INCIDENT_TERMS.client;
 
 function formatUpdatedAt(value) {
   const millis = timestampMillis(value);
@@ -105,7 +112,7 @@ export default function ClientIncidentPortal({
       title: formData.title,
       description: formData.description || '',
     }, actor);
-    showToast('Інцидент створено');
+    showToast(CLIENT_TERMS.created);
     return { ...created, projectId: project.id };
   };
 
@@ -162,7 +169,7 @@ export default function ClientIncidentPortal({
                   size="lg"
                   collapseAt="sm"
                 >
-                  Створити інцидент
+                  {CLIENT_TERMS.composerSubmit}
                 </Button>
               </div>
             )}
@@ -206,9 +213,9 @@ export default function ClientIncidentPortal({
                 description={workspaceSearch.trim()
                   ? 'Перевірте номер або слова в темі звернення.'
                   : scope === 'open'
-                    ? 'Якщо виникла проблема або запитання, створіть новий інцидент — команда підтримки відповість у ньому.'
-                    : 'Змініть фільтр або створіть новий інцидент.'}
-                action={workspaceSearch.trim() ? 'Очистити пошук' : 'Створити інцидент'}
+                    ? 'Якщо виникла проблема або запитання, створіть нове звернення — команда підтримки відповість у ньому.'
+                    : 'Змініть фільтр або створіть нове звернення.'}
+                action={workspaceSearch.trim() ? 'Очистити пошук' : CLIENT_TERMS.composerSubmit}
                 onAction={() => {
                   if (workspaceSearch.trim()) setWorkspaceSearch('');
                   else setShowComposer(true);
@@ -232,7 +239,7 @@ export default function ClientIncidentPortal({
                       <div className="min-w-0 flex-1">
                         <TaskIdentity issue={issue} project={project} done={category === 'done'} />
                         <p className="mt-1 truncate text-[14px] font-bold text-ink">
-                          {issue.title || 'Інцидент без назви'}
+                          {issue.title || CLIENT_TERMS.untitled}
                         </p>
                         <p className="mt-1 text-[11px] text-muted">
                           Оновлено {formatUpdatedAt(issue.updatedAt || issue.createdAt)}

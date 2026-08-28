@@ -10,6 +10,7 @@ import { TaskIcon } from '@/lib/design/icons';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import MarkdownEditor from '@/components/ui/Forms/MarkdownEditor';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
+import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { resolveCategoryStatusId } from '@/lib/utils/statusCategories.mjs';
 import { Select } from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
@@ -48,6 +49,12 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
   const timeZone = organizationTimeZone(activeOrg);
   const { labels: availableLabels = [], statuses = [], types = [], priorities = [] } = useWorkflowConfig();
   const incidentComposer = entity === 'incident';
+  // The same composer opens for three readers, and each has its own word for
+  // what it is about to create. `clientMode` is the one that matters: the
+  // external client whose portal is «Мої звернення» was being asked to create
+  // an «інцидент» — a second name for the record, on the one screen where they
+  // had already been given the first.
+  const terms = incidentTerms(clientMode);
   const [mode, setMode] = useState('task');
   const [form, setForm] = useState({
     title: '', description: '', status: 'backlog',
@@ -330,7 +337,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
   const handleSubmit = async (e) => {
     e.preventDefault();
     const nextErrors = {};
-    if (!form.title.trim()) nextErrors.title = incidentComposer ? 'Вкажіть тему інциденту' : 'Вкажіть назву завдання';
+    if (!form.title.trim()) nextErrors.title = incidentComposer ? terms.composerSubjectRequired : 'Вкажіть назву завдання';
     const estimateError = clientMode || incidentComposer ? '' : issueEstimateHoursError(form.estimateHours);
     if (estimateError) nextErrors.estimateHours = estimateError;
     if (projects && projects.length > 0 && !form.projectId) {
@@ -395,7 +402,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
       console.error('[CreateTask]', err);
       setError(userFacingErrorMessage(
         err,
-        incidentComposer ? 'Не вдалося створити інцидент' : 'Не вдалося створити завдання',
+        incidentComposer ? terms.composerFailed : 'Не вдалося створити завдання',
       ));
     } finally {
       setLoading(false);
@@ -406,7 +413,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
     <Dialog
       isOpen={isOpen}
       onClose={closeAndReset}
-      title={incidentComposer ? 'Новий інцидент' : 'Нове завдання'}
+      title={incidentComposer ? terms.composerTitle : 'Нове завдання'}
       size="lg"
       bodyPadding="flush"
       isDirty={mode === 'task' && draftTouched}
@@ -433,7 +440,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
             disabled={!clientMode && creatableTypes.length === 0}
             loading={loading}
           >
-            {loading ? 'Створення...' : incidentComposer ? 'Створити інцидент' : 'Створити завдання'}
+            {loading ? 'Створення...' : incidentComposer ? terms.composerSubmit : 'Створити завдання'}
           </Button>
         </>
       ) : undefined}
@@ -467,14 +474,14 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
             <div role="alert" className="lg:col-span-2">
               <Alert
                 variant="error"
-                title={incidentComposer ? 'Не вдалося створити інцидент' : 'Не вдалося створити завдання'}
+                title={incidentComposer ? terms.composerFailed : 'Не вдалося створити завдання'}
                 description={error}
               />
             </div>
           )}
 
           {/* Title */}
-          <FormGroup label={incidentComposer ? 'Тема інциденту' : 'Назва'} required error={fieldErrors.title} className="lg:col-span-2">
+          <FormGroup label={incidentComposer ? terms.composerSubjectLabel : 'Назва'} required error={fieldErrors.title} className="lg:col-span-2">
             <Input
               ref={titleInputRef}
               autoFocus
@@ -547,7 +554,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
 
           {/* Description */}
           <div className="flex flex-col gap-[6px] lg:col-span-2">
-            <Label>{incidentComposer ? 'Опис звернення' : 'Опис'}</Label>
+            <Label>{incidentComposer ? terms.composerDescriptionLabel : 'Опис'}</Label>
             <MarkdownEditor
               value={form.description}
               onChange={(val) => set('description', val)}

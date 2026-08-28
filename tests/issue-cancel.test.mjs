@@ -12,6 +12,7 @@ import {
   isCancelledIssue,
   withoutCancelledIssues,
 } from '../src/lib/utils/issueCancel.mjs';
+import { INCIDENT_TERMS } from '../src/lib/content/incidentTerms.mjs';
 
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
@@ -51,12 +52,20 @@ test('the difference between the two is stated where the choice is made', async 
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/app/(app)/settings/page.js'),
   ]);
+  // The incident page states both to whoever opened it, and it is opened by
+  // support and by the external client, so the sentences live in the shared
+  // vocabulary and the page picks the reader's.
+  assert.match(detail, /title=\{terms\.archivedTitle\}/);
+  assert.match(detail, /title=\{terms\.cancelledTitle\}/);
   // Archiving preserves the customer record and says exactly what survives.
-  assert.match(detail, /Історія звернення, чат і файли/);
+  assert.match(INCIDENT_TERMS.staff.archivedText, /Історія звернення, чат і файли/);
+  assert.match(INCIDENT_TERMS.client.archivedText, /Листування та файли/);
   assert.match(bar, /історія, чат і файли залишаться/);
   // Cancelling stays distinct from resolving and says where the record goes.
-  assert.match(detail, /не рахується як вирішений/);
+  assert.match(INCIDENT_TERMS.staff.cancelledText, /не рахується як вирішений/);
+  assert.match(INCIDENT_TERMS.client.cancelledText, /не вважається вирішеним/);
   assert.match(bar, /не рахуватимуться як вирішені/);
+  // The confirmation before cancelling is staff-only and still names the list.
   assert.match(detail, /«Архіві» → «Скасовані»/);
   // And the archive screen says which list means which.
   assert.match(settings, /Архівовані інциденти зникають з активної черги, але зберігають історію та показники/);

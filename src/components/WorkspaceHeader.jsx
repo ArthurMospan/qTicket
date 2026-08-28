@@ -28,6 +28,7 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useRouter, usePathname } from 'next/navigation';
 import { groupNotifications } from '@/lib/utils/notificationGrouping.mjs';
 import { notificationDestinationWithOrganization, notificationOpenLabel } from '@/lib/utils/notificationNavigation.mjs';
+import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { GLOBAL_NOTIFICATION_Z_INDEX } from '@/lib/utils/overlayLayers.mjs';
 import { useFloatingOverlay } from '@/lib/hooks/useFloatingOverlay';
 import { auth, db } from '@/lib/firebase';
@@ -194,6 +195,11 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
   // for the bell live in QuickTeam's account, not in a qTicket copy of it, so
   // the gear would point at a section they no longer have.
   const clientViewer = isClientRole(orgRole);
+  // The bell itself is not a staff screen. An external client is a participant
+  // of their own incident, so a support reply or a status change puts the same
+  // card in front of them — and the card names where it goes.
+  const notificationRecord = incidentTerms(clientViewer)
+    .record.toLocaleLowerCase('uk-UA');
   const liveNotifs = useWorkspaceStore(s => s.liveNotifs);
   const dismissLiveNotif = useWorkspaceStore(s => s.dismissLiveNotif);
   const clearLiveNotif = useWorkspaceStore(s => s.clearLiveNotif);
@@ -631,7 +637,7 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
                   surface="canvas"
                 />
               ) : null}
-              openLabel={notificationOpenLabel(card)}
+              openLabel={notificationOpenLabel(card, { record: notificationRecord })}
               onOpen={card.link ? () => handleNotifClick(card) : undefined}
               onDismiss={() => dismissLiveNotif(card.id)}
               style={{ animation: 'slideUpIn 0.3s cubic-bezier(0.16,1,0.3,1)' }}

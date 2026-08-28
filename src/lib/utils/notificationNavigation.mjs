@@ -84,12 +84,16 @@ export function notificationConversationId(notification) {
 // be a capitalised label above the title, repeating in worse words what the
 // title already said in plain ones; said by the button instead, it earns its
 // place.
+//
+// Two of these named the destination «завдання», and the bell is not a staff
+// screen: an external client is a participant of their own incident, so a
+// support reply or a status change puts the same card in front of them. The
+// conversation labels say what the destination is rather than what the record
+// is called, and the three that genuinely name the record take the name from
+// the caller — «інцидент» for support, «звернення» for the client.
 const OPEN_LABELS = {
-  commented: 'Відкрити чат завдання',
-  mentioned: 'Відкрити чат завдання',
-  assigned: 'Відкрити завдання',
-  status_changed: 'Відкрити завдання',
-  deadline: 'Відкрити завдання',
+  commented: 'Відкрити обговорення',
+  mentioned: 'Відкрити обговорення',
   chat_message: 'Відкрити розмову',
   calendar_invite: 'Відкрити подію',
   calendar_changed: 'Відкрити подію',
@@ -98,17 +102,25 @@ const OPEN_LABELS = {
   alert: 'Відкрити профіль',
 };
 
+// The three whose destination is the record itself rather than a conversation
+// on it. They are the ones that need the reader's word for it.
+const RECORD_DESTINATIONS = new Set(['assigned', 'status_changed', 'deadline']);
+
 /**
  * @param {object} notification The notification being named.
+ * @param {string} options.record What this reader calls the record — accusative,
+ *   which for both «інцидент» and «звернення» is the nominative. Defaults to the
+ *   support wording; the client portal's reader passes its own.
  * @returns {string} Where the card goes, in words — its accessible name, and the
  *   label of the row action where one is still drawn. «Перейти» for anything
  *   without a place of its own.
  */
-export function notificationOpenLabel(notification) {
+export function notificationOpenLabel(notification, { record = 'інцидент' } = {}) {
   const type = typeof notification?.type === 'string' ? notification.type : '';
-  // A mention in the workspace chat is a conversation, not a task — the same
-  // type reaches two different places, and the link is what knows which.
+  // A mention in the workspace chat is a conversation, not an incident — the
+  // same type reaches two different places, and the link is what knows which.
   if (type === 'mentioned' && !notification?.issueId) return 'Відкрити розмову';
+  if (RECORD_DESTINATIONS.has(type)) return `Відкрити ${record}`;
   return OPEN_LABELS[type] || 'Перейти';
 }
 

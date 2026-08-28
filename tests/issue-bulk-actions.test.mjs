@@ -95,7 +95,10 @@ test('Shift+click opens selection mode; a plain click still cannot', async () =>
   // And the card in Help has to say both halves: shift starts a selection, and
   // the next shift+click is what makes it a range.
   const shortcuts = await read('src/lib/content/shortcuts.mjs');
-  assert.match(shortcuts, /Почати вибір із цього завдання/);
+  // The sheet hangs off the sidebar's «?», which every role has, so no row in
+  // it names the record — «завдання» would be the wrong word for a client and
+  // one static list cannot say both. It names the row you clicked instead.
+  assert.match(shortcuts, /Почати вибір із цього рядка/);
   assert.match(shortcuts, /вибрати все між першим і цим/);
 });
 

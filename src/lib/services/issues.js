@@ -12,7 +12,9 @@ export async function createIssueViaApi({ organizationId, projectId, data }) {
   return authenticatedIssueRequest('/api/issues', {
     method: 'POST',
     body: JSON.stringify({ organizationId, projectId, data }),
-  }, 'Не вдалося створити задачу');
+    // The portal and the internal composer share this call, and each names the
+    // record in its own title; the fallback only has to say it failed.
+  }, 'Не вдалося зберегти. Спробуйте ще раз');
 }
 
 // Fields whose new value changes who gets reminded, and when.

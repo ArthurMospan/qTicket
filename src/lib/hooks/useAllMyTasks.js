@@ -265,7 +265,9 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
         sendNotification({
           userIds: recipients,
           type: 'status_changed',
-          title: `${current.issueKey || 'Задача'}: статус змінено`,
+          // Same title as the board writes, and neutral for the same reason:
+          // the client who opened the record is among the recipients.
+          title: current.issueKey ? `${current.issueKey}: статус змінено` : 'Статус змінено',
           body: `${current.title || ''} → ${statusLabel(columnId, statuses)}`,
           link: issuePath(current),
           issueId: taskId,

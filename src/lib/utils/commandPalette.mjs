@@ -69,11 +69,14 @@ const INTERNAL_ACTIONS = [
   },
 ];
 
+// The palette a client opens sits behind «Мої звернення», so it says
+// «звернення» too — «Створити інцидент» was the second name for the record on
+// the one surface that had already given them the first.
 const CLIENT_ACTIONS = [
   {
     id: 'action-new-issue',
-    label: 'Створити інцидент',
-    hint: 'Нове звернення до підтримки',
+    label: 'Створити звернення',
+    hint: 'Опишіть проблему або запит до підтримки',
     href: '/?new=1',
     icon: 'plus',
     keywords: 'stvoryty intsydent nove zvernennya new incident request support help',
