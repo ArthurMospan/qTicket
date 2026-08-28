@@ -2721,7 +2721,7 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'profile': return (
-        <Section title="Особистий профіль" desc="Ваша інформація відображається у профілі команди, інцидентах та внутрішньому чаті" rightAction={saveButton}>
+        <Section title="Особистий профіль" desc="Ваша інформація відображається у команді підтримки та інцидентах" rightAction={saveButton}>
           <Card preset="borderless" padding="lg">
             <Row label="Аватар" desc="Квадратне зображення виглядає найкраще — інші обрізаються по центру">
               <ImageUpload
@@ -2736,7 +2736,7 @@ export default function SettingsPage() {
                 showHint={false}
               />
             </Row>
-            <Row label="Ім'я" desc="Показується в інцидентах і внутрішньому чаті">
+            <Row label="Ім'я" desc="Показується у команді підтримки та інцидентах">
               <InlineEditField value={displayName} onChange={setDisplayName} saved={currentUser?.name || ''} onSave={() => saveProfileField('name', displayName)} className="w-[260px]" />
             </Row>
             <Row label="Email" desc="Використовується для входу та запрошень">
@@ -2751,7 +2751,7 @@ export default function SettingsPage() {
             <Row label="Локація">
               <InlineEditField value={location} onChange={setLocation} saved={currentUser?.location || ''} onSave={() => saveProfileField('location', location)} placeholder="Київ, Україна" className="w-[260px]" />
             </Row>
-            <Row label="День народження" desc="Показується команді в профілі та календарі">
+            <Row label="День народження" desc="Показується команді у профілі">
               <InlineDateField
                 value={birthday}
                 onChange={setBirthday}

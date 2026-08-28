@@ -2979,8 +2979,8 @@
             "src/app/(app)/settings/page.js:3540",
             "src/app/(app)/settings/page.js:3605",
             "src/app/(app)/settings/page.js:3611",
-            "src/components/WorkspaceHeader.jsx:357",
-            "src/components/WorkspaceHeader.jsx:367",
+            "src/components/WorkspaceHeader.jsx:366",
+            "src/components/WorkspaceHeader.jsx:376",
             "src/components/workspace/TimesheetTab.jsx:891",
             "src/components/workspace/WorkloadTab.jsx:282",
             "src/components/workspace/WorkloadTab.jsx:552",
@@ -3336,8 +3336,8 @@
             "src/app/(app)/sprints/page.js:974",
             "src/components/MobileNav.jsx:447",
             "src/components/UserStatusDialog.jsx:71",
-            "src/components/WorkspaceHeader.jsx:357",
-            "src/components/WorkspaceHeader.jsx:367",
+            "src/components/WorkspaceHeader.jsx:366",
+            "src/components/WorkspaceHeader.jsx:376",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:87",
             "src/components/integrations/YouTrackImportCard.jsx:766",
@@ -3609,8 +3609,8 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:357",
-            "src/components/WorkspaceHeader.jsx:367"
+            "src/components/WorkspaceHeader.jsx:366",
+            "src/components/WorkspaceHeader.jsx:376"
           ]
         },
         "circle": {
@@ -3843,8 +3843,8 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:357",
-            "src/components/WorkspaceHeader.jsx:367"
+            "src/components/WorkspaceHeader.jsx:366",
+            "src/components/WorkspaceHeader.jsx:376"
           ]
         }
       },
@@ -3963,8 +3963,8 @@
             "src/components/InviteMemberDialog.jsx:276",
             "src/components/MobileNav.jsx:447",
             "src/components/UserStatusDialog.jsx:114",
-            "src/components/WorkspaceHeader.jsx:357",
-            "src/components/WorkspaceHeader.jsx:367",
+            "src/components/WorkspaceHeader.jsx:366",
+            "src/components/WorkspaceHeader.jsx:376",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceInfoCenter.jsx:87",
@@ -4212,8 +4212,8 @@
             "src/components/InviteMemberDialog.jsx:252",
             "src/components/InviteMemberDialog.jsx:276",
             "src/components/UserStatusDialog.jsx:71",
-            "src/components/WorkspaceHeader.jsx:357",
-            "src/components/WorkspaceHeader.jsx:367",
+            "src/components/WorkspaceHeader.jsx:366",
+            "src/components/WorkspaceHeader.jsx:376",
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceInfoCenter.jsx:87",
             "src/components/client/ClientIncidentPortal.jsx:137",
@@ -4380,8 +4380,8 @@
             "src/app/(app)/chat/page.js:468",
             "src/app/(app)/settings/page.js:390",
             "src/app/(app)/settings/page.js:391",
-            "src/components/WorkspaceHeader.jsx:450",
-            "src/components/WorkspaceHeader.jsx:468"
+            "src/components/WorkspaceHeader.jsx:459",
+            "src/components/WorkspaceHeader.jsx:477"
           ]
         },
         "(default)": {
@@ -4571,7 +4571,7 @@
             "/settings"
           ],
           "files": [
-            "src/components/WorkspaceHeader.jsx:450",
+            "src/components/WorkspaceHeader.jsx:459",
             "src/components/integrations/YouTrackImportCard.jsx:540"
           ]
         },
@@ -4579,7 +4579,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:468"
+            "src/components/WorkspaceHeader.jsx:477"
           ]
         },
         "surface-plain": {
@@ -4631,8 +4631,8 @@
             "src/components/AudioTaskPanel.jsx:274",
             "src/components/MobileNav.jsx:348",
             "src/components/MobileNav.jsx:389",
-            "src/components/WorkspaceHeader.jsx:450",
-            "src/components/WorkspaceHeader.jsx:468",
+            "src/components/WorkspaceHeader.jsx:459",
+            "src/components/WorkspaceHeader.jsx:477",
             "src/components/integrations/YouTrackImportCard.jsx:540",
             "src/components/profile/ProfileView.jsx:229",
             "src/components/profile/ProfileView.jsx:238",
@@ -4702,8 +4702,8 @@
             "src/components/MobileNav.jsx:348",
             "src/components/MobileNav.jsx:389",
             "src/components/MobileNav.jsx:75",
-            "src/components/WorkspaceHeader.jsx:450",
-            "src/components/WorkspaceHeader.jsx:468",
+            "src/components/WorkspaceHeader.jsx:459",
+            "src/components/WorkspaceHeader.jsx:477",
             "src/components/WorkspaceSidebar.jsx:552",
             "src/components/integrations/YouTrackImportCard.jsx:540",
             "src/components/profile/ProfileModal.jsx:41",
@@ -5962,7 +5962,7 @@
             "src/app/(app)/settings/page.js:3064",
             "src/app/(app)/settings/page.js:3644",
             "src/app/(app)/settings/page.js:3745",
-            "src/components/WorkspaceHeader.jsx:555",
+            "src/components/WorkspaceHeader.jsx:564",
             "src/components/client/ClientIncidentPortal.jsx:177"
           ]
         },
@@ -6090,7 +6090,7 @@
             "src/app/(app)/settings/page.js:3737",
             "src/app/(app)/settings/page.js:3738",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:555",
+            "src/components/WorkspaceHeader.jsx:564",
             "src/components/WorkspaceInfoCenter.jsx:111",
             "src/components/migrations/DataMigrationSettings.jsx:115",
             "src/components/workspace/BillingTab.jsx:1412",
@@ -6294,7 +6294,7 @@
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:555",
+            "src/components/WorkspaceHeader.jsx:564",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:103",
             "src/components/migrations/DataMigrationSettings.jsx:115",
@@ -6374,7 +6374,7 @@
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:555",
+            "src/components/WorkspaceHeader.jsx:564",
             "src/components/WorkspaceInfoCenter.jsx:111",
             "src/components/client/ClientIncidentPortal.jsx:177",
             "src/components/integrations/YouTrackImportCard.jsx:729",
@@ -6482,7 +6482,7 @@
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:555",
+            "src/components/WorkspaceHeader.jsx:564",
             "src/components/WorkspaceInfoCenter.jsx:111",
             "src/components/client/ClientIncidentPortal.jsx:177",
             "src/components/integrations/YouTrackImportCard.jsx:729",
@@ -6598,7 +6598,7 @@
             "src/app/(app)/settings/page.js:4423",
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
-            "src/components/WorkspaceHeader.jsx:555",
+            "src/components/WorkspaceHeader.jsx:564",
             "src/components/client/ClientIncidentPortal.jsx:177",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:103",
@@ -6834,7 +6834,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/WorkspaceHeader.jsx:492",
+            "src/components/WorkspaceHeader.jsx:501",
             "src/components/workspace/qtplus/chat/ChatMessage.jsx:74"
           ]
         },
@@ -6881,7 +6881,7 @@
           ],
           "files": [
             "src/components/InviteLinkSection.jsx:128",
-            "src/components/WorkspaceHeader.jsx:492"
+            "src/components/WorkspaceHeader.jsx:501"
           ]
         },
         "lg": {
@@ -7125,7 +7125,7 @@
             "src/app/(app)/sprints/page.js:187",
             "src/app/(app)/sprints/page.js:78",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:518",
+            "src/components/WorkspaceHeader.jsx:527",
             "src/components/workspace/BoardConfigModal.jsx:225",
             "src/components/workspace/TimesheetTab.jsx:697"
           ]
@@ -7233,7 +7233,7 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:414",
-            "src/components/WorkspaceHeader.jsx:518",
+            "src/components/WorkspaceHeader.jsx:527",
             "src/components/profile/ProfileModal.jsx:28"
           ]
         },
@@ -7288,7 +7288,7 @@
             "src/components/CreateTaskModal.jsx:414",
             "src/components/InviteMemberDialog.jsx:158",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:518",
+            "src/components/WorkspaceHeader.jsx:527",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BillingTab.jsx:497",
             "src/components/workspace/BoardConfigModal.jsx:225",
@@ -7349,7 +7349,7 @@
             "src/app/(app)/sprints/page.js:78",
             "src/components/CreateTaskModal.jsx:414",
             "src/components/InviteMemberDialog.jsx:158",
-            "src/components/WorkspaceHeader.jsx:518",
+            "src/components/WorkspaceHeader.jsx:527",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BillingTab.jsx:497",
             "src/components/workspace/BoardConfigModal.jsx:225",
@@ -7847,7 +7847,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/WorkspaceHeader.jsx:383",
+            "src/components/WorkspaceHeader.jsx:392",
             "src/components/WorkspaceInfoCenter.jsx:255",
             "src/components/workspace/BillingTab.jsx:1286",
             "src/components/workspace/BillingTab.jsx:307",
@@ -7868,7 +7868,7 @@
             "src/app/(app)/analytics/page.js:1112",
             "src/app/(app)/analytics/page.js:1124",
             "src/app/(app)/analytics/team/[memberId]/page.js:281",
-            "src/components/WorkspaceHeader.jsx:383",
+            "src/components/WorkspaceHeader.jsx:392",
             "src/components/workspace/BillingTab.jsx:307",
             "src/components/workspace/WorkloadTab.jsx:494",
             "src/components/workspace/WorkloadTab.jsx:543"
@@ -8975,9 +8975,9 @@
     "Project Settings Dialog": "<Button style=\"secondary\" size=\"lg\" icon={Settings} onClick={() => setProjectSettingsOpen(true)}>\n  Налаштування проєкту\n</Button>\n<Dialog\n  isOpen={projectSettingsOpen}\n  onClose={() => setProjectSettingsOpen(false)}\n  title=\"Налаштування проєкту\"\n  size=\"sm\"\n  footer={(\n    <>\n      <Button style=\"secondary\" size=\"md\" onClick={() => setProjectSettingsOpen(false)}>\n        Скасувати\n      </Button>\n      <Button style=\"primary\" size=\"md\" onClick={() => setProjectSettingsOpen(false)}>\n        Зберегти зміни\n      </Button>\n    </>\n  )}\n>\n  <ProjectSettingsForm\n    name={projectSettingsName}\n    onNameChange={setProjectSettingsName}\n    description={projectSettingsDescription}\n    onDescriptionChange={setProjectSettingsDescription}\n    statuses={DEFAULT_STATUSES}\n    hiddenStatusIds={projectSettingsHidden}\n    onHiddenStatusIdsChange={setProjectSettingsHidden}\n    backlogStatusId=\"backlog\"\n    teamMembers={[\n      { id: 'owner-demo', name: 'Олена Коваль', email: 'olena@example.com' },\n      { id: 'designer-demo', name: 'Іван Петренко', email: 'ivan@example.com' },\n      { id: 'developer-demo', name: 'Марія Бондар', email: 'maria@example.com' },\n    ]}\n    teamMemberIds={projectSettingsTeam}\n    onTeamMemberIdsChange={setProjectSettingsTeam}\n    ownerId=\"owner-demo\"\n    layout=\"stacked\"\n    inviteEmails={projectSettingsInvites}\n    onInviteEmailsChange={setProjectSettingsInvites}\n  />\n</Dialog>",
     "CreateTaskModal — large sheet": "<Button style=\"primary\" size=\"lg\" icon={Plus} onClick={() => setCreateTaskOpen(true)}>\n  Створити завдання\n</Button>\n<CreateTaskModal\n  isOpen={createTaskOpen}\n  onClose={() => setCreateTaskOpen(false)}\n  onSubmit={async () => setCreateTaskOpen(false)}\n  stages={[]}\n  teamMembers={[]}\n  projectContext={{ id: 'ui-kit', name: 'UI Kit' }}\n  sprints={[]}\n/>",
     "1) WorkspaceHeader (Живий компонент)": "<div className=\"border border-[#f0f0f0] rounded-[16px] overflow-hidden bg-white\">\n  <WorkspaceHeader />\n</div>",
-    "2) Звичайний пошук (Search Mode)": "<div className=\"min-h-[150px] rounded-[16px] border border-[#f0f0f0] bg-white\">\n  <TopHeader\n    mode=\"search\"\n    searchValue=\"ретро\"\n    searchPlaceholder=\"Пошук по моїх завданнях...\"\n    searchLocalResultCount={0}\n    searchOutsideResultCount={4}\n    onSearchEscalate={() => {}}\n    unreadCount={0}\n  />\n</div>",
-    "3) Хлібні крихти з пошуком (Project Mode)": "<div className=\"border border-[#f0f0f0] rounded-[16px] overflow-hidden\">\n  <TopHeader\n    mode=\"project\"\n    projectName=\"Mobile App Redesign\"\n    unreadCount={5}\n  />\n</div>",
-    "4) Хлібні крихти детального перегляду (Breadcrumbs Mode)": "<div className=\"border border-[#f0f0f0] rounded-[16px] overflow-hidden\">\n  <TopHeader\n    mode=\"breadcrumbs\"\n    breadcrumbs={[\n      { label: 'Проєкти', href: '/' },\n      { label: 'Mobile App Redesign', href: '/project-1' },\n      { label: 'QT-104: Зворотній звʼязок', href: null },\n    ]}\n    unreadCount={2}\n  />\n</div>",
+    "2) Звичайний пошук (Search Mode)": "<div className=\"min-h-[150px] rounded-[16px] border border-[#f0f0f0] bg-white\">\n  <TopHeader\n    mode=\"search\"\n    searchValue=\"ретро\"\n    searchPlaceholder=\"Пошук по моїх інцидентах...\"\n    searchLocalResultCount={0}\n    searchOutsideResultCount={4}\n    onSearchEscalate={() => {}}\n    unreadCount={0}\n  />\n</div>",
+    "3) Хлібні крихти з пошуком (Client Space Mode)": "<div className=\"border border-[#f0f0f0] rounded-[16px] overflow-hidden\">\n  <TopHeader\n    mode=\"project\"\n    projectName=\"Acme Україна\"\n    unreadCount={5}\n  />\n</div>",
+    "4) Хлібні крихти детального перегляду (Breadcrumbs Mode)": "<div className=\"border border-[#f0f0f0] rounded-[16px] overflow-hidden\">\n  <TopHeader\n    mode=\"breadcrumbs\"\n    breadcrumbs={[\n      { label: 'Клієнти', href: '/clients' },\n      { label: 'Acme Україна', href: '/client-acme' },\n      { label: 'INC-104: Не працює імпорт', href: null },\n    ]}\n    unreadCount={2}\n  />\n</div>",
     "5) Пошук по чатах + Аватарки + Статус (Chat Mode)": "<div className=\"border border-[#f0f0f0] rounded-[16px] overflow-hidden\">\n  <TopHeader\n    mode=\"chat\"\n    showNotifications={false}\n    // No third-party avatar host here: the three placeholder URLs this\n    // used to fetch failed on every load of the page, and the product\n    // deliberately stores no such URL either — a user without a photo\n    // gets initials in their own deterministic colour, which is the\n    // thing worth previewing.\n    onlineUsers={[\n      { id: 'oksana', name: 'Оксана Литвин' },\n      { id: 'ivan', name: 'Іван Петренко' },\n      { id: 'taras', name: 'Тарас Шевчук' },\n    ]}\n  />\n</div>",
     "6) Меню користувача": "<div className=\"flex min-h-[220px] justify-end rounded-[16px] border border-[#f0f0f0] bg-white p-[16px]\">\n  <UserMenu\n    user={{ id: 'kit-arthur', name: 'Артур Моспан', email: 'arthur@quickteam.app' }}\n    open={menuOpen}\n    onToggle={() => setMenuOpen(value => !value)}\n    onSettings={() => {}}\n    onSignOut={() => {}}\n  />\n</div>",
     "7) Дзвінок сповіщень": "<div className=\"flex items-center gap-[16px] rounded-[12px] bg-white p-[12px]\">\n  <NotificationBell unreadCount={0} onToggle={() => {}} />\n  <NotificationBell unreadCount={3} onToggle={() => {}} />\n  <NotificationBell unreadCount={42} onToggle={() => {}} />\n  <NotificationBell unreadCount={2} hasEmergency onToggle={() => {}} />\n  <NotificationBell unreadCount={3} open onToggle={() => {}} />\n</div>",

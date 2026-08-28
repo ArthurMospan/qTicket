@@ -212,7 +212,7 @@ export default function SupportOverviewPage() {
                 icon={CircleDotDashed}
                 value={metrics.active}
                 label="У роботі"
-                sub={`${metrics.review} очікують перевірки`}
+                sub={`${metrics.review} очікують відповіді`}
               />
               <KpiCard
                 icon={UsersRound}

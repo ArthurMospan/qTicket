@@ -14,7 +14,7 @@ import Pill from '../DataDisplay/Pill';
  *
  * @param {{label: string, href?: string}[]} props.breadcrumbs The trail for the current screen.
  * @param {string} props.mode Which header this is; screens differ in what the right side carries.
- * @param {string} props.projectName Current project, where the header names one.
+ * @param {string} props.projectName Current client space, where the header names one.
  * @param {object} props.currentUser The signed-in user, for the avatar.
  * @param {() => void} props.onUserClick Opens the user menu.
  * @param {object[]} props.onlineUsers Present members, drawn as a stack of avatars.
@@ -48,8 +48,9 @@ export default function TopHeader({
   searchOutsideResultCount = 0,
   searchOutsideLoading = false,
 
-  // Project Props
-  projectName = 'Назва проєкту',
+  // Client-space Props. The implementation keeps the historical prop name so
+  // callers and generated UI Kit reports do not need a second source of truth.
+  projectName = 'Назва клієнта',
   projectSearchActive = false,
   onProjectSearchToggle = () => {},
 
@@ -108,7 +109,7 @@ export default function TopHeader({
 
     if (mode === 'project') {
       const projectCrumbs = [
-        { label: 'Проєкти', href: '/' },
+        { label: 'Клієнти', href: '/clients' },
         { label: projectName, href: null },
       ];
       return (
@@ -124,7 +125,7 @@ export default function TopHeader({
           searchLocalResultCount={searchLocalResultCount}
           searchOutsideResultCount={searchOutsideResultCount}
           searchOutsideLoading={searchOutsideLoading}
-          searchPlaceholder={`Пошук по "${projectName}"...`}
+          searchPlaceholder={`Пошук інцидентів клієнта "${projectName}"...`}
         />
       );
     }

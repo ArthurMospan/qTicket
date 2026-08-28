@@ -15,7 +15,7 @@ export default function HeadersSection() {
 
   return (
     <div className="flex flex-col gap-[32px]">
-      <PreviewBlock title="1) WorkspaceHeader (Живий компонент)" description="Справжній хедер додатку, який реагує на стейт (хлібні крихти, таймер, чат)." filePath="src/components/WorkspaceHeader.jsx" fullWidth>
+      <PreviewBlock title="1) WorkspaceHeader (Живий компонент)" description="Справжній хедер qTicket, який реагує на контекст екрана, пошук і хлібні крихти." filePath="src/components/WorkspaceHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden bg-white">
           <WorkspaceHeader />
         </div>
@@ -26,7 +26,7 @@ export default function HeadersSection() {
           <TopHeader
             mode="search"
             searchValue="ретро"
-            searchPlaceholder="Пошук по моїх завданнях..."
+            searchPlaceholder="Пошук по моїх інцидентах..."
             searchLocalResultCount={0}
             searchOutsideResultCount={4}
             onSearchEscalate={() => {}}
@@ -35,24 +35,24 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="3) Хлібні крихти з пошуком (Project Mode)" description="Навігація проєкту з розсувним пошуком. Аватарок команди тут навмисно немає — склад проєкту видно на вкладці «Команда», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація простору клієнта з розсувним пошуком інцидентів. Склад підтримки видно у вкладці «Люди», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="project"
-            projectName="Mobile App Redesign"
+            projectName="Acme Україна"
             unreadCount={5}
           />
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="4) Хлібні крихти детального перегляду (Breadcrumbs Mode)" description="Відображення повного ієрархічного шляху до конкретної завдання." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="4) Хлібні крихти детального перегляду (Breadcrumbs Mode)" description="Повний шлях до конкретного інциденту в просторі клієнта." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="breadcrumbs"
             breadcrumbs={[
-              { label: 'Проєкти', href: '/' },
-              { label: 'Mobile App Redesign', href: '/project-1' },
-              { label: 'QT-104: Зворотній звʼязок', href: null },
+              { label: 'Клієнти', href: '/clients' },
+              { label: 'Acme Україна', href: '/client-acme' },
+              { label: 'INC-104: Не працює імпорт', href: null },
             ]}
             unreadCount={2}
           />

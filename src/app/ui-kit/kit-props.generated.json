@@ -7054,10 +7054,10 @@
         },
         {
           "name": "projectName",
-          "default": "'Назва проєкту'",
+          "default": "'Назва клієнта'",
           "type": "string",
           "values": [],
-          "description": "Current project, where the header names one."
+          "description": "Current client space, where the header names one."
         },
         {
           "name": "projectSearchActive",

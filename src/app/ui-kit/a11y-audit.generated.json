@@ -199,7 +199,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/Layout/TopHeader.jsx:83",
+      "location": "src/components/ui/Layout/TopHeader.jsx:84",
       "attributes": [
         "aria-label"
       ]
@@ -302,7 +302,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:450",
+      "location": "src/components/WorkspaceHeader.jsx:459",
       "attributes": [
         "label"
       ]

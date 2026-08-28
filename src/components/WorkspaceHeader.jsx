@@ -128,7 +128,10 @@ function CalendarResponseActions({
 }
 
 function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
-  const EXCLUDED = ['my', 'team', 'analytics', 'calendar', 'chat', 'settings', 'sprints'];
+  const EXCLUDED = [
+    'overview', 'clients', 'my', 'team', 'analytics', 'calendar', 'chat',
+    'settings', 'sprints', 'errors', 'help', 'news',
+  ];
 
   if (!pathname) return { mode: 'default', project: null };
 
@@ -151,6 +154,12 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
         ? 'Пошук за номером або темою звернення...'
         : 'Пошук інцидентів, клієнтів і команди...',
     };
+  }
+  if (pathname.startsWith('/overview')) {
+    return { mode: 'search', project: null, placeholder: 'Пошук інцидентів, клієнтів і команди...' };
+  }
+  if (pathname.startsWith('/clients')) {
+    return { mode: 'search', project: null, placeholder: 'Пошук клієнтів...' };
   }
   if (pathname.startsWith('/my')) {
     return { mode: 'search', project: null, placeholder: 'Пошук по моїх інцидентах...' };

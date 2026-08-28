@@ -55,6 +55,23 @@ test('QUI-129 and QUI-139 keep the project header free of team avatars', async (
   assert.doesNotMatch(kit, /pravatar/);
 });
 
+test('qTicket headers distinguish global screens from client spaces', async () => {
+  const [topHeader, workspaceHeader, kit] = await Promise.all([
+    read('../src/components/ui/Layout/TopHeader.jsx'),
+    read('../src/components/WorkspaceHeader.jsx'),
+    readKitShowcase(),
+  ]);
+
+  assert.match(workspaceHeader, /pathname\.startsWith\('\/overview'\)/);
+  assert.match(workspaceHeader, /pathname\.startsWith\('\/clients'\)/);
+  assert.match(workspaceHeader, /placeholder: 'Пошук клієнтів\.\.\.'/);
+  assert.match(topHeader, /\{ label: 'Клієнти', href: '\/clients' \}/);
+  assert.match(topHeader, /Пошук інцидентів клієнта/);
+  assert.doesNotMatch(topHeader, /Назва проєкту|label: 'Проєкти'/);
+  assert.match(kit, /Client Space Mode/);
+  assert.match(kit, /INC-104: Не працює імпорт/);
+});
+
 test('QUI-130 drops the epic copy and leads the type list with Задача', async () => {
   const [settings, workflow, taskTypes] = await Promise.all([
     read('../src/app/(app)/settings/page.js'),
