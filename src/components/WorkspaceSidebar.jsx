@@ -8,6 +8,7 @@ import Image from 'next/image';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui';
 import {
+  ArrowUpRight,
   Folder, Users, Settings, ChevronsUpDown,
   Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen, UserRound,
 } from 'lucide-react';
@@ -145,6 +146,16 @@ export default function WorkspaceSidebar() {
       ]
     : internalNav;
   const homeHref = clientViewer ? '/' : '/overview';
+  // Staff arrive through a signed QuickTeam launch, which replaces the entry it
+  // came from — so the browser's own «back» is not a way back. The rail carries
+  // the return instead. Only for an internal seat of a QuickTeam-provisioned
+  // organization, and only when the workspace address is configured: a link to
+  // a guessed origin would be worse than no link at all. A client never sees
+  // it — they have no QuickTeam side to return to.
+  const quickTeamUrl = (process.env.NEXT_PUBLIC_QUICKTEAM_URL || '').trim();
+  const showQuickTeamReturn = Boolean(
+    quickTeamUrl && !clientViewer && activeOrg?.quickTeam?.sourceOrganizationId,
+  );
 
   return (
     <aside
@@ -481,6 +492,26 @@ export default function WorkspaceSidebar() {
         </div>
       </div>
         </>
+      )}
+
+      {showQuickTeamReturn && (
+        <div className="shrink-0 pt-[8px]" style={{ borderTop: '1px solid var(--sb-border)' }}>
+          <a
+            href={quickTeamUrl}
+            title={collapsed ? undefined : 'Повернутися в QuickTeam'}
+            className="flex items-center mx-[8px] h-[40px] rounded-[12px] transition-all"
+            style={{ color: 'var(--sb-muted)' }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--sb-hover)'; e.currentTarget.style.color = 'var(--sb-text)'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--sb-muted)'; }}
+          >
+            <Tooltip content={collapsed ? 'Повернутися в QuickTeam' : null} position="right" className="w-full h-full flex items-center">
+              <div className={`flex items-center w-full h-full ${collapsed ? 'justify-center' : 'pl-[12px] gap-[16px] pr-[12px]'}`}>
+                <ArrowUpRight size={18} className="shrink-0" />
+                {!collapsed && <span className="text-[13px] font-medium">QuickTeam</span>}
+              </div>
+            </Tooltip>
+          </a>
+        </div>
       )}
 
       <WorkspaceHelpMenu collapsed={collapsed} />

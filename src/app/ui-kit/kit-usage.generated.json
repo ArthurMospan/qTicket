@@ -6839,9 +6839,9 @@
             "src/app/(app)/chat/page.js:398",
             "src/components/MobileNav.jsx:209",
             "src/components/MobileNav.jsx:268",
-            "src/components/WorkspaceSidebar.jsx:270",
-            "src/components/WorkspaceSidebar.jsx:334",
-            "src/components/WorkspaceSidebar.jsx:474"
+            "src/components/WorkspaceSidebar.jsx:281",
+            "src/components/WorkspaceSidebar.jsx:345",
+            "src/components/WorkspaceSidebar.jsx:485"
           ]
         },
         "md": {
@@ -6876,9 +6876,9 @@
           "files": [
             "src/components/MobileNav.jsx:209",
             "src/components/MobileNav.jsx:268",
-            "src/components/WorkspaceSidebar.jsx:270",
-            "src/components/WorkspaceSidebar.jsx:334",
-            "src/components/WorkspaceSidebar.jsx:474"
+            "src/components/WorkspaceSidebar.jsx:281",
+            "src/components/WorkspaceSidebar.jsx:345",
+            "src/components/WorkspaceSidebar.jsx:485"
           ]
         }
       },
@@ -6895,8 +6895,8 @@
             "src/components/MobileNav.jsx:209",
             "src/components/MobileNav.jsx:268",
             "src/components/OrgSwitcherScreen.jsx:66",
-            "src/components/WorkspaceSidebar.jsx:270",
-            "src/components/WorkspaceSidebar.jsx:334",
+            "src/components/WorkspaceSidebar.jsx:281",
+            "src/components/WorkspaceSidebar.jsx:345",
             "src/components/workspace/qtplus/chat/QtPlusChatPanel.jsx:77"
           ]
         },
@@ -6904,7 +6904,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:474"
+            "src/components/WorkspaceSidebar.jsx:485"
           ]
         }
       },
@@ -6924,8 +6924,8 @@
           "files": [
             "src/components/MobileNav.jsx:209",
             "src/components/MobileNav.jsx:268",
-            "src/components/WorkspaceSidebar.jsx:270",
-            "src/components/WorkspaceSidebar.jsx:334"
+            "src/components/WorkspaceSidebar.jsx:281",
+            "src/components/WorkspaceSidebar.jsx:345"
           ]
         },
         "inverse-outline": {
@@ -6942,7 +6942,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:474",
+            "src/components/WorkspaceSidebar.jsx:485",
             "src/components/workspace/qtplus/chat/QtPlusChatPanel.jsx:77"
           ]
         }
@@ -7579,15 +7579,15 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:188"
+            "src/components/WorkspaceSidebar.jsx:199"
           ]
         },
         "caption": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:194",
-            "src/components/WorkspaceSidebar.jsx:197"
+            "src/components/WorkspaceSidebar.jsx:205",
+            "src/components/WorkspaceSidebar.jsx:208"
           ]
         }
       },
@@ -7596,21 +7596,21 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:188"
+            "src/components/WorkspaceSidebar.jsx:199"
           ]
         },
         "wide": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:194"
+            "src/components/WorkspaceSidebar.jsx:205"
           ]
         },
         "half": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:197"
+            "src/components/WorkspaceSidebar.jsx:208"
           ]
         }
       },
@@ -7619,9 +7619,9 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:188",
-            "src/components/WorkspaceSidebar.jsx:194",
-            "src/components/WorkspaceSidebar.jsx:197"
+            "src/components/WorkspaceSidebar.jsx:199",
+            "src/components/WorkspaceSidebar.jsx:205",
+            "src/components/WorkspaceSidebar.jsx:208"
           ]
         }
       }

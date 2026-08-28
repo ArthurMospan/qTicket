@@ -222,6 +222,21 @@ test('qTicket shell не повертає таймер QuickTeam у desktop аб
   assert.doesNotMatch(mobile, /SheetTimerCapsule/);
 });
 
+// Підписаний перехід із QuickTeam замінює запис в історії браузера, тож
+// «назад» звідти не працює — рейка несе зворотний вихід. Клієнтові його
+// показувати нема куди: у нього немає боку QuickTeam.
+test('повернення в QuickTeam бачить лише внутрішня роль провіженої організації', async () => {
+  const sidebar = await read('../src/components/WorkspaceSidebar.jsx');
+
+  assert.match(sidebar, /const quickTeamUrl = \(process\.env\.NEXT_PUBLIC_QUICKTEAM_URL \|\| ''\)\.trim\(\)/);
+  assert.match(
+    sidebar,
+    /showQuickTeamReturn = Boolean\(\s*quickTeamUrl && !clientViewer && activeOrg\?\.quickTeam\?\.sourceOrganizationId,/,
+  );
+  assert.match(sidebar, /\{showQuickTeamReturn && \(/);
+  assert.match(sidebar, /Повернутися в QuickTeam/);
+});
+
 test('лише client_admin бачить керування співробітниками у налаштуваннях', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
 

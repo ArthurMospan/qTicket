@@ -330,7 +330,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:261",
+      "location": "src/components/WorkspaceSidebar.jsx:272",
       "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
       "text": "",
       "childElements": [
@@ -346,7 +346,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:352",
+      "location": "src/components/WorkspaceSidebar.jsx:363",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -361,7 +361,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:375",
+      "location": "src/components/WorkspaceSidebar.jsx:386",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -376,7 +376,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:441",
+      "location": "src/components/WorkspaceSidebar.jsx:452",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -476,17 +476,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:352",
+      "location": "src/components/WorkspaceSidebar.jsx:363",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:375",
+      "location": "src/components/WorkspaceSidebar.jsx:386",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:441",
+      "location": "src/components/WorkspaceSidebar.jsx:452",
       "tag": "button",
       "context": "branding-action"
     }

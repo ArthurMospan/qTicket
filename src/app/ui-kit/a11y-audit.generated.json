@@ -11,13 +11,13 @@
   },
   "totals": {
     "files": 344,
-    "elements": 4148,
+    "elements": 4154,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 37
+    "runtimeNameVerification": 38
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -290,6 +290,13 @@
       "location": "src/components/WorkspaceHeader.jsx:447",
       "attributes": [
         "label"
+      ]
+    },
+    {
+      "element": "a",
+      "location": "src/components/WorkspaceSidebar.jsx:499",
+      "attributes": [
+        "title"
       ]
     }
   ]
