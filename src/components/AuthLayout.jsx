@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAppContext } from '@/lib/context/AppContext';
-import { Plus, X, LogOut } from 'lucide-react';
+import { Headphones, Plus, X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { IconAction } from '@/components/ui';
 import SupportDialog from '@/components/SupportDialog';
@@ -26,7 +26,12 @@ const AUTH_FOOTER_DOCUMENTS = [
 
 const AUTH_FOOTER_LINK_CLASS = 'text-white/30 hover:text-white/70 transition-colors text-[12px] font-medium';
 
-export default function AuthLayout({ children, hideCreateOrg = false, onClose }) {
+export default function AuthLayout({
+  children,
+  hideCreateOrg = false,
+  onClose,
+  portalMode = false,
+}) {
   const { currentUser, signOut } = useAppContext();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -57,12 +62,20 @@ export default function AuthLayout({ children, hideCreateOrg = false, onClose })
         {/* Header - Padding matches WorkspaceSidebar: pt-24px, px-20px */}
         <div className="w-full flex items-center justify-between pt-[24px] px-[20px] pb-[16px] shrink-0 relative z-50">
           <div className="flex items-center gap-[12px]">
-            <Image src="/logo-min.svg" alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
-            <h1 className="ui-type-section-title text-white tracking-tight leading-tight truncate">qTicket</h1>
+            {portalMode ? (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white" aria-hidden>
+                <Headphones size={17} />
+              </div>
+            ) : (
+              <Image src="/logo-min.svg" alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
+            )}
+            <h1 className="ui-type-section-title text-white tracking-tight leading-tight truncate">
+              {portalMode ? 'Портал підтримки' : 'qTicket'}
+            </h1>
           </div>
 
           <div className="flex items-center gap-6">
-            {currentUser && !hideCreateOrg && (
+            {currentUser && !hideCreateOrg && !portalMode && (
               <button
                 onClick={handleCreateOrg}
                 className="hidden md:flex items-center gap-2 text-white/70 hover:text-white transition-colors text-[13px] font-medium"

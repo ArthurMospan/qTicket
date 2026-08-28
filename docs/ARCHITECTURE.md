@@ -1,12 +1,16 @@
-# How QuickTeam works
+# How qTicket works
 
-Four subsystems that a change is likely to touch, in one file so that finding
+The inherited task engine still powers incidents internally, and the sections
+below document those mechanics. qTicket adds a separate QuickTeam authority
+boundary for staff identity, branding and entitlement. Finding either rule
+should cost one search rather than a guess at a filename. Setup, commands and
 the rule costs one search rather than a guess at a filename. Setup, commands and
 the data model are in [../README.md](../README.md); the rules a change must obey
 are in [../AGENTS.md](../AGENTS.md); shared UI has its own contract in
 [UI_KIT_CONTRACT.md](UI_KIT_CONTRACT.md).
 
-- [Tasks, subtasks, links and accounting](#задачі-підзадачі-звязки-та-облік) — the task model, its execution invariants, time and invoices
+- [QuickTeam authority boundary](#quickteam-authority-boundary) — staff provisioning, entitlement and separate sessions
+- [Tasks, subtasks, links and accounting](#задачі-підзадачі-звязки-та-облік) — the inherited incident record, its execution invariants, time and invoices
 - [View state: a screen's filters live in its address](#view-state-a-screens-filters-live-in-its-address) — URL state, the table view
 - [What is new to whom: one feed, one cursor](#what-is-new-to-whom-one-feed-one-cursor) — read/unread, the task history feed
 - [Notification delivery](#notification-delivery) — the two paths and their guarantees
@@ -16,9 +20,38 @@ One-time data migrations are runbooks, not architecture: they live in
 
 ---
 
+## QuickTeam authority boundary
+
+qTicket and QuickTeam are separate applications with separate Firebase
+projects, databases and browser sessions. QuickTeam owns the internal tenant
+identity, synchronized branding, add-on entitlement and the selected internal
+support team. qTicket owns client projects, external client identities,
+invitations, incidents, discussion and workflow.
+
+QuickTeam sends complete, monotonically versioned snapshots through the signed
+server contract in [integrations/QTICKET.md](integrations/QTICKET.md). A complete
+snapshot is intentional: absence removes an internal seat without asking
+qTicket to infer an event stream. Synchronized staff, ownership, branding and
+entitlement cannot be edited through qTicket-native routes.
+
+An active entitlement is part of membership, not a decorative plan field. Both
+server authorization and Firestore rules require it before granting access to
+organization data. Deactivation therefore closes existing qTicket sessions on
+their next read as well as refusing new launches. It does not delete the
+organization, client accounts, incidents, discussion or history; reactivation
+with a newer snapshot restores access to the preserved data.
+
+Internal staff start in QuickTeam. A signed launch produces a single-use,
+90-second opaque code, consumed only on the qTicket origin to create a qTicket
+Firebase session. External clients never use that launch path: they authenticate
+through qTicket's own invitation flow. Neither product accepts the other one's
+Firebase token or session cookie.
+
+---
+
 ## Задачі, підзадачі, зв’язки та облік
 
-Цей документ фіксує продуктову й технічну модель QuickTeam. Вона є спільною
+Цей розділ фіксує успадковану модель робочого елемента. Вона є спільною
 для дошки, списків, аналітики, обліку часу, рахунків та інтеграцій.
 
 ### Ментальна модель

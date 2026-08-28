@@ -10,14 +10,14 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 359,
-    "elements": 4323,
+    "files": 360,
+    "elements": 4309,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 41
+    "runtimeNameVerification": 39
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -27,14 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:3687",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
-      "element": "Button",
-      "location": "src/app/(app)/settings/page.js:3787",
+      "location": "src/app/(app)/settings/page.js:3726",
       "attributes": [
         "title",
         "aria-label"
@@ -42,7 +35,7 @@
     },
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:682",
+      "location": "src/app/(app)/settings/page.js:688",
       "attributes": [
         "aria-label",
         "title"
@@ -54,13 +47,6 @@
       "attributes": [
         "title",
         "aria-label"
-      ]
-    },
-    {
-      "element": "Button",
-      "location": "src/app/(app)/team/page.js:124",
-      "attributes": [
-        "title"
       ]
     },
     {
@@ -316,7 +302,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:443",
+      "location": "src/components/WorkspaceHeader.jsx:450",
       "attributes": [
         "label"
       ]

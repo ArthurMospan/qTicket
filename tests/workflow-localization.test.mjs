@@ -68,7 +68,7 @@ test('an organization role is written in one place, in Ukrainian', async () => {
   assert.deepEqual(ORGANIZATION_ROLE_LABELS, {
     owner: 'Власник',
     admin: 'Адміністратор',
-    member: 'Учасник',
+    member: 'Менеджер підтримки',
     client_admin: 'Адміністратор клієнта',
     client_member: 'Співробітник клієнта',
   });
@@ -76,9 +76,9 @@ test('an organization role is written in one place, in Ukrainian', async () => {
   assert.equal(organizationRoleLabel('admin'), 'Адміністратор');
   // An unknown or missing role reads as the least privileged thing it could be,
   // never as a raw id.
-  assert.equal(organizationRoleLabel('member'), 'Учасник');
-  assert.equal(organizationRoleLabel(undefined), 'Учасник');
-  assert.equal(organizationRoleLabel('archivist'), 'Учасник');
+  assert.equal(organizationRoleLabel('member'), 'Менеджер підтримки');
+  assert.equal(organizationRoleLabel(undefined), 'Менеджер підтримки');
+  assert.equal(organizationRoleLabel('archivist'), 'Менеджер підтримки');
 
   for (const path of [
     'src/components/OrgSwitcherScreen.jsx',

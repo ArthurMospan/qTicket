@@ -45,7 +45,7 @@ test('public routes, redirects and security headers form one coherent entry flow
 
   const loginResponse = await page.goto('/login', { waitUntil: 'domcontentloaded' });
   expect(loginResponse?.status()).toBe(200);
-  await expect(page.getByRole('heading', { name: 'Увійти або зареєструватися' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Вхід до порталу підтримки' })).toBeVisible();
   expect(loginResponse?.headers()['x-content-type-options']).toBe('nosniff');
   expect(loginResponse?.headers()['x-frame-options']).toBe('SAMEORIGIN');
 
@@ -72,7 +72,7 @@ test('the public entry flow fits a phone viewport without horizontal overflow', 
   const errors = await preparePage(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/login', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('heading', { name: 'Увійти або зареєструватися' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Вхід до порталу підтримки' })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
   await expectHealthyPage(page, errors);

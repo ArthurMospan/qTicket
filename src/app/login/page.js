@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Headphones } from 'lucide-react';
 import AnimatedLogo from '@/components/AnimatedLogo';
 import AuthLayout from '@/components/AuthLayout';
 import { useAppContext } from '@/lib/context/AppContext';
@@ -60,11 +61,16 @@ function getInitialError() {
 }
 
 function getInitialClientLogin() {
-  if (typeof window === 'undefined') return false;
-  return new URLSearchParams(window.location.search).get('mode') === 'client';
+  if (typeof window === 'undefined') return true;
+  const mode = new URLSearchParams(window.location.search).get('mode');
+  return !(STAFF_LOGIN_ENABLED && mode === 'staff');
 }
 
 const GITHUB_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GITHUB_LOGIN_ENABLED === 'true';
+// Production staff enter through the signed QuickTeam launch. The old native
+// staff form remains opt-in for isolated development and legacy recovery only;
+// a plain /login is always the external client portal.
+const STAFF_LOGIN_ENABLED = process.env.NEXT_PUBLIC_STANDALONE_STAFF_LOGIN_ENABLED === 'true';
 
 function providerErrorMessage(error, providerName) {
   if (error?.code === 'custom/popup-blocked') return 'Дозвольте popup-вікно у браузері та спробуйте ще раз.';
@@ -199,14 +205,20 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout hideCreateOrg={true}>
+    <AuthLayout hideCreateOrg={true} portalMode={clientLogin}>
       <div className="w-full max-w-[360px] flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
         <div className="mb-[24px]">
-          <AnimatedLogo />
+          {clientLogin ? (
+            <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px] bg-white/10 text-white" aria-hidden>
+              <Headphones size={34} strokeWidth={1.8} />
+            </div>
+          ) : (
+            <AnimatedLogo />
+          )}
         </div>
 
         <h1 className="text-white text-[28px] font-black tracking-tight mb-[30px]">
-          {clientLogin ? 'Увійти до qTicket' : 'Увійти або зареєструватися'}
+          {clientLogin ? 'Вхід до порталу підтримки' : 'Увійти або зареєструватися'}
         </h1>
 
         {clientLogin && (

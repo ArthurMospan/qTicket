@@ -2,15 +2,15 @@
 // src/components/WorkspaceSidebar.jsx
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import Image from 'next/image';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
-import { Counter, IconAction, Skeleton } from '@/components/ui';
+import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui';
 import {
   Folder, Users, Settings, ChevronsUpDown,
   Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen,
-  Clock, Square as StopIcon,
+  Clock, Square as StopIcon, UserRound,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
@@ -23,11 +23,14 @@ import WorkspaceHelpMenu from '@/components/WorkspaceHelpMenu';
 import WorkspacePlanLimitRail from '@/components/WorkspacePlanLimitRail';
 
 import { can, isClientRole } from '@/lib/utils/can';
+import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
 export default function WorkspaceSidebar() {
   const pathname  = usePathname();
   const router    = useRouter();
-  const { projects, activeOrg, activeOrgId, orgRole, currentUser, orgLoading } = useAppContext();
+  const searchParams = useSearchParams();
+  const { projects, activeOrg, activeOrgId, orgRole, currentUser, orgLoading, allOrgs } = useAppContext();
+  const clientViewer = isClientRole(orgRole);
   // Особиста преференція цього браузера/пристрою — НЕ дані організації, тому
   // ніяк не синхронізується і не видно іншим учасникам команди.
   const [collapsed, setCollapsed] = useState(() => {
@@ -59,6 +62,10 @@ export default function WorkspaceSidebar() {
 
   // ── Sidebar theme & Preview ──
   const sidebarPreview = useWorkspaceStore(s => s.sidebarPreview);
+  const portalBrand = useMemo(
+    () => resolveOrganizationPortalBrand(activeOrg),
+    [activeOrg],
+  );
 
   // ── Custom branding ──
   // orgBrand віддає кешований брендинг, поки документ організації ще
@@ -72,6 +79,18 @@ export default function WorkspaceSidebar() {
 
 
   const theme = useMemo(() => {
+    // The external portal always carries the support provider's identity. It
+    // is not the inherited paid "replace qTicket in the staff sidebar"
+    // feature: it is how a client knows who receives their incident. A later
+    // QuickTeam activation writes this snapshot under `portalBranding`.
+    if (clientViewer) {
+      const bgColor = portalBrand.sidebarTheme === 'light' ? SIDEBAR_PRESETS.light
+        : portalBrand.sidebarTheme === 'custom'
+          ? (portalBrand.sidebarColor || SIDEBAR_PRESETS.dark)
+          : SIDEBAR_PRESETS.dark;
+      return computeSidebarTheme(bgColor);
+    }
+
     // Priority: live preview from settings > org data (or its cache) > default dark
     const source = sidebarPreview || (isBranded ? {
       theme: orgBrand?.sidebarTheme || 'dark',
@@ -85,7 +104,7 @@ export default function WorkspaceSidebar() {
       : SIDEBAR_PRESETS.dark;
 
     return computeSidebarTheme(bgColor);
-  }, [isBranded, orgBrand?.sidebarTheme, orgBrand?.sidebarColor, sidebarPreview]);
+  }, [clientViewer, isBranded, orgBrand?.sidebarTheme, orgBrand?.sidebarColor, portalBrand, sidebarPreview]);
 
   // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня.
   useSidebarThemeBoot(theme, Boolean(activeOrg), activeOrgId);
@@ -125,8 +144,12 @@ export default function WorkspaceSidebar() {
     }
   };
 
-  const isActive = (href, exact) =>
-    exact ? pathname === href : pathname.startsWith(href);
+  const isActive = (href, exact, section) => {
+    const targetPath = href.split('?')[0];
+    const pathActive = exact ? pathname === targetPath : pathname.startsWith(targetPath);
+    if (!pathActive || !section) return pathActive;
+    return (searchParams.get('section') || 'profile') === section;
+  };
 
   const internalNav = [
     { href: '/overview',   icon: LayoutDashboard, label: 'Огляд' },
@@ -137,13 +160,16 @@ export default function WorkspaceSidebar() {
     // всередині створення задачі (CreateTaskModal → AudioTaskPanel).
     { href: '/settings',   icon: Settings,      label: 'Налаштування' },
   ];
-  const topNav = isClientRole(orgRole)
+  const topNav = clientViewer
     ? [
         { href: '/', icon: Folder, label: 'Мої звернення', exact: true },
-        { href: '/settings', icon: Settings, label: 'Налаштування' },
+        ...(orgRole === 'client_admin'
+          ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
+          : []),
+        { href: '/settings?section=profile', icon: UserRound, label: 'Мій профіль', section: 'profile' },
       ]
     : internalNav;
-  const homeHref = isClientRole(orgRole) ? '/' : '/overview';
+  const homeHref = clientViewer ? '/' : '/overview';
 
   return (
     <aside
@@ -197,6 +223,15 @@ export default function WorkspaceSidebar() {
                       </div>
                     </div>
                   </>
+                ) : clientViewer ? (
+                  <Link href={homeHref} className="shrink-0 transition-opacity hover:opacity-80" aria-label="На головну">
+                    <OrganizationMark
+                      name={portalBrand.name}
+                      logo={portalBrand.logo}
+                      size="sm"
+                      appearance="sidebar"
+                    />
+                  </Link>
                 ) : isBranded ? (
                   /* ── Branded logo: hover flips to reveal qTicket (CSS),
                        click goes home ── */
@@ -232,6 +267,46 @@ export default function WorkspaceSidebar() {
                 )}
                 {brandingReady && (
                   <div className="flex flex-col min-w-0 ml-[12px]">
+                    {clientViewer ? (
+                      <>
+                        {/* A client is in the support provider's portal, not in
+                            qTicket. The provider is therefore the primary
+                            identity and the product name does not appear in
+                            this lockup at all. */}
+                        <Link href={homeHref} className="hover:opacity-80 transition-opacity">
+                          <h1
+                            data-ui-type="branding-title"
+                            className="h-[19px] truncate text-[16px] font-bold leading-[19px] tracking-tight"
+                            style={{ color: theme.text }}
+                          >
+                            {portalBrand.name}
+                          </h1>
+                        </Link>
+                        {(allOrgs || []).length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => setShowOrgSwitcher(true)}
+                            aria-label="Змінити портал підтримки"
+                            className="flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors"
+                            style={{ color: theme.muted }}
+                          >
+                            <span className="min-w-0 truncate">Портал підтримки</span>
+                            {otherOrgUnreadCount > 0 && (
+                              <Counter variant="dot" size="sm" appearance="sidebar" />
+                            )}
+                            <ChevronsUpDown size={12} className="shrink-0" aria-hidden />
+                          </button>
+                        ) : (
+                          <span
+                            className="h-[17px] truncate text-[12px] font-medium leading-[17px]"
+                            style={{ color: theme.muted }}
+                          >
+                            Портал підтримки
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <>
                     {/* The lockup is 36px tall in both states, so nothing shifts
                         when branding arrives — but the two lines do not split it
                         evenly, because the big line moves from top to bottom and
@@ -285,6 +360,8 @@ export default function WorkspaceSidebar() {
                       )}
                       <ChevronsUpDown size={12} className="shrink-0" style={{ color: theme.muted }} />
                     </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -346,8 +423,8 @@ export default function WorkspaceSidebar() {
 
       {/* Main Navigation (y=88 in Figma) */}
       <nav className="pt-[8px] flex flex-col gap-[4px] shrink-0">
-        {topNav.map(({ href, icon: Icon, label, exact }) => {
-          const active = isActive(href, exact);
+        {topNav.map(({ href, icon: Icon, label, exact, section }) => {
+          const active = isActive(href, exact, section);
           return (
             <Link key={href} href={href} title={collapsed ? undefined : label}
               className="flex items-center mx-[8px] h-[40px] rounded-[12px] transition-all"
@@ -369,14 +446,21 @@ export default function WorkspaceSidebar() {
         })}
       </nav>
 
+      {clientViewer ? (
+        // External users have one portal surface. Listing the underlying
+        // project here exposed an implementation detail and linked straight
+        // back to a route that immediately redirected to «Мої звернення».
+        <div className="flex-1" />
+      ) : (
+        <>
       <div className="mx-[12px] mt-[16px] mb-[16px]" style={{ borderTop: '1px solid var(--sb-border)' }} />
 
-      {/* Client projects */}
+      {/* Client workspaces are internal support navigation. */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {!collapsed && (
           <div className="flex items-center justify-between px-[16px] mb-[16px]">
             <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--sb-muted-header)' }}>
-              {isClientRole(orgRole) ? 'ПРОСТІР ПІДТРИМКИ' : 'КЛІЄНТИ'}
+              КЛІЄНТИ
             </p>
             {can(orgRole, 'create:project') && (
               <button
@@ -421,13 +505,15 @@ export default function WorkspaceSidebar() {
             })}
         </div>
       </div>
+        </>
+      )}
 
-      {!isClientRole(orgRole) && <WorkspacePlanLimitRail collapsed={collapsed} />}
+      {!clientViewer && <WorkspacePlanLimitRail collapsed={collapsed} />}
 
       <WorkspaceHelpMenu collapsed={collapsed} />
 
       {/* Global Timer Capsule */}
-      {!isClientRole(orgRole) && activeTimer && (
+      {!clientViewer && activeTimer && (
         <div className={`shrink-0 ${collapsed ? 'p-[12px]' : 'p-[16px]'}`} style={{ borderTop: '1px solid var(--sb-border)', backgroundColor: theme.bg }}>
           <div
             onClick={() => {

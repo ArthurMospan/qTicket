@@ -7,12 +7,14 @@ import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
 import AuthLayout from '@/components/AuthLayout';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
-import { Counter } from '@/components/ui';
+import { Counter, OrganizationMark } from '@/components/ui';
 import { useModalFocus } from '@/lib/hooks/useModalFocus';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
 import { useOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCounts';
 import { planAllows } from '@/lib/utils/plans.mjs';
+import { isClientRole } from '@/lib/utils/can';
+import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
 // «Брендинг у сайдбарі» — платна можливість, і питати про це має кожен, хто
 // його малює, а не лише перемикач у налаштуваннях. Поле в базі лишається на
@@ -45,10 +47,11 @@ function orgLogoBackdrop(org) {
   return '#ffffff';
 }
 
-function OrgBigCard({ org, role, unreadCount, onClick }) {
-  const firstLetter = (org.name || 'О')[0].toUpperCase();
-  const logoSrc = orgLogo(org);
-  const hasLogo = Boolean(logoSrc);
+function OrgBigCard({ org, role, roleId, unreadCount, onClick }) {
+  const clientPortal = isClientRole(roleId);
+  const portalBrand = resolveOrganizationPortalBrand(org);
+  const displayName = clientPortal ? portalBrand.name : (org.name || 'Без назви');
+  const logoSrc = clientPortal ? portalBrand.logo : orgLogo(org);
 
   return (
     <button
@@ -56,18 +59,14 @@ function OrgBigCard({ org, role, unreadCount, onClick }) {
       className="flex flex-col items-center gap-4 transition-all duration-300 group/item w-[160px] group-hover/list:opacity-30 hover:!opacity-100"
     >
       <div className="relative">
-        <div
-          id={`org-circle-${org.id}`}
-          className="w-[110px] h-[110px] rounded-full flex items-center justify-center shrink-0 overflow-hidden border-[3px] border-transparent group-hover/item:border-white shadow-xl transition-all duration-300 relative z-10"
-          style={{ backgroundColor: hasLogo ? orgLogoBackdrop(org) : '#2a2a2a' }}
-        >
-          {hasLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoSrc} alt={org.name} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-[40px] font-medium text-white">{firstLetter}</span>
-          )}
-        </div>
+        <span id={`org-circle-${org.id}`} className="relative z-10 block shadow-xl transition-all duration-300 group-hover/item:scale-[1.02]">
+          <OrganizationMark
+            name={displayName}
+            logo={logoSrc}
+            size="picker"
+            appearance="inverse"
+          />
+        </span>
         {unreadCount > 0 && (
           <Counter
             value={unreadCount}
@@ -78,7 +77,7 @@ function OrgBigCard({ org, role, unreadCount, onClick }) {
         )}
       </div>
       <div className="flex flex-col items-center min-w-0 w-full text-center mt-2">
-        <p className="text-[16px] font-bold text-white w-full truncate transition-transform group-hover/item:scale-105">{org.name || 'Без назви'}</p>
+        <p className="text-[16px] font-bold text-white w-full truncate transition-transform group-hover/item:scale-105">{displayName}</p>
         <span className="text-[13px] font-medium text-white/50 mt-1 transition-transform group-hover/item:scale-105">{role}</span>
       </div>
     </button>
@@ -86,7 +85,8 @@ function OrgBigCard({ org, role, unreadCount, onClick }) {
 }
 
 export default function OrgSwitcherScreen({ onClose }) {
-  const { allOrgs, orgRoles, currentUser } = useAppContext();
+  const { allOrgs, orgRoles, currentUser, orgRole } = useAppContext();
+  const clientPortal = isClientRole(orgRole);
   const router = useRouter();
   const [expandingOrg, setExpandingOrg] = useState(null);
   const dialogRef = useModalFocus({ isOpen: Boolean(onClose), onClose });
@@ -137,6 +137,18 @@ export default function OrgSwitcherScreen({ onClose }) {
   const roleLabel = (org) => organizationRoleLabel(orgRoles?.[org.id]);
 
   const isExpanding = !!expandingOrg;
+  const expandingRole = expandingOrg ? orgRoles?.[expandingOrg.org.id] : null;
+  const expandingPortalBrand = expandingOrg
+    ? resolveOrganizationPortalBrand(expandingOrg.org)
+    : null;
+  const expandingLogo = expandingOrg
+    ? (isClientRole(expandingRole) ? expandingPortalBrand.logo : orgLogo(expandingOrg.org))
+    : '';
+  const expandingName = expandingOrg
+    ? (isClientRole(expandingRole)
+      ? expandingPortalBrand.name
+      : (expandingOrg.org.name || 'Організація'))
+    : '';
 
   return (
     <div
@@ -148,10 +160,12 @@ export default function OrgSwitcherScreen({ onClose }) {
       data-ui-overlay="workspace-mode"
       className={`fixed inset-0 z-[200] ${onClose ? 'bg-transparent' : 'bg-canvas'}`}
     >
-      <AuthLayout hideCreateOrg={false} onClose={onClose}>
+      <AuthLayout hideCreateOrg={clientPortal} portalMode={clientPortal} onClose={onClose}>
 
         <div className={`flex flex-col items-center w-full max-w-[800px] transition-opacity duration-300 ${isExpanding ? 'opacity-0' : 'opacity-100'} animate-in slide-in-from-bottom-8 duration-500 pb-16`}>
-          <h1 className="ui-type-display-title text-white mb-2 text-center tracking-tight">Оберіть організацію</h1>
+          <h1 className="ui-type-display-title text-white mb-2 text-center tracking-tight">
+            {clientPortal ? 'Оберіть службу підтримки' : 'Оберіть організацію'}
+          </h1>
           <p className="text-[14px] font-medium text-white/50 mb-12 text-center">
             Ви увійшли як {currentUser?.email}
           </p>
@@ -162,6 +176,7 @@ export default function OrgSwitcherScreen({ onClose }) {
                 key={org.id}
                 org={org}
                 role={roleLabel(org)}
+                roleId={orgRoles?.[org.id]}
                 unreadCount={unreadByOrg[org.id] || 0}
                 onClick={(e) => handleSelect(e, org)}
               />
@@ -180,16 +195,16 @@ export default function OrgSwitcherScreen({ onClose }) {
               height: 110,
               transform: `translate(-50%, -50%) scale(${expandingOrg.active ? 1.2 : 1})`,
               boxShadow: expandingOrg.active ? '0 0 0 150vw #ffffff' : '0 0 0 3px #ffffff',
-              backgroundColor: orgLogo(expandingOrg.org)
+              backgroundColor: expandingLogo
                 ? orgLogoBackdrop(expandingOrg.org)
                 : '#2a2a2a',
             }}
           >
-            {orgLogo(expandingOrg.org) ? (
+            {expandingLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={orgLogo(expandingOrg.org)} alt="" className="w-full h-full object-cover" />
+              <img src={expandingLogo} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[40px] font-medium text-white">{(expandingOrg.org.name || 'О')[0].toUpperCase()}</span>
+              <span className="text-[40px] font-medium text-white">{expandingName[0].toUpperCase()}</span>
             )}
           </div>
         )}

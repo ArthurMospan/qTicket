@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 119,
-    "props": 867,
-    "documentedProps": 867,
+    "components": 120,
+    "props": 872,
+    "documentedProps": 872,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -4231,6 +4231,47 @@
           "type": "string",
           "values": [],
           "description": "What the option is called."
+        }
+      ]
+    },
+    "OrganizationMark": {
+      "file": "src/components/ui/DataDisplay/OrganizationMark.jsx",
+      "summary": "The logo or initial that identifies an organization.",
+      "props": [
+        {
+          "name": "appearance",
+          "default": "'surface'",
+          "type": "'surface'|'sidebar'|'inverse'",
+          "values": [],
+          "description": "Surface contrast."
+        },
+        {
+          "name": "className",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Placement in the parent only."
+        },
+        {
+          "name": "logo",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Public organization logo URL."
+        },
+        {
+          "name": "name",
+          "default": "'Організація'",
+          "type": "string",
+          "values": [],
+          "description": "Organization name used for alt text and fallback."
+        },
+        {
+          "name": "size",
+          "default": "'sm'",
+          "type": "'sm'|'md'|'picker'",
+          "values": [],
+          "description": "Named geometry from the UI Kit."
         }
       ]
     },

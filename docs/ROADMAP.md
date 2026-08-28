@@ -7,6 +7,10 @@ This file contains current owner guardrails and confirmed open work. Completed i
 - qTicket is a shared multi-tenant SaaS add-on sold alongside QuickTeam. A subscribing organization configures its own support space and creates one or more client projects; qTicket, QuickTeam, and QuickTeam+ remain separate products that may all exist in parallel.
 - Organization roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. The first three belong to the tenant's support team. Client roles are restricted to their assigned project: they can see and create incidents and reply in an incident, while workflow, assignment, priority, and settings remain internal-only. A client admin may invite only client members into that same project.
 - Staff identity and incident-to-task transfer integrate with QuickTeam through explicit server-side contracts. External clients authenticate in qTicket's own Firebase project; project-scoped invitations are bound to the verified email returned by the sign-in provider. Do not couple the products' primary Firebase sessions or data models.
+- QuickTeam is the authority for the internal organization, branding,
+  entitlement and enabled support staff. qTicket must refuse direct changes to
+  synchronized internal seats, ownership and plan. qTicket remains the
+  authority for client projects, external invitations, incidents and workflow.
 - `issues` is the canonical incident collection. `tasks` is legacy/read-only and must not receive new features. The internal collection name stays stable during the fork; user-facing qTicket copy calls these records incidents.
 - Subscription billing will be supplied by the wider product ecosystem. The
   owner has since made the product decision the old wording was waiting for:
@@ -49,7 +53,8 @@ Completed foundation:
 - Firebase client/admin configuration and Cloudinary are configured in Vercel;
   secrets are not stored in Git. Transactional email is intentionally disabled.
 - Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
-  suite passes all 75 tests, including the project-scoped client boundary.
+  suite passes all 77 tests, including the project-scoped client boundary,
+  entitlement revocation and stale project-roster denial.
 - The role model already exists in code and rules: internal `owner`, `admin`,
   `member`; external `client_admin`, `client_member`. External users can create,
   read and discuss incidents in their client project, but cannot control the
@@ -82,10 +87,19 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The slice passes lint, production build, all 1,158 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,165 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
+- The version 1 QuickTeam add-on contract now exists in both repositories.
+  QuickTeam owners activate qTicket, choose from existing active team members
+  and synchronize branding; enabled staff receive a 90-second one-time launch
+  and sign into qTicket Firebase on the qTicket origin. qTicket stores no
+  QuickTeam session and refuses direct mutation of synchronized staff,
+  ownership or plan.
+- A plain qTicket `/login` is now the external client portal. Native staff login
+  is disabled by default and exists only behind an explicit development/recovery
+  environment switch.
 
 Product work still required:
 
@@ -136,14 +150,18 @@ surfaces first, then delete only when references and migrations are understood.
 4. **Completed:** rework the internal client-project entry reached from
    **Клієнти** around customer context, incidents, people and settings instead
    of a task board.
-5. **In progress:** local checks are green; deploy the slice, then execute the
-   two-sided acceptance flow with separate internal and client accounts.
-6. Only after the qTicket workflow is accepted, implement the QuickTeam transfer
-   contract and later the add-on entitlement contract.
+5. **Completed in code:** implement QuickTeam activation, staff selection,
+   branding synchronization and one-time staff launch without sharing Firebase
+   sessions or databases.
+6. **In progress:** configure both deployments with the shared secret, deploy
+   both checked slices, then execute the internal/client acceptance flow.
+7. Only after that flow is accepted, implement the incident-to-QuickTeam-task
+   transfer contract and connect the existing entitlement field to billing.
 
-The exact next implementation task is step 5: deploy the checked client
-workspace, then execute the internal/client acceptance flow with separate
-accounts and fix every concrete failure it reveals. Every completed
+The exact next implementation task is step 6: finish all local checks, deploy
+both repositories with the shared secret, then execute the internal/client
+acceptance flow with separate accounts and fix every concrete failure it
+reveals. Every completed
 slice should be a reviewable Git commit and this checkpoint should be updated
 in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
@@ -170,9 +188,10 @@ credentials, service-account JSON, `.env` values or session notes here.
 - Add the explicit server-to-server «Створити завдання у QuickTeam» action.
   The first version is manual, idempotent, records the QuickTeam task identity
   on the incident, and never shares Firebase sessions or databases.
-- Connect add-on entitlement and provisioning to QuickTeam billing. Until that
-  contract exists, enabling qTicket for an organization remains a manual
-  operation and must not be inferred from a browser-visible plan field.
+- Connect the implemented provisioning entitlement to QuickTeam billing. Until
+  that billing signal exists, the QuickTeam owner activation records an active
+  test entitlement; qTicket still enforces it server-side and never infers it
+  from a browser-visible plan field.
 - Create the production Firebase and Vercel projects only after the acceptance
   flow passes in the isolated test project. Transactional email is optional and
   remains disconnected while qTicket uses a temporary `vercel.app` domain;

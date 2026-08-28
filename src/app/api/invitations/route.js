@@ -12,6 +12,10 @@ import {
   recordPlanUsage,
 } from '@/lib/server/planLimits';
 import { invitedRoleFor, isClientRole, rolesFor } from '@/lib/utils/can';
+import {
+  isQuickTeamManagedOrganization,
+  QUICKTEAM_MANAGED_MESSAGE,
+} from '@/lib/utils/quickTeamManaged.mjs';
 
 // The invitation must be created even when the email provider is down or not
 // configured — the pending doc alone already works (it is auto-accepted on the
@@ -92,6 +96,16 @@ export async function POST(request) {
     const safeRole = invitedRoleFor(role, authorization.membership.role);
     const clientInvitee = isClientRole(safeRole);
     const db = getAdminDb();
+    const organizationSnapshot = await db.collection('organizations').doc(organizationId).get();
+    if (!organizationSnapshot.exists) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
+    if (isQuickTeamManagedOrganization(organizationSnapshot.data()) && !clientInvitee) {
+      return NextResponse.json({
+        error: QUICKTEAM_MANAGED_MESSAGE,
+        code: 'QUICKTEAM_MANAGED',
+      }, { status: 409 });
+    }
 
     // The seat ceiling, counted here rather than promised on the price list.
     // «До 5 учасників» has been on the free plan since before this route
@@ -106,7 +120,7 @@ export async function POST(request) {
     // their invitation was never going to cross.
     const refuseWithoutSeat = async () => {
       const [organizationSnapshot, seatsTaken, pendingSeats] = await Promise.all([
-        db.collection('organizations').doc(organizationId).get(),
+        Promise.resolve(organizationSnapshot),
         countActiveMembers(db, organizationId),
         db.collection('invitations')
           .where('organizationId', '==', organizationId)

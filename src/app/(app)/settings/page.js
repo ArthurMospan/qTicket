@@ -4,13 +4,12 @@ import dynamic from 'next/dynamic';
 // src/app/workspace/settings/page.js — Redesigned Settings (clean, no emoji, QT-style)
 import { Children, createContext, isValidElement, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppContext }  from '@/lib/context/AppContext';
 import useWorkspaceStore  from '@/store/useWorkspaceStore';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useMobilePaneBack } from '@/lib/hooks/useMobilePaneBack';
 import { restoreProject } from '@/lib/services/projects';
-import { transferOrganizationOwnership } from '@/lib/services/organizations';
 import { fetchWorkflowViaApi, updateWorkflowViaApi } from '@/lib/services/workflow';
 import { authenticatedRequest } from '@/lib/services/authenticatedRequest';
 import { deleteAccount, fetchAccountDeletionImpact } from '@/lib/services/account';
@@ -53,7 +52,7 @@ import {
   Copy, ExternalLink, ChevronRight, AlertTriangle,
   PlugZap, ToggleLeft, ToggleRight, Receipt, CreditCard,
   Globe, Tag as TagIcon, Briefcase, GripVertical, Send,
-  Archive, ArchiveRestore, Bug, SlidersHorizontal, DatabaseBackup, Lock,
+  Archive, ArchiveRestore, Bug, DatabaseBackup, Lock,
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -72,7 +71,6 @@ import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 // loads then rather than with the settings page.
 const Colorful = dynamic(() => import('@uiw/react-color').then(module => module.Colorful), { ssr: false });
 import InviteMemberDialog from '@/components/InviteMemberDialog';
-import TeamMemberSettingsDialog from '@/components/TeamMemberSettingsDialog';
 import IntegrationCard, { IntegrationCode, IntegrationNote, IntegrationSteps } from '@/components/integrations/IntegrationCard';
 import DataMigrationSettings, { MIGRATION_SOURCE_TITLES } from '@/components/migrations/DataMigrationSettings';
 import {
@@ -131,6 +129,14 @@ const DEFAULT_WORKFLOW_SETTINGS = Object.freeze({
   positions: DEFAULT_POSITIONS,
 });
 
+const CLIENT_SETTINGS_SECTIONS = new Set([
+  'profile',
+  'notifications',
+  'localization',
+  'account',
+  'team',
+]);
+
 const NAV = [
   { id: 'profile',       label: 'Особистий профіль',icon: User,          group: 'Особисте' },
   // «Способи входу» is not a section of its own any more. It answers half of
@@ -148,7 +154,7 @@ const NAV = [
   // which is `adminOnly` — so a plain member had no way to reach any of them.
   { id: 'account',       label: 'Безпека',          icon: ShieldCheck,   group: 'Особисте' },
   { id: 'workspace',     label: 'Загальні',         icon: Building,      group: 'Організація', adminOnly: true },
-  { id: 'team',          label: 'Учасники команди', icon: Users,         group: 'Організація' },
+  { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
   { id: 'billing',       label: 'Тарифний план',    icon: CreditCard,    group: 'Організація', adminOnly: true },
   { id: 'integrations',  label: 'Інтеграції',       icon: PlugZap,       group: 'Організація', adminOnly: true },
   { id: 'migration',     label: 'Перенесення даних', icon: DatabaseBackup, group: 'Організація', adminOnly: true },
@@ -791,6 +797,8 @@ const cleanWorkflowItems = arr => (arr || [])
 
 export default function SettingsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const settingsQuery = searchParams.toString();
   const { currentUser, signOut, activeOrgId, projects, orgRole, allOrgs, orgRoles } = useAppContext();
   const showToast = useWorkspaceStore(s => s.showToast);
   const confirmDialog = useConfirm();
@@ -798,11 +806,7 @@ export default function SettingsPage() {
     org,
     members,
     inviteMember,
-    changeMemberRole,
     deactivateMember,
-    reactivateMember,
-    setMemberPosition,
-    getMemberRemovalImpact,
   } = useOrganization();
 
   // Role resolution
@@ -930,14 +934,17 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const searchParams = new URLSearchParams(window.location.search);
+      const currentSearchParams = new URLSearchParams(settingsQuery);
       // Sections that were merged into another one. An old link, a bookmark and
       // every OAuth callback still name them.
       const MERGED_SECTIONS = { 'auth-methods': 'account' };
-      const rawSection = searchParams.get('section');
-      const sec = MERGED_SECTIONS[rawSection] || rawSection;
-      const authSuccess = searchParams.get('auth');
-      const authError = searchParams.get('authError');
+      const rawSection = currentSearchParams.get('section');
+      const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
+      const sec = clientViewer && !CLIENT_SETTINGS_SECTIONS.has(requestedSection)
+        ? 'profile'
+        : requestedSection;
+      const authSuccess = currentSearchParams.get('auth');
+      const authError = currentSearchParams.get('authError');
       if (sec) {
         queueMicrotask(() => {
           setActiveSection(sec);
@@ -947,8 +954,8 @@ export default function SettingsPage() {
       if (authSuccess === 'oneb_connected') {
         queueMicrotask(() => showToast('OneB підключено'));
       }
-      const qtplus = searchParams.get('qtplus');
-      const qtplusError = searchParams.get('qtplusError');
+      const qtplus = currentSearchParams.get('qtplus');
+      const qtplusError = currentSearchParams.get('qtplusError');
       if (qtplus === 'connected') {
         queueMicrotask(() => showToast('QuickTeam+ підключено'));
       }
@@ -973,7 +980,7 @@ export default function SettingsPage() {
         queueMicrotask(() => showToast(message, 'error'));
       }
     }
-  }, [showToast]);
+  }, [clientViewer, settingsQuery, showToast]);
 
   // ── Workflow ──
   const [statuses,   setStatuses]   = useState(DEFAULT_STATUSES);
@@ -1375,7 +1382,6 @@ export default function SettingsPage() {
 
   // ── Team invite ──
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [memberSettingsId, setMemberSettingsId] = useState(null);
 
   // ─── Auth methods ───
   const [authProviderIds, setAuthProviderIds] = useState([]);
@@ -2167,63 +2173,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleRoleChange = async (uid, role) => {
-    try { await changeMemberRole(uid, role); showToast('Роль змінено'); }
-    catch (error) { showToast(userFacingErrorMessage(error, 'Не вдалося змінити роль'), 'error'); }
-  };
-
-  const handlePositionChange = async (uid, positionId) => {
-    try { await setMemberPosition(uid, positionId); showToast('Посаду змінено'); }
-    catch (error) { showToast(userFacingErrorMessage(error, 'Не вдалося змінити посаду'), 'error'); }
-  };
-
-  const handleTransferOwnership = async (targetUid) => {
-    if (!(await confirmDialog({
-      title: 'Передати права власника?',
-      message: 'Ви втратите статус власника та станете адміністратором.',
-      confirmText: 'Передати права', danger: true,
-    }))) return;
-    try {
-      await transferOrganizationOwnership(activeOrgId, targetUid);
-      showToast('Права власника успішно передано');
-    } catch (e) {
-      showToast(userFacingErrorMessage(e, 'Не вдалося передати права власника'), 'error');
-    }
-  };
-
-  // The confirmation says what happens *and* what does not: the numbers below
-  // are the work that stays exactly where it is. A dialog that only counts what
-  // it is about to take away is how «видалити учасника» came to read as
-  // «стерти все, що він зробив».
-  const handleDeactivateMember = async (uid) => {
-    let impact;
-    try {
-      impact = await getMemberRemovalImpact(uid);
-    } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося перевірити доступ учасника'), 'error');
-      return;
-    }
-    const staying = [
-      impact.assignedIssueCount > 0
-        && `${impact.assignedIssueCount} ${plural(impact.assignedIssueCount, ['завдання', 'завдання', 'завдань'])} лишиться за ним`,
-      impact.watchedIssueCount > 0
-        && `${impact.watchedIssueCount} ${plural(impact.watchedIssueCount, ['підписка', 'підписки', 'підписок'])} збережеться`,
-    ].filter(Boolean);
-    if (!(await confirmDialog({
-      title: 'Забрати доступ до організації?',
-      message: [
-        `Людина втратить доступ до організації та до ${impact.projectCount} ${plural(impact.projectCount, ['проєкту', 'проєктів', 'проєктів'])}.`,
-        staying.length > 0
-          ? `Робота залишиться недоторканою: ${staying.join(', ')}. Коментарі, записаний час і авторство теж.`
-          : 'Усе, що вона зробила, лишиться недоторканим: коментарі, записаний час і авторство.',
-        'Доступ можна повернути будь-коли — з тією ж роллю, посадою і проєктами.',
-      ].join('\n\n'),
-      confirmText: 'Забрати доступ', danger: true,
-    }))) return;
-    try { await deactivateMember(uid); showToast('Доступ забрано'); }
-    catch (error) { showToast(userFacingErrorMessage(error, 'Не вдалося забрати доступ'), 'error'); }
-  };
-
   // Leaving is the same server call as being deactivated — the route tells the
   // two apart by the id — so the person keeps everything they did here and an
   // administrator can hand the seat back if they return.
@@ -2248,17 +2197,6 @@ export default function SettingsPage() {
       showToast(userFacingErrorMessage(error, 'Не вдалося вийти з організації'), 'error');
     } finally {
       setLeavingOrganization(false);
-    }
-  };
-
-  const handleReactivateMember = async (uid) => {
-    try {
-      const result = await reactivateMember(uid);
-      showToast(result?.projectCount > 0
-        ? `Доступ повернено, разом із проєктами (${result.projectCount})`
-        : 'Доступ повернено');
-    } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося повернути доступ'), 'error');
     }
   };
 
@@ -3681,17 +3619,27 @@ export default function SettingsPage() {
         ));
         return (
         <Section
-          title={clientViewer ? 'Співробітники клієнта' : 'Учасники команди'}
-          desc={clientViewer ? 'Люди, які мають доступ до вашого клієнтського простору та його інцидентів.' : undefined}
-          rightAction={isAdmin || (clientAdmin && clientProjectIds.length === 1) ? (
+          title={clientViewer ? 'Співробітники клієнта' : 'Команда підтримки'}
+          desc={clientViewer
+            ? 'Люди, які мають доступ до вашого клієнтського простору та його інцидентів.'
+            : 'Внутрішні працівники, яким власник надав доступ у QuickTeam.'}
+          rightAction={clientAdmin && clientProjectIds.length === 1 ? (
           <Button
             onClick={() => (seatsBlocked ? openPlanUpgrade({ limitId: 'members' }) : setShowInviteModal(true))}
             style="primary"
             size="md"
             icon={seatsBlocked ? PlanCrownIcon : Plus}
             title={seatsBlocked ? planLimits.notice('members').title : undefined}
-          >{clientViewer ? 'Запросити співробітника' : 'Запросити'}</Button>
+          >Запросити співробітника</Button>
         ) : null}>
+          {!clientViewer && (
+            <Alert
+              variant="info"
+              title="Команда керується в QuickTeam"
+              description="Щоб додати чи прибрати менеджера або адміністратора, відкрийте QuickTeam → Налаштування → Інтеграції → qTicket і синхронізуйте склад. Окремо запрошувати внутрішніх працівників у qTicket не потрібно."
+              className="mb-4"
+            />
+          )}
           <Surface preset="card" padding="none" className="overflow-hidden relative z-10">
             <div className="flex flex-col divide-y divide-line rounded-[16px]">
               {directoryMembers.map((member, i) => {
@@ -3714,15 +3662,6 @@ export default function SettingsPage() {
                     <div className="flex shrink-0 items-center gap-2">
                       <Pill size="lg" className="hidden sm:inline-flex">{positionLabel}</Pill>
                       <Pill tone="ink-subtle" size="lg">{organizationRoleLabel(member.role)}</Pill>
-                      {isAdmin && (
-                        <Button
-                          onClick={() => setMemberSettingsId(member.id || member.uid)}
-                          style="secondary"
-                          size="icon"
-                          icon={SlidersHorizontal}
-                          title="Налаштувати учасника"
-                        />
-                      )}
                     </div>
                   </div>
                 );
@@ -4444,9 +4383,8 @@ export default function SettingsPage() {
   // this, and they were open on Free with nothing marking them — the rail is
   // where somebody decides which of eleven entries to open, so the crown has to
   // be there rather than only inside the section.
-  const clientSectionIds = new Set(['profile', 'notifications', 'localization', 'account', 'team']);
   const allowedNav = NAV
-    .filter(item => clientViewer ? clientSectionIds.has(item.id) : (!item.adminOnly || isAdmin))
+    .filter(item => clientViewer ? CLIENT_SETTINGS_SECTIONS.has(item.id) : (!item.adminOnly || isAdmin))
     .map(item => {
     if (item.id === 'billing') {
       // No badge until the document has actually been read: a red «Free»
@@ -4567,30 +4505,6 @@ export default function SettingsPage() {
         clientMode={clientViewer}
         projectIds={clientProjectIds}
         projects={projects}
-      />
-      <TeamMemberSettingsDialog
-        member={members.find(member => (member.id || member.uid) === memberSettingsId)}
-        positions={positions}
-        currentUserId={currentUser?.uid || currentUser?.id}
-        isOwner={isOwner}
-        isAdmin={isAdmin}
-        canManageRoles={can(orgRole, 'manage:member_roles')}
-        canTransferOwnership={can(orgRole, 'transfer:ownership')}
-        onClose={() => setMemberSettingsId(null)}
-        onRoleChange={handleRoleChange}
-        onPositionChange={handlePositionChange}
-        onTransferOwnership={async uid => {
-          await handleTransferOwnership(uid);
-          setMemberSettingsId(null);
-        }}
-        onDeactivate={async uid => {
-          await handleDeactivateMember(uid);
-          setMemberSettingsId(null);
-        }}
-        onReactivate={async uid => {
-          await handleReactivateMember(uid);
-          setMemberSettingsId(null);
-        }}
       />
     </SidebarLayout>
   );

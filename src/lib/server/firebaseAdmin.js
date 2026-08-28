@@ -15,6 +15,7 @@ import {
 } from 'firebase-admin/firestore';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isRejectedIdTokenError } from '@/lib/utils/firebaseAuthError.mjs';
+import { isQuickTeamManagedOrganization } from '@/lib/utils/quickTeamManaged.mjs';
 
 function getAdminApp() {
   if (getApps().length) return getApp();
@@ -114,9 +115,20 @@ export async function authorizeOrgRequest(request, organizationId, allowedRoles 
   if (authResult.error) return authResult;
   if (!organizationId) return { error: 'Organization is required', status: 400 };
 
+  const db = getAdminDb();
   const membershipId = `${organizationId}_${authResult.user.uid}`;
-  const membershipSnap = await getAdminDb().collection('orgMemberships').doc(membershipId).get();
+  const [membershipSnap, organizationSnap] = await Promise.all([
+    db.collection('orgMemberships').doc(membershipId).get(),
+    db.collection('organizations').doc(organizationId).get(),
+  ]);
   if (!membershipSnap.exists) return { error: 'Forbidden', status: 403 };
+  if (
+    organizationSnap.exists
+    && isQuickTeamManagedOrganization(organizationSnap.data())
+    && organizationSnap.data()?.quickTeam?.entitlement !== 'active'
+  ) {
+    return { error: 'qTicket не активовано для цієї організації', status: 403, code: 'QTICKET_INACTIVE' };
+  }
 
   const membership = membershipSnap.data();
   if (
@@ -127,7 +139,7 @@ export async function authorizeOrgRequest(request, organizationId, allowedRoles 
     return { error: 'Forbidden', status: 403 };
   }
 
-  return { user: authResult.user, membership };
+  return { user: authResult.user, membership, organization: organizationSnap.data() || null };
 }
 
 // Only from the server-only document. The second argument used to be the

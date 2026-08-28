@@ -33,8 +33,22 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + request.auth.uid));
     }
 
+    // Standalone legacy workspaces have no QuickTeam marker and keep working.
+    // A provisioned add-on is reachable only while QuickTeam says its
+    // entitlement is active. This gate covers internal staff and external
+    // clients equally, including already-open browser sessions.
+    function organizationEntitlementActive(orgId) {
+      let orgPath = /databases/$(database)/documents/organizations/$(orgId);
+      let quickTeam = exists(orgPath)
+        ? get(orgPath).data.get('quickTeam', {})
+        : {};
+      return !exists(orgPath) ||
+        quickTeam.get('sourceOrganizationId', '') == '' ||
+        quickTeam.get('entitlement', 'inactive') == 'active';
+    }
+
     function isOrgMember(orgId) {
-      return signedIn() &&
+      return signedIn() && organizationEntitlementActive(orgId) &&
         exists(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + request.auth.uid));
     }
 
@@ -95,10 +109,15 @@ service cloud.firestore {
       let projectPath = /databases/$(database)/documents/projects/$(projectId);
       let project = get(projectPath).data;
       return exists(projectPath) &&
-        project.organizationId == orgId && (
-        isOrgAdminOrOwner(orgId) ||
-        request.auth.uid in project.team
-      );
+        project.organizationId == orgId &&
+        // A roster entry is scope, not a seat. Access is the live organization
+        // membership AND this project (unless the live seat is owner/admin).
+        // Without the membership half, a removed client whose uid remained in
+        // one legacy project could still read its incidents by id.
+        isOrgMember(orgId) && (
+          isOrgAdminOrOwner(orgId) ||
+          request.auth.uid in project.team
+        );
     }
 
     function canAccessProjectById(projectId) {
@@ -153,7 +172,8 @@ service cloud.firestore {
 
     // ── organizations/{orgId} ──────────────────────────────────────────
     match /organizations/{orgId} {
-      allow read: if signedIn() && (isOrgMember(orgId) || resource.data.ownerId == request.auth.uid);
+      allow read: if signedIn() && organizationEntitlementActive(orgId) &&
+        (isOrgMember(orgId) || resource.data.ownerId == request.auth.uid);
       // Created by /api/organizations, and it has to be: «one free workspace per
       // account» is a count of the documents somebody already owns, and a rule
       // cannot count anything. The check this replaces — «the new document names

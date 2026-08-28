@@ -113,7 +113,7 @@ export default function InviteLinkSection({ role = 'member' }) {
           </div>
         </div>
         <p className="text-[11px] leading-5 text-muted">
-          Роль зафіксована: <strong className="text-ink">{link.role === 'admin' ? 'Адміністратор' : 'Учасник'}</strong>.
+          Роль зафіксована: <strong className="text-ink">{link.role === 'admin' ? 'Адміністратор' : 'Менеджер підтримки'}</strong>.
           Змінити її після надсилання посилання неможливо.
         </p>
       </div>

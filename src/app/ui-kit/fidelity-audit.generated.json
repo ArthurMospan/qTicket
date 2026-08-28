@@ -11,12 +11,12 @@
     "productFiles": 242,
     "parsedFiles": 242,
     "parseErrors": 0,
-    "nativeControls": 20,
+    "nativeControls": 21,
     "structures": {
       "chat": 2,
       "analytics": 1,
       "settings": 1,
-      "shell": 13,
+      "shell": 14,
       "other": 3
     },
     "styledNativeControls": 12,
@@ -32,20 +32,20 @@
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 20,
+    "button": 21,
     "input": 0,
     "textarea": 0,
     "select": 0
   },
   "kit": {
     "totals": {
-      "components": 119,
-      "used": 119,
+      "components": 120,
+      "used": 120,
       "unused": 0,
-      "covered": 112,
+      "covered": 113,
       "uncovered": 0,
       "routes": 14,
-      "previews": 149,
+      "previews": 150,
       "internal": 7,
       "unlisted": 0
     },
@@ -55,7 +55,20 @@
   "nativeControls": [
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:104",
+      "location": "src/components/AuthLayout.jsx:100",
+      "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
+      "text": "",
+      "childElements": [],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/AuthLayout.jsx:117",
       "className": "w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-red-400 hover:bg-white/5 transition-colors text-left",
       "text": "Вийти",
       "childElements": [
@@ -70,7 +83,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:140",
+      "location": "src/components/AuthLayout.jsx:153",
       "className": "",
       "text": "Підтримка",
       "childElements": [],
@@ -83,7 +96,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:66",
+      "location": "src/components/AuthLayout.jsx:79",
       "className": "hidden md:flex items-center gap-2 text-white/70 hover:text-white transition-colors text-[13px] font-medium",
       "text": "Створити організацію",
       "childElements": [
@@ -98,20 +111,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:87",
-      "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
-      "text": "",
-      "childElements": [],
-      "ariaLabel": "",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "",
-      "structure": "shell",
-      "routes": []
-    },
-    {
-      "tag": "button",
-      "location": "src/components/MobileNav.jsx:237",
+      "location": "src/components/MobileNav.jsx:261",
       "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
       "text": "",
       "childElements": [
@@ -127,15 +127,15 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:297",
-      "className": "flex items-center gap-[6px] text-[var(--sb-text)] min-w-0",
+      "location": "src/components/MobileNav.jsx:329",
+      "className": "flex min-w-0 items-center gap-[6px] text-left",
       "text": "",
       "childElements": [
         "span",
         "ChevronsUpDown"
       ],
       "ariaLabel": "",
-      "styled": true,
+      "styled": false,
       "reviewed": "",
       "resembles": "IconAction",
       "structure": "shell",
@@ -143,7 +143,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:379",
+      "location": "src/components/MobileNav.jsx:425",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -159,7 +159,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/OrgSwitcherScreen.jsx:54",
+      "location": "src/components/OrgSwitcherScreen.jsx:57",
       "className": "flex flex-col items-center gap-4 transition-all duration-300 group/item w-[160px] group-hover/list:opacity-30 hover:!opacity-100",
       "text": "",
       "childElements": [
@@ -345,7 +345,23 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:300",
+      "location": "src/components/WorkspaceSidebar.jsx:286",
+      "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
+      "text": "",
+      "childElements": [
+        "span",
+        "ChevronsUpDown"
+      ],
+      "ariaLabel": "Змінити портал підтримки",
+      "styled": true,
+      "reviewed": "",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:377",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -360,7 +376,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:323",
+      "location": "src/components/WorkspaceSidebar.jsx:400",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -375,7 +391,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:382",
+      "location": "src/components/WorkspaceSidebar.jsx:466",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -407,11 +423,11 @@
       "count": 4
     },
     {
-      "file": "src/components/MobileNav.jsx",
-      "count": 3
+      "file": "src/components/WorkspaceSidebar.jsx",
+      "count": 4
     },
     {
-      "file": "src/components/WorkspaceSidebar.jsx",
+      "file": "src/components/MobileNav.jsx",
       "count": 3
     },
     {
@@ -450,12 +466,12 @@
   "repeatedNativeFingerprints": [],
   "reviewedNativeControls": [
     {
-      "location": "src/components/AuthLayout.jsx:140",
+      "location": "src/components/AuthLayout.jsx:153",
       "tag": "button",
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:379",
+      "location": "src/components/MobileNav.jsx:425",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
@@ -475,17 +491,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:300",
+      "location": "src/components/WorkspaceSidebar.jsx:377",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:323",
+      "location": "src/components/WorkspaceSidebar.jsx:400",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:382",
+      "location": "src/components/WorkspaceSidebar.jsx:466",
       "tag": "button",
       "context": "branding-action"
     }
@@ -516,22 +532,22 @@
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/settings/page.js:537",
+      "location": "src/app/(app)/settings/page.js:543",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     },
     {
-      "location": "src/app/(app)/settings/page.js:557",
+      "location": "src/app/(app)/settings/page.js:563",
       "tag": "div",
       "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
     },
     {
-      "location": "src/app/(app)/settings/page.js:601",
+      "location": "src/app/(app)/settings/page.js:607",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
     {
-      "location": "src/app/(app)/settings/page.js:720",
+      "location": "src/app/(app)/settings/page.js:726",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group"
     },
@@ -686,7 +702,7 @@
       "className": "mb-4 flex flex-wrap items-center gap-2 rounded-[14px] bg-white p-2"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:529",
+      "location": "src/components/WorkspaceHeader.jsx:536",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

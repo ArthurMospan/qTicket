@@ -13,7 +13,7 @@
     "long-text"
   ],
   "totals": {
-    "components": 119,
+    "components": 120,
     "stateful": 106,
     "hover": 71,
     "focus": 68,
@@ -332,6 +332,7 @@
       "focus": "global",
       "long-text": "description, title"
     },
+    "OrganizationMark": {},
     "PageHeader": {
       "long-text": "title"
     },
@@ -780,6 +781,9 @@
     ],
     "OptionCard": [
       "form-groups"
+    ],
+    "OrganizationMark": [
+      "avatars"
     ],
     "PageHeader": [
       "filters",

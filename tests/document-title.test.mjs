@@ -24,6 +24,18 @@ test('every top-level workspace destination names itself in the tab', () => {
   assert.equal(routeTitle('/settings'), 'Налаштування');
 });
 
+test('the external portal names the client experience instead of the staff overview', () => {
+  assert.equal(routeTitle('/', [], { clientPortal: true }), 'Мої звернення');
+  assert.equal(
+    workspaceDocumentTitle({
+      pathname: '/',
+      organizationName: 'Acme Support',
+      clientPortal: true,
+    }),
+    'Мої звернення · Acme Support',
+  );
+});
+
 test('a project route is named by the project, not by its id', () => {
   const projects = [{ id: 'p1', name: 'Сайт RetroMagaz' }];
   assert.equal(routeTitle('/p1', projects), 'Сайт RetroMagaz');

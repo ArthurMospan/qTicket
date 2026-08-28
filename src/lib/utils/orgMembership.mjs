@@ -35,7 +35,7 @@ export function membershipId(organizationId, userId) {
 export const ORGANIZATION_ROLE_LABELS = Object.freeze({
   owner: 'Власник',
   admin: 'Адміністратор',
-  member: 'Учасник',
+  member: 'Менеджер підтримки',
   client_admin: 'Адміністратор клієнта',
   client_member: 'Співробітник клієнта',
 });

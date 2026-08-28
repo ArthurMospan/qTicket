@@ -6,14 +6,14 @@
 // у висувній шторці «Ще».
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
-import { Button, Counter, IconAction } from '@/components/ui';
+import { Button, Counter, IconAction, OrganizationMark } from '@/components/ui';
 import { can, isClientRole } from '@/lib/utils/can';
 import {
   Folder, LayoutDashboard, Menu, X,
-  Users, Settings, Plus, Clock, Square as StopIcon, ChevronsUpDown, CircleHelp,
+  Users, Settings, Plus, Clock, Square as StopIcon, ChevronsUpDown, CircleHelp, UserRound,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
@@ -23,6 +23,7 @@ import { computeSidebarTheme, computeTranslucentSidebarTheme, SIDEBAR_PRESETS } 
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
 import { timerTargetHref } from '@/lib/utils/timerNavigation.mjs';
 import { useModalFocus } from '@/lib/hooks/useModalFocus';
+import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
 // The bar is glass: the organization's colour at this much opacity over a blur
 // of whatever is scrolling underneath. It is a request rather than a setting —
@@ -93,13 +94,19 @@ function SheetTimerCapsule({ onNavigate, onStop }) {
 export default function MobileNav({ keyboardOpen = false }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { projects, activeOrg, activeOrgId, orgRole } = useAppContext();
+  const searchParams = useSearchParams();
+  const { projects, activeOrg, activeOrgId, orgRole, allOrgs } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const visibleTabs = clientViewer
-    ? [{ href: '/', icon: Folder, label: 'Мої звернення', exact: true }]
+    ? [
+        { href: '/', icon: Folder, label: 'Звернення', exact: true },
+        ...(orgRole === 'client_admin'
+          ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
+          : []),
+      ]
     : TABS;
   const visibleMoreNav = clientViewer
-    ? [{ href: '/settings', icon: Settings, label: 'Налаштування' }]
+    ? [{ href: '/settings?section=profile', icon: UserRound, label: 'Мій профіль', section: 'profile' }]
     : MORE_NAV;
   const [moreOpen, setMoreOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -121,6 +128,10 @@ export default function MobileNav({ keyboardOpen = false }) {
 
   // Close the sheet on navigation
   const sidebarPreview = useWorkspaceStore(s => s.sidebarPreview);
+  const portalBrand = useMemo(
+    () => resolveOrganizationPortalBrand(activeOrg),
+    [activeOrg],
+  );
   // Кеш брендингу — без мигання стандартної теми, поки org завантажується.
   const orgBrand = useCachedOrgBranding(activeOrgId, activeOrg);
   const isBranded = sidebarPreview
@@ -128,6 +139,14 @@ export default function MobileNav({ keyboardOpen = false }) {
     : Boolean(orgBrand?.customBranding && orgBrand?.logo);
 
   const theme = useMemo(() => {
+    if (clientViewer) {
+      const bgColor = portalBrand.sidebarTheme === 'light' ? SIDEBAR_PRESETS.light
+        : portalBrand.sidebarTheme === 'custom'
+          ? (portalBrand.sidebarColor || SIDEBAR_PRESETS.dark)
+          : SIDEBAR_PRESETS.dark;
+      return computeSidebarTheme(bgColor);
+    }
+
     const source = sidebarPreview || (isBranded ? {
       theme: orgBrand?.sidebarTheme || 'dark',
       color: orgBrand?.sidebarColor || SIDEBAR_PRESETS.dark,
@@ -140,7 +159,7 @@ export default function MobileNav({ keyboardOpen = false }) {
       : SIDEBAR_PRESETS.dark;
 
     return computeSidebarTheme(bgColor);
-  }, [isBranded, orgBrand?.sidebarTheme, orgBrand?.sidebarColor, sidebarPreview]);
+  }, [clientViewer, isBranded, orgBrand?.sidebarTheme, orgBrand?.sidebarColor, portalBrand, sidebarPreview]);
 
   // The sheet is opaque and wears `theme`; the bar is glass and wears this.
   // Same organization colour, tokens derived from what it looks like through
@@ -156,9 +175,14 @@ export default function MobileNav({ keyboardOpen = false }) {
   useEffect(() => { queueMicrotask(() => setMoreOpen(false)); }, [pathname]);
 
 
-  const isActive = (href, exact) => (exact ? pathname === href : pathname.startsWith(href));
+  const isActive = (href, exact, section) => {
+    const targetPath = href.split('?')[0];
+    const pathActive = exact ? pathname === targetPath : pathname.startsWith(targetPath);
+    if (!pathActive || !section) return pathActive;
+    return (searchParams.get('section') || 'profile') === section;
+  };
   // «Ще» is highlighted when the current page lives in the sheet
-  const moreActive = visibleMoreNav.some(i => isActive(i.href));
+  const moreActive = visibleMoreNav.some(i => isActive(i.href, i.exact, i.section));
 
   const handleStopTimer = async e => {
     e.stopPropagation();
@@ -221,8 +245,8 @@ export default function MobileNav({ keyboardOpen = false }) {
           '--sb-border': barTheme.border,
         }}
       >
-        {visibleTabs.map(({ href, icon: Icon, label, exact }) => {
-          const active = isActive(href, exact);
+        {visibleTabs.map(({ href, icon: Icon, label, exact, section }) => {
+          const active = isActive(href, exact, section);
           return (
             <Link key={href} href={href}
               aria-current={active ? 'page' : undefined}
@@ -294,15 +318,33 @@ export default function MobileNav({ keyboardOpen = false }) {
             <div className="sticky top-0 bg-[var(--sb-bg)] pt-[10px] pb-[4px]">
               <div className="w-[36px] h-[4px] bg-[var(--sb-text)] opacity-20 rounded-full mx-auto mb-[12px]" />
               <div className="flex items-center justify-between px-[20px] pb-[8px]">
-                <button
-                  onClick={() => setShowOrgSwitcher(true)}
-                  className="flex items-center gap-[6px] text-[var(--sb-text)] min-w-0">
-                  <span className="text-[15px] font-bold truncate">{activeOrg?.name || 'qTicket'}</span>
-                  {otherOrgUnreadCount > 0 && (
-                    <Counter variant="dot" size="sm" appearance="sidebar" />
+                <div className="flex min-w-0 items-center gap-[10px] text-[var(--sb-text)]">
+                  <OrganizationMark
+                    name={clientViewer ? portalBrand.name : (activeOrg?.name || 'qTicket')}
+                    logo={clientViewer ? portalBrand.logo : (activeOrg?.logo || activeOrg?.logoUrl || '')}
+                    size="sm"
+                    appearance="sidebar"
+                  />
+                  {(allOrgs || []).length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowOrgSwitcher(true)}
+                      className="flex min-w-0 items-center gap-[6px] text-left"
+                    >
+                      <span className="truncate text-[15px] font-bold">
+                        {clientViewer ? portalBrand.name : (activeOrg?.name || 'qTicket')}
+                      </span>
+                      {otherOrgUnreadCount > 0 && (
+                        <Counter variant="dot" size="sm" appearance="sidebar" />
+                      )}
+                      <ChevronsUpDown size={14} className="shrink-0 text-[var(--sb-muted)]" />
+                    </button>
+                  ) : (
+                    <span className="truncate text-[15px] font-bold">
+                      {clientViewer ? portalBrand.name : (activeOrg?.name || 'qTicket')}
+                    </span>
                   )}
-                  <ChevronsUpDown size={14} className="shrink-0 text-[var(--sb-muted)]" />
-                </button>
+                </div>
                 <IconAction label="Закрити" icon={X} size="sm" appearance="quiet" onClick={() => setMoreOpen(false)} className="-mr-[6px]" />
               </div>
             </div>
@@ -320,8 +362,8 @@ export default function MobileNav({ keyboardOpen = false }) {
 
             {/* Secondary nav */}
             <div className="flex flex-col gap-[2px] px-[8px]">
-              {visibleMoreNav.map(({ href, icon: Icon, label }) => {
-                const active = isActive(href);
+              {visibleMoreNav.map(({ href, icon: Icon, label, exact, section }) => {
+                const active = isActive(href, exact, section);
                 return (
                   <Link key={href} href={href}
                     className={`flex items-center gap-[14px] h-[44px] px-[12px] rounded-[12px] transition-colors ${
@@ -334,12 +376,14 @@ export default function MobileNav({ keyboardOpen = false }) {
               })}
             </div>
 
+            {!clientViewer && (
+              <>
             <div className="mx-[16px] border-t border-white/[0.08] my-[10px]" />
 
-            {/* Client projects */}
+            {/* Client workspaces are internal support navigation. */}
             <div className="flex items-center justify-between px-[20px] pb-[8px]">
               <p className="text-[11px] font-bold text-[var(--sb-muted)] uppercase tracking-wider">
-                {clientViewer ? 'Простір підтримки' : 'Клієнти'}
+                Клієнти
               </p>
               {can(orgRole, 'create:project') && (
                 <IconAction
@@ -368,6 +412,8 @@ export default function MobileNav({ keyboardOpen = false }) {
                   );
                 })}
             </div>
+              </>
+            )}
 
             {/* Довідка. На десктопі вона висить на кебабі внизу рейки; на
                 телефоні рейки немає, тож підтримка, довідка, новини й правові

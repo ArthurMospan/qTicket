@@ -511,8 +511,8 @@ test('кожен контрол, що впреться в стелю, носит
   const surfaces = [
     // «Новий проєкт»
     ['src/app/(app)/page.js', 'projects'],
-    // «Запросити» — обидва місця, звідки запрошують
-    ['src/app/(app)/team/page.js', 'members'],
+    // «Запросити» — клієнтів запрошують з налаштувань. Внутрішня команда
+    // керується в QuickTeam і на сторінці «Команда» більше не створюється.
     ['src/app/(app)/settings/page.js', 'members'],
     // Вкладка «Аудіо-завдання (AI)»
     ['src/components/CreateTaskModal.jsx', 'aiCalls'],
@@ -527,6 +527,11 @@ test('кожен контрол, що впреться в стелю, носит
       `${path}: корона не відкриває прайслист на тій стелі, що заважає`,
     );
   }
+});
+
+test('сторінка команди не створює внутрішніх співробітників поза QuickTeam', async () => {
+  const source = withoutComments(await read('src/app/(app)/team/page.js'));
+  assert.doesNotMatch(source, /inviteMember|showInvite|Запросити співробітника/);
 });
 
 test('корона — це корона, і вона клікається', async () => {

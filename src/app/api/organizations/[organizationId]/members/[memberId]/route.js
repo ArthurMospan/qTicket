@@ -12,6 +12,10 @@ import {
   MEMBERSHIP_COLLECTION,
   membershipId,
 } from '@/lib/utils/orgMembership.mjs';
+import {
+  isQuickTeamManagedMembership,
+  QUICKTEAM_MANAGED_MESSAGE,
+} from '@/lib/utils/quickTeamManaged.mjs';
 
 function memberMutationError(code, status, message) {
   const error = new Error(code);
@@ -104,6 +108,12 @@ async function reactivateMember(organizationId, memberId, authorization) {
   if (!can(authorization.membership?.role, 'deactivate:member')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  const archivedMembership = await getAdminDb().collection(MEMBERSHIP_ARCHIVE)
+    .doc(membershipId(organizationId, memberId))
+    .get();
+  if (archivedMembership.exists && isQuickTeamManagedMembership(archivedMembership.data())) {
+    return NextResponse.json({ error: QUICKTEAM_MANAGED_MESSAGE, code: 'QUICKTEAM_MANAGED' }, { status: 409 });
+  }
   const outcome = await reactivateMembership({
     organizationId,
     userId: memberId,
@@ -160,6 +170,9 @@ export async function PATCH(request, context) {
     ) {
       return NextResponse.json({ error: 'Invalid member role' }, { status: 400 });
     }
+    if (action === 'role' && !can(authorization.membership?.role, 'manage:member_roles')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     const positionId = typeof body?.positionId === 'string' ? body.positionId.trim() : '';
     if (action === 'position' && (positionId.length > 120 || positionId.includes('/'))) {
       return NextResponse.json({ error: 'Invalid member position' }, { status: 400 });
@@ -181,6 +194,9 @@ export async function PATCH(request, context) {
       const membership = membershipSnap.data();
       if (membership.orgId !== organizationId || membership.userId !== memberId) {
         throw memberMutationError('FORBIDDEN', 403, 'Invalid organization member');
+      }
+      if (isQuickTeamManagedMembership(membership)) {
+        throw memberMutationError('QUICKTEAM_MANAGED', 409, QUICKTEAM_MANAGED_MESSAGE);
       }
       if (membership.removalPending === true) {
         throw memberMutationError('REMOVAL_PENDING', 409, 'This member is already being removed');
@@ -258,6 +274,9 @@ export async function DELETE(request, context) {
       const membership = currentMembership.data();
       if (membership.orgId !== organizationId || membership.userId !== memberId) {
         throw memberMutationError('FORBIDDEN', 403, 'Invalid organization member');
+      }
+      if (isQuickTeamManagedMembership(membership)) {
+        throw memberMutationError('QUICKTEAM_MANAGED', 409, QUICKTEAM_MANAGED_MESSAGE);
       }
       if (membership.role === 'owner') {
         throw memberMutationError(

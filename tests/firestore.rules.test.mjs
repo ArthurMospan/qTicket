@@ -298,6 +298,41 @@ test('issue execution fields can only be changed by the authoritative status API
   await assertFails(updateDoc(issueRef, { spentMinutesReconciledAt: new Date() }));
 });
 
+test('an inactive QuickTeam add-on closes existing staff and client sessions', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await updateDoc(doc(context.firestore(), 'organizations', 'org-a'), {
+      quickTeam: { sourceOrganizationId: 'quickteam-org-a', entitlement: 'inactive' },
+    });
+  });
+
+  const ownerDb = environment.authenticatedContext('owner-a').firestore();
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
+  await assertFails(getDoc(doc(ownerDb, 'organizations', 'org-a')));
+  await assertFails(getDoc(doc(ownerDb, 'projects', 'project-a')));
+  await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a')));
+  // The person can still reach their own account record to sign out or recover;
+  // only the add-on workspace is closed.
+  await assertSucceeds(getDoc(doc(ownerDb, 'users', 'owner-a')));
+
+  await environment.withSecurityRulesDisabled(async context => {
+    await updateDoc(doc(context.firestore(), 'organizations', 'org-a'), {
+      quickTeam: { sourceOrganizationId: 'quickteam-org-a', entitlement: 'active' },
+    });
+  });
+  await assertSucceeds(getDoc(doc(ownerDb, 'projects', 'project-a')));
+  await assertSucceeds(getDoc(doc(clientDb, 'issues', 'issue-a')));
+});
+
+test('a stale project roster entry never replaces a live organization seat', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await deleteDoc(doc(context.firestore(), 'orgMemberships', 'org-a_client-member-a'));
+  });
+  const removedClientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertFails(getDoc(doc(removedClientDb, 'projects', 'project-a')));
+  await assertFails(getDoc(doc(removedClientDb, 'issues', 'issue-a')));
+  await assertFails(getDoc(doc(removedClientDb, 'issues', 'issue-a', 'comments', 'member-comment')));
+});
+
 test('qTicket clients read their project and write its conversation, but cannot mutate the incident', async () => {
   for (const uid of ['client-admin-a', 'client-member-a']) {
     const db = environment.authenticatedContext(uid).firestore();

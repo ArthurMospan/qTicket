@@ -24,6 +24,7 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_GITHUB_LOGIN_ENABLED=false
+NEXT_PUBLIC_STANDALONE_STAFF_LOGIN_ENABLED=false
 
 FIREBASE_CLIENT_EMAIL=
 FIREBASE_PRIVATE_KEY=
@@ -34,6 +35,9 @@ CLOUDINARY_API_SECRET=
 
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_PORTAL_URL=
+
+# QuickTeam staff provisioning and one-click launch (same secret on both servers)
+QUICKTEAM_QTICKET_SHARED_SECRET=
 
 # Transactional email (leave blank for the current no-email rollout)
 RESEND_API_KEY=
@@ -73,7 +77,14 @@ CRON_SECRET=
 
 `NEXT_PUBLIC_*` values are shipped to the browser. Never put Admin SDK, Cloudinary secret, email-provider secret, API keys or other credentials in a public variable.
 
-The current rollout deliberately leaves `RESEND_API_KEY`, `BREVO_API_KEY`, `EMAIL_FROM`, and `AUTH_OTP_SECRET` blank, keeps `EMAIL_LOGIN_ENABLED=false`, and uses Google as the client sign-in provider. Creating an invitation still writes a pending, project-scoped access grant. qTicket then shows a ready-to-copy instruction for a messenger: the invited person opens `/login?mode=client` and signs in with the Google account whose verified email exactly matches the address entered by the client administrator. The invitation is accepted automatically after that first sign-in. No email is sent, and the interface must not claim otherwise.
+The current rollout deliberately leaves `RESEND_API_KEY`, `BREVO_API_KEY`, `EMAIL_FROM`, and `AUTH_OTP_SECRET` blank, keeps `EMAIL_LOGIN_ENABLED=false`, and uses Google as the client sign-in provider. Creating an invitation still writes a pending, project-scoped access grant. qTicket then shows a ready-to-copy instruction for a messenger: the invited person opens `/login` and signs in with the Google account whose verified email exactly matches the address entered by the client administrator. The invitation is accepted automatically after that first sign-in. No email is sent, and the interface must not claim otherwise.
+
+A plain `/login` is the external client portal. Internal owners, administrators
+and support managers enter through a signed one-click launch from QuickTeam and
+do not create a second password. `NEXT_PUBLIC_STANDALONE_STAFF_LOGIN_ENABLED`
+stays `false` in production; setting it to `true` exposes the legacy recovery
+form only at `/login?mode=staff`. The complete two-server contract is in
+[docs/integrations/QTICKET.md](docs/integrations/QTICKET.md).
 
 GitHub login is optional. Enable the GitHub provider in Firebase and set `NEXT_PUBLIC_GITHUB_LOGIN_ENABLED=true` only after its OAuth client ID and secret are configured; qTicket hides that button by default so a client is never offered a provider that cannot work.
 
@@ -125,12 +136,14 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=<firebaseConfig.storageBucket>
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=<firebaseConfig.messagingSenderId>
 NEXT_PUBLIC_FIREBASE_APP_ID=<firebaseConfig.appId>
 NEXT_PUBLIC_GITHUB_LOGIN_ENABLED=false
+NEXT_PUBLIC_STANDALONE_STAFF_LOGIN_ENABLED=false
 
 FIREBASE_CLIENT_EMAIL=<service-account client_email>
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 EMAIL_LOGIN_ENABLED=false
+QUICKTEAM_QTICKET_SHARED_SECRET=<same random 32+ character value as QuickTeam>
 ```
 
 The literal `\n` sequences in the private key are intentional; the server
@@ -189,22 +202,28 @@ until it is redeployed.
 Use separate Chrome profiles or an incognito window and at least two Google
 accounts whose addresses you know exactly.
 
-1. The tenant owner signs in, completes onboarding, creates the support
-   organization and creates one project for the test client.
-2. Open **Команда → Запросити**, choose **Адміністратор клієнта**, choose that
-   one project, enter the client's Google email and click **Запросити**.
-3. Because email is disabled, click **Скопіювати інструкцію** and send that text
+1. In QuickTeam, the tenant owner opens **Налаштування → Інтеграції → qTicket**,
+   selects existing team members and clicks **Активувати**. The owner is always
+   included. QuickTeam sends the organization name, branding and selected team
+   to qTicket without copying projects, tasks or Firebase sessions.
+2. Click **Відкрити qTicket** in QuickTeam. The owner must enter qTicket without
+   another login, see the synchronized organization branding and create one
+   client project. The selected staff members must open qTicket the same way;
+   an unselected QuickTeam member must have no qTicket launch action.
+3. Open that client project in qTicket, choose **Люди → Запросити клієнта**,
+   enter the client's Google email and create the project-scoped invitation.
+4. Because email is disabled, click **Скопіювати інструкцію** and send that text
    to the client in a messenger.
-4. The client opens the copied `/login?mode=client` address and signs in with the
+5. The client opens the copied `/login` address and signs in with the
    exact invited Google account. They must see only their project, create an
    incident and reply in its discussion. They must not be able to change status,
    priority, assignee or project settings.
-5. As that client administrator, open **Налаштування → Співробітники клієнта →
+6. As that client administrator, open **Налаштування → Співробітники клієнта →
    Запросити співробітника**, enter a second Google address, click **Надати
    доступ**, copy the instruction and sign the employee in separately.
-6. The employee must see the same single client project and its incidents, but
+7. The employee must see the same single client project and its incidents, but
    must not see the button for inviting more people.
-7. Return as internal support staff, answer in the incident, change its status,
+8. Return through QuickTeam as internal support staff, answer in the incident, change its status,
    priority and assignee, and confirm both client accounts can see those changes
    without gaining the controls themselves.
 
@@ -219,7 +238,7 @@ The scheduled outbox tracks retries and each channel separately. Dispatch reads 
 
 Local development intentionally has no Telegram credentials by default, but an existing production binding can still be disconnected from localhost.
 
-The inherited QuickTeam+ integration is not qTicket authentication. qTicket will use an explicit server-side QuickTeam contract for staff identity, add-on entitlement, and the manual “create QuickTeam task” action. External clients authenticate in qTicket's own Firebase project; their pending invitation is matched against the verified email returned by Google or GitHub. The products must not share primary Firebase sessions or databases.
+The inherited QuickTeam+ integration is not qTicket authentication. The implemented server-side QuickTeam contract provisions staff identity and add-on entitlement and issues one-time staff launches. External clients authenticate in qTicket's own Firebase project; their pending invitation is matched against the verified email returned by Google or GitHub. The later manual “create QuickTeam task” action is a separate contract. The products do not share primary Firebase sessions or databases.
 
 ## Commands
 

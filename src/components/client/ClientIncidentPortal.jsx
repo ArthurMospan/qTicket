@@ -21,6 +21,7 @@ import { ArrowRight, Inbox, Plus, UsersRound } from 'lucide-react';
 import CreateTaskModal from '@/components/CreateTaskModal';
 import { useIssues } from '@/lib/hooks/useIssues';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
+import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
@@ -46,6 +47,8 @@ export default function ClientIncidentPortal({
 }) {
   const router = useRouter();
   const showToast = useWorkspaceStore(state => state.showToast);
+  const workspaceSearch = useWorkspaceStore(state => state.workspaceSearch);
+  const setWorkspaceSearch = useWorkspaceStore(state => state.setWorkspaceSearch);
   const [showComposer, setShowComposer] = useState(false);
   const [scope, setScope] = useState('open');
   const {
@@ -60,17 +63,27 @@ export default function ClientIncidentPortal({
     () => new Map((statuses || []).map(status => [status.id, status])),
     [statuses],
   );
-  const visibleIssues = useMemo(() => [...(issues || [])]
+  const visibleIssues = useMemo(() => {
+    const query = workspaceSearch.trim().toLocaleLowerCase('uk-UA');
+    return [...(issues || [])]
     .filter(issue => {
       const category = statusCategoryOf(issue.columnId || issue.status, statuses);
       if (scope === 'open') return category !== 'done';
       if (scope === 'resolved') return category === 'done';
       return true;
     })
+    .filter(issue => {
+      if (!query) return true;
+      return [issue.issueKey, issue.title, issue.description]
+        .some(value => String(value || '').toLocaleLowerCase('uk-UA').includes(query));
+    })
     .sort((left, right) => (
       timestampMillis(right.updatedAt || right.createdAt)
       - timestampMillis(left.updatedAt || left.createdAt)
-    )), [issues, scope, statuses]);
+    ));
+  }, [issues, scope, statuses, workspaceSearch]);
+
+  usePublishLocalSearchResults(workspaceSearch, visibleIssues.length);
 
   const actor = useMemo(() => ({
     userId: currentUser?.uid || currentUser?.id,
@@ -177,12 +190,19 @@ export default function ClientIncidentPortal({
             <Surface preset="panel" padding="lg">
               <EmptyState
                 icon={Inbox}
-                title={scope === 'open' ? 'Відкритих звернень немає' : 'Звернень не знайдено'}
-                description={scope === 'open'
-                  ? 'Якщо виникла проблема або запитання, створіть новий інцидент — команда підтримки відповість у ньому.'
-                  : 'Змініть фільтр або створіть новий інцидент.'}
-                action="Створити інцидент"
-                onAction={() => setShowComposer(true)}
+                title={workspaceSearch.trim()
+                  ? 'За вашим запитом нічого не знайдено'
+                  : scope === 'open' ? 'Відкритих звернень немає' : 'Звернень не знайдено'}
+                description={workspaceSearch.trim()
+                  ? 'Перевірте номер або слова в темі звернення.'
+                  : scope === 'open'
+                    ? 'Якщо виникла проблема або запитання, створіть новий інцидент — команда підтримки відповість у ньому.'
+                    : 'Змініть фільтр або створіть новий інцидент.'}
+                action={workspaceSearch.trim() ? 'Очистити пошук' : 'Створити інцидент'}
+                onAction={() => {
+                  if (workspaceSearch.trim()) setWorkspaceSearch('');
+                  else setShowComposer(true);
+                }}
                 context="page"
               />
             </Surface>

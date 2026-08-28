@@ -56,6 +56,7 @@ export { default as IconButton } from './Button'
 // ===== DATA DISPLAY COMPONENTS =====
 export { default as Tag } from './DataDisplay/Tag'
 export { default as UserAvatar } from './DataDisplay/UserAvatar'
+export { default as OrganizationMark } from './DataDisplay/OrganizationMark'
 export { default as StatusPill } from './DataDisplay/StatusPill'
 export { default as PlanMark } from './DataDisplay/PlanMark'
 export { default as PlanCards } from './DataDisplay/PlanCards'

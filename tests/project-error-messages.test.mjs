@@ -74,13 +74,19 @@ test('settings API actions no longer replace server errors with generic toasts',
   for (const fallback of [
     'Не вдалося згенерувати API ключ',
     'Не вдалося видалити API ключ',
+    'Не вдалося вийти з організації',
+  ]) {
+    assert.match(settings, new RegExp(`userFacingErrorMessage\\([^)]*'${fallback}'`));
+  }
+  // Internal seats are synchronized from QuickTeam, so qTicket has no local
+  // role, position, ownership-transfer or access-removal action to toast about.
+  for (const removedFallback of [
     'Не вдалося змінити роль',
     'Не вдалося змінити посаду',
     'Не вдалося передати права власника',
     'Не вдалося забрати доступ',
     'Не вдалося повернути доступ',
-    'Не вдалося вийти з організації',
   ]) {
-    assert.match(settings, new RegExp(`userFacingErrorMessage\\([^)]*'${fallback}'`));
+    assert.doesNotMatch(settings, new RegExp(removedFallback));
   }
 });

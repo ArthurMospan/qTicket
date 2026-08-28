@@ -1,5 +1,5 @@
 'use client';
-import { PresenceDot, UserAvatar } from '@/components/ui';
+import { OrganizationMark, PresenceDot, UserAvatar } from '@/components/ui';
 import { PreviewBlock } from '../preview';
 
 export default function AvatarsSection() {
@@ -27,6 +27,22 @@ export default function AvatarsSection() {
       <PreviewBlock title="UserAvatar states" description="Ті самі стани, які реально бачить користувач: брендований колір і відсутні дані.">
         <UserAvatar user={{ name: 'Олена Коваль', avatarColor: '#059669' }} size="lg" tooltip />
         <UserAvatar user={null} size="lg" />
+      </PreviewBlock>
+
+      <PreviewBlock
+        title="OrganizationMark"
+        component="OrganizationMark"
+        description="Квадратна айдентика організації для порталу, рейки та перемикача. Логотип і fallback-літера мають одну геометрію й однакову поведінку при помилці завантаження."
+        filePath="src/components/ui/DataDisplay/OrganizationMark.jsx"
+      >
+        <div className="flex flex-wrap items-end gap-[16px]">
+          <OrganizationMark name="OneB" size="sm" appearance="surface" />
+          <OrganizationMark name="OneB" size="md" appearance="surface" />
+          <div className="rounded-[16px] bg-surface-dark p-[12px]">
+            <OrganizationMark name="OneB" size="sm" appearance="sidebar" />
+          </div>
+          <OrganizationMark name="OneB" size="picker" appearance="inverse" />
+        </div>
       </PreviewBlock>
 
       <PreviewBlock

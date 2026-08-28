@@ -39,26 +39,21 @@ test('deactivating a member closes their access and leaves their work alone', as
   assert.match(hook, /reactivateOrganizationMember\(activeOrgId, uid\)/);
 });
 
-test('an administrator may change a role, and only the owner seat is off limits', async () => {
-  const [route, dialog] = await Promise.all([
-    read('../src/app/api/organizations/[organizationId]/members/[memberId]/route.js'),
-    read('../src/components/TeamMemberSettingsDialog.jsx'),
-  ]);
+test('legacy member roles stay protected while QuickTeam-managed seats are immutable here', async () => {
+  const route = await read('../src/app/api/organizations/[organizationId]/members/[memberId]/route.js');
   assert.match(route, /authorizeOrgRequest\(request, organizationId, \['owner', 'admin'\]\)/);
   assert.doesNotMatch(route, /Only the owner can change member roles/);
   assert.match(route, /action === 'role' && membership\.role === 'owner'/);
   assert.match(route, /memberId === authorization\.user\.uid/);
-  assert.match(dialog, /canChangeRole = canManageRoles && !isMe && member\.role !== 'owner'/);
+  assert.match(route, /isQuickTeamManagedMembership\(membership\)/);
+  assert.match(route, /QUICKTEAM_MANAGED_MESSAGE/);
 });
 
-test('the confirmation says what is taken away and what stays', async () => {
+test('qTicket does not expose internal team mutations and keeps personal exit separate', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
-  assert.match(settings, /await getMemberRemovalImpact\(uid\)/);
-  assert.match(settings, /Забрати доступ до організації\?/);
-  // The numbers a person is most afraid of losing are quoted as staying.
-  assert.match(settings, /лишиться за ним/);
-  assert.match(settings, /Доступ можна повернути будь-коли/);
-  assert.match(settings, /await deactivateMember\(uid\)/);
+  assert.match(settings, /Команда керується в QuickTeam/);
+  assert.doesNotMatch(settings, /TeamMemberSettingsDialog/);
+  assert.doesNotMatch(settings, /getMemberRemovalImpact/);
 
   // Signing out, leaving and deleting the account are personal actions and
   // must not sit inside an `adminOnly` section, where a member cannot see them.
@@ -85,18 +80,16 @@ test('rates are served from protected paths and never persisted in public browse
   assert.ok(positions.DEFAULT_WORKFLOW_POSITIONS.every(position => !('hourlyRate' in position)));
 });
 
-test('ownership transfer changes both memberships and the organization atomically', async () => {
-  const [route, dialog] = await Promise.all([
-    read('../src/app/api/organizations/[organizationId]/route.js'),
-    read('../src/components/TeamMemberSettingsDialog.jsx'),
-  ]);
+test('legacy ownership transfer is atomic and QuickTeam-backed organizations refuse it', async () => {
+  const route = await read('../src/app/api/organizations/[organizationId]/route.js');
   assert.match(route, /authorizeOrgRequest\(request, organizationId, \['owner'\]\)/);
+  assert.match(route, /isQuickTeamManagedOrganization\(organizationSnapshot\.data\(\)\)/);
+  assert.match(route, /QUICKTEAM_MANAGED/);
   assert.match(route, /await db\.runTransaction/);
   assert.match(route, /transaction\.update\(currentRef, \{ role: 'admin'/);
   assert.match(route, /transaction\.update\(targetRef, \{ role: 'owner'/);
   assert.match(route, /ownerId: targetUserId/);
   assert.match(route, /targetSnap\.data\(\)\.removalPending === true/);
-  assert.match(dialog, /member\.role !== 'owner'/);
 });
 
 test('the one-time migration is explicit, dry-run by default and idempotent', async () => {
@@ -127,6 +120,7 @@ test('every permission in the matrix is read by something', async () => {
     'src/components/workspace/UnifiedTimeline.jsx',
     'src/lib/bulk/issueBulkActions.mjs',
     'src/app/api/issues/bulk/route.js',
+    'src/app/api/organizations/[organizationId]/route.js',
     'src/app/api/organizations/[organizationId]/members/[memberId]/route.js',
     'src/app/api/invitations/route.js',
     'src/app/api/issues/route.js',

@@ -30,8 +30,9 @@ export const ROUTE_TITLES = [
   { path: '/ai-call', title: 'Дзвінок в інциденти' },
 ];
 
-export function routeTitle(pathname, projects = []) {
+export function routeTitle(pathname, projects = [], { clientPortal = false } = {}) {
   const path = String(pathname || '/');
+  if (path === '/' && clientPortal) return 'Мої звернення';
   for (const entry of ROUTE_TITLES) {
     if (entry.exact ? path === entry.path : path.startsWith(entry.path)) return entry.title;
   }
@@ -51,12 +52,15 @@ export function workspaceDocumentTitle({
   breadcrumbs = [],
   projects = [],
   organizationName = '',
+  clientPortal = false,
 } = {}) {
   const trail = (breadcrumbs || [])
     .map(crumb => String(crumb?.label || '').trim())
     .filter(label => label && label !== '...');
 
-  const leaf = trail.length ? trail[trail.length - 1] : routeTitle(pathname, projects);
+  const leaf = trail.length
+    ? trail[trail.length - 1]
+    : routeTitle(pathname, projects, { clientPortal });
   const context = trail.length > 1 ? trail[trail.length - 2] : '';
   const brand = String(organizationName || '').trim() || BRAND;
 

@@ -78,7 +78,8 @@ test('без поштового провайдера клієнт отримує
   assert.match(dialog, /Скопіювати інструкцію/);
   assert.match(dialog, /\/login\?mode=client/);
   assert.doesNotMatch(dialog, /надішліть\s+посилання з вкладки «Посилання та QR»/);
-  assert.match(login, /Увійти до qTicket/);
+  assert.match(login, /Вхід до порталу підтримки/);
+  assert.match(login, /NEXT_PUBLIC_STANDALONE_STAFF_LOGIN_ENABLED/);
   assert.match(login, /!clientLogin && <button[\s\S]{0,180}handleOneB/);
   assert.match(login, /GITHUB_LOGIN_ENABLED && <button/);
 });

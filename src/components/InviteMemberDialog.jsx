@@ -18,7 +18,7 @@ import { isClientRole } from '@/lib/utils/can';
 const ROLE_OPTIONS = [
   {
     value: 'member',
-    label: 'Учасник',
+    label: 'Менеджер підтримки',
     description: 'Працює з інцидентами та проєктами, спілкується з командою.',
     icon: UserRound,
   },
@@ -162,7 +162,7 @@ export default function InviteMemberDialog({
         ? 'Запросити співробітника'
         : clientAdminMode
           ? 'Запросити клієнта'
-          : 'Запросити нового учасника'}
+          : 'Додати менеджера підтримки'}
       size="lg"
       bodyPadding="invite"
     >
@@ -226,7 +226,7 @@ export default function InviteMemberDialog({
                 ? 'Email співробітника'
                 : clientAdminMode
                   ? 'Email адміністратора клієнта'
-                  : 'Email учасника'}
+                  : 'Email менеджера'}
             </Label>
             <div className="flex gap-2">
               {/* The kit's standard large control, both halves. They used to

@@ -13,21 +13,26 @@ import { usePathname } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { decorateTitle, workspaceDocumentTitle } from '@/lib/utils/documentTitle.mjs';
+import { isClientRole } from '@/lib/utils/can';
+import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
 // How long each half of the blink lasts while the tab is in the background.
 const BLINK_MS = 1400;
 
 export default function WorkspaceDocumentTitle() {
   const pathname = usePathname();
-  const { projects, activeOrg } = useAppContext();
+  const { projects, activeOrg, orgRole } = useAppContext();
   const breadcrumbs = useWorkspaceStore(state => state.breadcrumbs);
   const unread = useWorkspaceStore(state => state.unreadChatCount);
 
+  const clientPortal = isClientRole(orgRole);
+  const portalBrand = resolveOrganizationPortalBrand(activeOrg);
   const baseTitle = workspaceDocumentTitle({
     pathname,
     breadcrumbs,
     projects,
-    organizationName: activeOrg?.name,
+    organizationName: clientPortal ? portalBrand.name : activeOrg?.name,
+    clientPortal,
   });
 
   useEffect(() => {

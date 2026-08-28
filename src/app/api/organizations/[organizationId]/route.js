@@ -9,6 +9,11 @@ import {
   normalizePlan,
   storedPlanLimit,
 } from '@/lib/utils/plans.mjs';
+import {
+  isQuickTeamManagedOrganization,
+  QUICKTEAM_MANAGED_MESSAGE,
+} from '@/lib/utils/quickTeamManaged.mjs';
+import { can } from '@/lib/utils/can';
 
 export async function PATCH(request, context) {
   try {
@@ -18,6 +23,17 @@ export async function PATCH(request, context) {
 
     const body = await readJsonBody(request);
     const { action, targetUserId } = body;
+    const db = getAdminDb();
+    const organizationSnapshot = await db.collection('organizations').doc(organizationId).get();
+    if (!organizationSnapshot.exists) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
+    if (isQuickTeamManagedOrganization(organizationSnapshot.data())) {
+      return NextResponse.json({
+        error: QUICKTEAM_MANAGED_MESSAGE,
+        code: 'QUICKTEAM_MANAGED',
+      }, { status: 409 });
+    }
 
     // ── Changing the plan ────────────────────────────────────────────────
     //
@@ -33,7 +49,6 @@ export async function PATCH(request, context) {
     // read-only and comes back untouched the moment the plan does.
     if (action === 'set-plan') {
       const plan = normalizePlan(body.plan);
-      const db = getAdminDb();
 
       // Один безкоштовний робочий простір на акаунт — і це рахунок, тож
       // тримати його може лише маршрут: `firestore.rules` бачить один документ
@@ -81,11 +96,13 @@ export async function PATCH(request, context) {
     if (action !== 'transfer-ownership' || typeof targetUserId !== 'string' || !targetUserId) {
       return NextResponse.json({ error: 'Invalid ownership transfer' }, { status: 400 });
     }
+    if (!can(authorization.membership?.role, 'transfer:ownership')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     if (targetUserId === authorization.user.uid) {
       return NextResponse.json({ error: 'Target user is already the owner' }, { status: 400 });
     }
 
-    const db = getAdminDb();
     const orgRef = db.collection('organizations').doc(organizationId);
     const currentRef = db.collection('orgMemberships').doc(`${organizationId}_${authorization.user.uid}`);
     const targetRef = db.collection('orgMemberships').doc(`${organizationId}_${targetUserId}`);

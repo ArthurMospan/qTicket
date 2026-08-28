@@ -38,6 +38,7 @@ import {
   countWorkspaceSearchMatches,
   createProjectSearchScope,
 } from '@/lib/utils/searchScope.mjs';
+import { isClientRole } from '@/lib/utils/can';
 
 // Icon and colour only. Every entry used to carry a `label` as well, drawn in
 // caps above the notification card's title — where it repeated, in the
@@ -126,7 +127,7 @@ function CalendarResponseActions({
   );
 }
 
-function useHeaderMode(pathname, projects, breadcrumbs = []) {
+function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
   const EXCLUDED = ['my', 'team', 'analytics', 'calendar', 'chat', 'settings', 'sprints'];
 
   if (!pathname) return { mode: 'default', project: null };
@@ -143,10 +144,16 @@ function useHeaderMode(pathname, projects, breadcrumbs = []) {
   }
 
   if (pathname === '/') {
-    return { mode: 'search', project: null, placeholder: 'Пошук...' };
+    return {
+      mode: 'search',
+      project: null,
+      placeholder: isClientRole(orgRole)
+        ? 'Пошук за номером або темою звернення...'
+        : 'Пошук інцидентів, клієнтів і команди...',
+    };
   }
   if (pathname.startsWith('/my')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук по моїх завданнях...' };
+    return { mode: 'search', project: null, placeholder: 'Пошук по моїх інцидентах...' };
   }
   if (pathname.startsWith('/team')) {
     return { mode: 'search', project: null, placeholder: 'Пошук по команді...' };
@@ -635,7 +642,7 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
 }
 
 export default function WorkspaceHeader() {
-  const { currentUser, signOut, projects, activeOrgId } = useAppContext();
+  const { currentUser, signOut, projects, activeOrgId, orgRole } = useAppContext();
   const { members: organizationMembers } = useOrganization();
 
   const breadcrumbs    = useWorkspaceStore(s => s.breadcrumbs);
@@ -661,7 +668,7 @@ export default function WorkspaceHeader() {
 
   const router   = useRouter();
   const pathname = usePathname();
-  const { mode, project, placeholder, label } = useHeaderMode(pathname, projects, breadcrumbs);
+  const { mode, project, placeholder, label } = useHeaderMode(pathname, projects, breadcrumbs, orgRole);
 
   const [projectSearch,   setProjectSearch]   = useState(false); // inline search toggle for project mode
   const [globalQuery,     setGlobalQuery]     = useState('');
