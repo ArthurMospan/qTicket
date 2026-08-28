@@ -18,7 +18,6 @@ import {
 import { TaskIcon } from '@/lib/design/icons';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { useWorkspaceHelp } from '@/components/WorkspaceHelpMenu';
-import WorkspacePlanLimitRail from '@/components/WorkspacePlanLimitRail';
 import { computeSidebarTheme, computeTranslucentSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
 import { useModalFocus } from '@/lib/hooks/useModalFocus';
@@ -279,12 +278,6 @@ export default function MobileNav({ keyboardOpen = false }) {
                 <IconAction label="Закрити" icon={X} size="sm" appearance="quiet" onClick={() => setMoreOpen(false)} className="-mr-[6px]" />
               </div>
             </div>
-
-            {/* The rail's ceiling notice, in the drawer that stands in for the
-                rail on a phone. The sheet already carries every `--sb-*` the
-                row mixes its colours from, so it is the same component with
-                nothing said twice. */}
-            {!clientViewer && <WorkspacePlanLimitRail />}
 
             {/* Secondary nav */}
             <div className="flex flex-col gap-[2px] px-[8px]">

@@ -1,24 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
-  readInvitationSeatState,
-  resolveInvitationScope,
-} from '../src/lib/server/invitationScope.mjs';
+import { resolveInvitationScope } from '../src/lib/server/invitationScope.mjs';
 
-function projectDb(projects, pendingSeats = 0) {
+function projectDb(projects) {
   return {
     collection(name) {
-      if (name === 'projects') {
-        return { doc: id => ({ id }) };
-      }
-      assert.equal(name, 'invitations');
-      const query = {
-        where() { return query; },
-        count() { return query; },
-        async get() { return { data: () => ({ count: pendingSeats }) }; },
-      };
-      return query;
+      assert.equal(name, 'projects');
+      return { doc: id => ({ id }) };
     },
     async getAll(...references) {
       return references.map(reference => {
@@ -82,18 +71,4 @@ test('an invitation cannot carry a project from another organization', async () 
     }),
     error => error.message === 'INVALID_PROJECT_SCOPE',
   );
-});
-
-test('invitation capacity reuses the verified organization snapshot without a TDZ failure', async () => {
-  const organizationSnapshot = { exists: true, data: () => ({ plan: 'free' }) };
-  const state = await readInvitationSeatState(
-    projectDb({}, 2),
-    'org-a',
-    organizationSnapshot,
-    async () => 3,
-  );
-
-  assert.equal(state.organizationSnapshot, organizationSnapshot);
-  assert.equal(state.seatsTaken, 3);
-  assert.equal(state.pendingSeats, 2);
 });

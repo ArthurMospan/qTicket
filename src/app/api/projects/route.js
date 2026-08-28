@@ -2,26 +2,17 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, enforceRateLimit, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { recordPlanUsage } from '@/lib/server/planLimits';
 import {
   initialProjectIssueCounts,
   organizationCountContext,
 } from '@/lib/server/projectIssueCounts';
 import { PROJECT_ISSUE_COUNTS_FIELD } from '@/lib/utils/projectIssueCounts.mjs';
-import { normalizePlan, planLimit, planLimitRefusal } from '@/lib/utils/plans.mjs';
 import { DEFAULT_STATUS_IDS, workflowIds } from '@/lib/utils/workflowDefaults.mjs';
 import {
   suggestAvailableIssuePrefix,
 } from '@/lib/utils/issueKeys.mjs';
 
 export async function POST(req) {
-  // Read inside the transaction and answered in the catch, so the refusal can
-  // say how many of how many, and on which plan, instead of a sentence with no
-  // numbers in it. Declared out here because a catch block cannot see into the
-  // try block above it.
-  let refusedPlan = '';
-  let refusedCount = 0;
-  let activeAfterCreate = 0;
   try {
     const body = await readJsonBody(req);
     const { name, description, visibility, organizationId, team = [], hiddenColumns = [] } = body;
@@ -132,20 +123,6 @@ export async function POST(req) {
         { name: normalizedName },
         organizationProjects,
       );
-      const activeProjectsCount = organizationProjects
-        .filter(project => project.status === 'active').length;
-      // The ceiling comes from the plan registry, not from here. It used to be
-      // `plan !== 'pro' && count >= 3`, which had one plan too few in it: Lite
-      // exists, is offered at sign-up, and was being refused a fourth project
-      // like a free workspace. `planLimit` returns Infinity where a plan sets
-      // no ceiling, so the comparison is the same either way.
-      refusedPlan = normalizePlan(orgSnap.data().plan);
-      refusedCount = activeProjectsCount;
-      if (activeProjectsCount >= planLimit(refusedPlan, 'projects')) {
-        throw new Error('PROJECT_LIMIT_REACHED');
-      }
-      activeAfterCreate = activeProjectsCount + 1;
-
       transaction.create(projectRef, {
         ...payload,
         issuePrefix,
@@ -165,21 +142,8 @@ export async function POST(req) {
       });
     });
 
-    // The transaction has just counted the projects for real, so the display
-    // cache is written from that number rather than from a second count.
-    await recordPlanUsage(db, organizationId, { projects: activeAfterCreate });
-
     return NextResponse.json({ success: true, id: projectRef.id });
   } catch (error) {
-    if (error.message === 'PROJECT_LIMIT_REACHED') {
-      // The sentence is the registry's, not this file's. It was written here
-      // once and in the dialog once, which is two copies of one refusal and
-      // exactly how a price list comes to promise what the code does not do.
-      return NextResponse.json({
-        error: planLimitRefusal(refusedPlan, 'projects', refusedCount),
-        planLimit: { id: 'projects', plan: refusedPlan, ceiling: planLimit(refusedPlan, 'projects'), used: refusedCount },
-      }, { status: 403 });
-    }
     if (error.message === 'ORGANIZATION_NOT_FOUND') {
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }

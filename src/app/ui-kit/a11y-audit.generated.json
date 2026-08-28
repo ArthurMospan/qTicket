@@ -10,14 +10,14 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 357,
-    "elements": 4298,
+    "files": 346,
+    "elements": 4184,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 39
+    "runtimeNameVerification": 37
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:3764",
+      "location": "src/app/(app)/settings/page.js:3555",
       "attributes": [
         "title",
         "aria-label"
@@ -35,7 +35,7 @@
     },
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:697",
+      "location": "src/app/(app)/settings/page.js:682",
       "attributes": [
         "aria-label",
         "title"
@@ -148,13 +148,6 @@
       ]
     },
     {
-      "element": "IconAction",
-      "location": "src/components/ui/DataDisplay/PlanMark.jsx:42",
-      "attributes": [
-        "label"
-      ]
-    },
-    {
       "element": "button",
       "location": "src/components/ui/DataDisplay/Tag.jsx:70",
       "attributes": [
@@ -166,14 +159,6 @@
       "location": "src/components/ui/ExportMenu.jsx:85",
       "attributes": [
         "title"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/Feedback/PlanLimitRail.jsx:62",
-      "attributes": [
-        "title",
-        "aria-label"
       ]
     },
     {

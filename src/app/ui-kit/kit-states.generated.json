@@ -13,14 +13,14 @@
     "long-text"
   ],
   "totals": {
-    "components": 120,
-    "stateful": 106,
-    "hover": 71,
-    "focus": 68,
+    "components": 114,
+    "stateful": 102,
+    "hover": 68,
+    "focus": 67,
     "disabled": 35,
     "loading": 7,
     "error": 6,
-    "long-text": 74
+    "long-text": 72
   },
   "components": {
     "Alert": {
@@ -344,22 +344,6 @@
       "hover": "css",
       "long-text": "children, label"
     },
-    "PlanCards": {},
-    "PlanDowngradeDialog": {
-      "hover": "css"
-    },
-    "PlanGate": {
-      "hover": "css",
-      "long-text": "children"
-    },
-    "PlanLimitRail": {
-      "hover": "css",
-      "focus": "global"
-    },
-    "PlanMark": {
-      "long-text": "label"
-    },
-    "PlanUpgradeDialog": {},
     "Popover": {
       "focus": "global",
       "long-text": "children"
@@ -799,24 +783,6 @@
       "detail-layout",
       "variant-matrix",
       "states"
-    ],
-    "PlanCards": [
-      "surfaces"
-    ],
-    "PlanDowngradeDialog": [
-      "feedback"
-    ],
-    "PlanGate": [
-      "feedback"
-    ],
-    "PlanLimitRail": [
-      "feedback"
-    ],
-    "PlanMark": [
-      "feedback"
-    ],
-    "PlanUpgradeDialog": [
-      "feedback"
     ],
     "Popover": [
       "task-attributes",

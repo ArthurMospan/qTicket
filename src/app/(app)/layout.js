@@ -13,7 +13,6 @@ import { ConfirmProvider } from '@/components/ui/ConfirmProvider';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import ProfileModal from '@/components/profile/ProfileModal';
 import WorkspaceQuickViewHost from '@/components/WorkspaceQuickViewHost';
-import WorkspacePlanUpgradeHost from '@/components/WorkspacePlanUpgradeHost';
 import { useState } from 'react';
 import WorkspaceNotificationBridge from '@/components/WorkspaceNotificationBridge';
 import IssueReadStateBridge from '@/components/IssueReadStateBridge';
@@ -35,8 +34,8 @@ import { isClientPortalRoute } from '@/lib/utils/clientPortalRoutes.mjs';
 // worst screen the product has: it asks the reader to keep waiting and never
 // tells them to stop. The workspace showed one for as long as `orgLoading` was
 // true, and `orgLoading` stays true through every path that waits for a read it
-// is not going to get — most often a Firestore refusal on the free plan's daily
-// quota, which is a condition with a known cause and a known end.
+// is not going to get — most often a Firestore refusal on the Firebase
+// project's daily quota, which is a condition with a known cause and a known end.
 //
 // Twelve seconds is well past a slow phone on a slow network and well short of
 // giving up on one. After that the screen says what it knows instead of
@@ -350,12 +349,9 @@ export default function WorkspaceLayout({ children }) {
           screen's own scroller (`.qt-nav-scroll`), which is the only element
           that knows where its content actually ends. */}
       <div className="flex flex-col flex-1 overflow-hidden w-full p-0 md:p-[12px] md:pl-[6px] md:pb-[12px]">
-        {/* Nothing between the shell and the content panel. A strip used to
-            hang here saying which ceiling of the plan had filled up, and every
-            screen under it was that much shorter for as long as it was there —
-            including the two that size themselves from the window rather than
-            from their own column. That notice lives at the foot of the sidebar
-            now, where the workspace already talks about itself. */}
+        {/* Nothing between the shell and the content panel. Any shell strip
+            here shortens every screen below it, including screens that size
+            themselves from the window rather than their own column. */}
         <div className="flex flex-col flex-1 bg-white rounded-none md:rounded-[24px] overflow-hidden relative">
           {!hideHeader && (
             <div className="print:hidden absolute top-0 left-0 right-0 z-30">
@@ -378,7 +374,6 @@ export default function WorkspaceLayout({ children }) {
       <WorkspaceToastHost />
       <ProfileModal />
       <WorkspaceQuickViewHost />
-      <WorkspacePlanUpgradeHost />
       <WorkspaceCommandPalette />
     </div>
     </WorkspaceOrganizationRouteGuard>

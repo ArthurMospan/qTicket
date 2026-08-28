@@ -4,7 +4,6 @@ The inherited task engine still powers incidents internally, and the sections
 below document those mechanics. qTicket adds a separate QuickTeam authority
 boundary for staff identity, branding and entitlement. Finding either rule
 should cost one search rather than a guess at a filename. Setup, commands and
-the rule costs one search rather than a guess at a filename. Setup, commands and
 the data model are in [../README.md](../README.md); the rules a change must obey
 are in [../AGENTS.md](../AGENTS.md); shared UI has its own contract in
 [UI_KIT_CONTRACT.md](UI_KIT_CONTRACT.md).
@@ -42,9 +41,12 @@ snapshot is intentional: absence removes an internal seat without asking
 qTicket to infer an event stream. Synchronized staff, ownership, branding and
 entitlement cannot be edited through qTicket-native routes.
 
-An active entitlement is part of membership, not a decorative plan field. Both
-server authorization and Firestore rules require it before granting access to
-organization data. Deactivation therefore closes existing qTicket sessions on
+An active entitlement is part of membership, not a decorative plan field.
+qTicket has no local tariff, checkout, subscription switch or plan-derived
+feature and capacity gates. Both server authorization and Firestore rules
+require a non-empty QuickTeam source organization id and an active entitlement
+before granting access to organization data; a legacy standalone organization
+therefore grants nothing. Deactivation closes existing qTicket sessions on
 their next read as well as refusing new launches. It does not delete the
 organization, client accounts, incidents, discussion or history; reactivation
 with a newer snapshot restores access to the preserved data.

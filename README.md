@@ -2,6 +2,13 @@
 
 Multi-tenant incident and client-support SaaS built with Next.js 16, React 19 and Firebase. qTicket is an optional QuickTeam add-on: the QuickTeam owner activates it for an existing organization, selects the internal support staff, then creates client spaces and invites each client into the appropriate one. qTicket has no standalone organization registration.
 
+qTicket does not publish tariffs, switch subscriptions, or enforce its own
+project, member, AI, branding, or integration limits. QuickTeam is the only
+commercial authority and provisions a signed `active`/`inactive` add-on
+entitlement. qTicket requires an active QuickTeam snapshot at both the server
+and Firestore boundaries; a legacy organization document without that snapshot
+grants no access.
+
 The codebase starts from the QuickTeam workspace so it can preserve the same `/ui-kit`, interaction language, and proven task mechanics. qTicket, QuickTeam, and QuickTeam+ remain separate applications and data stores. The inherited `issues` collection is the canonical incident record until a deliberate migration says otherwise; all user-facing qTicket copy calls it an incident.
 
 ## Requirements

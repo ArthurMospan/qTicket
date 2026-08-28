@@ -29,19 +29,6 @@ import {
 import { userFacingErrorMessage } from '@/lib/utils/errors';
 import { useAccountSessions } from '@/lib/hooks/useAccountSessions';
 import { describeSignInMethods } from '@/lib/utils/accountSessions.mjs';
-import {
-  DEFAULT_PLAN,
-  FREE_WORKSPACE,
-  capabilityAvailability,
-  freeWorkspaceElsewhere,
-  normalizePlan,
-  planAllows,
-  planDowngradeNotice,
-  planName,
-} from '@/lib/utils/plans.mjs';
-import { usePlanLimits } from '@/lib/hooks/usePlanLimits';
-import { switchOrganizationPlan } from '@/lib/services/organizationPlan';
-import { PlanCrownIcon } from '@/lib/design/icons';
 import { auth, createGitHubProvider, db, googleProvider } from '@/lib/firebase';
 import { linkWithPopup, unlink } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -50,13 +37,13 @@ import {
   Shapes, Check, Plus, Trash2, Edit2, X, Save,
   Building, LogOut, Download, RefreshCw, Mail, Star,
   Copy, ExternalLink, ChevronRight, AlertTriangle,
-  PlugZap, ToggleLeft, ToggleRight, Receipt, CreditCard,
+  PlugZap, ToggleLeft, ToggleRight, Receipt,
   Globe, Tag as TagIcon, Briefcase, GripVertical, Send,
   Archive, ArchiveRestore, Bug, DatabaseBackup, Lock,
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Alert, Button, Card, ColorSwatch, DatePicker, Dialog, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PlanCards, PlanDowngradeDialog, PlanGate, PlanMark, Popover, PriorityBadge, Select, SidebarLayout, Surface, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
+import { Alert, Button, Card, ColorSwatch, DatePicker, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, Popover, PriorityBadge, Select, SidebarLayout, Surface, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import ImageUpload from '@/components/ui/ImageUpload';
 import { sendNotification } from '@/lib/hooks/useNotifications';
@@ -164,7 +151,7 @@ const NAV = [
   { id: 'account',       label: 'Безпека',          icon: ShieldCheck,   group: 'Особисте' },
   { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
   { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
-  { id: 'billing',       label: 'Підписка qTicket', icon: CreditCard,    group: 'Організація', adminOnly: true },
+  { id: 'billing',       label: 'Доступ qTicket', icon: ShieldCheck,     group: 'Організація', adminOnly: true },
   { id: 'integrations',  label: 'Інтеграції',       icon: PlugZap,       group: 'Організація', adminOnly: true },
   { id: 'migration',     label: 'Перенесення даних', icon: DatabaseBackup, group: 'Організація', adminOnly: true },
   { id: 'statuses',      label: 'Статуси інцидентів', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
@@ -176,8 +163,6 @@ const NAV = [
   { id: 'danger',        label: 'Видалення даних',  icon: Shield,        group: 'Інше', danger: false, adminOnly: true },
 ];
 
-// Which sections belong to the plan rather than to the role. Both have been
-// sold as paid since the price list existed; neither was ever gated.
 // ── Primitives ───────────────────────────────────────────────────────
 // Toggle removed - using ToggleSwitch from UI Kit
 
@@ -808,7 +793,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const settingsQuery = searchParams.toString();
-  const { currentUser, signOut, activeOrgId, projects, orgRole, allOrgs, orgRoles } = useAppContext();
+  const { currentUser, signOut, activeOrgId, projects, orgRole } = useAppContext();
   const showToast = useWorkspaceStore(s => s.showToast);
   const confirmDialog = useConfirm();
   const {
@@ -1074,41 +1059,9 @@ export default function SettingsPage() {
   const [sidebarColor,    setSidebarColor]    = useState('#1f1f1f');  // HEX for custom theme
   const setSidebarPreview = useWorkspaceStore(s => s.setSidebarPreview);
   const clearSidebarPreview = useWorkspaceStore(s => s.clearSidebarPreview);
-  // Every ceiling this screen can meet, from the one hook that knows them. The
-  // seat ceiling is the one with a control on this page.
-  const planLimits = usePlanLimits();
-  const seatsBlocked = planLimits.blocked('members');
-  const openPlanUpgrade = useWorkspaceStore(s => s.openPlanUpgrade);
-
-  // ── Billing ──
-  //
-  // The plan is the live organization document's, not a read of this screen's
-  // own. It used to be local state seeded with «free» and filled in by a
-  // `getDoc` at the end of a chain of awaits, so every visit here spent about
-  // two seconds telling a paying workspace it was on Free: the badge went red,
-  // and crowns appeared beside «Інтеграції» and «Перенесення даних» before
-  // disappearing again.
-  //
-  // `planOverride` is the moment between pressing a plan and the snapshot that
-  // confirms it — the write goes through a server route, and the listener is a
-  // round trip behind it.
-  const [planOverride, setPlanOverride] = useState('');
-  const orgPlan = planOverride || planLimits.plan;
-  const planKnown = planLimits.planKnown;
-  // «Not read yet» is not «not allowed». See `usePlanLimits`.
-  const allowsOnPlan = capabilityId => !planKnown || planAllows(orgPlan, capabilityId);
-
   // Live preview: push changes to sidebar in real-time.
-  //
-  // Gated on the plan like everything else that paints a brand. A workspace
-  // that paid for a month and went back to Free still carries
-  // `customBranding: true` — the setting is kept on purpose, so it comes back
-  // with the plan — and this effect was handing it straight to the sidebar.
-  // The logo therefore reappeared the moment its owner opened Settings, on the
-  // one screen where it is most obviously supposed to be off.
-  const brandingPreviewAllowed = allowsOnPlan('branding');
   useEffect(() => {
-    if (orgCustomBranding && brandingPreviewAllowed) {
+    if (orgCustomBranding) {
       setSidebarPreview({
         theme: sidebarTheme,
         color: sidebarColor,
@@ -1118,7 +1071,7 @@ export default function SettingsPage() {
     } else {
       clearSidebarPreview();
     }
-  }, [orgCustomBranding, brandingPreviewAllowed, sidebarTheme, sidebarColor, orgLogo, setSidebarPreview, clearSidebarPreview]);
+  }, [orgCustomBranding, sidebarTheme, sidebarColor, orgLogo, setSidebarPreview, clearSidebarPreview]);
 
   // Leaving Settings drops the live preview so the sidebar falls back to the
   // saved org document (which branding auto-save has already persisted).
@@ -1294,19 +1247,6 @@ export default function SettingsPage() {
   };
   const [generatingKey, setGeneratingKey] = useState(false);
 
-  // ── Billing ──
-  const [projectsCount,  setProjectsCount]  = useState(0);
-  // Which plan is being switched to, not merely that one is: with three plans a
-  // boolean put the spinner on both buttons that were not the current one.
-  const [upgradingTo,    setUpgradingTo]    = useState('');
-  // What a downgrade would take away, held between «I picked Free» and «yes,
-  // really». The same dialog the crown's price list opens, from the same
-  // registry — one of the two must not be a quieter way to lose a feature.
-  const [downgrade, setDowngrade] = useState(null);
-  // Той простір, який уже займає безкоштовний тариф, поки пояснюємо, чому цей
-  // на нього не перемикається. `null`, доки нічого не пояснюємо.
-  const [freeTakenBy, setFreeTakenBy] = useState(null);
-
   // ── Notifications ──
   // `channels` is the event × channel matrix; the flat per-event flags beside it
   // are the pre-matrix shape, still written in step with the in-app column so a
@@ -1474,17 +1414,6 @@ export default function SettingsPage() {
     queueMicrotask(() => refreshAuthProviders());
   }, [currentUser?.id, currentUser?.uid]);
 
-  // The optimistic plan lasts exactly until the snapshot that makes it
-  // unnecessary — and no longer, or switching organizations would carry one
-  // workspace's plan into another.
-  useEffect(() => {
-    if (!planOverride || planLimits.plan !== planOverride) return;
-    queueMicrotask(() => setPlanOverride(''));
-  }, [planOverride, planLimits.plan]);
-  useEffect(() => {
-    queueMicrotask(() => setPlanOverride(''));
-  }, [activeOrgId]);
-
   // ── Breadcrumbs ──
   // Removed breadcrumbs to avoid duplicate 'Налаштування' in WorkspaceHeader
   useEffect(() => {
@@ -1552,15 +1481,6 @@ export default function SettingsPage() {
           if (!isCurrentWorkflowLoad()) return;
           setApiKeys(keyResult.keys || []);
 
-          // Plan-limit count is admin-only (billing). Under team-gated project
-          // reads a plain member can't run an org-wide projects query, so this
-          // stays behind isAdmin — admins may read every project in the org.
-          const { collection, query, where, getDocs } = await import('firebase/firestore');
-          if (!isCurrentWorkflowLoad()) return;
-          const projQuery = query(collection(db, 'projects'), where('organizationId', '==', organizationId));
-          const projSnap = await getDocs(projQuery);
-          if (!isCurrentWorkflowLoad()) return;
-          setProjectsCount(projSnap.docs.length);
         }
 
         const uid = currentUser?.uid || currentUser?.id;
@@ -2216,63 +2136,6 @@ export default function SettingsPage() {
     } finally {
       setLeavingOrganization(false);
     }
-  };
-
-  // Switching plans, with nothing to pay.
-  //
-  // This used to open a toast saying the payment system was in development,
-  // which was true and also the whole of the feature. Until money is involved
-  // the honest version is that an owner picks a plan and the workspace changes.
-  //
-  // Той простір акаунта, який уже займає безкоштовний тариф — якщо він не цей.
-  // Рахуємо лише ті, де ця людина власник: тариф чужої організації не її
-  // справа, і не її обмеження. Той самий підрахунок робить маршрут, який пише
-  // поле, — звідси спільна функція, а не друга копія умови.
-  const ownedFreeWorkspace = useMemo(() => freeWorkspaceElsewhere(
-    (allOrgs || []).filter(organization => orgRoles?.[organization.id] === 'owner'),
-    activeOrgId,
-  ), [allOrgs, orgRoles, activeOrgId]);
-
-  // The write itself is `switchOrganizationPlan`, because there are two screens
-  // that do it now — this one and the dialog the crown opens — and one field
-  // written from two places is one field that will be written two ways. What
-  // stays here is what belongs to this screen: the local state and the toast.
-  const applyPlan = async (next) => {
-    setUpgradingTo(next);
-    try {
-      await switchOrganizationPlan(activeOrgId, next);
-      setPlanOverride(next);
-      setDowngrade(null);
-      // The plan's own name. The toast had two branches for three plans, so
-      // switching to Lite announced «Тариф змінено на Безкоштовний».
-      showToast(`Тариф змінено на ${planName(next)}`);
-    } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося змінити тариф'), 'error');
-    } finally {
-      setUpgradingTo('');
-    }
-  };
-
-  const handleUpgradePlan = (newPlan) => {
-    const next = normalizePlan(newPlan);
-    if (next === orgPlan || upgradingTo) return;
-    // Один безкоштовний робочий простір на акаунт. Правило тримає маршрут, а
-    // це — його голос: кнопка, яка нічого не робить і нічого не каже, читається
-    // як зламана, а не як відмова. Дізнатися причину можна лише натиснувши, тож
-    // кнопка лишається натискною, а пояснення відкривається на місці відповіді.
-    if (next === DEFAULT_PLAN && ownedFreeWorkspace) {
-      setFreeTakenBy(ownedFreeWorkspace);
-      return;
-    }
-    // Asked before the switch, never explained after it. Everything on the list
-    // is reversible and says so; the one thing somebody could be surprised by is
-    // which projects go read-only, so that line names how many.
-    const notice = planDowngradeNotice(orgPlan, next, planLimits.used);
-    if (notice) {
-      setDowngrade({ ...notice, planId: next });
-      return;
-    }
-    applyPlan(next);
   };
 
   const unarchiveProject = async (id) => {
@@ -3028,13 +2891,7 @@ export default function SettingsPage() {
           );
         }
 
-        // The plan decides whether this can be turned on. It deliberately does
-        // not turn off branding a workspace already has: downgrading should
-        // stop somebody changing how the product looks, not repaint it under
-        // them without warning.
-        const brandingAllowed = allowsOnPlan('branding');
         const handleBrandingToggle = (val) => {
-          if (!brandingAllowed) return;
           setOrgCustomBranding(val);
           persistBranding({ orgCustomBranding: val });
         };
@@ -3088,19 +2945,12 @@ export default function SettingsPage() {
                 organisation *is*, not where you look up its key. */}
           </Card>
 
-          {/* Zone 2: Branding — the one thing the paid plan actually buys.
-              Two locks, and they are different: without a logo there is nothing
-              to brand with, and without the plan there is nothing to brand on.
-
-              Neither dims the card any more. Half-opacity over a whole block is
-              the product's way of saying «this is loading or broken», and it
-              was being spent on «this costs money» — which is what the crown
-              means, everywhere else, beside the one control that will not move.
-              So the block reads normally, the switch is disabled, and the crown
-              sits on the row it is about. */}
+          {/* Zone 2: Branding. Legacy standalone workspaces cannot pass the
+              QuickTeam entitlement boundary; this branch remains only while
+              their stored settings are migrated or removed. */}
           <Card preset="borderless" padding="lg">
             <GroupLabel label="Брендинг" />
-            {brandingAllowed && !orgLogo && (
+            {!orgLogo && (
               <p className="text-[12px] text-muted mb-3">Завантажте логотип організації, щоб розблокувати налаштування брендингу</p>
             )}
             <Row label="Брендинг у сайдбарі" desc="Замінити логотип QuickTeam на логотип вашої організації для всіх учасників">
@@ -3114,13 +2964,10 @@ export default function SettingsPage() {
                     className="w-[32px] h-[32px] rounded-[8px] object-cover border border-line"
                   />
                 )}
-                {!brandingAllowed && (
-                  <PlanMark capabilityId="branding" label={capabilityAvailability('branding')} />
-                )}
                 <ToggleSwitch
                   checked={orgCustomBranding}
                   onChange={handleBrandingToggle}
-                  disabled={!orgLogo || !brandingAllowed}
+                  disabled={!orgLogo}
                 />
               </div>
             </Row>
@@ -3239,7 +3086,6 @@ export default function SettingsPage() {
                 integrations list does. The wall stays one screen in, where
                 somebody is about to start one. */}
             <DataMigrationSettings
-              lockedCapabilityId={allowsOnPlan('data-import') ? '' : 'data-import'}
               organizationId={activeOrgId}
               currentUserId={currentUser?.id || currentUser?.uid || ''}
               isOrganizationOwner={myRole === 'owner'}
@@ -3281,18 +3127,12 @@ export default function SettingsPage() {
           }
         };
 
-        // Each row names the capability it needs rather than inheriting one
-        // from the section. The rail used to carry that decision for all three
-        // at once, which left nowhere to say «this one is free» — and giving a
-        // single integration away is a thing a price list should be able to do
-        // by changing one line here.
         const integrationRows = [
           {
             id: 'quickteam-plus',
             title: 'QuickTeam+',
             description: 'Клієнтські запити та оновлення з порталу.',
             logo: '/quickteam.png',
-            capability: 'integrations',
             status: qtEnabled ? 'Підключено' : 'Вимкнено',
             active: qtEnabled,
           },
@@ -3301,7 +3141,6 @@ export default function SettingsPage() {
             title: 'Telegram',
             description: 'Створення задач із робочої Telegram-групи.',
             logo: '/integrations/telegram.svg',
-            capability: 'integrations',
             status: telegramGroupStatus.connected
               ? 'Підключено'
               : telegramGroupStatus.configured ? 'Не підключено' : 'Недоступно',
@@ -3312,7 +3151,6 @@ export default function SettingsPage() {
             title: 'BuggyBag Portal',
             description: 'Баг-репорти клієнтів як задачі QuickTeam.',
             logo: '/bug-logo.png',
-            capability: 'integrations',
             status: buggyBagEnabled ? 'Підключено' : 'Вимкнено',
             active: buggyBagEnabled,
           },
@@ -3323,7 +3161,6 @@ export default function SettingsPage() {
             <Section title="Інтеграції" desc="Підключені сервіси та доступні канали">
               <div className="flex flex-col gap-[8px]">
                 {integrationRows.map(item => {
-                  const locked = Boolean(item.capability) && !allowsOnPlan(item.capability);
                   return (
                     <Card
                       key={item.id}
@@ -3340,14 +3177,7 @@ export default function SettingsPage() {
                           <span className="block text-[13px] font-bold text-ink">{item.title}</span>
                           <span className="mt-[2px] block truncate text-[11px] text-muted">{item.description}</span>
                         </span>
-                        {/* Beside the one it is about, not on the rail entry
-                            above all three. */}
-                        {locked ? (
-                          <PlanMark
-                            capabilityId={item.capability}
-                            label={capabilityAvailability(item.capability)}
-                          />
-                        ) : item.active ? (
+                        {item.active ? (
                           // «Підключено» — це факт, а не свято.
                           //
                           // Зелений тут був єдиним теплим кольором на екрані й
@@ -3379,8 +3209,6 @@ export default function SettingsPage() {
             backLabel="Усі інтеграції"
             rightAction={saveButton}
           >
-            <PlanGate capabilityId="integrations">
-
             {integrationDetail === 'quickteam-plus' && <IntegrationCard
               title="QuickTeam+"
               description="Синхронізує клієнтські запити та оновлення з порталу QuickTeam+."
@@ -3571,71 +3399,35 @@ export default function SettingsPage() {
                 </IntegrationNote>
               )}
             </IntegrationCard>}
-            </PlanGate>
           </Section>
         );
       }
 
       // ──────────────────────────────────────────────────────────────
       case 'billing': {
-        if (quickTeamManaged) {
-          const entitlementActive = org?.quickTeam?.entitlement === 'active';
-          return (
-            <Section
-              title="Підписка qTicket"
-              desc="Додаткова послуга до підписки QuickTeam"
-            >
-              <Alert
-                variant="info"
-                title="Підписка керується в QuickTeam"
-                description="Активація, тариф і склад внутрішньої команди змінюються у QuickTeam. qTicket отримує готове право доступу та не дозволяє перемикати тариф окремо."
-                className="mb-4"
-              />
-              <Card preset="borderless" padding="lg">
-                <Row label="Стан доповнення" desc="Доступ qTicket для цієї організації">
-                  <Pill tone={entitlementActive ? 'success' : 'warning'} size="md">
-                    {entitlementActive ? 'Активовано' : 'Неактивне'}
-                  </Pill>
-                </Row>
-                <Row label="Поточний рівень" desc="Ліміти, які qTicket застосовує до клієнтських просторів">
-                  <Pill tone="ink-subtle" size="md">{planName(orgPlan)}</Pill>
-                </Row>
-              </Card>
-            </Section>
-          );
-        }
-
+        const entitlementActive = org?.quickTeam?.entitlement === 'active';
         return (
           <Section
-          title="Тарифний план"
-          desc="Що входить у кожен тариф і на якому ви зараз"
-        >
-          {/* The price list itself is `PlanCards`, and it is the same component
-              onboarding shows. Two hand-built copies of a price list disagreed
-              about what the product costs, which is what a copy always ends up
-              doing; the plans are data and the list that prints them is one
-              thing. Nothing about it is decided here — this screen only says
-              which plan is in force and what happens when another is picked. */}
-          <PlanCards
-            activePlanId={orgPlan}
-            activeLabel="Це ваш тариф"
-            onChoose={handleUpgradePlan}
-            busyPlanId={upgradingTo}
-          />
-
-          {/* Сказано до натискання, а не тільки після. Кнопка лишається
-              натискною — пояснення відкривається саме там, де людина шукала
-              відповідь, — але правило не має бути сюрпризом. */}
-          {ownedFreeWorkspace && (
-            <p className="text-[12px] leading-relaxed text-muted">
-              {FREE_WORKSPACE.switchHint}
-            </p>
-          )}
-
-          <p className="text-[12px] leading-relaxed text-muted">
-            Оплата ще не підключена — тариф можна перемкнути будь-коли й без карти.
-          </p>
-        </Section>
+            title="Доступ qTicket"
+            desc="Стан доповнення для цієї організації QuickTeam"
+          >
+            <Alert
+              variant="info"
+              title="Доступ керується в QuickTeam"
+              description="Активація та склад внутрішньої команди змінюються у QuickTeam. qTicket отримує лише підписаний стан доступу active/inactive і не має власних тарифів чи перемикача підписки."
+              className="mb-4"
+            />
+            <Card preset="borderless" padding="lg">
+              <Row label="Стан доповнення" desc="Доступ qTicket для цієї організації">
+                <Pill tone={entitlementActive ? 'success' : 'warning'} size="md">
+                  {entitlementActive ? 'Активовано' : 'Неактивне'}
+                </Pill>
+              </Row>
+              <Row label="Джерело доступу" desc="qTicket не приймає локальні зміни комерційного стану">
+                <Pill tone="ink-subtle" size="md">QuickTeam</Pill>
+              </Row>
+            </Card>
+          </Section>
         );
       }
 
@@ -3662,11 +3454,10 @@ export default function SettingsPage() {
             : 'Внутрішні працівники, яким власник надав доступ у QuickTeam.'}
           rightAction={clientAdmin && clientProjectIds.length === 1 ? (
           <Button
-            onClick={() => (seatsBlocked ? openPlanUpgrade({ limitId: 'members' }) : setShowInviteModal(true))}
+            onClick={() => setShowInviteModal(true)}
             style="primary"
             size="md"
-            icon={seatsBlocked ? PlanCrownIcon : Plus}
-            title={seatsBlocked ? planLimits.notice('members').title : undefined}
+            icon={Plus}
           >Запросити співробітника</Button>
         ) : null}>
           {!clientViewer && (
@@ -4411,16 +4202,6 @@ export default function SettingsPage() {
 
   // ── Layout ───────────────────────────────────────────────────
   //
-  // «Тарифний план» carries the plan it would open. Which plan a workspace is
-  // on is the first thing anybody comes to that section to find out, and it
-  // took a click to learn it. The free one is red because it is the one with a
-  // ceiling somebody is going to meet.
-  //
-  // Two of these sections are the plan's, not the role's. «Інтеграції» and
-  // «Перенесення даних» have been on the price list as paid since before any of
-  // this, and they were open on Free with nothing marking them — the rail is
-  // where somebody decides which of eleven entries to open, so the crown has to
-  // be there rather than only inside the section.
   const allowedNav = NAV
     .filter(item => !HIDDEN_QTICKET_SETTINGS_SECTIONS.has(item.id))
     .filter(item => clientViewer ? clientSettingsSections.has(item.id) : (!item.adminOnly || isAdmin))
@@ -4428,22 +4209,10 @@ export default function SettingsPage() {
     if (clientViewer && item.id === 'team') {
       return { ...item, label: 'Співробітники клієнта', group: 'Клієнтський простір' };
     }
-    if (item.id === 'billing') {
-      // No badge until the document has actually been read: a red «Free»
-      // beside the plan section is exactly the wrong thing to guess.
-      return planKnown
-        ? { ...item, badge: planName(orgPlan), badgeAlert: orgPlan === DEFAULT_PLAN }
-        : item;
-    }
     return item;
   });
 
   const handleNavChange = async (id) => {
-    // Every section opens. «Інтеграції» and «Перенесення даних» used to be
-    // locked on the rail, which put one decision — «is this workspace allowed
-    // integrations» — in front of a list where the answer may differ per row:
-    // a single integration could be free one day, and a locked rail entry has
-    // nowhere to say so. The crown moved inside, beside each thing it is about.
     const success = await handleSectionChange(id);
     if (success) setMobilePane('content');
   };
@@ -4477,68 +4246,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
-
-
-
-      {/* Питання перед тим, як щось вимкнеться.
-          `handleUpgradePlan` виставляв цей стан із самого початку, а діалог
-          ніхто не монтував: імпорт був, рендера не було. Тому «Перейти на Free»
-          з платного тарифу нічого не робив — стан ставився, і на цьому все
-          закінчувалося. Це та сама пара, що вже стоїть у
-          `WorkspacePlanUpgradeHost`; жоден із двох шляхів до зниження тарифу не
-          має бути тихішим за інший. */}
-      <PlanDowngradeDialog
-        isOpen={Boolean(downgrade)}
-        notice={downgrade}
-        onStay={() => setDowngrade(null)}
-        onConfirm={() => applyPlan(downgrade.planId)}
-        busy={Boolean(upgradingTo)}
-      />
-
-      {/* Чому Free не перемикається. Правило тримає маршрут; тут воно
-          говорить — і називає той простір, який уже займає безкоштовний тариф,
-          бо «десь є ще одна організація» не підказує, куди йти її міняти. */}
-      <Dialog
-        isOpen={Boolean(freeTakenBy)}
-        onClose={() => setFreeTakenBy(null)}
-        size="sm"
-        title={FREE_WORKSPACE.switchTitle}
-        description={FREE_WORKSPACE.switchLead}
-        footer={(
-          <Button style="primary" size="md" onClick={() => setFreeTakenBy(null)} autoFocus>
-            Зрозуміло
-          </Button>
-        )}
-      >
-        <div className="flex flex-col gap-4">
-          <div data-ui-surface="compact-bordered-panel" data-ui-padding="wide" className="ui-surface flex items-center gap-3">
-            {/* Обличчя організації, якщо воно є. Літера — запасний варіант для
-                тих, хто логотип не завантажував, а не стан за замовчуванням:
-                логотип тут не платна можливість, а те, як людина впізнає, про
-                який зі своїх просторів іде мова. */}
-            {(freeTakenBy?.logo || freeTakenBy?.logoUrl) ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={freeTakenBy.logo || freeTakenBy.logoUrl}
-                alt=""
-                className="h-9 w-9 shrink-0 rounded-[10px] border border-line bg-white object-cover"
-              />
-            ) : (
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-ink text-[13px] font-bold text-white">
-                {(freeTakenBy?.name || 'О')[0].toUpperCase()}
-              </span>
-            )}
-            <span className="min-w-0">
-              <span className="block truncate text-[13px] font-bold text-ink">
-                {freeTakenBy?.name || 'Інша організація'}
-              </span>
-              <span className="block text-[12px] text-muted">Зараз на тарифі {planName(DEFAULT_PLAN)}</span>
-            </span>
-          </div>
-          <p className="text-[13px] leading-relaxed text-ink-soft">{FREE_WORKSPACE.switchHow}</p>
-          <p className="text-[12px] leading-relaxed text-muted">{FREE_WORKSPACE.switchReassurance}</p>
-        </div>
-      </Dialog>
 
       <InviteMemberDialog
         isOpen={showInviteModal}

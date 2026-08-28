@@ -2,7 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { refuseWithoutCapability } from '@/lib/server/planLimits';
+import { hasActiveQuickTeamEntitlement } from '@/lib/utils/quickTeamManaged.mjs';
 import {
   createIssueFromTelegram,
   sendTelegramMessage,
@@ -106,22 +106,14 @@ async function createGroupTask(message, content) {
   let createdIssue = null;
   try {
     const data = integration.data();
-    // The bot is «Інтеграції», and a linked chat is a door that stays open on
-    // its own. Nothing here had ever asked the plan: a group connected on Lite
-    // went on posting tasks into a workspace that had gone back to Free, which
-    // is the same failure as an API key that outlives its plan and harder to
-    // notice, because the person typing is in Telegram. The link is not broken
-    // for it — the chat is told why, and it works again with the plan.
-    const refusal = await refuseWithoutCapability(
-      getAdminDb(),
-      data.organizationId,
-      'integrations',
-    );
-    if (refusal) {
-      const { error } = await refusal.json();
+    // Webhooks bypass browser rules, so they enforce the same signed add-on
+    // entitlement as authenticated routes before writing an incident.
+    const organization = await db.collection('organizations').doc(data.organizationId).get();
+    if (!organization.exists || !hasActiveQuickTeamEntitlement(organization.data())) {
+      const error = 'qTicket не активовано для цієї організації';
       await receiptRef.update({ status: 'refused', error: String(error).slice(0, 500) });
       await sendTelegramMessage(message.chat.id, error)
-        .catch(sendError => console.warn('[telegram] plan refusal message failed:', sendError.message));
+        .catch(sendError => console.warn('[telegram] entitlement refusal message failed:', sendError.message));
       return true;
     }
     createdIssue = await createIssueFromTelegram({

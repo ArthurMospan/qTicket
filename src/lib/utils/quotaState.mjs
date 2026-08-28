@@ -11,7 +11,7 @@
 // stop watching it.
 //
 // A quota refusal is not a bug and not a network problem. It is a known
-// condition of the plan the product runs on, it lasts until a known time, and
+// condition of the Firebase tier the product runs on, it lasts until a known time, and
 // the data is untouched. That is three facts a person can act on, so the app
 // says them.
 //

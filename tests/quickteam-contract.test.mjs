@@ -10,6 +10,7 @@ import {
   signQuickTeamRequest,
   verifyQuickTeamRequest,
 } from '../src/lib/integrations/quickteamContract.mjs';
+import { hasActiveQuickTeamEntitlement } from '../src/lib/utils/quickTeamManaged.mjs';
 
 const secret = 'test-shared-secret-with-at-least-32-characters';
 
@@ -95,12 +96,26 @@ test('QuickTeam entitlement gates both Firestore and authenticated server routes
     readFile(new URL('../src/app/api/integrations/quickteam/consume/route.js', import.meta.url), 'utf8'),
   ]);
   assert.match(rules, /function organizationEntitlementActive\(orgId\)/);
+  assert.match(rules, /sourceOrganizationId[^\n]*!= ''/);
   assert.match(rules, /signedIn\(\) && organizationEntitlementActive\(orgId\)/);
   assert.match(server, /isQuickTeamManagedOrganization\(organizationSnap\.data\(\)\)/);
+  assert.match(server, /QTICKET_NOT_PROVISIONED/);
   assert.match(server, /QTICKET_INACTIVE/);
   assert.match(consume, /organization\.data\(\)\?\.quickTeam\?\.entitlement !== 'active'/);
   assert.ok(
     consume.indexOf("quickTeam?.entitlement !== 'active'") < consume.indexOf('createCustomToken'),
     'a launch created before deactivation must not mint a new session afterward',
   );
+});
+
+test('only an active QuickTeam snapshot is a qTicket entitlement', () => {
+  assert.equal(hasActiveQuickTeamEntitlement(null), false);
+  assert.equal(hasActiveQuickTeamEntitlement({}), false);
+  assert.equal(hasActiveQuickTeamEntitlement({ quickTeam: { entitlement: 'active' } }), false);
+  assert.equal(hasActiveQuickTeamEntitlement({
+    quickTeam: { sourceOrganizationId: 'quickteam-org-1', entitlement: 'inactive' },
+  }), false);
+  assert.equal(hasActiveQuickTeamEntitlement({
+    quickTeam: { sourceOrganizationId: 'quickteam-org-1', entitlement: 'active' },
+  }), true);
 });

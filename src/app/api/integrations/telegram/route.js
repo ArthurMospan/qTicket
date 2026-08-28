@@ -3,7 +3,6 @@ import { randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { authenticateRequest, authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { refuseWithoutCapability } from '@/lib/server/planLimits';
 import {
   ensureTelegramWebhook,
   telegramStatus,
@@ -35,11 +34,6 @@ export async function POST(request) {
     if (authorization.error) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     const status = telegramStatus();
     if (!status.configured) return NextResponse.json({ error: 'Telegram bot is not configured' }, { status: 503 });
-    // Linking is «Інтеграції». Unlinking (DELETE) never asks: a workspace must
-    // always be able to close a door it opened, whatever it is paying.
-    const refusal = await refuseWithoutCapability(getAdminDb(), organizationId, 'integrations');
-    if (refusal) return refusal;
-
     await ensureTelegramWebhook();
     const token = randomBytes(24).toString('base64url');
     await getAdminDb().collection('telegramConnectTokens').doc(telegramTokenId(token)).set({

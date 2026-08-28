@@ -99,7 +99,7 @@ Rules of the snapshot:
   incidents, comments, audit history and time records are not rewritten.
 - Branding is copied into `organization.portalBranding` with source
   `quickteam`. The external client shell draws this snapshot even though the
-  staff shell and plan-specific QuickTeam branding are separate concerns.
+  staff shell and client-facing portal branding are separate concerns.
 - Provisioning does not copy QuickTeam projects or tasks. A qTicket client
   project is a support boundary owned by qTicket.
 - A snapshot with `entitlement: "inactive"` immediately refuses new launches
@@ -148,7 +148,7 @@ new launch from QuickTeam, never a reusable fallback password.
 | Data | Authority |
 | --- | --- |
 | Internal organization identity and branding | QuickTeam |
-| Add-on entitlement | QuickTeam billing/provisioning |
+| Add-on entitlement | QuickTeam provisioning/commercial authority |
 | Enabled owner/admin/manager directory | QuickTeam selection |
 | qTicket client projects and their support roster | qTicket |
 | External client identities and invitations | qTicket |

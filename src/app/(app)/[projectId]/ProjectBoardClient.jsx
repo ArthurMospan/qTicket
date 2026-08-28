@@ -42,7 +42,6 @@ import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
-import { PROJECT_OVER_PLAN_LIMIT } from '@/lib/utils/projectAccess.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
@@ -295,7 +294,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const canManageProject = can(orgRole, 'edit:project_settings');
   const canInviteClient = can(orgRole, 'manage:team');
   const isArchived = project?.status === 'archived';
-  const isReadOnly = isArchived || project?.overPlanLimit === true;
+  const isReadOnly = isArchived;
   const tabs = PROJECT_TABS.map(tab => ({
     ...tab,
     count: tab.id === 'incidents'
@@ -413,13 +412,11 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
             </div>
           ) : (
             <div className="flex flex-col gap-[20px]">
-              {(isArchived || project.overPlanLimit === true) && (
+              {isArchived && (
                 <Alert
-                  variant={isArchived ? 'info' : 'warning'}
-                  title={isArchived ? 'Клієнтський простір в архіві' : 'Режим тільки для читання'}
-                  description={isArchived
-                    ? 'Історія та інциденти доступні, але нові звернення тут не створюються.'
-                    : PROJECT_OVER_PLAN_LIMIT}
+                  variant="info"
+                  title="Клієнтський простір в архіві"
+                  description="Історія та інциденти доступні, але нові звернення тут не створюються."
                 />
               )}
 

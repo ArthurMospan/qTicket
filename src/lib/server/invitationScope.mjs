@@ -39,25 +39,3 @@ export async function resolveInvitationScope(db, {
     restoreArchivedProjects: !clientInvitee,
   };
 }
-
-// Read the current invitation capacity without re-reading or shadowing the
-// organization snapshot already verified by the route. Keeping this Promise
-// fan-out executable in isolation prevents the TDZ regression that previously
-// made every new invitation fail before a document could be written.
-export async function readInvitationSeatState(
-  db,
-  organizationId,
-  organizationSnapshot,
-  countActiveMembers,
-) {
-  const [seatsTaken, pendingSeats] = await Promise.all([
-    countActiveMembers(db, organizationId),
-    db.collection('invitations')
-      .where('organizationId', '==', organizationId)
-      .where('status', '==', 'pending')
-      .count()
-      .get()
-      .then(snapshot => snapshot.data().count),
-  ]);
-  return { organizationSnapshot, seatsTaken, pendingSeats };
-}

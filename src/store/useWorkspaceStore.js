@@ -138,21 +138,6 @@ const useWorkspaceStore = create((set, get) => ({
   },
   closeQuickView: () => set({ quickView: null }),
 
-  // ── The plan gate ─────────────────────────────────────────────────
-  // One dialog for «this is on another plan», opened from wherever the wall
-  // was met: a crown beside a control that will not move, the strip across the
-  // top of the workspace, a 403 from a route that counted for real.
-  //
-  // Here for the same reason the quick view is: the alternative is every screen
-  // that can meet a ceiling owning a piece of modal state, and there are as
-  // many of those as there are ceilings times the places they are reached from.
-  // It carries what was refused, so the dialog can lead with that ceiling
-  // instead of opening on a generic price list.
-  planUpgrade: null, // { limitId?, capabilityId?, reason? }
-
-  openPlanUpgrade: (context = {}) => set({ planUpgrade: { ...context } }),
-  closePlanUpgrade: () => set({ planUpgrade: null }),
-
   // ── Timer ─────────────────────────────────────────────────────────
   activeTimer:    null,   // { issueId, projectId, startedAt, entityType?, ...context }
   timerElapsed:   0,      // seconds
@@ -580,7 +565,6 @@ const useWorkspaceStore = create((set, get) => ({
     get().liveNotifs.forEach(card => stopLiveNotifTimer(card.id));
     set({
       quickView: null,
-      planUpgrade: null,
       toast: null,
       _toastTimer: null,
       liveNotifs: [],

@@ -7,12 +7,6 @@ import {
   projectIssueCountDeltasFor,
   projectIssueCountIncrements,
 } from '@/lib/server/projectIssueCounts';
-import {
-  organizationPlan,
-  recordPlanUsage,
-  resyncProjectsOverPlanLimit,
-} from '@/lib/server/planLimits';
-import { normalizePlan, planLimit, planLimitRefusal } from '@/lib/utils/plans.mjs';
 import { introducedIssueExecutionViolations } from '@/lib/utils/issueStatusTransition.mjs';
 import {
   DEFAULT_STATUS_IDS,
@@ -46,10 +40,6 @@ async function loadAuthorizedProject(request, projectId) {
 }
 
 export async function PATCH(request, context) {
-  // Read inside the transaction and answered in the catch, which cannot see
-  // into the try block above it.
-  let restoredPlan = '';
-  let restoredCount = 0;
   try {
     const { projectId } = await context.params;
     const loaded = await loadAuthorizedProject(request, projectId);
@@ -341,39 +331,12 @@ export async function PATCH(request, context) {
     await db.runTransaction(async transaction => {
       const [freshProject, orgSnap] = await Promise.all([transaction.get(ref), transaction.get(orgRef)]);
       if (!freshProject.exists || !orgSnap.exists) throw new Error('NOT_FOUND');
-      restoredPlan = normalizePlan(orgSnap.data().plan);
-      // Bringing a project back is creating one as far as the ceiling is
-      // concerned, so it asks the same registry the create route asks. It used
-      // to read `plan !== 'pro'` with a hardcoded three — the exact bug the
-      // create route was fixed for, still living in the other half of the same
-      // pair, which is what happens when a ceiling is written twice.
-      if (action === 'restore' && freshProject.data().status !== 'active') {
-        const activeQuery = db.collection('projects')
-          .where('organizationId', '==', project.organizationId)
-          .where('status', '==', 'active');
-        const activeSnap = await transaction.get(activeQuery);
-        restoredCount = activeSnap.size;
-        if (activeSnap.size >= planLimit(restoredPlan, 'projects')) {
-          throw new Error('PROJECT_LIMIT_REACHED');
-        }
-      }
       transaction.update(ref, {
         status: action === 'archive' ? 'archived' : 'active',
         updatedAt: FieldValue.serverTimestamp(),
       });
       transaction.update(orgRef, { projectMutationVersion: FieldValue.increment(1) });
     });
-    // A restore has just counted the active projects for real; an archive knows
-    // the count moved but not to what, so it leaves the cache alone rather than
-    // guessing — every screen that shows it also holds the project list itself.
-    if (action === 'restore' && restoredCount) {
-      await recordPlanUsage(db, project.organizationId, { projects: restoredCount + 1 });
-    }
-    // The set of projects the ceiling has room for just changed. Archiving one
-    // on a workspace that is over its plan makes room for one of the ones that
-    // went read-only, and nothing else would have noticed: the mark was written
-    // by the plan switch, and the plan has not changed.
-    await resyncProjectsOverPlanLimit(db, project.organizationId, organizationPlan(await orgRef.get()));
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error?.projectApi) {
@@ -382,12 +345,6 @@ export async function PATCH(request, context) {
         error: message,
         ...details,
       }, { status });
-    }
-    if (error.message === 'PROJECT_LIMIT_REACHED') {
-      return NextResponse.json({
-        error: planLimitRefusal(restoredPlan, 'projects', restoredCount),
-        planLimit: { id: 'projects', plan: restoredPlan, ceiling: planLimit(restoredPlan, 'projects'), used: restoredCount },
-      }, { status: 403 });
     }
     return routeErrorResponse(error, { context: 'Project PATCH', fallbackMessage: 'Internal Server Error' });
   }
@@ -542,14 +499,6 @@ export async function DELETE(request, context) {
       projectMutationVersion: FieldValue.increment(1),
     });
     await db.recursiveDelete(ref);
-    // One fewer active project is one more place under the ceiling, and on a
-    // workspace that is over it that place belongs to whichever project went
-    // read-only last.
-    await resyncProjectsOverPlanLimit(
-      db,
-      project.organizationId,
-      organizationPlan(await db.collection('organizations').doc(project.organizationId).get()),
-    );
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error?.projectApi) {

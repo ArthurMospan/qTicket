@@ -1,8 +1,7 @@
 'use client';
 import Button from '@/components/ui/Button';
 import Surface from '@/components/ui/Surface';
-import { IconAction, Card, ListRow, PlanCards } from '@/components/ui';
-import { useState } from 'react';
+import { IconAction, Card, ListRow } from '@/components/ui';
 import { Edit2, Trash2, Settings, X, Zap, MoreVertical } from 'lucide-react';
 import { PreviewBlock } from '../preview';
 
@@ -115,23 +114,6 @@ export default function SurfacesSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock
-        title="PlanCards — прайслист" component="PlanCards"
-        description="Один прайслист на весь продукт: його показує і онбординг, і «Тарифний план» у налаштуваннях. Плани — дані з plans.mjs, картка нічого про них не вирішує. Смуги картки вирівняні через grid-rows-subgrid, тому ціни й кнопки стоять на одній лінії незалежно від довжини тексту."
-        filePath="src/components/ui/DataDisplay/PlanCards.jsx"
-        fullWidth
-      >
-        <PlanCardsPreview />
-      </PreviewBlock>
     </div>
-  );
-}
-
-// Стан вибору живе тут, бо прайслист сам його не тримає: екран каже, який тариф
-// уже обрано, і що робити, коли натиснули інший.
-function PlanCardsPreview() {
-  const [plan, setPlan] = useState('lite');
-  return (
-    <PlanCards activePlanId={plan} activeLabel="Обрано" onChoose={setPlan} />
   );
 }

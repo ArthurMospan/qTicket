@@ -3,7 +3,6 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, getAdminDb, hashApiKey } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { refuseWithoutCapability } from '@/lib/server/planLimits';
 
 async function authorize(request) {
   const organizationId = new URL(request.url).searchParams.get('organizationId');
@@ -51,11 +50,6 @@ export async function POST(request) {
     if (!safeName) return NextResponse.json({ error: 'Key name is required' }, { status: 400 });
 
     const db = getAdminDb();
-    // Issuing a key is the paid capability, not merely the screen that shows
-    // the list. Revoking one is never refused: a workspace must always be able
-    // to close a door it opened, whatever it is paying.
-    const refusal = await refuseWithoutCapability(db, organizationId, 'integrations');
-    if (refusal) return refusal;
     const { keysRef, keys } = await loadAndMigrateKeys(db, organizationId);
     const token = `qt_${randomBytes(32).toString('hex')}`;
     const storedKey = {

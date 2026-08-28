@@ -438,8 +438,8 @@ test('high-risk composed previews keep the product markup signatures', () => {
   // The scrollport itself is measured rather than derived from the window. It
   // was `100dvh` less a written-down allowance for the fixed header and the
   // shell's inset, which holds only while nothing is ever put above the content
-  // panel — and a strip announcing a spent plan ceiling was, pushing the panel
-  // down by its own height. The rail then stood taller than its column: its
+  // panel — and a temporary shell strip once did, pushing the panel down by its
+  // own height. The rail then stood taller than its column: its
   // composer hung below the bottom edge and the reading column's floor floated
   // up into the middle of the page.
   const detailCss = readFileSync(new URL('../src/app/globals.css', import.meta.url), 'utf8');

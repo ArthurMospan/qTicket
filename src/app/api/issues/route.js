@@ -5,7 +5,7 @@ import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { isValidIssuePrefix } from '@/lib/utils/issueKeys.mjs';
 import { isClientRole, rolesFor } from '@/lib/utils/can';
-import { assigneesOffProjectTeam, assigneesOutsideProject, PROJECT_OVER_PLAN_LIMIT } from '@/lib/utils/projectAccess.mjs';
+import { assigneesOffProjectTeam, assigneesOutsideProject } from '@/lib/utils/projectAccess.mjs';
 import { resolveProjectIssuePrefixInTransaction } from '@/lib/server/issueKeys';
 import {
   projectIssueCountDeltasFor,
@@ -174,16 +174,6 @@ export async function POST(request) {
     if (!isPrivileged && !(Array.isArray(projectTeam) && projectTeam.includes(authorization.user.uid))) {
       return NextResponse.json({ error: 'Ви не входите до команди цього проєкту' }, { status: 403 });
     }
-    // A project the plan's ceiling no longer has room for is read-only. The
-    // routes that edit and delete a task ask `projectWriteError`, which answers
-    // the same thing; creating a task has its own access check, so it asks here.
-    if (projectData.overPlanLimit === true) {
-      return NextResponse.json({
-        error: PROJECT_OVER_PLAN_LIMIT,
-        code: 'PROJECT_OVER_PLAN_LIMIT',
-      }, { status: 403 });
-    }
-
     const assigneeIds = Array.isArray(data.assigneeIds) ? [...new Set(data.assigneeIds)].slice(0, 20) : [];
     // Adding somebody to a project is a thing the caller asks for, never a side
     // effect of assigning them work. The first version of this rule did it

@@ -7,23 +7,11 @@
 // стають джерелом правди і оновлюють кеш.
 import { useEffect, useState } from 'react';
 import { SIDEBAR_THEME_VERSION } from '@/lib/utils/sidebarTheme';
-import { planAllows } from '@/lib/utils/plans.mjs';
 
 const cacheKey = orgId => `qt_sidebar_brand_${orgId}`;
 
-// Тариф питається тут, а не в сайдбарі, бо сайдбар — не єдиний читач цього
-// кешу, і брендинг, намальований в одному місці й не намальований в іншому,
-// гірший за обидві відповіді.
-//
-// Дірка була така: перемикач у налаштуваннях знав про тариф, а застосований
-// логотип — ні. Місяць на Lite, увімкнений бренд, повернення на Free — і
-// логотип лишався назавжди, бо його малювали з полів документа, яких ніхто не
-// звіряв із тарифом. Самі поля (`customBranding`, `logo`, `sidebarColor`) не
-// чіпаються: налаштування зберігається, вимикається лише фіча, і разом з
-// оплатою бренд повертається недоторканим.
 function normalizeBrand(org) {
   if (!org?.customBranding || !org?.logo) return null;
-  if (!planAllows(org.plan, 'branding')) return null;
   return {
     customBranding: true,
     logo: org.logo,

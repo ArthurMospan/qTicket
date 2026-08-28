@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 120,
-    "props": 872,
-    "documentedProps": 872,
+    "components": 114,
+    "props": 842,
+    "documentedProps": 842,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -2863,7 +2863,6 @@
           "values": [
             "auth-close",
             "contrast",
-            "plan",
             "primary",
             "quiet",
             "quiet-danger",
@@ -3050,7 +3049,7 @@
         {
           "name": "items",
           "default": "[]",
-          "type": "{id: string, label: string, icon?: React.ComponentType, badge?: string, badgeAlert?: boolean, locked?: boolean}[]",
+          "type": "{id: string, label: string, icon?: React.ComponentType}[]",
           "values": [],
           "description": "The entries, in order."
         },
@@ -4468,7 +4467,6 @@
             "accent",
             "count",
             "danger",
-            "danger-strong",
             "dark",
             "info",
             "ink-subtle",
@@ -4497,252 +4495,6 @@
             "medium"
           ],
           "description": "Font weight."
-        }
-      ]
-    },
-    "PlanCards": {
-      "file": "src/components/ui/DataDisplay/PlanCards.jsx",
-      "summary": "The price list. One of them, and only one.",
-      "props": [
-        {
-          "name": "activeLabel",
-          "default": "'Це ваш тариф'",
-          "type": "string",
-          "values": [],
-          "description": "What its own button says — «Це ваш тариф», «Обрано»."
-        },
-        {
-          "name": "activePlanId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The plan already in force, or already picked."
-        },
-        {
-          "name": "busyPlanId",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "The plan being switched to right now; its button spins."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "lockedLabel",
-          "default": "'Недоступно'",
-          "type": "string",
-          "values": [],
-          "description": "What a locked plan's button says instead of its own label."
-        },
-        {
-          "name": "lockedPlanIds",
-          "default": "[]",
-          "type": "string[]",
-          "values": [],
-          "description": "Plans this screen may not choose — the second free workspace on one account."
-        },
-        {
-          "name": "onChoose",
-          "default": "",
-          "type": "(planId: string) => void",
-          "values": [],
-          "description": "Fires with the plan whose button was pressed."
-        }
-      ]
-    },
-    "PlanDowngradeDialog": {
-      "file": "src/components/ui/Feedback/PlanDowngradeDialog.jsx",
-      "summary": "The question asked before a workspace loses something.",
-      "props": [
-        {
-          "name": "busy",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "The switch is in flight."
-        },
-        {
-          "name": "isOpen",
-          "default": "",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether it is on screen."
-        },
-        {
-          "name": "notice",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "From `planDowngradeNotice` — the whole dialog, in data."
-        },
-        {
-          "name": "onConfirm",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Goes ahead with the downgrade."
-        },
-        {
-          "name": "onStay",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Keeps the current plan. The × , the overlay and Escape do this too."
-        }
-      ]
-    },
-    "PlanGate": {
-      "file": "src/components/ui/Feedback/PlanGate.jsx",
-      "summary": "A whole screen the plan does not include, and what stands there instead. The crown is the mark for a control that will not move.",
-      "props": [
-        {
-          "name": "capabilityId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "One of `PLAN_CAPABILITIES`."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        }
-      ]
-    },
-    "PlanLimitRail": {
-      "file": "src/components/ui/Feedback/PlanLimitRail.jsx",
-      "summary": "A ceiling that has run out, said once, at the foot of the sidebar.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "collapsed",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "The rail is a 64px strip of icons."
-        },
-        {
-          "name": "extra",
-          "default": "0",
-          "type": "number",
-          "values": [],
-          "description": "How many further ceilings are also full."
-        },
-        {
-          "name": "notice",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "What ran out; from `planLimitNotice`."
-        },
-        {
-          "name": "onOpen",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Opens the price list on that ceiling."
-        }
-      ]
-    },
-    "PlanMark": {
-      "file": "src/components/ui/DataDisplay/PlanMark.jsx",
-      "summary": "A gold crown beside something this plan does not reach. It belongs next to the control, not on the price list.",
-      "props": [
-        {
-          "name": "capabilityId",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Which capability, when it is one of `PLAN_CAPABILITIES`."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "label",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Why the control will not move — the tooltip and the accessible name."
-        },
-        {
-          "name": "limitId",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Which ceiling, when it is one of `PLAN_LIMITS`."
-        },
-        {
-          "name": "size",
-          "default": "'micro'",
-          "type": "'micro'|'xs'|'sm'",
-          "values": [],
-          "description": "Box size; `micro` is the inline mark beside a label."
-        }
-      ]
-    },
-    "PlanUpgradeDialog": {
-      "file": "src/components/ui/Feedback/PlanUpgradeDialog.jsx",
-      "summary": "What the crown opens, and what the strip's button opens, and where a 403 from a route that counted for real sends the reader.",
-      "props": [
-        {
-          "name": "busyPlanId",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "The plan being switched to right now."
-        },
-        {
-          "name": "currentPlanId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The plan the workspace is on."
-        },
-        {
-          "name": "isOpen",
-          "default": "",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether it is on screen."
-        },
-        {
-          "name": "notice",
-          "default": "",
-          "type": "{title: string, hint: string, reading?: string}",
-          "values": [],
-          "description": "What was in the way, if anything."
-        },
-        {
-          "name": "onChoose",
-          "default": "",
-          "type": "(planId: string) => void",
-          "values": [],
-          "description": "Fires with the plan whose button was pressed."
-        },
-        {
-          "name": "onClose",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Closes it: the ×, the overlay and Escape all call this."
         }
       ]
     },

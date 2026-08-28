@@ -10,7 +10,6 @@ import {
   readSignedQuickTeamRequest,
   resolveQuickTeamStaff,
 } from '@/lib/server/quickteamIntegration';
-import { storedPlanLimit } from '@/lib/utils/plans.mjs';
 
 const INTERNAL_ROLES = new Set(['owner', 'admin', 'member']);
 const MAX_TRANSACTION_WRITES = 450;
@@ -73,18 +72,12 @@ export async function POST(request) {
       }
 
       const now = FieldValue.serverTimestamp();
-      const plan = currentOrganization.plan || 'pro';
       transaction.set(organizationRef, {
         id: organizationId,
         name: payload.organization.name,
         logo: payload.organization.logo,
         ownerId: owner.qTicketUserId,
         memberUids: [...new Set([...retainedClientIds, ...incomingUserIds])],
-        plan,
-        limits: currentOrganization.limits || {
-          maxProjects: storedPlanLimit(plan, 'projects'),
-          maxMembers: storedPlanLimit(plan, 'members'),
-        },
         timezone: payload.organization.timezone,
         onboarded: true,
         portalBranding: {

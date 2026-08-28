@@ -18,7 +18,6 @@ import Tooltip from '@/components/ui/Navigation/Tooltip';
 import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
 import WorkspaceHelpMenu from '@/components/WorkspaceHelpMenu';
-import WorkspacePlanLimitRail from '@/components/WorkspacePlanLimitRail';
 
 import { can, isClientRole } from '@/lib/utils/can';
 import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
@@ -483,8 +482,6 @@ export default function WorkspaceSidebar() {
       </div>
         </>
       )}
-
-      {!clientViewer && <WorkspacePlanLimitRail collapsed={collapsed} />}
 
       <WorkspaceHelpMenu collapsed={collapsed} />
 

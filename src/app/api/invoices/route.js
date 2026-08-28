@@ -6,7 +6,6 @@ import {
   getAdminDb,
 } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { refuseWithoutCapability } from '@/lib/server/planLimits';
 import {
   InvoicePayloadError,
   MAX_INVOICE_JSON_BYTES,
@@ -105,16 +104,6 @@ export async function POST(request) {
         code: 'INVOICE_RATE_LIMIT',
       }, { status: 429 });
     }
-    // Issuing an invoice is a paid capability, and the analytics screen was the
-    // only thing that knew it. Invoices already issued are not touched: they are
-    // the record of work that was billed, and they open, print and void on any
-    // plan. Only writing a new one waits for the plan to come back.
-    const capabilityRefusal = await refuseWithoutCapability(
-      getAdminDb(),
-      requestedOrganizationId,
-      'invoices',
-    );
-    if (capabilityRefusal) return capabilityRefusal;
 
     const normalized = normalizeInvoiceRequest(body);
     const {

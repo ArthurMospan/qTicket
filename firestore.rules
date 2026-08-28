@@ -33,17 +33,17 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + request.auth.uid));
     }
 
-    // Standalone legacy workspaces have no QuickTeam marker and keep working.
-    // A provisioned add-on is reachable only while QuickTeam says its
-    // entitlement is active. This gate covers internal staff and external
-    // clients equally, including already-open browser sessions.
+    // qTicket has no standalone tenant. A workspace is reachable only when it
+    // was provisioned by QuickTeam and the latest signed snapshot says the
+    // add-on is active. This covers internal staff and external clients equally,
+    // including already-open browser sessions.
     function organizationEntitlementActive(orgId) {
       let orgPath = /databases/$(database)/documents/organizations/$(orgId);
       let quickTeam = exists(orgPath)
         ? get(orgPath).data.get('quickTeam', {})
         : {};
-      return !exists(orgPath) ||
-        quickTeam.get('sourceOrganizationId', '') == '' ||
+      return exists(orgPath) &&
+        quickTeam.get('sourceOrganizationId', '') != '' &&
         quickTeam.get('entitlement', 'inactive') == 'active';
     }
 
@@ -180,20 +180,11 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if signedIn() && organizationEntitlementActive(orgId) &&
         (isOrgMember(orgId) || resource.data.ownerId == request.auth.uid);
-      // Created by /api/organizations, and it has to be: «one free workspace per
-      // account» is a count of the documents somebody already owns, and a rule
-      // cannot count anything. The check this replaces — «the new document names
-      // you as its owner» — is true of every second, third and tenth free
-      // workspace as well, so it was never the rule the product meant.
+      // Created only by the signed QuickTeam provisioning route.
       allow create: if false;
-      // `plan` and `limits` joined `apiKeys` here the day a plan change stopped
-      // being one field: moving down a plan also decides which projects the new
-      // ceiling no longer has room for, and marks them, in the same write.
-      // /api/organizations/{id} with action 'set-plan' is that write.
-      allow update: if isOrgAdminOrOwner(orgId) &&
-        request.resource.data.ownerId == resource.data.ownerId &&
-        !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(['apiKeys', 'plan', 'limits']);
+      // The organization document is a signed QuickTeam snapshot plus
+      // server-maintained qTicket counters. Browser SDKs never update it.
+      allow update: if false;
       allow delete: if false; // Requires a future server-side cascading delete.
 
       match /presence/{uid} {
@@ -208,17 +199,9 @@ service cloud.firestore {
       allow read: if signedIn() &&
         (resource.data.userId == request.auth.uid || isOrgAdminOrOwner(resource.data.orgId));
 
-      // Nothing writes a seat from a browser any more. The one exception was
-      // the first owner of a freshly created organization, and that seat is now
-      // written by /api/organizations in the same batch as the organization
-      // itself — the only place that can hold «one free workspace per account».
-      // What the bootstrap allowed, once the organization document could no
-      // longer be forged, was narrow; what it cost to keep was a second path
-      // into the collection that decides every permission in the product.
-      //
-      // Roles, positions, rates and removals were already privileged
-      // multi-document mutations. The Admin SDK routes validate them and
-      // perform their cascades; no browser write may bypass those routes.
+      // QuickTeam provisioning writes internal seats. qTicket invitation and
+      // membership routes write client seats. No browser write may bypass
+      // those server boundaries.
       allow create, update, delete: if false;
     }
 
@@ -263,8 +246,8 @@ service cloud.firestore {
       allow delete: if isOrgAdminOrOwner(resource.data.organizationId);
     }
 
-    // ── projects/{projectId} — created only via Admin SDK (/api/projects,
-    //    which enforces plan limits); client can read/update/delete ──────
+    // ── projects/{projectId} — created only via Admin SDK (/api/projects);
+    //    client can read/update/delete ───────────────────────────────────
     match /projects/{projectId} {
       // Per-project access: owners/admins see everything; a plain member may
       // only read a project they are a `team` member of. `team is list` guards
@@ -294,11 +277,7 @@ service cloud.firestore {
             'issueStatusVersion',
             'invoiceMutationVersion',
             'timeLogImportVersion',
-            'deletionPending',
-            // Which projects the plan's ceiling no longer has room for. Written
-            // by the plan switch and by nothing else — a browser that could
-            // clear it could write into a project the plan has closed.
-            'overPlanLimit'
+            'deletionPending'
           ])
         ) ||
         (isOrgMember(resource.data.organizationId) &&

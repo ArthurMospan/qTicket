@@ -12,23 +12,18 @@ import { useModalFocus } from '@/lib/hooks/useModalFocus';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
 import { useOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCounts';
-import { planAllows } from '@/lib/utils/plans.mjs';
 import { isClientRole } from '@/lib/utils/can';
 import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
-// «Брендинг у сайдбарі» — платна можливість, і питати про це має кожен, хто
-// його малює, а не лише перемикач у налаштуваннях. Поле в базі лишається на
-// місці: повернувся тариф — повернувся й брендинг.
 function orgIsBranded(org) {
-  return Boolean(org?.customBranding) && planAllows(org?.plan, 'branding');
+  return Boolean(org?.customBranding);
 }
 
 // А ось це — не брендинг.
 //
 // Логотип організації і брендинг сайдбару — дві різні речі, і в налаштуваннях
 // вони лежать у двох різних картках: «Логотип організації» під «Організація»
-// нічим не обмежений, а платне — це «Замінити логотип QuickTeam на логотип
-// вашої організації для всіх учасників», тобто чужа рейка, не власне обличчя.
+// — це обличчя tenant, а `customBranding` визначає оформлення його рейки.
 // Цей екран питає «яка з ваших організацій?» — тут логотип є відповіддю на це
 // питання, а не купленою можливістю. Він запитував `orgIsBranded`, тож варто
 // було вимкнути світч у налаштуваннях (або злетіти з Lite) — і всі організації

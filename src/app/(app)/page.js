@@ -46,10 +46,6 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { createIssueViaApi } from '@/lib/services/issues';
 import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
-import { planLimitNotice } from '@/lib/utils/plans.mjs';
-import { PROJECT_OVER_PLAN_LIMIT } from '@/lib/utils/projectAccess.mjs';
-import { usePlanLimits } from '@/lib/hooks/usePlanLimits';
-import { PlanCrownIcon } from '@/lib/design/icons';
 import ClientIncidentPortal from '@/components/client/ClientIncidentPortal';
 
 
@@ -232,17 +228,6 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
             >
               {project.name}
             </h2>
-            {/* A project the plan's ceiling no longer has room for. Marked
-                rather than hidden, and read-only rather than gone: everything
-                in it opens and reports exactly as before, and the mark goes
-                away the moment the plan goes back up. The ones marked are the
-                ones created most recently — the only ordering somebody can
-                predict for themselves. */}
-            {project.overPlanLimit === true && (
-              <Pill tone="warning" size="md" title={PROJECT_OVER_PLAN_LIMIT}>
-                Тільки читання
-              </Pill>
-            )}
             {/* «Вас тут згадали» — на кожній картці, а не лише на великій.
                 Це єдиний факт на картці, адресований особисто читачеві, і саме
                 його раніше було видно тільки на одній картці з чотирьох: стрічка
@@ -524,7 +509,7 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
 }
 
 // ── New Internal Project Modal ───────────────────────────────────────────────
-function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members = [], statuses = [] }) {
+function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
   const router = useRouter();
   const [name,        setName]        = useState('');
   const [description, setDescription] = useState('');
@@ -533,15 +518,6 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
   const [team,        setTeam]        = useState([]);
   const [hiddenColumns, setHiddenColumns] = useState([]);
   const [nameError, setNameError] = useState('');
-
-  // Read from the plan registry rather than restated — the ceiling, and the two
-  // sentences that go with it. This screen used to word its own refusal («На
-  // тарифі Free дозволено 3 активні проєкти…»), the create route worded another
-  // one, and the two would have parted company the first time either was
-  // edited. Now both print `planLimitNotice`.
-  const openPlanUpgrade = useWorkspaceStore(state => state.openPlanUpgrade);
-  const limitNotice = planLimitNotice(orgPlan, 'projects', activeProjectsCount);
-  const limitReached = Boolean(limitNotice);
 
   const [error, setError] = useState(null);
   const handleCreate = async () => {
@@ -576,14 +552,7 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
       });
       const result = await response.json();
       if (!response.ok) {
-        // A ceiling comes back named, so the alert can offer the price list on
-        // that ceiling instead of the screen guessing from the word «Pro» in a
-        // sentence — which is what it used to do, and what stopped working the
-        // moment the refusal named a cheaper plan.
-        setError({
-          message: result.error || 'Не вдалося створити клієнтський простір',
-          limitId: result.planLimit?.id || '',
-        });
+        setError({ message: result.error || 'Не вдалося створити клієнтський простір' });
         setSaving(false);
         return;
       }
@@ -591,56 +560,21 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
       onClose();
     } catch (err) {
       console.error('[NewProject]', err);
-      setError({ message: err.message, limitId: '' });
+      setError({ message: err.message });
     }
     setSaving(false);
   };
 
   return (
     <Dialog isOpen={true} onClose={onClose} title="Новий клієнт" size="sm" footer={
-      limitReached ? (
-        <div className="flex flex-col gap-2 w-full">
-          {/* The price list, not a route to a settings section — and not «Pro»,
-              which was the only way out this offered while a cheaper plan
-              existed that also raises this ceiling. */}
-          <Button onClick={() => { onClose(); openPlanUpgrade({ limitId: 'projects' }); }} style="primary" size="md" className="w-full">Тарифні плани</Button>
-          <Button onClick={onClose} style="secondary" size="md" className="w-full">Закрити</Button>
-        </div>
-      ) : (
-        <>
-          <Button onClick={onClose} style="secondary" size="md">Скасувати</Button>
-          <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити клієнта</Button>
-        </>
-      )
+      <>
+        <Button onClick={onClose} style="secondary" size="md">Скасувати</Button>
+        <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити клієнта</Button>
+      </>
     }>
-      {limitReached ? (
-        <div className="flex flex-col items-center text-center">
-          {/* Gold, not a grey padlock on a blue square. Nothing has broken and
-              nothing was lost: the workspace is doing exactly what the plan
-              says it does, and a lock is the product's word for «no». */}
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[12px] bg-plan-soft">
-            <PlanCrownIcon size={28} className="text-plan" aria-hidden />
-          </div>
-          <h3 className="ui-type-feature-title text-ink mb-2">{limitNotice.title}</h3>
-          <p className="text-[13px] text-muted leading-relaxed">
-            Використано {limitNotice.reading}. {limitNotice.hint}
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-[16px]">
+      <div className="flex flex-col gap-[16px]">
           {error && (
-            <Alert variant="error" title={error.message}>
-              {error.limitId ? (
-                <Button
-                  style="primary"
-                  size="sm"
-                  className="mt-1"
-                  onClick={() => { onClose(); openPlanUpgrade({ limitId: error.limitId }); }}
-                >
-                  Тарифні плани
-                </Button>
-              ) : null}
-            </Alert>
+            <Alert variant="error" title={error.message} />
           )}
           {/* Same shared form the settings dialog renders — the two used to be
               hand-written separately and drifted apart field by field. */}
@@ -663,14 +597,13 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
             teamPlaceholder="Оберіть працівників підтримки"
             teamHint="Після створення відкрийте клієнта → «Люди», щоб окремо запросити адміністратора клієнта."
           />
-        </div>
-      )}
+      </div>
     </Dialog>
   );
 }
 
 export default function WorkspacePage({ clientsRoute = false } = {}) {
-  const { projects, projectsLoading, projectsError, currentUser, activeOrgId, activeOrg, orgRole } = useAppContext();
+  const { projects, projectsLoading, projectsError, currentUser, activeOrgId, orgRole } = useAppContext();
   const showToast = useWorkspaceStore(s => s.showToast);
   const { members, loading: orgLoading } = useOrganization();
   const { statuses } = useWorkflowConfig();
@@ -684,12 +617,6 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     () => (projects || []).find(project => project.status !== 'archived') || null,
     [projects],
   );
-  // The ceiling, on the button that would meet it. A control that opens a form
-  // in order to tell you the form is closed wastes the click that told you.
-  const planLimits = usePlanLimits();
-  const projectsBlocked = planLimits.blocked('projects');
-  const openPlanUpgrade = useWorkspaceStore(s => s.openPlanUpgrade);
-
   // Real-time issues state
 
   // Filter states
@@ -891,19 +818,13 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
           actions={
             can(orgRole, 'create:project') && (
               <Button
-                onClick={() => (projectsBlocked
-                  ? openPlanUpgrade({ limitId: 'projects' })
-                  : setShowNewProject(true))}
+                onClick={() => setShowNewProject(true)}
                 style="primary"
                 color="dark"
                 size="lg"
-                // The crown replaces the plus when there is no room left. The
-                // button still works — it opens the price list on the ceiling
-                // that is in the way instead of a form that cannot be
-                // submitted — and it says so before it is pressed.
-                icon={projectsBlocked ? PlanCrownIcon : Plus}
+                icon={Plus}
                 collapseAt="sm"
-                title={projectsBlocked ? planLimits.notice('projects').title : 'Новий клієнт'}
+                title="Новий клієнт"
               >
                 Новий клієнт
               </Button>
@@ -1002,8 +923,6 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
       <NewProjectModal
         onClose={() => setShowNewProject(false)}
         orgId={activeOrgId}
-        orgPlan={activeOrg?.plan}
-        activeProjectsCount={stats.total}
         members={supportMembers}
         statuses={statuses}
       />

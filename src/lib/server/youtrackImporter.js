@@ -9,7 +9,6 @@ import {
   writeAnalyticsRollupDeltas,
 } from '@/lib/server/analyticsRollups';
 import { AnalyticsRollupDeltas } from '@/lib/utils/analyticsRollups.mjs';
-import { normalizePlan, planLimit, planLimitRefusal } from '@/lib/utils/plans.mjs';
 import { resolveProjectIssuePrefixInTransaction } from '@/lib/server/issueKeys';
 import { recountProjectIssueCounts } from '@/lib/server/projectIssueCounts';
 import {
@@ -345,29 +344,13 @@ async function ensureTargetProject(job, sourceProject) {
     ...Object.values(job.userMappings || {}).filter(value => value && value !== 'external'),
   ])].slice(0, 100);
   await db.runTransaction(async transaction => {
-    const [freshLink, organization, organizationProjects] = await Promise.all([
+    const [freshLink, organizationProjects] = await Promise.all([
       transaction.get(linkRef),
-      transaction.get(db.collection('organizations').doc(job.organizationId)),
       transaction.get(
         db.collection('projects').where('organizationId', '==', job.organizationId),
       ),
     ]);
     if (freshLink.exists) return;
-    if (!organization.exists) throw new Error('Організацію не знайдено');
-    // An import that creates a project is creating a project, so it asks the
-    // same registry the create route asks. This was the third copy of one
-    // ceiling — `plan !== 'pro'` with a hardcoded three, refusing Lite a fourth
-    // project like a free workspace — and the third copy of one refusal, which
-    // named Pro as the only way out while Lite raises this ceiling too.
-    const plan = normalizePlan(organization.data().plan);
-    const activeProjectCount = organizationProjects.docs
-      .filter(document => document.data().status === 'active')
-      .length;
-    if (activeProjectCount >= planLimit(plan, 'projects')) {
-      throw new Error(
-        `${planLimitRefusal(plan, 'projects', activeProjectCount)} Або зіставте імпорт із наявним проєктом.`,
-      );
-    }
     const organizationProjectValues = organizationProjects.docs.map(document => ({
       ...document.data(),
       id: document.id,

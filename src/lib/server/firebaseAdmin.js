@@ -15,7 +15,7 @@ import {
 } from 'firebase-admin/firestore';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isRejectedIdTokenError } from '@/lib/utils/firebaseAuthError.mjs';
-import { isQuickTeamManagedOrganization } from '@/lib/utils/quickTeamManaged.mjs';
+import { hasActiveQuickTeamEntitlement, isQuickTeamManagedOrganization } from '@/lib/utils/quickTeamManaged.mjs';
 
 function getAdminApp() {
   if (getApps().length) return getApp();
@@ -122,11 +122,10 @@ export async function authorizeOrgRequest(request, organizationId, allowedRoles 
     db.collection('organizations').doc(organizationId).get(),
   ]);
   if (!membershipSnap.exists) return { error: 'Forbidden', status: 403 };
-  if (
-    organizationSnap.exists
-    && isQuickTeamManagedOrganization(organizationSnap.data())
-    && organizationSnap.data()?.quickTeam?.entitlement !== 'active'
-  ) {
+  if (!organizationSnap.exists || !isQuickTeamManagedOrganization(organizationSnap.data())) {
+    return { error: 'Організацію qTicket не підключено через QuickTeam', status: 403, code: 'QTICKET_NOT_PROVISIONED' };
+  }
+  if (!hasActiveQuickTeamEntitlement(organizationSnap.data())) {
     return { error: 'qTicket не активовано для цієї організації', status: 403, code: 'QTICKET_INACTIVE' };
   }
 

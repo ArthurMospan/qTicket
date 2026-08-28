@@ -3,7 +3,6 @@ import { randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { refuseWithoutCapability } from '@/lib/server/planLimits';
 import {
   ensureTelegramWebhook,
   telegramStatus,
@@ -42,8 +41,6 @@ export async function POST(request) {
     if (authorization.error) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     const status = telegramStatus();
     if (!status.configured) return NextResponse.json({ error: 'Telegram bot is not configured' }, { status: 503 });
-    const refusal = await refuseWithoutCapability(getAdminDb(), organizationId, 'integrations');
-    if (refusal) return refusal;
     const project = await getAdminDb().collection('projects').doc(projectId).get();
     if (!project.exists || project.data().organizationId !== organizationId || project.data().status === 'archived') {
       return NextResponse.json({ error: 'Оберіть активний проєкт цієї організації' }, { status: 400 });

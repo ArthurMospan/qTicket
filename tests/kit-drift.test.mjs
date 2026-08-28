@@ -131,11 +131,8 @@ test('the variant matrix renders every component that can stand alone', () => {
 // Raised 112 → 113 by the table's row density, for the same reason: a row
 // carrying a face is `comfortable` and says so, a row of figures is `compact`
 // and says nothing, because that is what it gets by default.
-// Raised 113 → 114 because `Pill tone="info"` lost its last call site on
-// purpose. It was the blue badge over the most popular plan, and the price list
-// no longer marks that plan with a second colour — it carries a badge and
-// nothing else. The tone stays declared: blue is a status the product has, it
-// simply is not a thing to be in a price list.
+// Raised 113 → 114 because `Pill tone="info"` temporarily lost its last call
+// site. The tone stays declared because blue remains a product status.
 // Raised 114 → 115 because qTicket exposes only in-app notifications. The last
 // explicit `ToggleSwitch size="md"` was the master switch for a dormant
 // external channel. `md` remains the component default and its catalogue

@@ -83,24 +83,6 @@
   --color-info-solid:     #3b82f6;
   --color-info-soft:      #eff6ff;
 
-  /* ── The plan violet ─────────────────────────────────────────────────
-     One colour, for one meaning: «this is on another plan». It is not a status
-     — nothing failed, nothing is late, nothing needs care — and it is not the
-     brand either, because a crown drawn in the product's own ink is a black
-     glyph among black glyphs and says nothing.
-
-     It was a gold, `#b8860b`, and gold is the obvious choice for a crown and
-     the wrong one here: at fourteen pixels dark goldenrod reads brown, not
-     gold, and at 3.25:1 on white it clears the bar for a graphic and misses it
-     for text — so it needed a second, darker value for anything that had to be
-     read. Violet is one value for both. It clears AA at 5.7:1, so the crown,
-     the badge and the sentence beside them are the same colour, and it is the
-     only colour in the workspace that means nothing else.
-
-     Two roles, not three: the colour, and the wash it sits on. */
-  --color-plan:       #7c3aed;
-  --color-plan-soft:  #f5f3ff;
-
   /* A fourth role, for the one surface the three above cannot serve: dark.
      The ink clears AA on white and the solid is mixed to read on white, so on
      the sidebar or a dark counter both go muddy — which is why the dark dots in
@@ -745,75 +727,6 @@
     border-color: var(--color-line-strong);
     background: var(--color-canvas);
   }
-  /* ── The rail's own notice ───────────────────────────────────────────────
-     A ceiling of the plan that has run out, at the foot of the sidebar.
-
-     Every value in it is mixed out of `--sb-text`, which is the rail's own type
-     colour: the wash, the outline and the counter follow whatever an
-     organization has painted its sidebar, black, white or otherwise, and there
-     is no second palette to keep in step with a brand nobody here has seen. The
-     one colour that is not the rail's own is the glyph, and it is a fill rather
-     than text — the words beside it carry the meaning. */
-  .ui-rail-notice {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    gap: 10px;
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--sb-text, #ffffff) 8%, transparent);
-    padding: 8px 10px;
-    text-align: left;
-    transition: background-color 150ms;
-  }
-  .ui-rail-notice:hover {
-    background: color-mix(in srgb, var(--sb-text, #ffffff) 15%, transparent);
-  }
-  .ui-rail-notice[data-ui-rail-notice='collapsed'] {
-    width: 32px;
-    height: 32px;
-    justify-content: center;
-    margin-inline: auto;
-    padding: 0;
-  }
-  .ui-rail-notice__mark {
-    flex-shrink: 0;
-    color: var(--color-warning-solid);
-  }
-  .ui-rail-notice__body {
-    display: flex;
-    min-width: 0;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: 1px;
-  }
-  .ui-rail-notice__title {
-    overflow: hidden;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.3;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--sb-text, #ffffff);
-  }
-  .ui-rail-notice__detail {
-    overflow: hidden;
-    font-size: 10px;
-    font-weight: 500;
-    line-height: 1.3;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--sb-muted, #a3a3a3);
-  }
-  .ui-rail-notice__extra {
-    flex-shrink: 0;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--sb-text, #ffffff) 14%, transparent);
-    padding: 1px 6px;
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1.4;
-    color: var(--sb-text, #ffffff);
-  }
   .ui-native-control[data-ui-control='choice-card'] {
     display: flex;
     align-items: center;
@@ -1089,9 +1002,9 @@
        And the scrollport is measured, not guessed. It used to be derived from
        the window — `100dvh` minus a written-down allowance for the header and
        the shell's inset — which is true only for as long as nothing else is
-       ever put above the content panel. Something was: a strip announcing a
-       spent plan ceiling, which pushed the panel down by its own height plus a
-       gutter. The rail then stood some seventy pixels taller than the column it
+       ever put above the content panel. A temporary shell strip once pushed
+       the panel down by its own height plus a gutter. The rail then stood some
+       seventy pixels taller than the column it
        lives in, so its composer hung below the bottom edge, and the reading
        column's floor — which is the last item of a flex column stretched to the
        grid row — floated up into the middle of the page. Two visible faults,
@@ -1264,15 +1177,6 @@
   .ui-pill[data-ui-pill-tone='danger'] {
     background: var(--color-danger-soft);
     color: var(--color-danger);
-  }
-  /* The filled red beside `dark`'s filled black, for the one place a badge is a
-     pair: the plan a workspace is on, in the settings menu. A wash would not
-     read as the other half of that pair, and the fill is the ink rather than
-     the solid because this one carries a word — `danger-solid` is mixed to sit
-     under text, not behind it, and white on it is 3.7:1. */
-  .ui-pill[data-ui-pill-tone='danger-strong'] {
-    background: var(--color-danger);
-    color: var(--color-surface);
   }
   .ui-pill[data-ui-pill-tone='info'] {
     background: var(--color-info-soft);

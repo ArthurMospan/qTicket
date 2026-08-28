@@ -168,12 +168,6 @@ export default function BadgesSection() {
         </div>
       </PreviewBlock>
 
-      {/* `PlanMark` used to be previewed here, while it was a small dark star
-          among the other small dark marks. It is a gold crown that opens the
-          price list now, and it belongs beside the two things that open the
-          same dialog — the strip and the dialog itself — rather than beside
-          the priorities and the tags. It lives in «Feedback & States». */}
-
       <PreviewBlock
         title="StatusPill — sprint states"
         description="Спільний компактний статус зі сторінки спринтів. Геометрія однакова, а label і semantic color приходять із контексту."

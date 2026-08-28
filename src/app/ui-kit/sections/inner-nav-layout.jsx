@@ -6,7 +6,7 @@ import { IconAction, SidebarLayout, InnerNavigation, MobilePaneBack, UserAvatar,
 import ChatComposerDock from '@/components/ui/ChatComposerDock';
 import ChatConversationHeader from '@/components/ui/Chat/ChatConversationHeader';
 import ChatMessageList from '@/components/ui/Chat/ChatMessageList';
-import { Plus, User, Bell, X, Users, Building, CreditCard } from 'lucide-react';
+import { Plus, User, Bell, X, Users, Building } from 'lucide-react';
 import { ChatIcon } from '@/lib/design/icons';
 import { PreviewBlock } from '../preview';
 import { CHAT_DEMO_MEMBERS, CHAT_DEMO_MESSAGES } from '../demo-data';
@@ -27,10 +27,6 @@ export default function NavMenuSection() {
     { id: 'notifications', label: 'Сповіщення',        icon: Bell,     group: 'Особисте' },
     { id: 'workspace',     label: 'Загальні',          icon: Building, group: 'Організація' },
     { id: 'team',          label: 'Учасники команди',  icon: Users,    group: 'Організація' },
-    // Рядок може нести бейдж — той один факт, який варто знати ще до кліку.
-    // Тут це тариф: чорний, а на безкоштовному червоний, бо саме там є стеля,
-    // в яку хтось упреться.
-    { id: 'billing',       label: 'Тарифний план',     icon: CreditCard, group: 'Організація', badge: 'Free', badgeAlert: true },
   ];
   const demoUser = { id: 'kit-arthur', name: 'Артур Моспан' };
 

@@ -5,8 +5,8 @@
 // A report about a period should cost what the period costs, not what the
 // workspace's whole history costs. Windowing the raw reads (see
 // `analyticsWindow.mjs`) fixed the worst of it, but «за 90 днів» across a busy
-// team is still thousands of documents to draw four numbers, on a plan with a
-// hard daily read cap. A day's total for a project is a single small document,
+// team is still thousands of documents to draw four numbers, while Firestore
+// has a hard daily read cap. A day's total for a project is a single small document,
 // and ninety of them is ninety reads whatever the team did in those ninety days.
 //
 // ── What it is not ───────────────────────────────────────────────────────

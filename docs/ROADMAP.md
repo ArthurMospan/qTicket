@@ -15,8 +15,15 @@ This file contains current owner guardrails and confirmed open work. Completed i
 - qTicket does not publish a price list, sell or switch subscriptions, or use a
   browser-visible plan as a security boundary. QuickTeam owns the add-on's
   commercial state and sends only the server-side `active`/`inactive`
-  entitlement that qTicket enforces. Removing the remaining inherited plan UI
-  and plan gates is part of the current product-fit audit.
+  entitlement that qTicket enforces.
+- QuickTeam owns the internal support directory: activation, enabled staff,
+  roles, identity and removal. qTicket may render that synchronized directory
+  read-only for assignment and support operations, but must not duplicate its
+  administration. A separate **Команда** surface earns primary navigation only
+  if it adds incident-specific operational value such as workload, assigned
+  clients or SLA risk; a copied name/role roster belongs in contextual pickers
+  and profiles instead. External client employees remain qTicket-owned because
+  `client_admin` manages them inside one client project.
 - Organization deletion stays disabled until an owner-only, idempotent server cascade safely handles Firestore and external files and has integration coverage.
 - Multi-tenant isolation and server-authorized privileged writes take precedence over UI convenience.
 
@@ -42,7 +49,7 @@ Completed foundation:
 - Firebase client/admin configuration and Cloudinary are configured in Vercel;
   secrets are not stored in Git. Transactional email is intentionally disabled.
 - Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
-  suite passes all 80 tests, including the project-scoped client boundary,
+  suite passes all 81 tests, including the project-scoped client boundary,
   entitlement revocation and stale project-roster denial.
 - The role model already exists in code and rules: internal `owner`, `admin`,
   `member`; external `client_admin`, `client_member`. External users can create,
@@ -76,8 +83,9 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,175 unit tests, all 42 local
-  visual scenarios, and the UI Kit usage, drift, fidelity, colour and
+- The product baseline passes lint, the complete unit suite, production build,
+  all 81 Firestore rules tests, all 42 local visual scenarios, and the UI Kit
+  usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
 - The version 1 QuickTeam add-on contract now exists in both repositories.
@@ -151,14 +159,22 @@ Completed product slice on 2026-08-28:
   Admin SDK. Every calendar route now requires an internal support role, while
   `calendarEvents` stays server-only for every browser role in Firestore Rules;
   client accounts cannot trigger birthday/reminder jobs or mutate legacy events.
+- The inherited qTicket-local price list and plan subsystem are removed from
+  settings, shared UI, project creation/restoration, invitations, AI and
+  integration routes. qTicket no longer stores or switches a plan and applies
+  no local project/member/feature ceilings. Server authorization and Firestore
+  rules now require a non-empty QuickTeam source organization id plus an active
+  signed entitlement; legacy standalone organization documents grant no access,
+  and the synchronized organization snapshot is server-write-only.
 
 Product work still required:
 
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
-- Remove the inherited qTicket-local price list, plan switching and plan-limit
-  gates from settings and core incident/client flows. Retain only the
-  QuickTeam-provisioned active/inactive entitlement boundary.
+- Audit **Команда** and **Налаштування** by ownership and incident value. Remove
+  duplicate QuickTeam administration and inherited task-manager panels; retain
+  only incident workflow, client access, in-app notifications and read-only
+  QuickTeam state until another integration has an accepted support scenario.
 - Add the explicit, idempotent server-side transfer from an incident to a
   QuickTeam task. Billing entitlement follows only after the wider product has a
   server-side add-on contract.
@@ -213,9 +229,9 @@ surfaces first, then delete only when references and migrations are understood.
    transfer contract. Any later billing work belongs to QuickTeam; qTicket
    continues to consume only its active/inactive entitlement.
 
-The exact next implementation task remains step 7: remove the inherited local
-plan/price-list boundary, continue the static role audit, and then run the
-two-sided flow with separate staff, client-admin and client-member sessions.
+The exact next implementation task remains step 7: audit **Команда** and
+**Налаштування**, continue the static role audit, and then run the two-sided
+flow with separate staff, client-admin and client-member sessions.
 Fix every concrete failure it reveals. Every completed slice should be a reviewable Git commit and this
 checkpoint should be updated in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
@@ -226,6 +242,15 @@ credentials, service-account JSON, `.env` values or session notes here.
 
 ### qTicket MVP rollout
 
+- Before adding another inherited or speculative feature, run a focused
+  product-pattern audit against the current official documentation for
+  Zendesk, Jira Service Management, Freshdesk and Help Scout. Record a qTicket
+  decision for agent/client organization boundaries, public replies versus
+  internal notes, queues and assignment, SLA/business hours, request forms,
+  client administration, audit history and notifications: **adopt**,
+  **adapt**, or **reject**, with the QuickTeam ownership boundary as the final
+  constraint. Do not copy a competitor UI or turn its complete feature list
+  into qTicket scope.
 - Run the complete two-sided acceptance flow against a dedicated Firebase test
   project: tenant creates a client project, invites a client administrator,
   that administrator invites one employee, both clients create/reply to an
@@ -383,7 +408,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the two paths and their guarantees.
   архівні й скасовані задачі, тобто давав би відповідь, гіршу за поточну.
 - Дві знахідки з «Що потребує уваги» взагалі не виражаються запитом:
   «заблоковані залежностями» читає `issueLinks`, «без оцінки» — категорію
-  статусу проєкту. Списки за ними доводиться будувати з повного набору.
+статусу проєкту. Списки за ними доводиться будувати з повного набору.
 - А `useIssues.js` і `issueCancel.mjs` навмисно фільтрують у місці читання, а
   не в запиті, саме тому, що кожен потік задач і так обмежений проєктом.
 
@@ -391,8 +416,9 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the two paths and their guarantees.
 (`open`/`delivered`), яке пишуть ті самі серверні маршрути, що вже пишуть
 статус, плюс backfill `archivedAt`/`cancelledAt` у явний `null`. Це той самий
 крок, що вже описаний в ARCHITECTURE → «Що лишилось дорогим навмисно» як
-лічильники на документі проєкту, і робити його варто разом із переходом на
-платний тариф: він змінює те, що картка може показувати наживо.
+лічильники на документі проєкту. Робити його варто лише після вимірювання
+реального обсягу даних: він змінює те, що картка може показувати наживо, але не
+повинен створювати локальний тариф або штучне обмеження qTicket.
 
 Поки цього немає, вартість обмежена вікном і тим, що задача — скінченна
 множина: вона росте з обсягом роботи, а не з віком робочого простору.
@@ -438,4 +464,6 @@ Do not start these without an explicit owner decision:
 - AI project summaries and task assistance.
 - A client-safe AI status digest delivered through QuickTeam+.
 
-Billing provider, checkout, subscriptions, invoices, and webhook contracts remain blocked on the external billing decision.
+Commercial billing, checkout and subscription contracts belong to QuickTeam,
+not to the qTicket product backlog. qTicket consumes only the signed add-on
+entitlement.

@@ -35,27 +35,14 @@ export function hasProjectAccess(project, role, uid) {
 }
 
 /**
- * A project the plan's ceiling no longer has room for.
- *
- * Set by the plan switch, on the projects created most recently — the only
- * ordering somebody can predict. It is read-only, not gone: everything in it
- * opens, prints and reports exactly as before, and the flag is cleared the
- * moment the plan goes back up.
- */
-export const PROJECT_OVER_PLAN_LIMIT = 'Проєкт понад ліміт тарифу — доступний лише для читання. Підніміть тариф або заархівуйте інший проєкт.';
-
-/**
  * The localized reason a project cannot be written to, or '' when it can.
  * Order matters: "not found" and "being deleted" are facts about the project
- * and must not be reported as a permission problem — and being over the plan's
- * ceiling is a third kind of fact again, about the workspace rather than about
- * the person, so it is answered after access and never instead of it.
+ * and must not be reported as a permission problem.
  */
 export function projectWriteError(project, organizationId, role, uid) {
   if (!project || project.organizationId !== organizationId) return 'Проєкт задачі не знайдено';
   if (project.deletionPending === true) return 'Проєкт уже видаляється';
   if (!hasProjectAccess(project, role, uid)) return 'Ви не входите до команди цього проєкту';
-  if (project.overPlanLimit === true) return PROJECT_OVER_PLAN_LIMIT;
   return '';
 }
 

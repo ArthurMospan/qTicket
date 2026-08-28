@@ -20,11 +20,6 @@ export const APPEARANCES = {
   'surface-plain': '!bg-white !text-faint hover:!text-ink',
   'auth-close': '!border !border-white/10 !bg-surface-dark !text-white/70 hover:!bg-white/10 hover:!text-white',
   'quiet-danger': '!bg-transparent !text-muted hover:!bg-danger-soft hover:!text-danger',
-  // The crown, and only the crown. It sits beside a control that will not move
-  // and says why, so it has to be findable without being an advertisement:
-  // transparent until the pointer is on it, and the one warm colour on the
-  // screen. See `PlanMark`.
-  plan: '!bg-transparent !text-plan hover:!bg-plan-soft',
 };
 
 export const BUTTON_SIZES = {

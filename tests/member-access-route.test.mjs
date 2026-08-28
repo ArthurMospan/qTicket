@@ -80,16 +80,11 @@ test('rates are served from protected paths and never persisted in public browse
   assert.ok(positions.DEFAULT_WORKFLOW_POSITIONS.every(position => !('hourlyRate' in position)));
 });
 
-test('legacy ownership transfer is atomic and QuickTeam-backed organizations refuse it', async () => {
+test('qTicket refuses every organization ownership mutation', async () => {
   const route = await read('../src/app/api/organizations/[organizationId]/route.js');
   assert.match(route, /authorizeOrgRequest\(request, organizationId, \['owner'\]\)/);
-  assert.match(route, /isQuickTeamManagedOrganization\(organizationSnapshot\.data\(\)\)/);
   assert.match(route, /QUICKTEAM_MANAGED/);
-  assert.match(route, /await db\.runTransaction/);
-  assert.match(route, /transaction\.update\(currentRef, \{ role: 'admin'/);
-  assert.match(route, /transaction\.update\(targetRef, \{ role: 'owner'/);
-  assert.match(route, /ownerId: targetUserId/);
-  assert.match(route, /targetSnap\.data\(\)\.removalPending === true/);
+  assert.doesNotMatch(route, /runTransaction|targetUserId|ownerId:/);
 });
 
 test('the one-time migration is explicit, dry-run by default and idempotent', async () => {

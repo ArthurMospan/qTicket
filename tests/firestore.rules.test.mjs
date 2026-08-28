@@ -32,7 +32,11 @@ beforeEach(async () => {
   await environment.clearFirestore();
   await environment.withSecurityRulesDisabled(async context => {
     const db = context.firestore();
-    await setDoc(doc(db, 'organizations', 'org-a'), { ownerId: 'owner-a', name: 'Org A' });
+    await setDoc(doc(db, 'organizations', 'org-a'), {
+      ownerId: 'owner-a',
+      name: 'Org A',
+      quickTeam: { sourceOrganizationId: 'quickteam-org-a', entitlement: 'active' },
+    });
     await setDoc(doc(db, 'users', 'owner-a'), { name: 'Owner', email: 'owner@example.com' });
     await setDoc(doc(db, 'users', 'member-a'), { name: 'Member', email: 'member@example.com' });
     await setDoc(doc(db, 'users', 'member-offteam'), { name: 'Off-team member', email: 'offteam@example.com' });
@@ -139,35 +143,42 @@ async function seedDirectRoom() {
 }
 
 test('a browser cannot create an organization or seat itself in one', async () => {
-  // «One free workspace per account» is a count of the documents somebody
-  // already owns, and rules cannot count. The rule that stood here — «the new
-  // document names you as its owner» — is true of every second, third and tenth
-  // free workspace too, so /api/organizations writes both documents now and
-  // both creates are closed.
+  // The signed QuickTeam provisioning route is the only tenant bootstrap.
   const db = environment.authenticatedContext('owner-b').firestore();
   await assertFails(setDoc(doc(db, 'organizations', 'org-b'), {
-    id: 'org-b', ownerId: 'owner-b', name: 'Org B', plan: 'free',
+    id: 'org-b', ownerId: 'owner-b', name: 'Org B',
   }));
   await assertFails(setDoc(doc(db, 'orgMemberships', 'org-a_owner-b'), {
     id: 'org-a_owner-b', orgId: 'org-a', userId: 'owner-b', role: 'owner',
   }));
 });
 
-test('the plan and what it closes are server-written', async () => {
-  // A plan change stopped being one field the day it also had to decide which
-  // projects the new ceiling no longer has room for. Both halves are
-  // /api/organizations/{id} with action 'set-plan' now, so an owner cannot
-  // write either from a browser — and nobody can clear the read-only mark on a
-  // project the plan has closed and then write into it.
+test('the QuickTeam organization snapshot is server-written', async () => {
   const ownerDb = environment.authenticatedContext('owner-a').firestore();
-  const adminDb = environment.authenticatedContext('admin-a').firestore();
-  await assertFails(updateDoc(doc(ownerDb, 'organizations', 'org-a'), { plan: 'pro' }));
   await assertFails(updateDoc(doc(ownerDb, 'organizations', 'org-a'), {
-    limits: { maxProjects: null, maxMembers: null },
+    name: 'Forged organization',
   }));
-  await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { overPlanLimit: false }));
-  // What an owner may still edit about the organization is untouched.
-  await assertSucceeds(updateDoc(doc(ownerDb, 'organizations', 'org-a'), { name: 'Org A renamed' }));
+  await assertFails(updateDoc(doc(ownerDb, 'organizations', 'org-a'), {
+    logo: 'https://example.com/forged.png',
+  }));
+  await assertFails(updateDoc(doc(ownerDb, 'organizations', 'org-a'), {
+    quickTeam: { sourceOrganizationId: 'quickteam-org-a', entitlement: 'inactive' },
+  }));
+  await assertFails(updateDoc(doc(ownerDb, 'organizations', 'org-a'), {
+    portalBranding: { source: 'quickteam', name: 'Forged' },
+  }));
+});
+
+test('a legacy standalone organization grants no qTicket access', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'organizations', 'org-a'), {
+      ownerId: 'owner-a', name: 'Legacy workspace',
+    });
+  });
+  const ownerDb = environment.authenticatedContext('owner-a').firestore();
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
+  await assertFails(getDoc(doc(ownerDb, 'organizations', 'org-a')));
+  await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a')));
 });
 
 test('an authenticated outsider cannot self-join an organization', async () => {

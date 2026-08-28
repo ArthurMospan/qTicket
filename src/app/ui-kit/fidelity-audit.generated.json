@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 239,
-    "parsedFiles": 239,
+    "productFiles": 234,
+    "parsedFiles": 234,
     "parseErrors": 0,
     "nativeControls": 20,
     "structures": {
@@ -39,13 +39,13 @@
   },
   "kit": {
     "totals": {
-      "components": 120,
-      "used": 120,
+      "components": 114,
+      "used": 114,
       "unused": 0,
-      "covered": 113,
+      "covered": 107,
       "uncovered": 0,
       "routes": 14,
-      "previews": 150,
+      "previews": 144,
       "internal": 7,
       "unlisted": 0
     },
@@ -96,7 +96,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:195",
+      "location": "src/components/MobileNav.jsx:194",
       "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
       "text": "",
       "childElements": [
@@ -112,7 +112,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:260",
+      "location": "src/components/MobileNav.jsx:259",
       "className": "flex min-w-0 items-center gap-[6px] text-left",
       "text": "",
       "childElements": [
@@ -128,7 +128,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:351",
+      "location": "src/components/MobileNav.jsx:344",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -144,7 +144,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/OrgSwitcherScreen.jsx:57",
+      "location": "src/components/OrgSwitcherScreen.jsx:52",
       "className": "flex flex-col items-center gap-4 transition-all duration-300 group/item w-[160px] group-hover/list:opacity-30 hover:!opacity-100",
       "text": "",
       "childElements": [
@@ -330,7 +330,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:262",
+      "location": "src/components/WorkspaceSidebar.jsx:261",
       "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
       "text": "",
       "childElements": [
@@ -346,7 +346,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:353",
+      "location": "src/components/WorkspaceSidebar.jsx:352",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -361,7 +361,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:376",
+      "location": "src/components/WorkspaceSidebar.jsx:375",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -376,7 +376,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:442",
+      "location": "src/components/WorkspaceSidebar.jsx:441",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -456,7 +456,7 @@
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:351",
+      "location": "src/components/MobileNav.jsx:344",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
@@ -476,17 +476,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:353",
+      "location": "src/components/WorkspaceSidebar.jsx:352",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:376",
+      "location": "src/components/WorkspaceSidebar.jsx:375",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:442",
+      "location": "src/components/WorkspaceSidebar.jsx:441",
       "tag": "button",
       "context": "branding-action"
     }
@@ -507,32 +507,32 @@
       "className": "w-full max-w-[420px] bg-white border border-line rounded-[16px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center"
     },
     {
-      "location": "src/app/(app)/page.js:176",
+      "location": "src/app/(app)/page.js:172",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/page.js:188",
+      "location": "src/app/(app)/page.js:184",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/settings/page.js:552",
+      "location": "src/app/(app)/settings/page.js:537",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     },
     {
-      "location": "src/app/(app)/settings/page.js:572",
+      "location": "src/app/(app)/settings/page.js:557",
       "tag": "div",
       "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
     },
     {
-      "location": "src/app/(app)/settings/page.js:616",
+      "location": "src/app/(app)/settings/page.js:601",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
     {
-      "location": "src/app/(app)/settings/page.js:735",
+      "location": "src/app/(app)/settings/page.js:720",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group"
     },
@@ -552,22 +552,22 @@
       "className": "bg-canvas rounded-[16px] border border-transparent shadow-none overflow-hidden shrink-0"
     },
     {
-      "location": "src/components/AudioTaskPanel.jsx:211",
+      "location": "src/components/AudioTaskPanel.jsx:202",
       "tag": "div",
       "className": "flex items-center gap-3 rounded-[14px] bg-canvas px-4 py-3"
     },
     {
-      "location": "src/components/AudioTaskPanel.jsx:253",
+      "location": "src/components/AudioTaskPanel.jsx:244",
       "tag": "div",
       "className": "rounded-[14px] bg-canvas p-4"
     },
     {
-      "location": "src/components/AudioTaskPanel.jsx:259",
+      "location": "src/components/AudioTaskPanel.jsx:250",
       "tag": "div",
       "className": "rounded-[14px] bg-canvas p-4"
     },
     {
-      "location": "src/components/AudioTaskPanel.jsx:288",
+      "location": "src/components/AudioTaskPanel.jsx:279",
       "tag": "div",
       "className": "rounded-[14px] border border-line bg-white p-4 transition-opacity ${…}"
     },
@@ -597,7 +597,7 @@
       "className": "mt-4 rounded-[12px] border border-dashed border-faint bg-white p-2"
     },
     {
-      "location": "src/components/migrations/DataMigrationSettings.jsx:91",
+      "location": "src/components/migrations/DataMigrationSettings.jsx:90",
       "tag": "div",
       "className": "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border border-line bg-white"
     },

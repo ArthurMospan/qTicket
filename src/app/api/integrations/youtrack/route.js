@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { readJsonBody } from '@/lib/server/apiErrors';
 import { authorizeOrgRequest, enforceRateLimit, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { youTrackRouteErrorResponse } from '@/lib/server/youtrackRouteErrors';
-import { refuseWithoutCapability } from '@/lib/server/planLimits';
 import {
   connectYouTrack,
   disconnectYouTrack,
@@ -41,10 +40,6 @@ export async function POST(request) {
     if (!(await enforceRateLimit('youtrack-connect', authorization.user.uid, 10, 60))) {
       return NextResponse.json({ error: 'Забагато спроб підключення' }, { status: 429 });
     }
-    // Connecting a tracker is «Перенесення даних». Disconnecting (DELETE) is
-    // not: a stored credential must always be removable.
-    const refusal = await refuseWithoutCapability(getAdminDb(), organizationId, 'data-import');
-    if (refusal) return refusal;
     const connection = await connectYouTrack({
       organizationId,
       baseUrl,
