@@ -646,8 +646,8 @@ test('a reply in a task chat reaches the person answered', async () => {
   // `replyTo` carries a name for the quote and no id, so the author is read off
   // the feed that is already open — no extra document.
   assert.match(timeline, /comments\.find\(item => item\.id === draft\.replyTo\.id\)\?\.authorId/);
-  assert.match(timeline, /відповів вам у завданні/);
-  // And is not told twice: the broad «написав у завданні» excludes both the
+  assert.match(timeline, /відповів вам в інциденті/);
+  // And is not told twice: the broad incident reply excludes both the
   // people mentioned and the person answered.
   assert.match(timeline, /exclude: \[\.\.\.mentionedUserIds, \.\.\.replyRecipients\]/);
 });

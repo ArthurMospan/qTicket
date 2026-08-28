@@ -374,12 +374,15 @@ service cloud.firestore {
         allow read: if canAccessIssueProject(issueId);
         allow create: if issueAcceptsNestedWrites(issueId) &&
           canAccessIssueProject(issueId) &&
-          request.resource.data.authorId == request.auth.uid;
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.get('visibility', 'public') == 'public';
         // The author may edit their own comment; any org member may mark it read
         // (read receipts) — that write touches only `readBy` and the `readAt`
         // stamp beside it, and nothing else.
         allow update: if issueAcceptsNestedWrites(issueId) &&
-          canAccessIssueProject(issueId) && (
+          canAccessIssueProject(issueId) &&
+          resource.data.get('visibility', 'public') == 'public' &&
+          request.resource.data.get('visibility', 'public') == 'public' && (
           (resource.data.authorId == request.auth.uid &&
            request.resource.data.authorId == resource.data.authorId) ||
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'readAt'])
@@ -393,6 +396,33 @@ service cloud.firestore {
           resource.data.authorId == request.auth.uid ||
           isOrgAdminOrOwner(issueOrg(issueId))
         );
+      }
+
+      // Staff collaboration is physically separate from the public incident
+      // conversation. A visibility field inside `comments` would not be a safe
+      // boundary: Firestore authorizes whole documents and legacy comments do
+      // not carry that field. Clients never read or write this collection.
+      match /internalNotes/{noteId} {
+        allow read: if isInternalContributor(issueOrg(issueId)) &&
+          canAccessIssueProject(issueId);
+        allow create: if issueAcceptsNestedWrites(issueId) &&
+          isInternalContributor(issueOrg(issueId)) &&
+          canAccessIssueProject(issueId) &&
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.visibility == 'internal';
+        allow update: if issueAcceptsNestedWrites(issueId) &&
+          isInternalContributor(issueOrg(issueId)) &&
+          canAccessIssueProject(issueId) &&
+          resource.data.authorId == request.auth.uid &&
+          request.resource.data.authorId == resource.data.authorId &&
+          resource.data.visibility == 'internal' &&
+          request.resource.data.visibility == 'internal';
+        allow delete: if issueAcceptsNestedWrites(issueId) &&
+          isInternalContributor(issueOrg(issueId)) &&
+          canAccessIssueProject(issueId) && (
+            resource.data.authorId == request.auth.uid ||
+            isOrgAdminOrOwner(issueOrg(issueId))
+          );
       }
 
       // Who is typing in the task's chat, as one document rather than two
@@ -412,7 +442,11 @@ service cloud.firestore {
 
       // Append-only activity log.
       match /audit/{auditId} {
-        allow read: if canAccessIssueProject(issueId);
+        // Assignment, priority and other support-side changes are the internal
+        // work record, not the customer's public conversation. The customer
+        // sees the current customer-facing status and public replies instead.
+        allow read: if isInternalContributor(issueOrg(issueId)) &&
+          canAccessIssueProject(issueId);
         allow create: if issueAcceptsNestedWrites(issueId) &&
           canAccessIssueProject(issueId) &&
           isInternalContributor(issueOrg(issueId)) &&

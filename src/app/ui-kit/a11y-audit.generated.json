@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 346,
-    "elements": 4184,
+    "elements": 4190,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -273,14 +273,14 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1415",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1477",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1435",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1497",
       "attributes": [
         "label"
       ]

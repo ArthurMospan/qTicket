@@ -281,7 +281,7 @@ On Windows with Firebase CLI 15 and Node 24, the rules assertions can finish suc
 - Firestore rules remain authoritative for browser Firestore access.
 - Organizations and internal memberships are created only by the signed QuickTeam provisioning route. External memberships are created only by the project-scoped invitation flow. `POST /api/organizations` refuses standalone creation, and every browser `create` on both collections is refused by Firestore Rules.
 - Roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. Owner, admin, and member are the tenant's internal support team. Owner and admin manage the organization; an admin may also change internal roles. The owner seat moves only through the ownership-transfer route, and the owner cannot be deactivated or demoted while holding it.
-- Client roles are scoped by `project.team`. They may see all incidents in their assigned client project, create an incident, read its public history, reply, and attach files. They cannot change status, priority, assignee, organization/project settings, access internal support channels or staff calendars, or read support time logs and analytics rollups. Firestore rules and server routes enforce the boundary; hiding controls is only defensive UI.
+- Client roles are scoped by `project.team`. They may see all incidents in their assigned client project, create an incident, read its public conversation, reply, and attach files. Staff replies live under `issues/{issueId}/comments`; staff-only collaboration lives under the separately ruled `internalNotes` subcollection. Clients cannot read internal notes or the support-side `audit` feed, change status, priority or assignee, enter organization/project settings, access internal support channels or staff calendars, or read support time logs and analytics rollups. Firestore rules and server routes enforce the boundary; hiding controls is only defensive UI.
 - A `client_admin` may invite only `client_member` users, into exactly one project the client admin already belongs to. A `client_member` cannot invite users. Internal owners/admins retain organization-wide administration.
 - The inherited internal `member` role remains a support agent to avoid weakening proven QuickTeam mechanics during the fork; it is not a client role.
 - Owners and admins may delete another person's comment or group-channel message, never edit one. Direct rooms are neither readable nor moderatable by them.
@@ -300,7 +300,7 @@ Primary collections:
 
 - `organizations`, `orgMemberships` and `orgMembershipArchive` (deactivated seats, server-only)
 - `projects` (client workspaces) and `stages`
-- `issues` (incidents), with `comments` and `audit` subcollections
+- `issues` (incidents), with public `comments` plus staff-only `internalNotes` and `audit` subcollections
 - `issueLinks`, `sprints`, `timeLogs`, `timerStates`, `invoices`
 - `notifications`; presence under `organizations/{orgId}/presence`
 - `system/notificationSweep` — the scheduled sweep's watermark and last counts. Server-written only; Firestore rules have no `system` match, so browsers cannot read or forge it.

@@ -242,15 +242,28 @@ credentials, service-account JSON, `.env` values or session notes here.
 
 ### qTicket MVP rollout
 
-- Before adding another inherited or speculative feature, run a focused
-  product-pattern audit against the current official documentation for
-  Zendesk, Jira Service Management, Freshdesk and Help Scout. Record a qTicket
-  decision for agent/client organization boundaries, public replies versus
-  internal notes, queues and assignment, SLA/business hours, request forms,
-  client administration, audit history and notifications: **adopt**,
-  **adapt**, or **reject**, with the QuickTeam ownership boundary as the final
-  constraint. Do not copy a competitor UI or turn its complete feature list
-  into qTicket scope.
+The focused competitor-pattern audit is complete. It used current first-party
+documentation for [Zendesk closed customer access and internal notes](https://support.zendesk.com/hc/en-us/articles/4408883658906-Permitting-only-added-users-to-submit-tickets),
+[Jira Service Management restricted portals, comments, queues and SLA](https://support.atlassian.com/jira-service-management-cloud/docs/set-up-and-manage-portal-access/),
+[Freshdesk public/private notes and SLA](https://support.freshdesk.com/support/solutions/articles/231527),
+and [Help Scout's no-self-registration customer portal](https://docs.helpscout.com/article/1777-set-up-and-manage-customer-portal).
+The competitors validate behaviors, not qTicket's ownership model or UI.
+
+| Product question | qTicket decision | MVP consequence |
+| --- | --- | --- |
+| Staff/customer identity and organization boundary | **Adopt** the restricted B2B portal pattern | Staff enters only from signed QuickTeam provisioning/launch; a client account exists only after a project-scoped invitation. No local registration or organization creation. |
+| Client company visibility and administration | **Adapt** organization-level customer visibility | One qTicket client project is the customer's support space. `client_admin` invites only `client_member` into that project; no arbitrary cross-project sharing or request participants. |
+| Public reply versus internal note | **Adopt** | Public `comments` remain shared with clients. Staff-only `internalNotes` are a separate Firestore collection, explicitly selected in the composer, excluded from client subscriptions and notifications, and protected by rules. Support-side `audit` is staff-only. |
+| Queue and assignment | **Adapt** | Keep one opinionated global incident queue with project, status, priority, assignee and date filters plus manual assignment. Reject custom queue builders, support groups and automatic routing until real volume proves they are needed. |
+| SLA and business hours | **Adapt after role acceptance** | Add a small per-client first-response/resolution policy with business hours and a pause while waiting for the client. Reject a general policy/escalation engine in the MVP. |
+| Request forms | **Adapt** | Incident types provide customer-friendly categories; add only proven type-specific required fields. Reject a general conditional form builder in the MVP. |
+| Audit and notifications | **Adapt** | Clients receive public replies and customer-facing status; staff receives internal notes and the support audit. In-app delivery stays split by audience. Email remains disconnected until Resend is intentionally enabled. |
+| Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles; primary Team/settings duplication is removed in the next acceptance slice. Client employees remain qTicket-owned. |
+| Pricing, billing and inherited planning modules | **Reject for qTicket MVP** | No local plans, prices, checkout, invoices, timesheets, sprints, calendar or AI surface. qTicket consumes only QuickTeam's signed active/inactive entitlement. |
+
+Stop condition: do not copy a competitor UI or turn its complete feature list
+into qTicket scope. Add a feature only when it closes a verified incident-service
+workflow or security gap.
 - Run the complete two-sided acceptance flow against a dedicated Firebase test
   project: tenant creates a client project, invites a client administrator,
   that administrator invites one employee, both clients create/reply to an
@@ -261,9 +274,9 @@ credentials, service-account JSON, `.env` values or session notes here.
 - Finish the user-facing terminology pass on qTicket routes. The canonical
   collection and inherited internal code may remain `issues`/task-oriented,
   but a client must never be asked to create, edit or filter a «завдання».
-- Decide whether incident chat needs a staff-only internal-note mode. Today the
-  inherited incident timeline is shared with the client; organization chat is
-  internal and unavailable to client roles.
+- **Completed:** incident conversation now has explicit «Відповідь клієнту» and
+  staff-only «Внутрішня нотатка» modes. The latter is stored under separately
+  ruled `internalNotes`; clients cannot subscribe to it or the support audit.
 - Add the explicit server-to-server «Створити завдання у QuickTeam» action.
   The first version is manual, idempotent, records the QuickTeam task identity
   on the incident, and never shares Firebase sessions or databases.

@@ -361,8 +361,41 @@ test('qTicket clients read their project and write its conversation, but cannot 
     await assertSucceeds(setDoc(doc(db, 'issues', 'issue-a', 'comments', `${uid}-comment`), {
       authorId: uid,
       text: 'Client reply',
+      visibility: 'public',
+    }));
+    await assertFails(setDoc(doc(db, 'issues', 'issue-a', 'comments', `${uid}-fake-note`), {
+      authorId: uid,
+      text: 'Pretend this is private',
+      visibility: 'internal',
     }));
   }
+});
+
+test('internal incident notes are staff-only and cannot leak through public comments', async () => {
+  const memberDb = environment.authenticatedContext('member-a').firestore();
+  const ownerDb = environment.authenticatedContext('owner-a').firestore();
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
+  const notePath = ['issues', 'issue-a', 'internalNotes', 'staff-note'];
+
+  await assertSucceeds(setDoc(doc(memberDb, ...notePath), {
+    authorId: 'member-a',
+    text: 'Escalate this incident internally',
+    visibility: 'internal',
+  }));
+  await assertSucceeds(getDoc(doc(memberDb, ...notePath)));
+  await assertSucceeds(getDoc(doc(ownerDb, ...notePath)));
+  await assertFails(getDoc(doc(clientDb, ...notePath)));
+  await assertFails(getDocs(collection(clientDb, 'issues', 'issue-a', 'internalNotes')));
+  await assertFails(setDoc(doc(clientDb, 'issues', 'issue-a', 'internalNotes', 'client-note'), {
+    authorId: 'client-admin-a',
+    text: 'Client-authored private note',
+    visibility: 'internal',
+  }));
+  await assertFails(setDoc(doc(memberDb, 'issues', 'issue-a', 'comments', 'leaked-note'), {
+    authorId: 'member-a',
+    text: 'Wrong collection',
+    visibility: 'internal',
+  }));
 });
 
 test('qTicket clients cannot enter organization chat or another client project', async () => {
@@ -692,7 +725,7 @@ test('calendar source documents are server-only for staff and client browsers', 
   }
 });
 
-test('client roles can read issue history but cannot forge audit entries', async () => {
+test('issue audit history is staff-only and clients cannot forge entries', async () => {
   const clientDb = environment.authenticatedContext('client-admin-a').firestore();
   const memberDb = environment.authenticatedContext('member-a').firestore();
   const clientAuditRef = doc(clientDb, 'issues', 'issue-a', 'audit', 'client-forged-audit');
@@ -710,7 +743,8 @@ test('client roles can read issue history but cannot forge audit entries', async
     from: 'new',
     to: 'resolved',
   }));
-  await assertSucceeds(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'member-audit')));
+  await assertSucceeds(getDoc(doc(memberDb, 'issues', 'issue-a', 'audit', 'member-audit')));
+  await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'member-audit')));
 });
 
 // A summary of hours you may not see is still those hours. The daily totals

@@ -168,8 +168,12 @@ test('клієнтська сесія не підписується на вну�
   assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
   assert.match(detail, /useSprints\(\{ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer \}\)/);
   assert.match(detail, /SHOW_INHERITED_TASK_PLANNING && internalViewer \? issueId : null/);
-  assert.match(timeline, /const internalViewer = Boolean\(orgRole\) && !isClientRole\(orgRole\)/);
+  assert.match(timeline, /const internalViewer = can\(orgRole, 'access:internal_notes'\)/);
+  assert.match(timeline, /useComments\(issueId, COMMENT_WINDOW \* historyWindow, \{ includeInternal: internalViewer \}\)/);
+  assert.match(timeline, /useAuditLog\(internalViewer \? issueId : null/);
   assert.match(timeline, /useTimeLogs\(\s*internalViewer \? issueId : null,\s*projectId,\s*\)/);
+  assert.match(timeline, /Відповідь клієнту/);
+  assert.match(timeline, /Внутрішня нотатка/);
 });
 
 test('клієнтський глобальний пошук не відкриває людей або події поза його простором', async () => {

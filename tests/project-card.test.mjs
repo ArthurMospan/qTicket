@@ -73,7 +73,7 @@ test('a mention in a task counts towards its project on the dashboard', () => {
   const route = read('../src/app/api/notifications/route.js');
 
   // 1. The task chat says which project it is naming you in.
-  assert.match(timeline, /type: 'mentioned',[\s\S]{0,300}projectId,/);
+  assert.match(timeline, /type: 'mentioned',[\s\S]{0,700}projectId,/);
   // 2. The route that writes the document keeps that field.
   assert.match(route, /const projectId = cleanText\(payload\.projectId, 128\)/);
   assert.match(route, /type, title, body, link: scopedLink, issueId, projectId, organizationId/);

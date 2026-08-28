@@ -544,16 +544,21 @@ Add a key to a schema; there is nothing else to register.
 
 ## What is new to whom: one feed, one cursor
 
-A task tells its reader two kinds of news — somebody said something, and somebody
-changed something. The product used to treat them as unrelated: messages had a
-boundary and a count, changes had a feed entry nobody marked, and the dot on a
-card stood for both without saying which.
+A task tells an internal reader three kinds of news — somebody replied to the
+client, somebody left a staff-only note, and somebody changed the support-side
+record. The client sees only the public conversation and current
+customer-facing incident state. The product used to treat messages and changes
+as unrelated: messages had a boundary and a count, changes had a feed entry
+nobody marked, and the dot on a card stood for both without saying which.
 
-There is no second data model for this. Everything below rides on what already
-existed: the `issues/{id}/audit` subcollection, the per-user cursor in
-`organizations/{orgId}/issueReadState/{uid}_{issueId}`, and `lastActivityAt` on
-the task document. No new field, no new query, and nothing extra read per row of
-a list.
+Public replies remain in `issues/{id}/comments`. Internal notes deliberately use
+`issues/{id}/internalNotes`: Firestore authorizes whole documents, and a
+visibility field cannot safely hide legacy comments that never carried one.
+Only internal roles subscribe to `internalNotes`, `audit` and time logs; rules
+also refuse those reads to both client roles. The shared unread cursor continues
+to describe public customer-visible activity and audited support changes for
+staff. Internal-note delivery uses staff-only notifications and never writes a
+preview onto the client-readable issue document.
 
 ### The pieces
 
@@ -574,6 +579,10 @@ a list.
   document of its own, because the task itself is subscribed to by every board
   and card that shows it and a heartbeat written there would cost each of them a
   read.
+- `src/lib/hooks/useComments.js` — one public-comments subscription for every
+  project participant and a second `internalNotes` subscription only for staff.
+  New staff messages carry an explicit `public`/`internal` composer choice; a
+  public reply can never quote an internal note.
 
 ### The rules
 
@@ -641,6 +650,11 @@ a list.
 - **Comments are not audit entries.** A message is its own thing in the feed with
   its own read receipts; mirroring it into the history would be a second copy of
   the same fact.
+- **Internal notes do not write public activity mirrors or read receipts.** A
+  `lastActivityText`, mention tally or receipt on the client-readable issue or
+  public comment would disclose that private collaboration exists. Staff are
+  notified directly; a later staff-only queue projection may add card-level
+  unread state without weakening this boundary.
 - **Creating a task is not a change to it.** A new task is new in full; it has no
   fields that changed.
 - **Marking a selection read is not implemented.** `ISSUE_BULK_ACTIONS` is a

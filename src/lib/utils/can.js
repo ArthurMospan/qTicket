@@ -79,6 +79,12 @@ export const PERMISSIONS = {
 
   // Comments and chat
   'create:comment': ['owner', 'admin', 'member', 'client_admin', 'client_member'],
+  // The staff-only half of an incident. A public reply lives in `comments` and
+  // is open to every participant of the project; an internal note lives in the
+  // separately ruled `internalNotes` subcollection, beside the support-side
+  // `audit` history. `firestore.rules` refuses both to the client roles, so a
+  // client never opens a query those rules would only refuse.
+  'access:internal_notes': ['owner', 'admin', 'member'],
   'edit:comment': ['owner', 'admin', 'member', 'client_admin', 'client_member'], // Only on own comments
   'moderate:content': ['owner', 'admin'],       // Прибрати чужий коментар або повідомлення
   'manage:channels': ['owner', 'admin'],        // Створити/видалити канал
