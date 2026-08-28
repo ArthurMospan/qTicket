@@ -238,12 +238,43 @@ service cloud.firestore {
     }
 
     // ── invitations/{id} ────────────────────────────────────────────────
+    //
+    // An invite-link invitation is server-only in every direction, and this is
+    // the third of the three places the internal door is shut — the other two
+    // are the create route and the accept transaction, both asking
+    // `src/lib/server/inviteLinks.mjs`. A link document carries `tokenHash`,
+    // and a hash a browser can read is a link a browser can replay against the
+    // accept route. It also carries a `role` no browser may choose: without
+    // this, an org admin could write `role: 'admin'` onto a link minted as
+    // `client_member`, and whoever opened it would be seated on the support
+    // side of a tenant whose staff only QuickTeam may enable. That is the
+    // mechanism 1717ab1 deleted, so it is refused here rather than trusted to
+    // the routes alone.
+    function isInviteLinkInvitation(data) {
+      return data.get('type', '') == 'link';
+    }
+
     match /invitations/{id} {
-      allow read: if signedIn() &&
-        (resource.data.email == request.auth.token.email || isOrgAdminOrOwner(resource.data.organizationId));
+      // `get` and `list` are separated deliberately. A per-document condition
+      // does not protect a query: asked for the whole collection, the engine
+      // returned the link document to an admin whose direct `get` of the same
+      // document it had just refused. Nothing in the browser reads this
+      // collection — every invitation path goes through an Admin SDK route —
+      // so listing is refused outright rather than filtered.
+      allow get: if signedIn() &&
+        !isInviteLinkInvitation(resource.data) &&
+        (resource.data.get('email', '') == request.auth.token.email ||
+          isOrgAdminOrOwner(resource.data.organizationId));
+      allow list: if false;
       allow create: if false; // Created by the authenticated invitation API.
-      allow update: if isOrgAdminOrOwner(resource.data.organizationId);
-      allow delete: if isOrgAdminOrOwner(resource.data.organizationId);
+      // Neither the stored document nor the one replacing it may be a link.
+      // Without the second half an admin could turn an ordinary email
+      // invitation into a link by writing `type` and `tokenHash` onto it.
+      allow update: if isOrgAdminOrOwner(resource.data.organizationId) &&
+        !isInviteLinkInvitation(resource.data) &&
+        !isInviteLinkInvitation(request.resource.data);
+      allow delete: if isOrgAdminOrOwner(resource.data.organizationId) &&
+        !isInviteLinkInvitation(resource.data);
     }
 
     // ── projects/{projectId} — created only via Admin SDK (/api/projects);

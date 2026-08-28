@@ -86,6 +86,13 @@ const escapeHtml = value => String(value ?? '')
 
 // The invitation email. `ctaPath` must be an app-relative path ('/login', …)
 // so the link can never point outside our own domain.
+//
+// It is signed by the tenant, not by qTicket. This letter reaches a client who
+// has never bought anything from us: they know the company that supports them,
+// and «запрошує вас приєднатися… у qTicket», «автоматичне повідомлення від
+// qTicket» named the software instead — in the one message where the sender's
+// identity is the whole reason the reader trusts the link. No provider is
+// connected today, so this is correctness for when one is.
 export function invitationEmailHtml({ orgName, inviterName, role, ctaPath }) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const safePath = typeof ctaPath === 'string' && ctaPath.startsWith('/') ? ctaPath : '/login';
@@ -96,7 +103,10 @@ export function invitationEmailHtml({ orgName, inviterName, role, ctaPath }) {
       : role === 'client_member'
         ? 'представника клієнта'
         : 'спеціаліста';
-  const org = escapeHtml(orgName || 'qTicket');
+  // «Підтримка» is the same last-resort name `resolveOrganizationPortalBrand`
+  // falls back to, so a nameless organization reads the same in the letter as
+  // it does on the portal.
+  const org = escapeHtml(orgName || 'Підтримка');
   const inviter = escapeHtml(inviterName || 'Колега');
   return `
     <!DOCTYPE html>
@@ -104,11 +114,11 @@ export function invitationEmailHtml({ orgName, inviterName, role, ctaPath }) {
     <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1f1f1f;line-height:1.6;margin:0;padding:0">
       <div style="max-width:600px;margin:0 auto;padding:24px 20px">
         <h2 style="margin:0 0 12px">Вас запрошено до «${org}»</h2>
-        <p style="margin:0 0 16px"><strong>${inviter}</strong> запрошує вас приєднатися до простору <strong>${org}</strong> у qTicket у ролі ${roleLabel}.</p>
+        <p style="margin:0 0 16px"><strong>${inviter}</strong> запрошує вас до порталу підтримки <strong>${org}</strong> у ролі ${roleLabel}.</p>
         <p style="margin:0 0 24px">Увійдіть з цією адресою пошти — і ви одразу потрапите в команду.</p>
         <p style="margin:0 0 24px"><a href="${baseUrl}${safePath}" style="display:inline-block;padding:12px 24px;background:#1f1f1f;color:#ffffff;border-radius:8px;text-decoration:none">Приєднатися</a></p>
         <hr style="border:none;border-top:1px solid #e9e9e9;margin:24px 0">
-        <p style="font-size:12px;color:#9a9a9a;margin:0">Це автоматичне повідомлення від qTicket. Якщо ви не очікували цього запрошення — просто проігноруйте лист.</p>
+        <p style="font-size:12px;color:#9a9a9a;margin:0">Це автоматичне повідомлення порталу підтримки «${org}». Якщо ви не очікували цього запрошення — просто проігноруйте лист.</p>
       </div>
     </body>
     </html>

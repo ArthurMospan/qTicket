@@ -21,7 +21,10 @@ import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCached
 import WorkspaceHelpMenu from '@/components/WorkspaceHelpMenu';
 
 import { can, isClientRole } from '@/lib/utils/can';
-import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
+import {
+  organizationPortalBackground,
+  resolveOrganizationPortalBrand,
+} from '@/lib/utils/organizationBranding.mjs';
 
 export default function WorkspaceSidebar() {
   const pathname  = usePathname();
@@ -81,13 +84,9 @@ export default function WorkspaceSidebar() {
     // is not the inherited paid "replace qTicket in the staff sidebar"
     // feature: it is how a client knows who receives their incident. A later
     // QuickTeam activation writes this snapshot under `portalBranding`.
-    if (clientViewer) {
-      const bgColor = portalBrand.sidebarTheme === 'light' ? SIDEBAR_PRESETS.light
-        : portalBrand.sidebarTheme === 'custom'
-          ? (portalBrand.sidebarColor || SIDEBAR_PRESETS.dark)
-          : SIDEBAR_PRESETS.dark;
-      return computeSidebarTheme(bgColor);
-    }
+    // The invitation landing page paints itself from the same two functions,
+    // so the front door and the rail are the same shade of the same company.
+    if (clientViewer) return computeSidebarTheme(organizationPortalBackground(portalBrand));
 
     // Priority: live preview from settings > org data (or its cache) > default dark
     const source = sidebarPreview || (isBranded ? {

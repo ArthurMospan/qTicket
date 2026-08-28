@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import BoardConfigModal from '@/components/workspace/BoardConfigModal';
 import CreateTaskModal from '@/components/CreateTaskModal';
+import InviteLinkSection from '@/components/InviteLinkSection';
 import InviteMemberDialog from '@/components/InviteMemberDialog';
 import { useAppContext } from '@/lib/context/AppContext';
 import { useIssues } from '@/lib/hooks/useIssues';
@@ -527,6 +528,17 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       emptyDescription="Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників."
                       onOpen={memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
                     />
+                    {/* The other half of the same invitation, for when you do
+                        not have the person's Google address — which is most
+                        first contacts with a new client. */}
+                    {canInviteClient && !isReadOnly && (
+                      <InviteLinkSection
+                        role="client_admin"
+                        projectId={project.id}
+                        surface="nested-card"
+                        description="Надішліть його адміністратору клієнта в месенджері. Посилання відкриває доступ тільки до цього простору й тільки в ролі адміністратора клієнта."
+                      />
+                    )}
                   </Surface>
 
                   <Surface preset="panel" padding="md">
