@@ -28,6 +28,14 @@ identity, synchronized branding, add-on entitlement and the selected internal
 support team. qTicket owns client projects, external client identities,
 invitations, incidents, discussion and workflow.
 
+There is no qTicket-native tenant bootstrap. `POST /api/organizations` refuses
+standalone creation and the retired `/onboarding` route redirects to the
+authenticated boundary. A Firebase sign-in without a verified membership does
+not create data or select a plan: the shell shows that access has not been
+granted. The only two entrances are a signed QuickTeam provisioning/launch for
+internal staff and a project-scoped invitation whose verified email matches an
+external client.
+
 QuickTeam sends complete, monotonically versioned snapshots through the signed
 server contract in [integrations/QTICKET.md](integrations/QTICKET.md). A complete
 snapshot is intentional: absence removes an internal seat without asking

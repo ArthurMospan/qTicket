@@ -1,6 +1,6 @@
 # qTicket
 
-Multi-tenant incident and client-support SaaS built with Next.js 16, React 19 and Firebase. qTicket is an optional product alongside QuickTeam: a subscribing organization configures its support space, creates projects for its clients, and invites each client into the appropriate project.
+Multi-tenant incident and client-support SaaS built with Next.js 16, React 19 and Firebase. qTicket is an optional QuickTeam add-on: the QuickTeam owner activates it for an existing organization, selects the internal support staff, then creates client spaces and invites each client into the appropriate one. qTicket has no standalone organization registration.
 
 The codebase starts from the QuickTeam workspace so it can preserve the same `/ui-kit`, interaction language, and proven task mechanics. qTicket, QuickTeam, and QuickTeam+ remain separate applications and data stores. The inherited `issues` collection is the canonical incident record until a deliberate migration says otherwise; all user-facing qTicket copy calls it an incident.
 
@@ -85,6 +85,14 @@ do not create a second password. `NEXT_PUBLIC_STANDALONE_STAFF_LOGIN_ENABLED`
 stays `false` in production; setting it to `true` exposes the legacy recovery
 form only at `/login?mode=staff`. The complete two-server contract is in
 [docs/integrations/QTICKET.md](docs/integrations/QTICKET.md).
+
+Signing in at `/login` proves an external client's identity; it does not create
+an organization or grant access. After invitation acceptance the account sees
+only the organization and client space named by that invitation. An
+authenticated account with no verified membership receives a closed access
+screen. The retired `/onboarding` address redirects to that boundary, and
+`POST /api/organizations` always refuses standalone creation. The signed
+QuickTeam provisioning endpoint is the only organization-creation path.
 
 GitHub login is optional. Enable the GitHub provider in Firebase and set `NEXT_PUBLIC_GITHUB_LOGIN_ENABLED=true` only after its OAuth client ID and secret are configured; qTicket hides that button by default so a client is never offered a provider that cannot work.
 
@@ -264,14 +272,14 @@ On Windows with Firebase CLI 15 and Node 24, the rules assertions can finish suc
 - Firebase ID tokens authenticate API requests.
 - `/api/auth/session` exchanges an ID token for an HTTP-only Firebase session cookie used by Next.js Proxy.
 - Firestore rules remain authoritative for browser Firestore access.
-- Organizations and memberships are created only by authenticated server routes (`/api/organizations` for the first pair, the invitation APIs for the rest); every `create` on both collections is refused from a browser.
+- Organizations and internal memberships are created only by the signed QuickTeam provisioning route. External memberships are created only by the project-scoped invitation flow. `POST /api/organizations` refuses standalone creation, and every browser `create` on both collections is refused by Firestore Rules.
 - Roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. Owner, admin, and member are the tenant's internal support team. Owner and admin manage the organization; an admin may also change internal roles. The owner seat moves only through the ownership-transfer route, and the owner cannot be deactivated or demoted while holding it.
 - Client roles are scoped by `project.team`. They may see all incidents in their assigned client project, create an incident, read its public history, reply, and attach files. They cannot change status, priority, assignee, organization/project settings, access internal support channels or staff calendars, or read support time logs and analytics rollups. Firestore rules and server routes enforce the boundary; hiding controls is only defensive UI.
 - A `client_admin` may invite only `client_member` users, into exactly one project the client admin already belongs to. A `client_member` cannot invite users. Internal owners/admins retain organization-wide administration.
 - The inherited internal `member` role remains a support agent to avoid weakening proven QuickTeam mechanics during the fork; it is not a client role.
 - Owners and admins may delete another person's comment or group-channel message, never edit one. Direct rooms are neither readable nor moderatable by them.
 - Taking access away deletes the `orgMemberships` document and archives it under `orgMembershipArchive`, and removes the person from `project.team`. Their tasks, comments, watches and time logs are never rewritten. Restoring the archived seat returns the same role, position and projects. Leaving on your own uses the same route and needs no privilege.
-- Projects and incidents are created through server APIs so plan limits, sequential incident keys and audit records are atomic.
+- Projects and incidents are created through server APIs so sequential incident keys and audit records are atomic.
 - Incident hierarchy, logical links and status transitions are validated by server APIs; external clients cannot bypass their execution invariants.
 - Invoice creation reserves and freezes its exact raw time-log sources transactionally.
 - `timerStates/{uid}` is account-owned and server-written: one active timer and one pending log at most, shared across organizations, tabs and devices.

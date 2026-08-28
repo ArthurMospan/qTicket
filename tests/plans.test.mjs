@@ -393,37 +393,22 @@ test('обидва місця, що рахують проєкти, читают�
   assert.doesNotMatch(createRoute, /Перейдіть на Pro план/);
 });
 
-test('прайслист один на весь продукт', async () => {
-  // Дві рукописні копії прайслиста розійшлися рівно так, як копії й розходяться:
-  // онбординг показував $0/$9/$19 із чотирма вигаданими пунктами на картку, а
-  // налаштування — реєстр. Людина бачила перший у день реєстрації, а другий —
-  // коли вперше пішла шукати рахунок.
+test('прайслист не створює qTicket-організацію', async () => {
   const settings = withoutComments(await read('src/app/(app)/settings/page.js'));
   const onboarding = withoutComments(await read('src/app/onboarding/page.js'));
 
-  for (const [name, page] of [['налаштування', settings], ['онбординг', onboarding]]) {
-    assert.match(page, /<PlanCards/, `${name} малює прайслист сам, замість PlanCards`);
-    // Ціни, назви й списки не переказуються на екрані жодного разу.
-    assert.doesNotMatch(page, /\$0|\$9|\$19|\$15/, `${name} називає ціну сам`);
-    assert.doesNotMatch(page, /До \d+ активних проєктів/, `${name} переказує стелю словами`);
-  }
+  assert.match(settings, /<PlanCards/);
+  assert.doesNotMatch(settings, /\$0|\$9|\$19|\$15/);
+  assert.doesNotMatch(settings, /До \d+ активних проєктів/);
 
   assert.doesNotMatch(settings, /isPro \? Infinity : 3/);
   assert.match(settings, /activePlanId=\{orgPlan\}/);
-  // Онбординг більше не тримає «обраний» тариф: кнопка картки — це і вибір, і
-  // дія одночасно, тож між ними нічого не лежить, і окремої «Продовжити» немає.
-  assert.match(onboarding, /activePlanId=""/);
-  assert.match(onboarding, /onChoose=\{handleFinish\}/);
-  assert.doesNotMatch(onboarding, /Продовжити/);
-  // Один безкоштовний простір на акаунт — принаймні цей екран так каже.
-  assert.match(onboarding, /lockedPlanIds=\{freeTaken \? \['free'\] : \[\]\}/);
-  // Стеля в документі організації теж із реєстру, а не з тернарника — і пише
-  // її тепер сервер, бо plan і limits браузеру заборонені: зміна тарифу ще й
-  // вирішує, для яких проєктів нової стелі вже не вистачає.
-  assert.doesNotMatch(onboarding, /maxProjects: 3/);
-  assert.doesNotMatch(onboarding, /limits: {/);
+  assert.match(onboarding, /redirect\('\/'\)/);
+  assert.doesNotMatch(onboarding, /PlanCards|activePlanId|onChoose|createOrganization/);
   const createRoute = await read('src/app/api/organizations/route.js');
-  assert.match(createRoute, /storedPlanLimit\(plan, 'projects'\)/);
+  assert.match(createRoute, /quickteam_provisioning_required/);
+  const standaloneCreate = createRoute.slice(createRoute.indexOf('export async function POST'));
+  assert.doesNotMatch(standaloneCreate, /storedPlanLimit|collection\('organizations'\)\.doc/);
   const planRoute = await read('src/app/api/organizations/[organizationId]/route.js');
   assert.match(planRoute, /storedPlanLimit\(plan, 'projects'\)/);
   assert.match(planRoute, /resyncProjectsOverPlanLimit\(/);

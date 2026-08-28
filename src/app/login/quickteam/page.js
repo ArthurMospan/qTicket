@@ -53,7 +53,7 @@ export default function QuickTeamLoginPage() {
   }, [code, router, signInWithAuthToken]);
 
   return (
-    <AuthLayout hideCreateOrg>
+    <AuthLayout>
       <div className="flex w-full max-w-[420px] flex-col items-center text-center">
         {error ? (
           <>

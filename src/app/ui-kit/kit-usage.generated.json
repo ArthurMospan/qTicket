@@ -1242,7 +1242,7 @@
     },
     "EmptyState": {
       "file": "src/components/ui/Feedback/EmptyState.jsx",
-      "count": 17,
+      "count": 18,
       "showcased": true,
       "usedByKit": [
         "ChatMessageList",
@@ -1267,6 +1267,7 @@
         "src/app/(app)/analytics/page.js",
         "src/app/(app)/analytics/team/[memberId]/page.js",
         "src/app/(app)/calendar/page.js",
+        "src/app/(app)/layout.js",
         "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/team/page.js",
@@ -2327,7 +2328,7 @@
     },
     "Surface": {
       "file": "src/components/ui/Surface.jsx",
-      "count": 12,
+      "count": 13,
       "showcased": true,
       "usedByKit": [
         "DataTable",
@@ -2351,6 +2352,7 @@
         "src/app/(app)/analytics/page.js",
         "src/app/(app)/analytics/team/[memberId]/page.js",
         "src/app/(app)/calendar/page.js",
+        "src/app/(app)/layout.js",
         "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
@@ -2845,7 +2847,7 @@
           ]
         },
         "lg": {
-          "count": 26,
+          "count": 28,
           "routes": [
             "/",
             "/[projectId]",
@@ -2861,6 +2863,8 @@
             "src/app/(app)/analytics/page.js:1033",
             "src/app/(app)/layout.js:115",
             "src/app/(app)/layout.js:119",
+            "src/app/(app)/layout.js:145",
+            "src/app/(app)/layout.js:148",
             "src/app/(app)/my/page.js:267",
             "src/app/(app)/my/page.js:377",
             "src/app/(app)/overview/page.js:167",
@@ -3130,7 +3134,7 @@
       },
       "style": {
         "secondary": {
-          "count": 70,
+          "count": 71,
           "routes": [
             "/",
             "/[projectId]",
@@ -3159,6 +3163,7 @@
             "src/app/(app)/calendar/page.js:768",
             "src/app/(app)/calendar/page.js:769",
             "src/app/(app)/chat/page.js:1233",
+            "src/app/(app)/layout.js:145",
             "src/app/(app)/my/page.js:355",
             "src/app/(app)/my/page.js:377",
             "src/app/(app)/my/page.js:405",
@@ -3363,7 +3368,7 @@
           ]
         },
         "(default)": {
-          "count": 16,
+          "count": 17,
           "routes": [
             "/analytics",
             "/calendar",
@@ -3377,6 +3382,7 @@
             "src/app/(app)/chat/page.js:1241",
             "src/app/(app)/layout.js:115",
             "src/app/(app)/layout.js:119",
+            "src/app/(app)/layout.js:148",
             "src/components/UserStatusDialog.jsx:114",
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
@@ -3394,7 +3400,7 @@
       },
       "shape": {
         "(default)": {
-          "count": 190,
+          "count": 192,
           "routes": [
             "/",
             "/[projectId]",
@@ -3439,6 +3445,8 @@
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:115",
             "src/app/(app)/layout.js:119",
+            "src/app/(app)/layout.js:145",
+            "src/app/(app)/layout.js:148",
             "src/app/(app)/my/page.js:267",
             "src/app/(app)/my/page.js:355",
             "src/app/(app)/my/page.js:377",
@@ -3626,7 +3634,7 @@
       },
       "surface": {
         "(default)": {
-          "count": 192,
+          "count": 194,
           "routes": [
             "/",
             "/[projectId]",
@@ -3671,6 +3679,8 @@
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:115",
             "src/app/(app)/layout.js:119",
+            "src/app/(app)/layout.js:145",
+            "src/app/(app)/layout.js:148",
             "src/app/(app)/my/page.js:267",
             "src/app/(app)/my/page.js:355",
             "src/app/(app)/my/page.js:377",
@@ -3849,7 +3859,7 @@
       },
       "color": {
         "(default)": {
-          "count": 175,
+          "count": 177,
           "routes": [
             "/",
             "/[projectId]",
@@ -3893,6 +3903,8 @@
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:115",
             "src/app/(app)/layout.js:119",
+            "src/app/(app)/layout.js:145",
+            "src/app/(app)/layout.js:148",
             "src/app/(app)/my/page.js:355",
             "src/app/(app)/my/page.js:377",
             "src/app/(app)/my/page.js:405",
@@ -4094,7 +4106,7 @@
       },
       "composition": {
         "(default)": {
-          "count": 177,
+          "count": 179,
           "routes": [
             "/",
             "/[projectId]",
@@ -4137,6 +4149,8 @@
             "src/app/(app)/chat/page.js:1241",
             "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/error.js:51",
+            "src/app/(app)/layout.js:145",
+            "src/app/(app)/layout.js:148",
             "src/app/(app)/my/page.js:267",
             "src/app/(app)/my/page.js:355",
             "src/app/(app)/my/page.js:377",
@@ -4406,7 +4420,7 @@
           "files": [
             "src/app/(app)/page.js:218",
             "src/components/AudioTaskPanel.jsx:274",
-            "src/components/AuthLayout.jsx:89"
+            "src/components/AuthLayout.jsx:72"
           ]
         },
         "compact": {
@@ -4551,7 +4565,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/AuthLayout.jsx:89"
+            "src/components/AuthLayout.jsx:72"
           ]
         },
         "surface": {
@@ -4642,7 +4656,7 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/AuthLayout.jsx:89",
+            "src/components/AuthLayout.jsx:72",
             "src/components/profile/ProfileModal.jsx:41",
             "src/components/profile/ProfileModal.jsx:46"
           ]
@@ -4738,7 +4752,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/AuthLayout.jsx:89"
+            "src/components/AuthLayout.jsx:72"
           ]
         },
         "chat-composer-cancel": {
@@ -5659,11 +5673,12 @@
           ]
         },
         "card": {
-          "count": 1,
+          "count": 2,
           "routes": [
             "/settings"
           ],
           "files": [
+            "src/app/(app)/layout.js:132",
             "src/app/(app)/settings/page.js:3680"
           ]
         },
@@ -5753,12 +5768,13 @@
           ]
         },
         "none": {
-          "count": 2,
+          "count": 3,
           "routes": [
             "/settings",
             "/sprints"
           ],
           "files": [
+            "src/app/(app)/layout.js:132",
             "src/app/(app)/settings/page.js:3680",
             "src/app/(app)/sprints/page.js:1083"
           ]
@@ -5775,7 +5791,7 @@
       },
       "composition": {
         "(default)": {
-          "count": 18,
+          "count": 19,
           "routes": [
             "/",
             "/[projectId]",
@@ -5795,6 +5811,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:535",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:553",
             "src/app/(app)/calendar/page.js:773",
+            "src/app/(app)/layout.js:132",
             "src/app/(app)/overview/page.js:226",
             "src/app/(app)/overview/page.js:297",
             "src/app/(app)/page.js:953",
@@ -7513,22 +7530,23 @@
             "src/components/client/ClientIncidentPortal.jsx:201"
           ]
         },
+        "flexible": {
+          "count": 2,
+          "routes": [
+            "/[projectId]/issue/[issueId]",
+            "/sprints"
+          ],
+          "files": [
+            "src/app/(app)/layout.js:133",
+            "src/components/workspace/UnifiedTimeline.jsx:1345"
+          ]
+        },
         "inset": {
           "count": 2,
           "routes": [],
           "files": [
             "src/components/WorkspaceInfoCenter.jsx:152",
             "src/components/WorkspaceInfoCenter.jsx:200"
-          ]
-        },
-        "flexible": {
-          "count": 1,
-          "routes": [
-            "/[projectId]/issue/[issueId]",
-            "/sprints"
-          ],
-          "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1345"
           ]
         },
         "centered": {
@@ -7562,7 +7580,7 @@
           ]
         },
         "(default)": {
-          "count": 21,
+          "count": 22,
           "routes": [
             "/",
             "/[projectId]",
@@ -7583,6 +7601,7 @@
             "src/app/(app)/analytics/team/[memberId]/page.js:233",
             "src/app/(app)/calendar/page.js:433",
             "src/app/(app)/calendar/page.js:778",
+            "src/app/(app)/layout.js:133",
             "src/app/(app)/page.js:954",
             "src/app/(app)/team/page.js:147",
             "src/components/WorkspaceInfoCenter.jsx:152",
@@ -7617,7 +7636,7 @@
           ]
         },
         "(default)": {
-          "count": 21,
+          "count": 22,
           "routes": [
             "/",
             "/[projectId]",
@@ -7639,6 +7658,7 @@
             "src/app/(app)/calendar/page.js:433",
             "src/app/(app)/calendar/page.js:587",
             "src/app/(app)/calendar/page.js:778",
+            "src/app/(app)/layout.js:133",
             "src/app/(app)/page.js:954",
             "src/app/(app)/team/page.js:147",
             "src/components/client/ClientIncidentPortal.jsx:126",

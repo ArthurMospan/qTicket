@@ -1,6 +1,5 @@
 'use client';
-// AutoFix is disabled — onboarding flow handles org creation now.
-// See /onboarding page for the proper workspace setup flow.
+// AutoFix is disabled. qTicket organizations are provisioned only by QuickTeam.
 export default function AutoFix() {
   return null;
 }

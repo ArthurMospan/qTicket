@@ -4,26 +4,19 @@ This file contains current owner guardrails and confirmed open work. Completed i
 
 ## Product guardrails
 
-- qTicket is a shared multi-tenant SaaS add-on sold alongside QuickTeam. A subscribing organization configures its own support space and creates one or more client projects; qTicket, QuickTeam, and QuickTeam+ remain separate products that may all exist in parallel.
+- qTicket is a shared multi-tenant SaaS add-on activated for an existing QuickTeam organization. It has no standalone registration or organization creation. QuickTeam provisions the tenant, branding and selected support staff; qTicket then owns client spaces, invitations and incidents. qTicket, QuickTeam, and QuickTeam+ remain separate products and data stores that may all exist in parallel.
 - Organization roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. The first three belong to the tenant's support team. Client roles are restricted to their assigned project: they can see and create incidents and reply in an incident, while workflow, assignment, priority, and settings remain internal-only. A client admin may invite only client members into that same project.
 - Staff identity and incident-to-task transfer integrate with QuickTeam through explicit server-side contracts. External clients authenticate in qTicket's own Firebase project; project-scoped invitations are bound to the verified email returned by the sign-in provider. Do not couple the products' primary Firebase sessions or data models.
 - QuickTeam is the authority for the internal organization, branding,
   entitlement and enabled support staff. qTicket must refuse direct changes to
-  synchronized internal seats, ownership and plan. qTicket remains the
+  synchronized internal seats, ownership and entitlement. qTicket remains the
   authority for client projects, external invitations, incidents and workflow.
 - `issues` is the canonical incident collection. `tasks` is legacy/read-only and must not receive new features. The internal collection name stays stable during the fork; user-facing qTicket copy calls these records incidents.
-- Subscription billing will be supplied by the wider product ecosystem. The
-  plan registry remains the single source for `free` and `pro`, but a
-  QuickTeam-managed organization sees its qTicket entitlement read-only under
-  «Налаштування» → «Підписка qTicket» and cannot switch it locally. Branding
-  and the client-space ceiling are enforced; every other listed capability is
-  marked `enforced: false` until a real boundary exists. Do not publish or sell
-  a capability that the server does not enforce.
-- Money is not connected. qTicket entitlement is provisioned manually until the
-  wider QuickTeam billing system exposes an add-on entitlement contract. No
-  client-visible plan field is a security boundary; when billing is connected,
-  entitlement must be checked by a server-side integration rather than by
-  coupling the two products' databases.
+- qTicket does not publish a price list, sell or switch subscriptions, or use a
+  browser-visible plan as a security boundary. QuickTeam owns the add-on's
+  commercial state and sends only the server-side `active`/`inactive`
+  entitlement that qTicket enforces. Removing the remaining inherited plan UI
+  and plan gates is part of the current product-fit audit.
 - Organization deletion stays disabled until an owner-only, idempotent server cascade safely handles Firestore and external files and has integration coverage.
 - Multi-tenant isolation and server-authorized privileged writes take precedence over UI convenience.
 
@@ -96,6 +89,11 @@ Completed product slice on 2026-08-28:
 - A plain qTicket `/login` is now the external client portal. Native staff login
   is disabled by default and exists only behind an explicit development/recovery
   environment switch.
+- qTicket no longer bootstraps a tenant after a public sign-in. The retired
+  onboarding route redirects into the authenticated boundary,
+  `POST /api/organizations` refuses standalone creation, organization-switcher
+  UI has no create action, and an account without a verified invitation or
+  QuickTeam-managed membership receives an explicit no-access screen.
 - The default incident lifecycle is **Новий → Прийнято → У роботі → Очікує
   відповіді → Вирішено**. The default types are **Звернення**, **Побажання** and
   **Помилка**; historical built-in labels are localized on read without
@@ -153,6 +151,9 @@ Product work still required:
 
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
+- Remove the inherited qTicket-local price list, plan switching and plan-limit
+  gates from settings and core incident/client flows. Retain only the
+  QuickTeam-provisioned active/inactive entitlement boundary.
 - Add the explicit, idempotent server-side transfer from an incident to a
   QuickTeam task. Billing entitlement follows only after the wider product has a
   server-side add-on contract.
@@ -204,12 +205,13 @@ surfaces first, then delete only when references and migrations are understood.
 7. **In progress:** execute the full internal/client acceptance flow with
    separate accounts and correct every concrete product or permission failure.
 8. Only after that flow is accepted, implement the incident-to-QuickTeam-task
-   transfer contract and connect the existing entitlement field to billing.
+   transfer contract. Any later billing work belongs to QuickTeam; qTicket
+   continues to consume only its active/inactive entitlement.
 
-The exact next implementation task remains step 7: continue the static role
-audit until separate staff, client-admin and client-member sessions are
-available, then run the two-sided flow below and fix the next concrete failure
-it reveals. Every completed slice should be a reviewable Git commit and this
+The exact next implementation task remains step 7: remove the inherited local
+plan/price-list boundary, continue the static role audit, and then run the
+two-sided flow with separate staff, client-admin and client-member sessions.
+Fix every concrete failure it reveals. Every completed slice should be a reviewable Git commit and this
 checkpoint should be updated in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
 `docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
@@ -235,10 +237,10 @@ credentials, service-account JSON, `.env` values or session notes here.
 - Add the explicit server-to-server «Створити завдання у QuickTeam» action.
   The first version is manual, idempotent, records the QuickTeam task identity
   on the incident, and never shares Firebase sessions or databases.
-- Connect the implemented provisioning entitlement to QuickTeam billing. Until
-  that billing signal exists, the QuickTeam owner activation records an active
-  test entitlement; qTicket still enforces it server-side and never infers it
-  from a browser-visible plan field.
+- QuickTeam may later derive the add-on entitlement from its own commercial
+  system. That is not a qTicket price-list or checkout task: qTicket continues
+  to consume only the signed active/inactive value and never infers access from
+  a browser-visible plan field.
 - Create the production Firebase and Vercel projects only after the acceptance
   flow passes in the isolated test project. Transactional email is optional and
   remains disconnected while qTicket uses a temporary `vercel.app` domain;

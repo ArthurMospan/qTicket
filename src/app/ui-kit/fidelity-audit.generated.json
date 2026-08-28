@@ -11,15 +11,15 @@
     "productFiles": 239,
     "parsedFiles": 239,
     "parseErrors": 0,
-    "nativeControls": 21,
+    "nativeControls": 20,
     "structures": {
       "chat": 2,
       "analytics": 1,
       "settings": 1,
-      "shell": 14,
+      "shell": 13,
       "other": 3
     },
-    "styledNativeControls": 12,
+    "styledNativeControls": 11,
     "reviewedNativeControls": 8,
     "manualLabels": 0,
     "manualModalShells": 0,
@@ -32,7 +32,7 @@
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 21,
+    "button": 20,
     "input": 0,
     "textarea": 0,
     "select": 0
@@ -56,19 +56,6 @@
     {
       "tag": "button",
       "location": "src/components/AuthLayout.jsx:100",
-      "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
-      "text": "",
-      "childElements": [],
-      "ariaLabel": "",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "",
-      "structure": "shell",
-      "routes": []
-    },
-    {
-      "tag": "button",
-      "location": "src/components/AuthLayout.jsx:117",
       "className": "w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-red-400 hover:bg-white/5 transition-colors text-left",
       "text": "Вийти",
       "childElements": [
@@ -83,7 +70,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:153",
+      "location": "src/components/AuthLayout.jsx:134",
       "className": "",
       "text": "Підтримка",
       "childElements": [],
@@ -96,12 +83,10 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:79",
-      "className": "hidden md:flex items-center gap-2 text-white/70 hover:text-white transition-colors text-[13px] font-medium",
-      "text": "Створити організацію",
-      "childElements": [
-        "Plus"
-      ],
+      "location": "src/components/AuthLayout.jsx:83",
+      "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
+      "text": "",
+      "childElements": [],
       "ariaLabel": "",
       "styled": true,
       "reviewed": "",
@@ -419,12 +404,12 @@
   },
   "nativeHotspots": [
     {
-      "file": "src/components/AuthLayout.jsx",
+      "file": "src/components/WorkspaceSidebar.jsx",
       "count": 4
     },
     {
-      "file": "src/components/WorkspaceSidebar.jsx",
-      "count": 4
+      "file": "src/components/AuthLayout.jsx",
+      "count": 3
     },
     {
       "file": "src/components/MobileNav.jsx",
@@ -466,7 +451,7 @@
   "repeatedNativeFingerprints": [],
   "reviewedNativeControls": [
     {
-      "location": "src/components/AuthLayout.jsx:153",
+      "location": "src/components/AuthLayout.jsx:134",
       "tag": "button",
       "context": "auth-footer-support"
     },

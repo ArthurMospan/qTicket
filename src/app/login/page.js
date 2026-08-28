@@ -205,7 +205,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout hideCreateOrg={true} portalMode={clientLogin}>
+    <AuthLayout portalMode={clientLogin}>
       <div className="w-full max-w-[360px] flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
         <div className="mb-[24px]">
           {clientLogin ? (
@@ -218,7 +218,7 @@ export default function LoginPage() {
         </div>
 
         <h1 className="text-white text-[28px] font-black tracking-tight mb-[30px]">
-          {clientLogin ? 'Вхід до порталу підтримки' : 'Увійти або зареєструватися'}
+          {clientLogin ? 'Вхід до порталу підтримки' : 'Службовий вхід'}
         </h1>
 
         {clientLogin && (

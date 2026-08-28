@@ -40,7 +40,7 @@ export default function EmailLoginPage() {
   }
 
   return (
-    <AuthLayout hideCreateOrg={true}>
+    <AuthLayout>
       <div className="w-full max-w-[360px] flex flex-col items-center text-center animate-in slide-in-from-right-4 fade-in duration-300">
         <button
           type="button"

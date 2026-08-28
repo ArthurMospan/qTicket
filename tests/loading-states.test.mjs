@@ -83,6 +83,6 @@ test('an already restored account never paints the login form while redirecting'
   const source = await read('../src/app/login/page.js');
   assert.match(source, /if \(authLoading \|\| currentUser\) \{/);
   assert.ok(
-    source.indexOf('if (authLoading || currentUser)') < source.indexOf('<AuthLayout hideCreateOrg={true}'),
+    source.indexOf('if (authLoading || currentUser)') < source.indexOf('<AuthLayout portalMode={clientLogin}>'),
   );
 });

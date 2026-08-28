@@ -19,7 +19,7 @@ import WorkspaceNotificationBridge from '@/components/WorkspaceNotificationBridg
 import IssueReadStateBridge from '@/components/IssueReadStateBridge';
 import WorkspaceDocumentTitle from '@/components/WorkspaceDocumentTitle';
 import WorkspaceCommandPalette from '@/components/WorkspaceCommandPalette';
-import { ConnectionBanner } from '@/components/ui';
+import { ConnectionBanner, EmptyState, Surface } from '@/components/ui';
 import { useOnlineStatus } from '@/lib/hooks/useOnlineStatus';
 import { useRecordAccountSession } from '@/lib/hooks/useAccountSessions';
 import WorkspaceOrganizationRouteGuard from '@/components/WorkspaceOrganizationRouteGuard';
@@ -126,9 +126,38 @@ function WorkspaceLoadFailure({ error, onRetry, onSignOut }) {
   );
 }
 
+function NoOrganizationAccess({ email, onRetry, onSignOut }) {
+  return (
+    <div className="w-full h-full bg-white p-0 md:bg-canvas md:p-[12px]">
+      <Surface preset="card" padding="none" className="flex h-full flex-col overflow-hidden">
+        <EmptyState
+          icon={LockKeyhole}
+          title="Доступ до qTicket не надано"
+          description="qTicket не створює окремих організацій. Клієнт входить лише після запрошення до конкретного клієнтського простору, а працівник відкриває qTicket через QuickTeam."
+          context="flexible"
+        >
+          {email && (
+            <p className="mx-auto mb-5 max-w-[480px] text-[13px] leading-relaxed text-ink-soft">
+              Для акаунта {email} активного доступу не знайдено.
+            </p>
+          )}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button onClick={onRetry} size="lg" style="secondary">
+              Перевірити доступ
+            </Button>
+            <Button onClick={onSignOut} size="lg">
+              Увійти іншим акаунтом
+            </Button>
+          </div>
+        </EmptyState>
+      </Surface>
+    </div>
+  );
+}
+
 export default function WorkspaceLayout({ children }) {
   const router = useRouter();
-  const { currentUser, authLoading, activeOrgId, activeOrg, orgLoading, orgError, orgRole, noOrg, signOut, allOrgs, invitationChecked } = useAppContext();
+  const { currentUser, authLoading, activeOrgId, orgLoading, orgError, orgRole, noOrg, signOut, allOrgs } = useAppContext();
   const [needsOrgSelection, setNeedsOrgSelection] = useState(false);
   // null on first render, then the matching nav is mounted. This prevents the
   // hidden nav variant from briefly opening its own Firestore subscriptions.
@@ -192,34 +221,6 @@ export default function WorkspaceLayout({ children }) {
     router.replace(`/?org=${encodeURIComponent(activeOrgId)}`);
   }, [activeOrgId, authLoading, clientRouteDenied, currentUser, orgLoading, router]);
 
-  // Onboarding redirect: if owner/admin and org not yet onboarded
-  useEffect(() => {
-    if (authLoading || orgLoading) return;
-    if (!currentUser) return;
-    if (!activeOrg) return;
-    // A workspace whose organization document has not been read yet is present
-    // because its membership is — see buildOrganizationList. It has no fields,
-    // so `onboarded` reads as missing, and sending its owner off to «створіть
-    // організацію» over a read that has not finished is exactly the kind of
-    // thing that must not follow from a slow network.
-    if (activeOrg.pending) return;
-    const requestedOrgId = new URLSearchParams(window.location.search).get('org');
-    if (requestedOrgId && requestedOrgId !== activeOrgId) return;
-    const isOwnerOrAdmin = orgRole === 'owner' || orgRole === 'admin';
-    if (isOwnerOrAdmin && activeOrg.onboarded !== true) {
-      router.replace('/onboarding');
-    }
-  }, [activeOrgId, authLoading, orgLoading, currentUser, activeOrg, orgRole, router]);
-
-  // 3. Authenticated but not in any org → onboarding. Gated on invitationChecked
-  //    so a freshly-invited user isn't bounced to "create an org" while their
-  //    membership is still being created by the invite-acceptance call.
-  useEffect(() => {
-    if (noOrg && !orgLoading && !authLoading && invitationChecked) {
-      router.replace('/onboarding');
-    }
-  }, [noOrg, orgLoading, authLoading, invitationChecked, router]);
-
   // 4. Intercept for full-screen Org Selector
   useEffect(() => {
     if (authLoading || orgLoading || !currentUser || noOrg) return;
@@ -253,12 +254,16 @@ export default function WorkspaceLayout({ children }) {
     return <WorkspaceLoadFailure error={orgError} onRetry={retryLoad} onSignOut={signOutAndReturn} />;
   }
 
-  // 3. Authenticated but not in any org → redirect immediately to onboarding
+  // An authenticated account without a verified membership is not a new
+  // tenant. It is either an uninvited client or a staff account that did not
+  // arrive through QuickTeam, so the only safe result is a closed door.
   if (noOrg) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-canvas">
-        <div className="w-8 h-8 border-[3px] border-line border-t-ink rounded-full animate-spin" />
-      </div>
+      <NoOrganizationAccess
+        email={currentUser.email}
+        onRetry={retryLoad}
+        onSignOut={signOutAndReturn}
+      />
     );
   }
 
@@ -307,7 +312,7 @@ export default function WorkspaceLayout({ children }) {
         <WorkspaceDocumentTitle />
         <OrgSwitcherScreen />
       </>
-    ); // No onClose provided, meaning they MUST select an org or create one
+    ); // No onClose provided, meaning they must select an existing organization.
   }
 
   return (

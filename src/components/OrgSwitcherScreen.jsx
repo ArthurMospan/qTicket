@@ -160,7 +160,7 @@ export default function OrgSwitcherScreen({ onClose }) {
       data-ui-overlay="workspace-mode"
       className={`fixed inset-0 z-[200] ${onClose ? 'bg-transparent' : 'bg-canvas'}`}
     >
-      <AuthLayout hideCreateOrg={clientPortal} portalMode={clientPortal} onClose={onClose}>
+      <AuthLayout portalMode={clientPortal} onClose={onClose}>
 
         <div className={`flex flex-col items-center w-full max-w-[800px] transition-opacity duration-300 ${isExpanding ? 'opacity-0' : 'opacity-100'} animate-in slide-in-from-bottom-8 duration-500 pb-16`}>
           <h1 className="ui-type-display-title text-white mb-2 text-center tracking-tight">

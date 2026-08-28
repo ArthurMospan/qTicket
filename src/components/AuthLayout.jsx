@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAppContext } from '@/lib/context/AppContext';
-import { Headphones, Plus, X, LogOut } from 'lucide-react';
+import { Headphones, X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { IconAction } from '@/components/ui';
 import SupportDialog from '@/components/SupportDialog';
@@ -28,7 +28,6 @@ const AUTH_FOOTER_LINK_CLASS = 'text-white/30 hover:text-white/70 transition-col
 
 export default function AuthLayout({
   children,
-  hideCreateOrg = false,
   onClose,
   portalMode = false,
 }) {
@@ -36,10 +35,6 @@ export default function AuthLayout({
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
-
-  const handleCreateOrg = () => {
-    router.push('/onboarding?new=true');
-  };
 
   const handleLogout = async () => {
     await signOut();
@@ -75,16 +70,6 @@ export default function AuthLayout({
           </div>
 
           <div className="flex items-center gap-6">
-            {currentUser && !hideCreateOrg && !portalMode && (
-              <button
-                onClick={handleCreateOrg}
-                className="hidden md:flex items-center gap-2 text-white/70 hover:text-white transition-colors text-[13px] font-medium"
-              >
-                <Plus size={16} />
-                Створити організацію
-              </button>
-            )}
-
             {onClose ? (
               <IconAction
                 label="Закрити"
@@ -132,9 +117,7 @@ export default function AuthLayout({
             `my-auto` on the child, not `justify-center` on the scroller. A
             centred flex column that overflows pushes its first child *above*
             the scroll origin, and there is no scroll position that brings it
-            back — so the top of anything taller than this card was cut off and
-            unreachable. That is what the price list on «Оберіть тариф» ran
-            into. Auto margins centre what fits and collapse to zero for what
+            back. Auto margins centre what fits and collapse to zero for what
             does not. */}
         <div className="flex-1 w-full flex flex-col items-center px-4 overflow-y-auto custom-scrollbar relative z-10">
           <div className="my-auto flex w-full flex-col items-center">

@@ -17,9 +17,8 @@ import { firestoreDocumentData } from '../src/lib/utils/firestoreDocument.mjs';
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
 test('each browser tab owns its organization selection and keeps it in the URL', async () => {
-  const [context, onboarding, guard, switcher] = await Promise.all([
+  const [context, guard, switcher] = await Promise.all([
     read('../src/lib/context/OrgContext.js'),
-    read('../src/app/onboarding/page.js'),
     read('../src/components/WorkspaceOrganizationRouteGuard.jsx'),
     read('../src/components/OrgSwitcherScreen.jsx'),
   ]);
@@ -28,8 +27,6 @@ test('each browser tab owns its organization selection and keeps it in the URL',
   assert.match(context, /sessionStorage\.getItem\(TAB_STORAGE_KEY\)/);
   assert.doesNotMatch(context, /localStorage\.(?:getItem|setItem)\(TAB_STORAGE_KEY/);
   assert.match(context, /window\.history\.replaceState\(null, '', scoped\)/);
-  assert.match(onboarding, /sessionStorage\.setItem\('qt_active_org_id', createdId\)/);
-  assert.doesNotMatch(onboarding, /localStorage\.setItem\('qt_active_org_id'/);
   assert.match(guard, /withNotificationOrganization\(current, activeOrgId\)/);
   // A click must navigate to the organization it selected. A bare `/` races
   // the state update and lets the guard restore the previous organization.
@@ -326,11 +323,12 @@ test('a short organizations read is asked again, of the server', async () => {
   assert.match(context, /const missing = orgIds\.filter\(orgId => !found\.has\(orgId\)\);/);
   assert.match(context, /documents\.concat\(await readOrganizationsById\(missing, true\)\)/);
   assert.match(context, /fromServer \? getDocsFromServer\(request\) : getDocs\(request\)/);
-  // «Створіть організацію» follows only from a server-confirmed empty
+  // A closed access screen follows only from a server-confirmed empty
   // membership list, never from an empty cache.
   assert.match(context, /if \(organizations\.length === 0\) \{[\s\S]*if \(!authoritative\) \{[\s\S]*setNoOrg\(true\);/);
-  // And an entry still waiting for its document does not read as un-onboarded.
-  assert.match(layout, /if \(activeOrg\.pending\) return;/);
+  assert.match(layout, /function NoOrganizationAccess/);
+  assert.match(layout, /if \(noOrg\) \{[\s\S]*<NoOrganizationAccess/);
+  assert.doesNotMatch(layout, /router\.replace\('\/onboarding'/);
 });
 
 test('every browser membership list is verified through the independent server directory', async () => {
@@ -384,41 +382,24 @@ test('the obsolete client-side organization bootstrap is gone', async () => {
   assert.doesNotMatch(hook, /setDoc\(membershipRef/);
 });
 
-// The owner seat is written when the organization is created. Rewriting it on
-// every onboarding was meant to be harmless, but roles and removals are
-// server-owned: the rules refuse every client write to a membership that
-// already exists, and a merge write onto an existing document is one of those.
-// Onboarding an organization that already had its seat failed on that no-op,
-// after the organization itself had already been saved.
-//
-test('a new organization and its owner seat are written by the server', async () => {
-  const onboarding = await read('../src/app/onboarding/page.js');
+test('qTicket tenants can only be provisioned by QuickTeam', async () => {
+  const [onboarding, authLayout, route, provision] = await Promise.all([
+    read('../src/app/onboarding/page.js'),
+    read('../src/components/AuthLayout.jsx'),
+    read('../src/app/api/organizations/route.js'),
+    read('../src/app/api/integrations/quickteam/provision/route.js'),
+  ]);
 
-  // Both privileged documents used to be written from this screen, guarded by a
-  // rule that could only ever check «the organization names you as its owner» —
-  // which is true of the tenth free workspace an account creates as well.
-  // «One free workspace per account» is a count, and rules cannot count.
-  assert.match(onboarding, /const isFreshOrganization = isNewOrg \|\| !activeOrgId;/);
-  assert.match(onboarding, /createOrganization\({/);
-  assert.doesNotMatch(onboarding, /'orgMemberships'/);
-  assert.doesNotMatch(onboarding, /ownerId: uid/);
-  // Finishing the onboarding of an organization that already exists is an
-  // update by its owner, which the rules can check on their own — so it stays
-  // a client write, and only that branch takes it.
-  assert.ok(onboarding.includes("if (!isFreshOrganization) {"));
-  assert.ok(onboarding.includes("await setDoc(doc(db, 'organizations', orgId)"));
-  // Its plan is not part of that update: plan and limits are refused from a
-  // browser, because a plan change also decides which projects the new ceiling
-  // no longer has room for.
-  assert.ok(onboarding.includes('switchOrganizationPlan(orgId, selectedPlan)'));
-  const clientWrite = onboarding.slice(onboarding.indexOf("setDoc(doc(db, 'organizations', orgId)"));
-  assert.ok(!clientWrite.slice(0, 500).includes('plan:'), 'браузер не пише plan у документ організації');
-  assert.doesNotMatch(onboarding, /getDoc\(/);
-
-  const route = await read('../src/app/api/organizations/route.js');
-  assert.match(route, /export async function POST\(request\)/);
-  assert.match(route, /FREE_WORKSPACE\.refusal/);
-  assert.match(route, /collection\('orgMemberships'\)/);
+  assert.match(onboarding, /redirect\('\/'\)/);
+  assert.doesNotMatch(onboarding, /createOrganization|PlanCards|setDoc/);
+  assert.doesNotMatch(authLayout, /Створити організацію|\/onboarding/);
+  assert.match(route, /export async function POST\(\)/);
+  assert.match(route, /code: 'quickteam_provisioning_required'/);
+  const standaloneCreate = route.slice(route.indexOf('export async function POST'));
+  assert.doesNotMatch(standaloneCreate, /batch\.set|collection\('orgMemberships'\)/);
+  assert.match(provision, /readSignedQuickTeamRequest\(request\)/);
+  assert.match(provision, /transaction\.set\(organizationRef/);
+  assert.match(provision, /collection\('orgMemberships'\)\.doc\(membershipId\)/);
 
   const rules = await read('../firestore.rules');
   const organizations = rules.slice(rules.indexOf('match /organizations/{orgId}'), rules.indexOf('match /orgMemberships/{membershipId}'));
