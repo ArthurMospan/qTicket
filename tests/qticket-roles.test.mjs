@@ -176,25 +176,60 @@ test('клієнтська сесія не підписується на вну�
 });
 
 // Внутрішнє місце в qTicket видає лише підписаний provisioning із QuickTeam.
+//
 // Посилання-запрошення з фіксованою роллю `member`/`admin` було другим входом
-// повз цю межу: будь-хто з URL отримував staff-доступ, а перевірка
-// QuickTeam-керованої організації, яку робить `/api/invitations`, до нього не
-// доходила. Тому механізм не «вимкнено» — його немає.
+// повз цю межу — будь-хто з URL отримував staff-доступ, — і 1717ab1 видалив
+// увесь механізм. Клієнтська його половина повернулася: пошта не підключена,
+// тож посилання, передане в месенджері, і є підтриманим способом видати
+// доступ. Тому перевіряється вже не відсутність файлів, а те, що жоден із них
+// не вміє назвати внутрішню роль. Відмова стоїть у трьох місцях, бо зламатися
+// можуть три різні речі: маршрут створення, транзакція прийняття і Rules.
 test('qTicket не має самостійного шляху до внутрішнього місця', async () => {
-  const dialog = await read('../src/components/InviteMemberDialog.jsx');
+  const [dialog, helper, createRoute, acceptRoute, rules] = await Promise.all([
+    read('../src/components/InviteMemberDialog.jsx'),
+    read('../src/lib/server/inviteLinks.mjs'),
+    read('../src/app/api/invitations/link/route.js'),
+    read('../src/app/api/invitations/link/accept/route.js'),
+    read('../firestore.rules'),
+  ]);
 
-  assert.doesNotMatch(dialog, /Менеджер підтримки|Адміністратор'|InviteLinkSection|Посилання та QR/);
+  // Діалог і далі не пропонує внутрішньої ролі й не має QR-половини старого
+  // механізму: qTicket видає рівно два запрошення.
+  assert.doesNotMatch(dialog, /Менеджер підтримки|Адміністратор'|Посилання та QR/);
   assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : 'client_admin'/);
 
-  for (const removed of [
-    '../src/app/api/invitations/link/route.js',
-    '../src/app/api/invitations/link/accept/route.js',
-    '../src/app/invite/[token]/page.js',
-    '../src/components/InviteLinkSection.jsx',
-    '../src/lib/server/inviteLinks.js',
-  ]) {
-    await assert.rejects(read(removed), { code: 'ENOENT' }, `${removed} має бути видалений`);
-  }
+  // 1. Виписати внутрішню роль неможливо: `isClientRole` — умова, а не
+  //    підстраховка, і немає гілки, що повертає щось інше.
+  assert.match(helper, /if \(!isClientRole\(requestedRole\)\) throw new Error\('INTERNAL_ROLE_REFUSED'\)/);
+  assert.match(helper, /if \(inviterRole === 'client_admin'\) return 'client_member'/);
+  assert.doesNotMatch(helper, /return 'member'|return 'admin'|return 'owner'/);
+
+  // 2. Маршрут створення питає саме цю функцію, а не власний список ролей, і
+  //    звіряє її з тією самою політикою, що й запрошення поштою.
+  assert.match(createRoute, /const safeRole = inviteLinkRole\(role, inviterRole\)/);
+  assert.match(createRoute, /resolveInvitationScope/);
+  assert.match(createRoute, /if \(scope\.role !== safeRole \|\| scope\.projectIds\.length !== 1\)/);
+
+  // 3. Прийняття перечитує роль із документа з тією ж підозрою: документ, що
+  //    каже `admin`, не садить нікого.
+  assert.match(acceptRoute, /role = acceptedInviteLinkRole\(invitation\.role\)/);
+  assert.doesNotMatch(acceptRoute, /request\.role|body\.role/);
+
+  // 4. Firestore Rules не дають браузеру ані прочитати `tokenHash`, ані
+  //    переписати роль у вже створеному посиланні.
+  assert.match(rules, /function isInviteLinkInvitation\(data\) \{\s*return data\.get\('type', ''\) == 'link';/);
+  assert.match(rules, /allow get: if signedIn\(\) &&\s*!isInviteLinkInvitation\(resource\.data\)/);
+  // Умова на документ не захищає запит: браузер, якому відмовили в `get`,
+  // отримував той самий документ списком. Тому список закритий геть.
+  assert.match(rules, /allow list: if false;/);
+  assert.match(rules, /allow update: if isOrgAdminOrOwner\(resource\.data\.organizationId\) &&\s*!isInviteLinkInvitation\(resource\.data\) &&\s*!isInviteLinkInvitation\(request\.resource\.data\)/);
+
+  // Старий помічник із внутрішньою роллю не повернувся під своїм ім'ям.
+  await assert.rejects(
+    read('../src/lib/server/inviteLinks.js'),
+    { code: 'ENOENT' },
+    'внутрішній помічник посилань має лишатися видаленим',
+  );
 });
 
 test('клієнтський глобальний пошук не відкриває людей або події поза його простором', async () => {

@@ -6,6 +6,8 @@
 // render time.  Existing standalone qTicket organizations predate that field,
 // so their ordinary name/logo/sidebar settings remain the fallback.
 
+import { SIDEBAR_PRESETS } from './sidebarTheme';
+
 const cleanText = (value, fallback = '') => (
   typeof value === 'string' && value.trim() ? value.trim() : fallback
 );
@@ -43,4 +45,21 @@ export function resolveOrganizationPortalBrand(organization = null) {
 
 export function organizationPortalName(organization) {
   return resolveOrganizationPortalBrand(organization).name;
+}
+
+/**
+ * The colour a client surface is painted in, from the brand above.
+ *
+ * The sidebar worked this out inline, and the invitation landing page needs the
+ * same answer before anybody has signed in — one tenant, two screens, and a
+ * second copy of the ternary is how the rail and the front door would end up
+ * two different shades of the same company.
+ *
+ * @param {{sidebarTheme: string, sidebarColor: string}} brand From `resolveOrganizationPortalBrand`.
+ * @returns {string} A HEX colour to hand `computeSidebarTheme`.
+ */
+export function organizationPortalBackground(brand) {
+  if (brand?.sidebarTheme === 'light') return SIDEBAR_PRESETS.light;
+  if (brand?.sidebarTheme === 'custom') return brand.sidebarColor || SIDEBAR_PRESETS.dark;
+  return SIDEBAR_PRESETS.dark;
 }

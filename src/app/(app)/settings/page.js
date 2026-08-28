@@ -57,6 +57,7 @@ import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 // The colour wheel is reached by opening one section of one screen, so it
 // loads then rather than with the settings page.
 const Colorful = dynamic(() => import('@uiw/react-color').then(module => module.Colorful), { ssr: false });
+import InviteLinkSection from '@/components/InviteLinkSection';
 import InviteMemberDialog from '@/components/InviteMemberDialog';
 import IntegrationCard, { IntegrationCode, IntegrationNote, IntegrationSteps } from '@/components/integrations/IntegrationCard';
 import DataMigrationSettings, { MIGRATION_SOURCE_TITLES } from '@/components/migrations/DataMigrationSettings';
@@ -3497,6 +3498,17 @@ export default function SettingsPage() {
               })}
             </div>
           </Surface>
+          {/* A client administrator adds colleagues they know by name long
+              before they know their Google address. Same access, offered the
+              other way round — and never wider: this link is fixed to the one
+              client space they already belong to. */}
+          {clientAdmin && clientProjectIds.length === 1 && (
+            <InviteLinkSection
+              role="client_member"
+              projectId={clientProjectIds[0]}
+              description="Надішліть його співробітнику в месенджері. Посилання відкриває доступ тільки до вашого простору й тільки в ролі співробітника клієнта."
+            />
+          )}
         </Section>
         );
       }

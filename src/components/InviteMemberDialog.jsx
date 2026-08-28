@@ -10,6 +10,7 @@ import Label from '@/components/ui/Forms/Label';
 import { useAppContext } from '@/lib/context/AppContext';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { isClientRole } from '@/lib/utils/can';
+import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 
 const GITHUB_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GITHUB_LOGIN_ENABLED === 'true';
 
@@ -31,8 +32,12 @@ export default function InviteMemberDialog({
   clientAdminMode = false,
   projectIds = [],
 }) {
-  const { currentUser, orgRole } = useAppContext();
+  const { activeOrg, currentUser, orgRole } = useAppContext();
   const clientInvite = clientMode || isClientRole(orgRole);
+  // The instruction goes to a client, so it is signed by the tenant. «Вам
+  // підготовлено доступ до qTicket» named the software the client has never
+  // heard of instead of the company they are already buying support from.
+  const portalName = organizationPortalName(activeOrg);
   const showToast = useWorkspaceStore(state => state.showToast);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -56,7 +61,7 @@ export default function InviteMemberDialog({
 
   const copyLoginInstructions = async () => {
     const loginUrl = new URL('/login?mode=client', window.location.origin).toString();
-    const instructions = `Вам підготовлено доступ до qTicket.\n\n1. Відкрийте: ${loginUrl}\n2. Увійдіть через ${GITHUB_LOGIN_ENABLED ? 'Google або GitHub' : 'Google'}.\n3. Використайте акаунт з адресою ${pendingAccessEmail} — вона має точно збігатися з адресою запрошення.\n\nПісля першого входу доступ до клієнтського проєкту підключиться автоматично.`;
+    const instructions = `Вам підготовлено доступ до порталу підтримки «${portalName}».\n\n1. Відкрийте: ${loginUrl}\n2. Увійдіть через ${GITHUB_LOGIN_ENABLED ? 'Google або GitHub' : 'Google'}.\n3. Використайте акаунт з адресою ${pendingAccessEmail} — вона має точно збігатися з адресою запрошення.\n\nПісля першого входу доступ до клієнтського простору підключиться автоматично.`;
 
     try {
       await navigator.clipboard.writeText(instructions);

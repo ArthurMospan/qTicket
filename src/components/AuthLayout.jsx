@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAppContext } from '@/lib/context/AppContext';
 import { Headphones, X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { IconAction } from '@/components/ui';
+import { IconAction, OrganizationMark } from '@/components/ui';
 import SupportDialog from '@/components/SupportDialog';
 
 // Everything QuickTeam owes a reader who is not inside a workspace yet: the
@@ -25,11 +25,33 @@ const AUTH_FOOTER_DOCUMENTS = [
 ];
 
 const AUTH_FOOTER_LINK_CLASS = 'text-white/30 hover:text-white/70 transition-colors text-[12px] font-medium';
+// Branded, the quiet grey is derived from the tenant's own colour instead of
+// assumed to be white at 30% — a light brand would have painted the footer
+// invisible on itself.
+const BRANDED_FOOTER_LINK_CLASS = 'text-[12px] font-medium opacity-60 transition-opacity hover:opacity-100';
 
+/**
+ * The shell around every screen outside the workspace, wearing the tenant's
+ * identity whenever the screen knows whose it is.
+ *
+ * `portalMode` is the honest anonymous case: a plain `/login` cannot know which
+ * support provider a visitor belongs to until they have signed in, so it shows
+ * a headset and «Портал підтримки» rather than qTicket's own mark. An
+ * invitation link is the case where the screen *does* know — carrying the
+ * organization identity is what the token is for — and then the client meets
+ * their supplier's logo, name and colour on the way in, exactly as they will
+ * once they are inside.
+ *
+ * Staff screens (`/login?mode=staff`, `/login/quickteam`) pass neither and keep
+ * qTicket's own identity: qTicket is the product the support team bought.
+ *
+ * @param {{name: string, logo: string, theme: object}} props.brand Tenant name, logo, and a `computeSidebarTheme` result. The card is branded through the same `--sb-*` variables as the workspace rail, so one organization colour cannot produce two shades.
+ */
 export default function AuthLayout({
   children,
   onClose,
   portalMode = false,
+  brand = null,
 }) {
   const { currentUser, signOut } = useAppContext();
   const router = useRouter();
@@ -50,22 +72,47 @@ export default function AuthLayout({
     ? 'animate-in slide-in-from-left-8 fade-in duration-[500ms] origin-left ease-[cubic-bezier(0.16,1,0.3,1)]'
     : 'animate-in fade-in duration-500 ease-out';
 
+  const theme = brand?.theme || null;
+  // The rail's own variables, on the card. Everything inside a branded shell
+  // reads them rather than a brand token, for the same reason the sidebar does:
+  // the surface belongs to the organization, not to the product palette.
+  const brandedStyle = theme ? {
+    '--sb-bg': theme.bg,
+    '--sb-text': theme.text,
+    '--sb-muted': theme.muted,
+    '--sb-hover': theme.hover,
+    '--sb-active': theme.active,
+    backgroundColor: 'var(--sb-bg)',
+    color: 'var(--sb-text)',
+  } : undefined;
+  const footerLinkClass = theme ? BRANDED_FOOTER_LINK_CLASS : AUTH_FOOTER_LINK_CLASS;
+  const footerLinkStyle = theme ? { color: theme.muted } : undefined;
+
   return (
     <div className={`w-full h-[100dvh] bg-[#f5f5f5] p-[12px] flex flex-col overflow-hidden select-none ${animationClass}`}>
-      <div className="w-full h-full bg-[#1c1c1c] rounded-[24px] overflow-hidden flex flex-col relative text-white">
+      <div
+        data-ui-surface="local"
+        style={brandedStyle}
+        className={`w-full h-full rounded-[24px] overflow-hidden flex flex-col relative ${theme ? '' : 'bg-[#1c1c1c] text-white'}`}
+      >
 
         {/* Header - Padding matches WorkspaceSidebar: pt-24px, px-20px */}
         <div className="w-full flex items-center justify-between pt-[24px] px-[20px] pb-[16px] shrink-0 relative z-50">
-          <div className="flex items-center gap-[12px]">
-            {portalMode ? (
+          <div className="flex items-center gap-[12px] min-w-0">
+            {brand ? (
+              <OrganizationMark name={brand.name} logo={brand.logo} size="sm" appearance="sidebar" />
+            ) : portalMode ? (
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white" aria-hidden>
                 <Headphones size={17} />
               </div>
             ) : (
               <Image src="/logo-min.svg" alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
             )}
-            <h1 className="ui-type-section-title text-white tracking-tight leading-tight truncate">
-              {portalMode ? 'Портал підтримки' : 'qTicket'}
+            <h1
+              className={`ui-type-section-title tracking-tight leading-tight truncate ${theme ? '' : 'text-white'}`}
+              style={theme ? { color: theme.text } : undefined}
+            >
+              {brand ? brand.name : (portalMode ? 'Портал підтримки' : 'qTicket')}
             </h1>
           </div>
 
@@ -132,21 +179,37 @@ export default function AuthLayout({
               rather than navigating. A kit `Button` here would put a control
               box in a line of quiet 12px links and make support the loudest
               thing on a screen whose job is the sign-in buttons above it.
-              Marked `data-ui-control="auth-footer-support"`. */}
-          <button
-            type="button"
-            data-ui-control="auth-footer-support"
-            onClick={() => setSupportOpen(true)}
-            className={AUTH_FOOTER_LINK_CLASS}
-          >
-            Підтримка
-          </button>
+              Marked `data-ui-control="auth-footer-support"`.
+
+              It is not drawn on a branded screen. This opens qTicket's own
+              support channels, and a client of the tenant who presses «Підтримка»
+              on their supplier's portal expects their supplier — not the
+              Telegram account of the company that made the software. The
+              tenant's own support is the incidents they are being invited to. */}
+          {!brand && (
+            <button
+              type="button"
+              data-ui-control="auth-footer-support"
+              onClick={() => setSupportOpen(true)}
+              className={AUTH_FOOTER_LINK_CLASS}
+            >
+              Підтримка
+            </button>
+          )}
           {AUTH_FOOTER_DOCUMENTS.map(document => (
-            <Link key={document.href} href={document.href} className={AUTH_FOOTER_LINK_CLASS}>
+            <Link
+              key={document.href}
+              href={document.href}
+              className={footerLinkClass}
+              style={footerLinkStyle}
+            >
               {document.label}
             </Link>
           ))}
-          <span className="text-white/30 text-[12px] font-medium ml-auto">
+          <span
+            className={`ml-auto text-[12px] font-medium ${theme ? 'opacity-60' : 'text-white/30'}`}
+            style={footerLinkStyle}
+          >
             Українська
           </span>
         </div>

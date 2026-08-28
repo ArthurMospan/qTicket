@@ -60,8 +60,9 @@ Completed foundation:
 - Firebase client/admin configuration and Cloudinary are configured in Vercel;
   secrets are not stored in Git. Transactional email is intentionally disabled.
 - Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
-  suite passes all 81 tests, including the project-scoped client boundary,
-  entitlement revocation and stale project-roster denial.
+  suite passes all 86 tests, including the project-scoped client boundary,
+  entitlement revocation, stale project-roster denial and the invite-link
+  refusals.
 - The role model already exists in code and rules: internal `owner`, `admin`,
   `member`; external `client_admin`, `client_member`. External users can create,
   read and discuss incidents in their client project, but cannot control the
@@ -95,7 +96,7 @@ Completed product slice on 2026-08-28:
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
 - The product baseline passes lint, the complete unit suite, production build,
-  all 81 Firestore rules tests, all 42 local visual scenarios, and the UI Kit
+  all 86 Firestore rules tests, all 42 local visual scenarios, and the UI Kit
   usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -177,6 +178,43 @@ Completed product slice on 2026-08-28:
   rules now require a non-empty QuickTeam source organization id plus an active
   signed entitlement; legacy standalone organization documents grant no access,
   and the synchronized organization snapshot is server-write-only.
+
+Completed product slice on 2026-08-29:
+
+- Client-facing surfaces now carry the tenant's brand rather than qTicket's.
+  `AuthLayout` takes an optional brand and paints the shell from the same
+  `--sb-*` theme the workspace rail uses, so one organization colour cannot
+  produce two shades; `organizationPortalBackground` is now the one place that
+  turns a portal brand into a colour, and the sidebar reads it too. A plain
+  `/login` stays deliberately unbranded — it cannot know whose portal it is
+  before sign-in — and `/login?mode=staff` and `/login/quickteam` keep qTicket's
+  own identity, because qTicket is the product the support team bought.
+- The copied login instruction and the (still unsent) invitation email name the
+  tenant instead of qTicket, and both resolve the name through
+  `organizationPortalName` rather than reading the organization document raw.
+  qTicket's own support channels are not offered on a branded screen: a client
+  pressing «Підтримка» there would have reached OneB's Telegram rather than
+  their supplier.
+- The client invitation **link** exists again, client-only. Staff mint a
+  `client_admin` link on a client space's «Люди» tab; a `client_admin` mints a
+  `client_member` link in «Співробітники клієнта». A link is fixed to one role
+  and one client project, expires in 7 days, is capped at 10 uses and can be
+  revoked. `src/lib/server/inviteLinks.mjs` refuses an internal role when the
+  link is minted and again when it is accepted; `firestore.rules` refuses every
+  browser read, list and write of a link document. Firestore stores only the
+  token's SHA-256, accepting is a transaction so the last use cannot be spent
+  twice, and expired/revoked/exhausted/unknown all answer identically.
+- Listing `invitations` from a browser is now refused outright. A per-document
+  `read` condition does not protect a query: the rules engine returned the link
+  document to an admin whose direct `get` of that same document it had just
+  refused, which would have let a `tokenHash` be harvested in bulk. `get` and
+  `list` are separate rules now, and `tests/firestore.rules.test.mjs` holds it.
+- `/invite/{token}` is the product's only unauthenticated read. Given a valid
+  token it returns the portal name, logo, colour, client space name and invited
+  role — and nothing about the inviter, the members, the organization id or the
+  remaining uses — so an invited client meets their supplier's brand before
+  signing in. It is rate-limited by IP and its page metadata deliberately does
+  not unfurl the tenant, because the link is pasted into group chats.
 
 Product work still required:
 
@@ -269,7 +307,7 @@ The competitors validate behaviors, not qTicket's ownership model or UI.
 | SLA and business hours | **Reject** | The owner rejected the whole category: no service-level policy, no promised first-response or resolution time, no business-hours calendar, no automatic pause while an incident waits for the client, and no post-resolution satisfaction rating. «Очікує відповіді» stays a status a person chooses, and a resolution date stays a date a person sets. Do not reopen this as a smaller version of itself. |
 | Request forms | **Adapt** | Incident types provide customer-friendly categories; add only proven type-specific required fields. Reject a general conditional form builder in the MVP. |
 | Audit and notifications | **Adapt** | Clients receive public replies and customer-facing status; staff receives internal notes and the support audit. In-app delivery stays split by audience. Email remains disconnected until Resend is intentionally enabled. |
-| Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles, refuses every mutation of a QuickTeam-managed seat, and no longer offers an internal role or an invite link anywhere. Client employees remain qTicket-owned. |
+| Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles, refuses every mutation of a QuickTeam-managed seat, and offers no internal role and no link into an internal seat anywhere. The invite link exists again for clients only: it may carry `client_admin` or `client_member` and nothing else, refused at the create route, in the accept transaction and in Firestore Rules. Client employees remain qTicket-owned. |
 | Pricing, billing and inherited planning modules | **Reject for qTicket MVP** | No local plans, prices, checkout, invoices, timesheets, sprints, calendar or AI surface. qTicket consumes only QuickTeam's signed active/inactive entitlement. |
 
 Stop condition: do not copy a competitor UI or turn its complete feature list

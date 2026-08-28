@@ -98,6 +98,29 @@ beforeEach(async () => {
       title: 'Internal support review',
       visibility: 'team',
     });
+    // The two shapes an invitation comes in: an address somebody typed, and a
+    // link whose token is the whole credential.
+    await setDoc(doc(db, 'invitations', 'pending-email'), {
+      organizationId: 'org-a',
+      email: 'invited@example.com',
+      role: 'client_admin',
+      scope: 'client-project',
+      projectIds: ['project-a'],
+      status: 'pending',
+    });
+    await setDoc(doc(db, 'invitations', 'pending-link'), {
+      type: 'link',
+      tokenHash: 'a'.repeat(64),
+      organizationId: 'org-a',
+      projectId: 'project-a',
+      projectIds: ['project-a'],
+      scope: 'client-project',
+      role: 'client_member',
+      status: 'pending',
+      invitedBy: 'client-admin-a',
+      maxUses: 10,
+      usedCount: 0,
+    });
   });
 });
 
@@ -256,6 +279,78 @@ test('an admin cannot bypass the invitation API by writing memberships directly'
   const membership = { id: 'org-a_new-user', orgId: 'org-a', userId: 'new-user', role: 'member' };
   await assertFails(setDoc(doc(db, 'orgMemberships', 'org-a_new-user'), membership));
   await assertFails(setDoc(doc(db, 'orgMemberships', 'forged-id'), { ...membership, id: 'forged-id' }));
+});
+
+// ── Invite links ────────────────────────────────────────────────────────
+//
+// The mechanism 1717ab1 deleted came back for clients only, and these are the
+// assertions that keep it there. A browser must not be able to read the hash
+// that makes a link work, and must not be able to write the role it grants.
+
+test('no browser role can read an invite link, hash included', async () => {
+  for (const uid of ['owner-a', 'admin-a', 'member-a', 'client-admin-a', 'client-member-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertFails(getDoc(doc(db, 'invitations', 'pending-link')));
+  }
+  // Nor by querying around the refusal. A per-document `read` condition does
+  // not protect a list: asked for the collection, the engine handed an admin
+  // the very document whose `get` it had just refused, which is how a
+  // `tokenHash` would be harvested in bulk. Listing invitations is therefore
+  // refused outright, for every filter.
+  const adminDb = environment.authenticatedContext('admin-a').firestore();
+  const invitations = collection(adminDb, 'invitations');
+  await assertFails(getDocs(invitations));
+  await assertFails(getDocs(query(invitations, where('organizationId', '==', 'org-a'))));
+  await assertFails(getDocs(query(invitations, where('tokenHash', '==', 'a'.repeat(64)))));
+  await assertFails(getDocs(query(invitations, where('type', '==', 'link'))));
+  await assertFails(getDocs(query(invitations, where('email', '==', 'invited@example.com'))));
+
+  // One invitation addressed to a person is still readable by an admin, which
+  // is what makes the refusals above about links rather than about the
+  // collection having been closed by accident.
+  await assertSucceeds(getDoc(doc(adminDb, 'invitations', 'pending-email')));
+});
+
+test('an admin cannot forge an internal seat onto an invite link', async () => {
+  const adminDb = environment.authenticatedContext('admin-a').firestore();
+  const ownerDb = environment.authenticatedContext('owner-a').firestore();
+  const link = doc(adminDb, 'invitations', 'pending-link');
+  // The whole point: `client_member` must not become `admin` between minting
+  // the link and somebody opening it.
+  await assertFails(updateDoc(link, { role: 'admin' }));
+  await assertFails(updateDoc(link, { role: 'member' }));
+  await assertFails(updateDoc(link, { maxUses: 5000 }));
+  await assertFails(updateDoc(link, { projectId: 'project-b' }));
+  await assertFails(updateDoc(doc(ownerDb, 'invitations', 'pending-link'), { role: 'owner' }));
+  // Revoking and deleting go through the server route too, so the document is
+  // untouchable rather than merely unpromotable.
+  await assertFails(updateDoc(link, { status: 'revoked' }));
+  await assertFails(deleteDoc(link));
+});
+
+test('an ordinary invitation cannot be turned into a link', async () => {
+  const adminDb = environment.authenticatedContext('admin-a').firestore();
+  await assertFails(updateDoc(doc(adminDb, 'invitations', 'pending-email'), {
+    type: 'link',
+    tokenHash: 'b'.repeat(64),
+    role: 'admin',
+  }));
+  // The email invitation itself stays administrable, which is what makes the
+  // refusal above about links rather than about invitations.
+  await assertSucceeds(updateDoc(doc(adminDb, 'invitations', 'pending-email'), {
+    status: 'cancelled',
+  }));
+});
+
+test('a browser still cannot create an invitation of either shape', async () => {
+  const adminDb = environment.authenticatedContext('admin-a').firestore();
+  await assertFails(setDoc(doc(adminDb, 'invitations', 'forged-email'), {
+    organizationId: 'org-a', email: 'someone@example.com', role: 'admin', status: 'pending',
+  }));
+  await assertFails(setDoc(doc(adminDb, 'invitations', 'forged-link'), {
+    type: 'link', tokenHash: 'c'.repeat(64), organizationId: 'org-a',
+    projectId: 'project-a', role: 'admin', status: 'pending', maxUses: 50, usedCount: 0,
+  }));
 });
 
 test('a member cannot change identity fields on a membership', async () => {
@@ -1881,3 +1976,4 @@ test('a member may refresh the typing heartbeat but not rewrite a channel', asyn
   await assertSucceeds(updateDoc(channel, { typing: ['member-a'], typingAt: { 'member-a': 1 } }));
   await assertFails(updateDoc(channel, { name: 'hijacked' }));
 });
+

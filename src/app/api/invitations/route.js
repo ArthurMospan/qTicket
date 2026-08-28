@@ -7,6 +7,7 @@ import { reactivateMembership } from '@/lib/server/orgMembership';
 import { seedChatReadState } from '@/lib/server/chatReadState';
 import { resolveInvitationScope } from '@/lib/server/invitationScope.mjs';
 import { rolesFor } from '@/lib/utils/can';
+import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 import {
   isQuickTeamManagedOrganization,
   QUICKTEAM_MANAGED_MESSAGE,
@@ -21,11 +22,14 @@ async function sendInvitationEmail(db, { email, organizationId, inviterUid, role
       db.collection('organizations').doc(organizationId).get(),
       db.collection('users').doc(inviterUid).get(),
     ]);
-    const orgName = orgSnap.exists ? orgSnap.data().name : '';
+    // The name the client already knows, resolved through the one brand
+    // resolver rather than read raw off the organization document: a
+    // QuickTeam-managed tenant may present a portal name of its own.
+    const orgName = orgSnap.exists ? organizationPortalName(orgSnap.data()) : '';
     const inviter = inviterSnap.exists ? inviterSnap.data() : {};
     const delivered = await deliverEmail({
       to: email,
-      subject: `Запрошення до «${orgName || 'qTicket'}»`,
+      subject: `Запрошення до «${orgName || 'Підтримка'}»`,
       html: invitationEmailHtml({
         orgName,
         inviterName: inviter.name || inviter.email || '',
