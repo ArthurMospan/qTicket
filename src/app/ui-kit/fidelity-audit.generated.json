@@ -692,7 +692,7 @@
       "className": "flex items-center gap-2 bg-canvas rounded-full pl-[4px] pr-[6px] py-[4px]"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1631",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1639",
       "tag": "div",
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },

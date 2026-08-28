@@ -159,14 +159,20 @@ service cloud.firestore {
     }
 
     function canAccessTimeLog(data) {
-      return (
-        isTeamCalendarTimeLog(data) && (
-          data.get('projectId', '') == '' ||
+      // Hours, descriptions and per-person totals are internal support and
+      // billing records. A client may discuss the incident and observe its
+      // workflow history, but project access must never become access to the
+      // support team's time ledger.
+      return isInternalContributor(data.organizationId) && (
+        (
+          isTeamCalendarTimeLog(data) && (
+            data.get('projectId', '') == '' ||
+            canAccessProject(data.projectId, data.organizationId)
+          )
+        ) || (
+          data.get('issueId', '') != '' &&
           canAccessProject(data.projectId, data.organizationId)
         )
-      ) || (
-        data.get('issueId', '') != '' &&
-        canAccessProject(data.projectId, data.organizationId)
       );
     }
 
@@ -421,6 +427,7 @@ service cloud.firestore {
         allow read: if canAccessIssueProject(issueId);
         allow create: if issueAcceptsNestedWrites(issueId) &&
           canAccessIssueProject(issueId) &&
+          isInternalContributor(issueOrg(issueId)) &&
           request.resource.data.userId == request.auth.uid;
         allow update, delete: if false;
       }
@@ -484,9 +491,9 @@ service cloud.firestore {
     // carries per-person minutes for one project, so whoever may not see that
     // project's time logs may not see its totals either; a summary of data you
     // cannot read is still that data. Project-less rollups hold team calendar
-    // time, which any member may already read one log at a time.
+    // time. Both are internal support records, never client-portal data.
     match /analyticsRollups/{id} {
-      allow read: if isOrgMember(resource.data.organizationId) && (
+      allow read: if isInternalContributor(resource.data.organizationId) && (
         resource.data.get('projectId', '') == '' ||
         canAccessProject(resource.data.projectId, resource.data.organizationId)
       );

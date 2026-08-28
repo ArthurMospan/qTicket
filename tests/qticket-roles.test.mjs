@@ -116,10 +116,11 @@ test('клієнтський інтерфейс створює інцидент 
 });
 
 test('клієнтська сесія не підписується на внутрішні модулі QuickTeam', async () => {
-  const [bridge, sprints, detail] = await Promise.all([
+  const [bridge, sprints, detail, timeline] = await Promise.all([
     read('../src/components/WorkspaceNotificationBridge.jsx'),
     read('../src/lib/hooks/useSprints.js'),
     read('../src/components/workspace/IssueDetail.jsx'),
+    read('../src/components/workspace/UnifiedTimeline.jsx'),
   ]);
   assert.match(bridge, /const internalViewer = Boolean\(orgRole\) && !isClientRole\(orgRole\)/);
   assert.match(bridge, /useUnreadChatCount\(\{ enabled: internalViewer \}\)/);
@@ -129,6 +130,8 @@ test('клієнтська сесія не підписується на вну�
   assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
   assert.match(detail, /useSprints\(\{ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer \}\)/);
   assert.match(detail, /SHOW_INHERITED_TASK_PLANNING && internalViewer \? issueId : null/);
+  assert.match(timeline, /const internalViewer = Boolean\(orgRole\) && !isClientRole\(orgRole\)/);
+  assert.match(timeline, /useTimeLogs\(\s*internalViewer \? issueId : null,\s*projectId,\s*\)/);
 });
 
 test('клієнтський глобальний пошук не відкриває людей або події поза його простором', async () => {

@@ -638,6 +638,45 @@ test('plain members cannot read or write time logs outside their project team', 
   await assertSucceeds(getDoc(doc(ownerDb, 'timeLogs', 'private-log')));
 });
 
+test('client roles cannot read internal time logs even inside their project', async () => {
+  const clientAdminDb = environment.authenticatedContext('client-admin-a').firestore();
+  const clientMemberDb = environment.authenticatedContext('client-member-a').firestore();
+  const internalMemberDb = environment.authenticatedContext('member-a').firestore();
+
+  for (const clientDb of [clientAdminDb, clientMemberDb]) {
+    await assertFails(getDoc(doc(clientDb, 'timeLogs', 'log-owner')));
+    await assertFails(getDocs(query(
+      collection(clientDb, 'timeLogs'),
+      where('organizationId', '==', 'org-a'),
+      where('projectId', '==', 'project-a'),
+      where('issueId', '!=', ''),
+    )));
+  }
+
+  await assertSucceeds(getDoc(doc(internalMemberDb, 'timeLogs', 'log-owner')));
+});
+
+test('client roles can read issue history but cannot forge audit entries', async () => {
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
+  const memberDb = environment.authenticatedContext('member-a').firestore();
+  const clientAuditRef = doc(clientDb, 'issues', 'issue-a', 'audit', 'client-forged-audit');
+  const memberAuditRef = doc(memberDb, 'issues', 'issue-a', 'audit', 'member-audit');
+
+  await assertFails(setDoc(clientAuditRef, {
+    userId: 'client-admin-a',
+    type: 'status_changed',
+    from: 'new',
+    to: 'resolved',
+  }));
+  await assertSucceeds(setDoc(memberAuditRef, {
+    userId: 'member-a',
+    type: 'status_changed',
+    from: 'new',
+    to: 'resolved',
+  }));
+  await assertSucceeds(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'member-audit')));
+});
+
 // A summary of hours you may not see is still those hours. The daily totals
 // repeat the raw log's rule rather than relaxing it, and nothing in a browser
 // may write one — they are derived by server transactions and rebuilt by
@@ -669,7 +708,10 @@ test('daily analytics totals are readable exactly where their logs are, and writ
   });
 
   const memberDb = environment.authenticatedContext('member-a').firestore();
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
   await assertSucceeds(getDoc(doc(memberDb, 'analyticsRollups', 'org-a_project-a_2026-08-24')));
+  await assertFails(getDoc(doc(clientDb, 'analyticsRollups', 'org-a_project-a_2026-08-24')));
+  await assertFails(getDoc(doc(clientDb, 'analyticsRollups', 'org-a__2026-08-24')));
   // Team calendar time hangs off no project and any member may already read it
   // one log at a time.
   await assertSucceeds(getDoc(doc(memberDb, 'analyticsRollups', 'org-a__2026-08-24')));

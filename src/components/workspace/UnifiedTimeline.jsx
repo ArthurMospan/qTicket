@@ -19,7 +19,7 @@ import LoadOlderButton from '@/components/ui/Chat/LoadOlderButton';
 import { IconAction, Pill, Popover, useConfirm } from '@/components/ui';
 import EmptyState from '@/components/ui/Feedback/EmptyState';
 import { useAppContext } from '@/lib/context/AppContext';
-import { can, canWhileRoleLoads } from '@/lib/utils/can';
+import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
 import { COMMENT_WINDOW, useComments } from '@/lib/hooks/useComments';
 import { useIssueTyping } from '@/lib/hooks/useIssueTyping';
 import { useSearch } from '@/lib/hooks/useSearch';
@@ -321,6 +321,7 @@ export default function UnifiedTimeline({
 }) {
   const router = useRouter();
   const { currentUser, projects = [], activeOrgId, orgRole } = useAppContext();
+  const internalViewer = Boolean(orgRole) && !isClientRole(orgRole);
   // Owners and admins may remove a comment that should not stand; editing one
   // stays with its author, because an edited comment still carries their name.
   const canModerateComments = can(orgRole, 'moderate:content');
@@ -369,7 +370,14 @@ export default function UnifiedTimeline({
     hasMore: hasOlderChanges,
   } = useAuditLog(issueId, AUDIT_WINDOW * historyWindow);
   const hasOlderHistory = hasOlderComments || hasOlderChanges;
-  const { logs: timeLogs, loading: timeLogsLoading } = useTimeLogs(issueId, projectId);
+  // Time records may contain internal work notes and billing evidence. The
+  // shared incident conversation is client-visible; the support ledger is not.
+  // Keep the subscription dormant until an internal membership is known, so a
+  // client never even attempts the Firestore query that rules also refuse.
+  const { logs: timeLogs, loading: timeLogsLoading } = useTimeLogs(
+    internalViewer ? issueId : null,
+    projectId,
+  );
 
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);

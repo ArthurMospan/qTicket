@@ -49,7 +49,7 @@ Completed foundation:
 - Firebase client/admin configuration and Cloudinary are configured in Vercel;
   secrets are not stored in Git. Transactional email is intentionally disabled.
 - Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
-  suite passes all 77 tests, including the project-scoped client boundary,
+  suite passes all 79 tests, including the project-scoped client boundary,
   entitlement revocation and stale project-roster denial.
 - The role model already exists in code and rules: internal `owner`, `admin`,
   `member`; external `client_admin`, `client_member`. External users can create,
@@ -137,6 +137,11 @@ Completed product slice on 2026-08-28:
   only hidden navigation. Client roles may open their portal, personal settings
   and accessible incident details; direct staff overview, queue, team and board
   URLs return to the client portal before the internal screen renders.
+- The shared incident conversation no longer subscribes a client session to
+  staff time logs. Firestore also refuses client reads of raw time records and
+  analytics rollups, and refuses client-authored audit entries, so internal work
+  notes, billing evidence and forged workflow history cannot cross the portal
+  boundary through a direct SDK request.
 
 Product work still required:
 
