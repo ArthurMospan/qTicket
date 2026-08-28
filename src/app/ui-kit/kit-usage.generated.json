@@ -2423,8 +2423,8 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:347",
             "src/app/(app)/analytics/page.js:963",
             "src/app/(app)/my/page.js:355",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1394",
+            "src/components/workspace/IssueDetail.jsx:1397",
+            "src/components/workspace/IssueDetail.jsx:1400",
             "src/components/workspace/calendar/CalendarEventPage.jsx:892",
             "src/components/workspace/calendar/CalendarEventPage.jsx:903",
             "src/components/workspace/calendar/CalendarEventPage.jsx:923",
@@ -2514,10 +2514,10 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1386",
-            "src/components/workspace/IssueDetail.jsx:1387",
-            "src/components/workspace/IssueDetail.jsx:2101",
-            "src/components/workspace/IssueDetail.jsx:2102",
+            "src/components/workspace/IssueDetail.jsx:1392",
+            "src/components/workspace/IssueDetail.jsx:1393",
+            "src/components/workspace/IssueDetail.jsx:2118",
+            "src/components/workspace/IssueDetail.jsx:2119",
             "src/components/workspace/TimesheetTab.jsx:295",
             "src/components/workspace/TimesheetTab.jsx:704",
             "src/components/workspace/TimesheetTab.jsx:705",
@@ -2597,18 +2597,18 @@
             "src/components/workspace/AgileBoard.jsx:67",
             "src/components/workspace/BillingTab.jsx:1480",
             "src/components/workspace/BillingTab.jsx:1483",
-            "src/components/workspace/IssueDetail.jsx:1559",
-            "src/components/workspace/IssueDetail.jsx:1583",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:2133",
-            "src/components/workspace/IssueDetail.jsx:2269",
-            "src/components/workspace/IssueDetail.jsx:2270",
-            "src/components/workspace/IssueDetail.jsx:2295",
-            "src/components/workspace/IssueDetail.jsx:2400",
-            "src/components/workspace/IssueDetail.jsx:2401",
-            "src/components/workspace/IssueDetail.jsx:2434",
-            "src/components/workspace/IssueDetail.jsx:2462",
-            "src/components/workspace/IssueDetail.jsx:2472",
+            "src/components/workspace/IssueDetail.jsx:1576",
+            "src/components/workspace/IssueDetail.jsx:1600",
+            "src/components/workspace/IssueDetail.jsx:1638",
+            "src/components/workspace/IssueDetail.jsx:2150",
+            "src/components/workspace/IssueDetail.jsx:2286",
+            "src/components/workspace/IssueDetail.jsx:2287",
+            "src/components/workspace/IssueDetail.jsx:2312",
+            "src/components/workspace/IssueDetail.jsx:2417",
+            "src/components/workspace/IssueDetail.jsx:2418",
+            "src/components/workspace/IssueDetail.jsx:2451",
+            "src/components/workspace/IssueDetail.jsx:2479",
+            "src/components/workspace/IssueDetail.jsx:2489",
             "src/components/workspace/UnifiedTimeline.jsx:1682",
             "src/components/workspace/WorkloadTab.jsx:553",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:387",
@@ -2636,8 +2636,8 @@
             "src/components/MobileNav.jsx:366",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/profile/ProfileView.jsx:175",
-            "src/components/workspace/IssueDetail.jsx:1447",
-            "src/components/workspace/IssueDetail.jsx:1458",
+            "src/components/workspace/IssueDetail.jsx:1464",
+            "src/components/workspace/IssueDetail.jsx:1475",
             "src/components/workspace/UnifiedTimeline.jsx:1823"
           ]
         },
@@ -2657,7 +2657,7 @@
             "src/components/workspace/AgileBoard.jsx:607",
             "src/components/workspace/AgileBoard.jsx:641",
             "src/components/workspace/AgileBoard.jsx:656",
-            "src/components/workspace/IssueDetail.jsx:1521"
+            "src/components/workspace/IssueDetail.jsx:1538"
           ]
         },
         "(default)": {
@@ -2724,18 +2724,18 @@
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
-            "src/components/workspace/IssueDetail.jsx:1386",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1394",
-            "src/components/workspace/IssueDetail.jsx:1447",
-            "src/components/workspace/IssueDetail.jsx:1458",
-            "src/components/workspace/IssueDetail.jsx:2101",
-            "src/components/workspace/IssueDetail.jsx:2133",
-            "src/components/workspace/IssueDetail.jsx:2269",
-            "src/components/workspace/IssueDetail.jsx:2400",
-            "src/components/workspace/IssueDetail.jsx:2434",
-            "src/components/workspace/IssueDetail.jsx:2462",
-            "src/components/workspace/IssueDetail.jsx:2472",
+            "src/components/workspace/IssueDetail.jsx:1392",
+            "src/components/workspace/IssueDetail.jsx:1397",
+            "src/components/workspace/IssueDetail.jsx:1400",
+            "src/components/workspace/IssueDetail.jsx:1464",
+            "src/components/workspace/IssueDetail.jsx:1475",
+            "src/components/workspace/IssueDetail.jsx:2118",
+            "src/components/workspace/IssueDetail.jsx:2150",
+            "src/components/workspace/IssueDetail.jsx:2286",
+            "src/components/workspace/IssueDetail.jsx:2417",
+            "src/components/workspace/IssueDetail.jsx:2451",
+            "src/components/workspace/IssueDetail.jsx:2479",
+            "src/components/workspace/IssueDetail.jsx:2489",
             "src/components/workspace/TimesheetTab.jsx:295",
             "src/components/workspace/TimesheetTab.jsx:704",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:628",
@@ -2788,13 +2788,13 @@
             "src/components/workspace/BillingTab.jsx:1545",
             "src/components/workspace/BillingTab.jsx:533",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1387",
-            "src/components/workspace/IssueDetail.jsx:1559",
-            "src/components/workspace/IssueDetail.jsx:1583",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:2102",
-            "src/components/workspace/IssueDetail.jsx:2270",
-            "src/components/workspace/IssueDetail.jsx:2401",
+            "src/components/workspace/IssueDetail.jsx:1393",
+            "src/components/workspace/IssueDetail.jsx:1576",
+            "src/components/workspace/IssueDetail.jsx:1600",
+            "src/components/workspace/IssueDetail.jsx:1638",
+            "src/components/workspace/IssueDetail.jsx:2119",
+            "src/components/workspace/IssueDetail.jsx:2287",
+            "src/components/workspace/IssueDetail.jsx:2418",
             "src/components/workspace/TimesheetTab.jsx:705",
             "src/components/workspace/UnifiedTimeline.jsx:1682"
           ]
@@ -2853,8 +2853,8 @@
             "src/components/workspace/BillingTab.jsx:1483",
             "src/components/workspace/BillingTab.jsx:511",
             "src/components/workspace/BillingTab.jsx:518",
-            "src/components/workspace/IssueDetail.jsx:1521",
-            "src/components/workspace/IssueDetail.jsx:2295",
+            "src/components/workspace/IssueDetail.jsx:1538",
+            "src/components/workspace/IssueDetail.jsx:2312",
             "src/components/workspace/TimesheetTab.jsx:891",
             "src/components/workspace/UnifiedTimeline.jsx:1823",
             "src/components/workspace/WorkloadTab.jsx:282",
@@ -3019,27 +3019,27 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1386",
-            "src/components/workspace/IssueDetail.jsx:1387",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1394",
-            "src/components/workspace/IssueDetail.jsx:1447",
-            "src/components/workspace/IssueDetail.jsx:1458",
-            "src/components/workspace/IssueDetail.jsx:1521",
-            "src/components/workspace/IssueDetail.jsx:1559",
-            "src/components/workspace/IssueDetail.jsx:1583",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:2101",
-            "src/components/workspace/IssueDetail.jsx:2102",
-            "src/components/workspace/IssueDetail.jsx:2133",
-            "src/components/workspace/IssueDetail.jsx:2269",
-            "src/components/workspace/IssueDetail.jsx:2270",
-            "src/components/workspace/IssueDetail.jsx:2295",
-            "src/components/workspace/IssueDetail.jsx:2400",
-            "src/components/workspace/IssueDetail.jsx:2401",
-            "src/components/workspace/IssueDetail.jsx:2434",
-            "src/components/workspace/IssueDetail.jsx:2462",
-            "src/components/workspace/IssueDetail.jsx:2472",
+            "src/components/workspace/IssueDetail.jsx:1392",
+            "src/components/workspace/IssueDetail.jsx:1393",
+            "src/components/workspace/IssueDetail.jsx:1397",
+            "src/components/workspace/IssueDetail.jsx:1400",
+            "src/components/workspace/IssueDetail.jsx:1464",
+            "src/components/workspace/IssueDetail.jsx:1475",
+            "src/components/workspace/IssueDetail.jsx:1538",
+            "src/components/workspace/IssueDetail.jsx:1576",
+            "src/components/workspace/IssueDetail.jsx:1600",
+            "src/components/workspace/IssueDetail.jsx:1638",
+            "src/components/workspace/IssueDetail.jsx:2118",
+            "src/components/workspace/IssueDetail.jsx:2119",
+            "src/components/workspace/IssueDetail.jsx:2150",
+            "src/components/workspace/IssueDetail.jsx:2286",
+            "src/components/workspace/IssueDetail.jsx:2287",
+            "src/components/workspace/IssueDetail.jsx:2312",
+            "src/components/workspace/IssueDetail.jsx:2417",
+            "src/components/workspace/IssueDetail.jsx:2418",
+            "src/components/workspace/IssueDetail.jsx:2451",
+            "src/components/workspace/IssueDetail.jsx:2479",
+            "src/components/workspace/IssueDetail.jsx:2489",
             "src/components/workspace/TimesheetTab.jsx:295",
             "src/components/workspace/TimesheetTab.jsx:704",
             "src/components/workspace/TimesheetTab.jsx:705",
@@ -3215,27 +3215,27 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1386",
-            "src/components/workspace/IssueDetail.jsx:1387",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1394",
-            "src/components/workspace/IssueDetail.jsx:1447",
-            "src/components/workspace/IssueDetail.jsx:1458",
-            "src/components/workspace/IssueDetail.jsx:1521",
-            "src/components/workspace/IssueDetail.jsx:1559",
-            "src/components/workspace/IssueDetail.jsx:1583",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:2101",
-            "src/components/workspace/IssueDetail.jsx:2102",
-            "src/components/workspace/IssueDetail.jsx:2133",
-            "src/components/workspace/IssueDetail.jsx:2269",
-            "src/components/workspace/IssueDetail.jsx:2270",
-            "src/components/workspace/IssueDetail.jsx:2295",
-            "src/components/workspace/IssueDetail.jsx:2400",
-            "src/components/workspace/IssueDetail.jsx:2401",
-            "src/components/workspace/IssueDetail.jsx:2434",
-            "src/components/workspace/IssueDetail.jsx:2462",
-            "src/components/workspace/IssueDetail.jsx:2472",
+            "src/components/workspace/IssueDetail.jsx:1392",
+            "src/components/workspace/IssueDetail.jsx:1393",
+            "src/components/workspace/IssueDetail.jsx:1397",
+            "src/components/workspace/IssueDetail.jsx:1400",
+            "src/components/workspace/IssueDetail.jsx:1464",
+            "src/components/workspace/IssueDetail.jsx:1475",
+            "src/components/workspace/IssueDetail.jsx:1538",
+            "src/components/workspace/IssueDetail.jsx:1576",
+            "src/components/workspace/IssueDetail.jsx:1600",
+            "src/components/workspace/IssueDetail.jsx:1638",
+            "src/components/workspace/IssueDetail.jsx:2118",
+            "src/components/workspace/IssueDetail.jsx:2119",
+            "src/components/workspace/IssueDetail.jsx:2150",
+            "src/components/workspace/IssueDetail.jsx:2286",
+            "src/components/workspace/IssueDetail.jsx:2287",
+            "src/components/workspace/IssueDetail.jsx:2312",
+            "src/components/workspace/IssueDetail.jsx:2417",
+            "src/components/workspace/IssueDetail.jsx:2418",
+            "src/components/workspace/IssueDetail.jsx:2451",
+            "src/components/workspace/IssueDetail.jsx:2479",
+            "src/components/workspace/IssueDetail.jsx:2489",
             "src/components/workspace/TimesheetTab.jsx:295",
             "src/components/workspace/TimesheetTab.jsx:704",
             "src/components/workspace/TimesheetTab.jsx:705",
@@ -3389,27 +3389,27 @@
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1386",
-            "src/components/workspace/IssueDetail.jsx:1387",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1394",
-            "src/components/workspace/IssueDetail.jsx:1447",
-            "src/components/workspace/IssueDetail.jsx:1458",
-            "src/components/workspace/IssueDetail.jsx:1521",
-            "src/components/workspace/IssueDetail.jsx:1559",
-            "src/components/workspace/IssueDetail.jsx:1583",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:2101",
-            "src/components/workspace/IssueDetail.jsx:2102",
-            "src/components/workspace/IssueDetail.jsx:2133",
-            "src/components/workspace/IssueDetail.jsx:2269",
-            "src/components/workspace/IssueDetail.jsx:2270",
-            "src/components/workspace/IssueDetail.jsx:2295",
-            "src/components/workspace/IssueDetail.jsx:2400",
-            "src/components/workspace/IssueDetail.jsx:2401",
-            "src/components/workspace/IssueDetail.jsx:2434",
-            "src/components/workspace/IssueDetail.jsx:2462",
-            "src/components/workspace/IssueDetail.jsx:2472",
+            "src/components/workspace/IssueDetail.jsx:1392",
+            "src/components/workspace/IssueDetail.jsx:1393",
+            "src/components/workspace/IssueDetail.jsx:1397",
+            "src/components/workspace/IssueDetail.jsx:1400",
+            "src/components/workspace/IssueDetail.jsx:1464",
+            "src/components/workspace/IssueDetail.jsx:1475",
+            "src/components/workspace/IssueDetail.jsx:1538",
+            "src/components/workspace/IssueDetail.jsx:1576",
+            "src/components/workspace/IssueDetail.jsx:1600",
+            "src/components/workspace/IssueDetail.jsx:1638",
+            "src/components/workspace/IssueDetail.jsx:2118",
+            "src/components/workspace/IssueDetail.jsx:2119",
+            "src/components/workspace/IssueDetail.jsx:2150",
+            "src/components/workspace/IssueDetail.jsx:2286",
+            "src/components/workspace/IssueDetail.jsx:2287",
+            "src/components/workspace/IssueDetail.jsx:2312",
+            "src/components/workspace/IssueDetail.jsx:2417",
+            "src/components/workspace/IssueDetail.jsx:2418",
+            "src/components/workspace/IssueDetail.jsx:2451",
+            "src/components/workspace/IssueDetail.jsx:2479",
+            "src/components/workspace/IssueDetail.jsx:2489",
             "src/components/workspace/TimesheetTab.jsx:295",
             "src/components/workspace/TimesheetTab.jsx:704",
             "src/components/workspace/TimesheetTab.jsx:705",
@@ -3601,24 +3601,24 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1386",
-            "src/components/workspace/IssueDetail.jsx:1387",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1394",
-            "src/components/workspace/IssueDetail.jsx:1447",
-            "src/components/workspace/IssueDetail.jsx:1458",
-            "src/components/workspace/IssueDetail.jsx:1521",
-            "src/components/workspace/IssueDetail.jsx:1559",
-            "src/components/workspace/IssueDetail.jsx:1583",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:2101",
-            "src/components/workspace/IssueDetail.jsx:2102",
-            "src/components/workspace/IssueDetail.jsx:2133",
-            "src/components/workspace/IssueDetail.jsx:2269",
-            "src/components/workspace/IssueDetail.jsx:2270",
-            "src/components/workspace/IssueDetail.jsx:2295",
-            "src/components/workspace/IssueDetail.jsx:2400",
-            "src/components/workspace/IssueDetail.jsx:2401",
+            "src/components/workspace/IssueDetail.jsx:1392",
+            "src/components/workspace/IssueDetail.jsx:1393",
+            "src/components/workspace/IssueDetail.jsx:1397",
+            "src/components/workspace/IssueDetail.jsx:1400",
+            "src/components/workspace/IssueDetail.jsx:1464",
+            "src/components/workspace/IssueDetail.jsx:1475",
+            "src/components/workspace/IssueDetail.jsx:1538",
+            "src/components/workspace/IssueDetail.jsx:1576",
+            "src/components/workspace/IssueDetail.jsx:1600",
+            "src/components/workspace/IssueDetail.jsx:1638",
+            "src/components/workspace/IssueDetail.jsx:2118",
+            "src/components/workspace/IssueDetail.jsx:2119",
+            "src/components/workspace/IssueDetail.jsx:2150",
+            "src/components/workspace/IssueDetail.jsx:2286",
+            "src/components/workspace/IssueDetail.jsx:2287",
+            "src/components/workspace/IssueDetail.jsx:2312",
+            "src/components/workspace/IssueDetail.jsx:2417",
+            "src/components/workspace/IssueDetail.jsx:2418",
             "src/components/workspace/TimesheetTab.jsx:295",
             "src/components/workspace/TimesheetTab.jsx:704",
             "src/components/workspace/TimesheetTab.jsx:705",
@@ -3699,9 +3699,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2434",
-            "src/components/workspace/IssueDetail.jsx:2462",
-            "src/components/workspace/IssueDetail.jsx:2472"
+            "src/components/workspace/IssueDetail.jsx:2451",
+            "src/components/workspace/IssueDetail.jsx:2479",
+            "src/components/workspace/IssueDetail.jsx:2489"
           ]
         },
         "chat-composer-action": {
@@ -4154,7 +4154,7 @@
             "src/app/(app)/settings/page.js:2976",
             "src/components/workspace/BillingTab.jsx:139",
             "src/components/workspace/BillingTab.jsx:321",
-            "src/components/workspace/IssueDetail.jsx:2251"
+            "src/components/workspace/IssueDetail.jsx:2268"
           ]
         },
         "lg": {
@@ -4169,11 +4169,11 @@
           "files": [
             "src/components/InviteMemberDialog.jsx:133",
             "src/components/WorkspaceInfoCenter.jsx:127",
-            "src/components/workspace/IssueDetail.jsx:2049",
-            "src/components/workspace/IssueDetail.jsx:2057",
-            "src/components/workspace/IssueDetail.jsx:2073",
-            "src/components/workspace/IssueDetail.jsx:2081",
-            "src/components/workspace/IssueDetail.jsx:2096",
+            "src/components/workspace/IssueDetail.jsx:2066",
+            "src/components/workspace/IssueDetail.jsx:2074",
+            "src/components/workspace/IssueDetail.jsx:2090",
+            "src/components/workspace/IssueDetail.jsx:2098",
+            "src/components/workspace/IssueDetail.jsx:2113",
             "src/components/workspace/TimesheetTab.jsx:746",
             "src/components/workspace/TimesheetTab.jsx:750"
           ]
@@ -4211,7 +4211,7 @@
             "src/components/workspace/BillingTab.jsx:1451",
             "src/components/workspace/BillingTab.jsx:1469",
             "src/components/workspace/BillingTab.jsx:321",
-            "src/components/workspace/IssueDetail.jsx:2251",
+            "src/components/workspace/IssueDetail.jsx:2268",
             "src/components/workspace/TimesheetTab.jsx:757",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:385",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:386",
@@ -4256,8 +4256,8 @@
             "/analytics/team/[memberId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2049",
-            "src/components/workspace/IssueDetail.jsx:2073",
+            "src/components/workspace/IssueDetail.jsx:2066",
+            "src/components/workspace/IssueDetail.jsx:2090",
             "src/components/workspace/TimesheetTab.jsx:746",
             "src/components/workspace/calendar/CalendarEventPage.jsx:224"
           ]
@@ -4270,8 +4270,8 @@
             "/analytics/team/[memberId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2057",
-            "src/components/workspace/IssueDetail.jsx:2081",
+            "src/components/workspace/IssueDetail.jsx:2074",
+            "src/components/workspace/IssueDetail.jsx:2098",
             "src/components/workspace/TimesheetTab.jsx:750",
             "src/components/workspace/calendar/CalendarEventPage.jsx:235"
           ]
@@ -4282,7 +4282,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2096"
+            "src/components/workspace/IssueDetail.jsx:2113"
           ]
         }
       },
@@ -4319,12 +4319,12 @@
             "src/components/workspace/BillingTab.jsx:1447",
             "src/components/workspace/BillingTab.jsx:1451",
             "src/components/workspace/BillingTab.jsx:1469",
-            "src/components/workspace/IssueDetail.jsx:2049",
-            "src/components/workspace/IssueDetail.jsx:2057",
-            "src/components/workspace/IssueDetail.jsx:2073",
-            "src/components/workspace/IssueDetail.jsx:2081",
-            "src/components/workspace/IssueDetail.jsx:2096",
-            "src/components/workspace/IssueDetail.jsx:2251",
+            "src/components/workspace/IssueDetail.jsx:2066",
+            "src/components/workspace/IssueDetail.jsx:2074",
+            "src/components/workspace/IssueDetail.jsx:2090",
+            "src/components/workspace/IssueDetail.jsx:2098",
+            "src/components/workspace/IssueDetail.jsx:2113",
+            "src/components/workspace/IssueDetail.jsx:2268",
             "src/components/workspace/TimesheetTab.jsx:746",
             "src/components/workspace/TimesheetTab.jsx:750",
             "src/components/workspace/TimesheetTab.jsx:757",
@@ -4500,14 +4500,14 @@
             "src/components/workspace/BillingTab.jsx:1299",
             "src/components/workspace/BillingTab.jsx:1309",
             "src/components/workspace/BillingTab.jsx:1440",
-            "src/components/workspace/IssueDetail.jsx:1765",
-            "src/components/workspace/IssueDetail.jsx:1790",
-            "src/components/workspace/IssueDetail.jsx:1891",
-            "src/components/workspace/IssueDetail.jsx:1918",
-            "src/components/workspace/IssueDetail.jsx:1930",
-            "src/components/workspace/IssueDetail.jsx:1942",
-            "src/components/workspace/IssueDetail.jsx:2376",
-            "src/components/workspace/IssueDetail.jsx:2384",
+            "src/components/workspace/IssueDetail.jsx:1782",
+            "src/components/workspace/IssueDetail.jsx:1807",
+            "src/components/workspace/IssueDetail.jsx:1908",
+            "src/components/workspace/IssueDetail.jsx:1935",
+            "src/components/workspace/IssueDetail.jsx:1947",
+            "src/components/workspace/IssueDetail.jsx:1959",
+            "src/components/workspace/IssueDetail.jsx:2393",
+            "src/components/workspace/IssueDetail.jsx:2401",
             "src/components/workspace/TimesheetTab.jsx:712",
             "src/components/workspace/TimesheetTab.jsx:728",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:720",
@@ -4596,14 +4596,14 @@
             "src/components/workspace/BillingTab.jsx:1299",
             "src/components/workspace/BillingTab.jsx:1309",
             "src/components/workspace/BillingTab.jsx:1440",
-            "src/components/workspace/IssueDetail.jsx:1765",
-            "src/components/workspace/IssueDetail.jsx:1790",
-            "src/components/workspace/IssueDetail.jsx:1891",
-            "src/components/workspace/IssueDetail.jsx:1918",
-            "src/components/workspace/IssueDetail.jsx:1930",
-            "src/components/workspace/IssueDetail.jsx:1942",
-            "src/components/workspace/IssueDetail.jsx:2376",
-            "src/components/workspace/IssueDetail.jsx:2384",
+            "src/components/workspace/IssueDetail.jsx:1782",
+            "src/components/workspace/IssueDetail.jsx:1807",
+            "src/components/workspace/IssueDetail.jsx:1908",
+            "src/components/workspace/IssueDetail.jsx:1935",
+            "src/components/workspace/IssueDetail.jsx:1947",
+            "src/components/workspace/IssueDetail.jsx:1959",
+            "src/components/workspace/IssueDetail.jsx:2393",
+            "src/components/workspace/IssueDetail.jsx:2401",
             "src/components/workspace/TimesheetTab.jsx:712",
             "src/components/workspace/TimesheetTab.jsx:728",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:720",
@@ -4741,14 +4741,14 @@
             "src/components/integrations/YouTrackImportCard.jsx:680",
             "src/components/workspace/BillingTab.jsx:117",
             "src/components/workspace/BillingTab.jsx:1440",
-            "src/components/workspace/IssueDetail.jsx:1765",
-            "src/components/workspace/IssueDetail.jsx:1790",
-            "src/components/workspace/IssueDetail.jsx:1891",
-            "src/components/workspace/IssueDetail.jsx:1918",
-            "src/components/workspace/IssueDetail.jsx:1930",
-            "src/components/workspace/IssueDetail.jsx:1942",
-            "src/components/workspace/IssueDetail.jsx:2376",
-            "src/components/workspace/IssueDetail.jsx:2384",
+            "src/components/workspace/IssueDetail.jsx:1782",
+            "src/components/workspace/IssueDetail.jsx:1807",
+            "src/components/workspace/IssueDetail.jsx:1908",
+            "src/components/workspace/IssueDetail.jsx:1935",
+            "src/components/workspace/IssueDetail.jsx:1947",
+            "src/components/workspace/IssueDetail.jsx:1959",
+            "src/components/workspace/IssueDetail.jsx:2393",
+            "src/components/workspace/IssueDetail.jsx:2401",
             "src/components/workspace/TimesheetTab.jsx:712",
             "src/components/workspace/TimesheetTab.jsx:728",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:720",
@@ -4782,7 +4782,7 @@
             "src/app/(app)/analytics/team/[memberId]/page.js:271",
             "src/app/(app)/chat/page.js:1282",
             "src/app/(app)/my/page.js:283",
-            "src/components/workspace/IssueDetail.jsx:1772",
+            "src/components/workspace/IssueDetail.jsx:1789",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:759",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:857",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1170",
@@ -4814,7 +4814,7 @@
           ],
           "files": [
             "src/app/(app)/chat/page.js:1282",
-            "src/components/workspace/IssueDetail.jsx:1772",
+            "src/components/workspace/IssueDetail.jsx:1789",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:759",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:857",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1170",
@@ -4846,7 +4846,7 @@
           ],
           "files": [
             "src/app/(app)/chat/page.js:1282",
-            "src/components/workspace/IssueDetail.jsx:1772",
+            "src/components/workspace/IssueDetail.jsx:1789",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:759",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:857",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1170",
@@ -4930,7 +4930,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2250"
+            "src/components/workspace/IssueDetail.jsx:2267"
           ]
         }
       },
@@ -4976,7 +4976,7 @@
             "src/components/InviteLinkSection.jsx:86",
             "src/components/client/ClientIncidentPortal.jsx:227",
             "src/components/workspace/BillingTab.jsx:1381",
-            "src/components/workspace/IssueDetail.jsx:2250"
+            "src/components/workspace/IssueDetail.jsx:2267"
           ]
         },
         "none": {
@@ -5040,7 +5040,7 @@
             "src/components/client/ClientIncidentPortal.jsx:227",
             "src/components/workspace/BillingTab.jsx:1237",
             "src/components/workspace/BillingTab.jsx:1381",
-            "src/components/workspace/IssueDetail.jsx:2250"
+            "src/components/workspace/IssueDetail.jsx:2267"
           ]
         },
         "chart-panel": {
@@ -5237,7 +5237,7 @@
           "files": [
             "src/components/workspace/IssueCard.jsx:334",
             "src/components/workspace/IssueCard.jsx:51",
-            "src/components/workspace/IssueDetail.jsx:1729",
+            "src/components/workspace/IssueDetail.jsx:1746",
             "src/components/workspace/WorkloadTab.jsx:139"
           ]
         },
@@ -5292,7 +5292,7 @@
             "src/components/workspace/IssueCard.jsx:334",
             "src/components/workspace/IssueCard.jsx:348",
             "src/components/workspace/IssueCard.jsx:51",
-            "src/components/workspace/IssueDetail.jsx:1729",
+            "src/components/workspace/IssueDetail.jsx:1746",
             "src/components/workspace/UnifiedTimeline.jsx:1528",
             "src/components/workspace/UnifiedTimeline.jsx:1695",
             "src/components/workspace/UnifiedTimeline.jsx:272"
@@ -5487,7 +5487,7 @@
             "src/components/workspace/BillingTab.jsx:564",
             "src/components/workspace/BillingTab.jsx:566",
             "src/components/workspace/IssueCard.jsx:410",
-            "src/components/workspace/IssueDetail.jsx:1729",
+            "src/components/workspace/IssueDetail.jsx:1746",
             "src/components/workspace/UnifiedTimeline.jsx:241",
             "src/components/workspace/WorkloadTab.jsx:139",
             "src/components/workspace/WorkloadTab.jsx:140",
@@ -5566,7 +5566,7 @@
             "src/components/workspace/IssueCard.jsx:348",
             "src/components/workspace/IssueCard.jsx:410",
             "src/components/workspace/IssueCard.jsx:51",
-            "src/components/workspace/IssueDetail.jsx:1729",
+            "src/components/workspace/IssueDetail.jsx:1746",
             "src/components/workspace/UnifiedTimeline.jsx:1528",
             "src/components/workspace/UnifiedTimeline.jsx:1695",
             "src/components/workspace/UnifiedTimeline.jsx:241",
@@ -5670,7 +5670,7 @@
             "src/components/workspace/IssueCard.jsx:334",
             "src/components/workspace/IssueCard.jsx:348",
             "src/components/workspace/IssueCard.jsx:51",
-            "src/components/workspace/IssueDetail.jsx:1729",
+            "src/components/workspace/IssueDetail.jsx:1746",
             "src/components/workspace/UnifiedTimeline.jsx:1528",
             "src/components/workspace/UnifiedTimeline.jsx:1695",
             "src/components/workspace/UnifiedTimeline.jsx:241",
@@ -5775,7 +5775,7 @@
             "src/components/workspace/BillingTab.jsx:564",
             "src/components/workspace/BillingTab.jsx:566",
             "src/components/workspace/IssueCard.jsx:410",
-            "src/components/workspace/IssueDetail.jsx:1729",
+            "src/components/workspace/IssueDetail.jsx:1746",
             "src/components/workspace/UnifiedTimeline.jsx:1528",
             "src/components/workspace/UnifiedTimeline.jsx:1695",
             "src/components/workspace/UnifiedTimeline.jsx:272",
@@ -5988,7 +5988,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:820"
+            "src/components/workspace/IssueDetail.jsx:826"
           ]
         }
       },
@@ -6016,7 +6016,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:820"
+            "src/components/workspace/IssueDetail.jsx:826"
           ]
         },
         "xs": {
@@ -6067,7 +6067,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2174"
+            "src/components/workspace/IssueDetail.jsx:2191"
           ]
         }
       }
@@ -6225,7 +6225,7 @@
           ],
           "files": [
             "src/app/(app)/chat/page.js:1226",
-            "src/components/workspace/IssueDetail.jsx:2023",
+            "src/components/workspace/IssueDetail.jsx:2040",
             "src/components/workspace/TimesheetTab.jsx:287",
             "src/components/workspace/calendar/CalendarEventPage.jsx:207"
           ]
@@ -6351,7 +6351,7 @@
           ],
           "files": [
             "src/components/WorkspaceInfoCenter.jsx:245",
-            "src/components/workspace/IssueDetail.jsx:2023",
+            "src/components/workspace/IssueDetail.jsx:2040",
             "src/components/workspace/calendar/CalendarEventPage.jsx:207"
           ]
         }
@@ -6394,7 +6394,7 @@
           "files": [
             "src/app/(app)/my/page.js:504",
             "src/components/WorkspaceInfoCenter.jsx:245",
-            "src/components/workspace/IssueDetail.jsx:2023",
+            "src/components/workspace/IssueDetail.jsx:2040",
             "src/components/workspace/calendar/CalendarEventPage.jsx:207"
           ]
         },
@@ -6431,7 +6431,7 @@
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BillingTab.jsx:497",
             "src/components/workspace/BoardConfigModal.jsx:225",
-            "src/components/workspace/IssueDetail.jsx:2023",
+            "src/components/workspace/IssueDetail.jsx:2040",
             "src/components/workspace/TimesheetTab.jsx:287",
             "src/components/workspace/TimesheetTab.jsx:697",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:621",
@@ -6502,7 +6502,7 @@
             "src/components/InviteMemberDialog.jsx:163",
             "src/components/integrations/YouTrackImportCard.jsx:570",
             "src/components/workspace/BillingTab.jsx:541",
-            "src/components/workspace/IssueDetail.jsx:1555"
+            "src/components/workspace/IssueDetail.jsx:1572"
           ]
         },
         "warning": {
@@ -6525,8 +6525,8 @@
             "src/components/workspace/BillingTab.jsx:1527",
             "src/components/workspace/BillingTab.jsx:1534",
             "src/components/workspace/BillingTab.jsx:549",
-            "src/components/workspace/IssueDetail.jsx:1579",
-            "src/components/workspace/IssueDetail.jsx:1609",
+            "src/components/workspace/IssueDetail.jsx:1596",
+            "src/components/workspace/IssueDetail.jsx:1626",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:873"
           ]
         },
@@ -6875,7 +6875,7 @@
             "src/components/WorkspaceInfoCenter.jsx:255",
             "src/components/workspace/BillingTab.jsx:1286",
             "src/components/workspace/BillingTab.jsx:307",
-            "src/components/workspace/IssueDetail.jsx:2032",
+            "src/components/workspace/IssueDetail.jsx:2049",
             "src/components/workspace/UnifiedTimeline.jsx:1703"
           ]
         }
@@ -6908,7 +6908,7 @@
           ],
           "files": [
             "src/components/WorkspaceInfoCenter.jsx:255",
-            "src/components/workspace/IssueDetail.jsx:2032"
+            "src/components/workspace/IssueDetail.jsx:2049"
           ]
         },
         "billing-selection": {
@@ -7076,7 +7076,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1875"
+            "src/components/workspace/IssueDetail.jsx:1892"
           ]
         },
         "cell": {
@@ -7296,8 +7296,8 @@
             "src/app/(app)/my/page.js:364",
             "src/components/CreateTaskModal.jsx:450",
             "src/components/workspace/BillingTab.jsx:1200",
-            "src/components/workspace/IssueDetail.jsx:1484",
-            "src/components/workspace/IssueDetail.jsx:1979"
+            "src/components/workspace/IssueDetail.jsx:1501",
+            "src/components/workspace/IssueDetail.jsx:1996"
           ]
         },
         "underline": {
@@ -7334,7 +7334,7 @@
             "src/app/(app)/settings/page.js:3999",
             "src/components/profile/ProfileView.jsx:264",
             "src/components/workspace/BillingTab.jsx:1200",
-            "src/components/workspace/IssueDetail.jsx:1979"
+            "src/components/workspace/IssueDetail.jsx:1996"
           ]
         },
         "pane-switch": {
@@ -7348,7 +7348,7 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:450",
-            "src/components/workspace/IssueDetail.jsx:1484"
+            "src/components/workspace/IssueDetail.jsx:1501"
           ]
         }
       }
@@ -7440,7 +7440,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2194"
+            "src/components/workspace/IssueDetail.jsx:2211"
           ]
         }
       }
@@ -7508,7 +7508,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1741"
+            "src/components/workspace/IssueDetail.jsx:1758"
           ]
         },
         "calendar": {
@@ -7574,7 +7574,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1472"
+            "src/components/workspace/IssueDetail.jsx:1489"
           ]
         },
         "event": {
@@ -7594,11 +7594,11 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2191",
-            "src/components/workspace/IssueDetail.jsx:2207",
-            "src/components/workspace/IssueDetail.jsx:2288",
+            "src/components/workspace/IssueDetail.jsx:2208",
+            "src/components/workspace/IssueDetail.jsx:2224",
+            "src/components/workspace/IssueDetail.jsx:2305",
             "src/components/workspace/IssueDetail.jsx:231",
-            "src/components/workspace/IssueDetail.jsx:2334"
+            "src/components/workspace/IssueDetail.jsx:2351"
           ]
         },
         "(default)": {
@@ -7607,7 +7607,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2141",
+            "src/components/workspace/IssueDetail.jsx:2158",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1336",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1353",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1377",
@@ -7719,7 +7719,7 @@
           ],
           "files": [
             "src/app/(app)/settings/page.js:2958",
-            "src/components/workspace/IssueDetail.jsx:1860",
+            "src/components/workspace/IssueDetail.jsx:1877",
             "src/components/workspace/UnifiedTimeline.jsx:1487",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1056",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1154",
@@ -7732,7 +7732,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1648"
+            "src/components/workspace/IssueDetail.jsx:1665"
           ]
         }
       },
@@ -7745,7 +7745,7 @@
           ],
           "files": [
             "src/app/(app)/settings/page.js:2958",
-            "src/components/workspace/IssueDetail.jsx:1860",
+            "src/components/workspace/IssueDetail.jsx:1877",
             "src/components/workspace/UnifiedTimeline.jsx:1487",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1056",
             "src/components/workspace/calendar/CalendarEventPage.jsx:1154",
@@ -7758,7 +7758,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1648"
+            "src/components/workspace/IssueDetail.jsx:1665"
           ]
         }
       }

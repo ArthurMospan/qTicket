@@ -37,6 +37,7 @@ above — a new file is a place for the next reader not to look.
 - Use `npm run lint`, `npm run test:unit`, and `npm run build` as separate checks. Next.js does not run lint as part of the build.
 - `.github/workflows/checks.yml` asks all of them on every push and pull request, together with the rules suite and a check that the generated reports match the code. Every "`npm run test:unit` fails while…" in this file is a claim that workflow now makes true; before it existed they held only while somebody remembered to run the command.
 - Firestore rule changes require `npm run test:rules:emulator`.
+- A rules assertion sends the write the product sends. Firestore authorizes every write of a transaction or batch separately and refuses all of them when one is refused, so a hand-written `setDoc` standing in for a multi-document write proves nothing about the feature: the suite asserted a client could write a comment while «Надіслати» in the client portal had never once worked, because `useComments.addComment` sends the comment and the parent incident's conversation metadata together. When a hook writes more than one document at a time, the test drives the same transaction.
 - After changing shared UI usage, run `npm run kit:scan` and commit the generated report when it changes.
 
 ## Architecture and security invariants

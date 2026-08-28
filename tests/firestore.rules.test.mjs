@@ -6,7 +6,7 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { arrayUnion, doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField, collection, query, where, getDocs, getCountFromServer, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField, collection, increment, query, runTransaction, where, getDocs, getCountFromServer, serverTimestamp, Timestamp, writeBatch } from 'firebase/firestore';
 
 let environment;
 
@@ -464,6 +464,132 @@ test('qTicket clients read their project and write its conversation, but cannot 
       visibility: 'internal',
     }));
   }
+});
+
+// ── The incident conversation, in the shape the product actually writes ──────
+//
+// The `setDoc` above is not a shape the product ever sends. `addComment` writes
+// the message *and* the incident's conversation metadata inside one
+// `runTransaction`, and Firestore authorizes every write of a transaction
+// separately and fails the whole transaction when one of them is refused — so a
+// rule that allowed only the comment allowed nothing. The test above passed
+// while «Надіслати» in the client portal returned «Missing or insufficient
+// permissions» to every external client, on the one action the portal exists
+// for. These three send what the browser sends.
+const CLIENT_REPLY_TEXT = 'Проблема повторилась сьогодні вранці';
+
+function clientReplyDocument(uid) {
+  return {
+    authorId: uid,
+    authorName: 'Клієнт',
+    authorAvatar: null,
+    text: CLIENT_REPLY_TEXT,
+    attachments: [],
+    visibility: 'public',
+    issueMentions: [],
+    readBy: [uid],
+    replyTo: null,
+    createdAt: serverTimestamp(),
+  };
+}
+
+// Exactly the patch `useComments.addComment` puts on the parent incident.
+function conversationMetadataPatch(uid) {
+  return {
+    commentCount: increment(1),
+    updatedAt: serverTimestamp(),
+    lastActivityType: 'comment',
+    lastActivityAt: serverTimestamp(),
+    lastActivityActorId: uid,
+    lastActivityActorName: 'Клієнт',
+    lastActivityActorAvatar: null,
+    lastActivityText: CLIENT_REPLY_TEXT,
+    lastCommentAt: serverTimestamp(),
+    lastCommentAuthorId: uid,
+    lastCommentMentionIds: ['member-a'],
+    lastCommentReadBy: [uid],
+    'unreadMentions.member-a': increment(1),
+  };
+}
+
+function sendClientReply(db, uid, commentId, extraIssueFields = {}) {
+  return runTransaction(db, async transaction => {
+    const issueRef = doc(db, 'issues', 'issue-a');
+    const issueSnap = await transaction.get(issueRef);
+    assert.ok(issueSnap.exists());
+    transaction.set(doc(db, 'issues', 'issue-a', 'comments', commentId), clientReplyDocument(uid));
+    transaction.update(issueRef, { ...conversationMetadataPatch(uid), ...extraIssueFields });
+  });
+}
+
+test('a client sends a reply the way the product sends it: the message and the incident conversation metadata in one transaction', async () => {
+  for (const uid of ['client-admin-a', 'client-member-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertSucceeds(sendClientReply(db, uid, `${uid}-transactional-reply`));
+  }
+});
+
+test('a reply is not a way to move an incident: one workflow field refuses the whole transaction', async () => {
+  const db = environment.authenticatedContext('client-admin-a').firestore();
+  // Everything the customer must never touch, sent as a passenger on the write
+  // they are allowed to make. `hasOnly` is what refuses each of them, and the
+  // server-only denial list above still refuses the first five to everybody.
+  const forbidden = [
+    { status: 'done' },
+    { columnId: 'done' },
+    { archivedAt: Timestamp.fromDate(new Date()) },
+    { cancelledAt: Timestamp.fromDate(new Date()) },
+    { spentMinutes: 0 },
+    { assigneeIds: ['client-admin-a'] },
+    { priority: 'urgent' },
+    { labelIds: ['vip'] },
+    { dueDate: Timestamp.fromDate(new Date('2026-09-01T00:00:00Z')) },
+    { watcherIds: ['client-admin-a'] },
+    { title: 'Переписано клієнтом' },
+  ];
+  for (const smuggled of forbidden) {
+    await assertFails(sendClientReply(db, 'client-admin-a', 'smuggled-reply', smuggled));
+  }
+  // And the incident is untouched: the refusal is the whole write, not the
+  // conversation half landing and the workflow half bouncing.
+  await environment.withSecurityRulesDisabled(async context => {
+    const issue = await getDoc(doc(context.firestore(), 'issues', 'issue-a'));
+    assert.equal(issue.data().status, undefined);
+    assert.equal(issue.data().commentCount, undefined);
+  });
+});
+
+test('a client removes their own message and marks a staff reply read, both the way the product does', async () => {
+  const uid = 'client-member-a';
+  const db = environment.authenticatedContext(uid).firestore();
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'comments', 'client-own-reply'), {
+      authorId: uid, text: 'Написав зайве', visibility: 'public', createdAt: new Date(),
+    });
+    await updateDoc(doc(context.firestore(), 'issues', 'issue-a'), { commentCount: 3 });
+  });
+
+  // `useComments.deleteComment`: the message and the counter leave together.
+  await assertSucceeds(runTransaction(db, async transaction => {
+    const issueRef = doc(db, 'issues', 'issue-a');
+    await transaction.get(issueRef);
+    transaction.delete(doc(db, 'issues', 'issue-a', 'comments', 'client-own-reply'));
+    transaction.update(issueRef, { commentCount: 2, updatedAt: serverTimestamp() });
+  }));
+
+  // `useComments.markCommentsRead`: the receipt on the message and the tally on
+  // the incident, in one batch. Its failure was swallowed, so support never
+  // learned that the customer had read anything at all.
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'issues', 'issue-a', 'comments', 'member-comment'), {
+    readBy: arrayUnion(uid),
+    [`readAt.${uid}`]: serverTimestamp(),
+  });
+  batch.update(doc(db, 'issues', 'issue-a'), {
+    lastCommentReadBy: arrayUnion(uid),
+    [`unreadMentions.${uid}`]: deleteField(),
+  });
+  await assertSucceeds(batch.commit());
 });
 
 test('internal incident notes are staff-only and cannot leak through public comments', async () => {

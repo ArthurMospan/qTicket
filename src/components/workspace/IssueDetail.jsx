@@ -279,6 +279,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // other's screen.
   const terms = incidentTerms(clientViewer);
   const canEditIssue = can(orgRole, 'edit:issue');
+  // Where «назад» goes from this screen. `/{projectId}` is the tenant's
+  // customer-administration surface and it sends a client straight back to the
+  // portal, so for a client every way out of an incident — the crumb, the link
+  // under «Інцидент не знайдено» and Escape — pointed at a bounce. Their list of
+  // incidents is «Мої звернення» at `/`.
+  const backHref = clientViewer ? '/' : `/${projectId}`;
   const timeZone = organizationTimeZone(activeOrg);
   const {
     issues,
@@ -795,11 +801,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
 
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      router.push(`/${projectId}`);
+      router.push(backHref);
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
-  }, [router, projectId, isEditing, showLinkInput, showSubInput, draftIsDirty, confirmDialog]);
+  }, [router, backHref, isEditing, showLinkInput, showSubInput, draftIsDirty, confirmDialog]);
 
   if (!issue) {
     return (
@@ -825,7 +831,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             <p className="text-[16px] font-bold text-ink mb-2">{terms.notFound}</p>
             {/* Back to where this reader actually came from: a client has no
                 board to return to, and the route would only bounce them. */}
-            <Link href={clientViewer ? '/' : `/${projectId}`} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
+            <Link href={backHref} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
           </div>
         )}
       </div>
@@ -1415,11 +1421,22 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 ? [{ label: 'Позначити непрочитаним', icon: CircleDot, onClick: handleMarkUnread }]
                 : []),
               ...(!isArchived ? [
-                {
+                // «Стежити» writes `watcherIds` on the incident, which is a
+                // support-side field: the rule that authorizes it is the
+                // internal-contributor one, so for a client this row was a
+                // button that could only ever end in a raw permission error.
+                // Hidden rather than widened, and this is the deliberate half:
+                // a customer has one client space, every incident of it is
+                // already listed in «Мої звернення», and they are a participant
+                // of their own incidents — so notifications already reach them,
+                // and the portal has no «стежу» surface for the answer to show
+                // up in. The gate mirrors the rule exactly: `internalViewer` is
+                // owner/admin/member, which is `isInternalContributor`.
+                ...(internalViewer ? [{
                   label: isWatching ? 'Не стежити' : 'Стежити',
                   icon: isWatching ? EyeOff : Eye,
                   onClick: toggleWatch,
-                },
+                }] : []),
                 // Two different things, and they finally read as two: putting a
                 // task aside for good, and deleting it with a clock running.
                 ...(canWhileRoleLoads(orgRole, 'edit:issue')

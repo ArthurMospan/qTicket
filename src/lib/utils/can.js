@@ -4,7 +4,7 @@
 // One rule about this file: an entry describes what the product actually
 // enforces, never what someone once meant it to enforce. Firestore rules and
 // the server routes are authoritative; when they disagree with an entry here,
-// the entry is the bug. Two entries have already drifted that way, so every
+// the entry is the bug. Three entries have already drifted that way, so every
 // permission below names the route or rule that backs it.
 
 export const ORGANIZATION_ROLES = ['owner', 'admin', 'member', 'client_admin', 'client_member'];
@@ -81,6 +81,14 @@ export const PERMISSIONS = {
   'delete:issue': ['owner', 'admin', 'member'],
 
   // Comments and chat
+  //
+  // The third entry that had drifted, and the most expensive one: this said a
+  // client may reply while `firestore.rules` refused the write the product
+  // actually sends. Sending a reply is a transaction — the comment plus the
+  // incident's conversation metadata — and only the comment half was allowed,
+  // so the whole thing was refused. `issues/{issueId}` now carries a narrow
+  // conversation-participant clause beside `issues/{issueId}/comments`, and
+  // this entry is true for the first time.
   'create:comment': ['owner', 'admin', 'member', 'client_admin', 'client_member'],
   // The staff-only half of an incident. A public reply lives in `comments` and
   // is open to every participant of the project; an internal note lives in the
