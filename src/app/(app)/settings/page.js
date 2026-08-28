@@ -4253,7 +4253,6 @@ export default function SettingsPage() {
         inviteMember={inviteMember}
         clientMode={clientViewer}
         projectIds={clientProjectIds}
-        projects={projects}
       />
     </SidebarLayout>
   );

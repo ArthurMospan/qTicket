@@ -87,30 +87,3 @@ test('the task card and the task row use the shared icons', () => {
   assert.match(counters, /import \{ ChatIcon \} from '@\/lib\/design\/icons'/);
   assert.match(counters, /<ChatIcon size=\{scale\.icon \+ 1\} \/>/);
 });
-
-// A `CheckCircle`-shaped tick that means "this succeeded" is a different
-// decision that happens to look alike, and it keeps its own icon.
-//
-// Раніше тут стояв точний рядок класів, включно з `text-emerald-500`, і тест
-// був єдиним, що про нього знало: `/invite` лежить поза обходом `kit:colors`,
-// тож палітра Tailwind жила там непоміченою, а тест її ще й закріплював.
-// Перевіряється намір — галочка лишається власною іконкою й фарбується
-// токеном, — а не те, як саме її цього тижня набрали.
-test('the success tick is left alone', () => {
-  const invite = readFileSync(join(ROOT, 'src/app/invite/[token]/page.js'), 'utf8');
-  assert.match(invite, /<CheckCircle2 /);
-  assert.doesNotMatch(invite, /text-emerald-\d/);
-});
-
-// Той самий обхід, що його не бачить `kit:colors`: сторінка запрошення живе
-// поза `(app)`, тож жоден зі згенерованих звітів туди не заглядає. Тут стояли
-// індиговий спінер, смарагдова галочка, червоний хрестик і `bg-[#101010]` —
-// чотири кольори, яких у гамі продукту немає.
-test('the invite landing paints from tokens, like everything else', () => {
-  const invite = readFileSync(join(ROOT, 'src/app/invite/[token]/page.js'), 'utf8');
-  assert.doesNotMatch(invite, /(?:bg|text|border|ring)-\[#[0-9a-fA-F]{3,8}\]/);
-  assert.doesNotMatch(
-    invite,
-    /(?:bg|text|border|ring)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d/,
-  );
-});

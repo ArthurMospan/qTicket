@@ -68,5 +68,5 @@ test('the invite dialog lets you press the button and tells you what is missing'
   const dialog = await read('../src/components/InviteMemberDialog.jsx');
   assert.match(dialog, /setEmailError\('Вкажіть email учасника'\)/);
   assert.doesNotMatch(dialog, /disabled=\{!email\.trim\(\)/);
-  assert.match(dialog, /clientInvite[\s\S]{0,120}\? 'Email співробітника'[\s\S]{0,120}clientAdminMode[\s\S]{0,120}\? 'Email адміністратора клієнта'/);
+  assert.match(dialog, /clientInvite \? 'Email співробітника' : 'Email адміністратора клієнта'/);
 });

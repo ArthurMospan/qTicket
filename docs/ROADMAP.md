@@ -258,7 +258,7 @@ The competitors validate behaviors, not qTicket's ownership model or UI.
 | SLA and business hours | **Adapt after role acceptance** | Add a small per-client first-response/resolution policy with business hours and a pause while waiting for the client. Reject a general policy/escalation engine in the MVP. |
 | Request forms | **Adapt** | Incident types provide customer-friendly categories; add only proven type-specific required fields. Reject a general conditional form builder in the MVP. |
 | Audit and notifications | **Adapt** | Clients receive public replies and customer-facing status; staff receives internal notes and the support audit. In-app delivery stays split by audience. Email remains disconnected until Resend is intentionally enabled. |
-| Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles; primary Team/settings duplication is removed in the next acceptance slice. Client employees remain qTicket-owned. |
+| Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles, refuses every mutation of a QuickTeam-managed seat, and no longer offers an internal role or an invite link anywhere. Client employees remain qTicket-owned. |
 | Pricing, billing and inherited planning modules | **Reject for qTicket MVP** | No local plans, prices, checkout, invoices, timesheets, sprints, calendar or AI surface. qTicket consumes only QuickTeam's signed active/inactive entitlement. |
 
 Stop condition: do not copy a competitor UI or turn its complete feature list

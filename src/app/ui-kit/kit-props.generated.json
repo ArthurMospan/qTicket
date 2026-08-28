@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 114,
-    "props": 842,
-    "documentedProps": 842,
+    "components": 113,
+    "props": 835,
+    "documentedProps": 835,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -4174,61 +4174,6 @@
           "type": "'emergency'|'default'",
           "values": [],
           "description": "An emergency draws a different surface."
-        }
-      ]
-    },
-    "OptionCard": {
-      "file": "src/components/ui/Forms/OptionCard.jsx",
-      "summary": "A card you pick one of: a glyph, a name, a sentence explaining it, and a tick on the chosen one.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "description",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "One sentence saying what choosing it means."
-        },
-        {
-          "name": "disabled",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Unavailable: dimmed and not clickable."
-        },
-        {
-          "name": "icon",
-          "default": "",
-          "type": "React.ComponentType",
-          "values": [],
-          "description": "The option's glyph, in the round chip."
-        },
-        {
-          "name": "onClick",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Chooses it."
-        },
-        {
-          "name": "selected",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether this is the current choice — the ink border and the tick."
-        },
-        {
-          "name": "title",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "What the option is called."
         }
       ]
     },

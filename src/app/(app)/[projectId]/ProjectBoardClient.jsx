@@ -627,7 +627,6 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         isOpen={showClientInvite}
         onClose={() => setShowClientInvite(false)}
         inviteMember={inviteMember}
-        projects={[project]}
         projectIds={[project.id]}
         clientAdminMode
       />

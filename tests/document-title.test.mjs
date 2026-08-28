@@ -129,7 +129,7 @@ test('product fonts are self-hosted instead of blocking first paint on Google', 
 });
 
 test('every unauthenticated screen carries its own metadata', async () => {
-  for (const segment of ['login', 'onboarding', 'privacy-policy', 'invite', 'ui-kit']) {
+  for (const segment of ['login', 'onboarding', 'privacy-policy', 'ui-kit']) {
     const layout = await read(`../src/app/${segment}/layout.js`);
     assert.match(layout, /export const metadata = \{\s*\n\s*title: '.+'/, `${segment} has no title`);
   }

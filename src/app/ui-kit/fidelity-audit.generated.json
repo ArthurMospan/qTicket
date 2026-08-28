@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 234,
-    "parsedFiles": 234,
+    "productFiles": 233,
+    "parsedFiles": 233,
     "parseErrors": 0,
     "nativeControls": 20,
     "structures": {
@@ -25,7 +25,7 @@
     "manualModalShells": 0,
     "manualPills": 0,
     "manualSurfaces": 0,
-    "localSurfaceExceptions": 40,
+    "localSurfaceExceptions": 39,
     "manualIconButtons": 0,
     "headingStyles": 0,
     "sharedChromeOverrides": 0,
@@ -39,13 +39,13 @@
   },
   "kit": {
     "totals": {
-      "components": 114,
-      "used": 114,
+      "components": 113,
+      "used": 113,
       "unused": 0,
-      "covered": 107,
+      "covered": 106,
       "uncovered": 0,
       "routes": 14,
-      "previews": 144,
+      "previews": 143,
       "internal": 7,
       "unlisted": 0
     },
@@ -590,11 +590,6 @@
       "location": "src/components/integrations/YouTrackImportCard.jsx:675",
       "tag": "div",
       "className": "grid items-center gap-2 rounded-[10px] bg-white p-2 sm:grid-cols-[minmax(180px,1fr)_minmax(220px,1fr)]"
-    },
-    {
-      "location": "src/components/InviteLinkSection.jsx:98",
-      "tag": "div",
-      "className": "mt-4 rounded-[12px] border border-dashed border-faint bg-white p-2"
     },
     {
       "location": "src/components/migrations/DataMigrationSettings.jsx:90",

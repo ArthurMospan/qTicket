@@ -2,13 +2,13 @@
   "generatedBy": "scripts/scan-kit-usage.mjs",
   "scope": "authenticated-workspace",
   "totals": {
-    "components": 114,
-    "used": 114,
+    "components": 113,
+    "used": 113,
     "unused": 0,
-    "covered": 107,
+    "covered": 106,
     "uncovered": 0,
     "routes": 14,
-    "previews": 144,
+    "previews": 143,
     "internal": 7,
     "unlisted": 0
   },
@@ -66,7 +66,6 @@
       "ListRow",
       "LoadingSpinner",
       "MarkdownEditor",
-      "OptionCard",
       "PageHeader",
       "Pill",
       "PriorityBadge",
@@ -80,7 +79,6 @@
       "Tag",
       "TaskCounters",
       "TaskIdentity",
-      "TextAction",
       "Textarea",
       "ToggleSwitch",
       "TypeBadge",
@@ -421,7 +419,6 @@
       "Label",
       "LoadingSpinner",
       "MobilePaneBack",
-      "OptionCard",
       "Pill",
       "Popover",
       "PriorityBadge",
@@ -433,7 +430,6 @@
       "Tag",
       "TaskCounters",
       "TaskIdentity",
-      "TextAction",
       "Textarea",
       "ToggleSwitch",
       "TypeBadge",
@@ -675,7 +671,7 @@
     },
     "Button": {
       "file": "src/components/ui/Button.jsx",
-      "count": 35,
+      "count": 34,
       "showcased": true,
       "usedByKit": [
         "AttachmentRow",
@@ -723,7 +719,6 @@
         "src/app/(app)/team/page.js",
         "src/components/AudioTaskPanel.jsx",
         "src/components/CreateTaskModal.jsx",
-        "src/components/InviteLinkSection.jsx",
         "src/components/InviteMemberDialog.jsx",
         "src/components/MobileNav.jsx",
         "src/components/UserStatusDialog.jsx",
@@ -1816,19 +1811,6 @@
         "src/components/WorkspaceHeader.jsx"
       ]
     },
-    "OptionCard": {
-      "file": "src/components/ui/Forms/OptionCard.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/[projectId]",
-        "/settings"
-      ],
-      "usedIn": [
-        "src/components/InviteMemberDialog.jsx"
-      ]
-    },
     "OrganizationMark": {
       "file": "src/components/ui/DataDisplay/OrganizationMark.jsx",
       "count": 3,
@@ -2088,7 +2070,7 @@
     },
     "Select": {
       "file": "src/components/ui/Select.jsx",
-      "count": 17,
+      "count": 16,
       "showcased": true,
       "usedByKit": [
         "BulkActionBar"
@@ -2116,7 +2098,6 @@
         "src/app/(app)/sprints/page.js",
         "src/components/AudioTaskPanel.jsx",
         "src/components/CreateTaskModal.jsx",
-        "src/components/InviteMemberDialog.jsx",
         "src/components/client/ClientIncidentPortal.jsx",
         "src/components/integrations/YouTrackImportCard.jsx",
         "src/components/workspace/BillingTab.jsx",
@@ -2276,7 +2257,7 @@
     },
     "Tabs": {
       "file": "src/components/ui/Tabs.jsx",
-      "count": 7,
+      "count": 6,
       "showcased": true,
       "usedByKit": [
         "PageHeader"
@@ -2296,7 +2277,6 @@
         "src/app/(app)/my/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/CreateTaskModal.jsx",
-        "src/components/InviteMemberDialog.jsx",
         "src/components/profile/ProfileView.jsx",
         "src/components/workspace/BillingTab.jsx",
         "src/components/workspace/IssueDetail.jsx"
@@ -2452,7 +2432,7 @@
     },
     "TextAction": {
       "file": "src/components/ui/TextAction.jsx",
-      "count": 5,
+      "count": 4,
       "showcased": true,
       "usedByKit": [
         "ChannelInfoPanel",
@@ -2460,15 +2440,12 @@
         "TaskListView"
       ],
       "routes": [
-        "/[projectId]",
         "/[projectId]/issue/[issueId]",
         "/calendar",
-        "/settings",
         "/sprints"
       ],
       "usedIn": [
         "src/app/(app)/calendar/page.js",
-        "src/components/InviteLinkSection.jsx",
         "src/components/WorkspaceHeader.jsx",
         "src/components/workspace/IssueDetail.jsx",
         "src/components/workspace/qtplus/chat/ChatMessage.jsx"
@@ -2758,7 +2735,7 @@
           ]
         },
         "lg": {
-          "count": 28,
+          "count": 27,
           "routes": [
             "/",
             "/[projectId]",
@@ -2791,8 +2768,7 @@
             "src/app/(app)/settings/page.js:4032",
             "src/app/(app)/sprints/page.js:784",
             "src/components/AudioTaskPanel.jsx:237",
-            "src/components/InviteLinkSection.jsx:104",
-            "src/components/InviteMemberDialog.jsx:252",
+            "src/components/InviteMemberDialog.jsx:143",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
             "src/components/client/ClientIncidentPortal.jsx:147",
             "src/components/client/ClientIncidentPortal.jsx:157",
@@ -2938,7 +2914,7 @@
             "src/app/(app)/settings/page.js:609",
             "src/app/(app)/sprints/page.js:856",
             "src/app/(app)/team/page.js:138",
-            "src/components/InviteMemberDialog.jsx:276",
+            "src/components/InviteMemberDialog.jsx:165",
             "src/components/UserStatusDialog.jsx:71",
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceInfoCenter.jsx:87",
@@ -3093,7 +3069,7 @@
             "src/app/(app)/sprints/page.js:856",
             "src/app/(app)/team/page.js:138",
             "src/components/CreateTaskModal.jsx:425",
-            "src/components/InviteMemberDialog.jsx:276",
+            "src/components/InviteMemberDialog.jsx:165",
             "src/components/client/ClientIncidentPortal.jsx:147",
             "src/components/integrations/YouTrackImportCard.jsx:505",
             "src/components/integrations/YouTrackImportCard.jsx:537",
@@ -3132,7 +3108,7 @@
           ]
         },
         "primary": {
-          "count": 38,
+          "count": 37,
           "routes": [
             "/",
             "/[projectId]",
@@ -3168,8 +3144,7 @@
             "src/components/AudioTaskPanel.jsx:237",
             "src/components/AudioTaskPanel.jsx:266",
             "src/components/CreateTaskModal.jsx:428",
-            "src/components/InviteLinkSection.jsx:104",
-            "src/components/InviteMemberDialog.jsx:252",
+            "src/components/InviteMemberDialog.jsx:143",
             "src/components/client/ClientIncidentPortal.jsx:157",
             "src/components/workspace/AgileBoard.jsx:67",
             "src/components/workspace/BillingTab.jsx:1545",
@@ -3303,7 +3278,7 @@
       },
       "shape": {
         "(default)": {
-          "count": 188,
+          "count": 187,
           "routes": [
             "/",
             "/[projectId]",
@@ -3422,9 +3397,8 @@
             "src/components/AudioTaskPanel.jsx:266",
             "src/components/CreateTaskModal.jsx:425",
             "src/components/CreateTaskModal.jsx:428",
-            "src/components/InviteLinkSection.jsx:104",
-            "src/components/InviteMemberDialog.jsx:252",
-            "src/components/InviteMemberDialog.jsx:276",
+            "src/components/InviteMemberDialog.jsx:143",
+            "src/components/InviteMemberDialog.jsx:165",
             "src/components/MobileNav.jsx:366",
             "src/components/UserStatusDialog.jsx:114",
             "src/components/UserStatusDialog.jsx:71",
@@ -3533,7 +3507,7 @@
       },
       "surface": {
         "(default)": {
-          "count": 190,
+          "count": 189,
           "routes": [
             "/",
             "/[projectId]",
@@ -3652,9 +3626,8 @@
             "src/components/AudioTaskPanel.jsx:266",
             "src/components/CreateTaskModal.jsx:425",
             "src/components/CreateTaskModal.jsx:428",
-            "src/components/InviteLinkSection.jsx:104",
-            "src/components/InviteMemberDialog.jsx:252",
-            "src/components/InviteMemberDialog.jsx:276",
+            "src/components/InviteMemberDialog.jsx:143",
+            "src/components/InviteMemberDialog.jsx:165",
             "src/components/MobileNav.jsx:366",
             "src/components/UserStatusDialog.jsx:114",
             "src/components/UserStatusDialog.jsx:71",
@@ -3754,7 +3727,7 @@
       },
       "color": {
         "(default)": {
-          "count": 173,
+          "count": 172,
           "routes": [
             "/",
             "/[projectId]",
@@ -3860,9 +3833,8 @@
             "src/components/AudioTaskPanel.jsx:266",
             "src/components/CreateTaskModal.jsx:425",
             "src/components/CreateTaskModal.jsx:428",
-            "src/components/InviteLinkSection.jsx:104",
-            "src/components/InviteMemberDialog.jsx:252",
-            "src/components/InviteMemberDialog.jsx:276",
+            "src/components/InviteMemberDialog.jsx:143",
+            "src/components/InviteMemberDialog.jsx:165",
             "src/components/MobileNav.jsx:366",
             "src/components/UserStatusDialog.jsx:114",
             "src/components/WorkspaceHeader.jsx:354",
@@ -3997,7 +3969,7 @@
       },
       "composition": {
         "(default)": {
-          "count": 175,
+          "count": 174,
           "routes": [
             "/",
             "/[projectId]",
@@ -4108,9 +4080,8 @@
             "src/components/AudioTaskPanel.jsx:266",
             "src/components/CreateTaskModal.jsx:425",
             "src/components/CreateTaskModal.jsx:428",
-            "src/components/InviteLinkSection.jsx:104",
-            "src/components/InviteMemberDialog.jsx:252",
-            "src/components/InviteMemberDialog.jsx:276",
+            "src/components/InviteMemberDialog.jsx:143",
+            "src/components/InviteMemberDialog.jsx:165",
             "src/components/UserStatusDialog.jsx:71",
             "src/components/WorkspaceHeader.jsx:354",
             "src/components/WorkspaceHeader.jsx:364",
@@ -4747,7 +4718,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/InviteMemberDialog.jsx:236",
+            "src/components/InviteMemberDialog.jsx:128",
             "src/components/WorkspaceInfoCenter.jsx:127",
             "src/components/workspace/IssueDetail.jsx:2023",
             "src/components/workspace/IssueDetail.jsx:2031",
@@ -4788,7 +4759,7 @@
             "src/components/AudioTaskPanel.jsx:290",
             "src/components/CreateTaskModal.jsx:478",
             "src/components/CreateTaskModal.jsx:617",
-            "src/components/InviteMemberDialog.jsx:236",
+            "src/components/InviteMemberDialog.jsx:128",
             "src/components/WorkspaceInfoCenter.jsx:127",
             "src/components/integrations/YouTrackImportCard.jsx:481",
             "src/components/integrations/YouTrackImportCard.jsx:489",
@@ -4910,7 +4881,7 @@
             "src/components/AudioTaskPanel.jsx:290",
             "src/components/CreateTaskModal.jsx:478",
             "src/components/CreateTaskModal.jsx:617",
-            "src/components/InviteMemberDialog.jsx:236",
+            "src/components/InviteMemberDialog.jsx:128",
             "src/components/UserStatusDialog.jsx:105",
             "src/components/WorkspaceInfoCenter.jsx:127",
             "src/components/integrations/YouTrackImportCard.jsx:481",
@@ -5064,7 +5035,7 @@
     "Select": {
       "size": {
         "(default)": {
-          "count": 64,
+          "count": 63,
           "routes": [
             "/",
             "/[projectId]",
@@ -5116,7 +5087,6 @@
             "src/components/CreateTaskModal.jsx:576",
             "src/components/CreateTaskModal.jsx:584",
             "src/components/CreateTaskModal.jsx:597",
-            "src/components/InviteMemberDialog.jsx:191",
             "src/components/client/ClientIncidentPortal.jsx:171",
             "src/components/integrations/YouTrackImportCard.jsx:596",
             "src/components/integrations/YouTrackImportCard.jsx:636",
@@ -5194,7 +5164,7 @@
           ]
         },
         "(default)": {
-          "count": 42,
+          "count": 41,
           "routes": [
             "/",
             "/[projectId]",
@@ -5224,7 +5194,6 @@
             "src/components/CreateTaskModal.jsx:576",
             "src/components/CreateTaskModal.jsx:584",
             "src/components/CreateTaskModal.jsx:597",
-            "src/components/InviteMemberDialog.jsx:191",
             "src/components/integrations/YouTrackImportCard.jsx:596",
             "src/components/integrations/YouTrackImportCard.jsx:636",
             "src/components/integrations/YouTrackImportCard.jsx:680",
@@ -5356,7 +5325,7 @@
           ]
         },
         "(default)": {
-          "count": 40,
+          "count": 39,
           "routes": [
             "/",
             "/[projectId]",
@@ -5386,7 +5355,6 @@
             "src/components/CreateTaskModal.jsx:576",
             "src/components/CreateTaskModal.jsx:584",
             "src/components/CreateTaskModal.jsx:597",
-            "src/components/InviteMemberDialog.jsx:191",
             "src/components/integrations/YouTrackImportCard.jsx:596",
             "src/components/integrations/YouTrackImportCard.jsx:636",
             "src/components/integrations/YouTrackImportCard.jsx:680",
@@ -6717,15 +6685,12 @@
     "TextAction": {
       "tone": {
         "muted": {
-          "count": 2,
+          "count": 1,
           "routes": [
-            "/[projectId]",
-            "/calendar",
-            "/settings"
+            "/calendar"
           ],
           "files": [
-            "src/app/(app)/calendar/page.js:397",
-            "src/components/InviteLinkSection.jsx:128"
+            "src/app/(app)/calendar/page.js:397"
           ]
         },
         "danger-quiet": {
@@ -6775,13 +6740,9 @@
           ]
         },
         "sm": {
-          "count": 2,
-          "routes": [
-            "/[projectId]",
-            "/settings"
-          ],
+          "count": 1,
+          "routes": [],
           "files": [
-            "src/components/InviteLinkSection.jsx:128",
             "src/components/WorkspaceHeader.jsx:489"
           ]
         },
@@ -7044,7 +7005,7 @@
           "files": [
             "src/app/(app)/sprints/page.js:256",
             "src/components/CreateTaskModal.jsx:406",
-            "src/components/InviteMemberDialog.jsx:158",
+            "src/components/InviteMemberDialog.jsx:111",
             "src/components/WorkspaceInfoCenter.jsx:245",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:621",
@@ -7141,7 +7102,7 @@
             "/settings"
           ],
           "files": [
-            "src/components/InviteMemberDialog.jsx:158"
+            "src/components/InviteMemberDialog.jsx:111"
           ]
         },
         "responsive": {
@@ -7182,7 +7143,7 @@
             "src/app/(app)/sprints/page.js:256",
             "src/app/(app)/sprints/page.js:78",
             "src/components/CreateTaskModal.jsx:406",
-            "src/components/InviteMemberDialog.jsx:158",
+            "src/components/InviteMemberDialog.jsx:111",
             "src/components/SupportDialog.jsx:48",
             "src/components/WorkspaceHeader.jsx:515",
             "src/components/profile/ProfileModal.jsx:28",
@@ -7243,7 +7204,7 @@
             "src/app/(app)/sprints/page.js:256",
             "src/app/(app)/sprints/page.js:78",
             "src/components/CreateTaskModal.jsx:406",
-            "src/components/InviteMemberDialog.jsx:158",
+            "src/components/InviteMemberDialog.jsx:111",
             "src/components/WorkspaceHeader.jsx:515",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BillingTab.jsx:497",
@@ -7321,7 +7282,7 @@
             "src/app/(app)/settings/page.js:2865",
             "src/app/(app)/settings/page.js:3414",
             "src/app/(app)/settings/page.js:3464",
-            "src/components/InviteMemberDialog.jsx:267",
+            "src/components/InviteMemberDialog.jsx:158",
             "src/components/integrations/YouTrackImportCard.jsx:570",
             "src/components/workspace/BillingTab.jsx:541",
             "src/components/workspace/IssueDetail.jsx:1529"
@@ -8208,7 +8169,7 @@
     "Tabs": {
       "variant": {
         "(default)": {
-          "count": 6,
+          "count": 5,
           "routes": [
             "/",
             "/[projectId]",
@@ -8216,13 +8177,11 @@
             "/analytics",
             "/clients",
             "/my",
-            "/settings",
             "/sprints"
           ],
           "files": [
             "src/app/(app)/my/page.js:364",
             "src/components/CreateTaskModal.jsx:443",
-            "src/components/InviteMemberDialog.jsx:212",
             "src/components/workspace/BillingTab.jsx:1200",
             "src/components/workspace/IssueDetail.jsx:1458",
             "src/components/workspace/IssueDetail.jsx:1953"
@@ -8249,9 +8208,8 @@
       },
       "composition": {
         "(default)": {
-          "count": 6,
+          "count": 5,
           "routes": [
-            "/[projectId]",
             "/[projectId]/issue/[issueId]",
             "/analytics",
             "/my",
@@ -8262,7 +8220,6 @@
           "files": [
             "src/app/(app)/my/page.js:364",
             "src/app/(app)/settings/page.js:4072",
-            "src/components/InviteMemberDialog.jsx:212",
             "src/components/profile/ProfileView.jsx:264",
             "src/components/workspace/BillingTab.jsx:1200",
             "src/components/workspace/IssueDetail.jsx:1953"
@@ -8288,7 +8245,7 @@
     "Label": {
       "context": {
         "(default)": {
-          "count": 27,
+          "count": 26,
           "routes": [
             "/",
             "/[projectId]",
@@ -8312,8 +8269,7 @@
             "src/components/CreateTaskModal.jsx:609",
             "src/components/CreateTaskModal.jsx:640",
             "src/components/CreateTaskModal.jsx:685",
-            "src/components/InviteMemberDialog.jsx:190",
-            "src/components/InviteMemberDialog.jsx:224",
+            "src/components/InviteMemberDialog.jsx:120",
             "src/components/workspace/BillingTab.jsx:116",
             "src/components/workspace/BillingTab.jsx:137",
             "src/components/workspace/BillingTab.jsx:84",
@@ -8787,7 +8743,6 @@
     "Плюс у комірці": "<div className=\"group flex w-[150px] items-center justify-between rounded-[8px] border border-line bg-white p-[7px]\">\n  <CalendarDayNumber state=\"today\">14</CalendarDayNumber>\n  <IconAction\n    label=\"Додати подію\"\n    icon={Plus}\n    size=\"xs\"\n    appearance=\"quiet\"\n    className=\"opacity-0 transition-opacity group-hover:opacity-100\"\n  />\n</div>",
     "Form Group Layouts": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Назва проєкту\">\n    <Input placeholder=\"Введіть назву...\" />\n  </FormGroup>\n\n  <FormGroup label=\"Електронна пошта\" required>\n    <Input placeholder=\"name@company.com\" />\n  </FormGroup>\n\n  <FormGroup label=\"Пароль\" required error=\"Пароль має містити щонайменше 8 символів\">\n    <Input type=\"password\" placeholder=\"••••••••\" error={true} />\n  </FormGroup>\n</div>",
     "Label з іконкою": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Учасники\" icon={Users}>\n    <Input placeholder=\"Додати учасників\" />\n  </FormGroup>\n\n  <FormGroup label=\"Нагадування\" icon={Bell} required>\n    <Input placeholder=\"За 15 хвилин\" />\n  </FormGroup>\n\n  <div className=\"flex flex-col gap-[6px]\">\n    <Label icon={MapPin}>Місце</Label>\n    <Input placeholder=\"Офіс або кімната\" />\n  </div>\n</div>",
-    "Картка вибору": "<div className=\"grid w-full max-w-[720px] gap-2 sm:grid-cols-2\">\n  <OptionCard\n    selected={role === 'member'}\n    icon={UserRound}\n    title=\"Учасник\"\n    description=\"Працює із завданнями та проєктами.\"\n    onClick={() => setRole('member')}\n  />\n  <OptionCard\n    selected={role === 'admin'}\n    icon={Shield}\n    title=\"Адміністратор\"\n    description=\"Керує командою та налаштуваннями.\"\n    onClick={() => setRole('admin')}\n  />\n  <OptionCard icon={Briefcase} title=\"Без опису\" onClick={() => {}} />\n  <OptionCard\n    selected\n    disabled\n    icon={Shield}\n    title=\"Власник\"\n    description=\"Роль фіксована — її не змінює навіть власник.\"\n  />\n</div>",
     "Filter Bar — Projects Page": "<PageHeader\n  title=\"Проєкти\"\n  actions={<Button style=\"primary\" color=\"dark\" size=\"lg\" icon={Plus}>Новий проєкт</Button>}\n  filters={(\n    <FilterBar context=\"projects\">\n      <Select filterRole=\"member\" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant=\"ghost\" />\n      <Select filterRole=\"date\" options={dateOptions} value={dateFilter} onChange={setDateFilter} variant=\"ghost\" />\n      <Select filterRole=\"sort\" options={sortOptions} value={sortOption} onChange={setSortOption} variant=\"ghost\" />\n    </FilterBar>\n  )}\n/>",
     "Popover & Tooltip": "<div className=\"flex items-center gap-[24px] flex-wrap\">\n  <Popover\n    trigger={<Button style=\"secondary\">Показати Popover</Button>}\n    position=\"bottom\"\n  >\n    <div className=\"p-2\">\n      <h4 className=\"text-[14px] font-bold mb-1\">Інформаційне вікно</h4>\n      <p className=\"text-[12px] text-[#9a9a9a]\">Корисна інформація або додаткові налаштування.</p>\n    </div>\n  </Popover>\n\n  <Tooltip content=\"Це підказка при наведенні\" position=\"top\">\n    <Button style=\"secondary\">Наведіть для підказки</Button>\n  </Tooltip>\n</div>",
     "Context Menu": "<div className=\"flex items-start gap-[40px] flex-wrap\">\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Інтерактивне меню</span>\n    <ContextMenu\n      trigger={<Button style=\"secondary\" size=\"icon\" icon={MoreVertical}>Меню</Button>}\n      items={menuItems}\n    />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Меню-перемикач (мітки задачі)</span>\n    <ContextMenu\n      trigger={(\n        <Button style=\"secondary\" size=\"sm\" composition=\"inline-add-action\" icon={Plus}>\n          Додати мітку\n        </Button>\n      )}\n      dropdownClassName=\"w-[220px]\"\n      closeOnSelect={false}\n      items={toggleMenuItems}\n    />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Експорт (ContextMenu + Button)</span>\n    {/* The live component, with a document small enough to read. It is\n        the same control the analytics tabs and the invoice carry, and\n        the only kit component whose menu items do work rather than\n        navigate. */}\n    <ExportMenu size=\"md\" build={() => KIT_EXPORT_DOCUMENT} />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Меню людини (align=&quot;start&quot;)</span>\n    <ContextMenu\n      align=\"start\"\n      dropdownClassName=\"w-[210px]\"\n      trigger={(\n        <MetaTrigger\n          label=\"Автор:\"\n          user={{ id: 'u1', name: 'Артур Моспан' }}\n          name=\"Артур Моспан\"\n          className=\"text-[12px] font-medium text-muted\"\n        />\n      )}\n      items={[\n        { icon: User, label: 'Переглянути профіль' },\n        { icon: MessageCircle, label: 'Написати в чат' },\n      ]}\n    />\n  </div>\n</div>",

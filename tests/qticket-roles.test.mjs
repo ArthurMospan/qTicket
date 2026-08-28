@@ -100,12 +100,11 @@ test('клієнтське запрошення завжди прив’язан
   assert.match(scope, /clientScopedInvitation && !snapshot\.data\(\)\.team\?\.includes\(inviterUid\)/);
   assert.match(scope, /scope: clientInvitee \? 'client-project' : 'organization'/);
   assert.match(acceptRoute, /isClientRole\(invitation\.role\) \? invitation\.role : 'client_member'/);
-  assert.match(dialog, /value: 'client_admin'/);
-  assert.match(dialog, /internalClientInvite \? \[selectedProjectId\] : \[\]/);
-  assert.match(dialog, /ariaLabel="Клієнтський проєкт"/);
-  assert.match(dialog, /!clientInvite && !internalClientInvite && !clientAdminMode && <Tabs/);
-  assert.match(dialog, /clientInvite \|\| internalClientInvite \|\| tab === 'email'/);
-  assert.match(dialog, /clientAdminMode \? presetProjectId : ''/);
+  // Проєкт більше не питається окремо: діалог відкривають або зі сторінки
+  // клієнтського проєкту, або з простору самого клієнта, і обидва вже його
+  // назвали. `projectIds` іде в запит як є, а сервер тримає межу «рівно один».
+  assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : 'client_admin'/);
+  assert.match(dialog, /inviteMember\(normalizedEmail, uid, invitedRole, projectIds\)/);
 });
 
 test('без поштового провайдера клієнт отримує ручну інструкцію, а не недоступну вкладку', async () => {
@@ -174,6 +173,28 @@ test('клієнтська сесія не підписується на вну�
   assert.match(timeline, /useTimeLogs\(\s*internalViewer \? issueId : null,\s*projectId,\s*\)/);
   assert.match(timeline, /Відповідь клієнту/);
   assert.match(timeline, /Внутрішня нотатка/);
+});
+
+// Внутрішнє місце в qTicket видає лише підписаний provisioning із QuickTeam.
+// Посилання-запрошення з фіксованою роллю `member`/`admin` було другим входом
+// повз цю межу: будь-хто з URL отримував staff-доступ, а перевірка
+// QuickTeam-керованої організації, яку робить `/api/invitations`, до нього не
+// доходила. Тому механізм не «вимкнено» — його немає.
+test('qTicket не має самостійного шляху до внутрішнього місця', async () => {
+  const dialog = await read('../src/components/InviteMemberDialog.jsx');
+
+  assert.doesNotMatch(dialog, /Менеджер підтримки|Адміністратор'|InviteLinkSection|Посилання та QR/);
+  assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : 'client_admin'/);
+
+  for (const removed of [
+    '../src/app/api/invitations/link/route.js',
+    '../src/app/api/invitations/link/accept/route.js',
+    '../src/app/invite/[token]/page.js',
+    '../src/components/InviteLinkSection.jsx',
+    '../src/lib/server/inviteLinks.js',
+  ]) {
+    await assert.rejects(read(removed), { code: 'ENOENT' }, `${removed} має бути видалений`);
+  }
 });
 
 test('клієнтський глобальний пошук не відкриває людей або події поза його простором', async () => {
