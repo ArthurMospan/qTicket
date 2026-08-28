@@ -18,7 +18,7 @@ const rootUrl = new URL('../', import.meta.url);
 const flattenArticle = article => JSON.stringify(article).toLocaleLowerCase('uk-UA');
 
 test('help center has one valid article for every required critical area', () => {
-  assert.equal(HELP_ARTICLES.length, 20);
+  assert.equal(HELP_ARTICLES.length, 13);
   assert.equal(new Set(HELP_ARTICLES.map(article => article.id)).size, HELP_ARTICLES.length);
   assert.equal(new Set(HELP_ARTICLES.map(article => article.slug)).size, HELP_ARTICLES.length);
 
@@ -37,6 +37,36 @@ test('help center has one valid article for every required critical area', () =>
     }
   }
   assert.deepEqual([...coverage.keys()].toSorted(), [...REQUIRED_HELP_COVERAGE].toSorted());
+});
+
+test('qTicket help publishes only reachable support workflows', () => {
+  const articleIds = HELP_ARTICLES.map(article => article.id).toSorted();
+  assert.deepEqual(articleIds, [
+    'attachments',
+    'chat-and-mentions',
+    'creating-issues',
+    'issue-fields',
+    'kanban-and-bulk-actions',
+    'notifications',
+    'organizations-and-roles',
+    'profiles-and-activity',
+    'projects-and-boards',
+    'search-and-shortcuts',
+    'security-and-access',
+    'statuses-and-categories',
+    'support',
+  ]);
+
+  const publicText = HELP_ARTICLES.map(flattenArticle).join(' ');
+  for (const inheritedFeature of [
+    'спринти й беклог',
+    'як рахувати витрачений час',
+    'аналітика й рахунки',
+    'перенести завдання з youtrack',
+    'канали й особисті переписки',
+  ]) {
+    assert.ok(!publicText.includes(inheritedFeature), `${inheritedFeature} is not public qTicket help`);
+  }
 });
 
 test('controlled product features cannot exist without a valid help article', async () => {
@@ -77,7 +107,7 @@ test('the version is one number, and the news is empty until there is a release'
   assert.ok(NEWS_ARTICLES.every(article => article.slug && article.publishedAt && article.sections.length));
 });
 
-// The help centre is for somebody using QuickTeam, not for somebody who built
+// The help centre is for somebody using qTicket, not for somebody who built
 // it. None of these words describe anything a person can see on a screen, and
 // every one of them was in an article a new user was expected to read.
 test('the help centre explains the product, not its plumbing', () => {

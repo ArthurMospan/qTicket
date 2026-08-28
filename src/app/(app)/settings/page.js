@@ -63,7 +63,7 @@ import { sendNotification } from '@/lib/hooks/useNotifications';
 import {
   CHANNEL_DEFAULTS,
   EVENT_DEFAULTS,
-  NOTIFICATION_EVENTS,
+  QTICKET_NOTIFICATION_EVENT_KEYS,
   resolveNotificationMatrix,
 } from '@/lib/utils/notificationChannels.mjs';
 import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
@@ -2782,19 +2782,17 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'notifications': {
-        // Split by channel, one card each, because that is the question people
-        // actually arrive with: "what does Telegram send me?". The previous
-        // version put five event switches in one list and four channel switches
-        // in another, and which event reached which channel was written nowhere —
-        // it was hardcoded in the senders, and they disagreed with each other.
+        // qTicket ships with in-app delivery only. Email stays unavailable
+        // until a verified sender domain exists, and Telegram is not part of
+        // the add-on contract yet. Do not advertise dormant providers as
+        // switches a customer can turn on.
         const eventRows = [
           { key: 'assigned',      label: 'Інцидент призначено мені', desc: 'Хтось призначив інцидент на тебе або створив новий одразу з тобою' },
           { key: 'commented',     label: 'Нове повідомлення',        desc: 'В інцидентах, де ти виконавець або автор' },
-          { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в коментарі' },
+          { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в розмові інциденту' },
           { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли інцидент переходить на інший етап' },
-          { key: 'deadline',      label: 'Дедлайни',                 desc: 'За 24 години до дедлайну; для прострочених — у день дедлайну, наступного дня і далі щотижня' },
-          { key: 'chatMessage',   label: 'Повідомлення в чаті',      desc: 'Нові повідомлення в каналах і особистих чатах' },
-        ].filter(row => NOTIFICATION_EVENTS.some(event => event.key === row.key));
+          { key: 'deadline',      label: 'Терміни вирішення',        desc: 'Нагадування про наближення або прострочення терміну' },
+        ].filter(row => QTICKET_NOTIFICATION_EVENT_KEYS.includes(row.key));
 
         // Every line is the shared <Row>, so all three cards land on the same
         // label column and the same right-hand control column.
@@ -2823,7 +2821,7 @@ export default function SettingsPage() {
         );
 
         return (
-          <Section title="Сповіщення" desc="Кожен канал окремо: обери, про що він тебе повідомляє" rightAction={saveButton}>
+          <Section title="Сповіщення" desc="Оберіть, про які події qTicket повідомляє всередині застосунку" rightAction={saveButton}>
             {channelCard({
               id: 'inapp',
               icon: Bell,
@@ -2843,54 +2841,6 @@ export default function SettingsPage() {
               ),
             })}
 
-            {channelCard({
-              id: 'email',
-              icon: Mail,
-              title: 'Email',
-              caption: currentUser?.email || 'Пошта не вказана',
-              available: notif.emailEnabled === true,
-              offNote: 'Канал вимкнено — увімкни, щоб обрати, що дублювати на пошту.',
-              master: (
-                <ToggleSwitch
-                  checked={notif.emailEnabled === true}
-                  onChange={v => setNotif(p => ({ ...p, emailEnabled: v }))}
-                  size="md"
-                  ariaLabel="Сповіщення на пошту"
-                />
-              ),
-            })}
-
-            {channelCard({
-              id: 'telegram',
-              icon: Send,
-              title: 'Telegram',
-              caption: telegramBotStatus.connected
-                ? `Підключено: ${telegramBotStatus.chatTitle || 'особистий чат із ботом'}`
-                : telegramAwaitingLink
-                  ? 'Натисніть «Старт» у Telegram — підключиться саме'
-                  : telegramBotStatus.configured
-                    ? 'Не підключено'
-                    : 'Інтеграцію не налаштовано в цьому середовищі',
-              available: telegramBotStatus.connected && notif.telegramEnabled === true,
-              offNote: telegramBotStatus.configured
-                ? 'Увімкни канал — відкриється бот. Після «Старт» тут зʼявиться список подій.'
-                : telegramBotStatus.connected
-                  ? 'Акаунт уже підключений у production. Його можна відключити і з localhost.'
-                  : 'Інтеграцію не налаштовано в цьому середовищі.',
-              master: (
-                <ToggleSwitch
-                  checked={telegramBotStatus.connected && notif.telegramEnabled === true}
-                  onChange={toggleTelegram}
-                  disabled={
-                    telegramBotLoading ||
-                    telegramAwaitingLink ||
-                    (!telegramBotStatus.configured && !telegramBotStatus.connected)
-                  }
-                  size="md"
-                  ariaLabel="Сповіщення в Telegram"
-                />
-              ),
-            })}
           </Section>
         );
       }

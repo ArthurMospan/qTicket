@@ -136,9 +136,13 @@ test('the variant matrix renders every component that can stand alone', () => {
 // no longer marks that plan with a second colour — it carries a badge and
 // nothing else. The tone stays declared: blue is a status the product has, it
 // simply is not a thing to be in a price list.
+// Raised 114 → 115 because qTicket exposes only in-app notifications. The last
+// explicit `ToggleSwitch size="md"` was the master switch for a dormant
+// external channel. `md` remains the component default and its catalogue
+// preview remains generated from that declaration.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 114,
+    committed.totals.declaredUnused <= 115,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   for (const key of ['Input.composition.status-entry', 'Button.composition.status-submit', 'Dialog.size.status']) {

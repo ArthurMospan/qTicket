@@ -83,7 +83,7 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,165 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,168 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -111,6 +111,17 @@ Completed product slice on 2026-08-28:
   time tracking, estimates, task hierarchy, task links or QuickTeam+ chat.
   Internal support keeps status, responsible staff, priority, type, resolution
   target, labels, description, attachments and the shared client conversation.
+- Direct visits to inherited task-manager routes are now contained at the
+  request boundary: `/analytics` and `/calendar` return to **Огляд**, while
+  `/sprints` and `/chat` return to **Інциденти**. The active organization is
+  preserved and legacy view filters are discarded.
+- Public help is now a qTicket catalogue of 13 implemented topics. Articles for
+  sprints, time tracking, invoices, analytics, planning calendars, YouTrack and
+  workspace chat remain inherited implementation material and are not
+  published as available qTicket features.
+- Notification settings expose only in-app delivery. Email and Telegram remain
+  hidden until a real provider is configured and verified; the beta does not
+  promise channels that cannot deliver.
 
 Product work still required:
 

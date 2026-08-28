@@ -6,6 +6,7 @@ import {
   EVENT_DEFAULTS,
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENTS,
+  QTICKET_NOTIFICATION_EVENT_KEYS,
   filterRecipients,
   isChannelEnabled,
   resolveNotificationMatrix,
@@ -192,11 +193,12 @@ test('chat can be silenced on Telegram without disconnecting Telegram', () => {
   assert.equal(shouldDeliver(muted, 'inapp', 'chat_message'), true);
 });
 
-test('the settings page offers a row for every event the model declares', async () => {
+test('qTicket settings offer every published incident event and no workspace-chat event', async () => {
   const { readFile } = await import('node:fs/promises');
   const page = await readFile(new URL('../src/app/(app)/settings/page.js', import.meta.url), 'utf8');
   const rows = page.slice(page.indexOf('const eventRows = ['), page.indexOf('].filter(row =>'));
-  for (const { key } of NOTIFICATION_EVENTS) {
+  for (const key of QTICKET_NOTIFICATION_EVENT_KEYS) {
     assert.match(rows, new RegExp(`key: '${key}'`), `${key} has no row in Settings`);
   }
+  assert.doesNotMatch(rows, /key: 'chatMessage'/);
 });

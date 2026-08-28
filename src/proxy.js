@@ -7,8 +7,30 @@
 import { NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/server/firebaseAdmin';
 
+const LEGACY_WORKSPACE_DESTINATIONS = Object.freeze([
+  { prefix: '/analytics', destination: '/overview' },
+  { prefix: '/calendar', destination: '/overview' },
+  { prefix: '/sprints', destination: '/my' },
+  { prefix: '/chat', destination: '/my' },
+]);
+
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
+  const legacyRoute = LEGACY_WORKSPACE_DESTINATIONS.find(({ prefix }) => (
+    pathname === prefix || pathname.startsWith(`${prefix}/`)
+  ));
+
+  // The inherited implementation stays in the repository until its data
+  // readers and migrations can be removed safely, but these are not qTicket
+  // product routes. A copied bookmark must land in the nearest supported
+  // workflow and must not resurrect the task-manager interface.
+  if (legacyRoute) {
+    const destinationUrl = new URL(legacyRoute.destination, request.url);
+    const organizationId = request.nextUrl.searchParams.get('org');
+    if (organizationId) destinationUrl.searchParams.set('org', organizationId);
+    return NextResponse.redirect(destinationUrl);
+  }
+
   const isDevelopmentReferencePage =
     process.env.NODE_ENV === 'development'
     && pathname === '/ui-kit';
@@ -45,5 +67,11 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/ui-kit'],
+  matcher: [
+    '/ui-kit',
+    '/analytics/:path*',
+    '/calendar/:path*',
+    '/sprints/:path*',
+    '/chat/:path*',
+  ],
 };

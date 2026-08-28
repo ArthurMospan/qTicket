@@ -44,16 +44,15 @@ test('a schedule invokes the notification sweep independently of a browser', asy
   assert.doesNotMatch(header, /useDeadlineReminders/);
 });
 
-test('localhost can disconnect an existing Telegram binding without bot credentials', async () => {
+test('qTicket hides dormant channels while cleanup stays independent of bot credentials', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
-  assert.match(
-    settings,
-    /\(!telegramBotStatus\.configured && !telegramBotStatus\.connected\)/,
+  const notificationSection = settings.slice(
+    settings.indexOf("case 'notifications'"),
+    settings.indexOf("case 'localization'"),
   );
-  assert.match(
-    settings,
-    /\(!telegramGroupStatus\.configured && !telegramGroupStatus\.connected\)/,
-  );
+  assert.match(notificationSection, /id: 'inapp'/);
+  assert.match(notificationSection, /title: 'На сайті'/);
+  assert.doesNotMatch(notificationSection, /id: 'email'|id: 'telegram'/);
 
   const route = await read('../src/app/api/integrations/telegram/route.js');
   const deleteHandler = route.slice(route.indexOf('export async function DELETE'));

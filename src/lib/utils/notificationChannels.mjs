@@ -58,6 +58,18 @@ export const NOTIFICATION_EVENTS = [
   { key: 'chatMessage', type: 'chat_message' },
 ];
 
+// qTicket publishes incident events only. `chatMessage` belongs to the
+// inherited organization-chat engine, whose routes are not part of the qTicket
+// product surface. Keep its stored preference readable without advertising a
+// switch for a feature customers cannot open.
+export const QTICKET_NOTIFICATION_EVENT_KEYS = Object.freeze([
+  'assigned',
+  'commented',
+  'mentioned',
+  'statusChanged',
+  'deadline',
+]);
+
 const EVENT_KEY_BY_TYPE = new Map(NOTIFICATION_EVENTS.map(event => [event.type, event.key]));
 
 // Per-event defaults for an account that has never saved anything. Single source
@@ -126,8 +138,8 @@ export function isChannelEnabled(preferences = {}, channel) {
   return false;
 }
 
-// Types outside NOTIFICATION_EVENTS — chat_message, alert, emergency, the
-// calendar family, test — have no switch of their own in Settings, so a channel
+// Types outside NOTIFICATION_EVENTS — alert, emergency, the calendar family and
+// test — have no switch of their own in Settings, so a channel
 // policy decides. In-app records them all and Telegram takes them all, which is
 // what both already did. Email stays narrow on purpose: it used to run off a
 // hardcoded whitelist, and opening it up would mean a mail per chat message.

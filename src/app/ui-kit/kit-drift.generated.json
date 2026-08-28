@@ -13,9 +13,9 @@
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 229,
+    "usedAndPreviewed": 228,
     "usedWithoutPreview": 0,
-    "declaredUnused": 114
+    "declaredUnused": 115
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -692,6 +692,12 @@
       "component": "ToggleSwitch",
       "prop": "size",
       "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "ToggleSwitch",
+      "prop": "size",
+      "value": "md",
       "namespace": null
     },
     {
@@ -1452,7 +1458,6 @@
     "Label.context.inline": 1,
     "Textarea.composition.settings-note": 1,
     "ToggleSwitch.size.sm": 6,
-    "ToggleSwitch.size.md": 2,
     "Pill.tone.ink-subtle": 6,
     "ColorSwatch.size.theme": 1,
     "Input.composition.color-hex": 1,

@@ -47,6 +47,14 @@ Firebase session. External clients never use that launch path: they authenticate
 through qTicket's own invitation flow. Neither product accepts the other one's
 Firebase token or session cookie.
 
+The published qTicket route surface is deliberately narrower than the inherited
+task engine. `src/proxy.js` redirects direct visits to `/analytics` and
+`/calendar` into `/overview`, and `/sprints` and `/chat` into `/my`, preserving
+only the active `org` query parameter. The public help catalogue follows the
+same boundary: it describes only workflows reachable in qTicket, even while
+legacy implementation remains in the repository for a later reference-safe
+removal.
+
 ---
 
 ## Задачі, підзадачі, зв’язки та облік
@@ -616,8 +624,12 @@ example to copy.
 
 ## Notification delivery
 
-QuickTeam has two notification paths. They share channel preferences, but their
-triggers and reliability guarantees are different.
+The inherited notification engine has event-driven and time-driven paths. In
+the current qTicket beta only in-app delivery is exposed in product settings.
+Email and Telegram provider code is retained but is not a published capability
+until a real provider is configured, verified and covered by the acceptance
+flow. The sections below document the retained delivery mechanics without
+promising those external channels to users.
 
 ### Event-driven notifications
 

@@ -704,7 +704,8 @@ test('the local reference page does not depend on a working login flow', () => {
     'the development bypass must run before Firebase session verification',
   );
   assert.match(source, /pathname === '\/ui-kit'/);
-  assert.match(source, /matcher: \['\/ui-kit'\]/);
+  assert.match(source, /matcher: \[/);
+  assert.match(source, /'\/ui-kit'/);
   assert.doesNotMatch(
     source,
     /'\/ui-decisions'|'\/ui-diff'|'\/ui-audit'/,
@@ -716,4 +717,23 @@ test('the local reference page does not depend on a working login flow', () => {
     /if \(!hasSession\)[\s\S]*NextResponse\.redirect\(loginUrl\)/,
     'production reference pages must remain session-protected',
   );
+});
+
+test('legacy task-manager pages redirect to supported qTicket workflows', () => {
+  const source = readFileSync(new URL('../src/proxy.js', import.meta.url), 'utf8');
+
+  for (const matcher of [
+    '/analytics/:path*',
+    '/calendar/:path*',
+    '/sprints/:path*',
+    '/chat/:path*',
+  ]) {
+    assert.ok(source.includes(`'${matcher}'`), `${matcher} is intercepted before rendering`);
+  }
+  assert.match(source, /prefix: '\/analytics', destination: '\/overview'/);
+  assert.match(source, /prefix: '\/calendar', destination: '\/overview'/);
+  assert.match(source, /prefix: '\/sprints', destination: '\/my'/);
+  assert.match(source, /prefix: '\/chat', destination: '\/my'/);
+  assert.match(source, /searchParams\.get\('org'\)/);
+  assert.match(source, /destinationUrl\.searchParams\.set\('org', organizationId\)/);
 });
