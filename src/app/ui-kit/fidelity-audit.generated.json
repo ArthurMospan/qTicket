@@ -55,7 +55,7 @@
   "nativeControls": [
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:100",
+      "location": "src/components/AuthLayout.jsx:102",
       "className": "w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-red-400 hover:bg-white/5 transition-colors text-left",
       "text": "Вийти",
       "childElements": [
@@ -70,7 +70,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:134",
+      "location": "src/components/AuthLayout.jsx:136",
       "className": "",
       "text": "Підтримка",
       "childElements": [],
@@ -83,7 +83,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:83",
+      "location": "src/components/AuthLayout.jsx:85",
       "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
       "text": "",
       "childElements": [],
@@ -451,7 +451,7 @@
   "repeatedNativeFingerprints": [],
   "reviewedNativeControls": [
     {
-      "location": "src/components/AuthLayout.jsx:134",
+      "location": "src/components/AuthLayout.jsx:136",
       "tag": "button",
       "context": "auth-footer-support"
     },

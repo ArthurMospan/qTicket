@@ -4420,7 +4420,7 @@
           "files": [
             "src/app/(app)/page.js:218",
             "src/components/AudioTaskPanel.jsx:274",
-            "src/components/AuthLayout.jsx:72"
+            "src/components/AuthLayout.jsx:74"
           ]
         },
         "compact": {
@@ -4565,7 +4565,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/AuthLayout.jsx:72"
+            "src/components/AuthLayout.jsx:74"
           ]
         },
         "surface": {
@@ -4656,7 +4656,7 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/AuthLayout.jsx:72",
+            "src/components/AuthLayout.jsx:74",
             "src/components/profile/ProfileModal.jsx:41",
             "src/components/profile/ProfileModal.jsx:46"
           ]
@@ -4752,7 +4752,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/AuthLayout.jsx:72"
+            "src/components/AuthLayout.jsx:74"
           ]
         },
         "chat-composer-cancel": {
