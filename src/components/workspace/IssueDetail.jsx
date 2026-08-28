@@ -270,6 +270,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const clientViewer = isClientRole(orgRole);
   const internalViewer = Boolean(orgRole) && !clientViewer;
   const canEditIssue = can(orgRole, 'edit:issue');
+  // Where «назад» goes from this screen. `/{projectId}` is the tenant's
+  // customer-administration surface and it sends a client straight back to the
+  // portal, so for a client every way out of an incident — the crumb, the link
+  // under «Інцидент не знайдено» and Escape — pointed at a bounce. Their list of
+  // incidents is «Мої звернення» at `/`.
+  const backHref = clientViewer ? '/' : `/${projectId}`;
   const timeZone = organizationTimeZone(activeOrg);
   const {
     issues,
@@ -693,17 +699,35 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   };
 
   // ── Breadcrumbs ───────────────────────────────────────────────────
+  //
+  // A trail says where you are and offers the way back. The internal one is
+  // «Клієнти › <клієнт> › KEY», and read by a customer it said the opposite of
+  // both: that they were somewhere inside a list of the tenant's clients, and
+  // that their own company's name was a link — to a screen that immediately
+  // returned them here. A client sees the two places they have: their requests,
+  // and this one.
   useEffect(() => {
     if (isModal) return;
+    const issueCrumb = {
+      label: issue?.issueKey || '...',
+      href: null,
+      onClick: () => copyIssueUrl(canonicalIssuePath, showToast),
+      title: 'Копіювати посилання на інцидент',
+    };
     useWorkspaceStore.setState({
-      breadcrumbs: [
-        { label: 'Клієнти', href: '/clients' },
-        { label: project?.name || '...', href: `/${projectId}` },
-        { label: issue?.issueKey || '...', href: null, onClick: () => copyIssueUrl(canonicalIssuePath, showToast), title: 'Копіювати посилання на інцидент' },
-      ]
+      breadcrumbs: clientViewer
+        ? [
+          { label: 'Мої звернення', href: '/' },
+          issueCrumb,
+        ]
+        : [
+          { label: 'Клієнти', href: '/clients' },
+          { label: project?.name || '...', href: `/${projectId}` },
+          issueCrumb,
+        ]
     });
     return () => useWorkspaceStore.setState({ breadcrumbs: [] });
-  }, [canonicalIssuePath, project?.name, issue?.issueKey, projectId, isModal, showToast]);
+  }, [canonicalIssuePath, clientViewer, project?.name, issue?.issueKey, projectId, isModal, showToast]);
 
   // Whether the open draft says anything the task does not. Everything that can
   // be edited in place (status, sprint, labels…) writes straight through, so the
@@ -771,11 +795,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
 
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      router.push(`/${projectId}`);
+      router.push(backHref);
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
-  }, [router, projectId, isEditing, showLinkInput, showSubInput, draftIsDirty, confirmDialog]);
+  }, [router, backHref, isEditing, showLinkInput, showSubInput, draftIsDirty, confirmDialog]);
 
   if (!issue) {
     return (
@@ -799,7 +823,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         ) : (
           <div className="text-center">
             <p className="text-[16px] font-bold text-ink mb-2">Інцидент не знайдено</p>
-            <Link href={`/${projectId}`} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
+            <Link href={backHref} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
           </div>
         )}
       </div>
@@ -1389,11 +1413,22 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 ? [{ label: 'Позначити непрочитаним', icon: CircleDot, onClick: handleMarkUnread }]
                 : []),
               ...(!isArchived ? [
-                {
+                // «Стежити» writes `watcherIds` on the incident, which is a
+                // support-side field: the rule that authorizes it is the
+                // internal-contributor one, so for a client this row was a
+                // button that could only ever end in a raw permission error.
+                // Hidden rather than widened, and this is the deliberate half:
+                // a customer has one client space, every incident of it is
+                // already listed in «Мої звернення», and they are a participant
+                // of their own incidents — so notifications already reach them,
+                // and the portal has no «стежу» surface for the answer to show
+                // up in. The gate mirrors the rule exactly: `internalViewer` is
+                // owner/admin/member, which is `isInternalContributor`.
+                ...(internalViewer ? [{
                   label: isWatching ? 'Не стежити' : 'Стежити',
                   icon: isWatching ? EyeOff : Eye,
                   onClick: toggleWatch,
-                },
+                }] : []),
                 // Two different things, and they finally read as two: putting a
                 // task aside for good, and deleting it with a clock running.
                 ...(canWhileRoleLoads(orgRole, 'edit:issue')

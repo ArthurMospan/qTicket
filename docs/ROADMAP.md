@@ -60,8 +60,9 @@ Completed foundation:
 - Firebase client/admin configuration and Cloudinary are configured in Vercel;
   secrets are not stored in Git. Transactional email is intentionally disabled.
 - Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
-  suite passes all 81 tests, including the project-scoped client boundary,
-  entitlement revocation and stale project-roster denial.
+  suite passes all 85 tests, including the client reply transaction the product
+  actually sends, the project-scoped client boundary, entitlement revocation and
+  stale project-roster denial.
 - The role model already exists in code and rules: internal `owner`, `admin`,
   `member`; external `client_admin`, `client_member`. External users can create,
   read and discuss incidents in their client project, but cannot control the
@@ -95,7 +96,7 @@ Completed product slice on 2026-08-28:
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
 - The product baseline passes lint, the complete unit suite, production build,
-  all 81 Firestore rules tests, all 42 local visual scenarios, and the UI Kit
+  all 85 Firestore rules tests, all 42 local visual scenarios, and the UI Kit
   usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -177,6 +178,28 @@ Completed product slice on 2026-08-28:
   rules now require a non-empty QuickTeam source organization id plus an active
   signed entitlement; legacy standalone organization documents grant no access,
   and the synchronized organization snapshot is server-write-only.
+- An external client can reply in their own incident. Until now they could not:
+  `useComments.addComment` writes the message and the incident's conversation
+  metadata in one transaction, Firestore refused the second write to a client
+  role, and the atomic transaction took the message down with it — «Надіслати»
+  returned a raw English «Missing or insufficient permissions» on the one action
+  the client portal exists for, from the bootstrap commit onwards. Deleting your
+  own message and the read receipt failed for the same reason. `issues` now
+  carries a narrow conversation-participant update clause: whoever reaches the
+  incident may write the comment counter, the last-activity strip, the last-
+  comment fields and the mention tally, and `hasOnly` refuses status, columnId,
+  assignees, priority, labels, deadlines, watchers, hierarchy, archive/cancel
+  stamps and every other field. The client's incident screen also stops offering
+  «Стежити», which writes a support-side field, and its breadcrumb no longer
+  says «Клієнти › …» to the customer or link them at a screen that bounces.
+
+Two things this record should say plainly. The two-sided acceptance flow below
+could never have passed: its step «клієнт створює інцидент і відповідає в його
+обговоренні» was broken in the shipped product the whole time it was listed as
+open. And the rules suite passed while it was broken, because the test for it
+exercised a bare `setDoc` on the comment document — a shape the product never
+sends. A rules test that does not send the transaction the product sends proves
+nothing about the product.
 
 Product work still required:
 

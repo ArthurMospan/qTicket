@@ -368,6 +368,60 @@ service cloud.firestore {
             'cancelledAt',
             'cancelledBy'
           ]);
+      // A participant of the conversation maintains the conversation.
+      //
+      // The one action the client portal exists for is answering in an
+      // incident, and the product does not write that answer as one document:
+      // `useComments.addComment` writes the message and the incident's
+      // conversation metadata inside a single `runTransaction` — the counter,
+      // the «last reply» strip a card draws, the receipt, the mention tally.
+      // Firestore authorizes each write of a transaction on its own and fails
+      // all of them when one is refused, so a rule that allowed the comment and
+      // refused the parent allowed nothing at all: «Надіслати» returned a raw
+      // English «Missing or insufficient permissions» to every external client
+      // from the bootstrap commit onwards. Deleting one's own message and
+      // marking a staff reply read failed the same way, for the same reason.
+      //
+      // So whoever reaches the incident — `canAccessIssueData`: a live seat in
+      // the organization plus this client space's roster — may write these keys
+      // on it, and `hasOnly` is what keeps that narrow. Status, columnId,
+      // assignees, priority, labels, deadlines, watchers, hierarchy, the
+      // archive and cancel stamps, `spentMinutes` and every other field are
+      // absent from the list, so none of them can ride along with a reply; the
+      // list is disjoint from the server-only denial list above, and the
+      // emulator suite sends the real transaction with each of them attached to
+      // prove both halves.
+      //
+      // Authoring `lastActivityText` and `lastActivityActorName` is not an
+      // escalation. This is the person who wrote the message, and they already
+      // choose the `authorName` the comment itself carries — the metadata is a
+      // copy of what they just said, not a new privilege. Rules cannot tie the
+      // stamp to the comment beside it (the comment's id is not knowable here),
+      // so a participant can in principle stamp without writing; the blast
+      // radius is the cosmetic strip they can already fill by actually replying.
+      //
+      // Internal notes stay entirely outside this. A note is a document in the
+      // separately ruled `internalNotes` collection, `addComment` stamps the
+      // incident only for a public comment, and a client is refused that
+      // collection outright — there is no path from an internal note to here.
+      allow update: if issueAcceptsNestedWrites(issueId) &&
+        canAccessIssueData(resource.data) &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'commentCount',
+            'updatedAt',
+            'lastActivityType',
+            'lastActivityAt',
+            'lastActivityActorId',
+            'lastActivityActorName',
+            'lastActivityActorAvatar',
+            'lastActivityText',
+            'lastCommentAt',
+            'lastCommentAuthorId',
+            'lastCommentMentionIds',
+            'lastCommentReadBy',
+            'unreadMentions'
+          ]);
       allow delete: if false; // Server route enforces hierarchy and cascades.
 
       match /comments/{commentId} {
