@@ -2880,8 +2880,8 @@
             "src/components/InviteLinkSection.jsx:104",
             "src/components/InviteMemberDialog.jsx:252",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
-            "src/components/client/ClientIncidentPortal.jsx:137",
             "src/components/client/ClientIncidentPortal.jsx:147",
+            "src/components/client/ClientIncidentPortal.jsx:157",
             "src/components/workspace/BillingTab.jsx:1545",
             "src/components/workspace/BillingTab.jsx:1566"
           ]
@@ -2979,8 +2979,8 @@
             "src/app/(app)/settings/page.js:3490",
             "src/app/(app)/settings/page.js:3555",
             "src/app/(app)/settings/page.js:3561",
-            "src/components/WorkspaceHeader.jsx:366",
-            "src/components/WorkspaceHeader.jsx:376",
+            "src/components/WorkspaceHeader.jsx:354",
+            "src/components/WorkspaceHeader.jsx:364",
             "src/components/workspace/TimesheetTab.jsx:891",
             "src/components/workspace/WorkloadTab.jsx:282",
             "src/components/workspace/WorkloadTab.jsx:552",
@@ -3184,7 +3184,7 @@
             "src/app/(app)/team/page.js:138",
             "src/components/CreateTaskModal.jsx:433",
             "src/components/InviteMemberDialog.jsx:276",
-            "src/components/client/ClientIncidentPortal.jsx:137",
+            "src/components/client/ClientIncidentPortal.jsx:147",
             "src/components/integrations/YouTrackImportCard.jsx:505",
             "src/components/integrations/YouTrackImportCard.jsx:537",
             "src/components/integrations/YouTrackImportCard.jsx:696",
@@ -3263,7 +3263,7 @@
             "src/components/CreateTaskModal.jsx:436",
             "src/components/InviteLinkSection.jsx:104",
             "src/components/InviteMemberDialog.jsx:252",
-            "src/components/client/ClientIncidentPortal.jsx:147",
+            "src/components/client/ClientIncidentPortal.jsx:157",
             "src/components/workspace/AgileBoard.jsx:67",
             "src/components/workspace/BillingTab.jsx:1545",
             "src/components/workspace/BillingTab.jsx:533",
@@ -3336,8 +3336,8 @@
             "src/app/(app)/sprints/page.js:974",
             "src/components/MobileNav.jsx:447",
             "src/components/UserStatusDialog.jsx:71",
-            "src/components/WorkspaceHeader.jsx:366",
-            "src/components/WorkspaceHeader.jsx:376",
+            "src/components/WorkspaceHeader.jsx:354",
+            "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:87",
             "src/components/integrations/YouTrackImportCard.jsx:766",
@@ -3525,8 +3525,8 @@
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:87",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
-            "src/components/client/ClientIncidentPortal.jsx:137",
             "src/components/client/ClientIncidentPortal.jsx:147",
+            "src/components/client/ClientIncidentPortal.jsx:157",
             "src/components/integrations/IntegrationCard.jsx:106",
             "src/components/integrations/YouTrackImportCard.jsx:505",
             "src/components/integrations/YouTrackImportCard.jsx:537",
@@ -3609,8 +3609,8 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:366",
-            "src/components/WorkspaceHeader.jsx:376"
+            "src/components/WorkspaceHeader.jsx:354",
+            "src/components/WorkspaceHeader.jsx:364"
           ]
         },
         "circle": {
@@ -3758,8 +3758,8 @@
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceInfoCenter.jsx:87",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
-            "src/components/client/ClientIncidentPortal.jsx:137",
             "src/components/client/ClientIncidentPortal.jsx:147",
+            "src/components/client/ClientIncidentPortal.jsx:157",
             "src/components/integrations/IntegrationCard.jsx:106",
             "src/components/integrations/YouTrackImportCard.jsx:505",
             "src/components/integrations/YouTrackImportCard.jsx:537",
@@ -3843,8 +3843,8 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:366",
-            "src/components/WorkspaceHeader.jsx:376"
+            "src/components/WorkspaceHeader.jsx:354",
+            "src/components/WorkspaceHeader.jsx:364"
           ]
         }
       },
@@ -3963,13 +3963,13 @@
             "src/components/InviteMemberDialog.jsx:276",
             "src/components/MobileNav.jsx:447",
             "src/components/UserStatusDialog.jsx:114",
-            "src/components/WorkspaceHeader.jsx:366",
-            "src/components/WorkspaceHeader.jsx:376",
+            "src/components/WorkspaceHeader.jsx:354",
+            "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceInfoCenter.jsx:87",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
-            "src/components/client/ClientIncidentPortal.jsx:137",
+            "src/components/client/ClientIncidentPortal.jsx:147",
             "src/components/integrations/IntegrationCard.jsx:106",
             "src/components/integrations/YouTrackImportCard.jsx:505",
             "src/components/integrations/YouTrackImportCard.jsx:537",
@@ -4061,7 +4061,7 @@
             "src/app/(app)/overview/page.js:167",
             "src/app/(app)/page.js:893",
             "src/app/(app)/settings/page.js:2775",
-            "src/components/client/ClientIncidentPortal.jsx:147"
+            "src/components/client/ClientIncidentPortal.jsx:157"
           ]
         },
         "red": {
@@ -4212,12 +4212,12 @@
             "src/components/InviteMemberDialog.jsx:252",
             "src/components/InviteMemberDialog.jsx:276",
             "src/components/UserStatusDialog.jsx:71",
-            "src/components/WorkspaceHeader.jsx:366",
-            "src/components/WorkspaceHeader.jsx:376",
+            "src/components/WorkspaceHeader.jsx:354",
+            "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceInfoCenter.jsx:138",
             "src/components/WorkspaceInfoCenter.jsx:87",
-            "src/components/client/ClientIncidentPortal.jsx:137",
             "src/components/client/ClientIncidentPortal.jsx:147",
+            "src/components/client/ClientIncidentPortal.jsx:157",
             "src/components/integrations/IntegrationCard.jsx:106",
             "src/components/integrations/YouTrackImportCard.jsx:505",
             "src/components/integrations/YouTrackImportCard.jsx:537",
@@ -4380,8 +4380,8 @@
             "src/app/(app)/chat/page.js:468",
             "src/app/(app)/settings/page.js:390",
             "src/app/(app)/settings/page.js:391",
-            "src/components/WorkspaceHeader.jsx:459",
-            "src/components/WorkspaceHeader.jsx:477"
+            "src/components/WorkspaceHeader.jsx:447",
+            "src/components/WorkspaceHeader.jsx:465"
           ]
         },
         "(default)": {
@@ -4571,7 +4571,7 @@
             "/settings"
           ],
           "files": [
-            "src/components/WorkspaceHeader.jsx:459",
+            "src/components/WorkspaceHeader.jsx:447",
             "src/components/integrations/YouTrackImportCard.jsx:540"
           ]
         },
@@ -4579,7 +4579,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:477"
+            "src/components/WorkspaceHeader.jsx:465"
           ]
         },
         "surface-plain": {
@@ -4631,8 +4631,8 @@
             "src/components/AudioTaskPanel.jsx:274",
             "src/components/MobileNav.jsx:348",
             "src/components/MobileNav.jsx:389",
-            "src/components/WorkspaceHeader.jsx:459",
-            "src/components/WorkspaceHeader.jsx:477",
+            "src/components/WorkspaceHeader.jsx:447",
+            "src/components/WorkspaceHeader.jsx:465",
             "src/components/integrations/YouTrackImportCard.jsx:540",
             "src/components/profile/ProfileView.jsx:229",
             "src/components/profile/ProfileView.jsx:238",
@@ -4702,8 +4702,8 @@
             "src/components/MobileNav.jsx:348",
             "src/components/MobileNav.jsx:389",
             "src/components/MobileNav.jsx:75",
-            "src/components/WorkspaceHeader.jsx:459",
-            "src/components/WorkspaceHeader.jsx:477",
+            "src/components/WorkspaceHeader.jsx:447",
+            "src/components/WorkspaceHeader.jsx:465",
             "src/components/WorkspaceSidebar.jsx:552",
             "src/components/integrations/YouTrackImportCard.jsx:540",
             "src/components/profile/ProfileModal.jsx:41",
@@ -5231,7 +5231,7 @@
             "src/components/CreateTaskModal.jsx:599",
             "src/components/CreateTaskModal.jsx:612",
             "src/components/InviteMemberDialog.jsx:191",
-            "src/components/client/ClientIncidentPortal.jsx:161",
+            "src/components/client/ClientIncidentPortal.jsx:171",
             "src/components/integrations/YouTrackImportCard.jsx:596",
             "src/components/integrations/YouTrackImportCard.jsx:636",
             "src/components/integrations/YouTrackImportCard.jsx:680",
@@ -5304,7 +5304,7 @@
             "src/app/(app)/sprints/page.js:808",
             "src/app/(app)/sprints/page.js:819",
             "src/app/(app)/sprints/page.js:829",
-            "src/components/client/ClientIncidentPortal.jsx:161"
+            "src/components/client/ClientIncidentPortal.jsx:171"
           ]
         },
         "(default)": {
@@ -5381,7 +5381,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:372",
             "src/app/(app)/my/page.js:292",
-            "src/components/client/ClientIncidentPortal.jsx:161",
+            "src/components/client/ClientIncidentPortal.jsx:171",
             "src/components/workspace/BillingTab.jsx:1299"
           ]
         },
@@ -5668,9 +5668,9 @@
             "src/app/(app)/page.js:953",
             "src/app/(app)/page.js:968",
             "src/app/(app)/sprints/page.js:1083",
-            "src/components/client/ClientIncidentPortal.jsx:115",
-            "src/components/client/ClientIncidentPortal.jsx:190",
-            "src/components/client/ClientIncidentPortal.jsx:210"
+            "src/components/client/ClientIncidentPortal.jsx:125",
+            "src/components/client/ClientIncidentPortal.jsx:200",
+            "src/components/client/ClientIncidentPortal.jsx:220"
           ]
         },
         "card": {
@@ -5729,8 +5729,8 @@
             "src/app/(app)/analytics/team/[memberId]/page.js:247",
             "src/app/(app)/page.js:946",
             "src/app/(app)/page.js:968",
-            "src/components/client/ClientIncidentPortal.jsx:115",
-            "src/components/client/ClientIncidentPortal.jsx:190"
+            "src/components/client/ClientIncidentPortal.jsx:125",
+            "src/components/client/ClientIncidentPortal.jsx:200"
           ]
         },
         "md": {
@@ -5751,7 +5751,7 @@
             "src/app/(app)/overview/page.js:226",
             "src/app/(app)/overview/page.js:297",
             "src/app/(app)/page.js:953",
-            "src/components/client/ClientIncidentPortal.jsx:210",
+            "src/components/client/ClientIncidentPortal.jsx:220",
             "src/components/workspace/BillingTab.jsx:1381",
             "src/components/workspace/IssueDetail.jsx:2224"
           ]
@@ -5816,9 +5816,9 @@
             "src/app/(app)/page.js:968",
             "src/app/(app)/settings/page.js:3673",
             "src/app/(app)/team/page.js:128",
-            "src/components/client/ClientIncidentPortal.jsx:115",
-            "src/components/client/ClientIncidentPortal.jsx:190",
-            "src/components/client/ClientIncidentPortal.jsx:210",
+            "src/components/client/ClientIncidentPortal.jsx:125",
+            "src/components/client/ClientIncidentPortal.jsx:200",
+            "src/components/client/ClientIncidentPortal.jsx:220",
             "src/components/workspace/BillingTab.jsx:1237",
             "src/components/workspace/BillingTab.jsx:1381",
             "src/components/workspace/IssueDetail.jsx:2224"
@@ -5962,8 +5962,8 @@
             "src/app/(app)/settings/page.js:3014",
             "src/app/(app)/settings/page.js:3594",
             "src/app/(app)/settings/page.js:3695",
-            "src/components/WorkspaceHeader.jsx:564",
-            "src/components/client/ClientIncidentPortal.jsx:177"
+            "src/components/WorkspaceHeader.jsx:552",
+            "src/components/client/ClientIncidentPortal.jsx:187"
           ]
         },
         "success": {
@@ -6090,7 +6090,7 @@
             "src/app/(app)/settings/page.js:3687",
             "src/app/(app)/settings/page.js:3688",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:564",
+            "src/components/WorkspaceHeader.jsx:552",
             "src/components/WorkspaceInfoCenter.jsx:111",
             "src/components/migrations/DataMigrationSettings.jsx:115",
             "src/components/workspace/BillingTab.jsx:1412",
@@ -6149,7 +6149,7 @@
             "src/app/(app)/settings/page.js:4373",
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
-            "src/components/client/ClientIncidentPortal.jsx:177",
+            "src/components/client/ClientIncidentPortal.jsx:187",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:201",
             "src/components/migrations/DataMigrationSettings.jsx:203",
@@ -6249,7 +6249,7 @@
             "src/app/(app)/settings/page.js:641",
             "src/app/(app)/settings/page.js:656",
             "src/components/WorkspaceInfoCenter.jsx:111",
-            "src/components/client/ClientIncidentPortal.jsx:177",
+            "src/components/client/ClientIncidentPortal.jsx:187",
             "src/components/workspace/BillingTab.jsx:250",
             "src/components/workspace/BillingTab.jsx:253",
             "src/components/workspace/IssueCard.jsx:322",
@@ -6294,7 +6294,7 @@
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:564",
+            "src/components/WorkspaceHeader.jsx:552",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:103",
             "src/components/migrations/DataMigrationSettings.jsx:115",
@@ -6374,9 +6374,9 @@
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:564",
+            "src/components/WorkspaceHeader.jsx:552",
             "src/components/WorkspaceInfoCenter.jsx:111",
-            "src/components/client/ClientIncidentPortal.jsx:177",
+            "src/components/client/ClientIncidentPortal.jsx:187",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:103",
             "src/components/migrations/DataMigrationSettings.jsx:201",
@@ -6482,9 +6482,9 @@
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:564",
+            "src/components/WorkspaceHeader.jsx:552",
             "src/components/WorkspaceInfoCenter.jsx:111",
-            "src/components/client/ClientIncidentPortal.jsx:177",
+            "src/components/client/ClientIncidentPortal.jsx:187",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:103",
             "src/components/migrations/DataMigrationSettings.jsx:115",
@@ -6598,8 +6598,8 @@
             "src/app/(app)/settings/page.js:4373",
             "src/app/(app)/sprints/page.js:1080",
             "src/app/(app)/sprints/page.js:1105",
-            "src/components/WorkspaceHeader.jsx:564",
-            "src/components/client/ClientIncidentPortal.jsx:177",
+            "src/components/WorkspaceHeader.jsx:552",
+            "src/components/client/ClientIncidentPortal.jsx:187",
             "src/components/integrations/YouTrackImportCard.jsx:729",
             "src/components/migrations/DataMigrationSettings.jsx:103",
             "src/components/migrations/DataMigrationSettings.jsx:201",
@@ -6834,7 +6834,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/WorkspaceHeader.jsx:501",
+            "src/components/WorkspaceHeader.jsx:489",
             "src/components/workspace/qtplus/chat/ChatMessage.jsx:74"
           ]
         },
@@ -6881,7 +6881,7 @@
           ],
           "files": [
             "src/components/InviteLinkSection.jsx:128",
-            "src/components/WorkspaceHeader.jsx:501"
+            "src/components/WorkspaceHeader.jsx:489"
           ]
         },
         "lg": {
@@ -7125,7 +7125,7 @@
             "src/app/(app)/sprints/page.js:187",
             "src/app/(app)/sprints/page.js:78",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:527",
+            "src/components/WorkspaceHeader.jsx:515",
             "src/components/workspace/BoardConfigModal.jsx:225",
             "src/components/workspace/TimesheetTab.jsx:697"
           ]
@@ -7233,7 +7233,7 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:414",
-            "src/components/WorkspaceHeader.jsx:527",
+            "src/components/WorkspaceHeader.jsx:515",
             "src/components/profile/ProfileModal.jsx:28"
           ]
         },
@@ -7288,7 +7288,7 @@
             "src/components/CreateTaskModal.jsx:414",
             "src/components/InviteMemberDialog.jsx:158",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:527",
+            "src/components/WorkspaceHeader.jsx:515",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BillingTab.jsx:497",
             "src/components/workspace/BoardConfigModal.jsx:225",
@@ -7349,7 +7349,7 @@
             "src/app/(app)/sprints/page.js:78",
             "src/components/CreateTaskModal.jsx:414",
             "src/components/InviteMemberDialog.jsx:158",
-            "src/components/WorkspaceHeader.jsx:527",
+            "src/components/WorkspaceHeader.jsx:515",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BillingTab.jsx:497",
             "src/components/workspace/BoardConfigModal.jsx:225",
@@ -7408,7 +7408,7 @@
             "src/app/(app)/sprints/page.js:851",
             "src/app/(app)/team/page.js:133",
             "src/components/CreateTaskModal.jsx:483",
-            "src/components/client/ClientIncidentPortal.jsx:184",
+            "src/components/client/ClientIncidentPortal.jsx:194",
             "src/components/workspace/VelocityTab.jsx:229"
           ]
         },
@@ -7524,8 +7524,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:322",
             "src/app/(app)/page.js:954",
-            "src/components/client/ClientIncidentPortal.jsx:116",
-            "src/components/client/ClientIncidentPortal.jsx:191"
+            "src/components/client/ClientIncidentPortal.jsx:126",
+            "src/components/client/ClientIncidentPortal.jsx:201"
           ]
         },
         "inset": {
@@ -7602,8 +7602,8 @@
             "src/app/(app)/team/page.js:147",
             "src/components/WorkspaceInfoCenter.jsx:152",
             "src/components/WorkspaceInfoCenter.jsx:200",
-            "src/components/client/ClientIncidentPortal.jsx:116",
-            "src/components/client/ClientIncidentPortal.jsx:191",
+            "src/components/client/ClientIncidentPortal.jsx:126",
+            "src/components/client/ClientIncidentPortal.jsx:201",
             "src/components/profile/ProfileView.jsx:432",
             "src/components/workspace/BillingTab.jsx:1183",
             "src/components/workspace/TimesheetTab.jsx:918",
@@ -7656,8 +7656,8 @@
             "src/app/(app)/calendar/page.js:778",
             "src/app/(app)/page.js:954",
             "src/app/(app)/team/page.js:147",
-            "src/components/client/ClientIncidentPortal.jsx:116",
-            "src/components/client/ClientIncidentPortal.jsx:191",
+            "src/components/client/ClientIncidentPortal.jsx:126",
+            "src/components/client/ClientIncidentPortal.jsx:201",
             "src/components/profile/ProfileView.jsx:432",
             "src/components/workspace/BillingTab.jsx:1183",
             "src/components/workspace/TimesheetTab.jsx:918",
@@ -7706,7 +7706,7 @@
             "src/app/(app)/settings/page.js:4315",
             "src/app/(app)/settings/page.js:4338",
             "src/app/(app)/settings/page.js:4361",
-            "src/components/client/ClientIncidentPortal.jsx:105",
+            "src/components/client/ClientIncidentPortal.jsx:115",
             "src/components/workspace/BillingTab.jsx:1328",
             "src/components/workspace/calendar/CalendarEventPage.jsx:772"
           ]
@@ -7837,7 +7837,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/WorkspaceHeader.jsx:392",
+            "src/components/WorkspaceHeader.jsx:380",
             "src/components/WorkspaceInfoCenter.jsx:255",
             "src/components/workspace/BillingTab.jsx:1286",
             "src/components/workspace/BillingTab.jsx:307",
@@ -7858,7 +7858,7 @@
             "src/app/(app)/analytics/page.js:1112",
             "src/app/(app)/analytics/page.js:1124",
             "src/app/(app)/analytics/team/[memberId]/page.js:281",
-            "src/components/WorkspaceHeader.jsx:392",
+            "src/components/WorkspaceHeader.jsx:380",
             "src/components/workspace/BillingTab.jsx:307",
             "src/components/workspace/WorkloadTab.jsx:494",
             "src/components/workspace/WorkloadTab.jsx:543"
@@ -7902,7 +7902,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:97",
             "src/app/(app)/overview/page.js:248",
             "src/app/(app)/overview/page.js:319",
-            "src/components/client/ClientIncidentPortal.jsx:211"
+            "src/components/client/ClientIncidentPortal.jsx:221"
           ]
         },
         "lg": {
@@ -8002,7 +8002,7 @@
             "src/app/(app)/settings/page.js:4138",
             "src/app/(app)/settings/page.js:4192",
             "src/app/(app)/settings/page.js:4281",
-            "src/components/client/ClientIncidentPortal.jsx:211",
+            "src/components/client/ClientIncidentPortal.jsx:221",
             "src/components/integrations/IntegrationCard.jsx:93",
             "src/components/migrations/DataMigrationSettings.jsx:224",
             "src/components/migrations/DataMigrationSettings.jsx:89",
@@ -8138,7 +8138,7 @@
             "src/app/(app)/overview/page.js:256",
             "src/app/(app)/overview/page.js:321",
             "src/components/SupportDialog.jsx:62",
-            "src/components/client/ClientIncidentPortal.jsx:216"
+            "src/components/client/ClientIncidentPortal.jsx:226"
           ]
         },
         "compact": {
@@ -8747,7 +8747,7 @@
             "src/app/(app)/calendar/page.js:734",
             "src/app/(app)/my/page.js:282",
             "src/app/(app)/sprints/page.js:798",
-            "src/components/client/ClientIncidentPortal.jsx:160"
+            "src/components/client/ClientIncidentPortal.jsx:170"
           ]
         },
         "detail": {

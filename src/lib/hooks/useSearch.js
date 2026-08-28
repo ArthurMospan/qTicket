@@ -4,9 +4,10 @@ import { auth } from '@/lib/firebase';
 import { searchScopeParams } from '@/lib/utils/searchScope.mjs';
 import { searchMinimumLength } from '@/lib/utils/searchRanking.mjs';
 
-// QUI-104. `results` is still the task list, so the header's search dropdown is
-// unchanged; people, projects and events arrive beside it for callers that show
-// more than tasks.
+// `results` is the incident list used by the header and palette. Support people
+// and client spaces arrive beside it for the internal qTicket palette. The
+// `events` slot stays in the transport shape for inherited callers, but qTicket
+// search deliberately returns it empty.
 const EMPTY = { people: [], projects: [], events: [] };
 
 export function useSearch() {

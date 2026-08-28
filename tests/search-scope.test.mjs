@@ -85,9 +85,10 @@ test('broader search is offered only after the local scope returns no matches', 
   }).active, true);
 });
 
-test('project scope is applied by the server before issue and event reads', async () => {
+test('project scope is applied before incident reads and qTicket search skips calendar data', async () => {
   const route = await read('../src/app/api/search/route.js');
   assert.match(route, /issuesQuery = issuesQuery\.where\('projectId', '==', projectId\)/);
-  assert.match(route, /eventsQuery = eventsQuery\.where\('projectId', '==', projectId\)/);
+  assert.doesNotMatch(route, /collection\('calendarEvents'\)|eventsQuery/);
+  assert.match(route, /const events = \[\]/);
   assert.match(route, /Project not found/);
 });

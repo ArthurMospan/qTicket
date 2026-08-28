@@ -83,7 +83,7 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,169 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,171 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -122,17 +122,16 @@ Completed product slice on 2026-08-28:
 - Notification settings expose only in-app delivery. Email and Telegram remain
   hidden until a real provider is configured and verified; the beta does not
   promise channels that cannot deliver.
+- `Ctrl+K` and the global empty-search state are now role-aware qTicket
+  surfaces. Internal support gets overview, incidents, clients, team, settings
+  and incident/client creation; external clients get only their requests,
+  incident creation, profile and the client-admin employee entry. Calendar,
+  sprint, analytics and timer commands are gone. Search no longer reads
+  calendar events, and client people results are restricted to their accessible
+  client-space teams.
 
 Product work still required:
 
-- Rebuild the `Ctrl+K` command palette as a qTicket surface. Its inherited
-  catalogue still offers calendar, sprint, analytics, timer and generic
-  project actions even though those routes are no longer part of the product.
-  The qTicket palette must expose only overview, incidents, clients, support
-  team, settings, new incident/client and organization switching; external
-  client roles need their own smaller catalogue. The global empty-search copy
-  in `SearchModal` still says «завдання» and belongs in the same terminology
-  pass. This audit is recorded but no command-palette code has been changed yet.
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
 - Add the explicit, idempotent server-side transfer from an incident to a
@@ -183,18 +182,15 @@ surfaces first, then delete only when references and migrations are understood.
    sessions or databases.
 6. **Completed:** configure both deployments with the shared secret and verify
    the first synchronized staff launch against the test deployment.
-7. **In progress:** continue the qTicket product-fit pass with the command
-   palette and global search, then execute the full internal/client acceptance
-   flow with separate accounts.
+7. **In progress:** execute the full internal/client acceptance flow with
+   separate accounts and correct every concrete product or permission failure.
 8. Only after that flow is accepted, implement the incident-to-QuickTeam-task
    transfer contract and connect the existing entitlement field to billing.
 
-The exact next implementation task is step 7: replace the inherited command
-palette catalogue and global empty-search copy with the role-aware qTicket
-surface described above. Then run the local checks, deploy, and continue the
-internal/client acceptance flow with separate accounts. Every completed slice
-should be a reviewable Git commit and this checkpoint should be updated in the
-same commit.
+The exact next implementation task is step 7: run the two-sided acceptance flow
+below with separate staff, client-admin and client-member sessions, then fix the
+first concrete failure it reveals. Every completed slice should be a reviewable
+Git commit and this checkpoint should be updated in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
 `docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
 credentials, service-account JSON, `.env` values or session notes here.

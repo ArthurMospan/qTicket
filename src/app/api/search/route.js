@@ -1,8 +1,7 @@
 // QUI-104. Search used to read one collection — `issues` — and answer with
-// tasks only. Typing a colleague's name, a project's name or the title of a
-// meeting therefore returned nothing at all, which reads as "search is broken"
-// rather than "search does not cover that". It now answers across the four
-// things a workspace is made of: tasks, people, projects and calendar events.
+// incidents only. qTicket search also answers with support people and client
+// spaces; inherited calendar events are deliberately outside this product
+// surface and are not read merely because somebody opened Ctrl+K.
 //
 // Each kind keeps its own visibility rule. Widening what search *finds* must
 // never widen what a member can *see* — a plain member could once read the
@@ -87,15 +86,14 @@ export async function GET(request) {
     const db = getAdminDb();
     const uid = authorization.user.uid;
     let issuesQuery = db.collection('issues').where('organizationId', '==', organizationId);
-    let eventsQuery = db.collection('calendarEvents').where('organizationId', '==', organizationId);
     if (projectId) {
       issuesQuery = issuesQuery.where('projectId', '==', projectId);
-      eventsQuery = eventsQuery.where('projectId', '==', projectId);
     }
     // Search must honour the same per-project access model as the rest of the
     // app: a plain member could previously find the titles of tasks in projects
     // they are not on and cannot open. Owners/admins still see everything.
     const isPrivileged = ['owner', 'admin'].includes(authorization.membership?.role);
+    const isClientViewer = ['client_admin', 'client_member'].includes(authorization.membership?.role);
     let scopedProject = null;
     let scopedProjectSnapshot = null;
     if (projectId) {
@@ -120,9 +118,8 @@ export async function GET(request) {
       projects: projectsSnapshot,
       memberships: membershipsSnapshot,
       profiles: profilesSnapshot,
-      events: eventsSnapshot,
     } = await readCorpus(corpusKey(organizationId, projectId, mention), async () => {
-    const [issues, projects, memberships, events] = await Promise.all([
+    const [issues, projects, memberships] = await Promise.all([
       issuesQuery
         .select('issueKey', 'title', 'description', 'projectId', 'type', 'assigneeIds', 'createdAt', 'columnId', 'status', 'dueDate', 'archivedAt', 'cancelledAt')
         .get(),
@@ -136,11 +133,6 @@ export async function GET(request) {
         ? EMPTY_SNAPSHOT
         : db.collection('orgMemberships').where('orgId', '==', organizationId)
           .select('userId', 'role', 'orgId')
-          .get(),
-      mention
-        ? EMPTY_SNAPSHOT
-        : eventsQuery
-          .select('title', 'description', 'location', 'type', 'visibility', 'organizerId', 'participantIds', 'projectId', 'startAt')
           .get(),
     ]);
       const profiles = mention || memberships.docs.length === 0
@@ -162,7 +154,6 @@ export async function GET(request) {
         projects: plain(projects),
         memberships: plain(memberships),
         profiles: plain(profiles),
-        events: plain(events),
       };
     });
 
@@ -232,7 +223,13 @@ export async function GET(request) {
     // already open — so people carry no extra visibility rule of their own.
     const scopedMemberIds = projectId
       ? new Set(Array.isArray(scopedProject.team) ? scopedProject.team : [])
-      : null;
+      : isClientViewer
+        ? new Set(
+          projectRecords
+            .filter(project => visibleProjectIds?.has(project.id))
+            .flatMap(project => Array.isArray(project.team) ? project.team : []),
+        )
+        : null;
     const memberships = membershipsSnapshot.docs
       .map(document => document.data())
       .filter(membership => !scopedMemberIds || scopedMemberIds.has(membership.userId));
@@ -261,35 +258,7 @@ export async function GET(request) {
         email: entry.profile.email || '',
       }));
 
-    // The same visibility rule the calendar itself applies: a private event is
-    // the organizer's alone, a participant-only event reaches its participants.
-    const events = eventsSnapshot.docs
-      .map(document => ({ ...document.data(), id: document.id }))
-      .filter(event => (
-        event.visibility === 'private'
-          ? event.organizerId === uid
-          : event.visibility !== 'participants'
-            || event.organizerId === uid
-            || event.participantIds?.includes(uid)
-            || isPrivileged
-      ))
-      .filter(event => !projectId || event.projectId === projectId)
-      .map(event => ({
-        event,
-        score: Math.max(
-          scoreField(event.title, term, WEIGHTS.name),
-          scoreField(event.location, term, WEIGHTS.body),
-          scoreField(event.description, term, WEIGHTS.body),
-        ),
-      }))
-      .filter(entry => entry.score > 0)
-      .sort((a, b) => b.score - a.score || (b.event.startAt?.toMillis?.() || 0) - (a.event.startAt?.toMillis?.() || 0))
-      .slice(0, 8)
-      .map(entry => ({
-        id: entry.event.id,
-        title: entry.event.title || 'Подія',
-        startAt: entry.event.startAt?.toDate?.()?.toISOString() || null,
-      }));
+    const events = [];
 
     return NextResponse.json(
       { results, people, projects, events },

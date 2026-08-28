@@ -1814,9 +1814,9 @@
         {
           "name": "matches",
           "default": "",
-          "type": "{people: object[], projects: object[], events: object[]}",
+          "type": "{people: object[], projects: object[]}",
           "values": [],
-          "description": "The other kinds search found — people, projects, calendar events."
+          "description": "The other qTicket kinds search found — support people and clients."
         },
         {
           "name": "onClose",
@@ -1844,7 +1844,7 @@
           "default": "[]",
           "type": "object[]",
           "values": [],
-          "description": "Projects, used to name the project a found task belongs to."
+          "description": "Client spaces, used to name the client a found incident belongs to."
         },
         {
           "name": "requestKey",

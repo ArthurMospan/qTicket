@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Alert,
   Button,
@@ -46,6 +46,7 @@ export default function ClientIncidentPortal({
   orgRole,
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const showToast = useWorkspaceStore(state => state.showToast);
   const workspaceSearch = useWorkspaceStore(state => state.workspaceSearch);
   const setWorkspaceSearch = useWorkspaceStore(state => state.setWorkspaceSearch);
@@ -58,6 +59,15 @@ export default function ClientIncidentPortal({
     createIssue,
   } = useIssues(project?.id || null, { includeLinks: false });
   const { statuses, loading: workflowLoading } = useWorkflowConfig();
+
+  // `Ctrl+K` and future deep links use the same explicit request as the
+  // internal incident queue. Consume it once so refresh/back never reopens the
+  // composer after somebody has already answered the action.
+  useEffect(() => {
+    if (searchParams.get('new') !== '1') return;
+    queueMicrotask(() => setShowComposer(true));
+    router.replace('/', { scroll: false });
+  }, [router, searchParams]);
 
   const statusById = useMemo(
     () => new Map((statuses || []).map(status => [status.id, status])),

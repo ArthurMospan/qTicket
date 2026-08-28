@@ -22,23 +22,24 @@ const projects = [
 
 test('the catalogue reflects what this person can actually do', () => {
   const member = buildCommands({ projects, allowedPermissions: [] });
-  assert.equal(member.some(command => command.id === 'action-new-project'), false);
-  assert.equal(member.some(command => command.id === 'action-new-sprint'), false);
-  // A task and an event are everybody's work.
+  assert.equal(member.some(command => command.id === 'action-new-client'), false);
   assert.equal(member.some(command => command.id === 'action-new-issue'), true);
-  assert.equal(member.some(command => command.id === 'action-new-event'), true);
 
-  const admin = buildCommands({ projects, allowedPermissions: ['create:project', 'manage:sprints'] });
-  assert.equal(admin.some(command => command.id === 'action-new-project'), true);
-  assert.equal(admin.some(command => command.id === 'action-new-sprint'), true);
+  const admin = buildCommands({ projects, allowedPermissions: ['create:project'] });
+  assert.equal(admin.some(command => command.id === 'action-new-client'), true);
+  for (const inherited of ['action-stop-timer', 'action-new-event', 'action-new-sprint', 'nav-calendar', 'nav-sprints', 'nav-analytics', 'nav-chat']) {
+    assert.equal(admin.some(command => command.id === inherited), false, `${inherited} leaked into qTicket`);
+  }
 
-  // Stopping a timer is not offered when none is running.
-  assert.equal(admin.some(command => command.id === 'action-stop-timer'), false);
-  assert.equal(
-    buildCommands({ hasActiveTimer: true }).some(command => command.id === 'action-stop-timer'),
-    true,
-  );
-  // Nor is switching organization when there is only one.
+  const clientMember = buildCommands({ projects, role: 'client_member' });
+  assert.deepEqual(clientMember.filter(command => command.group === 'navigation').map(command => command.id), [
+    'nav-requests',
+    'nav-profile',
+  ]);
+  const clientAdmin = buildCommands({ projects, role: 'client_admin' });
+  assert.ok(clientAdmin.some(command => command.id === 'nav-client-team'));
+  assert.equal(clientAdmin.some(command => command.group === 'project'), false);
+
   assert.equal(
     buildCommands({ organizationCount: 3 }).some(command => command.id === 'action-switch-org'),
     true,
@@ -54,17 +55,16 @@ test('archived projects are not destinations', () => {
 test('a query finds the thing you were aiming at, not merely something matching', () => {
   const commands = buildCommands({ projects, allowedPermissions: ['create:project'] });
 
-  assert.equal(rankCommands(commands, 'нове завдання')[0].id, 'action-new-issue');
-  assert.equal(rankCommands(commands, 'подія')[0].id, 'action-new-event');
-  assert.equal(rankCommands(commands, 'кален')[0].id, 'nav-calendar');
+  assert.equal(rankCommands(commands, 'новий інцидент')[0].id, 'action-new-issue');
+  assert.equal(rankCommands(commands, 'новий клієнт')[0].id, 'action-new-client');
   assert.equal(rankCommands(commands, 'retro')[0].id, 'project-p1');
 });
 
 test('the wrong keyboard layout still finds the right command', () => {
   const commands = buildCommands({ projects });
   assert.equal(rankCommands(commands, 'settings')[0].id, 'nav-settings');
-  assert.equal(rankCommands(commands, 'calendar')[0].id, 'nav-calendar');
-  assert.equal(rankCommands(commands, 'my tasks')[0].id, 'nav-my');
+  assert.equal(rankCommands(commands, 'clients')[0].id, 'nav-clients');
+  assert.equal(rankCommands(commands, 'incidents')[0].id, 'nav-incidents');
 });
 
 test('scoring prefers word starts, runs and short labels', () => {
@@ -90,8 +90,7 @@ test('an empty query is a menu, with actions at the top', () => {
 test('the menu never hides a destination behind a project', () => {
   const commands = buildCommands({
     projects: new Array(30).fill(0).map((_value, index) => ({ id: `p${index}`, name: `Проєкт ${index}` })),
-    allowedPermissions: ['create:project', 'manage:sprints'],
-    hasActiveTimer: true,
+    allowedPermissions: ['create:project'],
     organizationCount: 2,
   });
   const ranked = rankCommands(commands, '');
@@ -109,21 +108,18 @@ test('the menu never hides a destination behind a project', () => {
 // things are actually done in a week.
 test('the actions are the things worth creating, in that order', () => {
   const commands = buildCommands({
-    allowedPermissions: ['create:project', 'manage:sprints'],
-    hasActiveTimer: true,
+    allowedPermissions: ['create:project'],
     organizationCount: 2,
   });
   assert.deepEqual(commands.filter(command => command.group === 'action').map(command => command.id), [
-    'action-stop-timer',
     'action-new-issue',
-    'action-new-event',
-    'action-new-sprint',
-    'action-new-project',
+    'action-new-client',
     'action-switch-org',
   ]);
   const byId = Object.fromEntries(commands.map(command => [command.id, command]));
-  assert.equal(byId['action-new-event'].href, '/calendar?new=1');
-  assert.equal(byId['action-new-sprint'].href, '/sprints?new=1');
+  assert.equal(byId['action-new-issue'].href, '/my?new=1');
+  assert.equal(byId['action-new-client'].href, '/clients?new=1');
+  assert.equal(buildCommands({ role: 'client_member' }).find(command => command.id === 'action-new-issue').href, '/?new=1');
   // A cheat sheet is not an action.
   assert.equal(commands.some(command => command.id === 'action-shortcuts'), false);
 });
@@ -147,7 +143,6 @@ test('grouping keeps the catalogue order and flattens to the keyboard order', ()
     ...searchCommands({
       people: [{ id: 'u1', name: 'Артур Моспан', email: 'arthur@quickteam.app' }],
       projects: [],
-      events: [{ id: 'e1', title: 'Планерка', startAt: '2026-08-14T09:00:00.000Z' }],
     }),
   ];
   const groups = groupCommands(commands);
@@ -158,7 +153,7 @@ test('grouping keeps the catalogue order and flattens to the keyboard order', ()
   assert.equal(flat.length, commands.length);
   // The flat order is what ArrowDown walks, so it must match what is rendered.
   assert.equal(flat[0].group, 'action');
-  assert.equal(flat[flat.length - 1].group, 'event');
+  assert.equal(flat[flat.length - 1].group, 'person');
 });
 
 test('search grouping preserves relevance for the active row and Enter', () => {
@@ -187,12 +182,10 @@ test('keyword aliases cannot match by hopping across unrelated words', () => {
 
   assert.equal(ranked[0].id, 'project-machete');
   assert.equal(ranked.some(command => command.id === 'action-switch-org'), false);
-  assert.equal(rankCommands(commands, 'my tasks')[0].id, 'nav-my');
+  assert.equal(rankCommands(commands, 'requests')[0].id, 'nav-incidents');
 });
 
-// QUI-104. Typing a colleague's name found nothing at all, because search read
-// one collection and that collection was `issues`.
-test('search answers with people, projects and events, not only tasks', () => {
+test('qTicket search answers with support people and clients beside incidents', () => {
   const commands = searchCommands({
     people: [{ id: 'u1', name: 'Артур Моспан', email: 'arthur@quickteam.app' }],
     projects: [{ id: 'p9', name: 'Редизайн сайту' }],
@@ -204,8 +197,7 @@ test('search answers with people, projects and events, not only tasks', () => {
   // A person result has to land on that person, not on the top of the list.
   assert.equal(byGroup.person.href, '/team?member=u1');
   assert.equal(byGroup.project.href, '/p9');
-  assert.equal(byGroup.event.href, '/calendar/event/e1');
-  assert.match(byGroup.event.hint, /серпня/);
+  assert.equal(byGroup.event, undefined, 'calendar events are not qTicket search results');
   for (const command of commands) {
     assert.ok(command.href, `${command.id} does nothing`);
     assert.ok(COMMAND_GROUPS.includes(command.group), `${command.id} has an unknown group`);
@@ -232,7 +224,7 @@ test('the team screen selects the member the search sent it to', async () => {
 
 test('every command is reachable: it navigates or it acts, never neither', () => {
   const commands = [
-    ...buildCommands({ projects, allowedPermissions: ['create:project'], hasActiveTimer: true, organizationCount: 2 }),
+    ...buildCommands({ projects, allowedPermissions: ['create:project'], organizationCount: 2 }),
     ...issueCommands([{ id: 'i1', title: 'Задача', projectId: 'p1' }], projects),
   ];
   for (const command of commands) {
@@ -322,17 +314,15 @@ test('choosing a command waits for the palette to give its history entry back', 
   }
 });
 
-// The palette is the only way to «Новий спринт», so the sprints screen has to
-// understand the request the same way the other screens already do.
 test('every action the palette offers lands somewhere that answers it', async () => {
-  const sprints = await read('../src/app/(app)/sprints/page.js');
-  const calendar = await read('../src/app/(app)/calendar/page.js');
   const my = await read('../src/app/(app)/my/page.js');
+  const clients = await read('../src/app/(app)/page.js');
+  const clientPortal = await read('../src/components/client/ClientIncidentPortal.jsx');
 
-  assert.match(sprints, /searchParams\.get\('new'\) !== '1'/);
-  assert.match(sprints, /setShowCreateSprintModal\(true\)/);
-  assert.match(calendar, /searchParams\.get\('new'\) !== '1'/);
   assert.match(my, /searchParams\.get\('new'\) === '1'/);
+  assert.match(clients, /clientsRoute && searchParams\?\.get\('new'\) === '1'/);
+  assert.match(clientPortal, /searchParams\.get\('new'\) !== '1'/);
+  assert.match(clientPortal, /setShowComposer\(true\)/);
 });
 
 // «Команди» sat above a field that already says what the window is for.
@@ -343,4 +333,16 @@ test('the palette has no headline, and still has a name for a screen reader', as
   assert.doesNotMatch(palette, /title="Команди"/);
   assert.match(palette, /ariaLabel="/);
   assert.match(dialog, /aria-label=\{title \? undefined : ariaLabel\}/);
+});
+
+test('the global search surface speaks about incidents, not inherited tasks', async () => {
+  const [modal, header] = await Promise.all([
+    read('../src/components/SearchModal.jsx'),
+    read('../src/components/WorkspaceHeader.jsx'),
+  ]);
+
+  assert.match(modal, /номером, темою або описом інциденту/);
+  assert.doesNotMatch(modal, /описанню завдання/);
+  assert.match(header, /placeholder: 'Пошук інцидентів\.\.\.'/);
+  assert.doesNotMatch(header, /Пошук по спринтах і завданнях|Пошук в аналітиці|Пошук у календарі/);
 });

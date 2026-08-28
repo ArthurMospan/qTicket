@@ -129,3 +129,15 @@ test('клієнтська сесія не підписується на вну�
   assert.match(detail, /useSprints\(\{ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer \}\)/);
   assert.match(detail, /SHOW_INHERITED_TASK_PLANNING && internalViewer \? issueId : null/);
 });
+
+test('клієнтський глобальний пошук не відкриває людей або події поза його простором', async () => {
+  const [route, paletteHost] = await Promise.all([
+    read('../src/app/api/search/route.js'),
+    read('../src/components/WorkspaceCommandPalette.jsx'),
+  ]);
+
+  assert.match(route, /const isClientViewer = \['client_admin', 'client_member'\]\.includes/);
+  assert.match(route, /isClientViewer[\s\S]{0,260}visibleProjectIds\?\.has\(project\.id\)/);
+  assert.match(route, /const events = \[\]/);
+  assert.match(paletteHost, /clientViewer[\s\S]{0,80}\? EMPTY_MATCHES/);
+});

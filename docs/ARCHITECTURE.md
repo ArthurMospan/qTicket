@@ -55,6 +55,15 @@ same boundary: it describes only workflows reachable in qTicket, even while
 legacy implementation remains in the repository for a later reference-safe
 removal.
 
+`Ctrl+K` follows that same boundary rather than acting as a hidden second
+sidebar. Internal users receive overview, incident, client, support-team and
+settings destinations plus incident/client creation. Client roles receive only
+their requests, incident creation, profile and the client-admin employee entry.
+`/api/search` ranks incidents, accessible client spaces and in-scope people; it
+does not read inherited calendar events. For a client role the people result is
+additionally intersected with `project.team` across that client's accessible
+spaces, and the palette publishes incident results only.
+
 ---
 
 ## Задачі, підзадачі, зв’язки та облік

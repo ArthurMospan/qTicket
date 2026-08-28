@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Bell, Building2, ChevronRight, Folder,
-  PieChart, Plus, Search, Settings, Square, Sun, User, Users, X, Zap,
+  Building2, ChevronRight, Folder, LayoutDashboard,
+  Plus, Search, Settings, User, Users, X,
 } from 'lucide-react';
-import { CalendarIcon, ChatIcon, TaskIcon } from '@/lib/design/icons';
+import { TaskIcon } from '@/lib/design/icons';
 import Dialog from '../Dialog';
 import {
   flattenGroups,
@@ -27,16 +27,10 @@ import { normalizeSearchScope, shouldRemoveSearchScope } from '@/lib/utils/searc
 const ICONS = {
   folder: Folder,
   check: TaskIcon,
-  sun: Sun,
-  message: ChatIcon,
-  calendar: CalendarIcon,
-  zap: Zap,
+  overview: LayoutDashboard,
   users: Users,
-  chart: PieChart,
   settings: Settings,
   plus: Plus,
-  stop: Square,
-  bell: Bell,
   building: Building2,
   issue: TaskIcon,
   user: User,
@@ -49,12 +43,12 @@ const ICONS = {
  * @param {() => void} props.onClose Closes it.
  * @param {object[]} props.commands Catalogue from `buildCommands`.
  * @param {object[]} props.issues Search results to append as their own group.
- * @param {{people: object[], projects: object[], events: object[]}} props.matches The other kinds search found — people, projects, calendar events.
+ * @param {{people: object[], projects: object[]}} props.matches The other qTicket kinds search found — support people and clients.
  * @param {boolean} props.searching Whether results are still loading.
  * @param {string} props.searchError An actionable search failure, if the request failed.
  * @param {(query: string) => void} props.onQueryChange Called as the query changes.
  * @param {(command: object) => void} props.onSelect Runs the chosen command.
- * @param {object[]} props.projects Projects, used to name the project a found task belongs to.
+ * @param {object[]} props.projects Client spaces, used to name the client a found incident belongs to.
  * @param {string} props.initialQuery Query supplied by the page that opened the palette.
  * @param {{type: 'project', projectId: string, label: string}|null} props.initialScope Removable page scope.
  * @param {number} props.requestKey Distinguishes repeated launches with the same query.

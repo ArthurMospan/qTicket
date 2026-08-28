@@ -162,22 +162,10 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
     return { mode: 'search', project: null, placeholder: 'Пошук клієнтів...' };
   }
   if (pathname.startsWith('/my')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук по моїх інцидентах...' };
+    return { mode: 'search', project: null, placeholder: 'Пошук інцидентів...' };
   }
   if (pathname.startsWith('/team')) {
     return { mode: 'search', project: null, placeholder: 'Пошук по команді...' };
-  }
-  if (pathname.startsWith('/sprints')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук по спринтах і завданнях...' };
-  }
-  if (pathname.startsWith('/chat')) {
-    return { mode: 'chat', project: null };
-  }
-  if (pathname.startsWith('/analytics')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук в аналітиці...' };
-  }
-  if (pathname.startsWith('/calendar')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук у календарі...' };
   }
   if (pathname.startsWith('/settings')) {
     return { mode: 'minimal', label: 'Налаштування' };

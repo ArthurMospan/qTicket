@@ -3,92 +3,61 @@
 //
 // Pure: descriptors carry an icon *name*, never a component, so the whole
 // catalogue and its ranking can be asserted without React. The workspace
-// already has a route table, a project list, a permission helper and a search
-// API; this is the layer that lets one keystroke reach all four.
+// already has a route table, a client-space list, a permission helper and a
+// search API; this is the layer that lets one keystroke reach them coherently.
 
 import { issuePath } from './issueKeys.mjs';
 
-export const COMMAND_GROUPS = ['action', 'navigation', 'project', 'issue', 'person', 'event'];
+export const COMMAND_GROUPS = ['action', 'navigation', 'project', 'issue', 'person'];
 
 export const GROUP_LABELS = {
   action: 'Дії',
   navigation: 'Перейти',
-  project: 'Проєкти',
+  project: 'Клієнти',
   issue: 'Інциденти',
   person: 'Люди',
-  event: 'Події',
 };
 
 // Latin spellings sit next to the Ukrainian ones on purpose. People type with
 // whatever layout is active, and having to notice the layout before you can
 // search is exactly the friction the palette exists to remove.
-const NAVIGATION = [
-  { id: 'nav-projects', label: 'Проєкти', href: '/', icon: 'folder', keywords: 'proekty projects home dashboard' },
-  { id: 'nav-my', label: 'Мої інциденти', href: '/my', icon: 'check', keywords: 'moi intsydenty incidenty incidents my tasks todo' },
-  { id: 'nav-chat', label: 'Чат', href: '/chat', icon: 'message', keywords: 'chat chat povidomlennya messages' },
-  { id: 'nav-calendar', label: 'Календар', href: '/calendar', icon: 'calendar', keywords: 'kalendar calendar events podii' },
-  { id: 'nav-sprints', label: 'Спринти', href: '/sprints', icon: 'zap', keywords: 'sprinty sprints' },
-  { id: 'nav-team', label: 'Команда', href: '/team', icon: 'users', keywords: 'komanda team people ludy' },
-  { id: 'nav-analytics', label: 'Аналітика', href: '/analytics', icon: 'chart', keywords: 'analityka analytics reports zvity' },
-  { id: 'nav-settings', label: 'Налаштування', href: '/settings', icon: 'settings', keywords: 'nalashtuvannya settings preferences profile' },
+const INTERNAL_NAVIGATION = [
+  { id: 'nav-overview', label: 'Огляд', href: '/overview', icon: 'overview', keywords: 'ohliad overview dashboard support pidtrymka' },
+  { id: 'nav-incidents', label: 'Інциденти', href: '/my', icon: 'issue', keywords: 'intsydenty incidents requests zvernennya queue cherha' },
+  { id: 'nav-clients', label: 'Клієнти', href: '/clients', icon: 'folder', keywords: 'kliyenty clients customers projects proekty' },
+  { id: 'nav-team', label: 'Команда', href: '/team', icon: 'users', keywords: 'komanda team support people ludy' },
+  { id: 'nav-settings', label: 'Налаштування', href: '/settings', icon: 'settings', keywords: 'nalashtuvannya settings preferences profile workflow' },
+];
+
+const CLIENT_NAVIGATION = [
+  { id: 'nav-requests', label: 'Мої звернення', href: '/', icon: 'issue', keywords: 'moi zvernennya requests incidents support dopomoha' },
+  { id: 'nav-client-team', label: 'Співробітники', href: '/settings?section=team', icon: 'users', keywords: 'spivrobitnyky employees people team', clientAdminOnly: true },
+  { id: 'nav-profile', label: 'Мій профіль', href: '/settings?section=profile', icon: 'user', keywords: 'mii profil profile account settings' },
 ];
 
 // `permission` is checked against `can(orgRole, …)` by the caller, so this file
 // stays free of the permission model.
 //
-// The order here is the order somebody reads on an empty palette, and it is the
-// order these things actually get done in a week: a task most days, an event
-// most days, a sprint every fortnight, a project rarely, another organization
-// rarer still. «Гарячі клавіші» used to sit among them — a cheat sheet is not
-// an action, and it now lives behind «?» in the sidebar with the rest of the
-// help. Stopping a timer is first only while a timer is running: it is the one
-// entry that answers a question the workspace is already asking.
-const ACTIONS = [
-  {
-    id: 'action-stop-timer',
-    label: 'Зупинити таймер',
-    hint: 'Зберегти витрачений час',
-    icon: 'stop',
-    action: 'stop-timer',
-    requiresTimer: true,
-    keywords: 'zupynyty taymer stop timer time',
-  },
+// Actions are deliberately qTicket-native. The inherited task engine still has
+// calendar, sprint and timer code, but the palette must never become a second
+// navigation system that republishes those hidden QuickTeam surfaces.
+const INTERNAL_ACTIONS = [
   {
     id: 'action-new-issue',
     label: 'Новий інцидент',
     hint: 'Створити інцидент',
     href: '/my?new=1',
     icon: 'plus',
-    keywords: 'novyi intsydent nove zavdannya нове завдання new incident task issue stvoryty create',
+    keywords: 'novyi intsydent new incident request zvernennya stvoryty create',
   },
   {
-    id: 'action-new-event',
-    label: 'Нова подія',
-    hint: 'Створити подію в календарі',
-    href: '/calendar?new=1',
-    icon: 'calendar',
-    keywords: 'nova podiya new event meeting zustrich calendar kalendar stvoryty create',
-  },
-  {
-    id: 'action-new-sprint',
-    label: 'Новий спринт',
-    hint: 'Створити спринт',
-    href: '/sprints?new=1',
-    icon: 'zap',
-    permission: 'manage:sprints',
-    keywords: 'novyi sprint new sprint stvoryty create',
-  },
-  {
-    id: 'action-new-project',
-    label: 'Новий проєкт',
-    hint: 'Створити проєкт',
-    href: '/?new=1',
-    // A folder, like every other project row in this list and in the sidebar.
-    // «Нова подія» is a calendar and «Новий спринт» is a lightning bolt: an
-    // action is drawn as the thing it makes, and this one was drawn as a plus.
+    id: 'action-new-client',
+    label: 'Новий клієнт',
+    hint: 'Створити клієнтський простір',
+    href: '/clients?new=1',
     icon: 'folder',
     permission: 'create:project',
-    keywords: 'novyi proekt new project stvoryty create',
+    keywords: 'novyi kliyent new client customer project proekt stvoryty create',
   },
   {
     id: 'action-switch-org',
@@ -100,28 +69,44 @@ const ACTIONS = [
   },
 ];
 
+const CLIENT_ACTIONS = [
+  {
+    id: 'action-new-issue',
+    label: 'Створити інцидент',
+    hint: 'Нове звернення до підтримки',
+    href: '/?new=1',
+    icon: 'plus',
+    keywords: 'stvoryty intsydent nove zvernennya new incident request support help',
+  },
+  INTERNAL_ACTIONS.find(action => action.id === 'action-switch-org'),
+];
+
 export function buildCommands({
   projects = [],
   allowedPermissions = [],
-  hasActiveTimer = false,
   organizationCount = 1,
+  role = 'member',
 } = {}) {
+  const clientRole = role === 'client_admin' || role === 'client_member';
   const permitted = new Set(allowedPermissions);
   const commands = [];
 
-  for (const action of ACTIONS) {
+  for (const action of clientRole ? CLIENT_ACTIONS : INTERNAL_ACTIONS) {
     if (action.permission && !permitted.has(action.permission)) continue;
-    if (action.requiresTimer && !hasActiveTimer) continue;
     if (action.requiresManyOrganizations && organizationCount < 2) continue;
     commands.push({ ...action, group: 'action' });
   }
-  for (const entry of NAVIGATION) commands.push({ ...entry, group: 'navigation' });
+  for (const entry of clientRole ? CLIENT_NAVIGATION : INTERNAL_NAVIGATION) {
+    if (entry.clientAdminOnly && role !== 'client_admin') continue;
+    commands.push({ ...entry, group: 'navigation' });
+  }
+  if (clientRole) return commands;
   for (const project of projects) {
     if (!project?.id || project.status === 'archived') continue;
     commands.push({
       id: `project-${project.id}`,
       group: 'project',
-      label: project.name || 'Проєкт',
+      label: project.name || 'Клієнт',
       href: `/${project.id}`,
       icon: 'folder',
       keywords: project.issuePrefix || '',
@@ -131,7 +116,7 @@ export function buildCommands({
 }
 
 // Subsequence matching, scored so that the thing you were obviously aiming at
-// wins. Typing "нз" should reach «Нове завдання» before it reaches anything
+// wins. Typing "ні" should reach «Новий інцидент» before it reaches anything
 // that merely contains an н and a з.
 export function fuzzyScore(text, query) {
   const haystack = String(text || '').toLowerCase();
@@ -177,10 +162,10 @@ function keywordScore(text, query) {
 }
 
 // The empty menu shows every action and every destination. It used to share one
-// 12-row budget with the projects, so a full workspace — a running timer, two
-// organizations — pushed «Аналітика» and «Налаштування» off the bottom of a
+// 12-row budget with the client spaces, so a full workspace pushed important
+// destinations like «Налаштування» off the bottom of a
 // menu whose whole job is to list where you can go. A menu that hides half of
-// itself is worse than no menu. Projects are the part that can be long, so they
+// itself is worse than no menu. Clients are the part that can be long, so they
 // are the part that is capped.
 const MENU_PROJECTS = 4;
 
@@ -208,13 +193,13 @@ export function rankCommands(commands, query, { limit = 12 } = {}) {
 }
 
 // Search results arrive asynchronously and are appended rather than ranked
-// against the static catalogue: they answer a different question ("which task?")
+// against the static catalogue: they answer a different question ("which incident?")
 // and mixing the two scores makes both worse.
 export function issueCommands(results = [], projects = []) {
   return results.slice(0, 8).map(issue => ({
     id: `issue-${issue.id}`,
     group: 'issue',
-    label: issue.title || 'Завдання',
+    label: issue.title || 'Інцидент',
     hint: [issue.issueKey, projects.find(item => item.id === issue.projectId)?.name]
       .filter(Boolean).join(' · '),
     href: issuePath(issue, projects.find(item => item.id === issue.projectId) || issue.projectId),
@@ -222,17 +207,17 @@ export function issueCommands(results = [], projects = []) {
   }));
 }
 
-// QUI-104. The other three kinds the server now answers with. Projects appear
-// here as well as in `buildCommands` — the static list only knows the projects
+// The two qTicket kinds the server answers with beside incidents. Client spaces
+// appear here as well as in `buildCommands` — the static list only knows the projects
 // already loaded in the client and matches their names, while these are matched
 // on the server by description and issue prefix too. `groupCommands` renders one
-// «Проєкти» group, and identical ids collapse rather than doubling up.
+// «Клієнти» group, and identical ids collapse rather than doubling up.
 const dedupe = commands => {
   const seen = new Set();
   return commands.filter(command => !seen.has(command.id) && seen.add(command.id));
 };
 
-export function searchCommands({ people = [], projects = [], events = [] } = {}) {
+export function searchCommands({ people = [], projects = [] } = {}) {
   return [
     ...people.slice(0, 6).map(person => ({
       id: `person-${person.id}`,
@@ -245,19 +230,9 @@ export function searchCommands({ people = [], projects = [], events = [] } = {})
     ...projects.slice(0, 6).map(project => ({
       id: `project-${project.id}`,
       group: 'project',
-      label: project.name || 'Проєкт',
+      label: project.name || 'Клієнт',
       href: `/${project.id}`,
       icon: 'folder',
-    })),
-    ...events.slice(0, 6).map(event => ({
-      id: `event-${event.id}`,
-      group: 'event',
-      label: event.title || 'Подія',
-      hint: event.startAt
-        ? new Date(event.startAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })
-        : '',
-      href: `/calendar/event/${event.id}`,
-      icon: 'calendar',
     })),
   ];
 }

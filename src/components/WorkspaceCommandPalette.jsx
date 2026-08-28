@@ -14,11 +14,11 @@ import { useSearch } from '@/lib/hooks/useSearch';
 import { CommandPalette } from '@/components/ui';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { buildCommands } from '@/lib/utils/commandPalette.mjs';
-import { can } from '@/lib/utils/can';
-import { timerTargetHref } from '@/lib/utils/timerNavigation.mjs';
+import { can, isClientRole } from '@/lib/utils/can';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 
-const PERMISSIONS = ['create:project', 'manage:sprints'];
+const PERMISSIONS = ['create:project'];
+const EMPTY_MATCHES = Object.freeze({ people: [], projects: [] });
 
 // QUI-103. ⌘K/Ctrl+K is the only global keystroke this file claims.
 //
@@ -39,18 +39,22 @@ export default function WorkspaceCommandPalette() {
   const [orgSwitcherOpen, setOrgSwitcherOpen] = useState(false);
   const { results, matches, loading, error, search, clear } = useSearch();
 
-  const activeTimer = useWorkspaceStore(state => state.activeTimer);
-  const stopTimer = useWorkspaceStore(state => state.stopTimer);
-  const showToast = useWorkspaceStore(state => state.showToast);
   const paletteRequest = useWorkspaceStore(state => state.commandPaletteRequest);
   const openCommandPalette = useWorkspaceStore(state => state.openCommandPalette);
+  const clientViewer = isClientRole(orgRole);
 
   const commands = useMemo(() => buildCommands({
     projects,
     allowedPermissions: PERMISSIONS.filter(permission => can(orgRole, permission)),
-    hasActiveTimer: Boolean(activeTimer),
     organizationCount: allOrgs?.length || 1,
-  }), [activeTimer, allOrgs?.length, orgRole, projects]);
+    role: orgRole,
+  }), [allOrgs?.length, orgRole, projects]);
+
+  const visibleMatches = useMemo(() => (
+    clientViewer
+      ? EMPTY_MATCHES
+      : { people: matches.people || [], projects: matches.projects || [] }
+  ), [clientViewer, matches.people, matches.projects]);
 
   const closePalette = useCallback(() => {
     setOpen(false);
@@ -102,20 +106,8 @@ export default function WorkspaceCommandPalette() {
       navigateAfterOverlayClose(() => router.push(command.href));
       return;
     }
-    if (command.action === 'stop-timer') {
-      // The minutes ride in the store, not in the URL — see `stopTimer`.
-      try {
-        const result = await stopTimer();
-        if (result?.queued) showToast('Зупинку таймера збережено до відновлення мережі', 'warning');
-        const href = timerTargetHref(result);
-        if (href) navigateAfterOverlayClose(() => router.push(href));
-      } catch (error) {
-        showToast(error.message || 'Не вдалося зупинити таймер', 'error');
-      }
-      return;
-    }
     if (command.action === 'switch-organization') setOrgSwitcherOpen(true);
-  }, [router, showToast, stopTimer]);
+  }, [router]);
 
   return (
     <>
@@ -124,7 +116,7 @@ export default function WorkspaceCommandPalette() {
         onClose={closePalette}
         commands={commands}
         issues={results}
-        matches={matches}
+        matches={visibleMatches}
         searching={loading}
         searchError={error?.message || ''}
         projects={projects}

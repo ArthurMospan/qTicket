@@ -214,7 +214,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/Navigation/CommandPalette.jsx:182",
+      "location": "src/components/ui/Navigation/CommandPalette.jsx:176",
       "attributes": [
         "aria-label"
       ]
@@ -302,7 +302,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:459",
+      "location": "src/components/WorkspaceHeader.jsx:447",
       "attributes": [
         "label"
       ]
