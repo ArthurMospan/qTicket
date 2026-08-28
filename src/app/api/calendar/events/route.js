@@ -6,6 +6,7 @@ import { authorizeOrgRequest, enforceRateLimit, getAdminDb } from '@/lib/server/
 import { syncCalendarEventReminderRows } from '@/lib/server/reminderJobs';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { assigneesOffProjectTeam, assigneesOutsideProject } from '@/lib/utils/projectAccess.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import {
   createCalendarNotifications,
   normalizedCalendarEventInput,
@@ -27,7 +28,11 @@ function calendarCreateError(code, message, status = 409) {
 export async function GET(request) {
   try {
     const organizationId = new URL(request.url).searchParams.get('organizationId')?.trim() || '';
-    const authorization = await authorizeOrgRequest(request, organizationId);
+    const authorization = await authorizeOrgRequest(
+      request,
+      organizationId,
+      rolesFor('access:calendar'),
+    );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }
@@ -165,7 +170,11 @@ export async function POST(request) {
       }, { status: 400 });
     }
     const organizationId = typeof body.organizationId === 'string' ? body.organizationId.trim() : '';
-    const authorization = await authorizeOrgRequest(request, organizationId, ['owner', 'admin', 'member']);
+    const authorization = await authorizeOrgRequest(
+      request,
+      organizationId,
+      rolesFor('access:calendar'),
+    );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }

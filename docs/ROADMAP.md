@@ -49,7 +49,7 @@ Completed foundation:
 - Firebase client/admin configuration and Cloudinary are configured in Vercel;
   secrets are not stored in Git. Transactional email is intentionally disabled.
 - Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
-  suite passes all 79 tests, including the project-scoped client boundary,
+  suite passes all 80 tests, including the project-scoped client boundary,
   entitlement revocation and stale project-roster denial.
 - The role model already exists in code and rules: internal `owner`, `admin`,
   `member`; external `client_admin`, `client_member`. External users can create,
@@ -83,7 +83,7 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,174 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,175 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.
@@ -142,6 +142,12 @@ Completed product slice on 2026-08-28:
   analytics rollups, and refuses client-authored audit entries, so internal work
   notes, billing evidence and forged workflow history cannot cross the portal
   boundary through a direct SDK request.
+- The static role audit found a second direct-API bypass behind the already
+  hidden calendar screen: any organization membership could call
+  `/api/calendar/events` and receive staff events and birthdays through the
+  Admin SDK. Every calendar route now requires an internal support role, while
+  `calendarEvents` stays server-only for every browser role in Firestore Rules;
+  client accounts cannot trigger birthday/reminder jobs or mutate legacy events.
 
 Product work still required:
 
@@ -200,10 +206,11 @@ surfaces first, then delete only when references and migrations are understood.
 8. Only after that flow is accepted, implement the incident-to-QuickTeam-task
    transfer contract and connect the existing entitlement field to billing.
 
-The exact next implementation task is step 7: run the two-sided acceptance flow
-below with separate staff, client-admin and client-member sessions, then fix the
-first concrete failure it reveals. Every completed slice should be a reviewable
-Git commit and this checkpoint should be updated in the same commit.
+The exact next implementation task remains step 7: continue the static role
+audit until separate staff, client-admin and client-member sessions are
+available, then run the two-sided flow below and fix the next concrete failure
+it reveals. Every completed slice should be a reviewable Git commit and this
+checkpoint should be updated in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
 `docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
 credentials, service-account JSON, `.env` values or session notes here.

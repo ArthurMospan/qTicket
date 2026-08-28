@@ -87,6 +87,13 @@ beforeEach(async () => {
       organizationId: 'org-a', projectId: 'project-a', issueId: 'issue-a',
       userId: 'owner-a', spentMinutes: 30,
     });
+    await setDoc(doc(db, 'calendarEvents', 'staff-meeting'), {
+      organizationId: 'org-a',
+      organizerId: 'member-a',
+      participantIds: ['owner-a', 'member-a'],
+      title: 'Internal support review',
+      visibility: 'team',
+    });
   });
 });
 
@@ -654,6 +661,24 @@ test('client roles cannot read internal time logs even inside their project', as
   }
 
   await assertSucceeds(getDoc(doc(internalMemberDb, 'timeLogs', 'log-owner')));
+});
+
+test('calendar source documents are server-only for staff and client browsers', async () => {
+  for (const uid of ['owner-a', 'member-a', 'client-admin-a', 'client-member-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertFails(getDoc(doc(db, 'calendarEvents', 'staff-meeting')));
+    await assertFails(getDocs(query(
+      collection(db, 'calendarEvents'),
+      where('organizationId', '==', 'org-a'),
+    )));
+    await assertFails(setDoc(doc(db, 'calendarEvents', `${uid}-forged-event`), {
+      organizationId: 'org-a',
+      organizerId: uid,
+      participantIds: [uid],
+      title: 'Forged event',
+      visibility: 'team',
+    }));
+  }
 });
 
 test('client roles can read issue history but cannot forge audit entries', async () => {

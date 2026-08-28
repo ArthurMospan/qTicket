@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, enforceRateLimit } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { runBirthdaySweep } from '@/lib/server/reminderJobs';
+import { rolesFor } from '@/lib/utils/can';
 
 // Announces the caller's birthday now, if it is today.
 //
@@ -23,7 +24,11 @@ export async function POST(request) {
       }, { status: 400 });
     }
     const organizationId = typeof body?.organizationId === 'string' ? body.organizationId.trim() : '';
-    const authorization = await authorizeOrgRequest(request, organizationId);
+    const authorization = await authorizeOrgRequest(
+      request,
+      organizationId,
+      rolesFor('access:calendar'),
+    );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }

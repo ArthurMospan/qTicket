@@ -5,6 +5,7 @@ import {
   enforceRateLimit,
   getAdminDb,
 } from '@/lib/server/firebaseAdmin';
+import { rolesFor } from '@/lib/utils/can';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
   analyticsRollupDeltasFor,
@@ -91,7 +92,7 @@ async function authorizeCalendarTimeRequest(request, organizationId) {
   const authorization = await authorizeOrgRequest(
     request,
     organizationId,
-    ['owner', 'admin', 'member'],
+    rolesFor('access:calendar'),
   );
   if (authorization.error) {
     return {

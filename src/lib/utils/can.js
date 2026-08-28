@@ -58,6 +58,14 @@ export const PERMISSIONS = {
   // the matrix follows them.
   'manage:finance': ['owner', 'admin'], // Рахунки, ставки, чужі табелі
 
+  // Inherited internal support modules
+  //
+  // qTicket does not publish the planning calendar as a product surface, but
+  // its server routes remain for the retained notification/accounting engine.
+  // They must never become a back door from the client portal into staff
+  // events, birthdays or calendar time.
+  'access:calendar': ['owner', 'admin', 'member'],
+
   // Issues
   //
   // A member may delete a task in a project they belong to. Access to the

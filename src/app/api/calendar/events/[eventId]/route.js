@@ -4,6 +4,7 @@ import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncCalendarEventReminderRows } from '@/lib/server/reminderJobs';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { assigneesOffProjectTeam, assigneesOutsideProject } from '@/lib/utils/projectAccess.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import {
   canManageCalendarEvent,
   createCalendarNotifications,
@@ -235,6 +236,7 @@ export async function PATCH(request, context) {
     const authorization = await authorizeOrgRequest(
       request,
       loaded.event.organizationId,
+      rolesFor('access:calendar'),
     );
     if (authorization.error) {
       return NextResponse.json(
@@ -610,6 +612,7 @@ export async function DELETE(request, context) {
     const authorization = await authorizeOrgRequest(
       request,
       loaded.event.organizationId,
+      rolesFor('access:calendar'),
     );
     if (authorization.error) {
       return NextResponse.json(

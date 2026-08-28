@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
+import { rolesFor } from '@/lib/utils/can';
 import {
   runBirthdaySweep,
   runCalendarReminderSweep,
@@ -13,7 +14,11 @@ export async function POST(request) {
   try {
     const body = await readJsonBody(request);
     const organizationId = typeof body.organizationId === 'string' ? body.organizationId.trim() : '';
-    const authorization = await authorizeOrgRequest(request, organizationId);
+    const authorization = await authorizeOrgRequest(
+      request,
+      organizationId,
+      rolesFor('access:calendar'),
+    );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }

@@ -21,7 +21,42 @@ test('клієнтські ролі не керують інцидентом а�
     assert.equal(can(role, 'delete:issue'), false);
     assert.equal(can(role, 'edit:project_settings'), false);
     assert.equal(can(role, 'manage:team'), false);
+    assert.equal(can(role, 'access:calendar'), false);
   }
+});
+
+test('усі calendar API залишаються внутрішнім server-only модулем', async () => {
+  for (const role of ['owner', 'admin', 'member']) {
+    assert.equal(can(role, 'access:calendar'), true);
+  }
+
+  const routePaths = [
+    '../src/app/api/calendar/events/route.js',
+    '../src/app/api/calendar/events/[eventId]/route.js',
+    '../src/app/api/calendar/events/[eventId]/time-logs/route.js',
+    '../src/app/api/calendar/reminders/route.js',
+    '../src/app/api/calendar/birthday/route.js',
+  ];
+  for (const path of routePaths) {
+    const route = await read(path);
+    const authorizationCalls = [
+      ...route.matchAll(/authorizeOrgRequest\(\s*([\s\S]*?)\)\s*;/g),
+    ];
+    assert.ok(authorizationCalls.length > 0, `${path} має авторизувати організацію`);
+    for (const [, argumentsSource] of authorizationCalls) {
+      assert.match(
+        argumentsSource,
+        /rolesFor\('access:calendar'\)/,
+        `${path} не має приймати клієнтську роль`,
+      );
+    }
+  }
+
+  const rules = await read('../firestore.rules');
+  assert.match(
+    rules,
+    /match \/calendarEvents\/\{eventId\} \{\s*allow read, write: if false;/,
+  );
 });
 
 test('лише client_admin отримує окреме право запросити співробітника клієнта', () => {

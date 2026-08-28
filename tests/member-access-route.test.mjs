@@ -123,6 +123,7 @@ test('every permission in the matrix is read by something', async () => {
     'src/app/api/organizations/[organizationId]/route.js',
     'src/app/api/organizations/[organizationId]/members/[memberId]/route.js',
     'src/app/api/invitations/route.js',
+    'src/app/api/calendar/events/route.js',
     'src/app/api/issues/route.js',
     'src/app/api/issues/[issueId]/archive/route.js',
   ].map(path => read(`../${path}`)));

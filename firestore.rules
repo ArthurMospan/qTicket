@@ -345,6 +345,15 @@ service cloud.firestore {
       }
     }
 
+    // ── calendarEvents/{eventId} ───────────────────────────────────────
+    // The inherited calendar is an internal support module and all of its
+    // reads and writes go through role-gated server routes. Keeping the source
+    // documents closed also prevents a client from bypassing those routes with
+    // the browser SDK to enumerate staff events or birthdays.
+    match /calendarEvents/{eventId} {
+      allow read, write: if false;
+    }
+
     // ── issues/{issueId} ─────────────────────────────────────────────────
     match /issues/{issueId} {
       allow read: if canAccessIssueData(resource.data);
