@@ -771,8 +771,15 @@ export default function SettingsPage() {
       .map(item => item.id),
   ), [clientSettingsSections, clientViewer, isAdmin]);
   // The first entry of this role's own rail, so «Налаштування» always opens on
-  // something this person can actually see.
-  const defaultSection = reachableSections.values().next().value || 'account';
+  // something this person can actually see — with one exception. Removing the
+  // personal group left «Безпека» first for staff, and a support manager who
+  // opens «Налаштування» is not asking which browsers they signed in from. For
+  // them the screen opens on the first section that is about the product; a
+  // client keeps their own order, where personal settings genuinely lead.
+  const defaultSection = [...reachableSections]
+    .find(sectionId => clientViewer || sectionId !== 'account')
+    || reachableSections.values().next().value
+    || 'account';
 
   // `chosenSection` is what somebody last asked for; `activeSection` is what the
   // screen is on. They differ for one reason: the role is read from Firestore
