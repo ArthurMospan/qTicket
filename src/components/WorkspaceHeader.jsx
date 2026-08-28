@@ -189,7 +189,11 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
 
 export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
   const router = useRouter();
-  const { activeOrgId, allOrgs } = useAppContext();
+  const { activeOrgId, allOrgs, orgRole } = useAppContext();
+  // Only a client account has a notification panel to open. Staff preferences
+  // for the bell live in QuickTeam's account, not in a qTicket copy of it, so
+  // the gear would point at a section they no longer have.
+  const clientViewer = isClientRole(orgRole);
   const liveNotifs = useWorkspaceStore(s => s.liveNotifs);
   const dismissLiveNotif = useWorkspaceStore(s => s.dismissLiveNotif);
   const clearLiveNotif = useWorkspaceStore(s => s.clearLiveNotif);
@@ -361,18 +365,20 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
           surface="canvas"
         />
       )}
-      <Button
-        onClick={() => {
-          setBellOpen(false);
-          navigateAfterOverlayClose(() => router.push('/settings?section=notifications'));
-        }}
-        title="Налаштування сповіщень"
-        style="ghost"
-        size="icon-sm"
-        icon={Settings}
-        shape="compact"
-        surface="canvas"
-      />
+      {clientViewer && (
+        <Button
+          onClick={() => {
+            setBellOpen(false);
+            navigateAfterOverlayClose(() => router.push('/settings?section=notifications'));
+          }}
+          title="Налаштування сповіщень"
+          style="ghost"
+          size="icon-sm"
+          icon={Settings}
+          shape="compact"
+          surface="canvas"
+        />
+      )}
     </>
   );
 
