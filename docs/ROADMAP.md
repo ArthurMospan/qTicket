@@ -69,6 +69,14 @@ Completed product slice on 2026-08-28:
   assignee, priority, type and creation-period filters; sprint controls are gone.
 - The user-facing help articles for navigation, client projects and incident
   creation describe the qTicket flow implemented in this slice.
+- The external client's `/` is now a dedicated **Мої звернення** portal rather
+  than a redirect to the inherited project Kanban. It lists only that client's
+  incidents, offers open/all/resolved views, exposes a prominent client-safe
+  composer, and links `client_admin` directly to their employee directory.
+- A direct client visit to the inherited project board returns to **Мої
+  звернення**. The client incident detail keeps the visible status, description,
+  attachments and shared conversation while removing internal assignee, roster,
+  label, deadline and direct-chat surfaces.
 - The slice passes lint, production build, all 1,179 unit tests and the UI Kit
   usage, drift, fidelity, colour and accessibility contracts. Public browser
   verification found no framework overlay or console error; authenticated
@@ -76,8 +84,6 @@ Completed product slice on 2026-08-28:
 
 Product work still required:
 
-- Simplify the external client portal around incident creation, status, files
-  and the shared incident conversation.
 - Rework the client-project entry screen reached from **Клієнти** so it reads as
   customer support administration instead of an inherited task project.
 - Complete the user-facing terminology pass; inherited internal identifiers may
@@ -121,19 +127,20 @@ surfaces first, then delete only when references and migrations are understood.
    **Огляд** screen using only shared components from `src/components/ui`.
 2. **Completed:** turn the inherited cross-project board into the global
    **Інциденти** queue and remove sprint/task-manager controls from that surface.
-3. Rebuild client project entry and incident creation/detail around the simple
-   client journey above while preserving the rule-enforced permission boundary.
-4. Run local checks, deploy the slice, then execute the two-sided acceptance
+3. **Completed:** rebuild the external client entry and incident
+   creation/detail around the simple client journey above while preserving the
+   rule-enforced permission boundary.
+4. Rework the internal client-project entry reached from **Клієнти** around
+   customer context, incidents, people and settings instead of a task board.
+5. Run local checks, deploy the slice, then execute the two-sided acceptance
    flow with separate internal and client accounts.
-5. Only after the qTicket workflow is accepted, implement the QuickTeam transfer
+6. Only after the qTicket workflow is accepted, implement the QuickTeam transfer
    contract and later the add-on entitlement contract.
 
-The exact next implementation task is step 3: make the external client's root a
-simple **Мої звернення** screen with a prominent **Створити інцидент** action,
-then restrict the incident composer/detail to client-safe fields while retaining
-attachments and the shared conversation. After that, rework the internal
-client-project page reached from `/clients`. Every completed slice should be a
-reviewable Git commit and this checkpoint should be updated in the same commit.
+The exact next implementation task is step 4: rework the internal client-project
+page reached from `/clients` while keeping the organization-wide queue at
+`/my`. Every completed slice should be a reviewable Git commit and this
+checkpoint should be updated in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
 `docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
 credentials, service-account JSON, `.env` values or session notes here.

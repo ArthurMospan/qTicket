@@ -125,9 +125,9 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
   await expect(page.getByRole('link', { name: expectedMatches[0].title })).toBeVisible();
 
   await page.goto('/help/kanban-and-bulk-actions', { waitUntil: 'domcontentloaded' });
-  await page.getByRole('link', { name: /Робота із задачами/ }).click();
+  await page.getByRole('link', { name: /Робота з інцидентами/ }).click();
   await expect(page).toHaveURL(/\/help\?category=work$/);
-  await expect(page.getByRole('button', { name: 'Робота із задачами' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Робота з інцидентами' })).toHaveAttribute('aria-pressed', 'true');
 
   await page.goto('/privacy-policy', { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/privacy$/);

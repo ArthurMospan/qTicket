@@ -83,16 +83,29 @@ test('без поштового провайдера клієнт отримує
 });
 
 test('клієнтський інтерфейс створює інцидент і не відкриває керування ним', async () => {
-  const [board, detail, composer] = await Promise.all([
+  const [root, portal, board, detail, composer] = await Promise.all([
+    read('../src/app/(app)/page.js'),
+    read('../src/components/client/ClientIncidentPortal.jsx'),
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/components/CreateTaskModal.jsx'),
   ]);
+  assert.match(root, /<ClientIncidentPortal/);
+  assert.match(portal, /title="Мої звернення"/);
+  assert.match(portal, /Створити інцидент/);
+  assert.match(portal, /clientMode/);
+  assert.doesNotMatch(portal, /Пріоритет|Виконавці|Спринт|Дедлайн/);
+  assert.match(board, /if \(clientViewer\) router\.replace\('\/'\)/);
   assert.match(board, /readOnly=\{!canEditIncidents\}/);
   assert.match(board, /entity="incident"/);
   assert.match(board, /clientMode=\{clientViewer\}/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
   assert.match(detail, /internalViewer \? issueId : null/);
+  const clientAttributesStart = detail.indexOf('primaryChildren={clientViewer ? (');
+  const internalAttributesStart = detail.indexOf(') : (', clientAttributesStart);
+  const clientAttributes = detail.slice(clientAttributesStart, internalAttributesStart);
+  assert.match(clientAttributes, />Статус</);
+  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Пріоритет/);
   assert.match(composer, /const submitted = clientMode[\s\S]{0,180}title: form\.title,[\s\S]{0,80}description: form\.description/);
 });
 

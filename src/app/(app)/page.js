@@ -57,6 +57,7 @@ import { planLimitNotice } from '@/lib/utils/plans.mjs';
 import { PROJECT_OVER_PLAN_LIMIT } from '@/lib/utils/projectAccess.mjs';
 import { usePlanLimits } from '@/lib/hooks/usePlanLimits';
 import { PlanCrownIcon } from '@/lib/design/icons';
+import ClientIncidentPortal from '@/components/client/ClientIncidentPortal';
 
 
 // ── Project Card ─────────────────────────────────────────────────────────────
@@ -760,15 +761,6 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     router.replace(searchParams?.get('new') === '1' ? '/clients?new=1' : '/overview');
   }, [clientViewer, clientsRoute, orgRole, router, searchParams]);
 
-  // A client seat is provisioned into one project. The root is a stable public
-  // destination in navigation and invitations; once the scoped project is
-  // known it becomes the incident workspace without adding a second copy of
-  // the board and its real-time subscriptions.
-  useEffect(() => {
-    if (!clientViewer || projectsLoading || !clientProject?.id) return;
-    router.replace(`/${encodeURIComponent(clientProject.id)}`);
-  }, [clientProject?.id, clientViewer, projectsLoading, router]);
-
   // This screen no longer reads tasks at all.
   //
   // It used to subscribe to every task of every project the account can open —
@@ -919,28 +911,12 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
 
   if (clientViewer) {
     return (
-      <div className="qt-nav-scroll flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent">
-        <div className="workspace-page-layout min-h-full">
-          <PageHeader title="Інциденти" />
-          <div className="flex min-h-[320px] w-full flex-1 items-center justify-center">
-            <Surface preset="panel" padding="lg">
-              {projectsLoading || clientProject ? (
-                <div role="status" aria-busy="true" className="flex items-center gap-3 text-[13px] text-muted">
-                  <LoadingSpinner size="md" />
-                  <span>{clientProject ? 'Відкриваємо простір підтримки…' : 'Завантаження…'}</span>
-                </div>
-              ) : (
-                <EmptyState
-                  icon={Folder}
-                  title="Простір підтримки ще не налаштовано"
-                  description="Адміністратор має додати ваш обліковий запис до клієнтського проєкту."
-                  context="page"
-                />
-              )}
-            </Surface>
-          </div>
-        </div>
-      </div>
+      <ClientIncidentPortal
+        project={clientProject}
+        projectsLoading={projectsLoading}
+        currentUser={currentUser}
+        orgRole={orgRole}
+      />
     );
   }
 

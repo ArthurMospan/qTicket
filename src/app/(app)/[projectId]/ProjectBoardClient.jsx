@@ -192,6 +192,13 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     }
   }, [activeOrgId, resourceOrganizationId, switchOrg]);
 
+  // External clients have their own incident list at `/`. The inherited
+  // project board exposes support-team concepts even when its controls are
+  // read-only, so a direct or bookmarked project URL returns to that portal.
+  useEffect(() => {
+    if (clientViewer) router.replace('/');
+  }, [clientViewer, router]);
+
   // If the qtplus tab was active and just became hidden (e.g. unlinked), fall back.
   useEffect(() => {
     if (activeTab === 'qtplus' && !showQtPlusTab) {
@@ -349,6 +356,14 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
       <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
         <LoadingSpinner size="md" />
         <span className="sr-only">Завантаження проєкту…</span>
+      </div>
+    );
+  }
+
+  if (clientViewer) {
+    return (
+      <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
+        <LoadingSpinner size="md" label="Відкриваємо ваші звернення…" />
       </div>
     );
   }

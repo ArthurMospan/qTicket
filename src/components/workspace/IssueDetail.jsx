@@ -1587,7 +1587,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
 
                 The second used to be silent, because the check asked whether
                 they had access rather than whether the project named them. */}
-            {assigneesOffProjectRoster.length > 0 && (
+            {!clientViewer && assigneesOffProjectRoster.length > 0 && (
               <div className="mt-3">
                 <Alert
                   variant="warning"
@@ -1622,7 +1622,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     so it opens the product's menu — the same panel, rows and icons
                     the kebab beside the title drops. An external author has no
                     profile and no chat, so that one stays an explanation. */}
-                {isExternalReporter ? (
+                {clientViewer ? (
+                  <span className="inline-flex items-center gap-1">
+                    <span>Автор:</span>
+                    <span className="font-semibold text-ink">{reporter.name}</span>
+                  </span>
+                ) : isExternalReporter ? (
                   <Popover
                     position="bottom"
                     align="start"
@@ -1701,7 +1706,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     <span className="text-ink font-semibold">{timeAgo(issue.updatedAt || issue.createdAt)}</span>
                   </div>
                 </Tooltip>
-                {isOverdue && (
+                {!clientViewer && isOverdue && (
                   <>
                     <span className="w-[3px] h-[3px] rounded-full bg-faint" />
                     <Pill tone="danger" size="sm">Прострочено</Pill>
@@ -1728,28 +1733,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 WebkitBackdropFilter: isHeaderScrolled ? 'blur(4px)' : undefined,
               }}
               primaryChildren={clientViewer ? (
-                <>
-                  <div className={attributeItemClass}>
-                    <span className={attributeLabelClass}>Статус</span>
-                    <StatusPill
-                      label={statusCfg?.label || 'Новий'}
-                      color={statusCfg?.color}
-                    />
-                  </div>
-                  <div className={attributeItemClass}>
-                    <span className={attributeLabelClass}>Виконавці</span>
-                    {assignees.length > 0 ? (
-                      <div className="flex items-center -space-x-[6px]" aria-label="Виконавці інциденту">
-                        {assignees.slice(0, 4).map(member => (
-                          <UserAvatar key={member.id || member.uid} user={member} size="xs" stacked tooltip />
-                        ))}
-                        {assignees.length > 4 && <Pill tone="neutral" size="sm">+{assignees.length - 4}</Pill>}
-                      </div>
-                    ) : (
-                      <Pill tone="neutral" size="sm">Ще не призначено</Pill>
-                    )}
-                  </div>
-                </>
+                <div className={attributeItemClass}>
+                  <span className={attributeLabelClass}>Статус</span>
+                  <StatusPill
+                    label={statusCfg?.label || 'Новий'}
+                    color={statusCfg?.color}
+                  />
+                </div>
               ) : (
                 <>
                   {/* Status */}
@@ -2180,7 +2170,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     </DescriptionPlaceholder>
                   )}
 
-                {issueLabels.length > 0 && (
+                {!clientViewer && issueLabels.length > 0 && (
                   <DetailSection density="group" icon={TagIcon} title="Мітки" count={issueLabels.length} className="pt-1">
                     <div className="flex flex-wrap items-center gap-2">
                       {issueLabels.map(label => (
