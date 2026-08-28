@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 233,
-    "parsedFiles": 233,
+    "productFiles": 226,
+    "parsedFiles": 226,
     "parseErrors": 0,
     "nativeControls": 20,
     "structures": {
@@ -25,7 +25,7 @@
     "manualModalShells": 0,
     "manualPills": 0,
     "manualSurfaces": 0,
-    "localSurfaceExceptions": 38,
+    "localSurfaceExceptions": 35,
     "manualIconButtons": 0,
     "headingStyles": 0,
     "sharedChromeOverrides": 0,
@@ -39,13 +39,13 @@
   },
   "kit": {
     "totals": {
-      "components": 113,
-      "used": 113,
+      "components": 111,
+      "used": 111,
       "unused": 0,
-      "covered": 106,
+      "covered": 104,
       "uncovered": 0,
-      "routes": 14,
-      "previews": 143,
+      "routes": 11,
+      "previews": 139,
       "internal": 7,
       "unlisted": 0
     },
@@ -253,14 +253,11 @@
         "/[projectId]/issue/[issueId]",
         "/analytics",
         "/analytics/team/[memberId]",
-        "/calendar",
-        "/calendar/event/[eventId]",
         "/chat",
         "/clients",
         "/my",
         "/overview",
         "/settings",
-        "/sprints",
         "/team"
       ]
     },
@@ -283,14 +280,11 @@
         "/[projectId]/issue/[issueId]",
         "/analytics",
         "/analytics/team/[memberId]",
-        "/calendar",
-        "/calendar/event/[eventId]",
         "/chat",
         "/clients",
         "/my",
         "/overview",
         "/settings",
-        "/sprints",
         "/team"
       ]
     },
@@ -306,8 +300,7 @@
       "resembles": "",
       "structure": "chat",
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/sprints"
+        "/[projectId]/issue/[issueId]"
       ]
     },
     {
@@ -530,21 +523,6 @@
       "location": "src/app/(app)/settings/page.js:615",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
-    },
-    {
-      "location": "src/app/(app)/sprints/page.js:1038",
-      "tag": "div",
-      "className": "py-12 text-center text-[13px] text-faint bg-canvas rounded-[16px]"
-    },
-    {
-      "location": "src/app/(app)/sprints/page.js:1052",
-      "tag": "div",
-      "className": "flex w-[48px] shrink-0 cursor-pointer flex-col items-center justify-start rounded-[16px] bg-canvas pb-2 pt-4 transition-colors hover:bg-line"
-    },
-    {
-      "location": "src/app/(app)/sprints/page.js:883",
-      "tag": "div",
-      "className": "bg-canvas rounded-[16px] border border-transparent shadow-none overflow-hidden shrink-0"
     },
     {
       "location": "src/components/AudioTaskPanel.jsx:202",

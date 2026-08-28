@@ -4,10 +4,10 @@
 // A whole day as a pressable tile — the timesheet's month grid, where one day
 // summarises the hours logged against it.
 //
-// It is the fourth of the calendar's own shapes, beside `CalendarEntry`,
-// `CalendarDayNumber` and `CalendarHourSlot`. The month view in the calendar
-// itself draws its cells as plain containers because the entries inside them
-// are the targets; here the day is the target, so it is a button.
+// It is one of the two calendar shapes the product still draws, beside
+// `CalendarDayNumber`. The entry tile and the hour strip went with the planning
+// calendar; the timesheet kept the grid, where the day itself is the target and
+// is therefore a button.
 
 import React from 'react';
 

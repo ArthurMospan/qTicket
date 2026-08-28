@@ -195,7 +195,6 @@ test('every composer forwards the consent to the API, or the box does nothing', 
   for (const path of [
     '../src/app/(app)/page.js',
     '../src/app/(app)/my/page.js',
-    '../src/app/(app)/sprints/page.js',
     '../src/app/(app)/[projectId]/ProjectBoardClient.jsx',
   ]) {
     const source = await read(path);
@@ -292,10 +291,8 @@ test('the comment composer is on the task screen before the membership arrives',
   assert.match(timeline, /const canModerateComments = can\(orgRole, 'moderate:content'\);/);
 
   // QuickTeam-only screens keep the old member-level behaviour.
-  for (const path of [
-    '../src/app/(app)/my/page.js',
-    '../src/app/(app)/sprints/page.js',
-  ]) {
+  {
+    const path = '../src/app/(app)/my/page.js';
     const source = await read(path);
     assert.doesNotMatch(source, /can\(orgRole, '(?:edit|delete):issue'\)/, path);
   }

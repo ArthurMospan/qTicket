@@ -172,15 +172,12 @@ test('QUI-134 gives the neutral dot the surface opposite, not a brand hue', asyn
 });
 
 test('QUI-135 keeps every status pill readable against its own tint', async () => {
-  const [sprints, kit] = await Promise.all([
-    read('../src/app/(app)/sprints/page.js'),
-    readKitShowcase(),
-  ]);
-  // `#cbd5e1` text on a 9% tint of itself scored about 1.5:1.
-  for (const source of [sprints, kit]) {
-    assert.doesNotMatch(source, /label="Завершено" color="#cbd5e1"/);
-    assert.match(source, /label="Завершено" color="#1f1f1f"/);
-  }
+  const kit = readKitShowcase();
+  // `#cbd5e1` text on a 9% tint of itself scored about 1.5:1. The sprint screen
+  // that shipped the unreadable pill is gone; the catalogue still has to show
+  // the readable one.
+  assert.doesNotMatch(kit, /label="Завершено" color="#cbd5e1"/);
+  assert.match(kit, /label="Вирішено" color="#1f1f1f"/);
 });
 
 test('QUI-136 gives every tooltip the same seamless arrow', async () => {
@@ -416,16 +413,16 @@ test('every profile action circle carries a tooltip as well as a label', async (
   assert.doesNotMatch(profile, /trigger=\{\s*<Tooltip/);
 });
 
-// The sprint accordion, the board column and the task list section are three
-// places that fold a group of tasks away. They are one control.
+// The board column and the task list section are two places that fold a group
+// of tasks away. They are one control. The sprint accordion was the third and
+// left with its screen.
 test('every collapse control that folds a group of tasks is the same button', async () => {
-  const [sprints, board, listView] = await Promise.all([
-    readFile(new URL('../src/app/(app)/sprints/page.js', import.meta.url), 'utf8'),
+  const [board, listView] = await Promise.all([
     readFile(new URL('../src/components/workspace/AgileBoard.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/components/ui/TaskManagement/TaskListView.jsx', import.meta.url), 'utf8'),
   ]);
 
-  for (const [name, source] of [['sprints', sprints], ['board', board], ['list view', listView]]) {
+  for (const [name, source] of [['board', board], ['list view', listView]]) {
     assert.match(
       source,
       /style="ghost"\s*\r?\n\s*size="icon-xs"/,
@@ -436,10 +433,6 @@ test('every collapse control that folds a group of tasks is the same button', as
     // kebab's glyph and its optical weight beside the plus.
     assert.doesNotMatch(source, /size="icon-sm"/, `${name} must keep the miniature control`);
   }
-  // The sprint header specifically: it used to be `icon`, a 32px box against
-  // the other two.
-  assert.doesNotMatch(sprints, /size="icon"\s*\r?\n\s*icon=\{isExpanded \? ChevronDown : ChevronRight\}/);
-  assert.match(sprints, /size="icon-xs"\s*\r?\n\s*icon=\{isExpanded \? ChevronDown : ChevronRight\}/);
 });
 
 test('the sidebar theme picker never nests a ColorSwatch button in another button', async () => {

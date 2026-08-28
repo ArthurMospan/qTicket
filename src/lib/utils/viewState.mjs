@@ -149,9 +149,3 @@ export const INCIDENT_QUEUE_VIEW_SCHEMA = Object.freeze({
   period: { default: 'all', values: ['all', '7days', '30days'] },
 });
 
-export const SPRINTS_VIEW_SCHEMA = Object.freeze({
-  projects: { default: [], type: 'list' },
-  assignee: { default: 'all' },
-  priority: { default: 'all' },
-  type: { default: 'all' },
-});

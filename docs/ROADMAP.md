@@ -134,14 +134,30 @@ Completed product slice on 2026-08-28:
   time tracking, estimates, task hierarchy, task links or QuickTeam+ chat.
   Internal support keeps status, responsible staff, priority, type, resolution
   target, labels, description, attachments and the shared client conversation.
-- Direct visits to inherited task-manager routes are now contained at the
-  request boundary: `/analytics` and `/calendar` return to **Огляд**, while
-  `/sprints` and `/chat` return to **Інциденти**. The active organization is
-  preserved and legacy view filters are discarded.
+- Direct visits to inherited task-manager routes are contained at the request
+  boundary: `/analytics` and `/calendar` return to **Огляд**, while `/sprints`
+  and `/chat` return to **Інциденти**. The active organization is preserved and
+  legacy view filters are discarded.
+- The planning calendar and the sprint board are now deleted, not merely
+  hidden. `src/app/(app)/calendar`, `src/app/(app)/calendar/event/[eventId]`
+  and `src/app/(app)/sprints` are gone, together with everything a reference
+  audit found unreachable without them: the `CalendarEntry` and
+  `CalendarHourSlot` kit components, `calendarEventDates`, `calendarLayout`,
+  `sectionExpansion` and `sprintPlanning`, `SPRINTS_VIEW_SCHEMA`, the
+  `sprintSearch`/`calendarSearch` store slices and the `manage:sprints`
+  permission, whose only call site was the deleted screen. The redirects stay:
+  a copied bookmark lands in the nearest supported workflow instead of on a
+  404. The `calendarEvents` server machinery is deliberately untouched —
+  `/api/calendar/*`, `reminderJobs`, the notification outbox, the Firestore
+  rule that keeps `calendarEvents` server-only for every browser role, and the
+  `sprints` collection with its stored `issue.sprintId` values, which are an
+  organization's own history and are not rewritten.
 - Public help is now a qTicket catalogue of 13 implemented topics. Articles for
-  sprints, time tracking, invoices, analytics, planning calendars, YouTrack and
-  workspace chat remain inherited implementation material and are not
-  published as available qTicket features.
+  time tracking, invoices, analytics, YouTrack and workspace chat remain
+  inherited implementation material and are not published as available qTicket
+  features. The sprint and planning-calendar articles are deleted outright:
+  unpublished was the right answer while the screens still existed, and a help
+  article for a screen that does not exist is not material for later.
 - Notification settings expose only in-app delivery. Email and Telegram remain
   hidden until a real provider is configured and verified; the beta does not
   promise channels that cannot deliver. The panel itself is now a client
@@ -267,10 +283,33 @@ External client users:
 4. **Інцидент** — visible status, description, attachments and shared
    conversation; no workflow, priority, assignee or organization controls.
 
-Sprints, planning calendars, time tracking, invoices, AI task estimation and
-QuickTeam+ portal controls are not primary qTicket navigation. Do not delete
-their inherited backend code merely to hide them; remove them from qTicket
-surfaces first, then delete only when references and migrations are understood.
+Time tracking, invoices, AI task estimation and QuickTeam+ portal controls are
+not primary qTicket navigation. Do not delete their inherited backend code
+merely to hide them; remove them from qTicket surfaces first, then delete only
+when references and migrations are understood.
+
+Sprints and planning calendars have finished that sequence. Their screens were
+removed from qTicket navigation, then contained at the request boundary, and
+their references are now audited and the screens deleted. What remains is
+deliberate and is not a leftover to clean up later:
+
+- **`calendarEvents` server machinery stays.** `/api/calendar/*` and
+  `src/lib/server/reminderJobs.js` drive birthday greetings, deadline reminders
+  and the notification outbox, which are live qTicket features. Those routes
+  keep requiring an internal support role and `calendarEvents` stays
+  server-only for every browser role in Firestore Rules. Deleting a screen is
+  not a reason to relax a rule.
+- **Stored sprint data stays.** The `sprints` collection, its index and
+  `issue.sprintId` are an organization's own record. Nothing rewrites them, and
+  `useSprints` still serves the incident detail.
+- **The event detail component chain stays, for now.** `EventModal`,
+  `CalendarEventPage`, `CalendarEventDialog`, `useCalendarEventTimeLogs` and
+  the `TimePicker` kit component are only reachable through
+  `openEventQuickView`, which the deleted calendar screen was the only caller
+  of. They are the last browser client of the calendar API routes that remain,
+  and they are entangled with the shared `DetailLayout context="event"` and
+  `TaskAttributesPanel context="calendar"` kit contract. Removing them is a
+  slice of its own, taken together with a decision about the API routes.
 
 ### Active build sequence and handoff rule
 

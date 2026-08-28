@@ -659,12 +659,8 @@ export default function WorkspaceHeader() {
   const setMyTaskSearch = useWorkspaceStore(s => s.setMyTaskSearch);
   const projectSearchQuery = useWorkspaceStore(s => s.projectSearch);
   const setProjectSearchQuery = useWorkspaceStore(s => s.setProjectSearch);
-  const sprintSearch = useWorkspaceStore(s => s.sprintSearch);
-  const setSprintSearch = useWorkspaceStore(s => s.setSprintSearch);
   const analyticsSearch = useWorkspaceStore(s => s.analyticsSearch);
   const setAnalyticsSearch = useWorkspaceStore(s => s.setAnalyticsSearch);
-  const calendarSearch = useWorkspaceStore(s => s.calendarSearch);
-  const setCalendarSearch = useWorkspaceStore(s => s.setCalendarSearch);
   const chatOnlineUsers = useWorkspaceStore(s => s.chatOnlineUsers);
   const localSearchFeedback = useWorkspaceStore(s => s.localSearchFeedback);
   const openCommandPalette = useWorkspaceStore(s => s.openCommandPalette);
@@ -696,20 +692,16 @@ export default function WorkspaceHeader() {
       setTeamSearch('');
       setWorkspaceSearch('');
       setMyTaskSearch('');
-      setSprintSearch('');
       setAnalyticsSearch('');
-      setCalendarSearch('');
       setGlobalQuery('');
       setShowSearch(false);
     });
   }, [
     pathname,
     setAnalyticsSearch,
-    setCalendarSearch,
     setChatSearch,
     setMyTaskSearch,
     setProjectSearchQuery,
-    setSprintSearch,
     setTeamSearch,
     setWorkspaceSearch,
   ]);
@@ -722,24 +714,18 @@ export default function WorkspaceHeader() {
         ? teamSearch
         : pathname.startsWith('/my')
           ? myTaskSearch
-          : pathname.startsWith('/sprints')
-            ? sprintSearch
-            : pathname.startsWith('/analytics')
-              ? analyticsSearch
-              : pathname.startsWith('/calendar')
-                ? calendarSearch
-              : pathname === '/'
-                ? workspaceSearch
-                : globalQuery;
+          : pathname.startsWith('/analytics')
+            ? analyticsSearch
+            : pathname === '/'
+              ? workspaceSearch
+              : globalQuery;
 
   const isContextualSearch = projectSearch
     || mode === 'chat'
     || pathname === '/'
     || pathname.startsWith('/team')
     || pathname.startsWith('/my')
-    || pathname.startsWith('/sprints')
-    || pathname.startsWith('/analytics')
-    || pathname.startsWith('/calendar');
+    || pathname.startsWith('/analytics');
   const searchScope = useMemo(
     () => (projectSearch && project ? createProjectSearchScope(project) : null),
     [project, projectSearch],
@@ -790,12 +776,8 @@ export default function WorkspaceHeader() {
             setTeamSearch(q);
           } else if (pathname.startsWith('/my')) {
             setMyTaskSearch(q);
-          } else if (pathname.startsWith('/sprints')) {
-            setSprintSearch(q);
           } else if (pathname.startsWith('/analytics')) {
             setAnalyticsSearch(q);
-          } else if (pathname.startsWith('/calendar')) {
-            setCalendarSearch(q);
           } else if (pathname === '/') {
             setWorkspaceSearch(q);
           } else {
@@ -818,12 +800,8 @@ export default function WorkspaceHeader() {
             setTeamSearch('');
           } else if (pathname.startsWith('/my')) {
             setMyTaskSearch('');
-          } else if (pathname.startsWith('/sprints')) {
-            setSprintSearch('');
           } else if (pathname.startsWith('/analytics')) {
             setAnalyticsSearch('');
-          } else if (pathname.startsWith('/calendar')) {
-            setCalendarSearch('');
           } else if (pathname === '/') {
             setWorkspaceSearch('');
           } else {

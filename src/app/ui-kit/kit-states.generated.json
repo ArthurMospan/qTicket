@@ -13,14 +13,14 @@
     "long-text"
   ],
   "totals": {
-    "components": 113,
-    "stateful": 101,
-    "hover": 67,
-    "focus": 66,
-    "disabled": 34,
+    "components": 111,
+    "stateful": 99,
+    "hover": 65,
+    "focus": 64,
+    "disabled": 32,
     "loading": 7,
     "error": 6,
-    "long-text": 71
+    "long-text": 69
   },
   "components": {
     "Alert": {
@@ -77,18 +77,6 @@
       "hover": "own",
       "focus": "global",
       "long-text": "children"
-    },
-    "CalendarEntry": {
-      "disabled": "native",
-      "hover": "own",
-      "focus": "global",
-      "long-text": "title"
-    },
-    "CalendarHourSlot": {
-      "disabled": "native",
-      "hover": "own",
-      "focus": "global",
-      "long-text": "label"
     },
     "Card": {
       "hover": "own",
@@ -547,13 +535,6 @@
       "calendar",
       "variant-matrix"
     ],
-    "CalendarEntry": [
-      "calendar",
-      "variant-matrix"
-    ],
-    "CalendarHourSlot": [
-      "calendar"
-    ],
     "Card": [
       "surfaces",
       "variant-matrix",
@@ -667,7 +648,6 @@
     ],
     "IconAction": [
       "surfaces",
-      "calendar",
       "inner-nav-layout",
       "variant-matrix",
       "states"

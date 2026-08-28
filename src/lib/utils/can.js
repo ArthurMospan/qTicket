@@ -30,8 +30,11 @@ export const PERMISSIONS = {
   // project settings, behind `edit:project_settings`, and the entry that used to
   // sit here was a second name for the same gate that nothing ever called.
 
-  // Sprints
-  'manage:sprints': ['owner', 'admin'], // Створення/старт/завершення спринтів
+  // Sprints are not in this matrix. The permission that guarded creating,
+  // starting and completing one was read by the planning screen and by nothing
+  // else, and that screen is gone — an entry no call site reads is a claim
+  // nothing tests. Stored `sprintId` values and the `sprints` collection rule
+  // are untouched: the data is still somebody's history.
 
   // Team
   //

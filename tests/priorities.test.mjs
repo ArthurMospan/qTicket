@@ -59,7 +59,6 @@ test('no path that creates a task invents a priority for it', async () => {
     'src/components/CreateTaskModal.jsx',
     'src/app/(app)/page.js',
     'src/app/(app)/my/page.js',
-    'src/app/(app)/sprints/page.js',
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
     'src/components/AudioTaskPanel.jsx',
     'src/components/workspace/IssueDetail.jsx',

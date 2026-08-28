@@ -244,42 +244,6 @@ test('a new task appears at the top of My tasks, as it does on a board', async (
   assert.deepEqual(sorted.slice(1).map(issue => issue.id), ['old', 'older']);
 });
 
-test('the planning board reads like the boards it borrows from', async () => {
-  const sprints = await read('src/app/(app)/sprints/page.js');
-
-  // A row and a card name the parent from every task in view. Each list used to
-  // be handed only its own column, so a subtask dropped into a sprint could not
-  // find its parent there and fell back to the words «Батьківське завдання»
-  // where the key belongs.
-  // Once for the card in «Без спринта», once for the row inside a sprint, once
-  // for the row in the dialog that puts an existing task into a sprint.
-  assert.equal(sprints.match(/allIssues=\{issues\}/g)?.length, 3);
-  assert.doesNotMatch(sprints, /issues=\{issueList\}/);
-  // Both also say what blocks a task, so the two views of one list agree.
-  assert.match(sprints, /<TaskRow[\s\S]{0,400}?issueLinks=\{issueLinks\}/);
-
-  // «Без спринта» is a board column and is drawn like one: no rule under the
-  // header, and the same count badge the board columns carry.
-  assert.doesNotMatch(sprints, /border-b border-line/);
-  assert.match(sprints, /<Pill tone="count" size="md"/);
-  assert.doesNotMatch(sprints, /<Counter/);
-});
-
-test('a collapsed sprint opens on the first click', async () => {
-  const { nextSectionExpansion } = await import('../src/lib/utils/sectionExpansion.mjs');
-
-  // A finished sprint starts collapsed, so the first click has to open it. The
-  // toggle used to write `false` into an empty slot — the value it already had
-  // — and the header only answered the second click.
-  assert.deepEqual(nextSectionExpansion({}, 'done-sprint', false), { 'done-sprint': true });
-  assert.deepEqual(nextSectionExpansion({}, 'live-sprint', true), { 'live-sprint': false });
-  // An explicit state is flipped, and its neighbours are left alone.
-  assert.deepEqual(
-    nextSectionExpansion({ a: false, b: true }, 'a', false),
-    { a: true, b: true },
-  );
-});
-
 // Дві знахідки з одного повідомлення: у редакторі опису при створенні завдання
 // не було «прикріпити файл», хоч у самому завданні воно є, і жодна іконка
 // тулбара не показувала підказки.
