@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { scanKitUsage } from '../scripts/scan-kit-usage.mjs';
 import { auditUiFidelity } from '../scripts/audit-ui-fidelity.mjs';
 import { readShowcase } from '../scripts/ui-kit-showcase.mjs';
@@ -608,7 +609,6 @@ test('approved UI decisions stay encoded in shared components', () => {
   const filterBar = readFileSync(new URL('../src/components/ui/FilterBar.jsx', import.meta.url), 'utf8');
   const card = readFileSync(new URL('../src/components/ui/Layout/Card.jsx', import.meta.url), 'utf8');
   const surface = readFileSync(new URL('../src/components/ui/Surface.jsx', import.meta.url), 'utf8');
-  const sprints = readFileSync(new URL('../src/app/(app)/sprints/page.js', import.meta.url), 'utf8');
   const button = readFileSync(new URL('../src/components/ui/Button.jsx', import.meta.url), 'utf8');
 
   assert.match(tokens, /h1: \{ size: '24px'/);
@@ -635,10 +635,6 @@ test('approved UI decisions stay encoded in shared components', () => {
   for (const preset of ['panel', 'card', 'inset', "'nested-card'", "'bordered-panel'"]) {
     assert.ok(surface.includes(`${preset}:`), `Surface preset missing: ${preset}`);
   }
-  assert.match(sprints, /<StatusPill label="Активний"/);
-  assert.doesNotMatch(sprints, /function Badge\(/);
-  assert.doesNotMatch(sprints, /<select\b/);
-  assert.doesNotMatch(sprints, /<Input type="date"/);
 
   // QUI-126. A control declares its height once, and the line box reads the
   // same value, so text is centred by the browser instead of by a `leading-*`
@@ -736,4 +732,17 @@ test('legacy task-manager pages redirect to supported qTicket workflows', () => 
   assert.match(source, /prefix: '\/chat', destination: '\/my'/);
   assert.match(source, /searchParams\.get\('org'\)/);
   assert.match(source, /destinationUrl\.searchParams\.set\('org', organizationId\)/);
+
+  // Two of the four have nothing behind the redirect any more. The planning
+  // calendar and the sprint board are deleted, so the redirect is the only
+  // thing standing between a copied bookmark and a 404 — and a page file
+  // reappearing at either address would be the inherited task manager coming
+  // back through a door nobody watches.
+  for (const route of ['calendar', 'calendar/event/[eventId]', 'sprints']) {
+    assert.equal(
+      existsSync(fileURLToPath(new URL(`../src/app/(app)/${route}/page.js`, import.meta.url))),
+      false,
+      `${route} is a deleted qTicket surface and must not have a page again`,
+    );
+  }
 });

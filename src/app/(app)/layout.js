@@ -184,15 +184,16 @@ export default function WorkspaceLayout({ children }) {
   const isSettings = pathname?.startsWith('/settings');
   const hideHeader = isSettings;
 
-  // A task and an event are the two screens you open *into* rather than
-  // navigate between: they carry their own breadcrumb back to the project, they
-  // have their own tabs, and on a phone a task's chat is a place people sit and
-  // type. The tab bar there costs 78px of a 660px screen for a destination
-  // nobody is heading to mid-conversation, so those two do without it. Every
-  // other screen keeps it.
-  const isFocusedRoute = Boolean(pathname) && (
-    /^\/[^/]+\/issue\/[^/]+/.test(pathname) || pathname.startsWith('/calendar/event/')
-  );
+  // A task is the screen you open *into* rather than navigate between: it
+  // carries its own breadcrumb back to the project, it has its own tabs, and on
+  // a phone its chat is a place people sit and type. The tab bar there costs
+  // 78px of a 660px screen for a destination nobody is heading to
+  // mid-conversation, so it does without one. Every other screen keeps it.
+  //
+  // The calendar event page used to be the second such screen. It is gone with
+  // the rest of the planning calendar, and a rule for a route that no longer
+  // resolves is a rule nobody can read the truth of.
+  const isFocusedRoute = Boolean(pathname) && /^\/[^/]+\/issue\/[^/]+/.test(pathname);
 
   // Published on <body> so the CSS that reserves room for the bar can stop
   // reserving it, the same way the on-screen keyboard already does.

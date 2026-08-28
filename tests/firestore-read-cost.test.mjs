@@ -283,8 +283,6 @@ test('every screen that reads time logs says which window it is drawing', async 
   // The screens that do not need hours do not pay for them.
   const settings = readFileSync(join(root, 'app', '(app)', 'settings', 'page.js'), 'utf8');
   assert.match(settings, /includeTimeLogs: false/);
-  const sprints = readFileSync(join(root, 'app', '(app)', 'sprints', 'page.js'), 'utf8');
-  assert.match(sprints, /includeTimeLogs: false/);
 });
 
 // A live listener earns its cost where somebody is acting on the data as it
@@ -320,7 +318,7 @@ test('the report screens take a reading rather than holding a subscription', () 
   }
 
   // The screens where the data is the thing being worked on keep the default.
-  for (const file of ['app/(app)/sprints/page.js', 'app/(app)/settings/page.js']) {
+  for (const file of ['app/(app)/my/page.js', 'app/(app)/settings/page.js']) {
     const source = readFileSync(join(root, file.split('/').join(sep)), 'utf8');
     assert.doesNotMatch(source, /live: false/, `${file} is a working screen, not a report`);
   }

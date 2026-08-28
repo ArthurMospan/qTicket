@@ -2,8 +2,9 @@
 
 // ─── UI Kit: Calendar Day Number ─────────────────────────────────────────────
 // The date in the corner of a day cell, which is also the control that opens
-// that day. Part of the calendar's own vocabulary, beside `CalendarEntry` and
-// `CalendarHourSlot`.
+// that day. Part of the calendar's own vocabulary, beside `CalendarDayCell` —
+// the two shapes the timesheet's month grid kept when the planning calendar
+// went away.
 
 import React from 'react';
 

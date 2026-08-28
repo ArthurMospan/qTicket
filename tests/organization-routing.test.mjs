@@ -248,15 +248,13 @@ test('role-filtered organization caches are isolated by organization, user and r
 });
 
 test('remembered workspace filters are scoped to the organization', async () => {
-  const [myTasks, sprints, clientWorkspace] = await Promise.all([
+  const [myTasks, clientWorkspace] = await Promise.all([
     read('../src/app/(app)/my/page.js'),
-    read('../src/app/(app)/sprints/page.js'),
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
   ]);
 
   assert.match(myTasks, /storageKey: `qt:view:\$\{activeOrgId\}:incident-queue`/);
   assert.match(myTasks, /qt:incident-queue:hidden-categories:\$\{uid \|\| 'anonymous'\}:\$\{activeOrgId \|\| 'none'\}/);
-  assert.match(sprints, /storageKey: `qt:view:\$\{activeOrgId\}:sprints`/);
   // The qTicket client workspace is a short customer queue, not another board
   // with a second remembered view contract. Its three filters reset when the
   // customer changes, while the organization-wide queue remains bookmarkable.

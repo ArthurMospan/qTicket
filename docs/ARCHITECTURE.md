@@ -60,10 +60,12 @@ Firebase token or session cookie.
 The published qTicket route surface is deliberately narrower than the inherited
 task engine. `src/proxy.js` redirects direct visits to `/analytics` and
 `/calendar` into `/overview`, and `/sprints` and `/chat` into `/my`, preserving
-only the active `org` query parameter. The public help catalogue follows the
-same boundary: it describes only workflows reachable in qTicket, even while
-legacy implementation remains in the repository for a later reference-safe
-removal.
+only the active `org` query parameter. Two of those four no longer have a page
+behind the redirect at all: the planning calendar and the sprint board are
+deleted, so the redirect is what keeps a copied bookmark off a 404. `/analytics`
+and `/chat` still have inherited pages, and for those the redirect is the whole
+containment. The public help catalogue follows the same boundary: it describes
+only workflows reachable in qTicket.
 
 The authenticated shell follows the same rule. Desktop and mobile navigation
 do not subscribe to or render the inherited QuickTeam timer. Client settings
@@ -494,7 +496,9 @@ setState({ priority: 'high' });   // a patch, never a whole state
   a hand-edited link must still open the screen.
 - `type: 'list'` serialises as `a,b,c`. Its default is `[]`.
 
-Shipped schemas: `INCIDENT_QUEUE_VIEW_SCHEMA` and `SPRINTS_VIEW_SCHEMA`.
+Shipped schema: `INCIDENT_QUEUE_VIEW_SCHEMA`. `SPRINTS_VIEW_SCHEMA` went with
+the sprint board — a schema is a description of a screen's address, and there is
+no longer a screen at that address.
 Аналітика має окрему перевірену серіалізацію в
 `analyticsUrlState.mjs`: вкладка, проєкти, виконавець, пріоритет, тип, період,
 пошук і точний тиждень або місяць табеля переживають перезавантаження та
@@ -525,16 +529,16 @@ Shipped schemas: `INCIDENT_QUEUE_VIEW_SCHEMA` and `SPRINTS_VIEW_SCHEMA`.
 ### Deliberate omissions
 
 - **Search is not in the address.** `projectSearch`, `myTaskSearch` and
-  `sprintSearch` live in the workspace store and are driven by the header, which
-  is shared chrome. Binding a store to the address in both directions is a
+  `analyticsSearch` live in the workspace store and are driven by the header,
+  which is shared chrome. Binding a store to the address in both directions is a
   second source of truth, which is the thing this change exists to remove.
 - **The old per-filter `localStorage` keys are not migrated.** `qt_board_sprint_*`,
   `qt_board_assignee_*`, `qt_board_priority_*`, `qt_board_type_*` and
   `qt_project_view_*` are no longer read or written. Filters reset once, and the
   alternative was carrying a migration shim indefinitely.
-- **`/calendar` is not converted.** Він має окрему лексику дати й режиму
-  календаря. `/analytics` уже зберігає власні періоди, вкладки й date anchor у
-  своїй адресі.
+- **`/analytics` не конвертовано.** Воно вже зберігає власні періоди, вкладки
+  й date anchor у своїй адресі. `/calendar` колись стояв тут із власною лексикою
+  дати й режиму — екрана більше немає, тож і винятку немає.
 
 ### Extending it
 

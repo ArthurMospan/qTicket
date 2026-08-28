@@ -41,11 +41,11 @@ test('a screen ends its own scroller with the footprint the shell stopped reserv
     'src/app/(app)/my/page.js',
     'src/app/(app)/analytics/page.js',
     'src/app/(app)/analytics/team/[memberId]/page.js',
-    'src/app/(app)/sprints/page.js',
     'src/app/(app)/settings/page.js',
     // `/errors` is not in this list any more and must not come back: it left
-    // the workspace shell entirely, so there is no bar over it to clear.
-    'src/app/(app)/calendar/page.js',
+    // the workspace shell entirely, so there is no bar over it to clear. The
+    // planning calendar and the sprint board are gone for a different reason —
+    // they are deleted, not merely outside the shell.
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
     'src/components/workspace/AgileBoard.jsx',
     'src/components/ui/Navigation/MemberRail.jsx',

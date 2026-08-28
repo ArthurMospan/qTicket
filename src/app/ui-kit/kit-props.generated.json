@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 113,
-    "props": 835,
-    "documentedProps": 835,
+    "components": 111,
+    "props": 820,
+    "documentedProps": 820,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -739,126 +739,6 @@
             "today"
           ],
           "description": "Which day this is relative to today and to the month on screen."
-        }
-      ]
-    },
-    "CalendarEntry": {
-      "file": "src/components/ui/Calendar/CalendarEntry.jsx",
-      "summary": "One entry inside a day cell — an event or a deadline.",
-      "props": [
-        {
-          "name": "accent",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Event only: the colour of the left rule, supplied per event type."
-        },
-        {
-          "name": "background",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Event only: the tinted fill that goes with `accent`."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "compact",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "The month grid's tighter geometry; the week grid uses the roomier one."
-        },
-        {
-          "name": "dimmed",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Fades the entry — a deadline that is already done."
-        },
-        {
-          "name": "leading",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "Icon or dot before the title."
-        },
-        {
-          "name": "meta",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "A second line under the title, shown only in the roomier geometry."
-        },
-        {
-          "name": "onClick",
-          "default": "",
-          "type": "(event) => void",
-          "values": [],
-          "description": "Opens the entry."
-        },
-        {
-          "name": "title",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "The entry's own text; it truncates rather than wraps."
-        },
-        {
-          "name": "tone",
-          "default": "'event'",
-          "type": "'event'|'deadline'",
-          "values": [
-            "deadline",
-            "event"
-          ],
-          "description": "Which of the two kinds of entry this is."
-        },
-        {
-          "name": "trailing",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "Pushed to the far end — the padlock on a private event."
-        }
-      ]
-    },
-    "CalendarHourSlot": {
-      "file": "src/components/ui/Calendar/CalendarHourSlot.jsx",
-      "summary": "One hour of a day column, as a create-here target.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "label",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Accessible name, since the slot has no text of its own."
-        },
-        {
-          "name": "onClick",
-          "default": "",
-          "type": "(event) => void",
-          "values": [],
-          "description": "Creates an event at this hour."
-        },
-        {
-          "name": "style",
-          "default": "",
-          "type": "React.CSSProperties",
-          "values": [],
-          "description": "Placement within the day column."
         }
       ]
     },

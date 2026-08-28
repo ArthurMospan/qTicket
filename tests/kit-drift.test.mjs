@@ -137,9 +137,18 @@ test('the variant matrix renders every component that can stand alone', () => {
 // explicit `ToggleSwitch size="md"` was the master switch for a dormant
 // external channel. `md` remains the component default and its catalogue
 // preview remains generated from that declaration.
+// Raised 115 → 118 when the planning calendar and the sprint board were
+// deleted. Three values lost the only screens that passed them: the phone
+// month's `CalendarDayCell density="compact"`, the «додати існуюче завдання»
+// dialog's `Dialog bodyPadding="sticky-head"`, and the sprint backlog's
+// `Surface composition="scroll-pane"`. They stay declared for the same reason
+// the skeleton presets did — they are the components' own vocabulary, and the
+// components themselves are still shipped by the incident screens. The number
+// grew because the evidence was deleted, not because a call site moved out of
+// the scan's view, which is the thing this ceiling is watching for.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 115,
+    committed.totals.declaredUnused <= 118,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   for (const key of ['Input.composition.status-entry', 'Button.composition.status-submit', 'Dialog.size.status']) {

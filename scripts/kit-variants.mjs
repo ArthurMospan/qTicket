@@ -141,7 +141,6 @@ const SOURCES = {
     preset: { literal: ['bordered', 'bordered-compact', 'borderless', 'elevated'] },
   },
   AttributeTrigger: { variant: { literal: ['cell', 'details'] } },
-  CalendarEntry: { tone: { literal: ['deadline', 'event'] } },
   ColorSwatch: { size: { literal: ['choice', 'theme', 'trigger'] } },
   ListRow: { density: { literal: ['compact', 'roomy'] } },
   CalendarDayNumber: { state: { literal: ['default', 'outside', 'today'] } },

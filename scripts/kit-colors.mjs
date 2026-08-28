@@ -48,7 +48,6 @@ const OUT_OF_SCOPE = new Set([
 const DATA_COLORS = {
   'src/app/(app)/page.js': 'fallback colour for a priority that carries none',
   'src/app/(app)/settings/page.js': 'the palette a person picks a brand colour from, and the stored sidebarColor',
-  'src/app/(app)/sprints/page.js': 'StatusPill is handed a colour, the way a status from the database is',
   'src/components/SearchModal.jsx': 'fallback colour for a type that carries none',
   'src/components/workspace/AgileBoard.jsx': 'the synthetic «Приховані» lane carries a colour like every other lane',
   'src/components/workspace/BillingTab.jsx': 'the invoice print document is injected into a window that cannot see the app CSS',

@@ -105,7 +105,6 @@ test('every permission in the matrix is read by something', async () => {
     'src/app/(app)/chat/page.js',
     'src/app/(app)/page.js',
     'src/app/(app)/my/page.js',
-    'src/app/(app)/sprints/page.js',
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
     'src/components/MobileNav.jsx',
     'src/components/WorkspaceSidebar.jsx',

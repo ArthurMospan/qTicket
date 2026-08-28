@@ -20,10 +20,12 @@ export async function proxy(request) {
     pathname === prefix || pathname.startsWith(`${prefix}/`)
   ));
 
-  // The inherited implementation stays in the repository until its data
-  // readers and migrations can be removed safely, but these are not qTicket
-  // product routes. A copied bookmark must land in the nearest supported
-  // workflow and must not resurrect the task-manager interface.
+  // None of these are qTicket product routes. `/calendar` and `/sprints` have
+  // no page behind them at all any more — the screens and everything only they
+  // reached are deleted — and the redirect is what keeps a copied bookmark
+  // landing in the nearest supported workflow instead of on a 404. `/analytics`
+  // and `/chat` still have inherited pages behind them; the redirect is what
+  // keeps those out of reach.
   if (legacyRoute) {
     const destinationUrl = new URL(legacyRoute.destination, request.url);
     const organizationId = request.nextUrl.searchParams.get('org');

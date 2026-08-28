@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Forms/Textarea';
 import { Select, MultiSelect } from '@/components/ui/Select';
 import Surface from '@/components/ui/Surface';
-import { AttributeTrigger, DetailSection, Meter, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, ChatComposerCore, MarkdownViewer, SelectableChip, ResponseChoice, CalendarEntry, CalendarDayNumber, CalendarDayCell, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
+import { AttributeTrigger, DetailSection, Meter, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, ChatComposerCore, MarkdownViewer, SelectableChip, ResponseChoice, CalendarDayNumber, CalendarDayCell, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
 import MentionMenu from '@/components/ui/Chat/MentionMenu';
 import MobilePaneBack from '@/components/ui/Navigation/MobilePaneBack';
 import AvatarButton from '@/components/ui/DataDisplay/AvatarButton';
 import TextAction from '@/components/ui/TextAction';
 import kitUsage from '../kit-usage.generated.json';
 import kitDrift from '../kit-drift.generated.json';
-import { Plus, Settings2, Folder, Users as UsersIcon } from 'lucide-react';
+import { Plus, Settings2, Folder } from 'lucide-react';
 import { KitContext } from '../preview';
 import { KIT_MENTION_MEMBERS } from '../demo-data';
 
@@ -64,15 +64,6 @@ const VARIANT_BASE = {
   ),
   Card: (props) => <Card {...props}><span className="text-[11px] text-muted">Картка</span></Card>,
   ResponseChoice: (props) => <ResponseChoice value="accepted" onChange={() => {}} {...props} />,
-  CalendarEntry: (props) => (
-    <CalendarEntry
-      accent="#6366f1"
-      background="#eef2ff"
-      title="10:00 Планерка"
-      leading={<UsersIcon size={11} style={{ color: '#6366f1' }} className="shrink-0" />}
-      {...props}
-    />
-  ),
   CalendarDayNumber: (props) => <CalendarDayNumber aria-label="Відкрити 14 число" {...props}>14</CalendarDayNumber>,
   CalendarDayCell: (props) => (
     <CalendarDayCell className="w-[92px]" {...props}>

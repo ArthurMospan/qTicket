@@ -169,14 +169,14 @@ export default function BadgesSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="StatusPill — sprint states"
-        description="Спільний компактний статус зі сторінки спринтів. Геометрія однакова, а label і semantic color приходять із контексту."
-        filePath="src/app/(app)/sprints/page.js"
+        title="StatusPill — статус із бази"
+        description="Спільний компактний статус із черги інцидентів і клієнтського порталу. Геометрія однакова, а label і колір приходять із workflow організації, тому це дані, а не токен."
+        filePath="src/app/(app)/overview/page.js"
       >
         <div className="flex flex-wrap items-center gap-[8px]">
-          <StatusPill label="Активний" color="#10b981" />
-          <StatusPill label="Запланований" color="#9a9a9a" />
-          <StatusPill label="Завершено" color="#1f1f1f" />
+          <StatusPill label="Новий" color="#10b981" />
+          <StatusPill label="У роботі" color="#9a9a9a" />
+          <StatusPill label="Вирішено" color="#1f1f1f" />
         </div>
       </PreviewBlock>
 

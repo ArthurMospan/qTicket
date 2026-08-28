@@ -40,12 +40,12 @@ export { default as FileThumb } from './Attachments/FileThumb'
 export { default as AudioPlayer } from './Attachments/AudioPlayer'
 
 // ===== CALENDAR =====
-// The calendar is a structure with its own vocabulary, like chat: a day cell,
-// the date in its corner, and the hour strip you click to create at a time.
-export { default as CalendarEntry } from './Calendar/CalendarEntry'
+// What is left of the calendar's own vocabulary now that the planning screen is
+// gone: a day cell and the date in its corner, both of which the timesheet's
+// month grid still draws. The entry tile and the hour strip left with the
+// screen that was the only thing clicking them.
 export { default as CalendarDayNumber } from './Calendar/CalendarDayNumber'
 export { default as CalendarDayCell } from './Calendar/CalendarDayCell'
-export { default as CalendarHourSlot } from './Calendar/CalendarHourSlot'
 export { default as TitleInput } from './Forms/TitleInput'
 
 // ===== BUTTON COMPONENTS =====

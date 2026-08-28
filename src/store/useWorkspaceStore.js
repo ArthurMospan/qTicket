@@ -518,12 +518,8 @@ const useWorkspaceStore = create((set, get) => ({
   setMyTaskSearch: (q) => set({ myTaskSearch: q }),
   projectSearch: '',
   setProjectSearch: (q) => set({ projectSearch: q }),
-  sprintSearch: '',
-  setSprintSearch: (q) => set({ sprintSearch: q }),
   analyticsSearch: '',
   setAnalyticsSearch: (q) => set({ analyticsSearch: q }),
-  calendarSearch: '',
-  setCalendarSearch: (q) => set({ calendarSearch: q }),
 
   // Local pages publish only their final filtered count. The header uses it to
   // decide whether it needs the broader (and more expensive) search request.
@@ -578,9 +574,7 @@ const useWorkspaceStore = create((set, get) => ({
       workspaceSearch: '',
       myTaskSearch: '',
       projectSearch: '',
-      sprintSearch: '',
       analyticsSearch: '',
-      calendarSearch: '',
       localSearchFeedback: null,
       chatOnlineUsers: [],
       sidebarPreview: null,

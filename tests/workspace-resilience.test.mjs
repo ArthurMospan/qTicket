@@ -68,14 +68,11 @@ test('losing the connection is visible, persistently', async () => {
 test('failed drag writes explain that the optimistic move did not persist', async () => {
   const clientWorkspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
   const myTasks = await read('../src/app/(app)/my/page.js');
-  const sprints = await read('../src/app/(app)/sprints/page.js');
 
   // The customer workspace no longer has a local drag surface. Status drag is
   // organization-wide and belongs to the global incident queue only.
   assert.doesNotMatch(clientWorkspace, /AgileBoard|onMoveIssue/);
   assert.match(myTasks, /зміни не збережено/);
-  assert.match(sprints, /відновлено попередній стан/);
-  assert.match(sprints, /'error'/);
 });
 
 test('the keyboard reaches the content without walking the sidebar', async () => {

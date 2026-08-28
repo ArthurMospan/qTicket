@@ -26,7 +26,6 @@ const DYNAMIC_ROUTES = {
   '/[projectId]/issue/[issueId]': { href: '/', hint: 'проєкт → задача' },
   '/[projectId]/portal': { href: '/', hint: 'проєкт → портал' },
   '/analytics/team/[memberId]': { href: '/analytics', hint: 'аналітика → учасник' },
-  '/calendar/event/[eventId]': { href: '/calendar', hint: 'календар → подія' },
 };
 
 function RouteLink({ route }) {

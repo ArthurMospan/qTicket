@@ -30,19 +30,19 @@ test('workspace task listeners expose their complete authorized scope', async ()
 });
 
 test('large single-swimlane columns virtualize without hiding tasks behind a button', async () => {
-  const [board, column, card, sprintPage, projectPage, myPage, profile] = await Promise.all([
+  const [board, column, card, projectPage, myPage, profile] = await Promise.all([
     read('src/components/workspace/AgileBoard.jsx'),
     read('src/components/workspace/VirtualDroppableColumn.jsx'),
     read('src/components/workspace/IssueCard.jsx'),
-    read('src/app/(app)/sprints/page.js'),
     read('src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
     read('src/app/(app)/my/page.js'),
     read('src/components/profile/ProfileView.jsx'),
   ]);
 
   assert.equal(COLUMN_VIRTUALIZATION_THRESHOLD, 40);
-  // The windowing itself is one module, so the board and the sprint backlog —
-  // the other list long enough to need it — cannot drift into two answers.
+  // The windowing itself is one module. The sprint backlog was the other list
+  // long enough to need it; the board is the only one left, and the module is
+  // still where the answer lives rather than inside the screen.
   assert.match(column, /mode="virtual"/);
   assert.match(column, /renderClone=/);
   assert.match(column, /const VIRTUAL_OVERSCAN = [1-9]\d*/);
@@ -51,23 +51,13 @@ test('large single-swimlane columns virtualize without hiding tasks behind a but
   assert.match(board, /const shouldVirtualize = swimlanes\.length === 1/);
   assert.match(board, /<VirtualDroppableColumn[\s\S]*issues=\{colIssues\}/);
   assert.match(board, /visibleColumnIds = columnCards/);
-  assert.match(
-    sprintPage,
-    /sorted\.length > COLUMN_VIRTUALIZATION_THRESHOLD[\s\S]{0,200}<VirtualDroppableColumn/,
-  );
   assert.match(card, /dragProvided/);
   assert.match(card, /virtualStyle/);
 
-  for (const source of [board, column, sprintPage, projectPage, myPage, profile]) {
+  for (const source of [board, column, projectPage, myPage, profile]) {
     assert.doesNotMatch(source, /Завантажити ще|Показати ще|Довантажити дані/);
   }
   assert.doesNotMatch(board, /renderedColIssues|remainingIssueCount|visibleCardLimits/);
-  assert.doesNotMatch(sprintPage, /renderedIssues|remainingIssueCount|visibleIssueLimits/);
-});
-
-test('sprint planning skips unused time-log subscriptions', async () => {
-  const page = await read('src/app/(app)/sprints/page.js');
-  assert.match(page, /useWorkspaceAnalytics\(projectIds, \{ includeTimeLogs: false \}\)/);
 });
 
 // A list of tasks is bounded by the card, and by nothing else.

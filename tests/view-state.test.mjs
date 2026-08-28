@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   INCIDENT_QUEUE_VIEW_SCHEMA,
-  SPRINTS_VIEW_SCHEMA,
   defaultViewState,
   hasViewStateParams,
   isDefaultViewState,
@@ -129,11 +128,10 @@ test('serializing ignores keys the schema does not declare', () => {
 
 // The incident queue carries `assignee` for the composer rather than as a
 // filter. That separation is contract, not incidental, so it is asserted here.
-test('the shipped schemas keep their agreed keys', () => {
+test('the shipped schema keeps its agreed keys', () => {
   assert.deepEqual(
     Object.keys(INCIDENT_QUEUE_VIEW_SCHEMA),
     ['view', 'projects', 'status', 'assigned', 'priority', 'type', 'period'],
   );
   assert.equal(INCIDENT_QUEUE_VIEW_SCHEMA.assignee, undefined);
-  assert.deepEqual(Object.keys(SPRINTS_VIEW_SCHEMA), ['projects', 'assignee', 'priority', 'type']);
 });

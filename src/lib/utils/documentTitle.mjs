@@ -23,8 +23,6 @@ export const ROUTE_TITLES = [
   { path: '/my', title: 'Інциденти' },
   { path: '/chat', title: 'Чат' },
   { path: '/analytics', title: 'Аналітика' },
-  { path: '/calendar', title: 'Календар' },
-  { path: '/sprints', title: 'Спринти' },
   { path: '/team', title: 'Команда' },
   { path: '/settings', title: 'Налаштування' },
   { path: '/ai-call', title: 'Дзвінок в інциденти' },
