@@ -6,7 +6,7 @@ import { QUICKTEAM_MANAGED_MESSAGE } from '@/lib/utils/quickTeamManaged.mjs';
 export async function PATCH(request, context) {
   try {
     const { organizationId } = await context.params;
-    const authorization = await authorizeOrgRequest(request, organizationId, ['owner']);
+    const authorization = await authorizeOrgRequest(request, organizationId, ['owner', 'admin']);
     if (authorization.error) {
       return NextResponse.json(
         { error: authorization.error, code: authorization.code },

@@ -269,11 +269,10 @@ test('a role still loading is not read as a refusal', async () => {
   assert.equal(canWhileRoleLoads(null, 'edit:comment'), true);
   assert.equal(canWhileRoleLoads(null, 'edit:issue'), true);
   assert.equal(canWhileRoleLoads(null, 'delete:issue'), true);
-  // An owner-only action stays hidden until the role proves otherwise: showing
+  // A privileged action stays hidden until the role proves otherwise: showing
   // a control somebody is about to lose is the worse way to be wrong.
   assert.equal(canWhileRoleLoads(null, 'create:project'), false);
   assert.equal(canWhileRoleLoads(null, 'manage:finance'), false);
-  assert.equal(canWhileRoleLoads(null, 'transfer:ownership'), false);
   // Once the role is known it answers exactly as `can` does.
   for (const role of ['owner', 'admin', 'member']) {
     for (const action of ['create:comment', 'create:project', 'manage:team', 'delete:issue']) {

@@ -82,7 +82,7 @@ test('rates are served from protected paths and never persisted in public browse
 
 test('qTicket refuses every organization ownership mutation', async () => {
   const route = await read('../src/app/api/organizations/[organizationId]/route.js');
-  assert.match(route, /authorizeOrgRequest\(request, organizationId, \['owner'\]\)/);
+  assert.match(route, /authorizeOrgRequest\(request, organizationId, \['owner', 'admin'\]\)/);
   assert.match(route, /QUICKTEAM_MANAGED/);
   assert.doesNotMatch(route, /runTransaction|targetUserId|ownerId:/);
 });
