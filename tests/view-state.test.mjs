@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   BOARD_VIEW_SCHEMA,
+  INCIDENT_QUEUE_VIEW_SCHEMA,
   MY_TASKS_VIEW_SCHEMA,
   SPRINTS_VIEW_SCHEMA,
   defaultViewState,
@@ -139,6 +140,11 @@ test('the shipped schemas keep their agreed keys', () => {
   assert.deepEqual(BOARD_VIEW_SCHEMA.view.values, ['kanban', 'list', 'table']);
   assert.deepEqual(Object.keys(MY_TASKS_VIEW_SCHEMA), ['view', 'projects', 'sprint', 'priority', 'type']);
   assert.equal(MY_TASKS_VIEW_SCHEMA.assignee, undefined);
+  assert.deepEqual(
+    Object.keys(INCIDENT_QUEUE_VIEW_SCHEMA),
+    ['view', 'projects', 'status', 'assigned', 'priority', 'type', 'period'],
+  );
+  assert.equal(INCIDENT_QUEUE_VIEW_SCHEMA.assignee, undefined);
   assert.deepEqual(Object.keys(SPRINTS_VIEW_SCHEMA), ['projects', 'assignee', 'priority', 'type']);
 });
 

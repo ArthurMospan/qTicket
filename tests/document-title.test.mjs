@@ -11,9 +11,11 @@ import {
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
 test('every top-level workspace destination names itself in the tab', () => {
-  assert.equal(routeTitle('/'), 'Проєкти');
+  assert.equal(routeTitle('/'), 'Огляд');
+  assert.equal(routeTitle('/overview'), 'Огляд');
+  assert.equal(routeTitle('/clients'), 'Клієнти');
   // Same words as the sidebar entry and the page heading.
-  assert.equal(routeTitle('/my'), 'Мої інциденти');
+  assert.equal(routeTitle('/my'), 'Інциденти');
   assert.equal(routeTitle('/chat'), 'Чат');
   assert.equal(routeTitle('/analytics'), 'Аналітика');
   assert.equal(routeTitle('/calendar'), 'Календар');
@@ -61,8 +63,8 @@ test('the organization name replaces the brand rather than stacking on it', () =
   assert.equal(workspaceDocumentTitle({ pathname: '/chat' }), 'Чат · qTicket');
   // A screen already called after the organization is not repeated.
   assert.equal(
-    workspaceDocumentTitle({ pathname: '/', organizationName: 'Проєкти' }),
-    'Проєкти',
+    workspaceDocumentTitle({ pathname: '/', organizationName: 'Огляд' }),
+    'Огляд',
   );
 });
 

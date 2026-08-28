@@ -15,10 +15,12 @@ const BRAND = 'qTicket';
 // Route → what to call that screen. Order matters: the first match wins, and
 // `/` is exact because every other path also starts with it.
 export const ROUTE_TITLES = [
-  { path: '/', exact: true, title: 'Проєкти' },
+  { path: '/', exact: true, title: 'Огляд' },
+  { path: '/overview', title: 'Огляд' },
+  { path: '/clients', title: 'Клієнти' },
   // The words the screens themselves use — the tab is not the place to invent
   // a third name for a destination the sidebar and the page already agree on.
-  { path: '/my', title: 'Мої інциденти' },
+  { path: '/my', title: 'Інциденти' },
   { path: '/chat', title: 'Чат' },
   { path: '/analytics', title: 'Аналітика' },
   { path: '/calendar', title: 'Календар' },

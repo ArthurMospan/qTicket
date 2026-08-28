@@ -709,7 +709,7 @@ function NewProjectModal({ onClose, orgId, orgPlan, activeProjectsCount, members
   );
 }
 
-export default function WorkspacePage() {
+export default function WorkspacePage({ clientsRoute = false } = {}) {
   const { projects, projectsLoading, projectsError, currentUser, activeOrgId, activeOrg, orgRole } = useAppContext();
   const showToast = useWorkspaceStore(s => s.showToast);
   const { members, loading: orgLoading } = useOrganization();
@@ -745,11 +745,20 @@ export default function WorkspacePage() {
 
   // Auto-open modal when navigated with ?new=1
   useEffect(() => {
-    if (searchParams?.get('new') === '1') {
+    if (clientsRoute && searchParams?.get('new') === '1') {
       queueMicrotask(() => setShowNewProject(true));
-      router.replace('/', { scroll: false });
+      router.replace('/clients', { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [clientsRoute, searchParams, router]);
+
+  // The old QuickTeam fork used the project grid as its front door. qTicket's
+  // internal front door is the support overview; keep the inherited grid at a
+  // named /clients destination so bookmarks to / remain safe while the product
+  // gains a real information architecture.
+  useEffect(() => {
+    if (clientsRoute || !orgRole || clientViewer) return;
+    router.replace(searchParams?.get('new') === '1' ? '/clients?new=1' : '/overview');
+  }, [clientViewer, clientsRoute, orgRole, router, searchParams]);
 
   // A client seat is provisioned into one project. The root is a stable public
   // destination in navigation and invitations; once the scoped project is
@@ -899,6 +908,14 @@ export default function WorkspacePage() {
   // read; only OrgContext may make the organization-level access decision.
   const workspaceScopeFailure = workspaceLoadErrorKind === 'permission-denied'
     || workspaceLoadErrorKind === 'not-found';
+
+  if (!clientsRoute && !clientViewer) {
+    return (
+      <div className="flex min-h-[320px] flex-1 items-center justify-center" role="status" aria-busy="true">
+        <LoadingSpinner size="md" label="Відкриваємо огляд підтримки…" />
+      </div>
+    );
+  }
 
   if (clientViewer) {
     return (

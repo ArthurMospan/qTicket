@@ -26,6 +26,118 @@ This file contains current owner guardrails and confirmed open work. Completed i
 - Organization deletion stays disabled until an owner-only, idempotent server cascade safely handles Firestore and external files and has integration coverage.
 - Multi-tenant isolation and server-authorized privileged writes take precedence over UI convenience.
 
+## Active implementation checkpoint (2026-08-28)
+
+This section is the durable handoff for the current qTicket build. Keep it
+current while the MVP is unfinished; move completed implementation details to
+Git commits once the corresponding slice is accepted.
+
+### Current product state
+
+The application is a working, isolated QuickTeam fork whose qTicket product
+conversion is now in progress. Infrastructure readiness must not be described
+as product readiness: the first role-aware qTicket navigation, internal support
+overview and global incident queue are implemented, while the client journey
+and several inherited project screens still expose too much task-manager UI.
+
+Completed foundation:
+
+- qTicket has its own GitHub repository, Vercel project and Firebase project;
+  it does not share QuickTeam's primary database or authentication session.
+- The test deployment is live at `https://qticket-qt.vercel.app` and reaches
+  Firestore from authenticated server routes.
+- Firebase client/admin configuration and Cloudinary are configured in Vercel;
+  secrets are not stored in Git. Transactional email is intentionally disabled.
+- Firestore rules and indexes are deployed to `qticket-qt`. The rules emulator
+  suite passes all 75 tests, including the project-scoped client boundary.
+- The role model already exists in code and rules: internal `owner`, `admin`,
+  `member`; external `client_admin`, `client_member`. External users can create,
+  read and discuss incidents in their client project, but cannot control the
+  workflow, priority, assignment or organization settings.
+
+Completed product slice on 2026-08-28:
+
+- Internal primary navigation is now **Огляд**, **Інциденти**, **Клієнти**,
+  **Команда**, **Налаштування**. Task-planning surfaces are no longer primary
+  qTicket navigation, and the legacy project dashboard is reached through
+  `/clients` rather than acting as the internal home screen.
+- `/overview` is a real support overview across accessible client projects: it
+  shows open, new, active and unassigned counts, recently updated incidents and
+  client queues. External client roles are redirected away from it.
+- `/my` is now the internal organization-wide incident queue, not the signed-in
+  person's task list. It provides board/list views and client, status, internal
+  assignee, priority, type and creation-period filters; sprint controls are gone.
+- The user-facing help articles for navigation, client projects and incident
+  creation describe the qTicket flow implemented in this slice.
+- The slice passes lint, production build, all 1,179 unit tests and the UI Kit
+  usage, drift, fidelity, colour and accessibility contracts. Public browser
+  verification found no framework overlay or console error; authenticated
+  two-role verification remains part of acceptance below.
+
+Product work still required:
+
+- Simplify the external client portal around incident creation, status, files
+  and the shared incident conversation.
+- Rework the client-project entry screen reached from **Клієнти** so it reads as
+  customer support administration instead of an inherited task project.
+- Complete the user-facing terminology pass; inherited internal identifiers may
+  remain task-oriented, but qTicket screens may not ask users to manage tasks.
+- Run the complete tenant/client acceptance flow and correct every permission or
+  usability problem it exposes.
+- Add the explicit, idempotent server-side transfer from an incident to a
+  QuickTeam task. Billing entitlement follows only after the wider product has a
+  server-side add-on contract.
+
+### Confirmed MVP information architecture
+
+Internal support users:
+
+1. **Огляд** — support workload, status counts, unassigned incidents and recent
+   activity across all client projects.
+2. **Інциденти** — one global queue with list and Kanban views; project/client,
+   status, priority, assignee and date filters.
+3. **Клієнти** — client projects, their team, configuration and incident counts.
+4. **Команда** — the tenant's internal support team.
+5. **Налаштування** — organization, workflows, invitations and integrations.
+
+External client users:
+
+1. **Мої звернення** — incidents in the one client project available to the
+   signed-in user.
+2. **Створити інцидент** — a prominent action, not a buried task-manager modal.
+3. **Співробітники** — available only to `client_admin`, who may invite
+   `client_member` users into that same project.
+4. **Інцидент** — visible status, description, attachments and shared
+   conversation; no workflow, priority, assignee or organization controls.
+
+Sprints, planning calendars, time tracking, invoices, AI task estimation and
+QuickTeam+ portal controls are not primary qTicket navigation. Do not delete
+their inherited backend code merely to hide them; remove them from qTicket
+surfaces first, then delete only when references and migrations are understood.
+
+### Active build sequence and handoff rule
+
+1. **Completed:** implement role-aware qTicket navigation and the internal
+   **Огляд** screen using only shared components from `src/components/ui`.
+2. **Completed:** turn the inherited cross-project board into the global
+   **Інциденти** queue and remove sprint/task-manager controls from that surface.
+3. Rebuild client project entry and incident creation/detail around the simple
+   client journey above while preserving the rule-enforced permission boundary.
+4. Run local checks, deploy the slice, then execute the two-sided acceptance
+   flow with separate internal and client accounts.
+5. Only after the qTicket workflow is accepted, implement the QuickTeam transfer
+   contract and later the add-on entitlement contract.
+
+The exact next implementation task is step 3: make the external client's root a
+simple **Мої звернення** screen with a prominent **Створити інцидент** action,
+then restrict the incident composer/detail to client-safe fields while retaining
+attachments and the shared conversation. After that, rework the internal
+client-project page reached from `/clients`. Every completed slice should be a
+reviewable Git commit and this checkpoint should be updated in the same commit.
+The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,
+`docs/UI_KIT_CONTRACT.md` and this file before continuing. Never place local
+credentials, service-account JSON, `.env` values or session notes here.
+
 ## Confirmed open work
 
 ### qTicket MVP rollout

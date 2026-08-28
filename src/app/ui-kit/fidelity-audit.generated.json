@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 267,
-    "parsedFiles": 267,
+    "productFiles": 269,
+    "parsedFiles": 269,
     "parseErrors": 0,
     "nativeControls": 21,
     "structures": {
@@ -45,7 +45,7 @@
       "unused": 0,
       "covered": 115,
       "uncovered": 0,
-      "routes": 12,
+      "routes": 14,
       "previews": 151,
       "internal": 5,
       "unlisted": 0
@@ -272,7 +272,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -300,7 +302,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -357,7 +361,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:299",
+      "location": "src/components/WorkspaceSidebar.jsx:300",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -372,7 +376,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:322",
+      "location": "src/components/WorkspaceSidebar.jsx:323",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -387,7 +391,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:381",
+      "location": "src/components/WorkspaceSidebar.jsx:382",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -491,17 +495,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:299",
+      "location": "src/components/WorkspaceSidebar.jsx:300",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:322",
+      "location": "src/components/WorkspaceSidebar.jsx:323",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:381",
+      "location": "src/components/WorkspaceSidebar.jsx:382",
       "tag": "button",
       "context": "branding-action"
     }

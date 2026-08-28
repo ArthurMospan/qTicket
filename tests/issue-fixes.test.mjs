@@ -137,8 +137,11 @@ test('QUI-80 gives every FilterBar selector a semantic icon role', async () => {
   }
   assert.match(project, /filterRole="sprint"[\s\S]{0,100}value=\{boardSprintFilter\}/);
   assert.match(project, /filterRole="priority"[\s\S]{0,100}value=\{boardPriorityFilter\}/);
+  assert.match(my, /filterRole="status"[\s\S]{0,100}value=\{filters\.status\}/);
+  assert.match(my, /filterRole="member"[\s\S]{0,100}value=\{filters\.assigned\}/);
   assert.match(my, /filterRole="priority"[\s\S]{0,100}value=\{filters\.priority\}/);
-  assert.match(my, /filterRole="sprint"[\s\S]{0,100}value=\{filters\.sprint\}/);
+  assert.match(my, /filterRole="date"[\s\S]{0,100}value=\{filters\.period\}/);
+  assert.doesNotMatch(my, /filterRole="sprint"/);
   assert.match(sprints, /filterRole="priority"[\s\S]{0,100}value=\{priorityFilter\}/);
   assert.match(analytics, /filterRole="type"[\s\S]{0,100}value=\{typeFilter\}/);
 });
@@ -318,11 +321,11 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(projectRoute, /completedAt: FieldValue\.delete\(\)/);
   assert.match(createProjectRoute, /hiddenColumns: requestedHidden/);
   assert.match(createIssueRoute, /\(project\.hiddenColumns \|\| \[\]\)\.includes\(statusCandidate\)/);
-  // «Мої завдання» folds away a *category*, not a status name — see
+  // The qTicket incident queue folds away a *category*, not a status name — see
   // tests/status-categories.test.mjs. The preference is also scoped to both the
   // signed-in account and organization, so neither can inherit another scope's
   // hidden board columns after a switch.
-  assert.match(myTasks, /const hiddenCategoriesStorageKey = `qt:my-tasks:hidden-categories:\$\{uid \|\| 'anonymous'\}:\$\{activeOrgId \|\| 'none'\}`/);
+  assert.match(myTasks, /const hiddenCategoriesStorageKey = `qt:incident-queue:hidden-categories:\$\{uid \|\| 'anonymous'\}:\$\{activeOrgId \|\| 'none'\}`/);
   assert.match(myTasks, /localStorage\.setItem\(hiddenCategoriesStorageKey/);
   assert.match(kit, /title="Project Status Visibility"[\s\S]{0,500}<StatusVisibilityPicker/);
 });

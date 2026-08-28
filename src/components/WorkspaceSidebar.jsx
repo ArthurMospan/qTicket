@@ -9,7 +9,7 @@ import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { Counter, IconAction, Skeleton } from '@/components/ui';
 import {
   Folder, Users, Settings, ChevronsUpDown,
-  Plus, PieChart, PanelLeftClose, PanelLeftOpen,
+  Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen,
   Clock, Square as StopIcon,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
@@ -129,20 +129,21 @@ export default function WorkspaceSidebar() {
     exact ? pathname === href : pathname.startsWith(href);
 
   const internalNav = [
-    { href: '/',            icon: Folder,        label: 'Клієнти',     exact: true },
-    { href: '/my',         icon: TaskIcon,      label: 'Мої інциденти' },
-    { href: '/team',       icon: Users,         label: 'Команда' },
-    { href: '/analytics',  icon: PieChart,      label: 'Аналітика',   exact: false },
+    { href: '/overview',   icon: LayoutDashboard, label: 'Огляд' },
+    { href: '/my',         icon: TaskIcon,        label: 'Інциденти' },
+    { href: '/clients',    icon: Folder,          label: 'Клієнти' },
+    { href: '/team',       icon: Users,           label: 'Команда' },
     // «Дзвінок → задачі» свідомо НЕ в сайдбарі: це не окремий екран, а вкладка
     // всередині створення задачі (CreateTaskModal → AudioTaskPanel).
     { href: '/settings',   icon: Settings,      label: 'Налаштування' },
   ];
   const topNav = isClientRole(orgRole)
     ? [
-        { href: '/', icon: Folder, label: 'Інциденти', exact: true },
+        { href: '/', icon: Folder, label: 'Мої звернення', exact: true },
         { href: '/settings', icon: Settings, label: 'Налаштування' },
       ]
     : internalNav;
+  const homeHref = isClientRole(orgRole) ? '/' : '/overview';
 
   return (
     <aside
@@ -200,7 +201,7 @@ export default function WorkspaceSidebar() {
                   /* ── Branded logo: hover flips to reveal qTicket (CSS),
                        click goes home ── */
                   <Link
-                    href="/"
+                    href={homeHref}
                     className="group/logo relative block w-[32px] h-[32px] shrink-0 [perspective:1000px]"
                     // The tooltip only ever appears on hover, and by then the
                     // logo has already flipped: telling the reader to hover was
@@ -225,7 +226,7 @@ export default function WorkspaceSidebar() {
                     </div>
                   </Link>
                 ) : (
-                  <Link href="/" className="flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity">
+                  <Link href={homeHref} className="flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity">
                     <Image src={theme.isDark ? '/logo-min.svg' : '/logo-min-dark.svg'} alt="QT" width={32} height={32} loading="eager" className="object-contain" />
                   </Link>
                 )}
@@ -243,7 +244,7 @@ export default function WorkspaceSidebar() {
                         split is 19+17 and 15+21; both land the words on the
                         logo's axis. Whoever changes a font size here re-measures:
                         `tests/sidebar-brand-lockup.test.mjs` recomputes it. */}
-                    <Link href="/" className="hover:opacity-80 transition-opacity">
+                    <Link href={homeHref} className="hover:opacity-80 transition-opacity">
                        <h1
                          data-ui-type="branding-title"
                          className="tracking-tight truncate transition-all"
@@ -379,7 +380,7 @@ export default function WorkspaceSidebar() {
             </p>
             {can(orgRole, 'create:project') && (
               <button
-                onClick={() => router.push('/?new=1')}
+                onClick={() => router.push('/clients?new=1')}
                 data-ui-control="branding-action"
                 className="transition-colors" title="Новий клієнт"
                 style={{ color: 'var(--sb-muted-header)' }}

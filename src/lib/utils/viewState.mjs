@@ -173,6 +173,19 @@ export const MY_TASKS_VIEW_SCHEMA = Object.freeze({
   type: { default: 'all' },
 });
 
+// The qTicket support queue uses `assigned`, not `assignee`: `/my?new=1`
+// already carries `assignee` to prefill the incident composer when it is opened
+// from a profile. One address must not give the same key two meanings.
+export const INCIDENT_QUEUE_VIEW_SCHEMA = Object.freeze({
+  view: { default: 'kanban', values: ['kanban', 'list'] },
+  projects: { default: [], type: 'list' },
+  status: { default: 'all' },
+  assigned: { default: 'all' },
+  priority: { default: 'all' },
+  type: { default: 'all' },
+  period: { default: 'all', values: ['all', '7days', '30days'] },
+});
+
 export const SPRINTS_VIEW_SCHEMA = Object.freeze({
   projects: { default: [], type: 'list' },
   assignee: { default: 'all' },

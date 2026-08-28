@@ -7,7 +7,7 @@
     "unused": 0,
     "covered": 115,
     "uncovered": 0,
-    "routes": 12,
+    "routes": 14,
     "previews": 151,
     "internal": 5,
     "unlisted": 0
@@ -325,6 +325,38 @@
       "TypeBadge",
       "UserAvatar"
     ],
+    "/clients": [
+      "Alert",
+      "Button",
+      "Checkbox",
+      "ContextMenu",
+      "DatePicker",
+      "Dialog",
+      "EmptyState",
+      "FileInput",
+      "FilterBar",
+      "FormGroup",
+      "IconAction",
+      "Input",
+      "Label",
+      "LoadingSpinner",
+      "MarkdownEditor",
+      "PageHeader",
+      "Pill",
+      "PriorityIcon",
+      "ProjectSettingsForm",
+      "Select",
+      "SelectableChip",
+      "Surface",
+      "Tabs",
+      "Tag",
+      "TaskCounters",
+      "TaskIdentity",
+      "Textarea",
+      "ToggleSwitch",
+      "TypeBadge",
+      "UserAvatar"
+    ],
     "/my": [
       "Alert",
       "BulkActionBar",
@@ -356,6 +388,27 @@
       "TaskListView",
       "Textarea",
       "ToggleSwitch",
+      "TypeBadge",
+      "UserAvatar"
+    ],
+    "/overview": [
+      "Alert",
+      "Button",
+      "Card",
+      "Checkbox",
+      "EmptyState",
+      "KpiCard",
+      "ListRow",
+      "LoadingSpinner",
+      "PageHeader",
+      "Pill",
+      "PriorityBadge",
+      "PriorityIcon",
+      "StatusPill",
+      "Surface",
+      "Tag",
+      "TaskCounters",
+      "TaskIdentity",
       "TypeBadge",
       "UserAvatar"
     ],
@@ -492,7 +545,7 @@
   "components": {
     "Alert": {
       "file": "src/components/ui/Feedback/Alert.jsx",
-      "count": 11,
+      "count": 12,
       "showcased": true,
       "usedByKit": [],
       "routes": [
@@ -502,13 +555,16 @@
         "/analytics",
         "/calendar",
         "/calendar/event/[eventId]",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
       ],
       "usedIn": [
         "src/app/(app)/my/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/sprints/page.js",
         "src/app/(app)/team/page.js",
@@ -642,7 +698,7 @@
     },
     "Button": {
       "file": "src/components/ui/Button.jsx",
-      "count": 35,
+      "count": 36,
       "showcased": true,
       "usedByKit": [
         "AttachmentRow",
@@ -672,7 +728,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -685,6 +743,7 @@
         "src/app/(app)/error.js",
         "src/app/(app)/layout.js",
         "src/app/(app)/my/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/app/(app)/sprints/page.js",
@@ -771,7 +830,7 @@
     },
     "Card": {
       "file": "src/components/ui/Layout/Card.jsx",
-      "count": 8,
+      "count": 9,
       "showcased": true,
       "usedByKit": [
         "ChartCard",
@@ -782,10 +841,12 @@
         "/[projectId]",
         "/analytics",
         "/analytics/team/[memberId]",
+        "/overview",
         "/settings",
         "/team"
       ],
       "usedIn": [
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/WorkspaceInfoCenter.jsx",
         "src/components/integrations/IntegrationCard.jsx",
@@ -943,7 +1004,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -1026,6 +1089,7 @@
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
         "/calendar/event/[eventId]",
+        "/clients",
         "/my",
         "/sprints",
         "/team"
@@ -1099,6 +1163,7 @@
         "/analytics/team/[memberId]",
         "/calendar",
         "/calendar/event/[eventId]",
+        "/clients",
         "/my",
         "/settings",
         "/sprints"
@@ -1181,6 +1246,7 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
         "/settings",
         "/sprints",
@@ -1210,7 +1276,7 @@
     },
     "EmptyState": {
       "file": "src/components/ui/Feedback/EmptyState.jsx",
-      "count": 16,
+      "count": 17,
       "showcased": true,
       "usedByKit": [
         "ChatMessageList",
@@ -1226,6 +1292,8 @@
         "/analytics/team/[memberId]",
         "/calendar",
         "/calendar/event/[eventId]",
+        "/clients",
+        "/overview",
         "/sprints",
         "/team"
       ],
@@ -1233,6 +1301,7 @@
         "src/app/(app)/analytics/page.js",
         "src/app/(app)/analytics/team/[memberId]/page.js",
         "src/app/(app)/calendar/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/team/page.js",
         "src/components/WorkspaceInfoCenter.jsx",
@@ -1270,6 +1339,7 @@
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
         "/chat",
+        "/clients",
         "/my",
         "/sprints"
       ],
@@ -1308,6 +1378,7 @@
         "/analytics",
         "/analytics/team/[memberId]",
         "/calendar",
+        "/clients",
         "/my",
         "/sprints"
       ],
@@ -1336,6 +1407,7 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
         "/sprints"
       ],
@@ -1378,6 +1450,7 @@
         "/analytics",
         "/calendar",
         "/chat",
+        "/clients",
         "/my",
         "/settings",
         "/sprints",
@@ -1446,6 +1519,7 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
         "/settings",
         "/sprints",
@@ -1508,16 +1582,18 @@
     },
     "KpiCard": {
       "file": "src/components/ui/DataDisplay/KpiCard.jsx",
-      "count": 4,
+      "count": 5,
       "showcased": true,
       "usedByKit": [],
       "routes": [
         "/[projectId]",
         "/analytics",
-        "/analytics/team/[memberId]"
+        "/analytics/team/[memberId]",
+        "/overview"
       ],
       "usedIn": [
         "src/app/(app)/analytics/page.js",
+        "src/app/(app)/overview/page.js",
         "src/components/workspace/AnalyticsTab.jsx",
         "src/components/workspace/VelocityTab.jsx",
         "src/components/workspace/WorkloadTab.jsx"
@@ -1538,6 +1614,7 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
         "/settings",
         "/sprints",
@@ -1555,11 +1632,14 @@
     },
     "ListRow": {
       "file": "src/components/ui/Layout/ListRow.jsx",
-      "count": 2,
+      "count": 3,
       "showcased": true,
       "usedByKit": [],
-      "routes": [],
+      "routes": [
+        "/overview"
+      ],
       "usedIn": [
+        "src/app/(app)/overview/page.js",
         "src/components/SearchModal.jsx",
         "src/components/SupportDialog.jsx"
       ]
@@ -1581,7 +1661,7 @@
     },
     "LoadingSpinner": {
       "file": "src/components/ui/Feedback/LoadingSpinner.jsx",
-      "count": 12,
+      "count": 13,
       "showcased": true,
       "usedByKit": [
         "MemberRail",
@@ -1594,7 +1674,9 @@
         "/analytics/team/[memberId]",
         "/calendar",
         "/calendar/event/[eventId]",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/team"
       ],
@@ -1605,6 +1687,7 @@
         "src/app/(app)/calendar/page.js",
         "src/app/(app)/loading.js",
         "src/app/(app)/my/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/profile/ProfileView.jsx",
@@ -1622,6 +1705,7 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
+        "/clients",
         "/my",
         "/sprints"
       ],
@@ -1804,7 +1888,7 @@
     },
     "PageHeader": {
       "file": "src/components/ui/Layout/PageHeader.jsx",
-      "count": 6,
+      "count": 7,
       "showcased": true,
       "usedByKit": [],
       "routes": [
@@ -1812,7 +1896,9 @@
         "/[projectId]",
         "/analytics",
         "/calendar",
+        "/clients",
         "/my",
+        "/overview",
         "/sprints"
       ],
       "usedIn": [
@@ -1820,6 +1906,7 @@
         "src/app/(app)/analytics/page.js",
         "src/app/(app)/calendar/page.js",
         "src/app/(app)/my/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/sprints/page.js"
       ]
@@ -1841,7 +1928,7 @@
     },
     "Pill": {
       "file": "src/components/ui/DataDisplay/Pill.jsx",
-      "count": 20,
+      "count": 21,
       "showcased": true,
       "usedByKit": [
         "ChatMessageList",
@@ -1867,13 +1954,16 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
       ],
       "usedIn": [
         "src/app/(app)/[projectId]/ProjectBoardClient.jsx",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/app/(app)/sprints/page.js",
@@ -2006,14 +2096,16 @@
     },
     "PriorityBadge": {
       "file": "src/components/ui/DataDisplay/PriorityBadge.jsx",
-      "count": 2,
+      "count": 3,
       "showcased": true,
       "usedByKit": [],
       "routes": [
         "/analytics",
+        "/overview",
         "/settings"
       ],
       "usedIn": [
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/workspace/BillingTab.jsx"
       ]
@@ -2037,7 +2129,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -2055,7 +2149,8 @@
       "usedByKit": [],
       "routes": [
         "/",
-        "/[projectId]"
+        "/[projectId]",
+        "/clients"
       ],
       "usedIn": [
         "src/app/(app)/page.js",
@@ -2127,6 +2222,7 @@
         "/analytics/team/[memberId]",
         "/calendar",
         "/calendar/event/[eventId]",
+        "/clients",
         "/my",
         "/settings",
         "/sprints",
@@ -2160,6 +2256,7 @@
       "routes": [
         "/",
         "/[projectId]",
+        "/clients",
         "/my",
         "/sprints"
       ],
@@ -2218,14 +2315,16 @@
     },
     "StatusPill": {
       "file": "src/components/ui/DataDisplay/StatusPill.jsx",
-      "count": 2,
+      "count": 3,
       "showcased": true,
       "usedByKit": [],
       "routes": [
         "/[projectId]/issue/[issueId]",
+        "/overview",
         "/sprints"
       ],
       "usedIn": [
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/sprints/page.js",
         "src/components/workspace/IssueDetail.jsx"
       ]
@@ -2258,7 +2357,7 @@
     },
     "Surface": {
       "file": "src/components/ui/Surface.jsx",
-      "count": 9,
+      "count": 10,
       "showcased": true,
       "usedByKit": [
         "DataTable",
@@ -2271,6 +2370,8 @@
         "/analytics",
         "/analytics/team/[memberId]",
         "/calendar",
+        "/clients",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -2279,6 +2380,7 @@
         "src/app/(app)/analytics/page.js",
         "src/app/(app)/analytics/team/[memberId]/page.js",
         "src/app/(app)/calendar/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/app/(app)/sprints/page.js",
@@ -2299,6 +2401,7 @@
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
         "/analytics",
+        "/clients",
         "/my",
         "/settings",
         "/sprints",
@@ -2333,7 +2436,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -2374,7 +2479,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -2386,7 +2493,7 @@
     },
     "TaskIdentity": {
       "file": "src/components/ui/TaskManagement/TaskIdentity.jsx",
-      "count": 1,
+      "count": 2,
       "showcased": true,
       "usedByKit": [
         "TaskRow"
@@ -2400,12 +2507,15 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
       ],
       "usedIn": [
+        "src/app/(app)/overview/page.js",
         "src/components/workspace/IssueCard.jsx"
       ]
     },
@@ -2511,6 +2621,7 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
         "/settings",
         "/sprints"
@@ -2605,6 +2716,7 @@
         "/[projectId]",
         "/calendar",
         "/calendar/event/[eventId]",
+        "/clients",
         "/my",
         "/settings",
         "/sprints"
@@ -2664,7 +2776,9 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
@@ -2689,7 +2803,7 @@
     },
     "UserAvatar": {
       "file": "src/components/ui/DataDisplay/UserAvatar.jsx",
-      "count": 17,
+      "count": 18,
       "showcased": true,
       "usedByKit": [
         "AvatarButton",
@@ -2716,13 +2830,16 @@
         "/calendar",
         "/calendar/event/[eventId]",
         "/chat",
+        "/clients",
         "/my",
+        "/overview",
         "/settings",
         "/sprints",
         "/team"
       ],
       "usedIn": [
         "src/app/(app)/chat/page.js",
+        "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/CreateTaskModal.jsx",
@@ -2756,12 +2873,14 @@
     "Button": {
       "size": {
         "lg": {
-          "count": 27,
+          "count": 28,
           "routes": [
             "/",
             "/[projectId]",
             "/analytics",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -2772,9 +2891,10 @@
             "src/app/(app)/analytics/page.js:1033",
             "src/app/(app)/layout.js:113",
             "src/app/(app)/layout.js:117",
-            "src/app/(app)/my/page.js:271",
-            "src/app/(app)/my/page.js:355",
-            "src/app/(app)/page.js:938",
+            "src/app/(app)/my/page.js:263",
+            "src/app/(app)/my/page.js:373",
+            "src/app/(app)/overview/page.js:167",
+            "src/app/(app)/page.js:955",
             "src/app/(app)/settings/page.js:3873",
             "src/app/(app)/settings/page.js:3939",
             "src/app/(app)/settings/page.js:3976",
@@ -2809,7 +2929,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:425",
             "src/app/(app)/analytics/page.js:979",
-            "src/app/(app)/my/page.js:333",
+            "src/app/(app)/my/page.js:351",
             "src/components/workspace/IssueDetail.jsx:1378",
             "src/components/workspace/IssueDetail.jsx:1381",
             "src/components/workspace/calendar/CalendarEventPage.jsx:892",
@@ -2852,6 +2972,7 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -2863,9 +2984,9 @@
             "src/app/(app)/calendar/page.js:578",
             "src/app/(app)/calendar/page.js:754",
             "src/app/(app)/calendar/page.js:768",
-            "src/app/(app)/my/page.js:383",
+            "src/app/(app)/my/page.js:401",
             "src/app/(app)/page.js:667",
-            "src/app/(app)/page.js:979",
+            "src/app/(app)/page.js:996",
             "src/app/(app)/settings/page.js:202",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2741",
@@ -2957,7 +3078,7 @@
           ]
         },
         "md": {
-          "count": 54,
+          "count": 57,
           "routes": [
             "/",
             "/[projectId]",
@@ -2967,7 +3088,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints"
           ],
@@ -2975,7 +3098,10 @@
             "src/app/(app)/chat/page.js:1233",
             "src/app/(app)/chat/page.js:1241",
             "src/app/(app)/error.js:51",
-            "src/app/(app)/my/page.js:491",
+            "src/app/(app)/my/page.js:509",
+            "src/app/(app)/overview/page.js:192",
+            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:303",
             "src/app/(app)/page.js:639",
             "src/app/(app)/page.js:640",
             "src/app/(app)/page.js:644",
@@ -3092,7 +3218,7 @@
           ]
         },
         "secondary": {
-          "count": 67,
+          "count": 70,
           "routes": [
             "/",
             "/[projectId]",
@@ -3102,7 +3228,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -3117,12 +3245,15 @@
             "src/app/(app)/calendar/page.js:768",
             "src/app/(app)/calendar/page.js:769",
             "src/app/(app)/chat/page.js:1233",
-            "src/app/(app)/my/page.js:333",
-            "src/app/(app)/my/page.js:355",
-            "src/app/(app)/my/page.js:383",
+            "src/app/(app)/my/page.js:351",
+            "src/app/(app)/my/page.js:373",
+            "src/app/(app)/my/page.js:401",
+            "src/app/(app)/overview/page.js:192",
+            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:303",
             "src/app/(app)/page.js:640",
             "src/app/(app)/page.js:644",
-            "src/app/(app)/page.js:979",
+            "src/app/(app)/page.js:996",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2825",
             "src/app/(app)/settings/page.js:3247",
@@ -3178,14 +3309,16 @@
           ]
         },
         "primary": {
-          "count": 39,
+          "count": 40,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
             "/analytics",
             "/analytics/team/[memberId]",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -3195,12 +3328,13 @@
             "src/app/(app)/analytics/page.js:1033",
             "src/app/(app)/analytics/page.js:979",
             "src/app/(app)/error.js:51",
-            "src/app/(app)/my/page.js:271",
-            "src/app/(app)/my/page.js:491",
+            "src/app/(app)/my/page.js:263",
+            "src/app/(app)/my/page.js:509",
+            "src/app/(app)/overview/page.js:167",
             "src/app/(app)/page.js:639",
             "src/app/(app)/page.js:645",
             "src/app/(app)/page.js:667",
-            "src/app/(app)/page.js:938",
+            "src/app/(app)/page.js:955",
             "src/app/(app)/settings/page.js:2826",
             "src/app/(app)/settings/page.js:3253",
             "src/app/(app)/settings/page.js:3687",
@@ -3332,7 +3466,7 @@
       },
       "shape": {
         "(default)": {
-          "count": 190,
+          "count": 194,
           "routes": [
             "/",
             "/[projectId]",
@@ -3342,7 +3476,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -3373,18 +3509,22 @@
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:113",
             "src/app/(app)/layout.js:117",
-            "src/app/(app)/my/page.js:271",
-            "src/app/(app)/my/page.js:333",
-            "src/app/(app)/my/page.js:355",
-            "src/app/(app)/my/page.js:383",
-            "src/app/(app)/my/page.js:491",
+            "src/app/(app)/my/page.js:263",
+            "src/app/(app)/my/page.js:351",
+            "src/app/(app)/my/page.js:373",
+            "src/app/(app)/my/page.js:401",
+            "src/app/(app)/my/page.js:509",
+            "src/app/(app)/overview/page.js:167",
+            "src/app/(app)/overview/page.js:192",
+            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:303",
             "src/app/(app)/page.js:639",
             "src/app/(app)/page.js:640",
             "src/app/(app)/page.js:644",
             "src/app/(app)/page.js:645",
             "src/app/(app)/page.js:667",
-            "src/app/(app)/page.js:938",
-            "src/app/(app)/page.js:979",
+            "src/app/(app)/page.js:955",
+            "src/app/(app)/page.js:996",
             "src/app/(app)/settings/page.js:202",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2741",
@@ -3562,7 +3702,7 @@
       },
       "surface": {
         "(default)": {
-          "count": 192,
+          "count": 196,
           "routes": [
             "/",
             "/[projectId]",
@@ -3572,7 +3712,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -3603,18 +3745,22 @@
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:113",
             "src/app/(app)/layout.js:117",
-            "src/app/(app)/my/page.js:271",
-            "src/app/(app)/my/page.js:333",
-            "src/app/(app)/my/page.js:355",
-            "src/app/(app)/my/page.js:383",
-            "src/app/(app)/my/page.js:491",
+            "src/app/(app)/my/page.js:263",
+            "src/app/(app)/my/page.js:351",
+            "src/app/(app)/my/page.js:373",
+            "src/app/(app)/my/page.js:401",
+            "src/app/(app)/my/page.js:509",
+            "src/app/(app)/overview/page.js:167",
+            "src/app/(app)/overview/page.js:192",
+            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:303",
             "src/app/(app)/page.js:639",
             "src/app/(app)/page.js:640",
             "src/app/(app)/page.js:644",
             "src/app/(app)/page.js:645",
             "src/app/(app)/page.js:667",
-            "src/app/(app)/page.js:938",
-            "src/app/(app)/page.js:979",
+            "src/app/(app)/page.js:955",
+            "src/app/(app)/page.js:996",
             "src/app/(app)/settings/page.js:202",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2741",
@@ -3783,7 +3929,7 @@
       },
       "color": {
         "(default)": {
-          "count": 177,
+          "count": 180,
           "routes": [
             "/",
             "/[projectId]",
@@ -3793,7 +3939,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -3824,16 +3972,19 @@
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:113",
             "src/app/(app)/layout.js:117",
-            "src/app/(app)/my/page.js:333",
-            "src/app/(app)/my/page.js:355",
-            "src/app/(app)/my/page.js:383",
-            "src/app/(app)/my/page.js:491",
+            "src/app/(app)/my/page.js:351",
+            "src/app/(app)/my/page.js:373",
+            "src/app/(app)/my/page.js:401",
+            "src/app/(app)/my/page.js:509",
+            "src/app/(app)/overview/page.js:192",
+            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:303",
             "src/app/(app)/page.js:639",
             "src/app/(app)/page.js:640",
             "src/app/(app)/page.js:644",
             "src/app/(app)/page.js:645",
             "src/app/(app)/page.js:667",
-            "src/app/(app)/page.js:979",
+            "src/app/(app)/page.js:996",
             "src/app/(app)/settings/page.js:202",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2741",
@@ -3979,15 +4130,18 @@
           ]
         },
         "dark": {
-          "count": 3,
+          "count": 4,
           "routes": [
             "/",
+            "/clients",
             "/my",
+            "/overview",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/my/page.js:271",
-            "src/app/(app)/page.js:938",
+            "src/app/(app)/my/page.js:263",
+            "src/app/(app)/overview/page.js:167",
+            "src/app/(app)/page.js:955",
             "src/app/(app)/settings/page.js:2826"
           ]
         },
@@ -3999,6 +4153,7 @@
             "/analytics",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/settings",
             "/team"
           ],
@@ -4034,7 +4189,7 @@
           ]
         },
         "(default)": {
-          "count": 176,
+          "count": 180,
           "routes": [
             "/",
             "/[projectId]",
@@ -4044,7 +4199,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -4072,18 +4229,22 @@
             "src/app/(app)/chat/page.js:1241",
             "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/error.js:51",
-            "src/app/(app)/my/page.js:271",
-            "src/app/(app)/my/page.js:333",
-            "src/app/(app)/my/page.js:355",
-            "src/app/(app)/my/page.js:383",
-            "src/app/(app)/my/page.js:491",
+            "src/app/(app)/my/page.js:263",
+            "src/app/(app)/my/page.js:351",
+            "src/app/(app)/my/page.js:373",
+            "src/app/(app)/my/page.js:401",
+            "src/app/(app)/my/page.js:509",
+            "src/app/(app)/overview/page.js:167",
+            "src/app/(app)/overview/page.js:192",
+            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:303",
             "src/app/(app)/page.js:639",
             "src/app/(app)/page.js:640",
             "src/app/(app)/page.js:644",
             "src/app/(app)/page.js:645",
             "src/app/(app)/page.js:667",
-            "src/app/(app)/page.js:938",
-            "src/app/(app)/page.js:979",
+            "src/app/(app)/page.js:955",
+            "src/app/(app)/page.js:996",
             "src/app/(app)/settings/page.js:202",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2741",
@@ -4321,7 +4482,7 @@
             "src/app/(app)/chat/page.js:327",
             "src/app/(app)/chat/page.js:336",
             "src/app/(app)/chat/page.js:401",
-            "src/components/WorkspaceSidebar.jsx:465"
+            "src/components/WorkspaceSidebar.jsx:466"
           ]
         },
         "md": {
@@ -4329,6 +4490,7 @@
           "routes": [
             "/",
             "/[projectId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -4356,6 +4518,7 @@
             "/",
             "/[projectId]",
             "/analytics",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -4416,6 +4579,7 @@
             "/[projectId]/issue/[issueId]",
             "/calendar",
             "/chat",
+            "/clients",
             "/sprints"
           ],
           "files": [
@@ -4472,6 +4636,7 @@
             "/",
             "/[projectId]",
             "/analytics",
+            "/clients",
             "/my",
             "/settings",
             "/sprints"
@@ -4496,7 +4661,7 @@
           "routes": [],
           "files": [
             "src/components/MobileNav.jsx:74",
-            "src/components/WorkspaceSidebar.jsx:465"
+            "src/components/WorkspaceSidebar.jsx:466"
           ]
         },
         "surface": {
@@ -4564,6 +4729,7 @@
             "/analytics",
             "/calendar",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -4601,7 +4767,7 @@
           "files": [
             "src/app/(app)/chat/page.js:468",
             "src/components/MobileNav.jsx:74",
-            "src/components/WorkspaceSidebar.jsx:465"
+            "src/components/WorkspaceSidebar.jsx:466"
           ]
         },
         "circle": {
@@ -4643,6 +4809,7 @@
             "/[projectId]",
             "/analytics",
             "/calendar",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -4662,7 +4829,7 @@
             "src/components/MobileNav.jsx:74",
             "src/components/WorkspaceHeader.jsx:443",
             "src/components/WorkspaceHeader.jsx:461",
-            "src/components/WorkspaceSidebar.jsx:465",
+            "src/components/WorkspaceSidebar.jsx:466",
             "src/components/integrations/YouTrackImportCard.jsx:540",
             "src/components/profile/ProfileModal.jsx:41",
             "src/components/profile/ProfileModal.jsx:46",
@@ -4743,6 +4910,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -4847,6 +5015,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -4967,6 +5136,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -5046,6 +5216,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -5076,6 +5247,7 @@
           "routes": [
             "/",
             "/[projectId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -5103,6 +5275,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints"
@@ -5137,7 +5310,7 @@
     "Select": {
       "size": {
         "(default)": {
-          "count": 66,
+          "count": 68,
           "routes": [
             "/",
             "/[projectId]",
@@ -5146,6 +5319,7 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -5166,12 +5340,14 @@
             "src/app/(app)/analytics/page.js:997",
             "src/app/(app)/calendar/page.js:735",
             "src/app/(app)/calendar/page.js:745",
-            "src/app/(app)/my/page.js:296",
-            "src/app/(app)/my/page.js:306",
-            "src/app/(app)/my/page.js:316",
-            "src/app/(app)/page.js:959",
-            "src/app/(app)/page.js:960",
-            "src/app/(app)/page.js:961",
+            "src/app/(app)/my/page.js:288",
+            "src/app/(app)/my/page.js:298",
+            "src/app/(app)/my/page.js:315",
+            "src/app/(app)/my/page.js:325",
+            "src/app/(app)/my/page.js:335",
+            "src/app/(app)/page.js:976",
+            "src/app/(app)/page.js:977",
+            "src/app/(app)/page.js:978",
             "src/app/(app)/settings/page.js:3025",
             "src/app/(app)/settings/page.js:3036",
             "src/app/(app)/settings/page.js:3048",
@@ -5232,12 +5408,13 @@
       },
       "variant": {
         "ghost": {
-          "count": 23,
+          "count": 25,
           "routes": [
             "/",
             "/[projectId]",
             "/analytics",
             "/calendar",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -5256,12 +5433,14 @@
             "src/app/(app)/analytics/page.js:997",
             "src/app/(app)/calendar/page.js:735",
             "src/app/(app)/calendar/page.js:745",
-            "src/app/(app)/my/page.js:296",
-            "src/app/(app)/my/page.js:306",
-            "src/app/(app)/my/page.js:316",
-            "src/app/(app)/page.js:959",
-            "src/app/(app)/page.js:960",
-            "src/app/(app)/page.js:961",
+            "src/app/(app)/my/page.js:288",
+            "src/app/(app)/my/page.js:298",
+            "src/app/(app)/my/page.js:315",
+            "src/app/(app)/my/page.js:325",
+            "src/app/(app)/my/page.js:335",
+            "src/app/(app)/page.js:976",
+            "src/app/(app)/page.js:977",
+            "src/app/(app)/page.js:978",
             "src/app/(app)/sprints/page.js:808",
             "src/app/(app)/sprints/page.js:819",
             "src/app/(app)/sprints/page.js:829"
@@ -5277,6 +5456,7 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -5332,23 +5512,23 @@
       },
       "filterRole": {
         "sprint": {
-          "count": 2,
+          "count": 1,
           "routes": [
-            "/[projectId]",
-            "/my"
+            "/[projectId]"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:452",
-            "src/app/(app)/my/page.js:316"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:452"
           ]
         },
         "member": {
-          "count": 7,
+          "count": 8,
           "routes": [
             "/",
             "/[projectId]",
             "/analytics",
             "/calendar",
+            "/clients",
+            "/my",
             "/sprints"
           ],
           "files": [
@@ -5357,7 +5537,8 @@
             "src/app/(app)/analytics/page.js:1080",
             "src/app/(app)/analytics/page.js:997",
             "src/app/(app)/calendar/page.js:745",
-            "src/app/(app)/page.js:959",
+            "src/app/(app)/my/page.js:298",
+            "src/app/(app)/page.js:976",
             "src/app/(app)/sprints/page.js:808"
           ]
         },
@@ -5373,7 +5554,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:475",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:508",
             "src/app/(app)/analytics/page.js:1091",
-            "src/app/(app)/my/page.js:296",
+            "src/app/(app)/my/page.js:315",
             "src/app/(app)/sprints/page.js:819"
           ]
         },
@@ -5391,7 +5572,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:518",
             "src/app/(app)/analytics/page.js:1101",
             "src/app/(app)/calendar/page.js:735",
-            "src/app/(app)/my/page.js:306",
+            "src/app/(app)/my/page.js:325",
             "src/app/(app)/sprints/page.js:829",
             "src/components/workspace/BillingTab.jsx:1309"
           ]
@@ -5405,22 +5586,37 @@
             "src/app/(app)/analytics/page.js:985"
           ]
         },
-        "date": {
-          "count": 1,
+        "status": {
+          "count": 2,
           "routes": [
-            "/"
+            "/analytics",
+            "/my"
           ],
           "files": [
-            "src/app/(app)/page.js:960"
+            "src/app/(app)/my/page.js:288",
+            "src/components/workspace/BillingTab.jsx:1299"
+          ]
+        },
+        "date": {
+          "count": 2,
+          "routes": [
+            "/",
+            "/clients",
+            "/my"
+          ],
+          "files": [
+            "src/app/(app)/my/page.js:335",
+            "src/app/(app)/page.js:977"
           ]
         },
         "sort": {
           "count": 1,
           "routes": [
-            "/"
+            "/",
+            "/clients"
           ],
           "files": [
-            "src/app/(app)/page.js:961"
+            "src/app/(app)/page.js:978"
           ]
         },
         "(default)": {
@@ -5433,6 +5629,7 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -5482,15 +5679,6 @@
             "src/components/workspace/calendar/CalendarEventPage.jsx:969",
             "src/components/workspace/calendar/CalendarEventPage.jsx:994"
           ]
-        },
-        "status": {
-          "count": 1,
-          "routes": [
-            "/analytics"
-          ],
-          "files": [
-            "src/components/workspace/BillingTab.jsx:1299"
-          ]
         }
       }
     },
@@ -5515,7 +5703,7 @@
             "src/app/(app)/analytics/team/[memberId]/page.js:271",
             "src/app/(app)/calendar/page.js:736",
             "src/app/(app)/chat/page.js:1282",
-            "src/app/(app)/my/page.js:287",
+            "src/app/(app)/my/page.js:279",
             "src/app/(app)/sprints/page.js:799",
             "src/components/workspace/IssueDetail.jsx:1765",
             "src/components/workspace/calendar/CalendarEventDialog.jsx:759",
@@ -5541,7 +5729,7 @@
             "src/app/(app)/analytics/page.js:1071",
             "src/app/(app)/analytics/team/[memberId]/page.js:271",
             "src/app/(app)/calendar/page.js:736",
-            "src/app/(app)/my/page.js:287",
+            "src/app/(app)/my/page.js:279",
             "src/app/(app)/sprints/page.js:799"
           ]
         },
@@ -5580,7 +5768,7 @@
             "src/app/(app)/analytics/page.js:1071",
             "src/app/(app)/analytics/team/[memberId]/page.js:271",
             "src/app/(app)/calendar/page.js:736",
-            "src/app/(app)/my/page.js:287",
+            "src/app/(app)/my/page.js:279",
             "src/app/(app)/sprints/page.js:799"
           ]
         },
@@ -5607,22 +5795,26 @@
     "Surface": {
       "preset": {
         "panel": {
-          "count": 8,
+          "count": 10,
           "routes": [
             "/",
             "/analytics",
             "/analytics/team/[memberId]",
             "/calendar",
+            "/clients",
+            "/overview",
             "/sprints"
           ],
           "files": [
             "src/app/(app)/analytics/page.js:1137",
             "src/app/(app)/analytics/team/[memberId]/page.js:247",
             "src/app/(app)/calendar/page.js:773",
-            "src/app/(app)/page.js:1013",
-            "src/app/(app)/page.js:909",
-            "src/app/(app)/page.js:991",
-            "src/app/(app)/page.js:998",
+            "src/app/(app)/overview/page.js:226",
+            "src/app/(app)/overview/page.js:297",
+            "src/app/(app)/page.js:1008",
+            "src/app/(app)/page.js:1015",
+            "src/app/(app)/page.js:1030",
+            "src/app/(app)/page.js:926",
             "src/app/(app)/sprints/page.js:1083"
           ]
         },
@@ -5671,14 +5863,15 @@
           "routes": [
             "/",
             "/analytics",
-            "/analytics/team/[memberId]"
+            "/analytics/team/[memberId]",
+            "/clients"
           ],
           "files": [
             "src/app/(app)/analytics/page.js:1137",
             "src/app/(app)/analytics/team/[memberId]/page.js:247",
-            "src/app/(app)/page.js:1013",
-            "src/app/(app)/page.js:909",
-            "src/app/(app)/page.js:991"
+            "src/app/(app)/page.js:1008",
+            "src/app/(app)/page.js:1030",
+            "src/app/(app)/page.js:926"
           ]
         },
         "sm": {
@@ -5693,15 +5886,19 @@
           ]
         },
         "md": {
-          "count": 3,
+          "count": 5,
           "routes": [
             "/",
             "/[projectId]/issue/[issueId]",
             "/analytics",
+            "/clients",
+            "/overview",
             "/sprints"
           ],
           "files": [
-            "src/app/(app)/page.js:998",
+            "src/app/(app)/overview/page.js:226",
+            "src/app/(app)/overview/page.js:297",
+            "src/app/(app)/page.js:1015",
             "src/components/workspace/BillingTab.jsx:1381",
             "src/components/workspace/IssueDetail.jsx:2243"
           ]
@@ -5732,11 +5929,12 @@
           "count": 2,
           "routes": [
             "/",
-            "/analytics"
+            "/analytics",
+            "/clients"
           ],
           "files": [
             "src/app/(app)/analytics/page.js:1137",
-            "src/app/(app)/page.js:991"
+            "src/app/(app)/page.js:1008"
           ]
         },
         "member-chart-panel": {
@@ -5749,21 +5947,25 @@
           ]
         },
         "(default)": {
-          "count": 9,
+          "count": 11,
           "routes": [
             "/",
             "/[projectId]/issue/[issueId]",
             "/analytics",
             "/calendar",
+            "/clients",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
           ],
           "files": [
             "src/app/(app)/calendar/page.js:773",
-            "src/app/(app)/page.js:1013",
-            "src/app/(app)/page.js:909",
-            "src/app/(app)/page.js:998",
+            "src/app/(app)/overview/page.js:226",
+            "src/app/(app)/overview/page.js:297",
+            "src/app/(app)/page.js:1015",
+            "src/app/(app)/page.js:1030",
+            "src/app/(app)/page.js:926",
             "src/app/(app)/settings/page.js:3695",
             "src/app/(app)/team/page.js:148",
             "src/components/workspace/BillingTab.jsx:1237",
@@ -5795,7 +5997,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -5822,22 +6026,25 @@
           ]
         },
         "warning": {
-          "count": 4,
+          "count": 5,
           "routes": [
             "/",
             "/[projectId]",
             "/analytics",
-            "/analytics/team/[memberId]"
+            "/analytics/team/[memberId]",
+            "/clients",
+            "/overview"
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:400",
+            "src/app/(app)/overview/page.js:287",
             "src/app/(app)/page.js:248",
             "src/components/workspace/BillingTab.jsx:253",
             "src/components/workspace/WorkloadTab.jsx:140"
           ]
         },
         "(default)": {
-          "count": 12,
+          "count": 13,
           "routes": [
             "/",
             "/[projectId]",
@@ -5847,12 +6054,15 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
           ],
           "files": [
+            "src/app/(app)/overview/page.js:333",
             "src/app/(app)/settings/page.js:193",
             "src/app/(app)/settings/page.js:3708",
             "src/app/(app)/settings/page.js:3709",
@@ -5949,7 +6159,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -5994,11 +6206,53 @@
             "src/components/workspace/calendar/CalendarEventPage.jsx:1413"
           ]
         },
+        "sm": {
+          "count": 20,
+          "routes": [
+            "/",
+            "/[projectId]",
+            "/[projectId]/issue/[issueId]",
+            "/analytics",
+            "/analytics/team/[memberId]",
+            "/calendar",
+            "/calendar/event/[eventId]",
+            "/chat",
+            "/clients",
+            "/my",
+            "/overview",
+            "/settings",
+            "/sprints",
+            "/team"
+          ],
+          "files": [
+            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:333",
+            "src/app/(app)/settings/page.js:3708",
+            "src/app/(app)/settings/page.js:3709",
+            "src/components/SearchModal.jsx:121",
+            "src/components/WorkspaceHeader.jsx:548",
+            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/migrations/DataMigrationSettings.jsx:115",
+            "src/components/workspace/BillingTab.jsx:1412",
+            "src/components/workspace/BillingTab.jsx:250",
+            "src/components/workspace/BillingTab.jsx:253",
+            "src/components/workspace/BillingTab.jsx:564",
+            "src/components/workspace/BillingTab.jsx:566",
+            "src/components/workspace/IssueCard.jsx:322",
+            "src/components/workspace/IssueCard.jsx:334",
+            "src/components/workspace/IssueCard.jsx:348",
+            "src/components/workspace/IssueCard.jsx:51",
+            "src/components/workspace/IssueDetail.jsx:1707",
+            "src/components/workspace/IssueDetail.jsx:1746",
+            "src/components/workspace/IssueDetail.jsx:1749"
+          ]
+        },
         "(default)": {
           "count": 2,
           "routes": [
             "/",
-            "/analytics"
+            "/analytics",
+            "/clients"
           ],
           "files": [
             "src/app/(app)/page.js:200",
@@ -6016,7 +6270,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6044,43 +6300,6 @@
             "src/components/workspace/WorkloadTab.jsx:140",
             "src/components/workspace/WorkloadTab.jsx:141",
             "src/components/workspace/WorkloadTab.jsx:142"
-          ]
-        },
-        "sm": {
-          "count": 18,
-          "routes": [
-            "/",
-            "/[projectId]",
-            "/[projectId]/issue/[issueId]",
-            "/analytics",
-            "/analytics/team/[memberId]",
-            "/calendar",
-            "/calendar/event/[eventId]",
-            "/chat",
-            "/my",
-            "/settings",
-            "/sprints",
-            "/team"
-          ],
-          "files": [
-            "src/app/(app)/settings/page.js:3708",
-            "src/app/(app)/settings/page.js:3709",
-            "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:548",
-            "src/components/WorkspaceInfoCenter.jsx:111",
-            "src/components/migrations/DataMigrationSettings.jsx:115",
-            "src/components/workspace/BillingTab.jsx:1412",
-            "src/components/workspace/BillingTab.jsx:250",
-            "src/components/workspace/BillingTab.jsx:253",
-            "src/components/workspace/BillingTab.jsx:564",
-            "src/components/workspace/BillingTab.jsx:566",
-            "src/components/workspace/IssueCard.jsx:322",
-            "src/components/workspace/IssueCard.jsx:334",
-            "src/components/workspace/IssueCard.jsx:348",
-            "src/components/workspace/IssueCard.jsx:51",
-            "src/components/workspace/IssueDetail.jsx:1707",
-            "src/components/workspace/IssueDetail.jsx:1746",
-            "src/components/workspace/IssueDetail.jsx:1749"
           ]
         },
         "chat-day": {
@@ -6121,7 +6340,7 @@
       },
       "shape": {
         "badge": {
-          "count": 13,
+          "count": 15,
           "routes": [
             "/",
             "/[projectId]",
@@ -6131,7 +6350,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6139,6 +6360,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:393",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:400",
+            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:333",
             "src/app/(app)/settings/page.js:3708",
             "src/app/(app)/settings/page.js:3709",
             "src/app/(app)/settings/page.js:630",
@@ -6163,7 +6386,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6220,7 +6445,7 @@
       },
       "appearance": {
         "(default)": {
-          "count": 53,
+          "count": 55,
           "routes": [
             "/",
             "/[projectId]",
@@ -6230,7 +6455,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6238,6 +6465,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:393",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:400",
+            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:333",
             "src/app/(app)/page.js:200",
             "src/app/(app)/page.js:248",
             "src/app/(app)/settings/page.js:193",
@@ -6319,7 +6548,7 @@
       },
       "preset": {
         "(default)": {
-          "count": 56,
+          "count": 58,
           "routes": [
             "/",
             "/[projectId]",
@@ -6329,7 +6558,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6337,6 +6568,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:393",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:400",
+            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:333",
             "src/app/(app)/page.js:248",
             "src/app/(app)/settings/page.js:193",
             "src/app/(app)/settings/page.js:3412",
@@ -6404,7 +6637,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6426,7 +6661,7 @@
       },
       "weight": {
         "(default)": {
-          "count": 46,
+          "count": 48,
           "routes": [
             "/",
             "/[projectId]",
@@ -6436,7 +6671,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6444,6 +6681,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:393",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:400",
+            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:333",
             "src/app/(app)/page.js:200",
             "src/app/(app)/page.js:248",
             "src/app/(app)/settings/page.js:193",
@@ -6501,7 +6740,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6543,12 +6784,40 @@
             "src/components/workspace/calendar/CalendarEventDialog.jsx:335"
           ]
         },
+        "sm": {
+          "count": 6,
+          "routes": [
+            "/",
+            "/[projectId]",
+            "/[projectId]/issue/[issueId]",
+            "/analytics",
+            "/analytics/team/[memberId]",
+            "/calendar",
+            "/calendar/event/[eventId]",
+            "/chat",
+            "/clients",
+            "/my",
+            "/overview",
+            "/settings",
+            "/sprints",
+            "/team"
+          ],
+          "files": [
+            "src/app/(app)/overview/page.js:285",
+            "src/components/workspace/AnalyticsTab.jsx:385",
+            "src/components/workspace/IssueCard.jsx:402",
+            "src/components/workspace/TimesheetTab.jsx:381",
+            "src/components/workspace/TimesheetTab.jsx:466",
+            "src/components/workspace/TimesheetTab.jsx:888"
+          ]
+        },
         "(default)": {
           "count": 3,
           "routes": [
             "/",
             "/analytics",
-            "/analytics/team/[memberId]"
+            "/analytics/team/[memberId]",
+            "/clients"
           ],
           "files": [
             "src/app/(app)/page.js:192",
@@ -6567,7 +6836,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6593,7 +6864,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -6619,30 +6892,6 @@
           ],
           "files": [
             "src/components/profile/ProfileView.jsx:233"
-          ]
-        },
-        "sm": {
-          "count": 5,
-          "routes": [
-            "/",
-            "/[projectId]",
-            "/[projectId]/issue/[issueId]",
-            "/analytics",
-            "/analytics/team/[memberId]",
-            "/calendar",
-            "/calendar/event/[eventId]",
-            "/chat",
-            "/my",
-            "/settings",
-            "/sprints",
-            "/team"
-          ],
-          "files": [
-            "src/components/workspace/AnalyticsTab.jsx:385",
-            "src/components/workspace/IssueCard.jsx:402",
-            "src/components/workspace/TimesheetTab.jsx:381",
-            "src/components/workspace/TimesheetTab.jsx:466",
-            "src/components/workspace/TimesheetTab.jsx:888"
           ]
         },
         "chat-mention": {
@@ -6765,6 +7014,7 @@
           "routes": [
             "/",
             "/[projectId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -6777,6 +7027,7 @@
           "routes": [
             "/",
             "/[projectId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -6856,8 +7107,8 @@
             "src/app/(app)/chat/page.js:398",
             "src/components/MobileNav.jsx:255",
             "src/components/MobileNav.jsx:302",
-            "src/components/WorkspaceSidebar.jsx:283",
-            "src/components/WorkspaceSidebar.jsx:414"
+            "src/components/WorkspaceSidebar.jsx:284",
+            "src/components/WorkspaceSidebar.jsx:415"
           ]
         },
         "md": {
@@ -6894,8 +7145,8 @@
           "files": [
             "src/components/MobileNav.jsx:255",
             "src/components/MobileNav.jsx:302",
-            "src/components/WorkspaceSidebar.jsx:283",
-            "src/components/WorkspaceSidebar.jsx:414"
+            "src/components/WorkspaceSidebar.jsx:284",
+            "src/components/WorkspaceSidebar.jsx:415"
           ]
         }
       },
@@ -6913,7 +7164,7 @@
             "src/components/MobileNav.jsx:255",
             "src/components/MobileNav.jsx:302",
             "src/components/OrgSwitcherScreen.jsx:72",
-            "src/components/WorkspaceSidebar.jsx:283",
+            "src/components/WorkspaceSidebar.jsx:284",
             "src/components/workspace/qtplus/chat/QtPlusChatPanel.jsx:77"
           ]
         },
@@ -6921,7 +7172,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:414"
+            "src/components/WorkspaceSidebar.jsx:415"
           ]
         }
       },
@@ -6941,7 +7192,7 @@
           "files": [
             "src/components/MobileNav.jsx:255",
             "src/components/MobileNav.jsx:302",
-            "src/components/WorkspaceSidebar.jsx:283"
+            "src/components/WorkspaceSidebar.jsx:284"
           ]
         },
         "inverse-outline": {
@@ -6959,7 +7210,7 @@
             "/sprints"
           ],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:414",
+            "src/components/WorkspaceSidebar.jsx:415",
             "src/components/workspace/qtplus/chat/QtPlusChatPanel.jsx:77"
           ]
         }
@@ -6993,12 +7244,13 @@
             "/[projectId]",
             "/analytics",
             "/analytics/team/[memberId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints"
           ],
           "files": [
-            "src/app/(app)/my/page.js:482",
+            "src/app/(app)/my/page.js:500",
             "src/app/(app)/page.js:633",
             "src/app/(app)/settings/page.js:4521",
             "src/app/(app)/sprints/page.js:138",
@@ -7017,6 +7269,7 @@
             "/[projectId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -7062,6 +7315,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/settings",
             "/sprints"
           ],
@@ -7089,7 +7343,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/my/page.js:482",
+            "src/app/(app)/my/page.js:500",
             "src/components/UserStatusDialog.jsx:62"
           ]
         },
@@ -7107,6 +7361,7 @@
           "routes": [
             "/",
             "/[projectId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -7151,6 +7406,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -7187,7 +7443,7 @@
             "/sprints"
           ],
           "files": [
-            "src/app/(app)/my/page.js:482",
+            "src/app/(app)/my/page.js:500",
             "src/components/WorkspaceInfoCenter.jsx:245",
             "src/components/workspace/IssueDetail.jsx:2016",
             "src/components/workspace/calendar/CalendarEventPage.jsx:207"
@@ -7215,6 +7471,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -7248,7 +7505,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:482"
+            "src/app/(app)/my/page.js:500"
           ]
         },
         "dialog": {
@@ -7269,19 +7526,22 @@
     "Alert": {
       "variant": {
         "error": {
-          "count": 7,
+          "count": 8,
           "routes": [
             "/",
             "/[projectId]",
             "/analytics",
+            "/clients",
             "/my",
+            "/overview",
             "/sprints",
             "/team"
           ],
           "files": [
-            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/my/page.js:396",
+            "src/app/(app)/overview/page.js:187",
             "src/app/(app)/page.js:665",
-            "src/app/(app)/page.js:968",
+            "src/app/(app)/page.js:985",
             "src/app/(app)/sprints/page.js:851",
             "src/app/(app)/team/page.js:153",
             "src/components/CreateTaskModal.jsx:479",
@@ -7297,6 +7557,7 @@
             "/analytics",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints"
@@ -7345,12 +7606,13 @@
     "EmptyState": {
       "context": {
         "(default)": {
-          "count": 16,
+          "count": 18,
           "routes": [
             "/analytics",
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/overview",
             "/team"
           ],
           "files": [
@@ -7361,6 +7623,8 @@
             "src/app/(app)/calendar/page.js:433",
             "src/app/(app)/calendar/page.js:587",
             "src/app/(app)/calendar/page.js:778",
+            "src/app/(app)/overview/page.js:238",
+            "src/app/(app)/overview/page.js:309",
             "src/app/(app)/team/page.js:167",
             "src/components/profile/ProfileView.jsx:497",
             "src/components/profile/ProfileView.jsx:529",
@@ -7376,11 +7640,12 @@
           "count": 4,
           "routes": [
             "/",
-            "/[projectId]"
+            "/[projectId]",
+            "/clients"
           ],
           "files": [
-            "src/app/(app)/page.js:916",
-            "src/app/(app)/page.js:999",
+            "src/app/(app)/page.js:1016",
+            "src/app/(app)/page.js:933",
             "src/components/workspace/AnalyticsTab.jsx:229",
             "src/components/workspace/AnalyticsTab.jsx:247"
           ]
@@ -7433,6 +7698,7 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/sprints",
             "/team"
           ],
@@ -7443,8 +7709,8 @@
             "src/app/(app)/analytics/team/[memberId]/page.js:233",
             "src/app/(app)/calendar/page.js:433",
             "src/app/(app)/calendar/page.js:778",
-            "src/app/(app)/page.js:916",
-            "src/app/(app)/page.js:999",
+            "src/app/(app)/page.js:1016",
+            "src/app/(app)/page.js:933",
             "src/app/(app)/team/page.js:167",
             "src/components/WorkspaceInfoCenter.jsx:152",
             "src/components/WorkspaceInfoCenter.jsx:200",
@@ -7466,15 +7732,18 @@
           ]
         },
         "compact": {
-          "count": 2,
+          "count": 4,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
             "/calendar",
+            "/overview",
             "/sprints"
           ],
           "files": [
             "src/app/(app)/calendar/page.js:587",
+            "src/app/(app)/overview/page.js:238",
+            "src/app/(app)/overview/page.js:309",
             "src/components/workspace/qtplus/chat/QtPlusChatPanel.jsx:92"
           ]
         }
@@ -7490,6 +7759,7 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/sprints",
             "/team"
           ],
@@ -7501,8 +7771,8 @@
             "src/app/(app)/calendar/page.js:433",
             "src/app/(app)/calendar/page.js:587",
             "src/app/(app)/calendar/page.js:778",
-            "src/app/(app)/page.js:916",
-            "src/app/(app)/page.js:999",
+            "src/app/(app)/page.js:1016",
+            "src/app/(app)/page.js:933",
             "src/app/(app)/team/page.js:167",
             "src/components/profile/ProfileView.jsx:497",
             "src/components/profile/ProfileView.jsx:529",
@@ -7517,11 +7787,14 @@
           ]
         },
         "card": {
-          "count": 8,
+          "count": 10,
           "routes": [
-            "/[projectId]"
+            "/[projectId]",
+            "/overview"
           ],
           "files": [
+            "src/app/(app)/overview/page.js:238",
+            "src/app/(app)/overview/page.js:309",
             "src/components/WorkspaceInfoCenter.jsx:152",
             "src/components/WorkspaceInfoCenter.jsx:200",
             "src/components/workspace/AnalyticsTab.jsx:229",
@@ -7537,7 +7810,7 @@
     "LoadingSpinner": {
       "size": {
         "md": {
-          "count": 22,
+          "count": 24,
           "routes": [
             "/",
             "/[projectId]",
@@ -7545,7 +7818,9 @@
             "/analytics/team/[memberId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/team"
           ],
@@ -7556,9 +7831,11 @@
             "src/app/(app)/analytics/team/[memberId]/page.js:211",
             "src/app/(app)/calendar/page.js:776",
             "src/app/(app)/loading.js:28",
-            "src/app/(app)/my/page.js:372",
-            "src/app/(app)/page.js:912",
-            "src/app/(app)/page.js:993",
+            "src/app/(app)/my/page.js:390",
+            "src/app/(app)/overview/page.js:183",
+            "src/app/(app)/page.js:1010",
+            "src/app/(app)/page.js:915",
+            "src/app/(app)/page.js:929",
             "src/app/(app)/settings/page.js:3756",
             "src/app/(app)/settings/page.js:3854",
             "src/app/(app)/settings/page.js:3899",
@@ -7591,15 +7868,15 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:186"
+            "src/components/WorkspaceSidebar.jsx:187"
           ]
         },
         "caption": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:192",
-            "src/components/WorkspaceSidebar.jsx:195"
+            "src/components/WorkspaceSidebar.jsx:193",
+            "src/components/WorkspaceSidebar.jsx:196"
           ]
         }
       },
@@ -7608,21 +7885,21 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:186"
+            "src/components/WorkspaceSidebar.jsx:187"
           ]
         },
         "wide": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:192"
+            "src/components/WorkspaceSidebar.jsx:193"
           ]
         },
         "half": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:195"
+            "src/components/WorkspaceSidebar.jsx:196"
           ]
         }
       },
@@ -7631,9 +7908,9 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:186",
-            "src/components/WorkspaceSidebar.jsx:192",
-            "src/components/WorkspaceSidebar.jsx:195"
+            "src/components/WorkspaceSidebar.jsx:187",
+            "src/components/WorkspaceSidebar.jsx:193",
+            "src/components/WorkspaceSidebar.jsx:196"
           ]
         }
       }
@@ -7658,6 +7935,7 @@
             "/[projectId]",
             "/calendar",
             "/calendar/event/[eventId]",
+            "/clients",
             "/my",
             "/settings",
             "/sprints"
@@ -7760,6 +8038,18 @@
     },
     "Card": {
       "padding": {
+        "none": {
+          "count": 3,
+          "routes": [
+            "/[projectId]",
+            "/overview"
+          ],
+          "files": [
+            "src/app/(app)/overview/page.js:248",
+            "src/app/(app)/overview/page.js:319",
+            "src/components/workspace/qtplus/cards/NoteCard.jsx:21"
+          ]
+        },
         "lg": {
           "count": 14,
           "routes": [
@@ -7821,25 +8111,19 @@
             "src/components/profile/ProfileView.jsx:545",
             "src/components/workspace/BillingTab.jsx:595"
           ]
-        },
-        "none": {
-          "count": 1,
-          "routes": [
-            "/[projectId]"
-          ],
-          "files": [
-            "src/components/workspace/qtplus/cards/NoteCard.jsx:21"
-          ]
         }
       },
       "preset": {
         "borderless": {
-          "count": 19,
+          "count": 21,
           "routes": [
             "/analytics",
+            "/overview",
             "/settings"
           ],
           "files": [
+            "src/app/(app)/overview/page.js:248",
+            "src/app/(app)/overview/page.js:319",
             "src/app/(app)/settings/page.js:2776",
             "src/app/(app)/settings/page.js:2853",
             "src/app/(app)/settings/page.js:3023",
@@ -7980,18 +8264,22 @@
     },
     "ListRow": {
       "density": {
+        "roomy": {
+          "count": 3,
+          "routes": [
+            "/overview"
+          ],
+          "files": [
+            "src/app/(app)/overview/page.js:256",
+            "src/app/(app)/overview/page.js:321",
+            "src/components/SupportDialog.jsx:62"
+          ]
+        },
         "compact": {
           "count": 1,
           "routes": [],
           "files": [
             "src/components/SearchModal.jsx:80"
-          ]
-        },
-        "roomy": {
-          "count": 1,
-          "routes": [],
-          "files": [
-            "src/components/SupportDialog.jsx:62"
           ]
         }
       }
@@ -8112,6 +8400,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -8139,6 +8428,7 @@
             "/[projectId]",
             "/analytics",
             "/analytics/team/[memberId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -8164,6 +8454,7 @@
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
             "/analytics",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -8171,7 +8462,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:499",
-            "src/app/(app)/my/page.js:342",
+            "src/app/(app)/my/page.js:360",
             "src/components/CreateTaskModal.jsx:447",
             "src/components/InviteMemberDialog.jsx:203",
             "src/components/workspace/BillingTab.jsx:1200",
@@ -8214,7 +8505,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:499",
-            "src/app/(app)/my/page.js:342",
+            "src/app/(app)/my/page.js:360",
             "src/app/(app)/settings/page.js:4304",
             "src/components/InviteMemberDialog.jsx:203",
             "src/components/profile/ProfileView.jsx:324",
@@ -8229,6 +8520,7 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
+            "/clients",
             "/my",
             "/sprints"
           ],
@@ -8250,6 +8542,7 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
             "/settings",
             "/sprints",
@@ -8316,7 +8609,9 @@
             "/calendar",
             "/calendar/event/[eventId]",
             "/chat",
+            "/clients",
             "/my",
+            "/overview",
             "/settings",
             "/sprints",
             "/team"
@@ -8605,7 +8900,7 @@
             "src/app/(app)/analytics/page.js:984",
             "src/app/(app)/analytics/page.js:995",
             "src/app/(app)/calendar/page.js:734",
-            "src/app/(app)/my/page.js:286",
+            "src/app/(app)/my/page.js:278",
             "src/app/(app)/sprints/page.js:798"
           ]
         },
@@ -8621,10 +8916,11 @@
         "projects": {
           "count": 1,
           "routes": [
-            "/"
+            "/",
+            "/clients"
           ],
           "files": [
-            "src/app/(app)/page.js:958"
+            "src/app/(app)/page.js:975"
           ]
         }
       }

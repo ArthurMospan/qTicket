@@ -1,12 +1,11 @@
 'use client';
-// src/app/workspace/my/page.js — My Tasks: Global Kanban Board & Sprints
-import { useCallback, useMemo, useState } from 'react';
+// src/app/workspace/my/page.js — qTicket's cross-client incident queue
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
-import { useSprints } from '@/lib/hooks/useSprints';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import AgileBoard from '@/components/workspace/AgileBoard';
 import CreateTaskModal from '@/components/CreateTaskModal';
@@ -33,40 +32,38 @@ import {
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
-import { can, canWhileRoleLoads } from '@/lib/utils/can';
+import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
 import { useViewState } from '@/lib/hooks/useViewState';
-import { MY_TASKS_VIEW_SCHEMA } from '@/lib/utils/viewState.mjs';
+import { INCIDENT_QUEUE_VIEW_SCHEMA } from '@/lib/utils/viewState.mjs';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 
 
 
-function filterTasks(tasks, filters, sprintMap) {
-  const { projects, priority, type, sprint } = filters;
+function filterTasks(tasks, filters) {
+  const { projects, status, assigned, priority, type, period } = filters;
+  const periodDays = period === '7days' ? 7 : period === '30days' ? 30 : 0;
+  const cutoff = periodDays ? Date.now() - periodDays * 24 * 60 * 60 * 1000 : 0;
 
   return tasks.filter(t => {
     if (projects && projects.length > 0 && !projects.includes(t.projectId)) return false;
+    if (status !== 'all' && (t.columnId || t.status) !== status) return false;
+    if (assigned === 'unassigned' && (t.assigneeIds || []).length > 0) return false;
+    if (assigned !== 'all' && assigned !== 'unassigned' && !(t.assigneeIds || []).includes(assigned)) return false;
     if (priority !== 'all' && (t.priority || NO_PRIORITY_ID) !== priority) return false;
     if (type !== 'all' && t.type !== type) return false;
-    if (sprint !== 'all') {
-      if (sprint === 'none') {
-        if (t.sprintId) return false;
-      } else if (sprint === 'active') {
-        const s = sprintMap[t.sprintId];
-        if (!s || s.status !== 'active') return false;
-      } else {
-        if (t.sprintId !== sprint) return false;
-      }
-    }
+    if (cutoff && timestampMillis(t.createdAt) < cutoff) return false;
     return true;
   });
 }
 
-export default function MyTasksPage() {
+export default function IncidentQueuePage() {
   const { currentUser, projects, activeOrgId, orgRole } = useAppContext();
   const { members } = useOrganization();
   const { labels, types, priorities, statuses, categoryColumns } = useWorkflowConfig();
   const uid = currentUser?.uid || currentUser?.id;
-  const hiddenCategoriesStorageKey = `qt:my-tasks:hidden-categories:${uid || 'anonymous'}:${activeOrgId || 'none'}`;
+  const clientViewer = isClientRole(orgRole);
+  const hiddenCategoriesStorageKey = `qt:incident-queue:hidden-categories:${uid || 'anonymous'}:${activeOrgId || 'none'}`;
   const {
     tasks: sourceTasks,
     allIssues,
@@ -76,12 +73,7 @@ export default function MyTasksPage() {
     moveTask,
     moveTaskToCategory,
     compareTaskCards,
-  } = useAllMyTasks(uid);
-  const {
-    sprints,
-    loading: sprintsLoading,
-    error: sprintsError,
-  } = useSprints();
+  } = useAllMyTasks(uid, { includeAll: true });
   const showToast = useWorkspaceStore(s => s.showToast);
   const resolveBulkStatusId = useCallback((issue, value) => {
     if (value?.mode !== 'category') return value?.id || null;
@@ -99,10 +91,10 @@ export default function MyTasksPage() {
   });
   const myTaskSearch = useWorkspaceStore(s => s.myTaskSearch);
 
-  // Filters and the kanban/list choice live in the address. `assignee` is not
-  // one of them: this screen already carries that parameter for the composer.
-  const [filters, setFilters] = useViewState(MY_TASKS_VIEW_SCHEMA, {
-    storageKey: `qt:view:${activeOrgId}:my-tasks`,
+  // Filters and the kanban/list choice live in the address. `assigned` is used
+  // for the queue because `assignee` already prefills the incident composer.
+  const [filters, setFilters] = useViewState(INCIDENT_QUEUE_VIEW_SCHEMA, {
+    storageKey: `qt:view:${activeOrgId}:incident-queue`,
   });
   const savedViewMode = filters.view;
   const setViewMode = useCallback(value => setFilters({ view: value }), [setFilters]);
@@ -121,6 +113,9 @@ export default function MyTasksPage() {
   // already the state, and mirroring it means two sources that can disagree.
   const router = useRouter();
   const searchParams = useSearchParams();
+  useEffect(() => {
+    if (orgRole && clientViewer) router.replace('/');
+  }, [clientViewer, orgRole, router]);
   const composerRequestedByUrl = searchParams.get('new') === '1';
   // A member profile can ask for the composer with that member already on it.
   const requestedAssignee = searchParams.get('assignee') || '';
@@ -232,14 +227,8 @@ export default function MyTasksPage() {
     await applyBulkAction(action, value, selectedIssues);
   };
 
-  // Group sprints by status
-  const sprintMap = (sprints || []).reduce((acc, s) => {
-    acc[s.id] = s;
-    return acc;
-  }, {});
-
   const normalizedSearch = myTaskSearch.trim().toLowerCase();
-  const filtered = filterTasks(tasks, filters, sprintMap).filter(t => {
+  const filtered = filterTasks(tasks, filters).filter(t => {
     const p = projects.find(proj => proj.id === t.projectId);
     if (!p || p.status === 'archived') return false;
     if (!normalizedSearch) return true;
@@ -250,9 +239,11 @@ export default function MyTasksPage() {
     activeOrgId,
     myTaskSearch,
     filters.projects.join(','),
+    filters.status,
+    filters.assigned,
     filters.priority,
     filters.type,
-    filters.sprint,
+    filters.period,
     hiddenCategories.join(','),
   ].join('|');
   usePublishLocalSearchResults(myTaskSearch, filtered.length);
@@ -260,12 +251,13 @@ export default function MyTasksPage() {
 
   // Одне питання на три екрани: відмова в доступі, вичерпана квота й обрив
   // мережі — це три різні речі, і всі три казали «перевірте зʼєднання».
-  const dataFailure = workspaceDataFailureCopy(tasksError || sprintsError, isQuotaRefused());
+  const dataFailure = workspaceDataFailureCopy(tasksError, isQuotaRefused());
+  if (clientViewer) return null;
   return (
     <div className={`flex-1 h-full bg-transparent ${viewMode === 'kanban' ? 'overflow-hidden' : 'qt-nav-scroll overflow-y-auto overflow-x-hidden hide-scrollbar'}`}>
       <div className={`workspace-page-layout ${viewMode === 'kanban' ? 'h-full pb-0' : 'min-h-full pb-[120px]'}`}>
         <PageHeader
-          title="Мої інциденти"
+          title="Інциденти"
           actions={
             <div className="flex gap-2">
               <Button
@@ -289,9 +281,36 @@ export default function MyTasksPage() {
                   value={filters.projects}
                 onChange={(val) => setFilters({ projects: val })}
                 options={projects.map(p => ({ value: p.id, label: p.name }))}
-                placeholder="Всі проєкти"
-                searchPlaceholder="Пошук проєкту..."
+                placeholder="Усі клієнти"
+                searchPlaceholder="Пошук клієнта..."
                 filterRole="project"
+              />
+              <Select
+                filterRole="status"
+                variant="ghost"
+                value={filters.status}
+                onChange={(val) => setFilters({ status: val })}
+                options={[
+                  { value: 'all', label: 'Усі статуси' },
+                  ...statuses.map(status => ({ value: status.id, label: status.label })),
+                ]}
+              />
+              <Select
+                filterRole="member"
+                variant="ghost"
+                value={filters.assigned}
+                onChange={(val) => setFilters({ assigned: val })}
+                options={[
+                  { value: 'all', label: 'Усі виконавці' },
+                  { value: 'unassigned', label: 'Без виконавця' },
+                  ...members
+                    .filter(member => !isClientRole(member.role))
+                    .map(member => ({
+                      value: member.id || member.uid,
+                      label: member.name || member.email || 'Учасник',
+                      user: member,
+                    })),
+                ]}
               />
               <Select
                 filterRole="priority"
@@ -299,7 +318,7 @@ export default function MyTasksPage() {
                 value={filters.priority}
                 onChange={(val) => setFilters({ priority: val })}
                 options={[
-                  { value: 'all', label: 'Всі пріоритети' },
+                  { value: 'all', label: 'Усі пріоритети' },
                   ...prioritySelectOptions(priorities),
                 ]}
               />
@@ -309,20 +328,19 @@ export default function MyTasksPage() {
                 value={filters.type}
                 onChange={(val) => setFilters({ type: val })}
                 options={[
-                  { value: 'all', label: 'Всі типи' },
+                  { value: 'all', label: 'Усі типи' },
                   ...types.map(taskTypeSelectOption),
                 ]}
               />
               <Select
-                filterRole="sprint"
+                filterRole="date"
                 variant="ghost"
-                value={filters.sprint}
-                onChange={(val) => setFilters({ sprint: val })}
+                value={filters.period}
+                onChange={(val) => setFilters({ period: val })}
                 options={[
-                  { value: 'all', label: 'Всі спринти' },
-                  { value: 'active', label: 'Тільки активні' },
-                  { value: 'none', label: 'Без спринта' },
-                  ...(sprints || []).map(s => ({ value: s.id, label: s.name }))
+                  { value: 'all', label: 'За весь час' },
+                  { value: '7days', label: 'Створені за 7 днів' },
+                  { value: '30days', label: 'Створені за 30 днів' },
                 ]}
               />
             </FilterBar>
@@ -367,12 +385,12 @@ export default function MyTasksPage() {
 
         {/* Main Content Area */}
         <div className={viewMode === 'kanban' ? 'flex min-h-0 flex-1 flex-col' : ''}>
-        {loading || sprintsLoading ? (
+        {loading ? (
           <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
             <LoadingSpinner size="md" />
             <span className="sr-only">Завантаження…</span>
           </div>
-        ) : tasksError || sprintsError ? (
+        ) : tasksError ? (
           <div className="flex min-h-[320px] flex-1 items-center justify-center p-6">
             <div className="flex w-full max-w-[480px] flex-col gap-3">
               <Alert
@@ -393,7 +411,7 @@ export default function MyTasksPage() {
               members={members}
               projects={projects}
               projectId="my"
-              sprints={sprints}
+              sprints={[]}
               showProjectName
               groupBy="category"
               compareIssueCards={compareTaskCards}
@@ -417,7 +435,7 @@ export default function MyTasksPage() {
             issueLinks={issueLinks}
             members={members}
             labels={labels}
-            sprints={sprints}
+            sprints={[]}
             projects={projects}
             showProjectName
             groupBy="category"
@@ -475,7 +493,7 @@ export default function MyTasksPage() {
         projects={projects}
         stages={[]}
         teamMembers={members}
-        sprints={sprints}
+        sprints={[]}
       />
 
       {showSettingsModal && (
@@ -526,7 +544,7 @@ export default function MyTasksPage() {
           issueLinks={issueLinks}
           members={members}
           labels={labels}
-          sprints={sprints}
+          sprints={[]}
           busy={Boolean(pendingStatusMove.busy)}
           onSelect={selectPendingStatus}
           onClose={() => setPendingStatusMove(null)}

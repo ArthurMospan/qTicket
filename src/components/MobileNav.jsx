@@ -12,7 +12,7 @@ import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { Button, Counter, IconAction } from '@/components/ui';
 import { can, isClientRole } from '@/lib/utils/can';
 import {
-  Folder, PieChart, Menu, X,
+  Folder, LayoutDashboard, Menu, X,
   Users, Settings, Plus, Clock, Square as StopIcon, ChevronsUpDown, CircleHelp,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
@@ -32,9 +32,9 @@ import { useModalFocus } from '@/lib/hooks/useModalFocus';
 const NAV_OPACITY = 0.88;
 
 const TABS = [
-  { href: '/',           icon: Folder,        label: 'Клієнти', exact: true },
-  { href: '/my',        icon: TaskIcon,      label: 'Мої інциденти' },
-  { href: '/analytics', icon: PieChart,      label: 'Аналітика' },
+  { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
+  { href: '/my',       icon: TaskIcon,        label: 'Інциденти' },
+  { href: '/clients',  icon: Folder,          label: 'Клієнти' },
 ];
 
 const MORE_NAV = [
@@ -96,7 +96,7 @@ export default function MobileNav({ keyboardOpen = false }) {
   const { projects, activeOrg, activeOrgId, orgRole } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const visibleTabs = clientViewer
-    ? [{ href: '/', icon: Folder, label: 'Інциденти', exact: true }]
+    ? [{ href: '/', icon: Folder, label: 'Мої звернення', exact: true }]
     : TABS;
   const visibleMoreNav = clientViewer
     ? [{ href: '/settings', icon: Settings, label: 'Налаштування' }]
@@ -347,7 +347,7 @@ export default function MobileNav({ keyboardOpen = false }) {
                   icon={Plus}
                   size="sm"
                   appearance="quiet"
-                  onClick={() => { setMoreOpen(false); router.push('/?new=1'); }}
+                  onClick={() => { setMoreOpen(false); router.push('/clients?new=1'); }}
                   className="-mr-[4px]"
                 />
               )}

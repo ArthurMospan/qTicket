@@ -257,8 +257,8 @@ test('remembered workspace filters are scoped to the organization', async () => 
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
   ]);
 
-  assert.match(myTasks, /storageKey: `qt:view:\$\{activeOrgId\}:my-tasks`/);
-  assert.match(myTasks, /qt:my-tasks:hidden-categories:\$\{uid \|\| 'anonymous'\}:\$\{activeOrgId \|\| 'none'\}/);
+  assert.match(myTasks, /storageKey: `qt:view:\$\{activeOrgId\}:incident-queue`/);
+  assert.match(myTasks, /qt:incident-queue:hidden-categories:\$\{uid \|\| 'anonymous'\}:\$\{activeOrgId \|\| 'none'\}/);
   assert.match(sprints, /storageKey: `qt:view:\$\{activeOrgId\}:sprints`/);
   assert.match(projectBoard, /storageKey: `qt:view:\$\{resourceOrganizationId \|\| activeOrgId\}:board:\$\{projectId\}`/);
 });

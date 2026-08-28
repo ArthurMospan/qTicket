@@ -51,7 +51,7 @@ function issueLabel(issue) {
   return issue?.issueKey || issue?.title || issue?.id || 'без назви';
 }
 
-export function useAllMyTasks(userId) {
+export function useAllMyTasks(userId, { includeAll = false } = {}) {
   const {
     activeOrgId,
     projects,
@@ -89,14 +89,15 @@ export function useAllMyTasks(userId) {
   // them, not against the handful this person happens to own.
   const snapshotTasks = useMemo(() => {
     if (!userId) return [];
-    return workspaceIssues
-      .filter(issue => issue.assigneeIds?.includes(userId))
-      .sort((a, b) => {
+    const assignedIssues = workspaceIssues
+      .filter(issue => issue.assigneeIds?.includes(userId));
+    const scopedIssues = includeAll ? workspaceIssues : assignedIssues;
+    return [...scopedIssues].sort((a, b) => {
         const aTime = a.dueDate?.toMillis?.() ?? a.createdAt?.toMillis?.() ?? 0;
         const bTime = b.dueDate?.toMillis?.() ?? b.createdAt?.toMillis?.() ?? 0;
         return aTime - bTime;
       });
-  }, [workspaceIssues, userId]);
+  }, [includeAll, workspaceIssues, userId]);
 
   // Keeps the "My tasks" kanban from springing a dropped card back to its old
   // column while the write is in flight. Sorted by due date here, not by

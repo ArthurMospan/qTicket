@@ -22,9 +22,9 @@ export default function manifest() {
       { src: '/quickteam.png', sizes: '436x436', type: 'image/png', purpose: 'any' },
     ],
     shortcuts: [
-      { name: 'Мої інциденти', url: '/my' },
-      { name: 'Чат', url: '/chat' },
-      { name: 'Календар', url: '/calendar' },
+      { name: 'Огляд підтримки', url: '/overview' },
+      { name: 'Інциденти', url: '/my' },
+      { name: 'Клієнти', url: '/clients' },
     ],
   };
 }
