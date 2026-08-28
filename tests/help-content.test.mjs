@@ -69,6 +69,12 @@ test('qTicket help publishes only reachable support workflows', () => {
   }
 });
 
+test('the public help shell introduces qTicket rather than the inherited task manager', async () => {
+  const explorer = await readFile(new URL('../src/app/(public)/help/HelpExplorer.jsx', import.meta.url), 'utf8');
+  assert.match(explorer, /інструкції про інциденти, клієнтські простори, команду підтримки/);
+  assert.doesNotMatch(explorer, /задачі, команду, спринти, час, інтеграції/);
+});
+
 test('controlled product features cannot exist without a valid help article', async () => {
   const covered = new Set(HELP_ARTICLES.flatMap(article => article.coverage));
   assert.deepEqual(

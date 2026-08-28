@@ -83,7 +83,7 @@ Completed product slice on 2026-08-28:
   support metrics, separate client/support rosters, a project-scoped client
   administrator invitation, and an internal-only settings summary. It no
   longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
-- The product baseline passes lint, production build, all 1,168 unit tests, all 42 local
+- The product baseline passes lint, production build, all 1,169 unit tests, all 42 local
   visual scenarios, and the UI Kit usage, drift, fidelity, colour and
   accessibility contracts. Authenticated two-role verification remains part of
   acceptance below.

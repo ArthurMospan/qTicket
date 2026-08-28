@@ -29,7 +29,7 @@ export default function HelpExplorer({ articles, categories, initialCategory = '
         <p className="ui-type-eyebrow text-muted">Довідковий центр qTicket</p>
         <h1 className="ui-type-page-title mt-[8px] text-ink">Відповіді про реальну роботу сервісу</h1>
         <p className="mt-[10px] max-w-[680px] text-[13px] leading-[1.65] text-muted">
-          Українські інструкції про задачі, команду, спринти, час, інтеграції, доступ і підтримку.
+          Українські інструкції про інциденти, клієнтські простори, команду підтримки, доступ і спілкування.
         </p>
       </div>
 
