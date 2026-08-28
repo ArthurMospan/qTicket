@@ -20,10 +20,21 @@ This file contains current owner guardrails and confirmed open work. Completed i
   roles, identity and removal. qTicket may render that synchronized directory
   read-only for assignment and support operations, but must not duplicate its
   administration. A separate **Команда** surface earns primary navigation only
-  if it adds incident-specific operational value such as workload, assigned
-  clients or SLA risk; a copied name/role roster belongs in contextual pickers
-  and profiles instead. External client employees remain qTicket-owned because
+  if it adds incident-specific operational value such as workload or assigned
+  clients; a copied name/role roster belongs in contextual pickers and profiles
+  instead. External client employees remain qTicket-owned because
   `client_admin` manages them inside one client project.
+- **The owner has rejected these outright. Do not propose them, do not build a
+  smaller version of one, and do not leave a placeholder that implies one is
+  coming.** Service-level policies and any promised first-response or
+  resolution time; business-hours calendars; an automatic pause while an
+  incident waits for the client; satisfaction ratings after resolution (CSAT);
+  conditional form builders; canned-response macros; an inbound support
+  mailbox; automatic routing or assignment rules; a knowledge base; any qTicket
+  billing, price list or checkout; and the inherited planning calendar, sprints
+  and timesheets. What survives from those categories is deliberately manual:
+  «Очікує відповіді» is a status a person chooses, a resolution date is a date
+  a person sets, and an incident is assigned by a person.
 - Organization deletion stays disabled until an owner-only, idempotent server cascade safely handles Firestore and external files and has integration coverage.
 - Multi-tenant isolation and server-authorized privileged writes take precedence over UI convenience.
 
@@ -255,7 +266,7 @@ The competitors validate behaviors, not qTicket's ownership model or UI.
 | Client company visibility and administration | **Adapt** organization-level customer visibility | One qTicket client project is the customer's support space. `client_admin` invites only `client_member` into that project; no arbitrary cross-project sharing or request participants. |
 | Public reply versus internal note | **Adopt** | Public `comments` remain shared with clients. Staff-only `internalNotes` are a separate Firestore collection, explicitly selected in the composer, excluded from client subscriptions and notifications, and protected by rules. Support-side `audit` is staff-only. |
 | Queue and assignment | **Adapt** | Keep one opinionated global incident queue with project, status, priority, assignee and date filters plus manual assignment. Reject custom queue builders, support groups and automatic routing until real volume proves they are needed. |
-| SLA and business hours | **Adapt after role acceptance** | Add a small per-client first-response/resolution policy with business hours and a pause while waiting for the client. Reject a general policy/escalation engine in the MVP. |
+| SLA and business hours | **Reject** | The owner rejected the whole category: no service-level policy, no promised first-response or resolution time, no business-hours calendar, no automatic pause while an incident waits for the client, and no post-resolution satisfaction rating. «Очікує відповіді» stays a status a person chooses, and a resolution date stays a date a person sets. Do not reopen this as a smaller version of itself. |
 | Request forms | **Adapt** | Incident types provide customer-friendly categories; add only proven type-specific required fields. Reject a general conditional form builder in the MVP. |
 | Audit and notifications | **Adapt** | Clients receive public replies and customer-facing status; staff receives internal notes and the support audit. In-app delivery stays split by audience. Email remains disconnected until Resend is intentionally enabled. |
 | Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles, refuses every mutation of a QuickTeam-managed seat, and no longer offers an internal role or an invite link anywhere. Client employees remain qTicket-owned. |

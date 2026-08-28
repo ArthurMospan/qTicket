@@ -1,8 +1,8 @@
 export const NO_PRIORITY_ID = 'none';
 
 // Stored ids are stable business semantics. Labels and colours are editable,
-// but these four anchors stay present and in this order so future SLA,
-// escalation and notification rules never depend on a translated label.
+// but these four anchors stay present and in this order so escalation and
+// notification rules never depend on a translated label.
 export const SYSTEM_PRIORITY_IDS = Object.freeze([
   'blocker',
   'high',
