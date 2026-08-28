@@ -33,12 +33,12 @@ import { auth, createGitHubProvider, db, googleProvider } from '@/lib/firebase';
 import { linkWithPopup, unlink } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import {
-  User, Bell, Shield, Zap, Users, GitBranch,
+  User, Bell, Zap, Users, GitBranch,
   Shapes, Check, Plus, Trash2, Edit2, X, Save,
   Building, LogOut, Download, RefreshCw, Mail, Star,
   Copy, ExternalLink, ChevronRight, AlertTriangle,
   PlugZap, ToggleLeft, ToggleRight, Receipt,
-  Globe, Tag as TagIcon, Briefcase, GripVertical, Send,
+  Globe, Tag as TagIcon, GripVertical, Send,
   Archive, ArchiveRestore, Bug, DatabaseBackup, Lock,
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
@@ -128,10 +128,26 @@ const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set([
   'team',
 ]);
 
+// A staff seat is a copy of a QuickTeam account: QuickTeam owns the person's
+// name, avatar, language and role, and re-sends all of it on the next sync. A
+// personal profile editor and a locale editor inside qTicket are therefore a
+// second place to change one setting, and the qTicket copy is the one that
+// loses. Сповіщення goes with them by the owner's decision — see
+// docs/ROADMAP.md for what internal staff can no longer reach because of it.
+// These stay whole for `client_admin`/`client_member`, whose account belongs to
+// qTicket and to nobody else.
+const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([
+  'profile',
+  'notifications',
+  'localization',
+]);
+
 // qTicket is a support add-on, not a second task manager. The inherited
-// migration, rates and organization-deletion surfaces remain in code until
-// their data paths can be removed safely, but they are not qTicket settings.
-const HIDDEN_QTICKET_SETTINGS_SECTIONS = new Set(['integrations', 'migration', 'positions', 'danger']);
+// migration and integration surfaces remain in code — the cross-repository
+// contracts in `docs/integrations/` and three unit tests still read them — but
+// they are not qTicket settings, so no role reaches them. «Посади та ставки»
+// and «Видалення даних» had no such reader and are gone.
+const HIDDEN_QTICKET_SETTINGS_SECTIONS = new Set(['integrations', 'migration']);
 
 const NAV = [
   { id: 'profile',       label: 'Особистий профіль',icon: User,          group: 'Особисте' },
@@ -158,9 +174,7 @@ const NAV = [
   { id: 'types',         label: 'Типи інцидентів',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
   { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
   { id: 'labels',        label: 'Мітки',            icon: TagIcon,       group: 'Процес підтримки', adminOnly: true },
-  { id: 'positions',     label: 'Посади та ставки', icon: Briefcase,     group: 'Налаштування процесів', adminOnly: true },
   { id: 'archives',      label: 'Архів і видалене', icon: Archive,       group: 'Інше' },
-  { id: 'danger',        label: 'Видалення даних',  icon: Shield,        group: 'Інше', danger: false, adminOnly: true },
 ];
 
 // ── Primitives ───────────────────────────────────────────────────────
@@ -700,87 +714,6 @@ function WorkflowItem({ item, onSave, onDelete, canDelete = true, locked = false
   );
 }
 
-function PositionItem({ item, onSave, onDelete }) {
-  const [editing, setEditing] = useState(item.isNew || false);
-  const [label, setLabel] = useState(item.label);
-  const [hourlyRate, setHourlyRate] = useState(item.hourlyRate || 0);
-
-  const save = () => {
-    if (label.trim()) {
-      const { isNew, ...rest } = item;
-      onSave({ ...rest, label: label.trim(), hourlyRate: Number(hourlyRate) || 0 });
-      setEditing(false);
-    } else {
-      if (item.isNew) onDelete(item.id);
-      else { setEditing(false); setLabel(item.label); setHourlyRate(item.hourlyRate); }
-    }
-  };
-
-  return (
-    <div data-ui-surface="local" className="flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group">
-      {editing ? (
-        <div className="flex flex-1 items-center gap-3">
-          <Input
-            size="sm"
-            autoFocus
-            value={label}
-            onChange={e => setLabel(e.target.value)}
-            placeholder="Назва посади"
-            className="flex-1"
-          />
-          {/* The rate is a number, not an amount in dollars. Which currency it
-              is worth is chosen per invoice, and printing "$" here promised a
-              denomination this field never carried. */}
-          <div className="w-[120px] flex items-center gap-1">
-            <Input
-              size="sm"
-              type="number"
-              value={hourlyRate}
-              onChange={e => setHourlyRate(e.target.value)}
-              placeholder="Ставка"
-              className="w-[70px] text-right"
-            />
-            <span className="text-[11px] text-muted">/год</span>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-1 items-center justify-between">
-          <span className="text-[13px] font-semibold text-ink">{item.label}</span>
-          <span className="text-[12px] font-medium text-muted">{item.hourlyRate || 0}/год</span>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-1 shrink-0 w-[64px]">
-        {editing ? (
-          <>
-            <Button onClick={save} aria-label="Зберегти" style="ghost" size="icon" icon={Check} />
-            <Button
-              onClick={() => {
-                if (item.isNew) { onDelete(item.id); }
-                else { setEditing(false); setLabel(item.label); setHourlyRate(item.hourlyRate); }
-              }}
-              aria-label="Скасувати"
-              style="ghost" size="icon" icon={X}
-            />
-          </>
-        ) : (
-          <>
-            <Button onClick={() => setEditing(true)}
-              aria-label="Редагувати"
-              style="ghost" size="icon" icon={Edit2}
-            />
-            <Button onClick={() => onDelete(item.id)}
-              aria-label="Видалити"
-              style="ghost" color="red" size="icon" icon={Trash2}
-            />
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Draft rows exist only in the editor. Persisting one before the person enters
 // a label makes the server correctly reject the entire workflow as malformed.
 const cleanWorkflowItems = arr => (arr || [])
@@ -826,14 +759,35 @@ export default function SettingsPage() {
       : []
   ), [clientViewer, currentUserId, projects]);
 
-  const [activeSection, setActiveSection] = useState('profile');
+  // Which sections this role may open — one answer for all three doors into a
+  // section: the rail, the `?section=` address and the body that renders. A
+  // section removed from the list but still reachable by URL is not removed.
+  const reachableSections = useMemo(() => new Set(
+    NAV
+      .filter(item => !HIDDEN_QTICKET_SETTINGS_SECTIONS.has(item.id))
+      .filter(item => (clientViewer
+        ? clientSettingsSections.has(item.id)
+        : !CLIENT_ONLY_SETTINGS_SECTIONS.has(item.id) && (!item.adminOnly || isAdmin)))
+      .map(item => item.id),
+  ), [clientSettingsSections, clientViewer, isAdmin]);
+  // The first entry of this role's own rail, so «Налаштування» always opens on
+  // something this person can actually see.
+  const defaultSection = reachableSections.values().next().value || 'account';
+
+  // `chosenSection` is what somebody last asked for; `activeSection` is what the
+  // screen is on. They differ for one reason: the role is read from Firestore
+  // after the first paint, so the opening guess can name a section this person
+  // may not reach — and a removed screen that draws itself even once is not
+  // removed.
+  const [chosenSection, setChosenSection] = useState('profile');
+  const activeSection = reachableSections.has(chosenSection) ? chosenSection : defaultSection;
   const [integrationDetail, setIntegrationDetail] = useState('');
   // Which migration source is open, held here for the same reason
   // `integrationDetail` is: the section header above it needs to know.
   const [migrationProvider, setMigrationProvider] = useState('');
   // Whether this person may delete themselves, and what it would touch. Loaded
-  // when the danger section opens rather than on every settings visit — it is
-  // three collection queries for a screen most people never reach.
+  // when «Безпека» opens rather than on every settings visit — it is three
+  // collection queries for a screen most people never reach.
   const [accountDeletion, setAccountDeletion] = useState({
     loading: false,
     busy: false,
@@ -940,17 +894,19 @@ export default function SettingsPage() {
       const MERGED_SECTIONS = { 'auth-methods': 'account' };
       const rawSection = currentSearchParams.get('section');
       const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
-      const qTicketSection = HIDDEN_QTICKET_SETTINGS_SECTIONS.has(requestedSection)
-        ? (clientViewer ? 'profile' : 'workspace')
-        : requestedSection;
-      const sec = clientViewer && !clientSettingsSections.has(qTicketSection)
-        ? 'profile'
-        : qTicketSection;
+      // The address is the second door into a section and it has to be the same
+      // door. An old link to a section this role no longer has — «Особистий
+      // профіль» and «Локалізація» for staff, «Інтеграції» for anyone — lands on
+      // the first section of that role's own rail instead of opening a screen
+      // the product took away.
+      const sec = requestedSection
+        ? (reachableSections.has(requestedSection) ? requestedSection : defaultSection)
+        : '';
       const authSuccess = currentSearchParams.get('auth');
       const authError = currentSearchParams.get('authError');
       if (sec) {
         queueMicrotask(() => {
-          setActiveSection(sec);
+          setChosenSection(sec);
           setMobilePane('content'); // deep link opens the section directly on mobile
         });
       }
@@ -983,7 +939,7 @@ export default function SettingsPage() {
         queueMicrotask(() => showToast(message, 'error'));
       }
     }
-  }, [clientSettingsSections, clientViewer, settingsQuery, showToast]);
+  }, [defaultSection, reachableSections, settingsQuery, showToast]);
 
   // ── Workflow ──
   const [statuses,   setStatuses]   = useState(DEFAULT_STATUSES);
@@ -1676,7 +1632,7 @@ export default function SettingsPage() {
       }
       revertProfile(); // chose to leave → discard so the guard stops prompting
     }
-    setActiveSection(newSection);
+    setChosenSection(newSection);
     setIntegrationDetail('');
     setMigrationProvider('');
     return true;
@@ -2158,7 +2114,6 @@ export default function SettingsPage() {
   const tpA = makeUpdater(setTypes);
   const prA = makeUpdater(setPriorities);
   const lbA = makeUpdater(setLabels);
-  const posA = makeUpdater(setPositions);
 
   const handlePriorityDragEnd = result => {
     if (!result.destination) return;
@@ -2328,12 +2283,7 @@ export default function SettingsPage() {
   // the save came back «Для видалених або застарілих статусів потрібно вибрати
   // ціль міграції» and the section rolled back. For any organization with real
   // work on a custom status, the reset button simply did not work.
-  //
-  // `everything` is the Danger-zone button, which resets the catalogues beside
-  // the statuses. It used to write them straight through the debounced
-  // autosave, which meant it took exactly the route described above and left
-  // tasks standing on statuses it had just removed.
-  const handleStatusesReset = async ({ everything = false } = {}) => {
+  const handleStatusesReset = async () => {
     const mutationOrganizationId = activeOrgId;
     if (!mutationOrganizationId) return;
 
@@ -2343,12 +2293,10 @@ export default function SettingsPage() {
       .map(migration => persistedStatuses.find(status => status.id === migration.fromStatusId))
       .filter(Boolean)
       .map(status => `«${status.label}»`);
-    const scope = everything
-      ? 'Статуси, типи, пріоритети та мітки буде замінено стандартним набором qTicket.'
-      : 'Усі ваші статуси в цій секції буде замінено стандартним набором qTicket.';
+    const scope = 'Усі ваші статуси в цій секції буде замінено стандартним набором qTicket.';
 
     if (!(await confirmDialog({
-      title: everything ? 'Скинути налаштування процесів?' : 'Скинути статуси?',
+      title: 'Скинути статуси?',
       message: movedLabels.length > 0
         // Naming them is the whole point: this is the only reset in settings
         // that moves tasks, and the person pressing it should know which.
@@ -2362,9 +2310,9 @@ export default function SettingsPage() {
 
     const payload = {
       statuses: cleanWorkflowItems(DEFAULT_STATUSES),
-      types: cleanWorkflowItems(everything ? DEFAULT_TYPES : types),
-      priorities: cleanWorkflowItems(everything ? DEFAULT_PRIORITIES : priorities),
-      labels: cleanWorkflowItems(everything ? DEFAULT_LABELS : labels),
+      types: cleanWorkflowItems(types),
+      priorities: cleanWorkflowItems(priorities),
+      labels: cleanWorkflowItems(labels),
       positions: cleanWorkflowItems(positions),
     };
     wfLatestPayload.current = payload;
@@ -2404,16 +2352,10 @@ export default function SettingsPage() {
       }
       if (wfOrgId.current !== mutationOrganizationId) return;
       setStatuses(DEFAULT_STATUSES);
-      if (everything) {
-        setTypes(DEFAULT_TYPES);
-        setPriorities(DEFAULT_PRIORITIES);
-        setLabels(DEFAULT_LABELS);
-      }
-      const resetNoun = everything ? 'Налаштування процесів скинуто' : 'Статуси скинуто';
       showToast(
         result.migratedIssues > 0
-          ? `${resetNoun}, переміщено завдань: ${result.migratedIssues}`
-          : resetNoun,
+          ? `Статуси скинуто, переміщено завдань: ${result.migratedIssues}`
+          : 'Статуси скинуто',
       );
     } catch (error) {
       if (wfOrgId.current !== mutationOrganizationId) return;
@@ -2433,9 +2375,11 @@ export default function SettingsPage() {
   const signInMethods = describeSignInMethods(accountSecurity.providerData);
 
   // The account section asks the server what deleting this account would touch,
-  // so the confirmation can state it instead of saying "everything".
+  // so the confirmation can state it instead of saying "everything". Only for a
+  // client account — internal staff have no delete button to explain, and this
+  // is three collection queries.
   useEffect(() => {
-    if (activeSection !== 'account') return undefined;
+    if (activeSection !== 'account' || !clientViewer) return undefined;
     let cancelled = false;
     setAccountDeletion(current => ({ ...current, loading: true }));
     fetchAccountDeletionImpact()
@@ -2454,7 +2398,7 @@ export default function SettingsPage() {
         if (!cancelled) setAccountDeletion(current => ({ ...current, loading: false }));
       });
     return () => { cancelled = true; };
-  }, [activeSection]);
+  }, [activeSection, clientViewer]);
 
   const handleDeleteAccount = async () => {
     if (accountDeletion.busy) return;
@@ -2541,11 +2485,6 @@ export default function SettingsPage() {
       noun: 'мітки',
       hint: 'Мітки доступні в усіх клієнтських просторах організації.',
       apply: () => setLabels(DEFAULT_LABELS),
-    },
-    positions: {
-      noun: 'посади',
-      hint: 'Ставка зберігається як число за годину; валюту обирають під час створення рахунку.',
-      apply: () => setPositions(DEFAULT_POSITIONS),
     },
   };
   const renderWorkflowResetFooter = () => {
@@ -3756,63 +3695,6 @@ export default function SettingsPage() {
         </Section>
       );
 
-      case 'positions': return (
-        <Section title="Посади та ставки" desc="Погодинні ставки виконавців. Валюту обирають у рахунку — тут це просто число за годину">
-          {wfLoading ? (
-            <div className="py-12 flex items-center justify-center">
-              <LoadingSpinner size="md" />
-            </div>
-          ) : (
-            <Card preset="borderless">
-              {positions.map(p => (
-                <PositionItem key={p.id} item={p} onSave={posA.onSave} onDelete={posA.onDelete} />
-              ))}
-              <Button
-                onClick={() => setPositions(p => [...p, { id: `pos-${Date.now()}`, label: 'Нова посада', hourlyRate: 0, isNew: true }])}
-                style="ghost" size="lg"
-                icon={Plus}
-                composition="settings-row-action"
-                className="mt-2"
-              >
-                Додати посаду
-              </Button>
-            </Card>
-          )}
-          {!wfLoading && renderWorkflowResetFooter()}
-        </Section>
-      );
-
-      // ──────────────────────────────────────────────────────────────
-      case 'danger': return (
-        <Section title="Видалення даних" desc="Незворотні дії з даними організації. Виконуйте обережно.">
-          <Card preset="borderless" padding="lg">
-            <Row
-              label="Скинути налаштування процесів"
-              desc="Повернути статуси, типи, пріоритети та мітки до стандартних значень. Завдання зі статусів, яких немає у стандартному наборі, буде переміщено"
-            >
-              <Button
-                onClick={() => handleStatusesReset({ everything: true })}
-                style="ghost" color="red" size="lg"
-                icon={RefreshCw}
-              >
-                Скинути
-              </Button>
-            </Row>
-            {isOwner && (
-              <Row
-                label="Видалення організації"
-                desc="Тимчасово недоступне, доки не налаштовано безпечне каскадне видалення даних і файлів"
-              >
-                <Button style="secondary" color="red" size="lg" disabled>
-                  Недоступно
-                </Button>
-              </Row>
-            )}
-
-          </Card>
-        </Section>
-      );
-
       // ──────────────────────────────────────────────────────────────
       case 'account': {
         // `formatTime` formats an "HH:MM" string off a form. Handed a Date it
@@ -3855,7 +3737,13 @@ export default function SettingsPage() {
         // in at all. The screen used to open with a link to another screen.
         <Section
           title="Безпека"
-          desc="Хто заходив у цей обліковий запис і звідки. Якщо якийсь пристрій вам незнайомий — вийдіть з усіх, крім цього, і перевірте, через які сервіси сюди можна увійти."
+          desc={clientViewer
+            ? 'Хто заходив у цей обліковий запис і звідки. Якщо якийсь пристрій вам незнайомий — вийдіть з усіх, крім цього, і перевірте, через які сервіси сюди можна увійти.'
+            // Staff see the sessions and nothing else. The sessions are
+            // qTicket's own — this browser opened this app — while the identity
+            // behind them, the seat in the organization and the account itself
+            // belong to QuickTeam, which is where they are changed.
+            : 'Хто заходив у цей обліковий запис і звідки. Якщо якийсь пристрій вам незнайомий — вийдіть з усіх, крім цього. Сам обліковий запис, спосіб входу й доступ до організації налаштовуються у QuickTeam.'}
         >
           {/* Звідки заходили — first, because it is the answer. One row per
               browser the account has been opened in, newest first, this one at
@@ -3932,7 +3820,14 @@ export default function SettingsPage() {
           {/* «Способи входу» lives here now rather than in a section of its
               own. Which services can open this account is the other half of
               «хто може сюди зайти», and the two halves were on two screens with
-              a button on one pointing at the other. */}
+              a button on one pointing at the other.
+
+              Client accounts only. A staff identity is QuickTeam's — it arrives
+              in the signed snapshot and comes back on the next sync — so a
+              second place to attach or detach a provider is a copy that loses
+              the argument. Staff keep the sessions above, which are qTicket's
+              own record of this browser opening this app. */}
+          {clientViewer && (
           <Card preset="borderless" padding="lg">
             <GroupLabel label="Способи входу" />
             <div className="divide-y divide-canvas">
@@ -3986,6 +3881,7 @@ export default function SettingsPage() {
               />
             </div>
           </Card>
+          )}
 
           <Card preset="borderless" padding="lg">
             <Row label="Вийти з акаунта" desc="Завершити сесію на цьому пристрої">
@@ -4000,9 +3896,14 @@ export default function SettingsPage() {
               </Button>
             </Row>
 
-            {/* Leaving is the counterpart of being deactivated, and it works the
-                same way: access closes, the work stays. The owner cannot leave
-                a workspace that would then have nobody to answer for it. */}
+            {/* Leaving and deleting are client-account actions. A staff seat is
+                opened and closed in QuickTeam — the server already refuses both
+                for a QuickTeam-managed membership — and the account behind it is
+                a QuickTeam identity, so a button here could only fail. Signing
+                out above stays: that ends a qTicket session, which is qTicket's
+                to end. */}
+            {clientViewer && (
+            <>
             <Row
               label="Вийти з організації"
               desc={isOwner
@@ -4041,6 +3942,8 @@ export default function SettingsPage() {
                 Видалити акаунт
               </Button>
             </Row>
+            </>
+            )}
           </Card>
         </Section>
         );
@@ -4202,9 +4105,10 @@ export default function SettingsPage() {
 
   // ── Layout ───────────────────────────────────────────────────
   //
+  // The rail draws exactly what `reachableSections` allows — the same list the
+  // address bar and the section body are answered from.
   const allowedNav = NAV
-    .filter(item => !HIDDEN_QTICKET_SETTINGS_SECTIONS.has(item.id))
-    .filter(item => clientViewer ? clientSettingsSections.has(item.id) : (!item.adminOnly || isAdmin))
+    .filter(item => reachableSections.has(item.id))
     .map(item => {
     if (clientViewer && item.id === 'team') {
       return { ...item, label: 'Співробітники клієнта', group: 'Клієнтський простір' };

@@ -127,8 +127,9 @@ Completed product slice on 2026-08-28:
   internal members, while external users are invited from the client space's
   **Люди** tab with `client_admin`/`client_member` scope.
 - QuickTeam-managed organization, branding, entitlement and support seats are
-  read-only in qTicket. Inherited migration, rates, deletion and unrelated
-  integration panels are removed from qTicket settings navigation.
+  read-only in qTicket. Inherited migration and unrelated integration panels are
+  removed from qTicket settings navigation; the rates and organization-deletion
+  panels were deleted outright in the 2026-08-29 slice below.
 - The incident composer and detail view no longer expose audio tasks, sprints,
   time tracking, estimates, task hierarchy, task links or QuickTeam+ chat.
   Internal support keeps status, responsible staff, priority, type, resolution
@@ -143,7 +144,9 @@ Completed product slice on 2026-08-28:
   published as available qTicket features.
 - Notification settings expose only in-app delivery. Email and Telegram remain
   hidden until a real provider is configured and verified; the beta does not
-  promise channels that cannot deliver.
+  promise channels that cannot deliver. The panel itself is now a client
+  surface only — see the settings-ownership entry below for what internal staff
+  lost with it.
 - `Ctrl+K` and the global empty-search state are now role-aware qTicket
   surfaces. Internal support gets overview, incidents, clients, team, settings
   and incident/client creation; external clients get only their requests,
@@ -178,14 +181,66 @@ Completed product slice on 2026-08-28:
   signed entitlement; legacy standalone organization documents grant no access,
   and the synchronized organization snapshot is server-write-only.
 
+Completed product slice on 2026-08-29:
+
+- **Налаштування** is audited by ownership for internal roles. A section stays
+  for `owner`/`admin`/`member` only where qTicket owns the thing it changes and
+  QuickTeam holds no copy of it. Internal staff keep incident statuses, incident
+  types, priorities, labels, «Архів і видалене», the read-only «Доступ qTicket»
+  state, «Організація і бренд», «Команда підтримки», and the qTicket half of
+  «Безпека». They lose **Особистий профіль**, **Локалізація** and
+  **Сповіщення**: name, avatar, language and role arrive in QuickTeam's signed
+  snapshot and are re-sent on the next sync, so a second editor here is a copy
+  that loses. Client roles (`client_admin`, `client_member`) keep all three
+  unchanged — their account is qTicket's own.
+- A removed section is removed at every door, not hidden behind one. One
+  `reachableSections` set answers the rail, the `?section=` address and the
+  rendered body, so `/settings?section=localization` opened by a staff member
+  lands on the first section that role actually has instead of drawing a screen
+  the product no longer offers. The bell's «Налаштування сповіщень» gear is
+  likewise client-only now.
+- **What internal staff can no longer configure, deliberately.** «Сповіщення» is
+  the one removed section qTicket genuinely owned: it is the only editor for
+  `users/{uid}/settings/notifications`, which decides whether the in-app bell
+  records `assigned`, `commented`, `mentioned`, `statusChanged` and `deadline`,
+  plus the notification sound and the pop-up card. Internal staff are now pinned
+  to whatever that document already holds, and a new staff account is pinned to
+  the defaults in `src/lib/utils/notificationChannels.mjs` — all five event types
+  on, sound on, pop-up on. Nothing else reads or writes those fields, so nobody
+  can turn a type off for them either. Reversing this is one line: drop
+  `'notifications'` from `CLIENT_ONLY_SETTINGS_SECTIONS` in
+  `src/app/(app)/settings/page.js` and the section returns to the internal rail,
+  its address and its body at once.
+- «Безпека» kept the part qTicket owns and dropped the copy. The device/session
+  list and «Вийти з акаунта» are qTicket's own record of this browser in this
+  app and stay for every role. «Способи входу», «Вийти з організації» and
+  «Видалення облікового запису» are now client-only: a staff identity and a
+  staff seat both belong to QuickTeam, and the member route already refuses a
+  QuickTeam-managed membership with `QUICKTEAM_MANAGED`, so those buttons could
+  only ever fail.
+- Two hidden inherited sections were deleted with their bodies, not left behind
+  a flag: «Посади та ставки» (`positions`) and «Видалення даних» (`danger`),
+  together with `PositionItem` and the whole-catalogue branch of the workflow
+  reset. `positions` data is still hydrated and saved with the workflow document
+  because «Команда підтримки» reads a member's position label. «Інтеграції» and
+  «Перенесення даних» stay hidden rather than deleted: `tests/ux-regressions`,
+  `tests/qa-group-26` and `tests/integration-auth-retry` still assert against
+  their code, and `docs/integrations/TELEGRAM.md` and
+  `docs/integrations/YOUTRACK_MIGRATION.md` still describe them as the screen
+  their contract is operated from. The repository rule is to preserve what is
+  still referenced.
+
 Product work still required:
 
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
-- Audit **Команда** and **Налаштування** by ownership and incident value. Remove
-  duplicate QuickTeam administration and inherited task-manager panels; retain
-  only incident workflow, client access, in-app notifications and read-only
-  QuickTeam state until another integration has an accepted support scenario.
+- Audit **Команда** by ownership and incident value; **Налаштування** is done
+  (see the 2026-08-29 slice above). Remove duplicate QuickTeam administration
+  and inherited task-manager panels; retain only incident workflow, client
+  access and read-only QuickTeam state until another integration has an accepted
+  support scenario. In-app notification preferences are no longer part of that
+  retained set for internal roles — the owner removed the panel, and the
+  consequence is recorded above.
 - Add the explicit, idempotent server-side transfer from an incident to a
   QuickTeam task. Billing entitlement follows only after the wider product has a
   server-side add-on contract.
@@ -240,9 +295,9 @@ surfaces first, then delete only when references and migrations are understood.
    transfer contract. Any later billing work belongs to QuickTeam; qTicket
    continues to consume only its active/inactive entitlement.
 
-The exact next implementation task remains step 7: audit **Команда** and
-**Налаштування**, continue the static role audit, and then run the two-sided
-flow with separate staff, client-admin and client-member sessions.
+The exact next implementation task remains step 7: **Налаштування** is audited,
+so what is left is **Команда**, the rest of the static role audit, and then the
+two-sided flow with separate staff, client-admin and client-member sessions.
 Fix every concrete failure it reveals. Every completed slice should be a reviewable Git commit and this
 checkpoint should be updated in the same commit.
 The next agent must read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`,

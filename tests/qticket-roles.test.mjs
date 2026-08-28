@@ -247,8 +247,55 @@ test('лише client_admin бачить керування співробітн
   );
   assert.match(settings, /const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set\(\[[\s\S]{0,100}'team'/);
   assert.match(settings, /clientAdmin\s*\? CLIENT_ADMIN_SETTINGS_SECTIONS\s*:\s*CLIENT_SETTINGS_SECTIONS/);
-  assert.match(settings, /clientViewer && !clientSettingsSections\.has\(qTicketSection\)/);
+  assert.match(settings, /clientViewer\s*\?\s*clientSettingsSections\.has\(item\.id\)/);
   assert.match(settings, /label: 'Співробітники клієнта', group: 'Клієнтський простір'/);
+});
+
+// Внутрішній працівник — копія акаунта QuickTeam: імʼя, аватар, мову й роль
+// тримає QuickTeam і надсилає їх наново з кожною синхронізацією. Другий
+// редактор того самого всередині qTicket програє наступному знімку, тож
+// «Особистий профіль», «Локалізація» і «Сповіщення» лишаються тільки в
+// клієнтських ролей, чий акаунт належить qTicket.
+test('персональні розділи QuickTeam недосяжні внутрішній ролі — ні в рейці, ні за адресою', async () => {
+  const settings = await read('../src/app/(app)/settings/page.js');
+
+  assert.match(
+    settings,
+    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'notifications',\s*'localization',\s*\]\);/,
+  );
+  // Одна відповідь на всі три двері в розділ: рейка, адреса й тіло розділу.
+  assert.match(settings, /const reachableSections = useMemo\(/);
+  assert.match(settings, /!CLIENT_ONLY_SETTINGS_SECTIONS\.has\(item\.id\) && \(!item\.adminOnly \|\| isAdmin\)/);
+  // `?section=` більше не відкриває розділ, якого немає в рейці цієї ролі.
+  assert.match(
+    settings,
+    /reachableSections\.has\(requestedSection\) \? requestedSection : defaultSection/,
+  );
+  assert.match(settings, /const allowedNav = NAV[\s\S]{0,40}\.filter\(item => reachableSections\.has\(item\.id\)\)/);
+  // Стан секції — здогад до того, як прочитано роль; малюється лише досяжне.
+  assert.match(
+    settings,
+    /const activeSection = reachableSections\.has\(chosenSection\) \? chosenSection : defaultSection;/,
+  );
+  // Видалені разом із їхніми тілами, а не приховані прапорцем.
+  assert.doesNotMatch(settings, /case 'positions':|case 'danger':/);
+  assert.doesNotMatch(settings, /function PositionItem/);
+  assert.match(settings, /const HIDDEN_QTICKET_SETTINGS_SECTIONS = new Set\(\['integrations', 'migration'\]\);/);
+});
+
+// «Безпека» змішувала своє з чужим: сеанси qTicket — це qTicket, а особа,
+// спосіб входу й саме місце в організації приходять із QuickTeam.
+test('внутрішня «Безпека» лишає сеанси qTicket і не дублює акаунт QuickTeam', async () => {
+  const settings = await read('../src/app/(app)/settings/page.js');
+  const account = settings.slice(settings.indexOf("case 'account': {"), settings.indexOf("case 'archives': {"));
+
+  // Сеанси й вихід із цього пристрою — без ролі: це сесія qTicket.
+  assert.match(account, /<GroupLabel\s+label="Пристрої"/);
+  assert.match(account, /Вийти з акаунта/);
+  // Способи входу, вихід з організації й видалення акаунта — лише клієнтам.
+  assert.match(account, /\{clientViewer && \(\s*<Card preset="borderless" padding="lg">\s*<GroupLabel label="Способи входу" \/>/);
+  assert.match(account, /\{clientViewer && \([\s\S]{0,40}<>[\s\S]{0,60}label="Вийти з організації"/);
+  assert.match(account, /label="Видалення облікового запису"/);
 });
 
 test('клієнтська сесія не може відкрити внутрішній workspace прямим URL', async () => {
