@@ -2,14 +2,14 @@
   "generatedBy": "scripts/scan-kit-usage.mjs",
   "scope": "authenticated-workspace",
   "totals": {
-    "components": 96,
-    "used": 96,
+    "components": 90,
+    "used": 90,
     "unused": 0,
-    "covered": 89,
+    "covered": 84,
     "uncovered": 0,
-    "routes": 9,
-    "previews": 126,
-    "internal": 7,
+    "routes": 8,
+    "previews": 122,
+    "internal": 6,
     "unlisted": 0
   },
   "routes": {
@@ -110,7 +110,6 @@
       "Pill",
       "Popover",
       "PriorityIcon",
-      "Segmented",
       "Select",
       "StatusPill",
       "Surface",
@@ -125,39 +124,6 @@
       "Tooltip",
       "TypeBadge",
       "UnreadDivider",
-      "UserAvatar"
-    ],
-    "/chat": [
-      "AttachmentViewer",
-      "Button",
-      "ChannelInfoPanel",
-      "ChannelRail",
-      "ChatAttachmentList",
-      "ChatComposerCore",
-      "ChatComposerDock",
-      "ChatConversationHeader",
-      "ChatMessageList",
-      "ChatSearchBanner",
-      "Checkbox",
-      "Counter",
-      "Dialog",
-      "FileInput",
-      "FormGroup",
-      "IconAction",
-      "Input",
-      "IssueMentionMenu",
-      "Label",
-      "MentionMenu",
-      "MultiSelect",
-      "PendingChatAttachments",
-      "Pill",
-      "PriorityIcon",
-      "SidebarLayout",
-      "Tag",
-      "TaskCounters",
-      "TaskIdentity",
-      "Textarea",
-      "TypeBadge",
       "UserAvatar"
     ],
     "/clients": [
@@ -335,15 +301,13 @@
     },
     "AttachmentViewer": {
       "file": "src/components/ui/AttachmentViewer.jsx",
-      "count": 3,
+      "count": 2,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/IssueDetail.jsx",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
@@ -410,7 +374,7 @@
     },
     "Button": {
       "file": "src/components/ui/Button.jsx",
-      "count": 22,
+      "count": 21,
       "showcased": true,
       "usedByKit": [
         "AttachmentRow",
@@ -420,7 +384,6 @@
         "EmptyState",
         "IconAction",
         "InnerNavigation",
-        "MessageBubble",
         "PageHeader",
         "StatusTransitionPicker",
         "TaskListView"
@@ -429,7 +392,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -438,7 +400,6 @@
       ],
       "usedIn": [
         "src/app/(app)/[projectId]/ProjectBoardClient.jsx",
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/error.js",
         "src/app/(app)/layout.js",
         "src/app/(app)/my/page.js",
@@ -478,109 +439,40 @@
         "src/components/WorkspaceInfoCenter.jsx"
       ]
     },
-    "ChannelInfoPanel": {
-      "file": "src/components/ui/Chat/ChannelInfoPanel.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/chat"
-      ],
-      "usedIn": [
-        "src/app/(app)/chat/page.js"
-      ]
-    },
-    "ChannelRail": {
-      "file": "src/components/ui/Navigation/ChannelRail.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/chat"
-      ],
-      "usedIn": [
-        "src/app/(app)/chat/page.js"
-      ]
-    },
     "ChatAttachmentList": {
       "file": "src/components/ui/Chat/ChatAttachmentList.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
-      "usedByKit": [
-        "ChannelInfoPanel",
-        "MessageBubble"
-      ],
+      "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
     },
     "ChatComposerCore": {
       "file": "src/components/ui/ChatComposerCore.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
     },
     "ChatComposerDock": {
       "file": "src/components/ui/ChatComposerDock.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
-      ]
-    },
-    "ChatConversationHeader": {
-      "file": "src/components/ui/Chat/ChatConversationHeader.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/chat"
-      ],
-      "usedIn": [
-        "src/app/(app)/chat/page.js"
-      ]
-    },
-    "ChatMessageList": {
-      "file": "src/components/ui/Chat/ChatMessageList.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/chat"
-      ],
-      "usedIn": [
-        "src/app/(app)/chat/page.js"
-      ]
-    },
-    "ChatSearchBanner": {
-      "file": "src/components/ui/Chat/ChatSearchBanner.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/chat"
-      ],
-      "usedIn": [
-        "src/app/(app)/chat/page.js"
       ]
     },
     "Checkbox": {
@@ -594,7 +486,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -672,21 +563,17 @@
     },
     "Counter": {
       "file": "src/components/ui/DataDisplay/Counter.jsx",
-      "count": 4,
+      "count": 3,
       "showcased": true,
       "usedByKit": [
-        "ChannelRail",
         "NotificationBell",
         "PageHeader",
         "Tabs",
         "TaskCounters",
         "TaskListView"
       ],
-      "routes": [
-        "/chat"
-      ],
+      "routes": [],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/MobileNav.jsx",
         "src/components/OrgSwitcherScreen.jsx",
         "src/components/WorkspaceSidebar.jsx"
@@ -747,7 +634,7 @@
     },
     "Dialog": {
       "file": "src/components/ui/Dialog.jsx",
-      "count": 10,
+      "count": 9,
       "showcased": true,
       "usedByKit": [
         "CommandPalette",
@@ -759,13 +646,11 @@
       "routes": [
         "/",
         "/[projectId]",
-        "/chat",
         "/clients",
         "/my",
         "/settings"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/my/page.js",
         "src/app/(app)/page.js",
         "src/components/CreateTaskModal.jsx",
@@ -782,7 +667,6 @@
       "count": 8,
       "showcased": true,
       "usedByKit": [
-        "ChatMessageList",
         "MemberRail",
         "TaskListView"
       ],
@@ -807,15 +691,13 @@
     },
     "FileInput": {
       "file": "src/components/ui/Forms/FileInput.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
     },
@@ -852,7 +734,7 @@
     },
     "FormGroup": {
       "file": "src/components/ui/Forms/FormGroup.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [
         "ProjectSettingsForm"
@@ -860,12 +742,10 @@
       "routes": [
         "/",
         "/[projectId]",
-        "/chat",
         "/clients",
         "/my"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/CreateTaskModal.jsx"
       ]
     },
@@ -882,25 +762,20 @@
     },
     "IconAction": {
       "file": "src/components/ui/IconAction.jsx",
-      "count": 9,
+      "count": 8,
       "showcased": true,
       "usedByKit": [
         "AttachmentRow",
-        "ChannelInfoPanel",
-        "ChatConversationHeader",
-        "MarkdownEditor",
-        "MessageBubble"
+        "MarkdownEditor"
       ],
       "routes": [
         "/",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/settings",
         "/team"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/AuthLayout.jsx",
@@ -937,7 +812,7 @@
     },
     "Input": {
       "file": "src/components/ui/Input.jsx",
-      "count": 6,
+      "count": 5,
       "showcased": true,
       "usedByKit": [
         "ConfirmProvider",
@@ -947,13 +822,11 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/settings"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/CreateTaskModal.jsx",
         "src/components/InviteMemberDialog.jsx",
@@ -975,15 +848,13 @@
     },
     "IssueMentionMenu": {
       "file": "src/components/ui/Chat/IssueMentionMenu.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
     },
@@ -1013,7 +884,7 @@
     },
     "Label": {
       "file": "src/components/ui/Forms/Label.jsx",
-      "count": 4,
+      "count": 3,
       "showcased": true,
       "usedByKit": [
         "FormGroup",
@@ -1022,13 +893,11 @@
       "routes": [
         "/",
         "/[projectId]",
-        "/chat",
         "/clients",
         "/my",
         "/settings"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/CreateTaskModal.jsx",
         "src/components/InviteMemberDialog.jsx",
         "src/components/workspace/BoardConfigModal.jsx"
@@ -1054,9 +923,7 @@
       "file": "src/components/ui/Chat/LoadOlderButton.jsx",
       "count": 1,
       "showcased": true,
-      "usedByKit": [
-        "ChatMessageList"
-      ],
+      "usedByKit": [],
       "routes": [
         "/[projectId]/issue/[issueId]"
       ],
@@ -1144,27 +1011,15 @@
     },
     "MentionMenu": {
       "file": "src/components/ui/Chat/MentionMenu.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
-    },
-    "MessageBubble": {
-      "file": "src/components/ui/Chat/MessageBubble.jsx",
-      "count": 0,
-      "showcased": false,
-      "usedByKit": [
-        "ChatMessageList"
-      ],
-      "routes": [],
-      "usedIn": []
     },
     "MetaTrigger": {
       "file": "src/components/ui/DataDisplay/MetaTrigger.jsx",
@@ -1182,9 +1037,7 @@
       "file": "src/components/ui/Navigation/MobilePaneBack.jsx",
       "count": 2,
       "showcased": true,
-      "usedByKit": [
-        "ChatConversationHeader"
-      ],
+      "usedByKit": [],
       "routes": [
         "/settings",
         "/team"
@@ -1196,18 +1049,16 @@
     },
     "MultiSelect": {
       "file": "src/components/ui/Select.jsx",
-      "count": 3,
+      "count": 2,
       "showcased": true,
       "usedByKit": [
         "ProjectSettingsForm"
       ],
       "routes": [
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/my"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/my/page.js",
         "src/components/workspace/IssueDetail.jsx"
       ]
@@ -1266,15 +1117,13 @@
     },
     "PendingChatAttachments": {
       "file": "src/components/ui/Chat/ChatAttachmentList.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/[projectId]/issue/[issueId]",
-        "/chat"
+        "/[projectId]/issue/[issueId]"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/UnifiedTimeline.jsx"
       ]
     },
@@ -1283,11 +1132,9 @@
       "count": 12,
       "showcased": true,
       "usedByKit": [
-        "ChatMessageList",
         "DetailSection",
         "IssueLinkRow",
         "MemberRail",
-        "MessageBubble",
         "PriorityBadge",
         "StatusPill",
         "TaskRow",
@@ -1297,7 +1144,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1359,7 +1205,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1398,16 +1243,13 @@
     },
     "Segmented": {
       "file": "src/components/ui/Segmented.jsx",
-      "count": 3,
+      "count": 2,
       "showcased": true,
       "usedByKit": [],
-      "routes": [
-        "/[projectId]/issue/[issueId]"
-      ],
+      "routes": [],
       "usedIn": [
         "src/components/WorkspaceHeader.jsx",
-        "src/components/WorkspaceInfoCenter.jsx",
-        "src/components/workspace/UnifiedTimeline.jsx"
+        "src/components/WorkspaceInfoCenter.jsx"
       ]
     },
     "Select": {
@@ -1451,16 +1293,14 @@
     },
     "SidebarLayout": {
       "file": "src/components/ui/Layout/SidebarLayout.jsx",
-      "count": 3,
+      "count": 2,
       "showcased": true,
       "usedByKit": [],
       "routes": [
-        "/chat",
         "/settings",
         "/team"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/settings/page.js",
         "src/app/(app)/team/page.js"
       ]
@@ -1586,7 +1426,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1621,7 +1460,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1644,7 +1482,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1691,7 +1528,6 @@
       "count": 3,
       "showcased": true,
       "usedByKit": [
-        "ChannelInfoPanel",
         "TaskListView"
       ],
       "routes": [
@@ -1707,18 +1543,16 @@
     },
     "Textarea": {
       "file": "src/components/ui/Forms/Textarea.jsx",
-      "count": 2,
+      "count": 1,
       "showcased": true,
       "usedByKit": [
         "ProjectSettingsForm"
       ],
       "routes": [
         "/[projectId]",
-        "/chat",
         "/my"
       ],
       "usedIn": [
-        "src/app/(app)/chat/page.js",
         "src/components/workspace/AgileBoard.jsx"
       ]
     },
@@ -1800,7 +1634,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1825,16 +1658,12 @@
     },
     "UserAvatar": {
       "file": "src/components/ui/DataDisplay/UserAvatar.jsx",
-      "count": 11,
+      "count": 10,
       "showcased": true,
       "usedByKit": [
         "AvatarButton",
-        "ChannelInfoPanel",
-        "ChannelRail",
-        "ChatConversationHeader",
         "MemberRail",
         "MentionMenu",
-        "MessageBubble",
         "MetaTrigger",
         "Select",
         "TaskRow",
@@ -1845,7 +1674,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/chat",
         "/clients",
         "/my",
         "/overview",
@@ -1854,7 +1682,6 @@
       ],
       "usedIn": [
         "src/app/(app)/[projectId]/ProjectBoardClient.jsx",
-        "src/app/(app)/chat/page.js",
         "src/app/(app)/overview/page.js",
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
@@ -1925,12 +1752,11 @@
           ]
         },
         "md": {
-          "count": 22,
+          "count": 20,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -1940,8 +1766,6 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:451",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:596",
-            "src/app/(app)/chat/page.js:1233",
-            "src/app/(app)/chat/page.js:1241",
             "src/app/(app)/error.js:51",
             "src/app/(app)/my/page.js:494",
             "src/app/(app)/overview/page.js:181",
@@ -1959,26 +1783,6 @@
             "src/components/workspace/BoardConfigModal.jsx:235",
             "src/components/workspace/IssueDetail.jsx:1127",
             "src/components/workspace/IssueDetail.jsx:1128"
-          ]
-        },
-        "icon-xs": {
-          "count": 9,
-          "routes": [
-            "/[projectId]",
-            "/[projectId]/issue/[issueId]",
-            "/chat",
-            "/my"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1310",
-            "src/components/workspace/AgileBoard.jsx:411",
-            "src/components/workspace/AgileBoard.jsx:492",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:523",
-            "src/components/workspace/AgileBoard.jsx:605",
-            "src/components/workspace/AgileBoard.jsx:639",
-            "src/components/workspace/AgileBoard.jsx:654",
-            "src/components/workspace/IssueDetail.jsx:1270"
           ]
         },
         "sm": {
@@ -2011,15 +1815,15 @@
             "src/components/workspace/IssueDetail.jsx:1308",
             "src/components/workspace/IssueDetail.jsx:1332",
             "src/components/workspace/IssueDetail.jsx:1370",
-            "src/components/workspace/IssueDetail.jsx:1792",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1818",
-            "src/components/workspace/IssueDetail.jsx:1923",
-            "src/components/workspace/IssueDetail.jsx:1924",
-            "src/components/workspace/IssueDetail.jsx:1957",
-            "src/components/workspace/IssueDetail.jsx:1985",
-            "src/components/workspace/IssueDetail.jsx:1995",
-            "src/components/workspace/UnifiedTimeline.jsx:1645"
+            "src/components/workspace/IssueDetail.jsx:1787",
+            "src/components/workspace/IssueDetail.jsx:1788",
+            "src/components/workspace/IssueDetail.jsx:1813",
+            "src/components/workspace/IssueDetail.jsx:1918",
+            "src/components/workspace/IssueDetail.jsx:1919",
+            "src/components/workspace/IssueDetail.jsx:1952",
+            "src/components/workspace/IssueDetail.jsx:1980",
+            "src/components/workspace/IssueDetail.jsx:1990",
+            "src/components/workspace/UnifiedTimeline.jsx:1599"
           ]
         },
         "icon": {
@@ -2041,26 +1845,43 @@
             "src/components/profile/ProfileView.jsx:96",
             "src/components/workspace/IssueDetail.jsx:1199",
             "src/components/workspace/IssueDetail.jsx:1210",
-            "src/components/workspace/UnifiedTimeline.jsx:1786"
+            "src/components/workspace/UnifiedTimeline.jsx:1713"
           ]
         },
         "icon-sm": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:362",
-            "src/components/WorkspaceHeader.jsx:373"
+            "src/components/WorkspaceHeader.jsx:361",
+            "src/components/WorkspaceHeader.jsx:372"
+          ]
+        },
+        "icon-xs": {
+          "count": 8,
+          "routes": [
+            "/[projectId]",
+            "/[projectId]/issue/[issueId]",
+            "/my"
+          ],
+          "files": [
+            "src/components/workspace/AgileBoard.jsx:411",
+            "src/components/workspace/AgileBoard.jsx:492",
+            "src/components/workspace/AgileBoard.jsx:508",
+            "src/components/workspace/AgileBoard.jsx:523",
+            "src/components/workspace/AgileBoard.jsx:605",
+            "src/components/workspace/AgileBoard.jsx:639",
+            "src/components/workspace/AgileBoard.jsx:654",
+            "src/components/workspace/IssueDetail.jsx:1270"
           ]
         }
       },
       "style": {
         "secondary": {
-          "count": 34,
+          "count": 33,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -2071,7 +1892,6 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:372",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:451",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
-            "src/app/(app)/chat/page.js:1233",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/my/page.js:340",
             "src/app/(app)/my/page.js:362",
@@ -2097,11 +1917,11 @@
             "src/components/workspace/IssueDetail.jsx:1135",
             "src/components/workspace/IssueDetail.jsx:1199",
             "src/components/workspace/IssueDetail.jsx:1210",
-            "src/components/workspace/IssueDetail.jsx:1792",
-            "src/components/workspace/IssueDetail.jsx:1923",
-            "src/components/workspace/IssueDetail.jsx:1957",
-            "src/components/workspace/IssueDetail.jsx:1985",
-            "src/components/workspace/IssueDetail.jsx:1995"
+            "src/components/workspace/IssueDetail.jsx:1787",
+            "src/components/workspace/IssueDetail.jsx:1918",
+            "src/components/workspace/IssueDetail.jsx:1952",
+            "src/components/workspace/IssueDetail.jsx:1980",
+            "src/components/workspace/IssueDetail.jsx:1990"
           ]
         },
         "primary": {
@@ -2134,18 +1954,15 @@
             "src/components/workspace/IssueDetail.jsx:1308",
             "src/components/workspace/IssueDetail.jsx:1332",
             "src/components/workspace/IssueDetail.jsx:1370",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1924",
-            "src/components/workspace/UnifiedTimeline.jsx:1645"
+            "src/components/workspace/IssueDetail.jsx:1788",
+            "src/components/workspace/IssueDetail.jsx:1919",
+            "src/components/workspace/UnifiedTimeline.jsx:1599"
           ]
         },
         "(default)": {
-          "count": 6,
-          "routes": [
-            "/chat"
-          ],
+          "count": 5,
+          "routes": [],
           "files": [
-            "src/app/(app)/chat/page.js:1241",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:147",
@@ -2154,16 +1971,14 @@
           ]
         },
         "ghost": {
-          "count": 32,
+          "count": 31,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/my",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/settings/page.js:1932",
             "src/app/(app)/settings/page.js:198",
             "src/app/(app)/settings/page.js:2389",
@@ -2180,8 +1995,8 @@
             "src/app/(app)/settings/page.js:629",
             "src/app/(app)/settings/page.js:636",
             "src/components/MobileNav.jsx:366",
-            "src/components/WorkspaceHeader.jsx:362",
-            "src/components/WorkspaceHeader.jsx:373",
+            "src/components/WorkspaceHeader.jsx:361",
+            "src/components/WorkspaceHeader.jsx:372",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/workspace/AgileBoard.jsx:411",
@@ -2193,19 +2008,18 @@
             "src/components/workspace/AgileBoard.jsx:64",
             "src/components/workspace/AgileBoard.jsx:654",
             "src/components/workspace/IssueDetail.jsx:1270",
-            "src/components/workspace/IssueDetail.jsx:1818",
-            "src/components/workspace/UnifiedTimeline.jsx:1786"
+            "src/components/workspace/IssueDetail.jsx:1813",
+            "src/components/workspace/UnifiedTimeline.jsx:1713"
           ]
         }
       },
       "shape": {
         "(default)": {
-          "count": 89,
+          "count": 86,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -2218,9 +2032,6 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:451",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:596",
-            "src/app/(app)/chat/page.js:1233",
-            "src/app/(app)/chat/page.js:1241",
-            "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
@@ -2293,23 +2104,23 @@
             "src/components/workspace/IssueDetail.jsx:1308",
             "src/components/workspace/IssueDetail.jsx:1332",
             "src/components/workspace/IssueDetail.jsx:1370",
-            "src/components/workspace/IssueDetail.jsx:1792",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1818",
-            "src/components/workspace/IssueDetail.jsx:1923",
-            "src/components/workspace/IssueDetail.jsx:1924",
-            "src/components/workspace/IssueDetail.jsx:1957",
-            "src/components/workspace/IssueDetail.jsx:1985",
-            "src/components/workspace/IssueDetail.jsx:1995",
-            "src/components/workspace/UnifiedTimeline.jsx:1645"
+            "src/components/workspace/IssueDetail.jsx:1787",
+            "src/components/workspace/IssueDetail.jsx:1788",
+            "src/components/workspace/IssueDetail.jsx:1813",
+            "src/components/workspace/IssueDetail.jsx:1918",
+            "src/components/workspace/IssueDetail.jsx:1919",
+            "src/components/workspace/IssueDetail.jsx:1952",
+            "src/components/workspace/IssueDetail.jsx:1980",
+            "src/components/workspace/IssueDetail.jsx:1990",
+            "src/components/workspace/UnifiedTimeline.jsx:1599"
           ]
         },
         "compact": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:362",
-            "src/components/WorkspaceHeader.jsx:373"
+            "src/components/WorkspaceHeader.jsx:361",
+            "src/components/WorkspaceHeader.jsx:372"
           ]
         },
         "circle": {
@@ -2319,18 +2130,17 @@
           ],
           "files": [
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/workspace/UnifiedTimeline.jsx:1786"
+            "src/components/workspace/UnifiedTimeline.jsx:1713"
           ]
         }
       },
       "surface": {
         "(default)": {
-          "count": 91,
+          "count": 88,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -2343,9 +2153,6 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:451",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:596",
-            "src/app/(app)/chat/page.js:1233",
-            "src/app/(app)/chat/page.js:1241",
-            "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
@@ -2419,35 +2226,34 @@
             "src/components/workspace/IssueDetail.jsx:1308",
             "src/components/workspace/IssueDetail.jsx:1332",
             "src/components/workspace/IssueDetail.jsx:1370",
-            "src/components/workspace/IssueDetail.jsx:1792",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1818",
-            "src/components/workspace/IssueDetail.jsx:1923",
-            "src/components/workspace/IssueDetail.jsx:1924",
-            "src/components/workspace/IssueDetail.jsx:1957",
-            "src/components/workspace/IssueDetail.jsx:1985",
-            "src/components/workspace/IssueDetail.jsx:1995",
-            "src/components/workspace/UnifiedTimeline.jsx:1645",
-            "src/components/workspace/UnifiedTimeline.jsx:1786"
+            "src/components/workspace/IssueDetail.jsx:1787",
+            "src/components/workspace/IssueDetail.jsx:1788",
+            "src/components/workspace/IssueDetail.jsx:1813",
+            "src/components/workspace/IssueDetail.jsx:1918",
+            "src/components/workspace/IssueDetail.jsx:1919",
+            "src/components/workspace/IssueDetail.jsx:1952",
+            "src/components/workspace/IssueDetail.jsx:1980",
+            "src/components/workspace/IssueDetail.jsx:1990",
+            "src/components/workspace/UnifiedTimeline.jsx:1599",
+            "src/components/workspace/UnifiedTimeline.jsx:1713"
           ]
         },
         "canvas": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:362",
-            "src/components/WorkspaceHeader.jsx:373"
+            "src/components/WorkspaceHeader.jsx:361",
+            "src/components/WorkspaceHeader.jsx:372"
           ]
         }
       },
       "color": {
         "(default)": {
-          "count": 84,
+          "count": 81,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -2459,9 +2265,6 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:451",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:596",
-            "src/app/(app)/chat/page.js:1233",
-            "src/app/(app)/chat/page.js:1241",
-            "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
@@ -2499,8 +2302,8 @@
             "src/components/InviteMemberDialog.jsx:170",
             "src/components/InviteMemberDialog.jsx:192",
             "src/components/MobileNav.jsx:366",
-            "src/components/WorkspaceHeader.jsx:362",
-            "src/components/WorkspaceHeader.jsx:373",
+            "src/components/WorkspaceHeader.jsx:361",
+            "src/components/WorkspaceHeader.jsx:372",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
@@ -2529,16 +2332,16 @@
             "src/components/workspace/IssueDetail.jsx:1308",
             "src/components/workspace/IssueDetail.jsx:1332",
             "src/components/workspace/IssueDetail.jsx:1370",
-            "src/components/workspace/IssueDetail.jsx:1792",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1818",
-            "src/components/workspace/IssueDetail.jsx:1923",
-            "src/components/workspace/IssueDetail.jsx:1924",
-            "src/components/workspace/IssueDetail.jsx:1957",
-            "src/components/workspace/IssueDetail.jsx:1985",
-            "src/components/workspace/IssueDetail.jsx:1995",
-            "src/components/workspace/UnifiedTimeline.jsx:1645",
-            "src/components/workspace/UnifiedTimeline.jsx:1786"
+            "src/components/workspace/IssueDetail.jsx:1787",
+            "src/components/workspace/IssueDetail.jsx:1788",
+            "src/components/workspace/IssueDetail.jsx:1813",
+            "src/components/workspace/IssueDetail.jsx:1918",
+            "src/components/workspace/IssueDetail.jsx:1919",
+            "src/components/workspace/IssueDetail.jsx:1952",
+            "src/components/workspace/IssueDetail.jsx:1980",
+            "src/components/workspace/IssueDetail.jsx:1990",
+            "src/components/workspace/UnifiedTimeline.jsx:1599",
+            "src/components/workspace/UnifiedTimeline.jsx:1713"
           ]
         },
         "dark": {
@@ -2575,12 +2378,11 @@
       },
       "composition": {
         "(default)": {
-          "count": 80,
+          "count": 77,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -2593,9 +2395,6 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:451",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:596",
-            "src/app/(app)/chat/page.js:1233",
-            "src/app/(app)/chat/page.js:1241",
-            "src/app/(app)/chat/page.js:1310",
             "src/app/(app)/error.js:51",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
@@ -2634,8 +2433,8 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:170",
             "src/components/InviteMemberDialog.jsx:192",
-            "src/components/WorkspaceHeader.jsx:362",
-            "src/components/WorkspaceHeader.jsx:373",
+            "src/components/WorkspaceHeader.jsx:361",
+            "src/components/WorkspaceHeader.jsx:372",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/profile/ProfileView.jsx:96",
@@ -2662,12 +2461,12 @@
             "src/components/workspace/IssueDetail.jsx:1308",
             "src/components/workspace/IssueDetail.jsx:1332",
             "src/components/workspace/IssueDetail.jsx:1370",
-            "src/components/workspace/IssueDetail.jsx:1792",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1818",
-            "src/components/workspace/IssueDetail.jsx:1923",
-            "src/components/workspace/IssueDetail.jsx:1924",
-            "src/components/workspace/UnifiedTimeline.jsx:1645"
+            "src/components/workspace/IssueDetail.jsx:1787",
+            "src/components/workspace/IssueDetail.jsx:1788",
+            "src/components/workspace/IssueDetail.jsx:1813",
+            "src/components/workspace/IssueDetail.jsx:1918",
+            "src/components/workspace/IssueDetail.jsx:1919",
+            "src/components/workspace/UnifiedTimeline.jsx:1599"
           ]
         },
         "workspace-guard": {
@@ -2714,9 +2513,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1957",
-            "src/components/workspace/IssueDetail.jsx:1985",
-            "src/components/workspace/IssueDetail.jsx:1995"
+            "src/components/workspace/IssueDetail.jsx:1952",
+            "src/components/workspace/IssueDetail.jsx:1980",
+            "src/components/workspace/IssueDetail.jsx:1990"
           ]
         },
         "chat-composer-action": {
@@ -2725,38 +2524,13 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1786"
+            "src/components/workspace/UnifiedTimeline.jsx:1713"
           ]
         }
       }
     },
     "IconAction": {
       "size": {
-        "(default)": {
-          "count": 3,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:327",
-            "src/app/(app)/chat/page.js:336",
-            "src/app/(app)/chat/page.js:401"
-          ]
-        },
-        "xs": {
-          "count": 5,
-          "routes": [
-            "/chat",
-            "/settings"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:468",
-            "src/app/(app)/settings/page.js:366",
-            "src/app/(app)/settings/page.js:367",
-            "src/components/WorkspaceHeader.jsx:457",
-            "src/components/WorkspaceHeader.jsx:475"
-          ]
-        },
         "md": {
           "count": 2,
           "routes": [
@@ -2766,6 +2540,18 @@
           "files": [
             "src/app/(app)/page.js:213",
             "src/components/AuthLayout.jsx:121"
+          ]
+        },
+        "xs": {
+          "count": 4,
+          "routes": [
+            "/settings"
+          ],
+          "files": [
+            "src/app/(app)/settings/page.js:366",
+            "src/app/(app)/settings/page.js:367",
+            "src/components/WorkspaceHeader.jsx:456",
+            "src/components/WorkspaceHeader.jsx:474"
           ]
         },
         "sm": {
@@ -2799,55 +2585,31 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1566",
-            "src/components/workspace/UnifiedTimeline.jsx:1567",
-            "src/components/workspace/UnifiedTimeline.jsx:1568",
-            "src/components/workspace/UnifiedTimeline.jsx:1712",
-            "src/components/workspace/UnifiedTimeline.jsx:286",
-            "src/components/workspace/UnifiedTimeline.jsx:287"
+            "src/components/workspace/UnifiedTimeline.jsx:1520",
+            "src/components/workspace/UnifiedTimeline.jsx:1521",
+            "src/components/workspace/UnifiedTimeline.jsx:1522",
+            "src/components/workspace/UnifiedTimeline.jsx:1640",
+            "src/components/workspace/UnifiedTimeline.jsx:281",
+            "src/components/workspace/UnifiedTimeline.jsx:282"
           ]
         }
       },
       "appearance": {
-        "(default)": {
-          "count": 2,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:327",
-            "src/app/(app)/chat/page.js:336"
-          ]
-        },
         "quiet": {
-          "count": 8,
+          "count": 7,
           "routes": [
             "/",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:401",
             "src/app/(app)/page.js:213",
             "src/components/MobileNav.jsx:278",
             "src/components/MobileNav.jsx:308",
-            "src/components/workspace/UnifiedTimeline.jsx:1566",
-            "src/components/workspace/UnifiedTimeline.jsx:1567",
-            "src/components/workspace/UnifiedTimeline.jsx:1712",
-            "src/components/workspace/UnifiedTimeline.jsx:286"
-          ]
-        },
-        "quiet-danger": {
-          "count": 3,
-          "routes": [
-            "/[projectId]/issue/[issueId]",
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:468",
-            "src/components/workspace/UnifiedTimeline.jsx:1568",
-            "src/components/workspace/UnifiedTimeline.jsx:287"
+            "src/components/workspace/UnifiedTimeline.jsx:1520",
+            "src/components/workspace/UnifiedTimeline.jsx:1521",
+            "src/components/workspace/UnifiedTimeline.jsx:1640",
+            "src/components/workspace/UnifiedTimeline.jsx:281"
           ]
         },
         "primary": {
@@ -2879,14 +2641,14 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:457"
+            "src/components/WorkspaceHeader.jsx:456"
           ]
         },
         "surface-danger": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:475"
+            "src/components/WorkspaceHeader.jsx:474"
           ]
         },
         "surface-plain": {
@@ -2905,39 +2667,36 @@
           "files": [
             "src/components/profile/ProfileView.jsx:141"
           ]
+        },
+        "quiet-danger": {
+          "count": 2,
+          "routes": [
+            "/[projectId]/issue/[issueId]"
+          ],
+          "files": [
+            "src/components/workspace/UnifiedTimeline.jsx:1522",
+            "src/components/workspace/UnifiedTimeline.jsx:282"
+          ]
         }
       },
       "shape": {
         "(default)": {
-          "count": 11,
+          "count": 8,
           "routes": [
             "/",
-            "/chat",
             "/clients",
             "/settings",
             "/team"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:327",
-            "src/app/(app)/chat/page.js:336",
-            "src/app/(app)/chat/page.js:401",
             "src/app/(app)/page.js:213",
             "src/app/(app)/settings/page.js:366",
             "src/app/(app)/settings/page.js:367",
             "src/components/MobileNav.jsx:278",
             "src/components/MobileNav.jsx:308",
-            "src/components/WorkspaceHeader.jsx:457",
-            "src/components/WorkspaceHeader.jsx:475",
+            "src/components/WorkspaceHeader.jsx:456",
+            "src/components/WorkspaceHeader.jsx:474",
             "src/components/profile/ProfileView.jsx:141"
-          ]
-        },
-        "compact": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:468"
           ]
         },
         "circle": {
@@ -2955,50 +2714,16 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1566",
-            "src/components/workspace/UnifiedTimeline.jsx:1567",
-            "src/components/workspace/UnifiedTimeline.jsx:1568",
-            "src/components/workspace/UnifiedTimeline.jsx:1712",
-            "src/components/workspace/UnifiedTimeline.jsx:286",
-            "src/components/workspace/UnifiedTimeline.jsx:287"
+            "src/components/workspace/UnifiedTimeline.jsx:1520",
+            "src/components/workspace/UnifiedTimeline.jsx:1521",
+            "src/components/workspace/UnifiedTimeline.jsx:1522",
+            "src/components/workspace/UnifiedTimeline.jsx:1640",
+            "src/components/workspace/UnifiedTimeline.jsx:281",
+            "src/components/workspace/UnifiedTimeline.jsx:282"
           ]
         }
       },
       "composition": {
-        "chat-composer-action": {
-          "count": 2,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:327",
-            "src/app/(app)/chat/page.js:336"
-          ]
-        },
-        "chat-panel-action": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:401"
-          ]
-        },
-        "chat-micro-action": {
-          "count": 6,
-          "routes": [
-            "/[projectId]/issue/[issueId]",
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:468",
-            "src/components/workspace/UnifiedTimeline.jsx:1566",
-            "src/components/workspace/UnifiedTimeline.jsx:1567",
-            "src/components/workspace/UnifiedTimeline.jsx:1568",
-            "src/components/workspace/UnifiedTimeline.jsx:286",
-            "src/components/workspace/UnifiedTimeline.jsx:287"
-          ]
-        },
         "(default)": {
           "count": 10,
           "routes": [
@@ -3013,8 +2738,8 @@
             "src/app/(app)/settings/page.js:367",
             "src/components/MobileNav.jsx:278",
             "src/components/MobileNav.jsx:308",
-            "src/components/WorkspaceHeader.jsx:457",
-            "src/components/WorkspaceHeader.jsx:475",
+            "src/components/WorkspaceHeader.jsx:456",
+            "src/components/WorkspaceHeader.jsx:474",
             "src/components/profile/ProfileModal.jsx:41",
             "src/components/profile/ProfileModal.jsx:46",
             "src/components/profile/ProfileView.jsx:141"
@@ -3027,13 +2752,26 @@
             "src/components/AuthLayout.jsx:121"
           ]
         },
+        "chat-micro-action": {
+          "count": 5,
+          "routes": [
+            "/[projectId]/issue/[issueId]"
+          ],
+          "files": [
+            "src/components/workspace/UnifiedTimeline.jsx:1520",
+            "src/components/workspace/UnifiedTimeline.jsx:1521",
+            "src/components/workspace/UnifiedTimeline.jsx:1522",
+            "src/components/workspace/UnifiedTimeline.jsx:281",
+            "src/components/workspace/UnifiedTimeline.jsx:282"
+          ]
+        },
         "chat-composer-cancel": {
           "count": 1,
           "routes": [
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1712"
+            "src/components/workspace/UnifiedTimeline.jsx:1640"
           ]
         }
       }
@@ -3041,17 +2779,15 @@
     "Input": {
       "size": {
         "(default)": {
-          "count": 3,
+          "count": 2,
           "routes": [
             "/",
             "/[projectId]",
-            "/chat",
             "/clients",
             "/my",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1254",
             "src/app/(app)/settings/page.js:353",
             "src/components/CreateTaskModal.jsx:433"
           ]
@@ -3082,53 +2818,49 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1774"
+            "src/components/workspace/IssueDetail.jsx:1769"
           ]
         }
       },
       "composition": {
         "(default)": {
-          "count": 7,
+          "count": 6,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1254",
             "src/app/(app)/settings/page.js:353",
             "src/app/(app)/settings/page.js:529",
             "src/components/CreateTaskModal.jsx:433",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:1774"
+            "src/components/workspace/IssueDetail.jsx:1769"
           ]
         }
       },
       "preset": {
         "(default)": {
-          "count": 7,
+          "count": 6,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1254",
             "src/app/(app)/settings/page.js:353",
             "src/app/(app)/settings/page.js:529",
             "src/components/CreateTaskModal.jsx:433",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:1774"
+            "src/components/workspace/IssueDetail.jsx:1769"
           ]
         }
       }
@@ -3136,28 +2868,17 @@
     "Textarea": {
       "composition": {
         "(default)": {
-          "count": 2,
+          "count": 1,
           "routes": [
             "/[projectId]",
-            "/chat",
             "/my"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1270",
             "src/components/workspace/AgileBoard.jsx:46"
           ]
         }
       },
       "surface": {
-        "(default)": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1270"
-          ]
-        },
         "white": {
           "count": 1,
           "routes": [
@@ -3203,12 +2924,12 @@
             "src/components/CreateTaskModal.jsx:522",
             "src/components/CreateTaskModal.jsx:531",
             "src/components/CreateTaskModal.jsx:539",
-            "src/components/workspace/IssueDetail.jsx:1503",
-            "src/components/workspace/IssueDetail.jsx:1596",
-            "src/components/workspace/IssueDetail.jsx:1608",
-            "src/components/workspace/IssueDetail.jsx:1620",
-            "src/components/workspace/IssueDetail.jsx:1899",
-            "src/components/workspace/IssueDetail.jsx:1907"
+            "src/components/workspace/IssueDetail.jsx:1498",
+            "src/components/workspace/IssueDetail.jsx:1591",
+            "src/components/workspace/IssueDetail.jsx:1603",
+            "src/components/workspace/IssueDetail.jsx:1615",
+            "src/components/workspace/IssueDetail.jsx:1894",
+            "src/components/workspace/IssueDetail.jsx:1902"
           ]
         }
       },
@@ -3255,12 +2976,12 @@
             "src/components/CreateTaskModal.jsx:522",
             "src/components/CreateTaskModal.jsx:531",
             "src/components/CreateTaskModal.jsx:539",
-            "src/components/workspace/IssueDetail.jsx:1503",
-            "src/components/workspace/IssueDetail.jsx:1596",
-            "src/components/workspace/IssueDetail.jsx:1608",
-            "src/components/workspace/IssueDetail.jsx:1620",
-            "src/components/workspace/IssueDetail.jsx:1899",
-            "src/components/workspace/IssueDetail.jsx:1907"
+            "src/components/workspace/IssueDetail.jsx:1498",
+            "src/components/workspace/IssueDetail.jsx:1591",
+            "src/components/workspace/IssueDetail.jsx:1603",
+            "src/components/workspace/IssueDetail.jsx:1615",
+            "src/components/workspace/IssueDetail.jsx:1894",
+            "src/components/workspace/IssueDetail.jsx:1902"
           ]
         }
       },
@@ -3352,12 +3073,12 @@
             "src/components/CreateTaskModal.jsx:522",
             "src/components/CreateTaskModal.jsx:531",
             "src/components/CreateTaskModal.jsx:539",
-            "src/components/workspace/IssueDetail.jsx:1503",
-            "src/components/workspace/IssueDetail.jsx:1596",
-            "src/components/workspace/IssueDetail.jsx:1608",
-            "src/components/workspace/IssueDetail.jsx:1620",
-            "src/components/workspace/IssueDetail.jsx:1899",
-            "src/components/workspace/IssueDetail.jsx:1907"
+            "src/components/workspace/IssueDetail.jsx:1498",
+            "src/components/workspace/IssueDetail.jsx:1591",
+            "src/components/workspace/IssueDetail.jsx:1603",
+            "src/components/workspace/IssueDetail.jsx:1615",
+            "src/components/workspace/IssueDetail.jsx:1894",
+            "src/components/workspace/IssueDetail.jsx:1902"
           ]
         }
       }
@@ -3365,31 +3086,18 @@
     "MultiSelect": {
       "size": {
         "(default)": {
-          "count": 3,
+          "count": 2,
           "routes": [
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/my"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1282",
             "src/app/(app)/my/page.js:268",
-            "src/components/workspace/IssueDetail.jsx:1510"
+            "src/components/workspace/IssueDetail.jsx:1505"
           ]
         }
       },
       "variant": {
-        "(default)": {
-          "count": 2,
-          "routes": [
-            "/[projectId]/issue/[issueId]",
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1282",
-            "src/components/workspace/IssueDetail.jsx:1510"
-          ]
-        },
         "ghost": {
           "count": 1,
           "routes": [
@@ -3398,20 +3106,18 @@
           "files": [
             "src/app/(app)/my/page.js:268"
           ]
+        },
+        "(default)": {
+          "count": 1,
+          "routes": [
+            "/[projectId]/issue/[issueId]"
+          ],
+          "files": [
+            "src/components/workspace/IssueDetail.jsx:1505"
+          ]
         }
       },
       "filterRole": {
-        "(default)": {
-          "count": 2,
-          "routes": [
-            "/[projectId]/issue/[issueId]",
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1282",
-            "src/components/workspace/IssueDetail.jsx:1510"
-          ]
-        },
         "project": {
           "count": 1,
           "routes": [
@@ -3419,6 +3125,15 @@
           ],
           "files": [
             "src/app/(app)/my/page.js:268"
+          ]
+        },
+        "(default)": {
+          "count": 1,
+          "routes": [
+            "/[projectId]/issue/[issueId]"
+          ],
+          "files": [
+            "src/components/workspace/IssueDetail.jsx:1505"
           ]
         }
       }
@@ -3487,7 +3202,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1773"
+            "src/components/workspace/IssueDetail.jsx:1768"
           ]
         }
       },
@@ -3526,7 +3241,7 @@
             "src/app/(app)/page.js:900",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:1773"
+            "src/components/workspace/IssueDetail.jsx:1768"
           ]
         },
         "none": {
@@ -3588,7 +3303,7 @@
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:138",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:1773"
+            "src/components/workspace/IssueDetail.jsx:1768"
           ]
         },
         "chart-panel": {
@@ -3611,7 +3326,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3628,12 +3342,11 @@
           ]
         },
         "(default)": {
-          "count": 13,
+          "count": 12,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3652,20 +3365,16 @@
             "src/app/(app)/settings/page.js:2969",
             "src/app/(app)/settings/page.js:577",
             "src/app/(app)/settings/page.js:592",
-            "src/components/workspace/IssueCard.jsx:300",
-            "src/components/workspace/UnifiedTimeline.jsx:1658"
+            "src/components/workspace/IssueCard.jsx:300"
           ]
         },
         "warning": {
-          "count": 3,
+          "count": 1,
           "routes": [
-            "/[projectId]/issue/[issueId]",
             "/overview"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:276",
-            "src/components/workspace/UnifiedTimeline.jsx:1503",
-            "src/components/workspace/UnifiedTimeline.jsx:262"
+            "src/app/(app)/overview/page.js:276"
           ]
         },
         "ink-subtle": {
@@ -3677,7 +3386,7 @@
             "src/app/(app)/settings/page.js:2227",
             "src/app/(app)/settings/page.js:2261",
             "src/app/(app)/settings/page.js:2327",
-            "src/components/WorkspaceHeader.jsx:562"
+            "src/components/WorkspaceHeader.jsx:560"
           ]
         },
         "success": {
@@ -3718,7 +3427,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3727,7 +3435,7 @@
           ],
           "files": [
             "src/components/workspace/IssueCard.jsx:312",
-            "src/components/workspace/IssueDetail.jsx:1467"
+            "src/components/workspace/IssueDetail.jsx:1462"
           ]
         },
         "surface": {
@@ -3736,18 +3444,17 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:231"
+            "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         }
       },
       "size": {
         "sm": {
-          "count": 15,
+          "count": 12,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3762,14 +3469,11 @@
             "src/app/(app)/settings/page.js:2319",
             "src/app/(app)/settings/page.js:2320",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:562",
+            "src/components/WorkspaceHeader.jsx:560",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
-            "src/components/workspace/IssueDetail.jsx:1467",
-            "src/components/workspace/UnifiedTimeline.jsx:1503",
-            "src/components/workspace/UnifiedTimeline.jsx:1658",
-            "src/components/workspace/UnifiedTimeline.jsx:262"
+            "src/components/workspace/IssueDetail.jsx:1462"
           ]
         },
         "(default)": {
@@ -3788,7 +3492,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3832,18 +3535,17 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:231"
+            "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         }
       },
       "shape": {
         "badge": {
-          "count": 14,
+          "count": 11,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3861,10 +3563,7 @@
             "src/app/(app)/settings/page.js:592",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:300",
-            "src/components/workspace/IssueCard.jsx:312",
-            "src/components/workspace/UnifiedTimeline.jsx:1503",
-            "src/components/workspace/UnifiedTimeline.jsx:1658",
-            "src/components/workspace/UnifiedTimeline.jsx:262"
+            "src/components/workspace/IssueCard.jsx:312"
           ]
         },
         "(default)": {
@@ -3873,7 +3572,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3893,7 +3591,7 @@
             "src/app/(app)/settings/page.js:2689",
             "src/app/(app)/settings/page.js:2969",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:562",
+            "src/components/WorkspaceHeader.jsx:560",
             "src/components/profile/ProfileView.jsx:194",
             "src/components/workspace/AgileBoard.jsx:501",
             "src/components/workspace/AgileBoard.jsx:518",
@@ -3901,19 +3599,18 @@
             "src/components/workspace/AgileBoard.jsx:614",
             "src/components/workspace/AgileBoard.jsx:649",
             "src/components/workspace/IssueCard.jsx:381",
-            "src/components/workspace/IssueDetail.jsx:1467",
-            "src/components/workspace/UnifiedTimeline.jsx:231"
+            "src/components/workspace/IssueDetail.jsx:1462",
+            "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         }
       },
       "appearance": {
         "(default)": {
-          "count": 35,
+          "count": 32,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -3941,7 +3638,7 @@
             "src/app/(app)/settings/page.js:577",
             "src/app/(app)/settings/page.js:592",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:562",
+            "src/components/WorkspaceHeader.jsx:560",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/AgileBoard.jsx:501",
             "src/components/workspace/AgileBoard.jsx:518",
@@ -3951,11 +3648,8 @@
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
             "src/components/workspace/IssueCard.jsx:381",
-            "src/components/workspace/IssueDetail.jsx:1467",
-            "src/components/workspace/UnifiedTimeline.jsx:1503",
-            "src/components/workspace/UnifiedTimeline.jsx:1658",
-            "src/components/workspace/UnifiedTimeline.jsx:231",
-            "src/components/workspace/UnifiedTimeline.jsx:262"
+            "src/components/workspace/IssueDetail.jsx:1462",
+            "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         },
         "outline": {
@@ -3970,12 +3664,11 @@
       },
       "preset": {
         "(default)": {
-          "count": 34,
+          "count": 31,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -4002,7 +3695,7 @@
             "src/app/(app)/settings/page.js:577",
             "src/app/(app)/settings/page.js:592",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:562",
+            "src/components/WorkspaceHeader.jsx:560",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/profile/ProfileView.jsx:194",
             "src/components/workspace/AgileBoard.jsx:501",
@@ -4012,11 +3705,8 @@
             "src/components/workspace/AgileBoard.jsx:649",
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
-            "src/components/workspace/IssueDetail.jsx:1467",
-            "src/components/workspace/UnifiedTimeline.jsx:1503",
-            "src/components/workspace/UnifiedTimeline.jsx:1658",
-            "src/components/workspace/UnifiedTimeline.jsx:231",
-            "src/components/workspace/UnifiedTimeline.jsx:262"
+            "src/components/workspace/IssueDetail.jsx:1462",
+            "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         },
         "avatar-counter": {
@@ -4025,7 +3715,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -4040,12 +3729,11 @@
       },
       "weight": {
         "(default)": {
-          "count": 28,
+          "count": 25,
           "routes": [
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -4070,17 +3758,14 @@
             "src/app/(app)/settings/page.js:2327",
             "src/app/(app)/settings/page.js:2689",
             "src/app/(app)/settings/page.js:2969",
-            "src/components/WorkspaceHeader.jsx:562",
+            "src/components/WorkspaceHeader.jsx:560",
             "src/components/workspace/AgileBoard.jsx:501",
             "src/components/workspace/AgileBoard.jsx:518",
             "src/components/workspace/AgileBoard.jsx:558",
             "src/components/workspace/AgileBoard.jsx:614",
             "src/components/workspace/AgileBoard.jsx:649",
             "src/components/workspace/IssueCard.jsx:381",
-            "src/components/workspace/IssueDetail.jsx:1467",
-            "src/components/workspace/UnifiedTimeline.jsx:1503",
-            "src/components/workspace/UnifiedTimeline.jsx:1658",
-            "src/components/workspace/UnifiedTimeline.jsx:262"
+            "src/components/workspace/IssueDetail.jsx:1462"
           ]
         },
         "medium": {
@@ -4089,7 +3774,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -4104,7 +3788,7 @@
             "src/components/profile/ProfileView.jsx:194",
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
-            "src/components/workspace/UnifiedTimeline.jsx:231"
+            "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         }
       }
@@ -4112,15 +3796,12 @@
     "UserAvatar": {
       "size": {
         "md": {
-          "count": 3,
+          "count": 1,
           "routes": [
-            "/[projectId]",
-            "/chat"
+            "/[projectId]"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:92",
-            "src/app/(app)/chat/page.js:414",
-            "src/app/(app)/chat/page.js:445"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:92"
           ]
         },
         "sm": {
@@ -4129,7 +3810,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -4149,7 +3829,7 @@
           ],
           "files": [
             "src/app/(app)/page.js:181",
-            "src/components/WorkspaceHeader.jsx:97"
+            "src/components/WorkspaceHeader.jsx:96"
           ]
         },
         "xs": {
@@ -4158,12 +3838,8 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
-            "/my",
-            "/overview",
-            "/settings",
-            "/team"
+            "/my"
           ],
           "files": [
             "src/app/(app)/page.js:482",
@@ -4174,15 +3850,8 @@
         "lg": {
           "count": 2,
           "routes": [
-            "/",
-            "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
-            "/clients",
-            "/my",
-            "/overview",
-            "/settings",
-            "/team"
+            "/settings"
           ],
           "files": [
             "src/app/(app)/settings/page.js:2315",
@@ -4204,7 +3873,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:211"
+            "src/components/workspace/UnifiedTimeline.jsx:210"
           ]
         }
       }
@@ -4217,8 +3886,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1467",
-            "src/components/workspace/UnifiedTimeline.jsx:1487"
+            "src/components/workspace/UnifiedTimeline.jsx:1422",
+            "src/components/workspace/UnifiedTimeline.jsx:1442"
           ]
         }
       }
@@ -4249,7 +3918,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:499"
+            "src/components/WorkspaceHeader.jsx:498"
           ]
         },
         "(default)": {
@@ -4281,7 +3950,7 @@
           ],
           "files": [
             "src/components/InviteLinkSection.jsx:169",
-            "src/components/WorkspaceHeader.jsx:499"
+            "src/components/WorkspaceHeader.jsx:498"
           ]
         },
         "lg": {
@@ -4331,7 +4000,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1699"
+            "src/components/workspace/IssueDetail.jsx:1694"
           ]
         }
       }
@@ -4341,22 +4010,13 @@
     },
     "MentionMenu": {
       "density": {
-        "composer": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:269"
-          ]
-        },
         "timeline": {
           "count": 1,
           "routes": [
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1692"
+            "src/components/workspace/UnifiedTimeline.jsx:1620"
           ]
         }
       }
@@ -4364,12 +4024,9 @@
     "Counter": {
       "size": {
         "sm": {
-          "count": 6,
-          "routes": [
-            "/chat"
-          ],
+          "count": 5,
+          "routes": [],
           "files": [
-            "src/app/(app)/chat/page.js:398",
             "src/components/MobileNav.jsx:209",
             "src/components/MobileNav.jsx:268",
             "src/components/WorkspaceSidebar.jsx:281",
@@ -4386,16 +4043,6 @@
         }
       },
       "variant": {
-        "(default)": {
-          "count": 2,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:398",
-            "src/components/OrgSwitcherScreen.jsx:66"
-          ]
-        },
         "dot": {
           "count": 5,
           "routes": [],
@@ -4406,16 +4053,20 @@
             "src/components/WorkspaceSidebar.jsx:345",
             "src/components/WorkspaceSidebar.jsx:485"
           ]
+        },
+        "(default)": {
+          "count": 1,
+          "routes": [],
+          "files": [
+            "src/components/OrgSwitcherScreen.jsx:66"
+          ]
         }
       },
       "status": {
         "(default)": {
-          "count": 6,
-          "routes": [
-            "/chat"
-          ],
+          "count": 5,
+          "routes": [],
           "files": [
-            "src/app/(app)/chat/page.js:398",
             "src/components/MobileNav.jsx:209",
             "src/components/MobileNav.jsx:268",
             "src/components/OrgSwitcherScreen.jsx:66",
@@ -4432,15 +4083,6 @@
         }
       },
       "appearance": {
-        "subtle": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:398"
-          ]
-        },
         "sidebar": {
           "count": 4,
           "routes": [],
@@ -4469,15 +4111,6 @@
     },
     "Dialog": {
       "size": {
-        "md": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1226"
-          ]
-        },
         "sm": {
           "count": 5,
           "routes": [
@@ -4490,7 +4123,7 @@
             "src/app/(app)/my/page.js:485",
             "src/app/(app)/page.js:563",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:525",
+            "src/components/WorkspaceHeader.jsx:523",
             "src/components/workspace/BoardConfigModal.jsx:225"
           ]
         },
@@ -4512,21 +4145,6 @@
         }
       },
       "bodyPadding": {
-        "(default)": {
-          "count": 4,
-          "routes": [
-            "/",
-            "/[projectId]",
-            "/chat",
-            "/clients"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1226",
-            "src/app/(app)/page.js:563",
-            "src/components/SupportDialog.jsx:48",
-            "src/components/workspace/BoardConfigModal.jsx:225"
-          ]
-        },
         "spacious": {
           "count": 1,
           "routes": [
@@ -4534,6 +4152,19 @@
           ],
           "files": [
             "src/app/(app)/my/page.js:485"
+          ]
+        },
+        "(default)": {
+          "count": 3,
+          "routes": [
+            "/",
+            "/[projectId]",
+            "/clients"
+          ],
+          "files": [
+            "src/app/(app)/page.js:563",
+            "src/components/SupportDialog.jsx:48",
+            "src/components/workspace/BoardConfigModal.jsx:225"
           ]
         },
         "flush": {
@@ -4546,7 +4177,7 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:380",
-            "src/components/WorkspaceHeader.jsx:525",
+            "src/components/WorkspaceHeader.jsx:523",
             "src/components/profile/ProfileModal.jsx:28"
           ]
         },
@@ -4569,27 +4200,6 @@
         }
       },
       "titleContext": {
-        "(default)": {
-          "count": 8,
-          "routes": [
-            "/",
-            "/[projectId]",
-            "/chat",
-            "/clients",
-            "/my",
-            "/settings"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1226",
-            "src/app/(app)/page.js:563",
-            "src/components/CreateTaskModal.jsx:380",
-            "src/components/InviteMemberDialog.jsx:126",
-            "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:525",
-            "src/components/profile/ProfileModal.jsx:28",
-            "src/components/workspace/BoardConfigModal.jsx:225"
-          ]
-        },
         "dialog": {
           "count": 2,
           "routes": [
@@ -4599,29 +4209,28 @@
             "src/app/(app)/my/page.js:485",
             "src/components/WorkspaceInfoCenter.jsx:269"
           ]
-        }
-      },
-      "presentation": {
+        },
         "(default)": {
           "count": 7,
           "routes": [
             "/",
             "/[projectId]",
-            "/chat",
             "/clients",
             "/my",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1226",
             "src/app/(app)/page.js:563",
             "src/components/CreateTaskModal.jsx:380",
             "src/components/InviteMemberDialog.jsx:126",
-            "src/components/WorkspaceHeader.jsx:525",
+            "src/components/SupportDialog.jsx:48",
+            "src/components/WorkspaceHeader.jsx:523",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BoardConfigModal.jsx:225"
           ]
-        },
+        }
+      },
+      "presentation": {
         "sheet": {
           "count": 1,
           "routes": [
@@ -4629,6 +4238,24 @@
           ],
           "files": [
             "src/app/(app)/my/page.js:485"
+          ]
+        },
+        "(default)": {
+          "count": 6,
+          "routes": [
+            "/",
+            "/[projectId]",
+            "/clients",
+            "/my",
+            "/settings"
+          ],
+          "files": [
+            "src/app/(app)/page.js:563",
+            "src/components/CreateTaskModal.jsx:380",
+            "src/components/InviteMemberDialog.jsx:126",
+            "src/components/WorkspaceHeader.jsx:523",
+            "src/components/profile/ProfileModal.jsx:28",
+            "src/components/workspace/BoardConfigModal.jsx:225"
           ]
         },
         "dialog": {
@@ -4734,7 +4361,7 @@
           ],
           "files": [
             "src/app/(app)/layout.js:132",
-            "src/components/workspace/UnifiedTimeline.jsx:1394"
+            "src/components/workspace/UnifiedTimeline.jsx:1350"
           ]
         },
         "inset": {
@@ -4778,7 +4405,7 @@
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/profile/ProfileView.jsx:223",
-            "src/components/workspace/UnifiedTimeline.jsx:1394"
+            "src/components/workspace/UnifiedTimeline.jsx:1350"
           ]
         }
       },
@@ -4814,7 +4441,7 @@
             "src/app/(app)/page.js:901",
             "src/app/(app)/team/page.js:130",
             "src/components/profile/ProfileView.jsx:223",
-            "src/components/workspace/UnifiedTimeline.jsx:1394"
+            "src/components/workspace/UnifiedTimeline.jsx:1350"
           ]
         }
       }
@@ -4936,26 +4563,20 @@
     "Segmented": {
       "surface": {
         "canvas": {
-          "count": 3,
-          "routes": [
-            "/[projectId]/issue/[issueId]"
-          ],
+          "count": 2,
+          "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:390",
-            "src/components/WorkspaceInfoCenter.jsx:279",
-            "src/components/workspace/UnifiedTimeline.jsx:1666"
+            "src/components/WorkspaceHeader.jsx:389",
+            "src/components/WorkspaceInfoCenter.jsx:279"
           ]
         }
       },
       "composition": {
         "(default)": {
-          "count": 2,
-          "routes": [
-            "/[projectId]/issue/[issueId]"
-          ],
+          "count": 1,
+          "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:390",
-            "src/components/workspace/UnifiedTimeline.jsx:1666"
+            "src/components/WorkspaceHeader.jsx:389"
           ]
         },
         "dialog-tabs": {
@@ -5064,7 +4685,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1562"
+            "src/components/workspace/IssueDetail.jsx:1557"
           ]
         }
       }
@@ -5121,7 +4742,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:118"
+            "src/components/WorkspaceHeader.jsx:117"
           ]
         }
       },
@@ -5130,7 +4751,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:118"
+            "src/components/WorkspaceHeader.jsx:117"
           ]
         }
       }
@@ -5138,16 +4759,14 @@
     "FormGroup": {
       "gap": {
         "(default)": {
-          "count": 3,
+          "count": 2,
           "routes": [
             "/",
             "/[projectId]",
-            "/chat",
             "/clients",
             "/my"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1253",
             "src/components/CreateTaskModal.jsx:432",
             "src/components/CreateTaskModal.jsx:445"
           ]
@@ -5221,18 +4840,15 @@
     "Label": {
       "context": {
         "(default)": {
-          "count": 11,
+          "count": 9,
           "routes": [
             "/",
             "/[projectId]",
-            "/chat",
             "/clients",
             "/my",
             "/settings"
           ],
           "files": [
-            "src/app/(app)/chat/page.js:1269",
-            "src/app/(app)/chat/page.js:1281",
             "src/components/CreateTaskModal.jsx:505",
             "src/components/CreateTaskModal.jsx:521",
             "src/components/CreateTaskModal.jsx:530",
@@ -5261,7 +4877,6 @@
             "/",
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/chat",
             "/clients",
             "/my",
             "/overview",
@@ -5278,67 +4893,26 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1719"
-          ]
-        }
-      }
-    },
-    "ChatComposerCore": {
-      "variant": {
-        "workspace": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:309"
-          ]
-        },
-        "timeline": {
-          "count": 1,
-          "routes": [
-            "/[projectId]/issue/[issueId]"
-          ],
-          "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1717"
+            "src/components/workspace/IssueDetail.jsx:1714"
           ]
         }
       }
     },
     "ChatComposerDock": {
       "composition": {
-        "(default)": {
-          "count": 2,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1439",
-            "src/app/(app)/chat/page.js:495"
-          ]
-        },
         "timeline-composer": {
           "count": 1,
           "routes": [
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1636"
+            "src/components/workspace/UnifiedTimeline.jsx:1590"
           ]
         }
       }
     },
     "SidebarLayout": {
       "context": {
-        "chat": {
-          "count": 1,
-          "routes": [
-            "/chat"
-          ],
-          "files": [
-            "src/app/(app)/chat/page.js:1298"
-          ]
-        },
         "settings": {
           "count": 1,
           "routes": [
@@ -5402,10 +4976,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1716",
-            "src/components/workspace/IssueDetail.jsx:1732",
-            "src/components/workspace/IssueDetail.jsx:1811",
-            "src/components/workspace/IssueDetail.jsx:1857",
+            "src/components/workspace/IssueDetail.jsx:1711",
+            "src/components/workspace/IssueDetail.jsx:1727",
+            "src/components/workspace/IssueDetail.jsx:1806",
+            "src/components/workspace/IssueDetail.jsx:1852",
             "src/components/workspace/IssueDetail.jsx:191"
           ]
         },
@@ -5415,7 +4989,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1666"
+            "src/components/workspace/IssueDetail.jsx:1661"
           ]
         }
       }
@@ -5462,8 +5036,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1547",
-            "src/components/workspace/UnifiedTimeline.jsx:1462"
+            "src/components/workspace/IssueDetail.jsx:1542",
+            "src/components/workspace/UnifiedTimeline.jsx:1417"
           ]
         }
       },
@@ -5483,8 +5057,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1547",
-            "src/components/workspace/UnifiedTimeline.jsx:1462"
+            "src/components/workspace/IssueDetail.jsx:1542",
+            "src/components/workspace/UnifiedTimeline.jsx:1417"
           ]
         }
       }
@@ -5558,21 +5132,18 @@
     "Skeleton — ролі": "<div className=\"grid w-full grid-cols-1 gap-[14px] sm:grid-cols-2 lg:grid-cols-3\">\n  {ROLES.map(([role, caption]) => (\n    <div key={role} className=\"flex flex-col gap-[6px] rounded-[12px] border border-line p-[12px]\">\n      <div className={role === 'panel' ? 'flex h-[120px]' : 'flex'}>\n        <Skeleton preset={role} />\n      </div>\n      <span className=\"font-mono text-[10px] font-bold text-ink\">{role}</span>\n      <span className=\"text-[10px] text-muted\">{caption}</span>\n    </div>\n  ))}\n</div>",
     "Skeleton — ширини": "<div className=\"flex w-full max-w-[520px] flex-col gap-[8px]\">\n  {WIDTHS.map(width => (\n    <div key={width} className=\"flex items-center gap-[10px]\">\n      <span className=\"w-[52px] shrink-0 font-mono text-[10px] font-bold text-muted\">{width}</span>\n      <Skeleton preset=\"text\" width={width} />\n    </div>\n  ))}\n</div>",
     "Skeleton — тон сайдбара": "<div className=\"grid w-full grid-cols-1 gap-[12px] sm:grid-cols-2\">\n  <div className=\"flex flex-col gap-[10px] rounded-[16px] bg-ink p-[16px] [--sb-text:#ffffff]\">\n    <span className=\"text-[10px] font-bold uppercase tracking-wider text-white/50\">темна тема</span>\n    <div className=\"flex items-start gap-[12px]\">\n      <Skeleton preset=\"logo\" tone=\"sidebar\" className=\"shrink-0\" />\n      <div className=\"flex flex-1 flex-col gap-[6px]\">\n        <Skeleton preset=\"caption\" width=\"wide\" tone=\"sidebar\" />\n        <Skeleton preset=\"caption\" width=\"half\" tone=\"sidebar\" />\n      </div>\n    </div>\n  </div>\n  <div className=\"flex flex-col gap-[10px] rounded-[16px] bg-canvas p-[16px] [--sb-text:#1f1f1f]\">\n    <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">світла тема</span>\n    <div className=\"flex items-start gap-[12px]\">\n      <Skeleton preset=\"logo\" tone=\"sidebar\" className=\"shrink-0\" />\n      <div className=\"flex flex-1 flex-col gap-[6px]\">\n        <Skeleton preset=\"caption\" width=\"wide\" tone=\"sidebar\" />\n        <Skeleton preset=\"caption\" width=\"half\" tone=\"sidebar\" />\n      </div>\n    </div>\n  </div>\n</div>",
-    "Workspace Chat Composer": "<div className=\"h-[420px] w-full\">\n<div className=\"relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-canvas h-full\">\n  <div className=\"relative z-10 flex min-h-[64px] shrink-0 items-center gap-2 border-b border-line/70 bg-canvas/90 px-4 py-3 backdrop-blur-xl\">\n    <Hash size={17} className=\"shrink-0 text-ink\" />\n    <div className=\"min-w-0 flex-1\">\n      <h2 className=\"flex items-center gap-1.5 truncate text-[15px] font-bold text-ink\">general</h2>\n      <p className=\"truncate text-[11px] text-muted\">Загальний канал для всієї команди</p>\n    </div>\n    <Info size={16} className=\"text-muted\" />\n  </div>\n\n  <div className=\"custom-scrollbar min-h-0 flex-1 overflow-y-auto px-4 pb-12 pt-2 scroll-pb-12\">\n    <div className=\"flex h-full flex-1 items-center justify-center\">\n      <EmptyState\n        icon={ChatIcon}\n        title=\"Ще немає повідомлень\"\n        description=\"Почніть розмову! 👋\"\n      />\n    </div>\n  </div>\n\n  <ChatComposerDock>\n    <div className=\"relative px-4 pb-4\">\n      <ChatComposerCore\n        variant=\"workspace\"\n        value={message}\n        onChange={event => setMessage(event.target.value)}\n        placeholder=\"Написати в #general...\"\n        toolbar={(\n          <>\n            <button\n              type=\"button\"\n              className=\"w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink transition-colors\"\n              title=\"Emoji\"\n            >\n              <Smile size={17} />\n            </button>\n            <button\n              type=\"button\"\n              className=\"w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink transition-colors\"\n              title=\"Прикріпити файл\"\n            >\n              <Paperclip size={17} />\n            </button>\n          </>\n        )}\n        onSubmit={() => setMessage('')}\n        canSubmit={canSend}\n      />\n    </div>\n  </ChatComposerDock>\n</div>\n</div>",
-    "Task Timeline composer": "<div className=\"grid w-full grid-cols-1 gap-[16px]\">\n  <div className=\"flex h-[210px] flex-col overflow-hidden rounded-[16px] bg-canvas\">\n    <div className=\"flex-1 p-4 text-[12px] text-muted\">Task timeline</div>\n    <ChatComposerDock composition=\"timeline-composer\">\n      <ChatComposerCore\n        variant=\"timeline\"\n        value=\"\"\n        onChange={() => {}}\n        placeholder=\"Написати повідомлення...\"\n        leading={<Button className=\"self-center rounded-full\" style=\"ghost\" size=\"icon-sm\" icon={Paperclip} type=\"button\" aria-label=\"Додати файл\" />}\n        onSubmit={() => {}}\n        canSubmit={false}\n      />\n    </ChatComposerDock>\n  </div>\n</div>",
-    "Чат — власна шкала аватарів": "<div className=\"flex flex-wrap items-end gap-[20px]\">\n  {[['chat-message', 36, 'рядок повідомлення'], ['chat-member', 28, 'список учасників'],\n    ['chat-inline', 20, 'у рядку'], ['chat-mention', 18, 'згадка в тексті']].map(([token, px, role]) => (\n    <div key={token} className=\"flex flex-col items-center gap-[6px]\">\n      <UserAvatar user={demoUser} size={token} />\n      <span className=\"font-mono text-[9px] font-bold text-[#1f1f1f]\">{token}</span>\n      <span className=\"text-[9px] text-[#cfcfcf]\">{px}px · {role}</span>\n    </div>\n  ))}\n</div>",
-    "Чат — розміри іконок у діях": "<div className=\"flex flex-col gap-[16px]\">\n  {[['chat-micro-action', 12, 'дії над повідомленням: відповісти, редагувати, видалити'],\n    ['chat-composer-cancel', 13, 'скасування в композері'],\n    ['chat-message-action', 15, 'дії в рядку: гілка, закріпити'],\n    ['chat-panel-action', 16, 'закрити гілку, інфо про канал'],\n    ['chat-composer-action', 17, 'емодзі та вкладення в композері']].map(([token, px, role]) => (\n    <div key={token} className=\"flex items-center gap-[12px]\">\n      <Button style=\"ghost\" size=\"icon-sm\" composition={token} icon={ChatIcon}>{token}</Button>\n      <span className=\"font-mono text-[10px] font-bold text-[#1f1f1f]\">{token}</span>\n      <span className=\"text-[10px] text-[#cfcfcf]\">{px}px · {role}</span>\n    </div>\n  ))}\n</div>",
-    "Чат — роздільники дат": "<Pill tone=\"surface\" size=\"chat-day\" weight=\"medium\" uppercase>Сьогодні</Pill>\n<Pill tone=\"surface\" size=\"chat-day-wide\" uppercase>12 березня</Pill>",
+    "Композер розмови": "<div className=\"grid w-full grid-cols-1 gap-[16px]\">\n  <div className=\"flex h-[210px] flex-col overflow-hidden rounded-[16px] bg-canvas\">\n    <div className=\"flex-1 p-4 text-[12px] text-muted\">Стрічка звернення</div>\n    <ChatComposerDock composition=\"timeline-composer\">\n      <ChatComposerCore\n        value={message}\n        onChange={event => setMessage(event.target.value)}\n        placeholder=\"Написати відповідь клієнту...\"\n        leading={<Button className=\"self-center rounded-full\" style=\"ghost\" size=\"icon-sm\" icon={Paperclip} type=\"button\" aria-label=\"Додати файл\" />}\n        onSubmit={() => setMessage('')}\n        canSubmit={Boolean(message.trim())}\n      />\n    </ChatComposerDock>\n  </div>\n</div>",
+    "Розмова — власна шкала аватарів": "<div className=\"flex flex-wrap items-end gap-[20px]\">\n  {[['chat-message', 36, 'рядок повідомлення'], ['chat-member', 28, 'список учасників'],\n    ['chat-inline', 20, 'у рядку'], ['chat-mention', 18, 'згадка в тексті']].map(([token, px, role]) => (\n    <div key={token} className=\"flex flex-col items-center gap-[6px]\">\n      <UserAvatar user={demoUser} size={token} />\n      <span className=\"font-mono text-[9px] font-bold text-[#1f1f1f]\">{token}</span>\n      <span className=\"text-[9px] text-[#cfcfcf]\">{px}px · {role}</span>\n    </div>\n  ))}\n</div>",
+    "Розмова — розміри іконок у діях": "<div className=\"flex flex-col gap-[16px]\">\n  {[['chat-micro-action', 12, 'дії над повідомленням: відповісти, редагувати, видалити'],\n    ['chat-composer-cancel', 13, 'скасування в композері'],\n    ['chat-message-action', 15, 'дії в рядку: гілка, закріпити'],\n    ['chat-panel-action', 16, 'закрити панель'],\n    ['chat-composer-action', 17, 'емодзі та вкладення в композері']].map(([token, px, role]) => (\n    <div key={token} className=\"flex items-center gap-[12px]\">\n      <Button style=\"ghost\" size=\"icon-sm\" composition={token} icon={ChatIcon}>{token}</Button>\n      <span className=\"font-mono text-[10px] font-bold text-[#1f1f1f]\">{token}</span>\n      <span className=\"text-[10px] text-[#cfcfcf]\">{px}px · {role}</span>\n    </div>\n  ))}\n</div>",
+    "Розмова — роздільники дат": "<Pill tone=\"surface\" size=\"chat-day\" weight=\"medium\" uppercase>Сьогодні</Pill>\n<Pill tone=\"surface\" size=\"chat-day-wide\" uppercase>12 березня</Pill>",
     "TextAction — кнопка без коробки": "<div className=\"flex flex-col gap-[14px]\">\n  {[['ink', 'Зберегти', 'ствердна дія в парі'], ['muted', 'Скасувати', 'тиха половина пари'],\n    ['danger', 'Видалити', 'деструктивна й видима'], ['danger-quiet', 'Прибрати', 'червоніє лише під курсором']].map(([tone, label, role]) => (\n    <div key={tone} className=\"flex items-center gap-[12px]\">\n      <span className=\"w-[130px] shrink-0 font-mono text-[10px] font-bold text-ink\">{tone}</span>\n      {['xs', 'sm', 'md'].map(size => (\n        <TextAction key={size} tone={tone} size={size}>{label}</TextAction>\n      ))}\n      <span className=\"text-[10px] text-[#cfcfcf]\">{role}</span>\n    </div>\n  ))}\n  <div className=\"flex items-center gap-[12px]\">\n    <span className=\"w-[130px] shrink-0 font-mono text-[10px] font-bold text-ink\">з іконкою</span>\n    <TextAction size=\"sm\" icon={UserPlus}>Додати</TextAction>\n    <TextAction size=\"md\" icon={ChatIcon}>3 відповіді</TextAction>\n    <TextAction size=\"xs\" tone=\"danger-quiet\" icon={Trash2} label=\"Видалити повідомлення\" />\n  </div>\n</div>",
     "AvatarButton — аватар як контрол": "<AvatarButton user={demoUser} size=\"chat-message\" label=\"Переглянути профіль\" />\n<AvatarButton user={{ name: 'Олена Коваль' }} size=\"chat-member\" label=\"Переглянути профіль\" />\n<AvatarButton user={{ name: 'Петро Іванчук' }} size=\"chat-inline\" label=\"Переглянути профіль\" />",
     "MentionMenu — дві щільності": "<div className=\"grid w-full grid-cols-1 gap-[16px] md:grid-cols-2\">\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"font-mono text-[10px] font-bold text-ink\">density=&quot;composer&quot;</span>\n    <MentionMenu density=\"composer\" members={KIT_MENTION_MEMBERS} onSelect={() => {}} />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"font-mono text-[10px] font-bold text-ink\">density=&quot;timeline&quot;</span>\n    <MentionMenu density=\"timeline\" members={KIT_MENTION_MEMBERS} selectedIndex={1} onSelect={() => {}} />\n  </div>\n</div>",
     "Межа непрочитаних повідомлень": "<div className=\"w-full max-w-[560px]\">\n  <UnreadDivider />\n</div>",
     "Межа завантаженої історії": "<div className=\"w-full max-w-[560px]\">\n  <LoadOlderButton onClick={() => {}} />\n  <LoadOlderButton onClick={() => {}}>Показати давнішу історію</LoadOlderButton>\n</div>",
     "IssueMentionMenu — згадки інцидентів через #": "<div className=\"w-full max-w-[560px]\">\n  <IssueMentionMenu\n    issues={KIT_ISSUE_MENTIONS}\n    projects={[\n      { id: 'engineering', name: 'Engineering' },\n      { id: 'design', name: 'Design' },\n    ]}\n    onSelect={() => {}}\n  />\n</div>",
-    "Вкладення в чаті": "<div className=\"grid w-full grid-cols-1 gap-[16px] md:grid-cols-2\">\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"font-mono text-[10px] font-bold text-ink\">ChatAttachmentList</span>\n    <ChatAttachmentList attachments={KIT_CHAT_ATTACHMENTS} onOpen={() => {}} />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"font-mono text-[10px] font-bold text-ink\">PendingChatAttachments</span>\n    <PendingChatAttachments files={KIT_PENDING_FILES} onRemove={() => {}} />\n  </div>\n</div>",
+    "Вкладення в розмові": "<div className=\"grid w-full grid-cols-1 gap-[16px] md:grid-cols-2\">\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"font-mono text-[10px] font-bold text-ink\">ChatAttachmentList</span>\n    <ChatAttachmentList attachments={KIT_CHAT_ATTACHMENTS} onOpen={() => {}} />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"font-mono text-[10px] font-bold text-ink\">PendingChatAttachments</span>\n    <PendingChatAttachments files={KIT_PENDING_FILES} onRemove={() => {}} />\n  </div>\n</div>",
     "FileInput — невидима половина «прикріпити»": "<div className=\"flex items-center gap-[12px]\">\n  <FileInput\n    ref={fileInputRef}\n    multiple\n    onChange={event => setPickedFiles(Array.from(event.target.files || []).map(file => file.name))}\n  />\n  <Button style=\"secondary\" size=\"md\" icon={Paperclip} onClick={() => fileInputRef.current?.click()}>\n    Прикріпити файл\n  </Button>\n  <span className=\"text-[11px] text-muted\">\n    {pickedFiles.length > 0 ? pickedFiles.join(', ') : 'Нічого не вибрано'}\n  </span>\n</div>",
-    "ChatSearchBanner": "<div className=\"w-full overflow-hidden rounded-[12px] border border-line\">\n  <ChatSearchBanner query=\"онбординг\" count={3} onClear={() => {}} />\n</div>",
-    "ChannelInfoPanel": "{/* md+ only: нижче панель — `fixed inset-0`, бо на телефоні вона\n    повноекранна, а не рейка збоку. */}\n<div className=\"hidden h-[520px] w-full justify-center md:flex\">\n  <ChannelInfoPanel\n    channel={{\n      id: 'general',\n      name: 'general',\n      description: 'Загальний канал для всієї команди',\n      members: ['kit-arthur', 'kit-olena'],\n    }}\n    members={KIT_MENTION_MEMBERS}\n    messages={CHAT_DEMO_MESSAGES}\n    activeTab={panelTab}\n    onTabChange={setPanelTab}\n    isAdminOrOwner\n    onOpenAttachment={() => {}}\n    onJumpToMessage={() => {}}\n    onClose={() => {}}\n    onSaveDescription={async () => true}\n    onAddMember={async () => true}\n    onAddAllMembers={async () => true}\n    onRemoveMember={async () => true}\n  />\n</div>\n<p className=\"text-[11px] text-muted md:hidden\">\n  На вузькому екрані панель займає весь екран — превʼю показане від 768px.\n</p>",
     "Status Transition Picker — точний статус після drop": "<Button style=\"secondary\" size=\"lg\" onClick={() => setStatusPickerOpen(true)}>\n  Перенести QUI-41 в «У роботі»\n</Button>\n{statusPickerOpen ? (\n  <StatusTransitionPicker\n    isOpen\n    issue={task1}\n    project={{ id: 'ui-kit-project', name: 'QuickTeam' }}\n    categoryLabel=\"У роботі\"\n    issues={demoIssues}\n    members={demoMembers}\n    labels={demoLabels}\n    statuses={[\n      { id: 'development', label: 'Розробка', color: '#6366f1' },\n      { id: 'code-review', label: 'Код-ревʼю', color: '#a855f7' },\n      { id: 'qa', label: 'QA', color: '#f59e0b' },\n    ]}\n    onSelect={() => setStatusPickerOpen(false)}\n    onClose={() => setStatusPickerOpen(false)}\n  />\n) : null}",
     "Task Identity — ключ, батьківське завдання, проєкт": "<div className=\"flex flex-col gap-3\">\n  <TaskIdentity issue={{ issueKey: 'QT-142' }} />\n  <TaskIdentity issue={{ issueKey: 'QT-142' }} projectName=\"QuickTeam\" showProjectName />\n  <TaskIdentity\n    issue={{ issueKey: 'QT-142' }}\n    projectName=\"QuickTeam\"\n    showProjectName\n    parentIssue={{ issueKey: 'QT-100', title: 'Переробити календар' }}\n  />\n  {/* A legacy `WS-` key keeps its number and takes the project's prefix. */}\n  <TaskIdentity issue={{ issueKey: 'WS-17' }} projectName=\"QuickTeam\" showProjectName />\n  {/* No key at all — the title below it is the task's name. */}\n  <TaskIdentity issue={{}} projectName=\"QuickTeam\" showProjectName />\n  {/* «Готово»: the key is struck, the rest of the line is not. */}\n  <TaskIdentity issue={{ issueKey: 'QT-138' }} projectName=\"QuickTeam\" showProjectName done />\n</div>",
     "Task Counters — вкладення, згадки, повідомлення, крапка": "<div className=\"flex flex-col gap-3\">\n  <TaskCounters attachments={2} messages={12} />\n  <TaskCounters attachments={1} mentions={3} messages={12} unread />\n  <TaskCounters messages={4} unread size=\"sm\" />\n  <TaskCounters unread />\n</div>",
@@ -5612,9 +5183,8 @@
     "4) Заголовок + Вкладки + Дії": "<div className=\"border border-[#f0f0f0] rounded-[24px] overflow-hidden bg-white p-[24px] w-full\">\n  <PageHeader\n    title=\"Проєкти\"\n    tabs={[\n      { id: 'active', label: 'Активні' },\n      { id: 'archived', label: 'Архівні' }\n    ]}\n    activeTab={tab2}\n    onTabChange={setTab2}\n    actions={\n      <Button onClick={() => alert('Створити проєкт')} style=\"primary\" color=\"dark\" size=\"lg\" icon={Plus} collapseAt=\"sm\">Новий проєкт</Button>\n    }\n  />\n</div>",
     "Workspace Layout Shell (Сайдбар + Мейн Контент)": "<div className=\"h-[550px] rounded-[24px] overflow-hidden flex bg-[#f5f5f5] w-full p-[12px] relative\">\n  {/* Left: Sidebar wrapper with exact layout.js paddings */}\n  <div className=\"shrink-0 h-full flex pr-[6px]\">\n    <div className=\"h-full rounded-[24px] overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex bg-[#1f1f1f]\">\n      <WorkspaceSidebar />\n    </div>\n  </div>\n\n  {/* Right: Main content panel with header and child page area */}\n  <div className=\"flex-1 h-full flex flex-col pl-[6px] overflow-hidden\">\n    <div className=\"flex flex-col flex-1 bg-white rounded-[24px] overflow-hidden relative\">\n      {/* Header inside the container */}\n      <div className=\"border-b border-[#f0f0f0] bg-white z-10 shrink-0\">\n        <WorkspaceHeader />\n      </div>\n\n      {/* Main Content Area */}\n      <div className=\"flex-1 p-[24px] overflow-y-auto bg-white flex flex-col gap-4\">\n        <div className=\"h-full border-2 border-dashed border-[#f0f0f0] rounded-[16px] flex items-center justify-center bg-[#fbfbfb]\">\n          <span className=\"text-[#cfcfcf] font-bold text-[13px]\">Main Work Area (Контентна зона)</span>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>",
     "SidebarLayout context=\"settings\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-white\">\n  <SidebarLayout\n    context=\"settings\"\n    sidebar={<InnerNavigation items={NAV} activeId={active} onChange={setActive} />}\n    hasBorder={false}\n  >\n    <main className=\"flex-1 overflow-y-auto custom-scrollbar bg-canvas relative\">\n      <div className=\"max-w-[760px] mx-auto px-[16px] py-[24px] md:px-[32px] md:py-[48px] min-h-full flex flex-col\">\n        <div className=\"flex-1 pb-[100px]\">\n          <h2 className=\"text-[22px] font-bold text-ink\">Особистий профіль</h2>\n          <p className=\"mt-1 text-[13px] text-muted\">Керуйте особистими даними та налаштуваннями профілю.</p>\n          <Surface preset=\"card\" padding=\"lg\" className=\"mt-6\">\n            <div className=\"h-[180px]\" />\n          </Surface>\n        </div>\n      </div>\n    </main>\n  </SidebarLayout>\n</div>",
-    "SidebarLayout context=\"team\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-white\">\n  <SidebarLayout\n    context=\"team\"\n    mobilePane={teamPane}\n    className=\"!pt-[12px]\"\n    sidebar={(\n      <MemberRail\n        members={[\n          { id: 'arthur', name: 'Артур Моспан', positionName: 'Власник організації' },\n          { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer' },\n          { id: 'petro', name: 'Петро Іванчук', positionName: 'Designer' },\n          { id: 'anna', name: 'Анна Мельник', positionName: 'QA Engineer' },\n        ]}\n        activeId=\"arthur\"\n        action={<Button style=\"ghost\" size=\"icon-xs\" icon={Plus} className=\"hover:!bg-white\" title=\"Запросити\" />}\n      />\n    )}\n  >\n    <Surface preset=\"panel\" padding=\"sm\" className=\"flex flex-1 flex-col overflow-hidden\">\n      <div className=\"flex flex-col items-center gap-2 py-8\">\n        <UserAvatar user={demoUser} size=\"hero\" />\n        <h3 className=\"text-[18px] font-bold text-ink\">Артур Моспан</h3>\n      </div>\n      <button type=\"button\" onClick={() => setTeamPane(teamPane === 'sidebar' ? 'content' : 'sidebar')}\n        className=\"mx-auto rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted\">\n        mobilePane: {teamPane} (клац, щоб перемкнути)\n      </button>\n    </Surface>\n  </SidebarLayout>\n</div>",
-    "SidebarLayout context=\"chat\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-canvas\">\n  <SidebarLayout\n    context=\"chat\"\n    className=\"!pt-[12px]\"\n    mobilePane={chatPane}\n    sidebar={(\n      <ChannelRail\n        activeId=\"general\"\n        groups={[\n          {\n            id: 'channels',\n            label: 'Канали',\n            action: <Button style=\"ghost\" size=\"icon-xs\" icon={Plus} className=\"hover:!bg-white\" title=\"Новий канал\" />,\n            items: [\n              { id: 'general', kind: 'channel', name: 'general' },\n              { id: 'design', kind: 'channel', name: 'design', unreadCount: 3 },\n              { id: 'releases', kind: 'channel', name: 'releases' },\n            ],\n          },\n          {\n            id: 'dms',\n            label: 'Особисті',\n            items: [\n              { id: 'olena', kind: 'dm', name: 'Олена Коваль', user: { name: 'Олена Коваль' }, unreadCount: 1 },\n              { id: 'petro', kind: 'dm', name: 'Петро Іванчук', user: { name: 'Петро Іванчук' } },\n            ],\n          },\n        ]}\n      />\n    )}\n  >\n    {/* Below md the shell shows one pane, and which one is the page's\n        own state — so the catalogue carries it too, or the phone form\n        of the whole conversation could not be looked at here at all. */}\n    <div className={`${chatPane === 'sidebar' ? 'hidden' : 'flex'} md:flex flex-1 gap-3 min-w-0 overflow-hidden`}>\n      {/* Conversation pane — the product's own chrome: canvas surface,\n          64px translucent header, composer docked at the bottom. */}\n      <div className=\"relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-canvas\">\n        {/* The header and the list are the product's own components.\n            This preview used to retype both, and the copy was already\n            wrong twice over: a bare <Info> glyph where /chat has a\n            toggle, and no pinned counter at all. */}\n        <ChatConversationHeader\n          type=\"channel\"\n          title=\"general\"\n          subtitle=\"Загальний канал для всієї команди\"\n          pinnedCount={1}\n          infoLabel=\"Про канал\"\n          onBack={() => setChatPane('sidebar')}\n        />\n        {/* `canModerate` is what an owner or admin sees in a group\n            channel: a delete action on someone else's message, and no\n            edit action — an edited message would still carry its\n            author's name. Never set in a direct room. */}\n        <ChatMessageList\n          canModerate\n          messages={CHAT_DEMO_MESSAGES}\n          myUid=\"kit-arthur\"\n          members={CHAT_DEMO_MEMBERS}\n          typingUsers={['Олена Коваль']}\n          unreadCount={2}\n          hasMore\n          onLoadMore={() => {}}\n          onReact={() => {}}\n          onEdit={() => {}}\n          onDelete={() => {}}\n          onThread={() => {}}\n          onPin={() => {}}\n          onOpenAttachment={() => {}}\n        />\n        <ChatComposerDock>\n          <div className=\"relative px-4 pb-4\">\n            <ChatComposerCore variant=\"workspace\" value=\"\" onChange={() => {}} onSubmit={() => {}} placeholder=\"Написати в #general...\" canSubmit={false} />\n          </div>\n        </ChatComposerDock>\n      </div>\n      {/* Thread rail — the second pane, and the only reason chat opts\n          out of the shell drawing a single content pane. */}\n      <div data-ui-overlay=\"responsive-pane\" className=\"hidden shrink-0 flex-col overflow-hidden rounded-[16px] bg-canvas md:flex md:w-[280px]\">\n        {/* `rounded-t-*`: a bar that paints a `backdrop-filter` is not\n            clipped by its pane's rounded corners in Chromium, so it\n            filled them square — the same repair the real thread pane\n            and `ChatConversationHeader` both carry. */}\n        <div className=\"relative z-10 flex h-[56px] shrink-0 items-center justify-between rounded-t-[var(--ui-radius-surface)] border-b border-line/70 bg-canvas/90 px-5 backdrop-blur-xl\">\n          <div className=\"flex items-center gap-2\">\n            <ChatIcon size={16} className=\"text-muted\" />\n            <h3 className=\"ui-type-card-title text-ink\">Гілка</h3>\n          </div>\n          <IconAction label=\"Закрити гілку\" icon={X} size=\"md\" appearance=\"quiet\" composition=\"chat-panel-action\" />\n        </div>\n      </div>\n    </div>\n  </SidebarLayout>\n</div>\n<button type=\"button\" onClick={() => setChatPane(chatPane === 'sidebar' ? 'content' : 'sidebar')}\n  className=\"mx-auto mt-[12px] block rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted\">\n  mobilePane: {chatPane} (клац, щоб перемкнути)\n</button>",
-    "Шлях назад — стрілка в заголовку": "<div className=\"flex flex-col gap-[12px]\">\n  <div className=\"flex items-center gap-4 rounded-[12px] bg-white p-[16px] [&_button]:!flex\">\n    <span className=\"font-mono text-[10px] font-bold text-faint\">pane</span>\n    <MobilePaneBack label=\"До списку команди\" onClick={() => {}} />\n    <MobilePaneBack label=\"Всі налаштування\" onClick={() => {}} />\n    <MobilePaneBack label=\"До списку чатів\" onClick={() => {}} />\n  </div>\n  <div className=\"flex items-center gap-4 rounded-[12px] bg-white p-[16px]\">\n    <span className=\"font-mono text-[10px] font-bold text-faint\">level</span>\n    <MobilePaneBack context=\"level\" label=\"Усі інтеграції\" onClick={() => {}} />\n    <MobilePaneBack context=\"level\" label=\"Усі джерела\" onClick={() => {}} />\n  </div>\n</div>",
+    "SidebarLayout context=\"team\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-white\">\n  <SidebarLayout\n    context=\"team\"\n    mobilePane={teamPane}\n    className=\"!pt-[12px]\"\n    sidebar={(\n      <MemberRail\n        members={[\n          { id: 'arthur', name: 'Артур Моспан', positionName: 'Власник організації', online: true },\n          { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer', online: true },\n          { id: 'petro', name: 'Петро Іванчук', positionName: 'Designer' },\n          { id: 'anna', name: 'Анна Мельник', positionName: 'QA Engineer' },\n        ]}\n        activeId=\"arthur\"\n        action={<Button style=\"ghost\" size=\"icon-xs\" icon={Plus} className=\"hover:!bg-white\" title=\"Запросити\" />}\n      />\n    )}\n  >\n    <Surface preset=\"panel\" padding=\"sm\" className=\"flex flex-1 flex-col overflow-hidden\">\n      <div className=\"flex flex-col items-center gap-2 py-8\">\n        <UserAvatar user={demoUser} size=\"hero\" />\n        <h3 className=\"text-[18px] font-bold text-ink\">Артур Моспан</h3>\n        <StatusPill label=\"Онлайн\" tone=\"success\" />\n      </div>\n      <button type=\"button\" onClick={() => setTeamPane(teamPane === 'sidebar' ? 'content' : 'sidebar')}\n        className=\"mx-auto rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted\">\n        mobilePane: {teamPane} (клац, щоб перемкнути)\n      </button>\n    </Surface>\n  </SidebarLayout>\n</div>",
+    "Шлях назад — стрілка в заголовку": "<div className=\"flex flex-col gap-[12px]\">\n  <div className=\"flex items-center gap-4 rounded-[12px] bg-white p-[16px] [&_button]:!flex\">\n    <span className=\"font-mono text-[10px] font-bold text-faint\">pane</span>\n    <MobilePaneBack label=\"До списку команди\" onClick={() => {}} />\n    <MobilePaneBack label=\"Всі налаштування\" onClick={() => {}} />\n    <MobilePaneBack label=\"До списку звернень\" onClick={() => {}} />\n  </div>\n  <div className=\"flex items-center gap-4 rounded-[12px] bg-white p-[16px]\">\n    <span className=\"font-mono text-[10px] font-bold text-faint\">level</span>\n    <MobilePaneBack context=\"level\" label=\"Усі інтеграції\" onClick={() => {}} />\n    <MobilePaneBack context=\"level\" label=\"Усі джерела\" onClick={() => {}} />\n  </div>\n</div>",
     "DetailLayout context=\"event\"": "<div className=\"h-[320px] overflow-hidden rounded-[12px] border border-line bg-white\">\n  <DetailLayout\n    context=\"event\"\n    standalone={false}\n    header={(\n      <div className=\"pb-[12px] pt-[12px]\">\n        <h1 className=\"ui-type-page-title leading-tight tracking-tight text-ink\">Планерка команди</h1>\n        <p className=\"mt-1 text-[12px] font-medium text-muted\">Організатор: Артур Моспан · створили сьогодні</p>\n      </div>\n    )}\n    attributes={(\n      <div className=\"flex flex-wrap items-center gap-2 rounded-[12px] bg-canvas px-3 py-2\">\n        <Pill tone=\"neutral\" size=\"md\">14:00–15:00</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Мітинг</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Уся команда</Pill>\n      </div>\n    )}\n  >\n    <DetailSection icon={AlignLeft} title=\"Опис\">\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface text-[13px] leading-relaxed text-ink\">\n        Порядок денний, рішення й наступні кроки.\n      </div>\n    </DetailSection>\n    <DetailSection icon={MapPin} title=\"Місце\">\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface text-[13px] text-ink\">\n        Кімната 2\n      </div>\n    </DetailSection>\n    <DetailSection icon={Users} title=\"Учасники\" count={2}>\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface flex flex-wrap gap-2\">\n        <Pill tone=\"surface-ink\" size=\"lg\" weight=\"medium\">\n          <UserAvatar user={demoUser} size=\"xs\" />\n          <span className=\"font-semibold\">Артур Моспан</span>\n        </Pill>\n      </div>\n    </DetailSection>\n  </DetailLayout>\n</div>",
     "DetailLayout context=\"task\"": "<div className=\"h-[320px] overflow-hidden rounded-[12px] border border-line bg-white\">\n  <DetailLayout\n    context=\"task\"\n    standalone={false}\n    header={(\n      <div className=\"pb-[12px] pt-[12px]\">\n        <h1 className=\"ui-type-page-title leading-tight tracking-tight text-ink\">Переробити онбординг</h1>\n        <p className=\"mt-1 text-[12px] font-medium text-muted\">Автор: Артур Моспан · оновили щойно</p>\n      </div>\n    )}\n    attributes={(\n      <div className=\"flex flex-wrap items-center gap-2 rounded-[12px] bg-canvas px-3 py-2\">\n        <Pill tone=\"neutral\" size=\"md\">У роботі</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Артур</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Спринт 12</Pill>\n      </div>\n    )}\n    aside={(\n      <div className=\"flex h-full flex-col items-center justify-center rounded-[16px] bg-canvas text-[11px] font-semibold text-muted\">\n        Чат задачі\n      </div>\n    )}\n  >\n    <DetailSection icon={AlignLeft} title=\"Опис\">\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface flex flex-col gap-4\">\n        <p className=\"text-[13px] leading-relaxed text-ink\">Перший екран лишаємо, другий переробляємо.</p>\n        <DetailSection density=\"group\" icon={Paperclip} title=\"Вкладення\" count={2}>\n          <p className=\"text-[12px] text-muted\">Список файлів</p>\n        </DetailSection>\n        <DetailSection density=\"group\" icon={TaskIcon} title=\"Підзавдання\" count={3} meta=\"1/3 · 2 ще в роботі\">\n          <p className=\"text-[12px] text-muted\">Рядки підзавдань</p>\n        </DetailSection>\n        <DetailSection density=\"group\" icon={Link2} title=\"Зв’язки\" count={1}>\n          <p className=\"text-[12px] text-muted\">Рядки зв’язків</p>\n        </DetailSection>\n      </div>\n    </DetailSection>\n  </DetailLayout>\n</div>"
   }

@@ -8,7 +8,6 @@ import {
   inviteLinkUsable,
   inviteTokenLooksWellFormed,
 } from '@/lib/server/inviteLinks.mjs';
-import { seedChatReadState } from '@/lib/server/chatReadState';
 import { MEMBERSHIP_ARCHIVE } from '@/lib/utils/orgMembership.mjs';
 import { hasActiveQuickTeamEntitlement } from '@/lib/utils/quickTeamManaged.mjs';
 
@@ -136,14 +135,6 @@ export async function POST(request) {
     });
 
     if (result.error) return INVALID();
-
-    // Місце в кімнаті видається разом із курсором прочитаного — так само, як у
-    // /api/invitations/accept. Хто вже був учасником, свої курсори має, і
-    // перезаписувати їх означало б стерти непрочитане людині, яка просто
-    // відкрила посилання вдруге.
-    if (!result.alreadyMember) {
-      await seedChatReadState(db, result.organizationId, uid);
-    }
 
     return NextResponse.json({
       organizationId: result.organizationId,

@@ -3,10 +3,10 @@
 // src/components/WorkspaceDocumentTitle.jsx
 // The single owner of document.title inside the authenticated workspace.
 //
-// It reads the route, the breadcrumb trail and the unread chat count — all
-// already in the store — and writes one string. Nothing else in the app touches
-// document.title, which is what lets the unread badge and the page name coexist
-// instead of overwriting each other.
+// It reads the route, the breadcrumb trail and the organization's unread count
+// — all already in the store — and writes one string. Nothing else in the app
+// touches document.title, which is what lets the unread badge and the page name
+// coexist instead of overwriting each other.
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
@@ -21,9 +21,12 @@ const BLINK_MS = 1400;
 
 export default function WorkspaceDocumentTitle() {
   const pathname = usePathname();
-  const { projects, activeOrg, orgRole } = useAppContext();
+  const { projects, activeOrg, activeOrgId, orgRole } = useAppContext();
   const breadcrumbs = useWorkspaceStore(state => state.breadcrumbs);
-  const unread = useWorkspaceStore(state => state.unreadChatCount);
+  // The bell's own number for the organization on screen, published once by
+  // `WorkspaceNotificationBridge`. It is the only unread the product has left:
+  // the workspace messenger that used to own this badge is gone.
+  const unread = useWorkspaceStore(state => state.notificationUnreadByOrg[activeOrgId] || 0);
 
   const clientPortal = isClientRole(orgRole);
   const portalBrand = resolveOrganizationPortalBrand(activeOrg);

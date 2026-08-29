@@ -80,10 +80,6 @@ beforeEach(async () => {
     await setDoc(doc(db, 'issues', 'issue-a', 'comments', 'owner-comment'), {
       authorId: 'owner-a', text: 'Owner comment',
     });
-    await setDoc(doc(db, 'organizations', 'org-a', 'channels', 'general'), { name: 'general', type: 'public' });
-    await setDoc(doc(db, 'organizations', 'org-a', 'channels', 'general', 'messages', 'owner-message'), {
-      senderId: 'owner-a', text: 'Original', reactions: {}, replyCount: 0,
-    });
     // The two shapes an invitation comes in: an address somebody typed, and a
     // link whose token is the whole credential.
     await setDoc(doc(db, 'invitations', 'pending-email'), {
@@ -113,43 +109,6 @@ beforeEach(async () => {
 after(async () => {
   await environment?.cleanup();
 });
-
-// ── Direct-message fixtures ─────────────────────────────────────────────
-// DM rooms live in the org-wide channels collection, so without an explicit
-// gate every member could read every conversation by reconstructing the
-// deterministic room id. Membership is proven from the id itself, which only
-// works for real Firebase uids (28 alphanumeric chars).
-const DM_A = 'Aa1bb2cc3dd4ee5ff6gg7hh8ii9j';
-const DM_B = 'Zz9yy8xx7ww6vv5uu4tt3ss2rr1q';
-const DM_C = 'Mm5nn4oo3pp2qq1rr0ss9tt8uu7v';
-const DM_ROOM = `${DM_A}_${DM_B}`;
-
-async function seedDirectRoomMembers() {
-  await environment.withSecurityRulesDisabled(async context => {
-    const db = context.firestore();
-    for (const uid of [DM_A, DM_B, DM_C]) {
-      await setDoc(doc(db, 'orgMemberships', `org-a_${uid}`), {
-        id: `org-a_${uid}`, orgId: 'org-a', userId: uid, role: 'member',
-      });
-    }
-  });
-}
-
-async function seedDirectRoom() {
-  await seedDirectRoomMembers();
-  await environment.withSecurityRulesDisabled(async context => {
-    const db = context.firestore();
-    await setDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM), {
-      name: 'DM', type: 'dm', participants: [DM_A, DM_B], messageCount: 1,
-    });
-    await setDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1'), {
-      senderId: DM_A, text: 'секрет',
-    });
-    await setDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1', 'replies', 'r1'), {
-      senderId: DM_B, text: 'теж секрет',
-    });
-  });
-}
 
 test('a browser cannot create an organization or seat itself in one', async () => {
   // The signed QuickTeam provisioning route is the only tenant bootstrap.
@@ -385,9 +344,10 @@ test('the issue trash is server-only, including for organization admins', async 
 
 // The list is shorter than it was, and deliberately. `spentMinutes`, its two
 // mirror counters and `timeLogMutationVersion` were named here because the
-// server owned them; the product no longer has time logs, and `timeLogs` no
-// longer has a rule of its own — an unmatched path denies by default, so there
-// is nothing left to assert about it that the default does not already say.
+// server owned them; the product no longer has time logs, so the fields are not
+// server-owned any more — they are simply not fields. The rule denies a fixed
+// list of keys, so an unlisted name is writable exactly the way `title` is, and
+// asserting a denial for a key nothing reads would be testing a typo.
 test('issue execution fields can only be changed by the authoritative status API', async () => {
   const memberDb = environment.authenticatedContext('member-a').firestore();
   const issueRef = doc(memberDb, 'issues', 'issue-a');
@@ -443,13 +403,44 @@ test('qTicket clients read their project and write its conversation, but cannot 
     await assertSucceeds(setDoc(doc(db, 'issues', 'issue-a', 'comments', `${uid}-comment`), {
       authorId: uid,
       text: 'Client reply',
-      visibility: 'public',
     }));
-    await assertFails(setDoc(doc(db, 'issues', 'issue-a', 'comments', `${uid}-fake-note`), {
-      authorId: uid,
-      text: 'Pretend this is private',
-      visibility: 'internal',
+    // Somebody else's message is still somebody else's.
+    await assertFails(setDoc(doc(db, 'issues', 'issue-a', 'comments', `${uid}-forged`), {
+      authorId: 'member-a',
+      text: 'Signed with a name that is not mine',
     }));
+  }
+});
+
+// The owner's rule, in the only place that can enforce it: everything support
+// writes in an incident, the client reads. There is no staff-only half of the
+// conversation to be kept from them — the collection that held one is deleted,
+// and a comment carries no visibility flag to hide behind.
+test('a client reads every message on an incident they can reach', async () => {
+  for (const uid of ['client-admin-a', 'client-member-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    // Written by support, before this client ever opened the incident.
+    await assertSucceeds(getDoc(doc(db, 'issues', 'issue-a', 'comments', 'member-comment')));
+    await assertSucceeds(getDoc(doc(db, 'issues', 'issue-a', 'comments', 'owner-comment')));
+    await assertSucceeds(getDocs(collection(db, 'issues', 'issue-a', 'comments')));
+  }
+});
+
+// What stays support-side, and the reason it is not the conversation: the
+// change history is the work record — who reassigned the incident, who moved
+// it — and the customer is shown the current status instead.
+test('the change history beside the conversation stays support-side', async () => {
+  const memberDb = environment.authenticatedContext('member-a').firestore();
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'audit', 'reassigned'), {
+      userId: 'member-a', action: 'assignee_changed',
+    });
+  });
+  await assertSucceeds(getDoc(doc(memberDb, 'issues', 'issue-a', 'audit', 'reassigned')));
+  for (const uid of ['client-admin-a', 'client-member-a']) {
+    const clientDb = environment.authenticatedContext(uid).firestore();
+    await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'reassigned')));
+    await assertFails(getDocs(collection(clientDb, 'issues', 'issue-a', 'audit')));
   }
 });
 
@@ -472,7 +463,6 @@ function clientReplyDocument(uid) {
     authorAvatar: null,
     text: CLIENT_REPLY_TEXT,
     attachments: [],
-    visibility: 'public',
     issueMentions: [],
     readBy: [uid],
     replyTo: null,
@@ -526,7 +516,6 @@ test('a reply is not a way to move an incident: one workflow field refuses the w
     { columnId: 'done' },
     { archivedAt: Timestamp.fromDate(new Date()) },
     { cancelledAt: Timestamp.fromDate(new Date()) },
-    { spentMinutes: 0 },
     { assigneeIds: ['client-admin-a'] },
     { priority: 'urgent' },
     { labelIds: ['vip'] },
@@ -551,7 +540,7 @@ test('a client removes their own message and marks a staff reply read, both the 
   const db = environment.authenticatedContext(uid).firestore();
   await environment.withSecurityRulesDisabled(async context => {
     await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'comments', 'client-own-reply'), {
-      authorId: uid, text: 'Написав зайве', visibility: 'public', createdAt: new Date(),
+      authorId: uid, text: 'Написав зайве', createdAt: new Date(),
     });
     await updateDoc(doc(context.firestore(), 'issues', 'issue-a'), { commentCount: 3 });
   });
@@ -579,40 +568,24 @@ test('a client removes their own message and marks a staff reply read, both the 
   await assertSucceeds(batch.commit());
 });
 
-test('internal incident notes are staff-only and cannot leak through public comments', async () => {
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  const ownerDb = environment.authenticatedContext('owner-a').firestore();
-  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
-  const notePath = ['issues', 'issue-a', 'internalNotes', 'staff-note'];
-
-  await assertSucceeds(setDoc(doc(memberDb, ...notePath), {
-    authorId: 'member-a',
-    text: 'Escalate this incident internally',
-    visibility: 'internal',
-  }));
-  await assertSucceeds(getDoc(doc(memberDb, ...notePath)));
-  await assertSucceeds(getDoc(doc(ownerDb, ...notePath)));
-  await assertFails(getDoc(doc(clientDb, ...notePath)));
-  await assertFails(getDocs(collection(clientDb, 'issues', 'issue-a', 'internalNotes')));
-  await assertFails(setDoc(doc(clientDb, 'issues', 'issue-a', 'internalNotes', 'client-note'), {
-    authorId: 'client-admin-a',
-    text: 'Client-authored private note',
-    visibility: 'internal',
-  }));
-  await assertFails(setDoc(doc(memberDb, 'issues', 'issue-a', 'comments', 'leaked-note'), {
-    authorId: 'member-a',
-    text: 'Wrong collection',
-    visibility: 'internal',
-  }));
-});
-
-test('qTicket clients cannot enter organization chat or another client project', async () => {
+// The organization chat is not gated any more, it is gone: there is no
+// `channels` collection, no rule for one, and therefore nothing there for any
+// role to reach. What still has to hold is the tenancy line between one client
+// and another.
+test('a client cannot reach another client project, and no chat room exists to reach', async () => {
   const clientDb = environment.authenticatedContext('client-member-a').firestore();
   const otherClientDb = environment.authenticatedContext('client-other').firestore();
-  await assertFails(getDoc(doc(clientDb, 'organizations', 'org-a', 'channels', 'general')));
-  await assertFails(getDoc(doc(clientDb, 'organizations', 'org-a', 'channels', 'general', 'messages', 'owner-message')));
+  const memberDb = environment.authenticatedContext('member-a').firestore();
   await assertFails(getDoc(doc(otherClientDb, 'projects', 'project-a')));
   await assertFails(getDoc(doc(otherClientDb, 'issues', 'issue-a')));
+  // Denied to everybody, staff included — the default rule, because no rule
+  // names this path any more.
+  for (const db of [clientDb, memberDb]) {
+    await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'channels', 'general')));
+    await assertFails(setDoc(doc(db, 'organizations', 'org-a', 'channels', 'general'), {
+      name: 'general', type: 'public',
+    }));
+  }
 });
 
 test('authors can delete their own comments but not another authors comments', async () => {
@@ -684,30 +657,6 @@ test('an admin removes a comment they did not write, but cannot rewrite it', asy
   await assertSucceeds(deleteDoc(commentRef(adminDb)));
 });
 
-test('an admin removes a channel message they did not send, but not one in a DM', async () => {
-  const adminDb = environment.authenticatedContext('admin-a').firestore();
-  const otherMemberDb = environment.authenticatedContext('member-offteam').firestore();
-  const channelMessage = db => doc(
-    db, 'organizations', 'org-a', 'channels', 'general', 'messages', 'moderated-message',
-  );
-  const directMessage = db => doc(
-    db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1',
-  );
-  await seedDirectRoom();
-  await environment.withSecurityRulesDisabled(async context => {
-    await setDoc(channelMessage(context.firestore()), {
-      senderId: 'member-a', text: 'Off-topic', reactions: {}, replyCount: 0,
-    });
-  });
-
-  // Another member of the organization is not a moderator.
-  await assertFails(deleteDoc(channelMessage(otherMemberDb)));
-  await assertSucceeds(deleteDoc(channelMessage(adminDb)));
-  // A direct room is not readable by an administrator, so it is not moderatable
-  // either — moderation must never become a way into a private conversation.
-  await assertFails(deleteDoc(directMessage(adminDb)));
-});
-
 test('issue audit history is staff-only and clients cannot forge entries', async () => {
   const clientDb = environment.authenticatedContext('client-admin-a').firestore();
   const memberDb = environment.authenticatedContext('member-a').firestore();
@@ -730,6 +679,10 @@ test('issue audit history is staff-only and clients cannot forge entries', async
   await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'member-audit')));
 });
 
+// A summary of hours you may not see is still those hours. The daily totals
+// repeat the raw log's rule rather than relaxing it, and nothing in a browser
+// may write one — they are derived by server transactions and rebuilt by
+// scripts/backfill-analytics-rollups.mjs.
 test('notifications can only be created by the server API', async () => {
   const db = environment.authenticatedContext('member-a').firestore();
   await assertFails(setDoc(doc(db, 'notifications', 'same-org'), {
@@ -762,64 +715,6 @@ test('user profiles are private even between organization members', async () => 
   const memberDb = environment.authenticatedContext('member-a').firestore();
   await assertSucceeds(getDoc(doc(memberDb, 'users', 'member-a')));
   await assertFails(getDoc(doc(memberDb, 'users', 'owner-a')));
-});
-
-test('chat members cannot edit another author message', async () => {
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  const ownerDb = environment.authenticatedContext('owner-a').firestore();
-  const memberMessage = doc(memberDb, 'organizations', 'org-a', 'channels', 'general', 'messages', 'owner-message');
-  await assertFails(updateDoc(memberMessage, { text: 'Forged' }));
-  await assertSucceeds(updateDoc(memberMessage, { reactions: { '👍': ['member-a'] } }));
-  await assertSucceeds(updateDoc(memberMessage, { isPinned: true }));
-  await assertSucceeds(updateDoc(
-    doc(ownerDb, 'organizations', 'org-a', 'channels', 'general', 'messages', 'owner-message'),
-    { text: 'Edited by owner' },
-  ));
-  await assertFails(setDoc(doc(memberDb, 'organizations', 'org-a', 'channels', 'unauthorized'), {
-    name: 'unauthorized', type: 'public',
-  }));
-});
-
-test('chat send metadata supports unread counts without opening channel settings', async () => {
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  const channel = doc(memberDb, 'organizations', 'org-a', 'channels', 'general');
-
-  await assertSucceeds(updateDoc(channel, {
-    lastMessageAt: new Date(),
-    lastMessageText: 'Hello',
-    lastMessageSender: 'Member',
-    lastMessageSenderId: 'member-a',
-    messageCount: 1,
-  }));
-  await assertFails(updateDoc(channel, { description: 'Bypass settings permission' }));
-});
-
-test('a member can send a DM using only the metadata the rules allow', async () => {
-  await seedDirectRoomMembers();
-  const memberDb = environment.authenticatedContext(DM_A).firestore();
-  const channel = doc(memberDb, 'organizations', 'org-a', 'channels', DM_ROOM);
-
-  await assertSucceeds(setDoc(channel, { name: 'DM', type: 'dm', participants: [DM_A, DM_B] }));
-  await assertSucceeds(updateDoc(channel, {
-    lastMessageAt: new Date(),
-    lastMessageSenderId: DM_A,
-    messageCount: 1,
-  }));
-  await assertSucceeds(setDoc(
-    doc(memberDb, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'message-a'),
-    { senderId: DM_A, text: 'Hello' },
-  ));
-  await assertSucceeds(setDoc(
-    doc(memberDb, 'organizations', 'org-a', 'activeDMs', DM_B),
-    { partners: [DM_A] },
-  ));
-
-  // Message text belongs under messages/, never on the org-enumerable room doc.
-  await assertFails(updateDoc(channel, { lastMessageText: 'Hello' }));
-  await assertFails(setDoc(
-    doc(memberDb, 'organizations', 'org-a', 'activeDMs', DM_A),
-    { partners: [DM_B] },
-  ));
 });
 
 test('organization bootstrap is a server route, not a rule', async () => {
@@ -896,14 +791,9 @@ test('the two reads the dashboard has left are allowed, and stay scoped', async 
 
 test('deletion markers freeze nested writes before non-atomic cascades', async () => {
   const memberDb = environment.authenticatedContext('member-a').firestore();
-  const messageRef = doc(memberDb, 'projects', 'project-a', 'messages', 'member-message');
   const commentRef = doc(memberDb, 'issues', 'issue-a', 'comments', 'pending-comment');
   const auditRef = doc(memberDb, 'issues', 'issue-a', 'audit', 'pending-audit');
 
-  await assertSucceeds(setDoc(messageRef, {
-    senderId: 'member-a',
-    text: 'Before deletion',
-  }));
   await assertSucceeds(setDoc(commentRef, {
     authorId: 'member-a',
     text: 'Before deletion',
@@ -919,18 +809,6 @@ test('deletion markers freeze nested writes before non-atomic cascades', async (
     });
   });
 
-  await assertFails(setDoc(doc(
-    memberDb,
-    'projects',
-    'project-a',
-    'messages',
-    'late-message',
-  ), {
-    senderId: 'member-a',
-    text: 'Too late',
-  }));
-  await assertFails(updateDoc(messageRef, { text: 'Too late' }));
-  await assertFails(deleteDoc(messageRef));
   await assertFails(setDoc(doc(
     memberDb,
     'issues',
@@ -1121,10 +999,6 @@ test('project-scoped data follows live team membership while admins retain acces
       status: 'active',
       team: ['member-a'],
     });
-    await setDoc(doc(db, 'projects', 'scoped-project', 'messages', 'message-a'), {
-      senderId: 'member-a',
-      text: 'Scoped message',
-    });
     await setDoc(doc(db, 'issues', 'scoped-issue'), {
       organizationId: 'org-a',
       projectId: 'scoped-project',
@@ -1157,7 +1031,6 @@ test('project-scoped data follows live team membership while admins retain acces
   const commentRef = db => doc(db, 'issues', 'scoped-issue', 'comments', 'comment-a');
   const auditRef = db => doc(db, 'issues', 'scoped-issue', 'audit', 'audit-a');
   const linkRef = db => doc(db, 'issueLinks', 'scoped-link');
-  const messageRef = db => doc(db, 'projects', 'scoped-project', 'messages', 'message-a');
 
   await assertFails(getDoc(issueRef(offTeamDb)));
   await assertFails(getDocs(query(
@@ -1169,11 +1042,6 @@ test('project-scoped data follows live team membership while admins retain acces
   await assertFails(getDoc(commentRef(offTeamDb)));
   await assertFails(getDoc(auditRef(offTeamDb)));
   await assertFails(getDoc(linkRef(offTeamDb)));
-  await assertFails(getDoc(messageRef(offTeamDb)));
-  await assertFails(setDoc(
-    doc(offTeamDb, 'projects', 'scoped-project', 'messages', 'message-b'),
-    { senderId: 'member-offteam', text: 'Forbidden' },
-  ));
 
   await assertSucceeds(getDoc(issueRef(teamDb)));
   await assertSucceeds(getDocs(query(
@@ -1185,7 +1053,6 @@ test('project-scoped data follows live team membership while admins retain acces
   await assertSucceeds(getDoc(commentRef(teamDb)));
   await assertSucceeds(getDoc(auditRef(teamDb)));
   await assertSucceeds(getDoc(linkRef(teamDb)));
-  await assertSucceeds(getDoc(messageRef(teamDb)));
   await assertSucceeds(getDoc(issueRef(adminDb)));
   await assertSucceeds(getDoc(issueRef(ownerDb)));
 });
@@ -1312,125 +1179,24 @@ test('an outsider cannot read an org settings document', async () => {
   await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'settings', 'general')));
 });
 
-test('a DM participant reads their own room and its messages', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext(DM_A).firestore();
-  await assertSucceeds(getDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM)));
-  await assertSucceeds(getDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1')));
-});
+// «Друкує…» in the one conversation the product has. The heartbeat lives on a
+// document of its own rather than on the incident, because every board and card
+// that shows the incident is subscribed to it and would pay a read for each
+// beat — and the document holds nothing but the two fields, which is what the
+// key check enforces.
+test('anyone in the conversation may say they are typing, and write nothing else there', async () => {
+  const typingRef = db => doc(db, 'issues', 'issue-a', 'presence', 'typing');
 
-test('another org member cannot read someone else\'s DM room or its messages', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM)));
-  await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1')));
-  await assertFails(getDocs(collection(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages')));
-  await assertFails(getDocs(collection(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1', 'replies')));
-});
+  for (const uid of ['member-a', 'client-member-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertSucceeds(setDoc(typingRef(db), { typing: [uid], typingAt: { [uid]: 1 } }));
+    await assertSucceeds(getDoc(typingRef(db)));
+    await assertFails(setDoc(typingRef(db), { typing: [uid], text: 'not a heartbeat' }));
+  }
 
-// Documented residual exposure: a query cannot be gated per document because
-// the {channelId} wildcard is unbound during `list`, so the room documents
-// themselves stay enumerable. That is only safe while they carry no message
-// text — this test pins the invariant that keeps it safe.
-test('DM room documents never carry a message preview', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext(DM_A).firestore();
-  await assertSucceeds(setDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM), {
-    lastMessageAt: new Date(), lastMessageSenderId: DM_A, messageCount: 2,
-  }, { merge: true }));
-  // Writing content onto the enumerable room document is rejected.
-  await assertFails(setDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM), {
-    lastMessageText: 'секрет',
-  }, { merge: true }));
-});
-
-// A room written by the OLD client already holds a preview. Rejecting every
-// write whose *result* still contains it would lock those rooms up entirely —
-// including the typing heartbeat — the moment these rules ship.
-test('a legacy DM room carrying an old preview is not bricked by the new rule', async () => {
-  await seedDirectRoomMembers();
-  await environment.withSecurityRulesDisabled(async context => {
-    await setDoc(doc(context.firestore(), 'organizations', 'org-a', 'channels', DM_ROOM), {
-      name: 'DM', type: 'dm', messageCount: 3,
-      lastMessageText: 'написано старим клієнтом', lastMessageSender: 'Хтось',
-    });
-  });
-  const db = environment.authenticatedContext(DM_A).firestore();
-  const room = doc(db, 'organizations', 'org-a', 'channels', DM_ROOM);
-
-  // Writes that leave the inherited field alone still go through.
-  await assertSucceeds(updateDoc(room, { typing: [DM_A], typingAt: { [DM_A]: 1 } }));
-  // And the client can purge the inherited preview.
-  await assertSucceeds(updateDoc(room, {
-    lastMessageAt: new Date(),
-    lastMessageSenderId: DM_A,
-    lastMessageText: deleteField(),
-    lastMessageSender: deleteField(),
-  }));
-  // Once purged, re-introducing content is refused.
-  await assertFails(updateDoc(room, { lastMessageText: 'знову секрет' }));
-});
-
-test('an org admin cannot read a DM they are not part of', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext('admin-a').firestore();
-  await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM)));
-  await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM, 'messages', 'm1')));
-  await assertFails(deleteDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM)));
-});
-
-test('channel listing still works for members', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext('member-a').firestore();
-  const channels = collection(db, 'organizations', 'org-a', 'channels');
-  await assertSucceeds(getDocs(query(channels)));
-  await assertSucceeds(getDocs(query(channels, where('type', '==', 'public'))));
-});
-
-test('a DM room cannot be created for a pair the caller is not in', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertFails(setDoc(doc(db, 'organizations', 'org-a', 'channels', `${DM_A}_${DM_C}`), {
-    name: 'DM', type: 'dm', participants: [DM_A, DM_C],
-  }));
-});
-
-test('participants can never name anyone outside the pair encoded in the room id', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext(DM_A).firestore();
-  await assertFails(updateDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM), {
-    participants: [DM_A, DM_B, 'member-a'],
-  }));
-  await assertSucceeds(updateDoc(doc(db, 'organizations', 'org-a', 'channels', DM_ROOM), {
-    participants: [DM_A, DM_B],
-  }));
-});
-
-test('a member still reads and posts in public channels', async () => {
-  await seedDirectRoom();
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertSucceeds(getDoc(doc(db, 'organizations', 'org-a', 'channels', 'general')));
-  await assertSucceeds(getDocs(collection(db, 'organizations', 'org-a', 'channels', 'general', 'messages')));
-  await assertSucceeds(setDoc(doc(db, 'organizations', 'org-a', 'channels', 'general', 'messages', 'new'), {
-    senderId: 'member-a', text: 'привіт',
-  }));
-});
-
-test('legacy project_* and numeric rooms are not mistaken for DM rooms', async () => {
-  await environment.withSecurityRulesDisabled(async context => {
-    const db = context.firestore();
-    await setDoc(doc(db, 'organizations', 'org-a', 'channels', 'project_alpha'), {
-      name: 'project alpha', type: 'public',
-    });
-  });
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertSucceeds(getDoc(doc(db, 'organizations', 'org-a', 'channels', 'project_alpha')));
-});
-
-test('a member may refresh the typing heartbeat but not rewrite a channel', async () => {
-  const db = environment.authenticatedContext('member-a').firestore();
-  const channel = doc(db, 'organizations', 'org-a', 'channels', 'general');
-  await assertSucceeds(updateDoc(channel, { typing: ['member-a'], typingAt: { 'member-a': 1 } }));
-  await assertFails(updateDoc(channel, { name: 'hijacked' }));
+  // Somebody with no access to the project has no conversation to be typing in.
+  const offTeamDb = environment.authenticatedContext('client-other').firestore();
+  await assertFails(getDoc(typingRef(offTeamDb)));
+  await assertFails(setDoc(typingRef(offTeamDb), { typing: ['client-other'], typingAt: {} }));
 });
 

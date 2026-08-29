@@ -50,7 +50,6 @@ const TYPE_CFG = {
   status_changed: { icon: GitPullRequest, color: '#10b981' },
   mentioned:      { icon: AtSign,         color: '#f97316' },
   deadline:       { icon: CalendarClock,  color: '#d97706' },
-  chat_message:   { icon: ChatIcon,       color: '#525252' },
   alert:          { icon: AlertCircle,    color: '#dc2626' },
   emergency:      { icon: Zap,            color: '#dc2626' },
   calendar_invite:{ icon: CalendarClock,  color: '#2563eb' },
@@ -86,7 +85,7 @@ function NotifIcon({ n, size = 28 }) {
   const Icon = cfg.icon;
   // The face, on its own. There used to be a type badge stuck to the corner of
   // it, and the badge could not do the job it was there for: twelve types share
-  // far fewer glyphs — a comment and a chat message carry the same one, and a
+  // far fewer glyphs — a comment and a mention carry the same one, and a
   // deadline, an invitation and a reminder carry the same calendar — so the
   // only thing separating them was an 18px disc of colour, two of which are
   // near-identical darks. It answered «one of the calendar three», and stopped.
@@ -128,7 +127,7 @@ function CalendarResponseActions({
 
 function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
   const EXCLUDED = [
-    'overview', 'clients', 'my', 'team', 'calendar', 'chat',
+    'overview', 'clients', 'my', 'team', 'calendar',
     'settings', 'errors', 'help', 'news',
   ];
 
@@ -186,7 +185,7 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
   return { mode: 'search', project: null };
 }
 
-export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
+export function WorkspaceHeaderRight({ currentUser, signOut }) {
   const router = useRouter();
   const { activeOrgId, allOrgs, orgRole } = useAppContext();
   // Only a client account has a notification panel to open. Staff preferences
@@ -512,8 +511,7 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
     <>
       <div className="ml-2 flex shrink-0 items-center gap-[6px] z-50 sm:ml-4">
         {/* ── Bell ──────────────────────── */}
-        {mode !== 'chat' && (
-          <div className="relative" ref={bellRef}>
+        <div className="relative" ref={bellRef}>
             <NotificationBell
               unreadCount={unreadCount}
               hasEmergency={hasEmergency}
@@ -587,7 +585,6 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
             document.body,
           )}
         </div>
-        )}
 
         {/* ── User avatar ───────────────── */}
         <div ref={userRef}>
@@ -648,8 +645,6 @@ export default function WorkspaceHeader() {
   const { members: organizationMembers } = useOrganization();
 
   const breadcrumbs    = useWorkspaceStore(s => s.breadcrumbs);
-  const chatSearch     = useWorkspaceStore(s => s.chatSearch);
-  const setChatSearch  = useWorkspaceStore(s => s.setChatSearch);
   const teamSearch     = useWorkspaceStore(s => s.teamSearch);
   const setTeamSearch  = useWorkspaceStore(s => s.setTeamSearch);
   const workspaceSearch = useWorkspaceStore(s => s.workspaceSearch);
@@ -658,7 +653,6 @@ export default function WorkspaceHeader() {
   const setMyTaskSearch = useWorkspaceStore(s => s.setMyTaskSearch);
   const projectSearchQuery = useWorkspaceStore(s => s.projectSearch);
   const setProjectSearchQuery = useWorkspaceStore(s => s.setProjectSearch);
-  const chatOnlineUsers = useWorkspaceStore(s => s.chatOnlineUsers);
   const localSearchFeedback = useWorkspaceStore(s => s.localSearchFeedback);
   const openCommandPalette = useWorkspaceStore(s => s.openCommandPalette);
 
@@ -679,13 +673,12 @@ export default function WorkspaceHeader() {
   } = useSearch();
 
   // A search belongs to the page where it was entered. Clear every contextual
-  // query on navigation so text from Chat/Team never leaks into the
-  // next screen and silently filters unrelated content.
+  // query on navigation so text from Team never leaks into the next screen and
+  // silently filters unrelated content.
   useEffect(() => {
     queueMicrotask(() => {
       setProjectSearch(false);
       setProjectSearchQuery('');
-      setChatSearch('');
       setTeamSearch('');
       setWorkspaceSearch('');
       setMyTaskSearch('');
@@ -694,7 +687,6 @@ export default function WorkspaceHeader() {
     });
   }, [
     pathname,
-    setChatSearch,
     setMyTaskSearch,
     setProjectSearchQuery,
     setTeamSearch,
@@ -703,18 +695,15 @@ export default function WorkspaceHeader() {
 
   const contextualSearchValue = projectSearch
     ? projectSearchQuery
-    : mode === 'chat'
-      ? chatSearch
-      : pathname.startsWith('/team')
-        ? teamSearch
-        : pathname.startsWith('/my')
-          ? myTaskSearch
-          : pathname === '/'
-            ? workspaceSearch
-            : globalQuery;
+    : pathname.startsWith('/team')
+      ? teamSearch
+      : pathname.startsWith('/my')
+        ? myTaskSearch
+        : pathname === '/'
+          ? workspaceSearch
+          : globalQuery;
 
   const isContextualSearch = projectSearch
-    || mode === 'chat'
     || pathname === '/'
     || pathname.startsWith('/team')
     || pathname.startsWith('/my');
@@ -762,8 +751,6 @@ export default function WorkspaceHeader() {
         onSearchChange={async (q) => {
           if (projectSearch) {
             setProjectSearchQuery(q);
-          } else if (mode === 'chat') {
-            setChatSearch(q);
           } else if (pathname.startsWith('/team')) {
             setTeamSearch(q);
           } else if (pathname.startsWith('/my')) {
@@ -784,8 +771,6 @@ export default function WorkspaceHeader() {
           if (projectSearch) {
             setProjectSearchQuery('');
             setProjectSearch(false);
-          } else if (mode === 'chat') {
-            setChatSearch('');
           } else if (pathname.startsWith('/team')) {
             setTeamSearch('');
           } else if (pathname.startsWith('/my')) {
@@ -805,7 +790,7 @@ export default function WorkspaceHeader() {
         projectSearchActive={projectSearch}
         onProjectSearchToggle={() => setProjectSearch(true)}
         breadcrumbs={breadcrumbs}
-        rightContent={<WorkspaceHeaderRight currentUser={currentUser} signOut={signOut} mode={mode} />}
+        rightContent={<WorkspaceHeaderRight currentUser={currentUser} signOut={signOut} />}
       />
 
       {/* ─── Search Modal ────────────────────────────────────────────── */}

@@ -16,7 +16,7 @@ import ChatComposerDock from '@/components/ui/ChatComposerDock';
 import ChatComposerCore from '@/components/ui/ChatComposerCore';
 import UnreadDivider from '@/components/ui/Chat/UnreadDivider';
 import LoadOlderButton from '@/components/ui/Chat/LoadOlderButton';
-import { IconAction, Pill, Popover, Segmented, useConfirm } from '@/components/ui';
+import { IconAction, Pill, Popover, useConfirm } from '@/components/ui';
 import EmptyState from '@/components/ui/Feedback/EmptyState';
 import { useAppContext } from '@/lib/context/AppContext';
 import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
@@ -75,7 +75,6 @@ function continuesRun(previous, next) {
     previous && next
     && previous._type === 'comment' && next._type === 'comment'
     && previous.authorId === next.authorId
-    && previous.visibility === next.visibility
     && Math.abs((next._time || 0) - (previous._time || 0)) <= RUN_WINDOW_MS
     && dayKey(previous.createdAt) === dayKey(next.createdAt),
   );
@@ -250,20 +249,16 @@ function DaySeparator({ timestamp }) {
  */
 function PendingMessage({ draft, members, onRetry, onDiscard }) {
   const failed = draft.status === 'failed';
-  const internal = draft.visibility === 'internal';
   return (
     <div className="group grid grid-cols-[minmax(0,1fr)_28px] items-end gap-x-2.5">
       <div className="col-start-1 row-start-1 flex max-w-[84%] min-w-0 flex-col items-end justify-self-end">
         <div className={`max-w-full break-words rounded-[16px] rounded-br-none p-3 text-[14px] leading-[22px] ${
-          internal
-            ? (failed ? 'bg-danger-soft text-danger' : 'bg-warning-soft text-warning')
-            : (failed ? 'bg-ink-hover/55 text-white/85' : 'bg-ink-hover text-white')
+          failed ? 'bg-ink-hover/55 text-white/85' : 'bg-ink-hover text-white'
         }`}>
-          {internal && <Pill tone="warning" size="sm" shape="badge">Внутрішня нотатка</Pill>}
-          <ReplyQuote replyTo={draft.replyTo} dark={!internal} />
+          <ReplyQuote replyTo={draft.replyTo} dark />
           {draft.text && (
-            <div className={internal ? 'mt-2 whitespace-pre-wrap' : 'whitespace-pre-wrap'}>
-              <MentionText text={draft.text} members={members} dark={!internal} issueMentions={draft.issueMentions} />
+            <div className="whitespace-pre-wrap">
+              <MentionText text={draft.text} members={members} dark issueMentions={draft.issueMentions} />
             </div>
           )}
           {draft.files.length > 0 && (
@@ -318,11 +313,12 @@ export default function UnifiedTimeline({
 }) {
   const router = useRouter();
   const { currentUser, projects = [], activeOrgId, orgRole } = useAppContext();
-  // Who sees the support side of the incident: internal notes, the change
-  // history and the time ledger. Read from the permission matrix rather than
-  // re-derived here, so the screen and `firestore.rules` cannot drift apart
-  // about what a client role may open.
-  const internalViewer = can(orgRole, 'access:internal_notes');
+  // Who sees the support side of the incident. Not the conversation — every
+  // message in an incident is read by both sides of the desk — but the change
+  // history beside it: who reassigned it, who moved it, when. Read from the
+  // permission matrix rather than re-derived here, so the screen and
+  // `firestore.rules` cannot drift apart about what a client role may open.
+  const internalViewer = can(orgRole, 'access:audit_log');
   // The conversation is the one surface both sides of the desk read at the same
   // time, so the record it belongs to has two names in it — «інцидент» for
   // support, «звернення» for the client whose portal is «Мої звернення».
@@ -361,13 +357,13 @@ export default function UnifiedTimeline({
   }), [statuses, priorities, types, labels, members, org]);
 
   // A task discussed for a year must not cost its whole year to open. The feed
-  // arrives as a window of the newest activity — the same rule the chat channel
-  // follows — and grows only when the reader asks for more.
+  // arrives as a window of the newest activity, and grows only when the reader
+  // asks for more.
   const [historyWindow, setHistoryWindow] = useState(1);
   const {
     comments, loading: commentsLoading, hasMore: hasOlderComments,
     addComment, updateComment, deleteComment, markCommentsRead,
-  } = useComments(issueId, COMMENT_WINDOW * historyWindow, { includeInternal: internalViewer });
+  } = useComments(issueId, COMMENT_WINDOW * historyWindow);
   const {
     entries: auditLogs,
     loading: auditLoading,
@@ -385,7 +381,6 @@ export default function UnifiedTimeline({
   // — or stays, marked as unsent, when the write fails.
   const [pendingMessages, setPendingMessages] = useState([]);
   const pendingSeqRef = useRef(0);
-  const [composerVisibility, setComposerVisibility] = useState('public');
   const [replyTo, setReplyTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [viewerAttachment, setViewerAttachment] = useState(null);
@@ -495,8 +490,6 @@ export default function UnifiedTimeline({
   const unreadMessages = useMemo(() => {
     if (!myId || !readCursorsLoaded) return [];
     return comments.filter(comment => (
-      comment.visibility !== 'internal'
-      &&
       comment.authorId !== myId
       && timestampMillis(comment.createdAt) > timestampMillis(lastSeenAt)
     ));
@@ -507,26 +500,20 @@ export default function UnifiedTimeline({
   );
   // Whose ticks to draw under this reader's own messages, gathered once for the
   // whole window instead of read out of each message on its own.
-  const publicComments = useMemo(
-    () => comments.filter(comment => comment.visibility !== 'internal'),
-    [comments],
-  );
-  const myReceiptMarks = useMemo(() => receiptMarks(publicComments, myId), [myId, publicComments]);
+  const myReceiptMarks = useMemo(() => receiptMarks(comments, myId), [comments, myId]);
 
-  const internalMentionMembers = useMemo(
-    () => (mentionMembers || members).filter(member => !isClientRole(member.role)),
-    [members, mentionMembers],
-  );
-  const composerMentionMembers = composerVisibility === 'internal'
-    ? internalMentionMembers
-    : (mentionMembers || members);
+  // Everybody who can read the incident can be named in it. There is no second,
+  // narrower list any more: the conversation is one thread, so a mention menu
+  // that quietly hid the client from it would be offering a privacy the message
+  // does not have.
+  const composerMentionMembers = mentionMembers || members;
 
   const filteredMembers = useMemo(() => {
     if (!mentionState.active) return [];
     return filterMentionCandidates(composerMentionMembers, myId, mentionState.query);
   }, [composerMentionMembers, mentionState.active, mentionState.query, myId]);
 
-  // «Друкує…», on the workspace chat's own mechanism. A flag is only worth
+  // «Друкує…». A flag is only worth
   // anything while it is fresh, so the list is recomputed on a clock of its own
   // — otherwise somebody who closed their laptop mid-sentence stays typing
   // until the next message arrives.
@@ -543,7 +530,6 @@ export default function UnifiedTimeline({
     .filter(Boolean), [members, myId, typingNow, typingState]);
   const typingRef = useRef(null);
   const noteTyping = () => {
-    if (composerVisibility === 'internal') return;
     setTyping(true);
     clearTimeout(typingRef.current);
     typingRef.current = setTimeout(() => setTyping(false), 2000);
@@ -680,27 +666,14 @@ export default function UnifiedTimeline({
     setEditingComment(null);
   };
 
-  const selectComposerVisibility = visibility => {
-    const next = visibility === 'internal' ? 'internal' : 'public';
-    if (next === 'internal') {
-      clearTimeout(typingRef.current);
-      setTyping(false);
-    }
-    // A public message may never carry a quote copied from a staff-only note.
-    if (next === 'public' && replyTo?.visibility === 'internal') setReplyTo(null);
-    setComposerVisibility(next);
-  };
-
   const focusComposer = () => setTimeout(() => inputRef.current?.focus(), 0);
 
   const beginReply = comment => {
     setEditingComment(null);
-    setComposerVisibility(comment.visibility === 'internal' ? 'internal' : 'public');
     setReplyTo({
       id: comment.id,
       authorName: comment.authorName,
       text: comment.text,
-      visibility: comment.visibility === 'internal' ? 'internal' : 'public',
     });
     focusComposer();
   };
@@ -708,7 +681,6 @@ export default function UnifiedTimeline({
   const beginEdit = comment => {
     setReplyTo(null);
     setPendingFiles([]);
-    setComposerVisibility(comment.visibility === 'internal' ? 'internal' : 'public');
     setEditingComment(comment);
     setInput(comment.text || '');
     focusComposer();
@@ -726,7 +698,7 @@ export default function UnifiedTimeline({
     });
     if (!confirmed) return;
     try {
-      await deleteComment(comment.id, comment.attachments, comment.visibility);
+      await deleteComment(comment.id, comment.attachments);
       if (editingComment?.id === comment.id || replyTo?.id === comment.id) resetComposer();
     } catch (error) {
       showToast(`Не вдалося видалити повідомлення: ${error.message}`, 'error');
@@ -998,9 +970,7 @@ export default function UnifiedTimeline({
     const answered = notifications.filter(notification => (
       !notification.read
       && notification.issueId === issueId
-      && (notification.type === 'commented'
-        || notification.type === 'mentioned'
-        || notification.type === 'chat_message')
+      && (notification.type === 'commented' || notification.type === 'mentioned')
     ));
     if (answered.length === 0) return;
     Promise.allSettled(answered.map(notification => markNotificationRead(notification.id)));
@@ -1163,8 +1133,7 @@ export default function UnifiedTimeline({
       item.clientId === draft.clientId ? { ...item, ...changes } : item
     )));
     try {
-      const isInternalNote = draft.visibility === 'internal';
-      const folder = `organizations/${project?.organizationId || 'shared'}/${isInternalNote ? 'internal-notes' : 'comments'}`;
+      const folder = `organizations/${project?.organizationId || 'shared'}/comments`;
       const attachments = [];
       for (const [index, file] of draft.files.entries()) {
         attachments.push(await uploadFile(file, folder, percent => {
@@ -1180,13 +1149,9 @@ export default function UnifiedTimeline({
       // по повному списку й тегало людину, для якої цієї задачі не існує.
       // Двері — на сервері (`/api/notifications` відмовляє тим, хто не дістає
       // проєкту); тут просто нічого зайвого не резолвиться.
-      const mentionCandidates = isInternalNote
-        ? internalMentionMembers
-        : (mentionMembers || members);
-      const internalMemberIds = new Set(internalMentionMembers.map(member => member.id || member.uid));
+      const mentionCandidates = mentionMembers || members;
       const mentionedUserIds = extractMentionedUserIds(draft.text, mentionCandidates, myId);
       const commentId = await addComment(issueId, draft.text, currentUser, attachments, draft.replyTo, {
-        visibility: draft.visibility,
         mentionedUserIds,
         issueMentions: draft.issueMentions,
         // Щоб розмова підняла проєкт на головному екрані — див. `addComment`.
@@ -1200,21 +1165,18 @@ export default function UnifiedTimeline({
       // out and back in — and the id is how the two are recognised as one.
       patchDraft({ serverId: commentId, status: 'sent' });
       const incidentChatLink = `${issuePath(issue, project || projectId)}?view=chat`;
-      // A public notification is written once and read by both sides of the
-      // desk: the client who opened the «звернення» and the support person
-      // working the «інцидент». Naming the record here would pick one of them
-      // and be wrong for the other, and the recipient list is not the place to
-      // fork the copy — so the title names the thing they genuinely share, the
-      // conversation, and the link says which one. The internal-note titles
-      // below can be specific: nobody outside support ever receives them.
+      // A notification is written once and read by both sides of the desk: the
+      // client who opened the «звернення» and the support person working the
+      // «інцидент». Naming the record here would pick one of them and be wrong
+      // for the other, and the recipient list is not the place to fork the copy
+      // — so the title names the thing they genuinely share, the conversation,
+      // and the link says which one.
       if (mentionedUserIds.length > 0) {
         try {
           const result = await sendNotification({
             userIds: mentionedUserIds,
             type: 'mentioned',
-            title: isInternalNote
-              ? `${currentUser?.name || 'Колега'} згадав вас у внутрішній нотатці`
-              : `${currentUser?.name || 'Колега'} згадав вас у розмові`,
+            title: `${currentUser?.name || 'Колега'} згадав вас у розмові`,
             body: draft.text.slice(0, 500),
             link: incidentChatLink,
             issueId,
@@ -1252,16 +1214,13 @@ export default function UnifiedTimeline({
       const replyRecipients = repliedToAuthorId
         && repliedToAuthorId !== myId
         && !mentionedUserIds.includes(repliedToAuthorId)
-        && (!isInternalNote || internalMemberIds.has(repliedToAuthorId))
         ? [repliedToAuthorId]
         : [];
       if (replyRecipients.length > 0) {
         sendNotification({
           userIds: replyRecipients,
-          type: 'chat_message',
-          title: isInternalNote
-            ? `${currentUser?.name || 'Колега'} відповів у внутрішній нотатці`
-            : `${currentUser?.name || 'Колега'} відповів вам у розмові`,
+          type: 'commented',
+          title: `${currentUser?.name || 'Колега'} відповів вам у розмові`,
           body: draft.text.slice(0, 500) || 'Вкладення',
           link: incidentChatLink,
           issueId,
@@ -1280,14 +1239,12 @@ export default function UnifiedTimeline({
         actorId: myId,
         commentAuthorIds: comments.map(item => item.authorId),
         exclude: [...mentionedUserIds, ...replyRecipients],
-      }).filter(userId => !isInternalNote || internalMemberIds.has(userId));
+      });
       if (commentRecipients.length > 0) {
         sendNotification({
           userIds: commentRecipients,
           type: 'commented',
-          title: isInternalNote
-            ? `${currentUser?.name || 'Колега'} додав внутрішню нотатку`
-            : `${currentUser?.name || 'Колега'} відповів у розмові`,
+          title: `${currentUser?.name || 'Колега'} відповів у розмові`,
           body: draft.text.slice(0, 500) || 'Вкладення',
           link: incidentChatLink,
           issueId,
@@ -1302,7 +1259,7 @@ export default function UnifiedTimeline({
       patchDraft({ status: 'failed' });
       showToast(`Помилка надсилання: ${error.message}`, 'error');
     }
-  }, [addComment, comments, currentUser, internalMentionMembers, issue, issueId, members, mentionMembers, myId, org, project, projectId, showToast]);
+  }, [addComment, comments, currentUser, issue, issueId, members, mentionMembers, myId, org, project, projectId, showToast]);
 
   const retryPendingMessage = draft => {
     setPendingMessages(current => current.map(item => (
@@ -1331,7 +1288,7 @@ export default function UnifiedTimeline({
       sendingRef.current = true;
       setSending(true);
       try {
-        await updateComment(editingComment.id, text, editingComment.visibility);
+        await updateComment(editingComment.id, text);
         resetComposer();
       } catch (error) {
         showToast(`Помилка надсилання: ${error.message}`, 'error');
@@ -1353,7 +1310,6 @@ export default function UnifiedTimeline({
       text,
       files: pendingFiles,
       replyTo,
-      visibility: composerVisibility,
       issueMentions: collectIssueMentions(text, resolvedIssues.current),
       // Seeded at zero so the files read as «being sent» from the first frame,
       // rather than offering a remove button for an upload already under way.
@@ -1395,7 +1351,7 @@ export default function UnifiedTimeline({
             icon={ChatIcon}
             title="Ще немає повідомлень"
             description={internalViewer
-              ? 'Відповідайте клієнту або додайте внутрішню нотатку для команди.'
+              ? 'Відповідайте клієнту — цю розмову бачать обидві сторони.'
               : 'Напишіть повідомлення команді підтримки.'}
             context="flexible"
           />
@@ -1426,12 +1382,11 @@ export default function UnifiedTimeline({
 
           if (item._type === 'comment') {
             const isMe = item.authorId === currentUser?.uid || item.authorId === currentUser?.id;
-            const isInternalNote = item.visibility === 'internal';
             // One run of messages is one person speaking without interruption.
-            // The name and the face are drawn once for it — Telegram's rule, and
-            // the workspace chat's already: the name opens the run, the face
-            // closes it, and the tail on the bubble marks the end. Four «ку» in
-            // a row used to cost four avatars and four identical headers.
+            // The name and the face are drawn once for it — Telegram's rule: the
+            // name opens the run, the face closes it, and the tail on the bubble
+            // marks the end. Four «ку» in a row used to cost four avatars and
+            // four identical headers.
             // A day break or the unread line ends a run wherever it falls.
             const nextItem = timeline[index + 1];
             const startsRun = Boolean(separator)
@@ -1499,19 +1454,18 @@ export default function UnifiedTimeline({
                       <StatusEmoji member={authorMember} />
                     </span>
                   )}
-                  <div className={`max-w-full break-words rounded-[16px] p-3 text-[14px] leading-[22px] transition-shadow duration-300 ${isInternalNote ? 'bg-warning-soft text-warning' : (isMe ? 'bg-ink-hover text-white' : 'bg-white text-ink')} ${endsRun ? (isMe ? 'rounded-br-none' : 'rounded-bl-none') : ''} ${highlightedCommentId === item.id ? 'ring-2 ring-ink/30' : ''}`}>
-                    {isInternalNote && <Pill tone="warning" size="sm" shape="badge">Внутрішня нотатка</Pill>}
+                  <div className={`max-w-full break-words rounded-[16px] p-3 text-[14px] leading-[22px] transition-shadow duration-300 ${isMe ? 'bg-ink-hover text-white' : 'bg-white text-ink'} ${endsRun ? (isMe ? 'rounded-br-none' : 'rounded-bl-none') : ''} ${highlightedCommentId === item.id ? 'ring-2 ring-ink/30' : ''}`}>
                     <ReplyQuote
                       replyTo={item.replyTo}
-                      dark={isMe && !isInternalNote}
+                      dark={isMe}
                       onJump={item.replyTo?.id ? () => jumpToComment(item.replyTo.id) : undefined}
                     />
                     {item.text && (
-                      <div className={isInternalNote ? 'mt-2 whitespace-pre-wrap' : 'whitespace-pre-wrap'}>
+                      <div className="whitespace-pre-wrap">
                         <MentionText
                           text={item.text}
                           members={members}
-                          dark={isMe && !isInternalNote}
+                          dark={isMe}
                           excludeMemberId={item.authorId}
                           issueMentions={item.issueMentions}
                         />
@@ -1519,7 +1473,7 @@ export default function UnifiedTimeline({
                     )}
                     <ChatAttachmentList
                       attachments={item.attachments}
-                      dark={isMe && !isInternalNote}
+                      dark={isMe}
                       onOpen={setViewerAttachment}
                     />
                   </div>
@@ -1551,7 +1505,7 @@ export default function UnifiedTimeline({
                         the half a sender is actually asking about — so pointing
                         at the ticks names the hour, and every reader in a task
                         with more than one of them. */}
-                    {isMe && !isInternalNote && (
+                    {isMe && (
                       <span
                         className="inline-flex cursor-help items-center"
                         title={readReceiptLabel(commentReaders(item, myReceiptMarks), members)}
@@ -1652,32 +1606,6 @@ export default function UnifiedTimeline({
               </Button>
             </div>
           )}
-          {internalViewer && (
-            <div className="mb-2 flex items-center justify-between gap-2 px-1">
-              {editingComment ? (
-                <Pill
-                  tone={editingComment.visibility === 'internal' ? 'warning' : 'info'}
-                  size="sm"
-                  shape="badge"
-                >
-                  {editingComment.visibility === 'internal' ? 'Внутрішня нотатка' : 'Відповідь клієнту'}
-                </Pill>
-              ) : (
-                <Segmented
-                  value={composerVisibility}
-                  onChange={selectComposerVisibility}
-                  surface="canvas"
-                  options={[
-                    { value: 'public', label: 'Відповідь клієнту' },
-                    { value: 'internal', label: 'Внутрішня нотатка' },
-                  ]}
-                />
-              )}
-              {(editingComment?.visibility === 'internal' || (!editingComment && composerVisibility === 'internal')) && (
-                <span className="text-[11px] font-semibold text-warning">Клієнт цього не побачить</span>
-              )}
-            </div>
-          )}
           {issueMention.active && (
             <IssueMentionMenu
               issues={issueResults}
@@ -1715,7 +1643,6 @@ export default function UnifiedTimeline({
 
           <FileInput accept={ATTACHMENT_UPLOAD_ACCEPT} ref={fileInputRef} multiple onChange={event => { addPendingFiles(event.target.files); event.target.value = ''; }} />
           <ChatComposerCore
-            variant="timeline"
             textareaRef={inputRef}
             value={input}
             onChange={event => {
@@ -1769,9 +1696,9 @@ export default function UnifiedTimeline({
             }}
             placeholder={editingComment
               ? 'Змінити повідомлення...'
-              : composerVisibility === 'internal'
-                ? 'Додати нотатку для команди...'
-                : 'Написати відповідь клієнту...'}
+              : internalViewer
+                ? 'Написати відповідь клієнту...'
+                : 'Написати повідомлення...'}
             attachments={pendingFiles.length > 0 ? (
               <div className="border-b border-black/[0.05] p-2">
                 {/* No progress here any more: the upload starts after the

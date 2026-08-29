@@ -7,6 +7,7 @@ import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENTS,
   QTICKET_NOTIFICATION_EVENT_KEYS,
+  REQUESTABLE_NOTIFICATION_TYPES,
   filterRecipients,
   isChannelEnabled,
   resolveNotificationMatrix,
@@ -25,8 +26,6 @@ test('a brand-new account keeps the defaults it had before the matrix', () => {
     mentioned: true,
     statusChanged: false,
     deadline: true,
-    // Chat gained a switch; email never carried chat and still does not.
-    chatMessage: false,
   });
 });
 
@@ -45,12 +44,9 @@ test('a legacy document keeps meaning exactly what it meant', () => {
   };
   const matrix = resolveNotificationMatrix(legacy);
 
-  // In-app received everything the event flags allowed. chatMessage had no flag
-  // in the legacy shape and no switch anywhere, so it falls back to what the
-  // channel policy was already doing: everything.
+  // In-app received everything the event flags allowed.
   assert.deepEqual(matrix.inapp, {
     assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
-    chatMessage: true,
   });
   assert.equal(matrix.telegram, undefined);
 
@@ -58,7 +54,6 @@ test('a legacy document keeps meaning exactly what it meant', () => {
   // "Зміна статусу" was on yet no status email ever arrived.
   assert.deepEqual(matrix.email, {
     assigned: true, commented: false, mentioned: false, statusChanged: false, deadline: false,
-    chatMessage: false,
   });
 });
 
@@ -171,10 +166,10 @@ test('channel defaults mirror what the settings page starts from', () => {
   });
 });
 
-// The Telegram integration was deleted with the other inherited messengers, so
-// the column delivered nowhere while a stored `telegramEnabled` still read back
-// as a preference somebody had set. A channel that cannot carry anything is not
-// a channel that happens to be switched off.
+// Two deletions, one shape of leftover: a preference stored for something the
+// product cannot do any more. Telegram delivered nowhere once the integration
+// went; `chatMessage` lost the event it switched when the workspace messenger
+// went. Neither reads back as a preference somebody set.
 test('there is no Telegram channel, whatever a stored document says', () => {
   assert.deepEqual(NOTIFICATION_CHANNELS, ['inapp', 'email']);
   assert.equal(Object.hasOwn(CHANNEL_DEFAULTS, 'telegramEnabled'), false);
@@ -184,6 +179,18 @@ test('there is no Telegram channel, whatever a stored document says', () => {
   assert.equal(shouldDeliver(stored, 'telegram', 'assigned'), false);
   assert.equal(shouldDeliver(stored, 'telegram', 'alert'), false);
   assert.equal(resolveNotificationMatrix(stored).telegram, undefined);
+});
+
+test('the deleted workspace-chat event has no switch and no way to be published', () => {
+  assert.ok(!REQUESTABLE_NOTIFICATION_TYPES.includes('chat_message'));
+  assert.ok(!NOTIFICATION_EVENTS.some(event => event.key === 'chatMessage'));
+  assert.ok(!('chatMessage' in EVENT_DEFAULTS));
+  // A stored preference for it changes nothing about the events that remain.
+  const stale = { channels: { inapp: { chatMessage: false } } };
+  assert.equal(shouldDeliver(stale, 'inapp', 'mentioned'), true);
+  assert.deepEqual(Object.keys(resolveNotificationMatrix(stale).inapp), [
+    'assigned', 'commented', 'mentioned', 'statusChanged', 'deadline',
+  ]);
 });
 
 // «Сповіщення» belongs to the client roles — an internal seat's preferences

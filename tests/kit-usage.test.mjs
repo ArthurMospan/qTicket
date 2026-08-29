@@ -54,7 +54,11 @@ test('the catalogue is the only reference page, and it lists components', () => 
     `stray reference pages: ${pages.join(', ')}`,
   );
   assert.doesNotMatch(kit, /SurfaceElements|surface-chat|CHAT_CONTROLS|fidelity-audit\.generated/);
-  assert.match(kit, /Чат — власна шкала аватарів/, '/ui-kit keeps the chat components it really owns');
+  assert.match(
+    kit,
+    /Розмова — власна шкала аватарів/,
+    '/ui-kit keeps the conversation components the incident screen really renders',
+  );
 });
 
 // The kit is the source of truth only while the product stays inside what the
@@ -372,7 +376,6 @@ test('a renamed default import is credited to the component it imports', () => {
 
 test('high-risk composed previews keep the product markup signatures', () => {
   const kit = readShowcase().everything;
-  const chat = readFileSync(new URL('../src/app/(app)/chat/page.js', import.meta.url), 'utf8');
   const projects = readFileSync(new URL('../src/app/(app)/page.js', import.meta.url), 'utf8');
   const settings = readFileSync(new URL('../src/app/(app)/settings/page.js', import.meta.url), 'utf8');
   const issueDetail = readFileSync(new URL('../src/components/workspace/IssueDetail.jsx', import.meta.url), 'utf8');
@@ -381,22 +384,19 @@ test('high-risk composed previews keep the product markup signatures', () => {
   const taskAttributes = readFileSync(new URL('../src/components/ui/Layout/TaskAttributesPanel.jsx', import.meta.url), 'utf8');
 
   for (const signature of [
-    // A border plus a focus shadow drew two concentric outlines around one
-    // box; the workspace chat wears the same single ring the task-page chat
-    // does, keeping only its own corner radius.
-    'overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.04] transition-all hover:ring-black/10 focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)]',
-    'w-full px-4 py-3.5 text-[14px] text-ink placeholder-placeholder bg-transparent outline-none resize-none max-h-[200px] leading-relaxed',
+    // A border plus a focus shadow drew two concentric outlines around one box;
+    // what survived that repair is the single ring that thickens. There were
+    // two shells here and the second was the workspace messenger's, deleted
+    // with it — the product has one conversation and one composer for it.
     'overflow-hidden rounded-[24px] bg-white ring-1 ring-black/[0.04] transition-all hover:ring-black/10 focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)]',
     'custom-scrollbar min-h-[36px] max-h-[120px] flex-1 resize-none border-0 bg-transparent px-1.5 py-2 text-[14px] leading-5 text-ink outline-none placeholder:text-muted',
     'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-white transition-transform hover:scale-105 disabled:bg-faint disabled:hover:scale-100',
   ]) {
     assert.ok(composerCore.includes(signature), `shared composer core lost product geometry: ${signature}`);
   }
-  assert.match(chat, /<ChatComposerCore[\s\S]*variant="workspace"/);
-  assert.match(timeline, /<ChatComposerCore[\s\S]*variant="timeline"/);
-  for (const variant of ['workspace', 'timeline']) {
-    assert.match(kit, new RegExp(`<ChatComposerCore[\\s\\S]{0,220}variant="${variant}"`));
-  }
+  assert.doesNotMatch(composerCore, /variant/);
+  assert.match(timeline, /<ChatComposerCore/);
+  assert.match(kit, /<ChatComposerCore/);
 
   assert.match(projects, /<EmptyState[\s\S]{0,1200}context="page"/);
   assert.match(kit, /<EmptyState[\s\S]{0,1200}context="page"/);

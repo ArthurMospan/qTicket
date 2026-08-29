@@ -34,8 +34,10 @@ test('QUI-77 keeps task detail additions compact and floating menus stationary',
   // A member's name opens the product's own menu — the same panel the kebab
   // drops — instead of a hand-built popover body full of ghost buttons.
   assert.match(issueDetail, /<ContextMenu\s+align="start"/);
-  assert.match(issueDetail, /label: 'Написати в чат',\s*\n\s*icon: MessageCircle,/);
-  assert.doesNotMatch(issueDetail, /Написати в чат\s*\n\s*<\/Button>/);
+  assert.match(issueDetail, /label: 'Переглянути профіль',\s*\n\s*icon: User,/);
+  // «Написати в чат» went with the workspace messenger it opened: there is no
+  // conversation with a colleague outside an incident to send anybody to.
+  assert.doesNotMatch(issueDetail, /Написати в чат/);
   assert.doesNotMatch(popover, /animate-in|zoom-in|slide-in/);
   assert.doesNotMatch(mainSections, /border-t border-line/);
   assert.doesNotMatch(mainSections, /<FormGroup label="(?:Зв’язок|Завдання)"/);

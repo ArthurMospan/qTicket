@@ -1,11 +1,11 @@
 'use client';
 
-// The files on a chat message.
+// The files on a message in an incident.
 //
 // Three kinds of file get a treatment of their own here, and the rule is the
-// same one the task's attachment row follows — a task where you can hear a
-// voice note and a chat where you cannot is the kind of difference nobody can
-// explain to a user:
+// same one the task's attachment row follows — an incident where you can hear a
+// voice note and a materials list where you cannot is the kind of difference
+// nobody can explain to a user:
 //
 //   • a picture shows the picture;
 //   • a video shows its own first frame, with the play badge over it, and opens
@@ -22,8 +22,8 @@ import FileThumb from '@/components/ui/Attachments/FileThumb';
 import {
   attachmentKind,
   attachmentMetaLabel,
+  attachmentUrl,
 } from '@/lib/utils/attachmentKinds.mjs';
-import { useChatAttachmentAccess } from '@/lib/hooks/useChatAttachmentAccess';
 
 function AttachmentTile({
   attachment,
@@ -33,16 +33,11 @@ function AttachmentTile({
   compact = false,
   dark = false,
 }) {
-  const privateAccess = useChatAttachmentAccess(attachment);
-  const url = previewUrl || privateAccess.url;
+  const url = previewUrl || attachmentUrl(attachment);
   const kind = attachmentKind({ ...attachment, previewUrl: url });
   const name = attachment?.name || 'Файл';
   const metaLabel = attachmentMetaLabel(attachment, kind);
-  const open = () => onOpen?.({
-    ...attachment,
-    previewUrl: url,
-    secureDownloadUrl: privateAccess.downloadUrl,
-  });
+  const open = () => onOpen?.({ ...attachment, previewUrl: url });
 
   const removeButton = onRemove ? (
     <button
@@ -219,11 +214,11 @@ function PendingAttachment({ file, onRemove, compact, progress }) {
 }
 
 // Where a file is being shown, and therefore how. This used to be four
-// `className` overrides at four call sites — `max-w-[280px]` in the task chat,
-// `max-w-[260px] sm:grid-cols-1` in a thread, `max-w-none sm:grid-cols-1` in the
-// materials list, nothing at all in the workspace chat — so the same PNG was a
-// 140px tile in one chat, a 96px tile squeezed into half of 280px in the next,
-// and a full-width row in the third. A file on a message looks like a file on a
+// `className` overrides at four call sites — `max-w-[280px]` in the incident
+// conversation, `max-w-[260px] sm:grid-cols-1` in a thread, `max-w-none
+// sm:grid-cols-1` in the materials list — so the same PNG was a 140px tile in
+// one place, a 96px tile squeezed into half of 280px in the next, and a
+// full-width row in the third. A file on a message looks like a file on a
 // message, wherever the message is.
 const ATTACHMENT_CONTEXTS = {
   message: { grid: 'mt-2 w-full max-w-[420px] gap-1.5', compact: false, columns: 2 },

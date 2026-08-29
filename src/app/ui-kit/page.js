@@ -89,7 +89,7 @@ const GROUPS = [
       { id: 'headers',           label: 'Header (Хедер)',                 icon: LayoutGrid },
       { id: 'page-headers',      label: 'Page Header (Шапка)',            icon: Type },
       { id: 'sidebar-layout',    label: 'Workspace Shell',                icon: PanelLeftOpen },
-      { id: 'inner-nav-layout',  label: 'SidebarLayout — 3 контексти',    icon: List },
+      { id: 'inner-nav-layout',  label: 'SidebarLayout — 2 контексти',    icon: List },
       { id: 'detail-layout',     label: 'Деталі задачі й події',          icon: TaskIcon },
     ]
   },

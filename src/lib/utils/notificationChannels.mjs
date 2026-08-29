@@ -23,7 +23,6 @@ export const REQUESTABLE_NOTIFICATION_TYPES = [
   'status_changed',
   'mentioned',
   'deadline',
-  'chat_message',
   'alert',
   'emergency',
   'test',
@@ -44,14 +43,11 @@ export const NOTIFICATION_EVENTS = [
   { key: 'mentioned', type: 'mentioned' },
   { key: 'statusChanged', type: 'status_changed' },
   { key: 'deadline', type: 'deadline' },
-  // Chat has no switch of its own and rides the channel policy below.
-  { key: 'chatMessage', type: 'chat_message' },
 ];
 
-// qTicket publishes incident events only. `chatMessage` belongs to the
-// inherited organization-chat engine, whose routes are not part of the qTicket
-// product surface. Keep its stored preference readable without advertising a
-// switch for a feature customers cannot open.
+// Every event qTicket can publish, in the order Settings draws them. It is the
+// whole of NOTIFICATION_EVENTS now: the organization-chat engine that used to
+// add a sixth event to the list, and no switch for it, is gone.
 export const QTICKET_NOTIFICATION_EVENT_KEYS = Object.freeze([
   'assigned',
   'commented',
@@ -73,9 +69,6 @@ export const EVENT_DEFAULTS = {
   // exactly the thing you wanted to know.
   statusChanged: true,
   deadline: true,
-  // True, because that is exactly what an account was already getting before
-  // the switch existed. Gaining a control must not change what anyone receives.
-  chatMessage: true,
 };
 
 // Channel-level switches. `inapp` has none — the record in the bell *is* the
@@ -130,7 +123,7 @@ export function isChannelEnabled(preferences = {}, channel) {
 // switch of their own in Settings, so a channel policy decides. In-app
 // records them all, which is what it already did. Email stays narrow on
 // purpose: it used to run off a hardcoded whitelist, and opening it up would
-// mean a mail per notification.
+// mean a mail per reply.
 const KEYLESS_TYPE_POLICY = {
   inapp: () => true,
   email: type => type === 'alert' || type === 'emergency',

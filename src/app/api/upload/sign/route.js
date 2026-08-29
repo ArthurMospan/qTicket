@@ -5,7 +5,6 @@ import { authenticateRequest, enforceRateLimit } from '@/lib/server/firebaseAdmi
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
   callerBelongsToPathOrganization,
-  isOrganizationChatUploadFolder,
   isSafeUploadFolder,
   organizationIdFromPath,
 } from '@/lib/server/uploadPaths';
@@ -55,12 +54,12 @@ export async function POST(req) {
 
     const timestamp = Math.round(new Date().getTime() / 1000);
 
-    // Chat material is confidential workspace content. Cloudinary's
-    // authenticated delivery type keeps both originals and derivations closed
-    // until our channel-authorized access route issues a short-lived URL.
-    const deliveryType = isOrganizationChatUploadFolder(folder, organizationId)
-      ? 'authenticated'
-      : 'upload';
+    // Every asset this product stores is delivered as a plain upload. The one
+    // folder that used Cloudinary's `authenticated` type was the workspace
+    // messenger's, and it needed a route of its own to sign a short-lived URL
+    // for each read. Both are deleted, so signing anything closed here would
+    // produce a file nothing in the app can open again.
+    const deliveryType = 'upload';
     // The size the browser declared, and the size it actually sends.
     //
     // `uploadFilePolicy` above checks `params.file`, which is `{ name, size,
@@ -68,7 +67,7 @@ export async function POST(req) {
     // sends 500 MB passes every check made here and is accepted by Cloudinary,
     // because the signature covers the format and not the size. One member can
     // exhaust a free-tier cloud that way, and what breaks then is everybody's
-    // avatars, logos and chat attachments rather than their own upload.
+    // avatars, logos and incident attachments rather than their own upload.
     //
     // Cloudinary has no per-request size parameter; the ceiling lives on an
     // upload preset, and a signed `upload_preset` is what binds it to this
@@ -84,7 +83,6 @@ export async function POST(req) {
       timestamp,
       allowed_formats: filePolicy.value.allowedFormats.join(','),
       ...(uploadPreset ? { upload_preset: uploadPreset } : {}),
-      ...(deliveryType === 'authenticated' ? { type: deliveryType } : {}),
     };
     const signature = cloudinary.utils.api_sign_request(
       signedParams,

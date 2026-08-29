@@ -43,11 +43,11 @@ export default function WorkspaceSidebar() {
     try { localStorage.setItem('qt_sidebar_collapsed', collapsed ? '1' : '0'); } catch {}
   }, [collapsed]);
   const [showOrgSwitcher, setShowOrgSwitcher] = useState(false);
-  // Read, not subscribed. Calling `useUnreadChatCount()` here opened a second
-  // pair of organization-wide listeners — channels and read cursors — beside
-  // the pair the notification bridge already keeps, so every page in the
-  // workspace paid for that list twice. One publisher, many readers: the bridge
-  // publishes the number, everything else reads it.
+  // Read, not subscribed. The rail used to count unread itself, which opened a
+  // second pair of organization-wide listeners beside the pair the notification
+  // bridge already keeps, so every page in the workspace paid for that list
+  // twice. One publisher, many readers: the bridge publishes the number,
+  // everything else reads it.
   const userId = currentUser?.id || currentUser?.uid;
   const { unreadProjectIds, markProjectRead } = useProjectUnreadIndicators(userId, activeOrgId);
   // Число публікує `WorkspaceNotificationBridge` — і воно вже готове. Тут

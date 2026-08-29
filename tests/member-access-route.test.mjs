@@ -100,7 +100,6 @@ test('every permission in the matrix is read by something', async () => {
   const { PERMISSIONS } = await import('../src/lib/utils/can.js');
   const sources = await Promise.all([
     'src/app/(app)/settings/page.js',
-    'src/app/(app)/chat/page.js',
     'src/app/(app)/page.js',
     'src/app/(app)/my/page.js',
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',

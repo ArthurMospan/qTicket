@@ -31,7 +31,7 @@ export const SECTIONS = [
   { id: 'headers', label: 'Header (Хедер)' },
   { id: 'page-headers', label: 'Page Header (Шапка)' },
   { id: 'sidebar-layout', label: 'Workspace Shell' },
-  { id: 'inner-nav-layout', label: 'SidebarLayout — 3 контексти' },
+  { id: 'inner-nav-layout', label: 'SidebarLayout — 2 контексти' },
   { id: 'detail-layout', label: 'Деталі задачі й події' },
   { id: 'variant-matrix', label: 'Матриця варіантів' },
   { id: 'states', label: 'Матриця станів' },

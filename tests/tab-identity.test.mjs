@@ -51,11 +51,16 @@ test('обидва оголошені файли іконки несуть од�
   assert.equal(png[25], 6, 'RGBA');
 });
 
-// Лічильник у вкладці — це чат, і нічого більше.
-test('вкладка рахує лише чат', async () => {
+// Лічильник у вкладці — це одне число з одного джерела.
+//
+// Раніше його рахували курсори прочитаного корпоративного месенджера. Месенджер
+// видалено; лишився дзвоник, і його число по активній організації вже лежить у
+// сторі — публікує його `WorkspaceNotificationBridge`, а не друга підписка тут.
+test('вкладка рахує непрочитане активної організації, і нічого не підписує', async () => {
   const component = await read('../src/components/WorkspaceDocumentTitle.jsx');
-  assert.match(component, /state\.unreadChatCount/);
-  assert.doesNotMatch(component, /notifications/);
+  assert.match(component, /state\.notificationUnreadByOrg\[activeOrgId\] \|\| 0/);
+  assert.doesNotMatch(component, /unreadChatCount/);
+  assert.doesNotMatch(component, /onSnapshot|useNotifications\(/);
 });
 
 // І перемальовувати іконку більше нікому.

@@ -47,9 +47,12 @@ test('the colour scan covers the kit, which is where most of the product is pain
   const walked = collectWorkspaceUiFiles({ includeSharedUi: true });
   const kitFiles = walked.filter(file => file.split(/[\\/]/).join('/').includes('/src/components/ui/'));
   assert.ok(
-    // 100 → 90: the kit lost the charts, the tables and the time controls that
-    // only the deleted reporting screens rendered.
-    kitFiles.length > 90,
+    // 100 → 90 → 85: the kit lost the charts, the tables and the time controls
+    // that only the deleted reporting screens rendered, and then the message
+    // row, the message list, the conversation header, the search banner, the
+    // channel info panel and the channel rail — six files that existed for the
+    // deleted workspace messenger.
+    kitFiles.length > 85,
     `the scan reaches ${kitFiles.length} kit files; it used to reach none`,
   );
   // Named rather than counted, so that losing one of the two files whose raw

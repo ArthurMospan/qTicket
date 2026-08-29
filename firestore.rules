@@ -61,19 +61,15 @@ service cloud.firestore {
     }
 
     // qTicket keeps QuickTeam's `member` role as the internal support-agent
-    // role. Client identities are deliberately separate: they may open an
-    // incident and write in its conversation, but they never mutate the
-    // incident workflow or enter the organization's internal chat.
+    // role. Client identities are deliberately separate: they read and write
+    // every message in their own incident, but they never mutate the incident
+    // workflow and never read the support-side change history beside it.
     function isInternalContributor(orgId) {
       return isOrgMember(orgId) && orgRole(orgId) in ['owner', 'admin', 'member'];
     }
 
     function isOrgOwner(orgId) {
       return isOrgMember(orgId) && orgRole(orgId) == 'owner';
-    }
-
-    function userIsOrgMember(orgId, uid) {
-      return exists(/databases/$(database)/documents/orgMemberships/$(orgId + '_' + uid));
     }
 
     function projectAcceptsNestedWrites(projectId) {
@@ -270,23 +266,6 @@ service cloud.firestore {
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt']))
       );
       allow delete: if false; // Cascading deletion is handled by /api/projects/[projectId].
-
-      // Portal chat — client + workspace side, scoped via parent project.
-      match /messages/{msgId} {
-        allow read: if canAccessProjectById(projectId);
-        allow create: if projectAcceptsNestedWrites(projectId) &&
-          canAccessProjectById(projectId) &&
-          request.resource.data.senderId == request.auth.uid;
-        allow update: if projectAcceptsNestedWrites(projectId) &&
-          canAccessProjectById(projectId) &&
-          resource.data.senderId == request.auth.uid &&
-          request.resource.data.senderId == resource.data.senderId;
-        allow delete: if projectAcceptsNestedWrites(projectId) &&
-          canAccessProjectById(projectId) && (
-          resource.data.senderId == request.auth.uid ||
-          isOrgAdminOrOwner(projectOrg(projectId))
-        );
-      }
     }
 
     // ── issues/{issueId} ─────────────────────────────────────────────────
@@ -351,11 +330,6 @@ service cloud.firestore {
       // stamp to the comment beside it (the comment's id is not knowable here),
       // so a participant can in principle stamp without writing; the blast
       // radius is the cosmetic strip they can already fill by actually replying.
-      //
-      // Internal notes stay entirely outside this. A note is a document in the
-      // separately ruled `internalNotes` collection, `addComment` stamps the
-      // incident only for a public comment, and a client is refused that
-      // collection outright — there is no path from an internal note to here.
       allow update: if issueAcceptsNestedWrites(issueId) &&
         canAccessIssueData(resource.data) &&
         request.resource.data.diff(resource.data).affectedKeys()
@@ -376,19 +350,21 @@ service cloud.firestore {
           ]);
       allow delete: if false; // Server route enforces hierarchy and cascades.
 
+      // One conversation, read by everyone who can reach the incident. There is
+      // no visibility flag on a comment any more and no second collection
+      // beside this one: what support writes here, the client reads. The
+      // support-side record that stays private is the change history in
+      // `audit/` below, which is not the customer's conversation.
       match /comments/{commentId} {
         allow read: if canAccessIssueProject(issueId);
         allow create: if issueAcceptsNestedWrites(issueId) &&
           canAccessIssueProject(issueId) &&
-          request.resource.data.authorId == request.auth.uid &&
-          request.resource.data.get('visibility', 'public') == 'public';
+          request.resource.data.authorId == request.auth.uid;
         // The author may edit their own comment; any org member may mark it read
         // (read receipts) — that write touches only `readBy` and the `readAt`
         // stamp beside it, and nothing else.
         allow update: if issueAcceptsNestedWrites(issueId) &&
-          canAccessIssueProject(issueId) &&
-          resource.data.get('visibility', 'public') == 'public' &&
-          request.resource.data.get('visibility', 'public') == 'public' && (
+          canAccessIssueProject(issueId) && (
           (resource.data.authorId == request.auth.uid &&
            request.resource.data.authorId == resource.data.authorId) ||
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'readAt'])
@@ -404,35 +380,8 @@ service cloud.firestore {
         );
       }
 
-      // Staff collaboration is physically separate from the public incident
-      // conversation. A visibility field inside `comments` would not be a safe
-      // boundary: Firestore authorizes whole documents and legacy comments do
-      // not carry that field. Clients never read or write this collection.
-      match /internalNotes/{noteId} {
-        allow read: if isInternalContributor(issueOrg(issueId)) &&
-          canAccessIssueProject(issueId);
-        allow create: if issueAcceptsNestedWrites(issueId) &&
-          isInternalContributor(issueOrg(issueId)) &&
-          canAccessIssueProject(issueId) &&
-          request.resource.data.authorId == request.auth.uid &&
-          request.resource.data.visibility == 'internal';
-        allow update: if issueAcceptsNestedWrites(issueId) &&
-          isInternalContributor(issueOrg(issueId)) &&
-          canAccessIssueProject(issueId) &&
-          resource.data.authorId == request.auth.uid &&
-          request.resource.data.authorId == resource.data.authorId &&
-          resource.data.visibility == 'internal' &&
-          request.resource.data.visibility == 'internal';
-        allow delete: if issueAcceptsNestedWrites(issueId) &&
-          isInternalContributor(issueOrg(issueId)) &&
-          canAccessIssueProject(issueId) && (
-            resource.data.authorId == request.auth.uid ||
-            isOrgAdminOrOwner(issueOrg(issueId))
-          );
-      }
-
-      // Who is typing in the task's chat, as one document rather than two
-      // fields on the task: the task itself is subscribed to by every board and
+      // Who is typing in the incident's conversation, as one document rather
+      // than two fields on the task: the task itself is subscribed to by every board and
       // every card that shows it, and a heartbeat written there every three
       // seconds would cost each of them a read. Anyone who can read the
       // conversation can see it, and anyone who can write in it can say they
@@ -503,134 +452,6 @@ service cloud.firestore {
       allow create: if false;
     }
 
-    // ── organizations/{orgId}/channels/... — chat, scoped via path ──────
-    //
-    // Direct messages live in the same collection but their CONTENT is not
-    // org-visible. A DM room id is the deterministic `uidA_uidB` pair built by
-    // directMessageRoomId(); both halves are Firebase uids (28 alphanumeric
-    // chars), so the shape below matches DM rooms exactly and never a human
-    // channel slug or a legacy `project_*` / numeric room. Membership is
-    // therefore provable from the document id alone: no get() is needed, so the
-    // check also holds while a brand-new DM room is created in the same batch
-    // as its first message. Keep in sync with isDirectRoomId() in
-    // src/lib/utils/workspaceChat.mjs.
-    //
-    // IMPORTANT — why `list` is not gated: on a query the {channelId} wildcard
-    // is unbound (null), so any id-based condition raises a null-value error and
-    // rejects every listing, including the caller's own channels. Per-document
-    // gating of a collection the app must enumerate is therefore not expressible
-    // here. The room documents stay listable (id, participants and unread
-    // counters — no message text: sendMessage deliberately omits
-    // lastMessageText/lastMessageSender for DM rooms), while everything under
-    // messages/ is addressed by a concrete channel id and IS gated.
-    match /organizations/{orgId}/channels/{channelId} {
-      function isDirectRoom() {
-        return channelId.matches('^[A-Za-z0-9]{20,}_[A-Za-z0-9]{20,}$');
-      }
-
-      function isDirectRoomMember() {
-        return request.auth.uid in channelId.split('_');
-      }
-
-      function canAccessRoom() {
-        return isInternalContributor(orgId) && (!isDirectRoom() || isDirectRoomMember());
-      }
-
-      // A DM room document is enumerable by the whole org (see above), so it
-      // must never hold message content. Enforced here rather than trusted to
-      // the client, because this is the only thing keeping the listing safe.
-      //
-      // Rooms created before this rule still carry a stale lastMessageText.
-      // Testing only the resulting document would reject every write to those
-      // rooms — including the typing heartbeat — and lock them up until someone
-      // sent a message. So a write is allowed when it does not touch the
-      // fields, and separately when it removes them; only writing a *new*
-      // preview is refused. sendMessage deletes them on the next DM sent,
-      // which clears the historical previews as conversations continue.
-      function keepsDirectRoomContentOut(touched) {
-        return !isDirectRoom() ||
-          !touched.hasAny(['lastMessageText', 'lastMessageSender']) ||
-          !request.resource.data.keys().hasAny(['lastMessageText', 'lastMessageSender']);
-      }
-
-      allow get: if canAccessRoom();
-      allow list: if isInternalContributor(orgId);
-      allow create: if isInternalContributor(orgId) &&
-        keepsDirectRoomContentOut(request.resource.data.keys()) && (
-        isDirectRoom()
-          ? (isDirectRoomMember() &&
-             request.resource.data.type == 'dm' &&
-             // `participants` is an optional mirror of the pair the id already
-             // encodes. The client does not write it (membership is provable
-             // from the id alone); this clause exists so that if anything ever
-             // does, it can never name someone outside the pair.
-             request.resource.data.get('participants', []).hasOnly(channelId.split('_')))
-          : (isOrgAdminOrOwner(orgId) ||
-             (channelId == 'general' && request.resource.data.type == 'public'))
-      );
-      allow update: if canAccessRoom() &&
-        keepsDirectRoomContentOut(request.resource.data.diff(resource.data).affectedKeys()) && (
-        isOrgAdminOrOwner(orgId) || (
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly([
-              'typing',
-              'typingAt',
-              'lastMessageAt',
-              'lastMessageText',
-              'lastMessageSender',
-              'lastMessageSenderId',
-              'messageCount',
-              'participants'
-            ]) &&
-          // `participants` backfills legacy DM rooms, but it can never name
-          // anyone outside the id-encoded pair.
-          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['participants']) ||
-           (isDirectRoom() && request.resource.data.get('participants', []).hasOnly(channelId.split('_'))))
-        )
-      );
-      allow delete: if isOrgAdminOrOwner(orgId) && !isDirectRoom();
-
-      match /messages/{msgId} {
-        allow read: if canAccessRoom();
-        allow create: if canAccessRoom() && request.resource.data.senderId == request.auth.uid;
-        allow update: if canAccessRoom() &&
-          request.resource.data.senderId == resource.data.senderId && (
-            resource.data.senderId == request.auth.uid ||
-            request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['reactions', 'replyCount', 'isPinned'])
-          );
-        // A direct message is not moderatable: an owner cannot read that room,
-        // and must not be able to reach into it to delete either.
-        allow delete: if canAccessRoom() && (
-          resource.data.senderId == request.auth.uid ||
-          (!isDirectRoom() && isOrgAdminOrOwner(orgId))
-        );
-
-        match /replies/{replyId} {
-          allow read: if canAccessRoom();
-          allow create: if canAccessRoom() && request.resource.data.senderId == request.auth.uid;
-          allow update: if canAccessRoom() &&
-            resource.data.senderId == request.auth.uid &&
-            request.resource.data.senderId == resource.data.senderId;
-          allow delete: if canAccessRoom() && (
-            resource.data.senderId == request.auth.uid ||
-            (!isDirectRoom() && isOrgAdminOrOwner(orgId))
-          );
-        }
-      }
-    }
-
-    match /organizations/{orgId}/readState/{stateId} {
-      allow read, delete: if isInternalContributor(orgId) && resource.data.userId == request.auth.uid;
-      allow create: if isInternalContributor(orgId) &&
-        request.resource.data.userId == request.auth.uid &&
-        stateId == request.auth.uid + '_' + request.resource.data.channelId;
-      allow update: if isInternalContributor(orgId) &&
-        resource.data.userId == request.auth.uid &&
-        request.resource.data.userId == resource.data.userId &&
-        request.resource.data.channelId == resource.data.channelId;
-    }
-
     match /organizations/{orgId}/issueReadState/{stateId} {
       allow read, delete: if isOrgMember(orgId) && resource.data.userId == request.auth.uid;
       allow create: if isOrgMember(orgId) &&
@@ -645,13 +466,6 @@ service cloud.firestore {
         request.resource.data.issueId == resource.data.issueId &&
         request.resource.data.lastSeenAt is timestamp &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeenAt']);
-    }
-
-    match /organizations/{orgId}/activeDMs/{uid} {
-      allow read: if isInternalContributor(orgId);
-      allow create, update: if isInternalContributor(orgId) && userIsOrgMember(orgId, uid) &&
-        request.auth.uid in request.resource.data.partners;
-      allow delete: if false;
     }
 
     match /organizations/{orgId}/settings/{settingsDoc} {

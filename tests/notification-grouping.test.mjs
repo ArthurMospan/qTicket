@@ -75,18 +75,17 @@ test('only the types that repeat with the same words are grouped', () => {
   assert.equal(rows.length, 2);
 });
 
-test('a chat conversation groups by its channel, and says so', () => {
+// Every conversation the product has is inside an incident, so a record that
+// names no incident has no conversation to be grouped into. The workspace
+// messenger's records are still in people's bells; they stand as themselves.
+test('a record naming no incident is a row of its own', () => {
+  assert.equal(notificationGroupKey({ type: 'chat_message', channelId: 'general' }), '');
+  assert.equal(notificationGroupKey({ type: 'commented' }), '');
   const rows = groupNotifications([
     { id: 'c2', type: 'chat_message', channelId: 'general', title: 'Нове', read: false },
     { id: 'c1', type: 'chat_message', channelId: 'general', title: 'Нове', read: false },
   ]);
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].title, '2 нові повідомлення в розмові');
-  // A record written before `channelId` existed is read from its link instead.
-  assert.equal(
-    notificationGroupKey({ type: 'chat_message', link: '/chat?channel=general' }),
-    'chat:general',
-  );
+  assert.equal(rows.length, 2);
 });
 
 test('the task key comes out of the link, and nothing is read to find it', () => {
@@ -121,10 +120,11 @@ test('the corner card counts a burst instead of stacking it', async () => {
     notificationCountTitle(4, comment('n1', 'issue-a'), 'issue:issue-a'),
     '4 нові повідомлення в QT-12',
   );
-  // Розмова робочого чату не має ключа задачі й називає себе розмовою.
+  // Запис без людського ключа інциденту не вигадує його — і не називає запис
+  // жодним словом, бо дзвоник спільний із зовнішнім клієнтом.
   assert.equal(
-    notificationCountTitle(2, { type: 'chat_message', link: '/chat?channel=design' }, 'chat:design'),
-    '2 нові повідомлення в розмові',
+    notificationCountTitle(2, { type: 'commented', link: '/proj/issue/8f2a1c9d0b' }),
+    '2 нові повідомлення в обговоренні',
   );
 
   const store = await readFile(new URL('../src/store/useWorkspaceStore.js', import.meta.url), 'utf8');

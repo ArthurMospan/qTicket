@@ -1,12 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 
 // These are the checks standing between one tenant and another tenant's files:
 // /api/upload/delete derives the owning organization from the path alone, so a
 // caller can never widen their own scope by naming a different organizationId.
 import {
-  isOrganizationChatStoragePath,
-  isOrganizationChatUploadFolder,
   isSafeStoragePath,
   isSafeUploadFolder,
   organizationIdFromPath,
@@ -64,27 +63,21 @@ test('storage paths are validated before reaching the delete API', () => {
   assert.equal(isSafeStoragePath(42), false);
 });
 
-test('private chat paths are exact and organization-scoped', () => {
-  assert.equal(
-    isOrganizationChatUploadFolder('quickteam/organizations/org-a/chat', 'org-a'),
-    true,
-  );
-  assert.equal(
-    isOrganizationChatUploadFolder('quickteam/organizations/org-a/chat/files', 'org-a'),
-    false,
-  );
-  assert.equal(
-    isOrganizationChatStoragePath('quickteam/organizations/org-a/chat/1699_file', 'org-a'),
-    true,
-  );
-  assert.equal(
-    isOrganizationChatStoragePath('quickteam/organizations/org-a/chat/1699_file', 'org-b'),
-    false,
-  );
-  assert.equal(
-    isOrganizationChatStoragePath('quickteam/chat/attachments/1699_file', 'org-a'),
-    false,
-  );
+// Cloudinary's `authenticated` delivery type kept the workspace messenger's
+// files closed until a route of its own signed a five-minute URL for each read.
+// The messenger and that route are deleted, so nothing signs anything: an asset
+// stored closed now would be one nothing in the product can ever open again.
+test('every asset this product stores is a plain upload', async () => {
+  const [sign, remove] = await Promise.all([
+    readFile(new URL('../src/app/api/upload/sign/route.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/app/api/upload/delete/route.js', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(sign, /const deliveryType = 'upload';/);
+  assert.doesNotMatch(sign, /isOrganizationChatUploadFolder/);
+  assert.doesNotMatch(sign, /type: deliveryType/);
+  assert.match(remove, /type: 'upload',/);
+  assert.doesNotMatch(remove, /ALLOWED_DELIVERY_TYPES/);
 });
 
 // Розмір, який назвав браузер, і розмір, який він насправді надсилає.

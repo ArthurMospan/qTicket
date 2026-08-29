@@ -1,16 +1,16 @@
 'use client';
 
-// src/lib/hooks/useComments.js — Public replies and staff-only notes for an incident
-import { useState, useEffect, useCallback, useMemo } from 'react';
+// src/lib/hooks/useComments.js — The one shared conversation on an incident
+import { useState, useEffect, useCallback } from 'react';
 import { arrayUnion, collection, deleteField, doc, getCountFromServer, limit, onSnapshot, orderBy, query, increment, runTransaction, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { reportLoadError } from '@/lib/utils/errors';
 import { liveDocumentData } from '@/lib/utils/firestoreDocument.mjs';
 import { deleteFileFromCloudinary } from '@/lib/services/fileUpload';
-// How much of a conversation opens with the task. The same reasoning as a chat
-// channel: the newest page is what a reader arrives for, and the rest is loaded
-// when they ask for it — a task discussed for a year must not cost its whole
-// year every time somebody opens it.
+// How much of a conversation opens with the task: the newest page is what a
+// reader arrives for, and the rest is loaded when they ask for it — an incident
+// discussed for a year must not cost its whole year every time somebody opens
+// it.
 // Як довго штамп активності проєкту вважається свіжим.
 //
 // Картку проєкту піднімає `project.updatedAt`, і питання, на яке вона
@@ -40,16 +40,13 @@ export const COMMENT_WINDOW = 60;
  * @param {string} issueId The task.
  * @param {number} windowSize How many of the newest comments to subscribe to.
  */
-export function useComments(issueId, windowSize = COMMENT_WINDOW, { includeInternal = false } = {}) {
-  const [publicComments, setPublicComments] = useState([]);
-  const [publicLoading, setPublicLoading] = useState(true);
-  const [hasMorePublic, setHasMorePublic] = useState(false);
-  const [internalNotes, setInternalNotes] = useState([]);
-  const [internalLoading, setInternalLoading] = useState(includeInternal);
-  const [hasMoreInternal, setHasMoreInternal] = useState(false);
+export function useComments(issueId, windowSize = COMMENT_WINDOW) {
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   useEffect(() => {
     if (!issueId) {
-      queueMicrotask(() => setPublicLoading(false));
+      queueMicrotask(() => setLoading(false));
       return undefined;
     }
     const conversationQuery = query(
@@ -59,64 +56,15 @@ export function useComments(issueId, windowSize = COMMENT_WINDOW, { includeInter
     );
     const unsub = onSnapshot(conversationQuery, snap => {
       // Newest first out of the query, oldest first into the conversation.
-      setPublicComments(snap.docs.map(item => ({
-        ...liveDocumentData(item),
-        visibility: 'public',
-      })).reverse());
-      setHasMorePublic(snap.size >= windowSize);
-      setPublicLoading(false);
+      setComments(snap.docs.map(item => liveDocumentData(item)).reverse());
+      setHasMore(snap.size >= windowSize);
+      setLoading(false);
     }, err => {
       reportLoadError('[useComments]', err);
-      setPublicLoading(false);
+      setLoading(false);
     });
     return () => unsub();
   }, [issueId, windowSize]);
-
-  // Internal notes are a separate collection, not public comments carrying a
-  // visibility flag. Firestore cannot hide individual fields or safely filter
-  // legacy documents that predate such a flag, so collection separation is the
-  // actual client/staff security boundary. A client never starts this query.
-  useEffect(() => {
-    if (!issueId || !includeInternal) {
-      queueMicrotask(() => {
-        setInternalNotes([]);
-        setHasMoreInternal(false);
-        setInternalLoading(false);
-      });
-      return undefined;
-    }
-    // Keep the loading transition out of the effect body: the subscription is
-    // the external system this effect synchronizes with, and React's lint rule
-    // deliberately rejects a synchronous render cascade here.
-    queueMicrotask(() => setInternalLoading(true));
-    const notesQuery = query(
-      collection(db, 'issues', issueId, 'internalNotes'),
-      orderBy('createdAt', 'desc'),
-      limit(windowSize),
-    );
-    const unsub = onSnapshot(notesQuery, snap => {
-      setInternalNotes(snap.docs.map(item => ({
-        ...liveDocumentData(item),
-        visibility: 'internal',
-      })).reverse());
-      setHasMoreInternal(snap.size >= windowSize);
-      setInternalLoading(false);
-    }, err => {
-      reportLoadError('[useComments] internal notes', err);
-      setInternalLoading(false);
-    });
-    return () => unsub();
-  }, [includeInternal, issueId, windowSize]);
-
-  const comments = useMemo(() => [...publicComments, ...internalNotes].sort(
-    (left, right) => {
-      const leftAt = left.createdAt?.toMillis?.() || left.createdAt?.seconds * 1000 || 0;
-      const rightAt = right.createdAt?.toMillis?.() || right.createdAt?.seconds * 1000 || 0;
-      return leftAt - rightAt;
-    },
-  ), [internalNotes, publicComments]);
-  const loading = publicLoading || (includeInternal && internalLoading);
-  const hasMore = hasMorePublic || (includeInternal && hasMoreInternal);
 
   // -------------------------------------------------------------------------
   // addComment
@@ -128,14 +76,10 @@ export function useComments(issueId, windowSize = COMMENT_WINDOW, { includeInter
   // -------------------------------------------------------------------------
   const addComment = useCallback(async (issueId, text, user = {}, attachments = [], replyTo = null, options = {}) => {
     if (!text?.trim() && attachments.length === 0) throw new Error('Comment cannot be empty');
-    const visibility = options.visibility === 'internal' ? 'internal' : 'public';
-    const collectionName = visibility === 'internal' ? 'internalNotes' : 'comments';
-    const commentRef = doc(collection(db, 'issues', issueId, collectionName));
+    const commentRef = doc(collection(db, 'issues', issueId, 'comments'));
     const issueRef = doc(db, 'issues', issueId);
     const authorId = user.uid || user.id || null;
-    const existingCount = visibility === 'public'
-      ? await getCountFromServer(collection(db, 'issues', issueId, 'comments'))
-      : null;
+    const existingCount = await getCountFromServer(collection(db, 'issues', issueId, 'comments'));
     await runTransaction(db, async transaction => {
       const issueSnap = await transaction.get(issueRef);
       if (!issueSnap.exists()) throw new Error('Issue not found');
@@ -145,7 +89,6 @@ export function useComments(issueId, windowSize = COMMENT_WINDOW, { includeInter
         authorAvatar: user.avatar || user.photoURL || null,
         text: text?.trim() || '',
         attachments,
-        visibility,
         // What the composer already resolved about the tasks this comment
         // names, so drawing them later costs nothing. See `collectIssueMentions`.
         issueMentions: Array.isArray(options.issueMentions) ? options.issueMentions : [],
@@ -160,33 +103,31 @@ export function useComments(issueId, windowSize = COMMENT_WINDOW, { includeInter
         } : null,
         createdAt: serverTimestamp()
       });
-      if (visibility === 'public') {
-        transaction.update(issueRef, {
-          commentCount: typeof issueSnap.data().commentCount === 'number'
-            ? increment(1)
-            : existingCount.data().count + 1,
-          updatedAt: serverTimestamp(),
-          lastActivityType: 'comment',
-          lastActivityAt: serverTimestamp(),
-          lastActivityActorId: authorId,
-          lastActivityActorName: user.name || user.displayName || user.email?.split('@')[0] || 'Невідомо',
-          lastActivityActorAvatar: user.avatar || user.photoURL || null,
-          lastActivityText: text?.trim().slice(0, 240) || 'Вкладення',
-          lastCommentAt: serverTimestamp(),
-          lastCommentAuthorId: authorId,
-          lastCommentMentionIds: options.mentionedUserIds || [],
-          lastCommentReadBy: authorId ? [authorId] : [],
-          // One tally per person, so a card can say "you were named three times"
-          // instead of only "you were named in the last message" — which is all
-          // `lastCommentMentionIds` can ever say, and the next message erases it.
-          // Cleared for a reader in `markCommentsRead` below.
-          ...Object.fromEntries(
-            [...new Set(options.mentionedUserIds || [])]
-              .filter(userId => userId && userId !== authorId)
-              .map(userId => [`unreadMentions.${userId}`, increment(1)]),
-          ),
-        });
-      }
+      transaction.update(issueRef, {
+        commentCount: typeof issueSnap.data().commentCount === 'number'
+          ? increment(1)
+          : existingCount.data().count + 1,
+        updatedAt: serverTimestamp(),
+        lastActivityType: 'comment',
+        lastActivityAt: serverTimestamp(),
+        lastActivityActorId: authorId,
+        lastActivityActorName: user.name || user.displayName || user.email?.split('@')[0] || 'Невідомо',
+        lastActivityActorAvatar: user.avatar || user.photoURL || null,
+        lastActivityText: text?.trim().slice(0, 240) || 'Вкладення',
+        lastCommentAt: serverTimestamp(),
+        lastCommentAuthorId: authorId,
+        lastCommentMentionIds: options.mentionedUserIds || [],
+        lastCommentReadBy: authorId ? [authorId] : [],
+        // One tally per person, so a card can say "you were named three times"
+        // instead of only "you were named in the last message" — which is all
+        // `lastCommentMentionIds` can ever say, and the next message erases it.
+        // Cleared for a reader in `markCommentsRead` below.
+        ...Object.fromEntries(
+          [...new Set(options.mentionedUserIds || [])]
+            .filter(userId => userId && userId !== authorId)
+            .map(userId => [`unreadMentions.${userId}`, increment(1)]),
+        ),
+      });
     });
     // Розмова в задачі — це подія проєкту.
     //
@@ -207,31 +148,29 @@ export function useComments(issueId, windowSize = COMMENT_WINDOW, { includeInter
     // картку на тому самому місці. Свіжість штампа звіряється з копією проєкту,
     // яка вже лежить у памʼяті екрана, тож перевірка не коштує жодного читання —
     // а запис із неї виходить один на проєкт на вікно замість одного на репліку.
-    if (visibility === 'public' && options.projectId && projectActivityStampIsStale(options.projectAt)) {
+    if (options.projectId && projectActivityStampIsStale(options.projectAt)) {
       updateDoc(doc(db, 'projects', options.projectId), { updatedAt: serverTimestamp() })
         .catch(error => reportLoadError('[useComments] project activity stamp', error));
     }
     return commentRef.id;
   }, []);
 
-  const updateComment = useCallback(async (commentId, text, visibility = 'public') => {
+  const updateComment = useCallback(async (commentId, text) => {
     if (!issueId || !commentId || !text?.trim()) return;
-    const collectionName = visibility === 'internal' ? 'internalNotes' : 'comments';
-    await updateDoc(doc(db, 'issues', issueId, collectionName, commentId), {
+    await updateDoc(doc(db, 'issues', issueId, 'comments', commentId), {
       text: text.trim(),
       editedAt: serverTimestamp(),
     });
   }, [issueId]);
 
-  const deleteComment = useCallback(async (commentId, attachments = [], visibility = 'public') => {
+  const deleteComment = useCallback(async (commentId, attachments = []) => {
     if (!issueId || !commentId) return;
-    const collectionName = visibility === 'internal' ? 'internalNotes' : 'comments';
-    const commentRef = doc(db, 'issues', issueId, collectionName, commentId);
+    const commentRef = doc(db, 'issues', issueId, 'comments', commentId);
     const issueRef = doc(db, 'issues', issueId);
     await runTransaction(db, async transaction => {
       const issueSnap = await transaction.get(issueRef);
       transaction.delete(commentRef);
-      if (visibility === 'public' && issueSnap.exists()) {
+      if (issueSnap.exists()) {
         transaction.update(issueRef, {
           commentCount: Math.max(0, (issueSnap.data().commentCount || 0) - 1),
           updatedAt: serverTimestamp(),

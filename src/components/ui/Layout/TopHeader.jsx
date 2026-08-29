@@ -33,7 +33,7 @@ import Pill from '../DataDisplay/Pill';
  * @param {boolean} props.hideBorder Drops the bottom divider where the page draws its own.
  */
 export default function TopHeader({
-  mode = 'search', // 'search', 'project', 'breadcrumbs', 'chat'
+  mode = 'search', // 'search', 'project', 'breadcrumbs', 'minimal'
 
   // Search Props
   searchValue = '',
@@ -100,24 +100,6 @@ export default function TopHeader({
       );
     }
 
-    if (mode === 'chat') {
-      return (
-        <div className="flex items-center w-full">
-          <HeaderSearch
-            value={searchValue}
-            onChange={onSearchChange}
-            onClear={onSearchClear}
-            onEscalate={onSearchEscalate}
-            localResultCount={searchLocalResultCount}
-            outsideResultCount={searchOutsideResultCount}
-            outsideLoading={searchOutsideLoading}
-            placeholder="Пошук по чатах..."
-            className="w-full max-w-[240px]"
-          />
-        </div>
-      );
-    }
-
     // Default: SEARCH mode
     return (
       <HeaderSearch
@@ -156,13 +138,6 @@ export default function TopHeader({
                 </span>
               )}
             </button>
-          )}
-
-          {mode === 'chat' && (
-            <div className="flex items-center gap-1.5 mr-2 bg-canvas px-2 py-1 rounded-full cursor-pointer hover:bg-line transition-colors">
-              <div className="w-2 h-2 rounded-full bg-success-solid"></div>
-              <span className="text-[11px] font-bold text-ink">В мережі</span>
-            </div>
           )}
 
           <button

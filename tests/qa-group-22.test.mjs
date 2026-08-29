@@ -28,16 +28,11 @@ test('stable API codes map to human task-form messages', () => {
   assert.equal(userFacingErrorMessage({ message: '  Детальна помилка  ' }, 'fallback'), 'Детальна помилка');
 });
 
-test('comment composers lock synchronously against a same-tick double submit', async () => {
-  const [timeline, workspace] = await Promise.all([
-    read('src/components/workspace/UnifiedTimeline.jsx'),
-    read('src/app/(app)/chat/page.js'),
-  ]);
-  for (const source of [timeline, workspace]) {
-    assert.match(source, /sendingRef\.current/);
-    assert.match(source, /sendingRef\.current = true/);
-    assert.match(source, /sendingRef\.current = false/);
-  }
+test('the comment composer locks synchronously against a same-tick double submit', async () => {
+  const timeline = await read('src/components/workspace/UnifiedTimeline.jsx');
+  assert.match(timeline, /sendingRef\.current/);
+  assert.match(timeline, /sendingRef\.current = true/);
+  assert.match(timeline, /sendingRef\.current = false/);
 });
 
 test('invalid issue bodies do not consume the 60-per-minute creation limit', async () => {

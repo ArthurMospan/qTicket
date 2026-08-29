@@ -16,15 +16,15 @@ test('every top-level workspace destination names itself in the tab', () => {
   assert.equal(routeTitle('/clients'), 'Клієнти');
   // Same words as the sidebar entry and the page heading.
   assert.equal(routeTitle('/my'), 'Звернення');
-  assert.equal(routeTitle('/chat'), 'Чат');
   assert.equal(routeTitle('/team'), 'Команда');
   assert.equal(routeTitle('/settings'), 'Налаштування');
-  // The planning calendar, the sprint board and the analytics tree are deleted,
-  // so there is no screen for a title to name. These addresses redirect before
-  // anything renders.
+  // The planning calendar, the sprint board, the analytics tree and the
+  // workspace messenger are deleted, so there is no screen for a title to name.
+  // These addresses redirect before anything renders.
   assert.equal(routeTitle('/calendar'), 'Проєкт');
   assert.equal(routeTitle('/sprints'), 'Проєкт');
   assert.equal(routeTitle('/analytics'), 'Проєкт');
+  assert.equal(routeTitle('/chat'), 'Проєкт');
 });
 
 test('the external portal names the client experience instead of the staff overview', () => {
@@ -72,10 +72,10 @@ test('placeholder crumbs never reach the tab', () => {
 
 test('the organization name replaces the brand rather than stacking on it', () => {
   assert.equal(
-    workspaceDocumentTitle({ pathname: '/chat', organizationName: 'Acme' }),
-    'Чат · Acme',
+    workspaceDocumentTitle({ pathname: '/team', organizationName: 'Acme' }),
+    'Команда · Acme',
   );
-  assert.equal(workspaceDocumentTitle({ pathname: '/chat' }), 'Чат · qTicket');
+  assert.equal(workspaceDocumentTitle({ pathname: '/team' }), 'Команда · qTicket');
   // A screen already called after the organization is not repeated.
   assert.equal(
     workspaceDocumentTitle({ pathname: '/', organizationName: 'Огляд' }),
@@ -84,11 +84,11 @@ test('the organization name replaces the brand rather than stacking on it', () =
 });
 
 test('the unread badge decorates the real title instead of replacing it', () => {
-  assert.equal(decorateTitle('Чат · Acme', { unread: 0 }), 'Чат · Acme');
-  assert.equal(decorateTitle('Чат · Acme', { unread: 3 }), '(3) Чат · Acme');
+  assert.equal(decorateTitle('Звернення · Acme', { unread: 0 }), 'Звернення · Acme');
+  assert.equal(decorateTitle('Звернення · Acme', { unread: 3 }), '(3) Звернення · Acme');
   assert.equal(
-    decorateTitle('Чат · Acme', { unread: 3, alternate: true }),
-    'Нове повідомлення · Чат · Acme',
+    decorateTitle('Звернення · Acme', { unread: 3, alternate: true }),
+    'Нове повідомлення · Звернення · Acme',
   );
 });
 

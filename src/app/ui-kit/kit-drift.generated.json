@@ -8,14 +8,14 @@
     "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
   },
   "totals": {
-    "componentsWithVariants": 40,
-    "declaredValues": 348,
+    "componentsWithVariants": 39,
+    "declaredValues": 345,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 180,
+    "usedAndPreviewed": 166,
     "usedWithoutPreview": 0,
-    "declaredUnused": 152
+    "declaredUnused": 163
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -115,6 +115,18 @@
     {
       "component": "Button",
       "prop": "composition",
+      "value": "chat-message-action",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
+      "value": "chat-panel-action",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
       "value": "color-hex",
       "namespace": ".ui-control[data-ui-composition]"
     },
@@ -203,6 +215,12 @@
       "namespace": null
     },
     {
+      "component": "Button",
+      "prop": "surface",
+      "value": "default",
+      "namespace": null
+    },
+    {
       "component": "Card",
       "prop": "padding",
       "value": "md",
@@ -236,6 +254,12 @@
       "component": "Counter",
       "prop": "status",
       "value": "danger",
+      "namespace": null
+    },
+    {
+      "component": "Counter",
+      "prop": "status",
+      "value": "muted",
       "namespace": null
     },
     {
@@ -331,6 +355,18 @@
     {
       "component": "IconAction",
       "prop": "composition",
+      "value": "chat-message-action",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
+      "value": "chat-panel-action",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
       "value": "color-hex",
       "namespace": ".ui-control[data-ui-composition]"
     },
@@ -369,6 +405,12 @@
       "prop": "composition",
       "value": "status-submit",
       "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "shape",
+      "value": "compact",
+      "namespace": null
     },
     {
       "component": "IconAction",
@@ -458,6 +500,12 @@
       "component": "MarkdownViewer",
       "prop": "size",
       "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "MentionMenu",
+      "prop": "density",
+      "value": "composer",
       "namespace": null
     },
     {
@@ -876,6 +924,12 @@
     },
     {
       "component": "TextAction",
+      "prop": "size",
+      "value": "xs",
+      "namespace": null
+    },
+    {
+      "component": "TextAction",
       "prop": "tone",
       "value": "ink",
       "namespace": null
@@ -925,7 +979,19 @@
     {
       "component": "UserAvatar",
       "prop": "size",
+      "value": "chat-inline",
+      "namespace": null
+    },
+    {
+      "component": "UserAvatar",
+      "prop": "size",
       "value": "chat-member",
+      "namespace": null
+    },
+    {
+      "component": "UserAvatar",
+      "prop": "size",
+      "value": "chat-message",
       "namespace": null
     },
     {
@@ -1465,12 +1531,6 @@
         "small"
       ]
     },
-    "ChatComposerCore": {
-      "variant": [
-        "timeline",
-        "workspace"
-      ]
-    },
     "ChatComposerDock": {
       "composition": [
         "timeline-composer"
@@ -1478,7 +1538,6 @@
     },
     "SidebarLayout": {
       "context": [
-        "chat",
         "settings",
         "team"
       ]
@@ -1546,43 +1605,27 @@
     "Card.preset.borderless": 17,
     "Card.padding.none": 4,
     "ListRow.density.roomy": 4,
-    "UserAvatar.size.md": 4,
+    "UserAvatar.size.md": 2,
     "Pill.tone.neutral": 9,
-    "Pill.size.sm": 22,
-    "Pill.shape.badge": 20,
+    "Pill.size.sm": 18,
+    "Pill.shape.badge": 17,
     "LoadingSpinner.size.md": 15,
     "Surface.preset.panel": 14,
     "Surface.padding.lg": 6,
     "EmptyState.context.page": 4,
     "Button.size.icon-lg": 5,
-    "Button.style.secondary": 41,
+    "Button.style.secondary": 40,
     "Button.size.lg": 17,
-    "Button.style.primary": 27,
+    "Button.style.primary": 26,
     "Select.filterRole.status": 2,
     "Select.variant.ghost": 11,
     "Select.filterRole.member": 3,
     "Select.filterRole.priority": 2,
     "Alert.variant.error": 7,
-    "Button.size.md": 29,
+    "Button.size.md": 27,
     "Alert.variant.info": 6,
     "Surface.padding.md": 10,
     "Pill.tone.success": 4,
-    "MentionMenu.density.composer": 1,
-    "ChatComposerCore.variant.workspace": 1,
-    "IconAction.appearance.soft": 5,
-    "IconAction.appearance.quiet": 13,
-    "IconAction.composition.chat-composer-action": 2,
-    "Counter.size.sm": 11,
-    "Counter.appearance.subtle": 3,
-    "IconAction.composition.chat-panel-action": 3,
-    "IconAction.size.xs": 5,
-    "IconAction.shape.compact": 1,
-    "IconAction.appearance.quiet-danger": 4,
-    "IconAction.composition.chat-micro-action": 6,
-    "Dialog.size.md": 3,
-    "SidebarLayout.context.chat": 1,
-    "Button.style.ghost": 43,
-    "Button.size.icon-xs": 11,
     "Button.composition.workspace-guard": 3,
     "Surface.preset.card": 2,
     "Surface.padding.none": 2,
@@ -1591,24 +1634,28 @@
     "MultiSelect.filterRole.project": 1,
     "Select.filterRole.type": 1,
     "Select.filterRole.date": 2,
-    "Button.size.sm": 30,
+    "Button.size.sm": 28,
     "Dialog.titleContext.dialog": 3,
     "Dialog.size.sm": 7,
     "Dialog.presentation.sheet": 1,
     "Dialog.bodyPadding.spacious": 1,
-    "UserAvatar.size.sm": 5,
-    "Pill.tone.warning": 6,
-    "Pill.tone.info": 2,
+    "UserAvatar.size.sm": 4,
+    "Pill.tone.warning": 3,
+    "Pill.tone.info": 1,
     "Pill.preset.avatar-counter": 2,
     "IconAction.size.md": 3,
+    "IconAction.appearance.quiet": 9,
     "UserAvatar.size.xs": 6,
     "FilterBar.context.projects": 1,
     "Select.filterRole.sort": 1,
     "Surface.composition.chart-panel": 1,
-    "Pill.size.md": 17,
+    "Pill.size.md": 16,
+    "Button.style.ghost": 37,
     "MobilePaneBack.context.pane": 1,
     "Input.composition.inline-edit": 1,
+    "IconAction.size.xs": 4,
     "IconAction.appearance.primary": 1,
+    "IconAction.appearance.soft": 2,
     "ColorSwatch.size.trigger": 1,
     "ColorSwatch.size.choice": 1,
     "Input.size.sm": 1,
@@ -1633,26 +1680,27 @@
     "SelectableChip.shape.person": 1,
     "SelectableChip.shape.label": 1,
     "Surface.padding.sm": 1,
-    "TextAction.tone.danger": 2,
+    "TextAction.tone.danger": 1,
     "TextAction.size.md": 1,
     "Surface.preset.bordered-card": 1,
-    "TextAction.tone.muted": 6,
-    "TextAction.size.sm": 4,
+    "TextAction.tone.muted": 3,
+    "TextAction.size.sm": 2,
     "Dialog.bodyPadding.invite": 1,
     "Input.size.lg": 2,
     "Counter.variant.dot": 6,
+    "Counter.size.sm": 9,
     "Counter.appearance.sidebar": 4,
-    "IconAction.size.sm": 5,
+    "IconAction.size.sm": 4,
     "Button.composition.sidebar-help-action": 2,
     "Counter.size.md": 1,
     "Counter.appearance.inverse-outline": 1,
     "ListRow.density.compact": 1,
     "Dialog.presentation.dialog": 6,
     "ResponseChoice.size.sm": 1,
-    "Button.size.icon-sm": 9,
+    "Button.size.icon-sm": 5,
     "Button.shape.compact": 2,
-    "Button.surface.canvas": 3,
-    "Segmented.surface.canvas": 3,
+    "Button.surface.canvas": 2,
+    "Segmented.surface.canvas": 2,
     "IconAction.appearance.surface": 1,
     "IconAction.appearance.surface-danger": 1,
     "TextAction.tone.danger-quiet": 1,
@@ -1677,6 +1725,7 @@
     "Pill.appearance.outline": 1,
     "Pill.tone.surface-ink": 1,
     "Textarea.surface.white": 1,
+    "Button.size.icon-xs": 10,
     "Button.composition.section-kebab": 2,
     "Pill.tone.count": 6,
     "Pill.tone.danger": 2,
@@ -1691,32 +1740,28 @@
     "Surface.preset.compact-bordered-card": 1,
     "Input.size.md": 1,
     "Button.composition.inline-add-action": 3,
-    "UserAvatar.size.chat-mention": 2,
+    "UserAvatar.size.chat-mention": 1,
     "Pill.tone.surface": 1,
     "Pill.size.chat-day": 1,
     "IconAction.size.micro": 6,
+    "IconAction.composition.chat-micro-action": 5,
     "IconAction.shape.micro": 6,
+    "IconAction.appearance.quiet-danger": 3,
     "AvatarButton.size.chat-member": 2,
     "ChatComposerDock.composition.timeline-composer": 1,
     "MentionMenu.density.timeline": 1,
     "IconAction.composition.chat-composer-cancel": 1,
-    "ChatComposerCore.variant.timeline": 1,
     "Button.composition.chat-composer-action": 1,
     "FileThumb.density.sm": 2,
     "FileThumb.density.lg": 1,
-    "UserAvatar.size.chat-inline": 1,
-    "TextAction.size.xs": 1,
-    "UserAvatar.size.chat-message": 2,
-    "IconAction.composition.chat-message-action": 1,
-    "Button.composition.chat-message-action": 2,
-    "Button.surface.default": 1,
     "Dialog.bodyPadding.default": 1,
     "Dialog.bodyPadding.horizontal": 1,
     "Counter.size.xs": 1,
     "FilterBar.context.stacked": 1,
-    "Counter.status.muted": 1,
+    "Dialog.size.md": 2,
     "LoadingSpinner.size.sm": 2,
     "Counter.appearance.solid": 1,
+    "Counter.appearance.subtle": 2,
     "Select.size.sm": 5,
     "Input.composition.project-name": 1,
     "Textarea.composition.project-description": 1,
@@ -1792,8 +1837,6 @@
     "Card.preset.bordered-compact",
     "Card.preset.borderless",
     "Card.preset.elevated",
-    "ChatComposerCore.variant.timeline",
-    "ChatComposerCore.variant.workspace",
     "ChatComposerDock.composition.timeline-composer",
     "ColorSwatch.size.choice",
     "ColorSwatch.size.theme",
@@ -1988,7 +2031,6 @@
     "Select.variant.inline",
     "SelectableChip.shape.label",
     "SelectableChip.shape.person",
-    "SidebarLayout.context.chat",
     "SidebarLayout.context.settings",
     "SidebarLayout.context.team",
     "Skeleton.preset.avatar",

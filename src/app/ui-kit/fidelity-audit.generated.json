@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 172,
-    "parsedFiles": 172,
+    "productFiles": 167,
+    "parsedFiles": 167,
     "parseErrors": 0,
     "nativeControls": 15,
     "structures": {
@@ -24,7 +24,7 @@
     "manualModalShells": 0,
     "manualPills": 0,
     "manualSurfaces": 0,
-    "localSurfaceExceptions": 15,
+    "localSurfaceExceptions": 14,
     "manualIconButtons": 0,
     "headingStyles": 0,
     "sharedChromeOverrides": 0,
@@ -38,14 +38,14 @@
   },
   "kit": {
     "totals": {
-      "components": 96,
-      "used": 96,
+      "components": 90,
+      "used": 90,
       "unused": 0,
-      "covered": 89,
+      "covered": 84,
       "uncovered": 0,
-      "routes": 9,
-      "previews": 126,
-      "internal": 7,
+      "routes": 8,
+      "previews": 122,
+      "internal": 6,
       "unlisted": 0
     },
     "unusedComponents": []
@@ -187,15 +187,7 @@
       "resembles": "IconAction",
       "structure": "chat",
       "routes": [
-        "/",
-        "/[projectId]",
-        "/[projectId]/issue/[issueId]",
-        "/chat",
-        "/clients",
-        "/my",
-        "/overview",
-        "/settings",
-        "/team"
+        "/[projectId]/issue/[issueId]"
       ]
     },
     {
@@ -212,20 +204,12 @@
       "resembles": "IconAction",
       "structure": "other",
       "routes": [
-        "/",
-        "/[projectId]",
-        "/[projectId]/issue/[issueId]",
-        "/chat",
-        "/clients",
-        "/my",
-        "/overview",
-        "/settings",
-        "/team"
+        "/[projectId]/issue/[issueId]"
       ]
     },
     {
       "tag": "button",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:160",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:159",
       "className": "${…} cursor-pointer transition-colors ${…}",
       "text": "",
       "childElements": [],
@@ -361,7 +345,7 @@
       "context": "profile-project-chip"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:160",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:159",
       "tag": "button",
       "context": "chat-reply-quote"
     },
@@ -386,11 +370,6 @@
   "manualPills": [],
   "manualSurfaces": [],
   "localSurfaceExceptions": [
-    {
-      "location": "src/app/(app)/chat/page.js:393",
-      "tag": "div",
-      "className": "relative z-10 flex h-[56px] shrink-0 items-center justify-between border-b border-line/70 bg-canvas/90 px-5 backdrop-blur-xl md:rounded-t-[var(--ui-radius-surface)]"
-    },
     {
       "location": "src/app/(app)/error.js:37",
       "tag": "div",
@@ -447,12 +426,12 @@
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1707",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1635",
       "tag": "div",
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:543",
+      "location": "src/components/WorkspaceHeader.jsx:541",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

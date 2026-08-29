@@ -76,7 +76,7 @@ export const PERMISSIONS = {
   'edit:issue': ['owner', 'admin', 'member'],
   'delete:issue': ['owner', 'admin', 'member'],
 
-  // Comments and chat
+  // The conversation
   //
   // The third entry that had drifted, and the most expensive one: this said a
   // client may reply while `firestore.rules` refused the write the product
@@ -86,15 +86,17 @@ export const PERMISSIONS = {
   // conversation-participant clause beside `issues/{issueId}/comments`, and
   // this entry is true for the first time.
   'create:comment': ['owner', 'admin', 'member', 'client_admin', 'client_member'],
-  // The staff-only half of an incident. A public reply lives in `comments` and
-  // is open to every participant of the project; an internal note lives in the
-  // separately ruled `internalNotes` subcollection, beside the support-side
-  // `audit` history. `firestore.rules` refuses both to the client roles, so a
-  // client never opens a query those rules would only refuse.
-  'access:internal_notes': ['owner', 'admin', 'member'],
+  // An incident has exactly one conversation and both sides of the desk read
+  // all of it. There is no staff-only half of it left to gate: the
+  // `internalNotes` collection and every note in it are gone.
+  //
+  // What stays support-side is the change history — who reassigned the
+  // incident, who moved it, when. That is the work record, not the customer's
+  // conversation, and `firestore.rules` refuses `issues/{issueId}/audit` to the
+  // client roles, so a client never opens a query those rules would only refuse.
+  'access:audit_log': ['owner', 'admin', 'member'],
   'edit:comment': ['owner', 'admin', 'member', 'client_admin', 'client_member'], // Only on own comments
-  'moderate:content': ['owner', 'admin'],       // Прибрати чужий коментар або повідомлення
-  'manage:channels': ['owner', 'admin'],        // Створити/видалити канал
+  'moderate:content': ['owner', 'admin'],       // Прибрати чужий коментар
 };
 
 /**

@@ -100,12 +100,6 @@ export async function POST(request) {
     const body = cleanText(payload.body, 2000);
     const link = cleanText(payload.link, 500);
     const issueId = cleanText(payload.issueId, 128);
-    // Which conversation in the workspace chat this is about, when it is about
-    // one. The record used to say so only inside its link, so the screen showing
-    // that conversation could not ask the question without parsing a URL —
-    // which is why a channel's records went on sitting unread in the bell of
-    // somebody reading the channel.
-    const channelId = cleanText(payload.channelId, 128);
     const dedupeKey = cleanText(payload.dedupeKey, 180);
     if (!userIds.length || !ALLOWED_TYPES.has(type) || !title || !body) return NextResponse.json({ error: 'Missing or invalid fields' }, { status: 400 });
     const scopedLink = link ? withNotificationOrganization(link, organizationId) : '';
@@ -193,7 +187,7 @@ export async function POST(request) {
     const reached = new Set([...inappAudience, ...emailAudience].map(item => item.userId));
 
     const notificationData = (delivery, { inapp }) => ({
-        userId: delivery.userId, type, title, body, link: scopedLink, issueId, projectId, organizationId, channelId,
+        userId: delivery.userId, type, title, body, link: scopedLink, issueId, projectId, organizationId,
         actorId: authorization.user.uid,
         actorName: sender.name || authorization.user.name || '',
         actorAvatar: sender.avatar || sender.photoURL || authorization.user.picture || '',

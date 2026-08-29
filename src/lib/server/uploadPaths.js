@@ -8,8 +8,6 @@ export {
   UPLOAD_ROOT,
   isSafeStoragePath,
   isSafeUploadFolder,
-  isOrganizationChatStoragePath,
-  isOrganizationChatUploadFolder,
   organizationIdFromPath,
 } from '@/lib/utils/uploadPaths.mjs';
 

@@ -26,9 +26,11 @@ test('QUI-129 and QUI-139 keep the project header free of team avatars', async (
     assert.doesNotMatch(source, /projectMembers/, 'the project team avatar strip is gone');
   }
   assert.doesNotMatch(topHeader, /ProjectMembersMenu/);
-  // Nor a strip of who is online: a ticket system does not report on the
-  // whereabouts of the people answering tickets.
-  assert.doesNotMatch(topHeader, /onlineUsers/);
+  // Nor a strip of who is online, for two reasons that arrived together: a
+  // ticket system does not report on the whereabouts of the people answering
+  // tickets, and the only screen that ever filled the strip was the workspace
+  // messenger.
+  assert.doesNotMatch(topHeader, /renderOnlineUsers|onlineUsers/);
   // The preview also stopped reaching for a third-party avatar host, which had
   // been failing on every page load.
   assert.doesNotMatch(kit, /pravatar/);
@@ -216,42 +218,37 @@ test('QUI-140 removes the unreachable portal route and the variant it kept alive
   assert.doesNotMatch(variants, /PageHeader: \{ variant/);
 });
 
-// QUI-141 / QUI-142. The previews were hand-copies of the two rails, and the
-// copies were wrong in five ways at once — 8px radius drawn as 10px, the
-// `bg-line` selected row drawn as white-with-a-shadow, a 32px avatar drawn at
-// 24px, a muted name drawn as bold ink, no presence dot. A copy will always
-// drift; the fix is that there is no copy. One component, three call sites.
-test('the chat and team rails exist once, and the pages and catalogue all render it', async () => {
-  const [rail, memberRail, chat, team, kit] = await Promise.all([
-    read('../src/components/ui/Navigation/ChannelRail.jsx'),
+// QUI-141 / QUI-142. The previews were hand-copies of the rails, and the copies
+// were wrong in five ways at once — 8px radius drawn as 10px, the `bg-line`
+// selected row drawn as white-with-a-shadow, a 32px avatar drawn at 24px, a
+// muted name drawn as bold ink, no presence dot. A copy will always drift; the
+// fix is that there is no copy. There were two rails and three call sites; the
+// channel rail went with the screen it listed channels for.
+test('the team rail exists once, and the page and the catalogue both render it', async () => {
+  const [memberRail, team, kit] = await Promise.all([
     read('../src/components/ui/Navigation/MemberRail.jsx'),
-    read('../src/app/(app)/chat/page.js'),
     read('../src/app/(app)/team/page.js'),
     readKitShowcase(),
   ]);
 
-  // The markup lives in the components and nowhere else.
-  assert.match(rail, /data-ui-control="chat-list-action"/);
-  assert.match(rail, /bg-line text-ink font-semibold/);
+  // The markup lives in the component and nowhere else.
   assert.match(memberRail, /rounded-\[8px\][\s\S]{0,80}isSelected \? 'bg-line'/);
   assert.match(memberRail, /<UserAvatar user=\{member\} size="md" \/>/);
   assert.match(memberRail, /text-\[13px\] font-medium truncate/);
-  // No presence mark on either rail. Whether a colleague is at their desk is
-  // not a fact a ticket system keeps.
-  assert.doesNotMatch(rail, /PresenceDot/);
+  // No presence mark on the rail. Whether a colleague is at their desk is not a
+  // fact a ticket system keeps.
   assert.doesNotMatch(memberRail, /PresenceDot/);
 
-  for (const [name, source] of [['chat', chat], ['team', team], ['kit', kit]]) {
+  for (const [name, source] of [['team', team], ['kit', kit]]) {
     assert.doesNotMatch(
       source,
       /data-ui-control="chat-list-action"|isSelected \? 'bg-line'/,
       `${name} must render the shared rail, not its own copy of the markup`,
     );
   }
-  assert.match(chat, /<ChannelRail/);
   assert.match(team, /<MemberRail/);
-  assert.match(kit, /<ChannelRail/);
   assert.match(kit, /<MemberRail/);
+  assert.doesNotMatch(kit, /<ChannelRail/);
 });
 
 test('both entry points to project settings offer the same capabilities', async () => {
@@ -287,6 +284,10 @@ test('a member profile offers qTicket actions only', async () => {
   // Icons only: no labelled Button survives in the action row.
   assert.doesNotMatch(profile, />\s*Написати\s*</);
   assert.doesNotMatch(profile, />\s*Виклик\s*</);
+  // «Написати повідомлення» is not among them: it opened a direct room in the
+  // workspace messenger, and the product has no conversation with a colleague
+  // outside an incident.
+  assert.doesNotMatch(profile, /Написати повідомлення/);
   for (const label of [
     'Створити інцидент і призначити учасника',
   ]) {

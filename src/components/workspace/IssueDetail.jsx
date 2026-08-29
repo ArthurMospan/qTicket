@@ -1431,11 +1431,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           router.push(`${pathname}?${params.toString()}`);
                         },
                       },
-                      {
-                        label: 'Написати в чат',
-                        icon: MessageCircle,
-                        onClick: () => router.push(`/chat?dm=${encodeURIComponent(reporterMember.id || reporterMember.uid)}`),
-                      },
                     ]}
                   />
                 )}
