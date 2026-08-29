@@ -35,7 +35,7 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація простору клієнта з розсувним пошуком звернень. Склад підтримки видно у вкладці «Люди», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація простору клієнта з розсувним пошуком звернень. Склад підтримки видно у вкладці «Учасники», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="project"

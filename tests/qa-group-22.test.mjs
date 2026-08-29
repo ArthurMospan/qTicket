@@ -14,7 +14,7 @@ test('task composer resets discarded drafts and owns its one inline failure', as
 
   const board = await read('src/app/(app)/[projectId]/ProjectBoardClient.jsx');
   const handler = board.slice(
-    board.indexOf('const handleCreateFullIssue'),
+    board.indexOf('const handleCreateIssue'),
     board.indexOf('const handleMoveIssue'),
   );
   assert.doesNotMatch(handler, /showToast\([^\n]*Помилка/);

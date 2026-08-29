@@ -258,7 +258,7 @@ export default function BoardConfigModal({
           teamMemberIds={teamMemberIds}
           onTeamMemberIdsChange={canManageTeam ? setTeamMemberIds : undefined}
           ownerId={project?.createdBy}
-          teamHint="Тут обирається тільки внутрішня команда підтримки. Доступ клієнтів керується окремо у вкладці «Люди»."
+          teamHint="Тут обирається тільки внутрішня команда підтримки. Доступ клієнтів керується окремо у вкладці «Учасники»."
           loading={loading}
           dangerZone={dangerZone}
         />

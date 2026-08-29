@@ -213,7 +213,7 @@ accounts whose addresses you know exactly.
    another login, see the synchronized organization branding and create one
    client project. The selected staff members must open qTicket the same way;
    an unselected QuickTeam member must have no qTicket launch action.
-3. Open that client project in qTicket, choose **Люди → Запросити клієнта**,
+3. Open that client project in qTicket, choose **Учасники → Запросити клієнта**,
    enter the client's Google email and create the project-scoped invitation.
 4. Because email is disabled, click **Скопіювати інструкцію** and send that text
    to the client in a messenger.

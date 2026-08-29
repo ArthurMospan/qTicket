@@ -64,7 +64,7 @@ export default function ProjectSettingsForm({
   inviteEmails,
   onInviteEmailsChange,
   inviteEmailsError = '',
-  inviteEmailsHint = 'Клієнтів запрошують після створення простору у вкладці «Люди».',
+  inviteEmailsHint = 'Клієнтів запрошують після створення простору у вкладці «Учасники».',
   loading = false,
   dangerZone = null,
 }) {

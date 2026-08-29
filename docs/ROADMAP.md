@@ -13,6 +13,18 @@ This file contains current owner guardrails and confirmed open work. Completed i
   authority for client projects, external invitations, incidents and workflow.
 - `issues` is the canonical incident collection. `tasks` is legacy/read-only and must not receive new features. The internal collection name stays stable during the fork; every user-facing string calls the record **«звернення»**, and it is one word for both audiences — the client's portal and the support queue name the same thing the same way.
 - **The conversation on an incident is one shared thread.** Everything support writes there, the client reads. There is no internal note, no staff-only mode in the composer and no second collection beside `comments` — the owner removed it after it shipped, and a smaller version of it (a «draft» reply, a hidden mention, a private quote) is the same feature under another name. When support needs to discuss a case among themselves, they do it somewhere that is not the customer's own record.
+- **Огляд and Звернення are two screens and stay two.** Folding the overview
+  into the queue as a set of saved filters was proposed and refused by the
+  owner on 2026-08-29: an overview answers «як ідуть справи» and a queue
+  answers «що робити далі», and one screen wearing both answers neither.
+  `/overview` is not to be redirected into `/my`, merged with it, or reduced
+  to a filter chip on it.
+- **A client space is that client's queue, not a second dashboard.** The page
+  reached from **Клієнти** carries two tabs — **Звернення** and **Учасники** —
+  and no counter tiles above the board: the board's own columns already say
+  where every request stands, and the numbers belong on **Огляд**. The space's
+  configuration is one dialog behind the gear in the header, never a tab of its
+  own beside it.
 - **The client and the support team see the same interface.** The difference between them is what the client is *not* shown — internal controls, other customers' queues, organization settings — never a second product built for customers. A screen both audiences reach is one screen that knows who is looking; a screen only clients reach exists only where support genuinely has no equivalent.
 - **The team and the brand are administered in QuickTeam's qTicket integration, not inside qTicket.** Staff seats, roles, identity, organization name, logo and colour arrive in the signed snapshot and are read-only here; a second editor for any of them is a copy that loses. What qTicket's own settings own is the support process and its record: statuses, types, priorities, labels and the archive. A settings section that does not administer one of those does not belong in qTicket.
 - qTicket does not publish a price list, sell or switch subscriptions, or use a
@@ -95,10 +107,11 @@ Completed product slice on 2026-08-28:
   attachments and shared conversation while removing internal assignee, roster,
   label, deadline and direct-chat surfaces.
 - The internal client-project route now opens a qTicket customer workspace
-  instead of the inherited project board. It has a focused incident queue and
-  support metrics, separate client/support rosters, a project-scoped client
-  administrator invitation, and an internal-only settings summary. It no
-  longer subscribes to sprints, project analytics, timers or QuickTeam+ UI.
+  instead of the inherited project board. It has a focused incident queue,
+  separate client/support rosters and a project-scoped client administrator
+  invitation. It no longer subscribes to sprints, project analytics, timers or
+  QuickTeam+ UI. (The support metrics and the settings summary that shipped
+  with it were removed on 2026-08-29 — see the slice below.)
 - The product baseline passes lint, the complete unit suite, production build,
   all 89 Firestore rules tests, all 42 local visual scenarios, and the UI Kit
   usage, drift, fidelity, colour and
@@ -130,7 +143,7 @@ Completed product slice on 2026-08-28:
 - Creating a client no longer turns an email entered in the setup dialog into
   an internal QuickTeam seat. Support staff are selected only from synchronized
   internal members, while external users are invited from the client space's
-  **Люди** tab with `client_admin`/`client_member` scope.
+  **Учасники** tab with `client_admin`/`client_member` scope.
 - QuickTeam-managed organization, branding, entitlement and support seats are
   read-only in qTicket. Inherited migration and unrelated integration panels are
   removed from qTicket settings navigation; the rates and organization-deletion
@@ -282,7 +295,7 @@ Completed product slice on 2026-08-29:
   pressing «Підтримка» there would have reached OneB's Telegram rather than
   their supplier.
 - The client invitation **link** exists again, client-only. Staff mint a
-  `client_admin` link on a client space's «Люди» tab; a `client_admin` mints a
+  `client_admin` link on a client space's «Учасники» tab; a `client_admin` mints a
   `client_member` link in «Співробітники клієнта». A link is fixed to one role
   and one client project, expires in 7 days, is capped at 10 uses and can be
   revoked. `src/lib/server/inviteLinks.mjs` refuses an internal role when the
@@ -301,6 +314,16 @@ Completed product slice on 2026-08-29:
   remaining uses — so an invited client meets their supplier's brand before
   signing in. It is rate-limited by IP and its page metadata deliberately does
   not unfurl the tenant, because the link is pasted into group chats.
+
+- The client space page lost its dashboard and its third tab. The four KPI
+  tiles above the board are gone for both readers, «Люди» is now **Учасники**,
+  and the «Налаштування» tab is deleted outright: its body was a read-only copy
+  of the client card plus a button that opened the very dialog the gear in the
+  header opens. One consequence is deliberate and worth stating — the client's
+  «Контекст» (`project.description`) is now readable only inside that dialog,
+  which is `owner`/`admin` (`edit:project_settings`), so an internal `member`
+  no longer sees it anywhere. If it turns out support needs that text, it comes
+  back as one line under the header, not as a tab.
 
 Product work still required:
 

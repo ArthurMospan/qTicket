@@ -8,7 +8,6 @@ import {
   Card,
   EmptyState,
   FilterBar,
-  KpiCard,
   ListRow,
   LoadingSpinner,
   PageHeader,
@@ -21,8 +20,6 @@ import {
 } from '@/components/ui';
 import {
   ArrowRight,
-  CheckCircle2,
-  CircleDotDashed,
   Inbox,
   Kanban,
   List,
@@ -46,17 +43,20 @@ import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
-import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
+import { assigneeIdsOf, categorizeIssues } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
+// Two tabs, not three. «Налаштування» was a third one whose body was a
+// read-only copy of the client card plus a button that opened the very dialog
+// the gear in the header opens. A tab is a place; that one led nowhere the
+// header did not already lead.
 const PROJECT_TABS = [
   { id: 'incidents', label: 'Звернення' },
-  { id: 'people', label: 'Люди' },
-  { id: 'settings', label: 'Налаштування' },
+  { id: 'people', label: 'Учасники' },
 ];
 
 const SCOPE_OPTIONS = [
@@ -211,7 +211,6 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     () => categorizeIssues(issues, statuses),
     [issues, statuses],
   );
-  const metrics = useMemo(() => incidentQueueMetrics(categorizedIssues), [categorizedIssues]);
   const visibleIssues = useMemo(() => {
     const query = workspaceSearch.trim().toLocaleLowerCase('uk-UA');
     return categorizedIssues
@@ -339,11 +338,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const tabs = (clientViewer ? PROJECT_TABS.filter(tab => tab.id === 'incidents') : PROJECT_TABS)
     .map(tab => ({
       ...tab,
-      count: tab.id === 'incidents'
-        ? visibleIssues.length
-        : tab.id === 'people'
-          ? projectMembers.length
-          : 0,
+      count: tab.id === 'incidents' ? visibleIssues.length : projectMembers.length,
     }));
 
   if (loading) {
@@ -478,20 +473,10 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
 
               {activeTab === 'incidents' && (
                 <>
-                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    <KpiCard
-                      icon={Inbox}
-                      value={metrics.open}
-                      label="Відкриті"
-                      // Who has not picked one up yet is a fact about the
-                      // support queue, said to the people who staff it.
-                      sub={clientViewer ? 'у цьому просторі' : `${metrics.unassigned} без відповідального`}
-                    />
-                    <KpiCard icon={Plus} value={metrics.new} label="Нові" sub="очікують першої реакції" />
-                    <KpiCard icon={CircleDotDashed} value={metrics.active} label="У роботі" sub="разом із перевіркою" />
-                    <KpiCard icon={CheckCircle2} value={metrics.resolved} label="Вирішені" sub="у цьому просторі" />
-                  </div>
-
+                  {/* No counters above the board. A client space is one
+                      customer's queue, and the board already says where every
+                      request in it stands — the four tiles that used to be here
+                      were «Огляд» drawn a second time, one client wide. */}
                   {visibleIssues.length === 0 ? (
                     <Surface preset="panel" padding="md">
                       <EmptyState
@@ -602,53 +587,6 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     />
                   </Surface>
                 </div>
-              )}
-
-              {activeTab === 'settings' && (
-                <Surface preset="panel" padding="lg">
-                  <div className="flex flex-col gap-6">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="max-w-[680px]">
-                        <h2 className="ui-type-section-title text-ink">Клієнтський простір</h2>
-                        <p className="mt-2 text-[13px] leading-6 text-muted">
-                          Тут зберігається контекст клієнта, його команда та всі звернення. Налаштування доступні тільки внутрішнім адміністраторам qTicket.
-                        </p>
-                      </div>
-                      {canManageProject && (
-                        <Button onClick={() => setShowSettings(true)} icon={Settings2} style="primary" size="md">
-                          Редагувати
-                        </Button>
-                      )}
-                    </div>
-
-                    <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
-                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
-                        <p className="text-[12px] font-semibold text-muted">Назва клієнта</p>
-                        <p className="text-[13px] font-semibold text-ink">{project.name}</p>
-                      </div>
-                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
-                        <p className="text-[12px] font-semibold text-muted">Контекст</p>
-                        <p className="whitespace-pre-line text-[13px] leading-6 text-ink">
-                          {project.description || 'Опис клієнта ще не додано.'}
-                        </p>
-                      </div>
-                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
-                        <p className="text-[12px] font-semibold text-muted">Доступ</p>
-                        <p className="text-[13px] text-ink">
-                          {clientMembers.length} клієнтських · {supportMembers.length} внутрішніх користувачів
-                        </p>
-                      </div>
-                      <div className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-4">
-                        <p className="text-[12px] font-semibold text-muted">Стан</p>
-                        <div>
-                          <Pill tone={isArchived ? 'neutral' : 'success'} size="sm" shape="badge">
-                            {isArchived ? 'В архіві' : 'Активний'}
-                          </Pill>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-                </Surface>
               )}
             </div>
           )}

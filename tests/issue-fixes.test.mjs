@@ -196,7 +196,7 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(settingsDialog, /dangerZone=\{dangerZone\}/);
   assert.match(settingsDialog, /Небезпечна зона/);
   // Client invitation is not an inline project-setting field: that path used
-  // the internal `member` role. It lives in the client's «Люди» tab instead.
+  // the internal `member` role. It lives in the client's «Учасники» tab instead.
   assert.doesNotMatch(settingsDialog, /<InviteMemberDialog/);
   assert.doesNotMatch(settingsDialog, /inviteEmails=\{inviteEmails\}/);
   assert.match(settingsDialog, /\.\.\.clientMemberIds, \.\.\.teamMemberIds/);

@@ -586,7 +586,7 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
             teamMemberIds={team}
             onTeamMemberIdsChange={setTeam}
             teamPlaceholder="Оберіть працівників підтримки"
-            teamHint="Після створення відкрийте клієнта → «Люди», щоб окремо запросити адміністратора клієнта."
+            teamHint="Після створення відкрийте клієнта → «Учасники», щоб окремо запросити адміністратора клієнта."
           />
       </div>
     </Dialog>

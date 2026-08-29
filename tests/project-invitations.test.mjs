@@ -77,7 +77,7 @@ test('client spaces never turn client invitations into internal QuickTeam seats'
   }
   assert.match(settings, /!isClientRole\(member\.role\)/);
   assert.match(settings, /\.\.\.clientMemberIds, \.\.\.teamMemberIds/);
-  assert.match(form, /Клієнтів запрошують після створення простору у вкладці «Люди»/);
+  assert.match(form, /Клієнтів запрошують після створення простору у вкладці «Учасники»/);
   assert.match(clientWorkspace, /<InviteMemberDialog[\s\S]{0,320}clientAdminMode/);
   assert.doesNotMatch(settings, /InviteMemberDialog/);
 });
