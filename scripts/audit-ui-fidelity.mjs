@@ -173,12 +173,11 @@ const STRUCTURES = [
   { id: 'chat', label: 'Чат', file: /(?:\/chat\/|Chat[A-Z]|ChatAttachments|MessageContent|UnifiedTimeline|HoverCard)/ },
   { id: 'calendar', label: 'Календар', file: /calendar/i },
   { id: 'analytics', label: 'Аналітика', file: /(?:analytics|BillingTab|TimesheetTab|WorkloadTab)/i },
-  { id: 'qtplus', label: 'QuickTeam+', file: /qtplus/i },
   { id: 'ai-call', label: 'AI-дзвінок', file: /(?:ai-call|AudioTask)/i },
   { id: 'tasks', label: 'Задачі', file: /(?:IssueDetail|IssueCard|CreateTaskModal|TaskRow|TaskListView|AttachmentViewer|Markdown)/ },
-  { id: 'board', label: 'Дошка й проєкт', file: /(?:AgileBoard|BoardConfig|QtPlusProjectTab|\(app\)\/\[projectId\]|\(app\)\/page\.js)/ },
+  { id: 'board', label: 'Дошка й проєкт', file: /(?:AgileBoard|BoardConfig|\(app\)\/\[projectId\]|\(app\)\/page\.js)/ },
   { id: 'sprints', label: 'Спринти', file: /sprints/i },
-  { id: 'settings', label: 'Налаштування', file: /(?:settings|TeamMemberSettings|InviteLink|InviteMemberDialog|OrgSwitcher|YouTrackImport)/i },
+  { id: 'settings', label: 'Налаштування', file: /(?:settings|TeamMemberSettings|InviteLink|InviteMemberDialog|OrgSwitcher)/i },
   { id: 'shell', label: 'Оболонка', file: /(?:WorkspaceHeader|WorkspaceSidebar|MobileNav|AuthLayout|SearchModal|UserStatusSetter|TopHeader|NotificationCenter|profile\/)/ },
 ];
 

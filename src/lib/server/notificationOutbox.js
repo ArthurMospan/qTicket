@@ -3,7 +3,6 @@ import 'server-only';
 
 import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { deliverEmail, emailConfigured } from '@/lib/server/email';
-import { deliverTelegramNotification, telegramAppLink } from '@/lib/server/telegram';
 import { generateEmailTemplate } from '@/lib/utils/sendEmail';
 import { shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
 import { reminderLabel } from '@/lib/utils/reminderCandidates.mjs';
@@ -309,18 +308,17 @@ export async function dispatchDueNotifications({ nowMs = Date.now(), limit = DIS
   for (const document of [...readySnapshot.docs, ...legacyDocuments]) {
     documents.set(document.id, document);
   }
-  if (!documents.size) return { due: 0, sent: 0, failed: 0, telegram: 0, email: 0 };
+  if (!documents.size) return { due: 0, sent: 0, failed: 0, email: 0 };
 
   const rows = dueRows(
     [...documents.values()].map(document => ({ ...document.data(), id: document.id })),
     nowMs,
     limit,
   );
-  if (!rows.length) return { due: 0, sent: 0, failed: 0, telegram: 0, email: 0 };
+  if (!rows.length) return { due: 0, sent: 0, failed: 0, email: 0 };
 
   const context = await loadRecipientContext(rows);
   const db = getAdminDb();
-  const telegramItems = new Map();
   const emails = [];
   const claimed = [];
   // Asked once per pass rather than once per row: it is a fact about the
@@ -358,10 +356,8 @@ export async function dispatchDueNotifications({ nowMs = Date.now(), limit = DIS
       && row.allowEmail !== false
       && shouldDeliver(preferences, 'email', row.type)
       && Boolean(profile.email);
-    const wantsTelegram = !row.telegramSentAtMs
-      && shouldDeliver(preferences, 'telegram', row.type);
 
-    if (!inapp && !wantsEmail && !wantsTelegram) {
+    if (!inapp && !wantsEmail) {
       await outboxRef().doc(row.id).update({ status: 'cancelled', cancelledAtMs: nowMs });
       continue;
     }
@@ -382,39 +378,23 @@ export async function dispatchDueNotifications({ nowMs = Date.now(), limit = DIS
       });
       continue;
     }
-    claimed.push({ row, body, wantsEmail, wantsTelegram });
+    claimed.push({ row, body, wantsEmail });
 
     if (wantsEmail) emails.push({ row, body, to: profile.email });
-    if (wantsTelegram) {
-      const list = telegramItems.get(row.userId) || [];
-      list.push({ type: row.type, title: row.title, body, url: telegramAppLink(row.link) });
-      telegramItems.set(row.userId, list);
-    }
   }
 
-  if (!claimed.length) return { due: rows.length, sent: 0, failed: 0, telegram: 0, email: 0 };
+  if (!claimed.length) return { due: rows.length, sent: 0, failed: 0, email: 0 };
 
-  const [emailResults, telegramResult] = await Promise.all([
-    Promise.allSettled(emails.map(item => deliverEmail({
-      to: item.to,
-      subject: item.row.title,
-      html: generateEmailTemplate({
-        type: item.row.type,
-        title: item.row.title,
-        body: item.body,
-        link: item.row.link,
-      }),
-    }))),
-    telegramItems.size
-      ? deliverTelegramNotification({
-        userIds: [...telegramItems.keys()],
-        itemsByUserId: telegramItems,
-      }).catch(error => {
-        console.warn('[outbox] Telegram delivery failed:', error.message);
-        return { delivered: 0, error: error.message };
-      })
-      : Promise.resolve({ delivered: 0 }),
-  ]);
+  const emailResults = await Promise.allSettled(emails.map(item => deliverEmail({
+    to: item.to,
+    subject: item.row.title,
+    html: generateEmailTemplate({
+      type: item.row.type,
+      title: item.row.title,
+      body: item.body,
+      link: item.row.link,
+    }),
+  })));
 
   const emailSucceeded = new Set();
   const emailErrors = new Map();
@@ -431,25 +411,16 @@ export async function dispatchDueNotifications({ nowMs = Date.now(), limit = DIS
       );
     }
   }
-  // A digest is one request per person. The Telegram helper returns failures
-  // per recipient so one successful chat cannot hide another blocked bot.
-  const telegramFailed = new Set(telegramResult.failedUserIds || []);
-  const telegramErrors = telegramResult.errorsByUserId || {};
-
   const batch = db.batch();
   let sent = 0;
   let failed = 0;
-  for (const { row, wantsEmail, wantsTelegram } of claimed) {
+  for (const { row, wantsEmail } of claimed) {
     const emailWasSuccessful = wantsEmail && emailSucceeded.has(row.id);
-    const telegramWasSuccessful = wantsTelegram && !telegramFailed.has(row.userId);
     const outcome = deliveryAttemptUpdate(row, {
       nowMs,
       emailRequested: wantsEmail,
       emailSucceeded: emailWasSuccessful,
-      telegramRequested: wantsTelegram,
-      telegramSucceeded: telegramWasSuccessful,
       emailError: emailErrors.get(row.id),
-      telegramError: telegramErrors[row.userId],
     });
     batch.update(outboxRef().doc(row.id), outcome.update);
     if (outcome.failed) failed += 1;
@@ -461,7 +432,6 @@ export async function dispatchDueNotifications({ nowMs = Date.now(), limit = DIS
     due: rows.length,
     sent,
     failed,
-    telegram: telegramResult.delivered || 0,
     email: emailSucceeded.size,
     recipients: groupByRecipient(claimed.map(item => item.row)).size,
   };

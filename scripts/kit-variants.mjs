@@ -161,7 +161,7 @@ const SOURCES = {
   // PageHeader declares no variants: `alt` was removed with the unreachable
   // portal route that was its only caller, leaving one layout and no choice.
   Tag: { size: { literal: ['small', 'default'] } },
-  ChatComposerCore: { variant: { literal: ['qtplus', 'timeline', 'workspace'] } },
+  ChatComposerCore: { variant: { literal: ['timeline', 'workspace'] } },
   ChatComposerDock: { composition: { css: ['.chat-composer-dock', 'data-ui-composition'] } },
   TaskAttributesPanel: { context: { literal: ['calendar', 'task'] } },
   SidebarLayout: { context: { map: ['Layout/SidebarLayout.jsx', 'CONTEXTS'] } },

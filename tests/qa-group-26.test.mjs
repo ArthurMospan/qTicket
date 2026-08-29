@@ -86,7 +86,6 @@ test('group 26 copy and layout contracts stay role-aware and concise', async () 
   assert.match(filterBar, /projects:\s*\{[\s\S]*?w-max max-w-full/);
   assert.match(filtersStory, /<FilterBar context="projects">/);
 
-  assert.match(settings, /Інтеграцію не налаштовано в цьому середовищі/);
   assert.match(settings, /Наразі інтерфейс доступний лише українською/);
   assert.match(settings, /value=\{language\}[\s\S]{0,100}disabled/);
   assert.doesNotMatch(toast, /<style>|toastSlideUp/);
@@ -94,13 +93,12 @@ test('group 26 copy and layout contracts stay role-aware and concise', async () 
   assert.match(globals, /@keyframes qt-toast-slide-up/);
 });
 
-test('sprint labels and YouTrack import metadata use the new contracts everywhere', async () => {
-  const [createTask, issueDetail, myTasks, kitStory, importer, velocity, chatSearch] = await Promise.all([
+test('sprint labels use the new contracts everywhere', async () => {
+  const [createTask, issueDetail, myTasks, kitStory, velocity, chatSearch] = await Promise.all([
     read('../src/components/CreateTaskModal.jsx'),
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/app/(app)/my/page.js'),
     read('../src/app/ui-kit/sections/task-attributes.jsx'),
-    read('../src/lib/server/youtrackImporter.js'),
     read('../src/components/workspace/VelocityTab.jsx'),
     read('../src/components/ui/Chat/ChatSearchBanner.jsx'),
   ]);
@@ -108,8 +106,6 @@ test('sprint labels and YouTrack import metadata use the new contracts everywher
   for (const source of [createTask, issueDetail, myTasks, kitStory]) {
     assert.doesNotMatch(source, /Без спринта \(Беклог\)|Беклог \(без спринта\)/);
   }
-  assert.match(importer, /importedAt: firstImportedAt/);
-  assert.match(importer, /importedAt: currentImportAt/);
   assert.match(velocity, /Помилка дат завершення/);
   assert.doesNotMatch(velocity, /\.filter\(v => v !== null && v >= 0\)/);
   assert.doesNotMatch(issueDetail, /length === 1 \? 'запис'/);

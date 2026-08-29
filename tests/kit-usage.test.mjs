@@ -375,7 +375,6 @@ test('high-risk composed previews keep the product markup signatures', () => {
   const issueDetail = readFileSync(new URL('../src/components/workspace/IssueDetail.jsx', import.meta.url), 'utf8');
   const calendarEvent = readFileSync(new URL('../src/components/workspace/calendar/CalendarEventPage.jsx', import.meta.url), 'utf8');
   const timeline = readFileSync(new URL('../src/components/workspace/UnifiedTimeline.jsx', import.meta.url), 'utf8');
-  const qtPlusComposer = readFileSync(new URL('../src/components/workspace/qtplus/chat/ChatComposer.jsx', import.meta.url), 'utf8');
   const composerCore = readFileSync(new URL('../src/components/ui/ChatComposerCore.jsx', import.meta.url), 'utf8');
   const taskAttributes = readFileSync(new URL('../src/components/ui/Layout/TaskAttributesPanel.jsx', import.meta.url), 'utf8');
 
@@ -388,15 +387,12 @@ test('high-risk composed previews keep the product markup signatures', () => {
     'overflow-hidden rounded-[24px] bg-white ring-1 ring-black/[0.04] transition-all hover:ring-black/10 focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)]',
     'custom-scrollbar min-h-[36px] max-h-[120px] flex-1 resize-none border-0 bg-transparent px-1.5 py-2 text-[14px] leading-5 text-ink outline-none placeholder:text-muted',
     'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-white transition-transform hover:scale-105 disabled:bg-faint disabled:hover:scale-100',
-    'flex min-h-[44px] items-end gap-1 rounded-[24px] bg-white p-1 ring-1 ring-black/[0.04] transition-all focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)]',
-    'max-h-[120px] min-h-[36px] flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-5 text-ink outline-none placeholder:text-muted disabled:opacity-50',
   ]) {
     assert.ok(composerCore.includes(signature), `shared composer core lost product geometry: ${signature}`);
   }
   assert.match(chat, /<ChatComposerCore[\s\S]*variant="workspace"/);
   assert.match(timeline, /<ChatComposerCore[\s\S]*variant="timeline"/);
-  assert.match(qtPlusComposer, /<ChatComposerCore[\s\S]*variant="qtplus"/);
-  for (const variant of ['workspace', 'timeline', 'qtplus']) {
+  for (const variant of ['workspace', 'timeline']) {
     assert.match(kit, new RegExp(`<ChatComposerCore[\\s\\S]{0,220}variant="${variant}"`));
   }
 
@@ -664,8 +660,6 @@ test('approved UI decisions stay encoded in shared components', () => {
 // wherever it lives. These two came in as separate reports about the same drift.
 test('every settings row that switches something on is a switch', () => {
   const settings = readFileSync(new URL('../src/app/(app)/settings/page.js', import.meta.url), 'utf8');
-  const integrationCard = readFileSync(new URL('../src/components/integrations/IntegrationCard.jsx', import.meta.url), 'utf8');
-  const youtrack = readFileSync(new URL('../src/components/integrations/YouTrackImportCard.jsx', import.meta.url), 'utf8');
 
   // QUI-120: login methods used a Підключити/Відключити button pair beside a
   // status pill that only repeated what the switch position already says.
@@ -677,16 +671,7 @@ test('every settings row that switches something on is a switch', () => {
   assert.doesNotMatch(loginMethod, /<Button\b|<Pill\b|ProviderStatus/);
   assert.doesNotMatch(settings, /function ProviderStatus/);
 
-  // QUI-119: one instruction panel shared by every integration. The same kind
-  // of hint used to carry a different radius, padding and body colour per
-  // service, and BuggyBag additionally listed what it syncs for no reason.
-  assert.match(integrationCard, /export function IntegrationNote/);
-  assert.match(integrationCard, /export function IntegrationCode/);
-  for (const source of [settings, youtrack]) {
-    assert.match(source, /<IntegrationNote/);
-    assert.doesNotMatch(source, /rounded-\[(8|10)px\] border border-line bg-canvas/);
-  }
-  assert.doesNotMatch(settings, /'Скріншоти та консоль'/);
+  assert.doesNotMatch(settings, /rounded-\[(8|10)px\] border border-line bg-canvas/);
 });
 
 test('the local reference page does not depend on a working login flow', () => {

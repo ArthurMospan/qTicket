@@ -82,7 +82,6 @@ test('every product dialog outside the shared shell opts into the modal-focus co
     '../src/components/OrgSwitcherScreen.jsx',
     '../src/components/workspace/IssueModal.jsx',
     '../src/components/ui/AttachmentViewer.jsx',
-    '../src/components/workspace/qtplus/MediaLightbox.jsx',
   ];
 
   for (const path of paths) {

@@ -131,26 +131,3 @@ test('every permission in the matrix is read by something', async () => {
   assert.deepEqual(unread, [], 'these permissions are declared and never asked');
 });
 
-// An API key is a digest, and there is no second way in.
-//
-// `isValidApiKey` carried a branch calling itself temporary — «until the
-// private-key migration runs» — and the migration it named did not exist, so it
-// was permanent. What it kept alive was a key stored as its own plaintext on
-// `organizations/{orgId}`, which every member of that organization may read,
-// granting whatever /api/v1 grants to whoever reads it. `npm run
-// migrate:api-keys` reported zero of those in production, so the branch is gone
-// rather than permanent twice over.
-test('an API key authenticates only as a hash, never as a stored token', async () => {
-  const source = await readFile(new URL('../src/lib/server/firebaseAdmin.js', import.meta.url), 'utf8');
-  // Without the comments. What was removed is written down right above the
-  // function, and prose describing a deleted branch is not that branch.
-  const admin = source.split(/\r?\n/).filter(line => !/^\s*\/\//.test(line)).join('\n');
-
-  assert.doesNotMatch(admin, /key\.token === token/);
-  assert.doesNotMatch(admin, /if \(key\.token\)/);
-  // And the read no longer falls back to the member-readable organization
-  // document, which is the place the keys were being moved off.
-  assert.doesNotMatch(admin, /legacyOrgData/);
-  assert.match(admin, /if \(!key\.tokenHash\) return false;/);
-  assert.match(admin, /timingSafeEqual\(expected, candidate\)/);
-});

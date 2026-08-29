@@ -10,7 +10,7 @@ const VARIANTS = {
     // that thickens; the workspace chat now wears exactly that, keeping only
     // its own corner radius and textarea geometry.
     // The mobile variants are appended, never woven in: `kit-usage.test.mjs`
-    // holds the desktop geometry of all three shells as a literal substring, so
+    // holds the desktop geometry of both shells as a literal substring, so
     // the phone's corner radius has to sit after it rather than inside it.
     shell: 'overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.04] transition-all hover:ring-black/10 focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)] max-md:rounded-[22px]',
     // Below md the field shares its line with the controls, so it stops being a
@@ -22,10 +22,6 @@ const VARIANTS = {
   timeline: {
     shell: 'overflow-hidden rounded-[24px] bg-white ring-1 ring-black/[0.04] transition-all hover:ring-black/10 focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)]',
     textarea: 'custom-scrollbar min-h-[36px] max-h-[120px] flex-1 resize-none border-0 bg-transparent px-1.5 py-2 text-[14px] leading-5 text-ink outline-none placeholder:text-muted',
-  },
-  qtplus: {
-    shell: 'flex min-h-[44px] items-end gap-1 rounded-[24px] bg-white p-1 ring-1 ring-black/[0.04] transition-all focus-within:ring-4 focus-within:ring-black/10 focus-within:shadow-[0_12px_40px_rgb(0,0,0,0.08)]',
-    textarea: 'max-h-[120px] min-h-[36px] flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-5 text-ink outline-none placeholder:text-muted disabled:opacity-50',
   },
 };
 
@@ -78,7 +74,7 @@ const Spinner = ({ className = '' }) => (
  * @param {string} props.value Draft text.
  * @param {(value: string) => void} props.onChange Fires with the new draft.
  * @param {() => void} props.onSubmit Sends it.
- * @param {'workspace'|'timeline'|'qtplus'} props.variant Which chat this is; changes the frame, not the behaviour.
+ * @param {'workspace'|'timeline'} props.variant Which chat this is; changes the frame, not the behaviour.
  * @param {string} props.placeholder Text shown while empty.
  * @param {number} props.rows Initial visible rows before it grows.
  * @param {boolean} props.disabled Unavailable: the field and the send button are both blocked.

@@ -369,9 +369,8 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
   );
   // Who *acted*, which is only ever what the activity record says. This used to
   // fall through to `reporterId` and then `reporterName`, so a task with no
-  // recorded activity was attributed to whoever originally filed it. On
-  // anything imported from YouTrack that reporter is an external person with a
-  // synthetic id who has no QuickTeam account at all, and the card announced
+  // recorded activity was attributed to whoever originally filed it. Where that
+  // reporter is an external person with no account at all, the card announced
   // that they had «оновив завдання» — an action by someone who does not exist,
   // on a task nobody had touched.
   //
@@ -400,8 +399,6 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
       // did it even if they have since left the organization.
       actorName = issue.lastActivityActorName;
       actorAvatar = issue.lastActivityActorAvatar || null;
-    } else if (issue.source === 'buggybag' || issue.integration === 'buggybag') {
-      actorName = 'BuggyBag';
     }
 
     return {

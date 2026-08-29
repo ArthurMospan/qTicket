@@ -311,15 +311,12 @@ const COUNTING_PATHS = [
   ['src/app/api/issues/[issueId]/cancel/route.js', 'cancelling a task'],
   ['src/app/api/issues/[issueId]/restore/route.js', 'restoring a deleted task'],
   ['src/app/api/issues/[issueId]/route.js', 'deleting a task'],
-  ['src/app/api/v1/tasks/route.js', 'a task from the public API'],
-  ['src/lib/server/telegram.js', 'a task dictated into Telegram'],
 ];
 
 // Two paths change what every counter in a workspace means rather than moving
 // one of them, so they rebuild instead of incrementing.
 const REBUILDING_PATHS = [
   ['src/app/api/organizations/[organizationId]/workflow/route.js', 'the workflow itself changed'],
-  ['src/lib/server/youtrackImporter.js', 'an import wrote tasks one at a time'],
   ['src/lib/server/reminderJobs.js', 'the twice-daily pass'],
 ];
 

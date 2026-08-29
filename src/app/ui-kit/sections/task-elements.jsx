@@ -309,7 +309,7 @@ export default function TaskElementsSection() {
           <IssueLinkRow label="Повʼязано" requiresReview onRemove={() => {}}>
             <span className="text-[13px] font-semibold text-ink truncate">
               <span className="text-muted font-medium mr-1 uppercase">QT-77</span>
-              Старий імпорт із YouTrack
+              Стара заявка про той самий збій
             </span>
           </IssueLinkRow>
         </div>

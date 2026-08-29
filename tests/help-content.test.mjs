@@ -8,7 +8,6 @@ import {
   HELP_CATEGORIES,
   REQUIRED_HELP_COVERAGE,
 } from '../src/lib/content/helpArticles.mjs';
-import { AVAILABLE_INTEGRATIONS, INTEGRATIONS, PLANNED_INTEGRATIONS } from '../src/lib/content/integrations.mjs';
 import { LEGAL_DOCUMENTS } from '../src/lib/content/legalDocuments.mjs';
 import { PRODUCT_VERSION } from '../src/lib/content/product.mjs';
 import { NEWS_ARTICLES } from '../src/lib/content/releaseContent.mjs';
@@ -87,16 +86,13 @@ test('controlled product features cannot exist without a valid help article', as
   }
 });
 
-test('public content contains no placeholder promises and reports integrations honestly', () => {
+test('public content contains no placeholder promises', () => {
   const publicText = [
     ...HELP_ARTICLES.map(flattenArticle),
     JSON.stringify(NEWS_ARTICLES).toLocaleLowerCase('uk-UA'),
     JSON.stringify(LEGAL_DOCUMENTS).toLocaleLowerCase('uk-UA'),
   ].join(' ');
   assert.doesNotMatch(publicText, /tbd|coming soon|lorem ipsum|скоро буде|заповнити пізніше/);
-  assert.ok(AVAILABLE_INTEGRATIONS.every(item => item.route));
-  assert.ok(PLANNED_INTEGRATIONS.every(item => !item.route));
-  assert.ok(INTEGRATIONS.every(item => ['available', 'planned'].includes(item.state)));
 });
 
 test('the version is one number, and the news is empty until there is a release', async () => {

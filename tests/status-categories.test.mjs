@@ -439,9 +439,6 @@ test('what measures output reads delivered; what asks "is there work left" reads
 test('no writer guesses the incoming column by the name «backlog»', async () => {
   for (const path of [
     '../src/app/api/issues/route.js',
-    '../src/app/api/v1/tasks/route.js',
-    '../src/lib/server/telegram.js',
-    '../src/lib/server/youtrackImporter.js',
   ]) {
     const source = await read(path);
     assert.match(source, /resolveEntryStatusId\(/, path);

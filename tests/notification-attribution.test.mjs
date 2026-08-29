@@ -191,11 +191,10 @@ test('a task key is never invented from a document id', async () => {
 });
 
 test('the prefix rule is written once, not once per writer', async () => {
-  for (const file of ['../src/app/api/issues/route.js', '../src/lib/server/telegram.js']) {
-    const source = await read(file);
-    assert.match(source, /resolveProjectIssuePrefixInTransaction/, file);
-    assert.doesNotMatch(source, /function projectPrefix\(/, file);
-  }
+  const file = '../src/app/api/issues/route.js';
+  const source = await read(file);
+  assert.match(source, /resolveProjectIssuePrefixInTransaction/, file);
+  assert.doesNotMatch(source, /function projectPrefix\(/, file);
   const resolver = await read('../src/lib/server/issueKeys.js');
   assert.match(resolver, /suggestAvailableIssuePrefix/);
 });

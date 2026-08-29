@@ -277,24 +277,6 @@
       ]
     },
     {
-      "collectionGroup": "imports",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "organizationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "provider",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "calendarEvents",
       "queryScope": "COLLECTION",
       "fields": [

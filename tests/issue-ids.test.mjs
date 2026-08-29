@@ -18,9 +18,6 @@ test('every project task writer consumes the stable project issue sequence', asy
   const [sources, transactionalResolver] = await Promise.all([
     Promise.all([
     read('../src/app/api/issues/route.js'),
-    read('../src/lib/server/telegram.js'),
-    read('../src/app/api/v1/tasks/route.js'),
-    read('../src/lib/server/youtrackImporter.js'),
     ]),
     read('../src/lib/server/issueKeys.js'),
   ]);
@@ -151,15 +148,6 @@ test('the historical key migration is explicit, dry-run-first and retry-safe', a
   assert.doesNotMatch(migration, /onAuthStateChanged|signInWith/);
   assert.match(documentation, /dry-run/i);
   assert.match(packageJson, /"migrate:issue-keys"/);
-});
-
-test('YouTrack imports use the same ASCII prefix rules as every other writer', async () => {
-  const importer = await read('../src/lib/server/youtrackImporter.js');
-
-  assert.match(importer, /suggestAvailableIssuePrefix\(/);
-  assert.match(importer, /resolveProjectIssuePrefixInTransaction\(/);
-  assert.doesNotMatch(importer, /cleanProjectPrefix/);
-  assert.doesNotMatch(importer, /А-ЯІЇЄҐ/);
 });
 
 test('search shows only persisted task IDs and never invents one from a document id', async () => {

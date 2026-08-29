@@ -211,15 +211,3 @@ test('the sweep remembers materialisation separately and never advances it on fa
   assert.match(source, /\.where\('dueDate', '>=', Timestamp\.fromMillis\(nowMs - DEADLINE_FLOOR_MS\)\)/);
   assert.match(source, /\.where\('startAt', '<=', Timestamp\.fromMillis\(nowMs \+ CALENDAR_LEAD_MS\)\)/);
 });
-
-test('one sweep sends one Telegram digest per person', async () => {
-  const source = await read('../src/lib/server/reminderJobs.js');
-  // Claiming no longer sends; it hands the item back to be batched.
-  const claim = source.slice(
-    source.indexOf('async function claimAndDeliver'),
-    source.indexOf('async function deliverTelegramDigests'),
-  );
-  assert.doesNotMatch(claim, /deliverTelegramNotification/);
-  assert.match(source, /deliverTelegramDigests\(results\)/);
-  assert.match(source, /itemsByUserId,/);
-});

@@ -36,10 +36,10 @@ import {
   User, Bell, Zap, Users, GitBranch,
   Shapes, Check, Plus, Trash2, Edit2, X, Save,
   Building, LogOut, Download, RefreshCw, Mail, Star,
-  Copy, ExternalLink, ChevronRight, AlertTriangle,
-  PlugZap, ToggleLeft, ToggleRight, Receipt,
+  ExternalLink, AlertTriangle,
+  ToggleLeft, ToggleRight, Receipt,
   Globe, Tag as TagIcon, GripVertical, Send,
-  Archive, ArchiveRestore, Bug, DatabaseBackup, Lock,
+  Archive, ArchiveRestore, Bug, Lock,
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -58,8 +58,6 @@ import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 // loads then rather than with the settings page.
 const Colorful = dynamic(() => import('@uiw/react-color').then(module => module.Colorful), { ssr: false });
 import InviteMemberDialog from '@/components/InviteMemberDialog';
-import IntegrationCard, { IntegrationCode, IntegrationNote, IntegrationSteps } from '@/components/integrations/IntegrationCard';
-import DataMigrationSettings, { MIGRATION_SOURCE_TITLES } from '@/components/migrations/DataMigrationSettings';
 import {
   DEFAULT_STATUSES,
   DEFAULT_TYPES,
@@ -97,7 +95,6 @@ import {
 import { isSystemTaskTypeId } from '@/lib/utils/taskTypes.mjs';
 
 // ── Constants ────────────────────────────────────────────────────────
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || '';
 const NOOP = () => {};
 // Workflow defaults live in useWorkflowConfig (single source of truth for
 // the board, this page and every other consumer) — never redeclare them here:
@@ -142,13 +139,6 @@ const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([
   'localization',
 ]);
 
-// qTicket is a support add-on, not a second task manager. The inherited
-// migration and integration surfaces remain in code — the cross-repository
-// contracts in `docs/integrations/` and three unit tests still read them — but
-// they are not qTicket settings, so no role reaches them. «Посади та ставки»
-// and «Видалення даних» had no such reader and are gone.
-const HIDDEN_QTICKET_SETTINGS_SECTIONS = new Set(['integrations', 'migration']);
-
 const NAV = [
   { id: 'profile',       label: 'Особистий профіль',icon: User,          group: 'Особисте' },
   // «Способи входу» is not a section of its own any more. It answers half of
@@ -156,9 +146,6 @@ const NAV = [
   // from where — was on «Безпека», with a row on one linking to the other.
   // `?section=auth-methods` still resolves, so every OAuth callback keeps
   // landing where it always did.
-  // No personal QuickTeam+ entry here on purpose. Connecting the account only
-  // ever served linking a project, so that action lives in the project's
-  // QuickTeam+ tab; the org-level switch stays under "Інтеграції".
   { id: 'notifications', label: 'Сповіщення',       icon: Bell,          group: 'Особисте' },
   { id: 'localization',  label: 'Локалізація',      icon: Globe,         group: 'Особисте' },
   // Signing out, leaving an organization and deleting your account are things a
@@ -168,8 +155,6 @@ const NAV = [
   { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
   { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
   { id: 'billing',       label: 'Доступ qTicket', icon: ShieldCheck,     group: 'Організація', adminOnly: true },
-  { id: 'integrations',  label: 'Інтеграції',       icon: PlugZap,       group: 'Організація', adminOnly: true },
-  { id: 'migration',     label: 'Перенесення даних', icon: DatabaseBackup, group: 'Організація', adminOnly: true },
   { id: 'statuses',      label: 'Статуси інцидентів', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
   { id: 'types',         label: 'Типи інцидентів',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
   { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
@@ -321,32 +306,23 @@ function Row({ label, desc, children, danger = false }) {
 }
 
 // The one way back, published to every Section on the screen rather than
-// threaded through fifteen call sites. It always means "one level up": out of
-// an integration, out of a migration source, and otherwise out of the section
-// entirely — see `mobileBack` below. A screen shows at most one.
-//
-// A section that has a level above it inside the screen passes `backLabel`, and
-// its arrow stays on a desk too, because the level is there at every width.
-// Without one the arrow is the way out of the pane, which only a phone has.
+// threaded through fifteen call sites — see `mobileBack` below. Every settings
+// section is one level deep now, so the arrow always means "out of the pane",
+// which only a phone has.
 const SectionBackContext = createContext(null);
 
-function Section({ title, desc, backLabel, rightAction, children }) {
+function Section({ title, desc, rightAction, children }) {
   const mobileBack = useContext(SectionBackContext);
   return (
     <div className="flex flex-col">
-      {/* One control, one place, at every width.
-          A desk used to get a labelled ghost button on its own line above the
-          title — «← Усі інтеграції» — and a phone got the arrow beside the
-          title. Two shapes for one action, and the labelled one cost a row of
-          the screen to say what the title says already. The arrow is it now;
-          where it goes is still spoken, as its accessible name. */}
+      {/* One control, one place, at every width. */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 items-start gap-[10px]">
           {mobileBack && (
             <MobilePaneBack
               onClick={mobileBack}
-              label={backLabel || 'Назад'}
-              context={backLabel ? 'level' : 'pane'}
+              label="Назад"
+              context="pane"
               className="mt-[2px]"
             />
           )}
@@ -764,7 +740,6 @@ export default function SettingsPage() {
   // section removed from the list but still reachable by URL is not removed.
   const reachableSections = useMemo(() => new Set(
     NAV
-      .filter(item => !HIDDEN_QTICKET_SETTINGS_SECTIONS.has(item.id))
       .filter(item => (clientViewer
         ? clientSettingsSections.has(item.id)
         : !CLIENT_ONLY_SETTINGS_SECTIONS.has(item.id) && (!item.adminOnly || isAdmin)))
@@ -788,10 +763,6 @@ export default function SettingsPage() {
   // removed.
   const [chosenSection, setChosenSection] = useState('profile');
   const activeSection = reachableSections.has(chosenSection) ? chosenSection : defaultSection;
-  const [integrationDetail, setIntegrationDetail] = useState('');
-  // Which migration source is open, held here for the same reason
-  // `integrationDetail` is: the section header above it needs to know.
-  const [migrationProvider, setMigrationProvider] = useState('');
   // Whether this person may delete themselves, and what it would touch. Loaded
   // when «Безпека» opens rather than on every settings visit — it is three
   // collection queries for a screen most people never reach.
@@ -903,9 +874,8 @@ export default function SettingsPage() {
       const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
       // The address is the second door into a section and it has to be the same
       // door. An old link to a section this role no longer has — «Особистий
-      // профіль» and «Локалізація» for staff, «Інтеграції» for anyone — lands on
-      // the first section of that role's own rail instead of opening a screen
-      // the product took away.
+      // профіль» and «Локалізація» for staff — lands on the first section of
+      // that role's own rail instead of opening a screen the product took away.
       const sec = requestedSection
         ? (reachableSections.has(requestedSection) ? requestedSection : defaultSection)
         : '';
@@ -919,21 +889,6 @@ export default function SettingsPage() {
       }
       if (authSuccess === 'oneb_connected') {
         queueMicrotask(() => showToast('OneB підключено'));
-      }
-      const qtplus = currentSearchParams.get('qtplus');
-      const qtplusError = currentSearchParams.get('qtplusError');
-      if (qtplus === 'connected') {
-        queueMicrotask(() => showToast('QuickTeam+ підключено'));
-      }
-      if (qtplusError) {
-        const message = qtplusError === 'state'
-          ? 'Термін дії посилання минув або воно відкрите не в тому браузері. Спробуйте ще раз'
-          : qtplusError === 'session'
-            ? 'Не вдалося підтвердити сесію. Увійдіть ще раз і повторіть підключення'
-            : qtplusError === 'not_configured'
-              ? 'Інтеграцію QuickTeam+ не налаштовано на сервері'
-              : 'Не вдалося підключити QuickTeam+';
-        queueMicrotask(() => showToast(message, 'error'));
       }
       if (authError) {
         const message = authError === 'oneb_already_linked'
@@ -1040,175 +995,6 @@ export default function SettingsPage() {
   // saved org document (which branding auto-save has already persisted).
   useEffect(() => () => clearSidebarPreview(), [clearSidebarPreview]);
 
-  // ── Integration (QT portal) ──
-  const [qtEnabled,      setQtEnabled]      = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [qtSaving,       setQtSaving]       = useState(false);
-
-  // ── API Keys ──
-  const [apiKeys, setApiKeys] = useState([]);
-  const [buggyBagLoading, setBuggyBagLoading] = useState(false);
-  const [telegramBotStatus, setTelegramBotStatus] = useState({ configured: false, connected: false, chatTitle: '' });
-  const [telegramBotLoading, setTelegramBotLoading] = useState(false);
-  // True between opening the bot deep link and the webhook confirming it.
-  const [telegramAwaitingLink, setTelegramAwaitingLink] = useState(false);
-  const [telegramGroupStatus, setTelegramGroupStatus] = useState({ configured: false, connected: false, chatTitle: '', defaultProjectId: '' });
-  const [telegramGroupLoading, setTelegramGroupLoading] = useState(false);
-  const [telegramGroupProjectId, setTelegramGroupProjectId] = useState('');
-  const [telegramGroupConnect, setTelegramGroupConnect] = useState(null);
-  const [telegramGroupSetupOpen, setTelegramGroupSetupOpen] = useState(false);
-
-  const apiKeysRequest = async (method = 'GET', body = null) => {
-    if (!activeOrgId) throw new Error('Не вказано організацію');
-    return authenticatedRequest(`/api/integrations/api-keys?organizationId=${encodeURIComponent(activeOrgId)}`, {
-      method,
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    }, 'Не вдалося оновити інтеграцію BuggyBag');
-  };
-
-  const telegramRequest = useCallback(async (path, method = 'GET', body = null) => {
-    return authenticatedRequest(path, {
-      method,
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    }, 'Не вдалося виконати запит до Telegram');
-  }, []);
-
-  const refreshTelegram = useCallback(async () => {
-    if (!currentUser) return;
-    const status = await telegramRequest('/api/integrations/telegram');
-    setTelegramBotStatus(status);
-  }, [currentUser, telegramRequest]);
-
-  const refreshTelegramGroup = useCallback(async () => {
-    if (!activeOrgId || !isAdmin) return;
-    const status = await telegramRequest(`/api/integrations/telegram/group?organizationId=${encodeURIComponent(activeOrgId)}`);
-    setTelegramGroupStatus(status);
-    if (status.defaultProjectId) setTelegramGroupProjectId(status.defaultProjectId);
-    if (status.connected) {
-      setTelegramGroupSetupOpen(false);
-      setTelegramGroupConnect(null);
-    }
-    return status;
-  }, [activeOrgId, isAdmin, telegramRequest]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => refreshTelegram().catch(() => {}), 0);
-    return () => window.clearTimeout(timeoutId);
-  }, [refreshTelegram]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => refreshTelegramGroup().catch(() => {}), 0);
-    return () => window.clearTimeout(timeoutId);
-  }, [refreshTelegramGroup]);
-
-  const connectTelegram = async () => {
-    if (!activeOrgId) return;
-    setTelegramBotLoading(true);
-    try {
-      const result = await telegramRequest('/api/integrations/telegram', 'POST', { organizationId: activeOrgId });
-      window.open(result.link, '_blank', 'noopener,noreferrer');
-      setTelegramAwaitingLink(true);
-      showToast('Натисніть «Старт» у Telegram — далі підключиться саме');
-    } catch (error) {
-      showToast(error.message, 'error');
-    } finally {
-      setTelegramBotLoading(false);
-    }
-  };
-
-  const disconnectTelegram = async () => {
-    setTelegramBotLoading(true);
-    try {
-      await telegramRequest('/api/integrations/telegram', 'DELETE');
-      setTelegramBotStatus(previous => ({ ...previous, connected: false, chatTitle: '' }));
-      setNotif(previous => ({ ...previous, telegramEnabled: false }));
-      showToast('Telegram відключено');
-    } catch (error) {
-      showToast(error.message, 'error');
-    } finally {
-      setTelegramBotLoading(false);
-    }
-  };
-
-  // One control for the whole channel, like every other row in Канали: the
-  // switch *is* the connection. Turning it on links the bot — or, for an
-  // account that is already linked, just re-enables delivery; turning it off
-  // unlinks it.
-  const toggleTelegram = async enabled => {
-    if (!enabled) {
-      if (telegramBotStatus.connected) {
-        await disconnectTelegram();
-        return;
-      }
-      setNotif(previous => ({ ...previous, telegramEnabled: false }));
-      return;
-    }
-    if (telegramBotStatus.connected) {
-      setNotif(previous => ({ ...previous, telegramEnabled: true }));
-      return;
-    }
-    await connectTelegram();
-  };
-
-  const connectTelegramGroup = async () => {
-    if (!activeOrgId || !telegramGroupProjectId) {
-      showToast('Оберіть проєкт для нових задач', 'error');
-      return;
-    }
-    setTelegramGroupLoading(true);
-    try {
-      const result = await telegramRequest('/api/integrations/telegram/group', 'POST', {
-        organizationId: activeOrgId,
-        projectId: telegramGroupProjectId,
-      });
-      setTelegramGroupConnect(result);
-      setTelegramGroupSetupOpen(true);
-      window.open(result.addGroupLink, '_blank', 'noopener,noreferrer');
-      showToast('Додайте бота в групу та надішліть команду підключення');
-    } catch (error) {
-      showToast(error.message, 'error');
-    } finally {
-      setTelegramGroupLoading(false);
-    }
-  };
-
-  const disconnectTelegramGroup = async () => {
-    if (!(await confirmDialog({
-      title: 'Відключити Telegram-групу?',
-      message: 'Бот перестане створювати задачі з цієї групи. Уже створені задачі залишаться у QuickTeam.',
-      confirmText: 'Відключити',
-      danger: true,
-    }))) return false;
-
-    setTelegramGroupLoading(true);
-    try {
-      await telegramRequest(`/api/integrations/telegram/group?organizationId=${encodeURIComponent(activeOrgId)}`, 'DELETE');
-      setTelegramGroupStatus(previous => ({ ...previous, connected: false, chatTitle: '', defaultProjectId: '' }));
-      setTelegramGroupConnect(null);
-      setTelegramGroupSetupOpen(false);
-      showToast('Telegram-групу відключено');
-      return true;
-    } catch (error) {
-      showToast(error.message, 'error');
-      return false;
-    } finally {
-      setTelegramGroupLoading(false);
-    }
-  };
-
-  const toggleTelegramGroup = async enabled => {
-    if (enabled) {
-      setTelegramGroupSetupOpen(true);
-      return;
-    }
-    if (telegramGroupStatus.connected) {
-      await disconnectTelegramGroup();
-      return;
-    }
-    setTelegramGroupSetupOpen(false);
-    setTelegramGroupConnect(null);
-  };
-  const [generatingKey, setGeneratingKey] = useState(false);
 
   // ── Notifications ──
   // `channels` is the event × channel matrix; the flat per-event flags beside it
@@ -1235,47 +1021,6 @@ export default function SettingsPage() {
       return next;
     });
   };
-
-  // The Telegram link is not established here: the bot's webhook writes it only
-  // after you press Start in Telegram. That wait used to be surfaced as a manual
-  // «Перевірити» button, which put the mechanics of our own webhook in front of
-  // the user. The row polls for the result itself now, and re-checks whenever
-  // the tab regains focus — which is exactly when someone comes back from
-  // Telegram. Enabling delivery is part of linking, so the preference is set
-  // here too and picked up by the notif auto-save below.
-  useEffect(() => {
-    if (!telegramAwaitingLink) return undefined;
-    const pollMs = 3000;
-    const maxTicks = 60; // three minutes; the connect token itself lasts fifteen
-    let ticks = 0;
-    const check = async () => {
-      try {
-        const status = await telegramRequest('/api/integrations/telegram');
-        setTelegramBotStatus(status);
-        if (!status.connected) return;
-        setTelegramAwaitingLink(false);
-        setNotif(previous => ({ ...previous, telegramEnabled: true }));
-        showToast('Telegram підключено');
-      } catch {
-        // Transient failure: the next tick retries, and the connect token stays
-        // valid for 15 minutes either way.
-      }
-    };
-    const timer = window.setInterval(() => {
-      ticks += 1;
-      if (ticks > maxTicks) {
-        setTelegramAwaitingLink(false);
-        return;
-      }
-      check();
-    }, pollMs);
-    const onFocus = () => check();
-    window.addEventListener('focus', onFocus);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
-    };
-  }, [telegramAwaitingLink, telegramRequest, showToast]);
 
   // Last notif/localization value known to match Firestore (JSON) — see the
   // auto-save effects below. null until the first render establishes it.
@@ -1429,22 +1174,6 @@ export default function SettingsPage() {
         const storedWorkflow = await fetchWorkflowViaApi(organizationId);
         if (!isCurrentWorkflowLoad()) return;
         applyHydratedWorkflow(storedWorkflow);
-
-        const intSnap = await getDoc(doc(db, 'organizations', organizationId, 'settings', 'integrations'));
-        if (!isCurrentWorkflowLoad()) return;
-        if (intSnap.exists()) {
-          setQtEnabled(intSnap.data().qtPortalEnabled !== false);
-        }
-
-        // The organization document is already subscribed by the workspace
-        // context, so this screen does not read it again for one field.
-
-        if (isAdmin) {
-          const keyResult = await apiKeysRequest();
-          if (!isCurrentWorkflowLoad()) return;
-          setApiKeys(keyResult.keys || []);
-
-        }
 
         const uid = currentUser?.uid || currentUser?.id;
         if (uid) {
@@ -1640,8 +1369,6 @@ export default function SettingsPage() {
       revertProfile(); // chose to leave → discard so the guard stops prompting
     }
     setChosenSection(newSection);
-    setIntegrationDetail('');
-    setMigrationProvider('');
     return true;
   };
 
@@ -2010,68 +1737,6 @@ export default function SettingsPage() {
       actor: { id: uid, name: currentUser?.name || '', avatar: currentUser?.avatar || '' },
     });
     showToast('Тестове сповіщення надіслано');
-  };
-
-  const saveIntegration = async (enabled) => {
-    if (!activeOrgId) return;
-    if (enabled && !PORTAL_URL) {
-      showToast('Спочатку налаштуйте NEXT_PUBLIC_PORTAL_URL', 'error');
-      return;
-    }
-
-    // If user is trying to turn it OFF, show confirmation
-    if (qtEnabled && !enabled) {
-      if (!(await confirmDialog({
-        title: 'Відключити інтеграцію?',
-        message: 'Ви впевнені? Якщо ви відключите інтеграцію, ви більше не зможете інтегрувати проєкти з клієнтським порталом. Ваші клієнти втратять доступ до оновлень у реальному часі.',
-        confirmText: 'Відключити', danger: true,
-      }))) return;
-    }
-
-    await confirmSaveIntegration(enabled);
-  };
-
-  const confirmSaveIntegration = async (enabled) => {
-    setQtSaving(true);
-    try {
-      await setDoc(doc(db, 'organizations', activeOrgId, 'settings', 'integrations'), {
-        qtPortalEnabled: enabled, updatedAt: serverTimestamp(),
-      }, { merge: true });
-      setQtEnabled(enabled);
-      showToast(enabled ? 'Інтеграцію з QT увімкнено' : 'Інтеграцію з QT вимкнено');
-    } catch { showToast('Помилка збереження', 'error'); }
-    setQtSaving(false);
-  };
-
-  const generateApiKey = async () => {
-    if (!activeOrgId) return;
-    setGeneratingKey(true);
-    try {
-      const { key } = await apiKeysRequest('POST', { name: `Key ${new Date().toLocaleDateString()}` });
-      const updatedKeys = [...apiKeys, key];
-      setApiKeys(updatedKeys);
-      showToast('Новий API ключ згенеровано');
-    } catch (e) {
-      showToast(userFacingErrorMessage(e, 'Не вдалося згенерувати API ключ'), 'error');
-    }
-    setGeneratingKey(false);
-  };
-
-  const revokeApiKey = async (keyId) => {
-    if (!activeOrgId) return;
-    if (!(await confirmDialog({
-      title: 'Видалити API ключ?',
-      message: 'Усі інтеграції, що його використовують, перестануть працювати.',
-      confirmText: 'Видалити', danger: true,
-    }))) return;
-    try {
-      const updatedKeys = apiKeys.filter(k => k.id !== keyId);
-      await apiKeysRequest('DELETE', { keyId });
-      setApiKeys(updatedKeys);
-      showToast('API ключ видалено');
-    } catch (e) {
-      showToast(userFacingErrorMessage(e, 'Не вдалося видалити API ключ'), 'error');
-    }
   };
 
   // Leaving is the same server call as being deactivated — the route tells the
@@ -3019,342 +2684,6 @@ export default function SettingsPage() {
 
 
       // ──────────────────────────────────────────────────────────────
-      case 'migration': {
-        // The same header shape as «Інтеграції» below: the way back lives beside
-        // the title, not inside the body, and the title names where you are.
-        const migrationSource = MIGRATION_SOURCE_TITLES[migrationProvider] || '';
-        return (
-          <Section
-            title={migrationProvider ? migrationSource : 'Перенесення даних'}
-            desc={migrationProvider
-              ? 'Що переноситься, як зіставляються люди й що буде пропущено'
-              : 'Перенесіть робочі проєкти та історію команди у QuickTeam'}
-            backLabel={migrationProvider ? 'Усі джерела' : ''}
-          >
-            {/* No wall over the list. Which sources exist, and which of them
-                are ready, is worth seeing before deciding whether to pay for
-                the import — and the crown says the rest, per row, the way the
-                integrations list does. The wall stays one screen in, where
-                somebody is about to start one. */}
-            <DataMigrationSettings
-              organizationId={activeOrgId}
-              currentUserId={currentUser?.id || currentUser?.uid || ''}
-              isOrganizationOwner={myRole === 'owner'}
-              members={members}
-              projects={projects}
-              showToast={showToast}
-              selectedProviderId={migrationProvider}
-              onSelectProvider={setMigrationProvider}
-            />
-          </Section>
-        );
-      }
-
-      case 'integrations': {
-        const buggyBagKey = apiKeys.find(k => k.name === 'BuggyBag Integration');
-        const buggyBagEnabled = !!buggyBagKey;
-
-        const toggleBuggyBag = async (enabled) => {
-          if (!activeOrgId) return;
-          setBuggyBagLoading(true);
-          try {
-            if (enabled) {
-              const { key } = await apiKeysRequest('POST', { name: 'BuggyBag Integration' });
-              const updatedKeys = [...apiKeys, key];
-              setApiKeys(updatedKeys);
-              showToast('Інтеграцію з BuggyBag увімкнено!');
-            } else if (buggyBagKey) {
-              const updatedKeys = apiKeys.filter(k => k.id !== buggyBagKey.id);
-              await apiKeysRequest('DELETE', { keyId: buggyBagKey.id });
-              setApiKeys(updatedKeys);
-              showToast('Інтеграцію з BuggyBag вимкнено');
-            }
-            return true;
-          } catch (error) {
-            showToast(error?.message || 'Не вдалося оновити інтеграцію BuggyBag', 'error');
-            return false;
-          } finally {
-            setBuggyBagLoading(false);
-          }
-        };
-
-        const integrationRows = [
-          {
-            id: 'quickteam-plus',
-            title: 'QuickTeam+',
-            description: 'Клієнтські запити та оновлення з порталу.',
-            logo: '/quickteam.png',
-            status: qtEnabled ? 'Підключено' : 'Вимкнено',
-            active: qtEnabled,
-          },
-          {
-            id: 'telegram',
-            title: 'Telegram',
-            description: 'Створення задач із робочої Telegram-групи.',
-            logo: '/integrations/telegram.svg',
-            status: telegramGroupStatus.connected
-              ? 'Підключено'
-              : telegramGroupStatus.configured ? 'Не підключено' : 'Недоступно',
-            active: telegramGroupStatus.connected,
-          },
-          {
-            id: 'buggybag',
-            title: 'BuggyBag Portal',
-            description: 'Баг-репорти клієнтів як задачі QuickTeam.',
-            logo: '/bug-logo.png',
-            status: buggyBagEnabled ? 'Підключено' : 'Вимкнено',
-            active: buggyBagEnabled,
-          },
-        ];
-
-        if (!integrationDetail) {
-          return (
-            <Section title="Інтеграції" desc="Підключені сервіси та доступні канали">
-              <div className="flex flex-col gap-[8px]">
-                {integrationRows.map(item => {
-                  return (
-                    <Card
-                      key={item.id}
-                      preset="bordered"
-                      padding="md"
-                      interactive
-                      onClick={() => setIntegrationDetail(item.id)}
-                    >
-                      <div className="flex items-center gap-[12px]">
-                        <span className="flex h-[40px] w-[40px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-white">
-                          <Image src={item.logo} alt="" width={30} height={30} className="h-[28px] w-[28px] object-contain" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[13px] font-bold text-ink">{item.title}</span>
-                          <span className="mt-[2px] block truncate text-[11px] text-muted">{item.description}</span>
-                        </span>
-                        {item.active ? (
-                          // «Підключено» — це факт, а не свято.
-                          //
-                          // Зелений тут був єдиним теплим кольором на екрані й
-                          // тягнув на себе більше уваги, ніж назва сервісу, під
-                          // якою він стоїть. Гама продукту — ink, тож увімкнений
-                          // стан бере її: біле на #1f1f1f. Зелений лишається
-                          // тому, що справді щось означає — «успішно», а не
-                          // «увімкнено».
-                          <Pill tone="dark" size="md">{item.status}</Pill>
-                        ) : (
-                          <Pill tone="neutral" size="md" appearance="soft-outline">{item.status}</Pill>
-                        )}
-                        <ChevronRight size={16} className="shrink-0 text-faint" />
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </Section>
-          );
-        }
-
-        const integrationTitle = integrationRows.find(item => item.id === integrationDetail)?.title || 'Інтеграція';
-
-        return (
-          <Section
-            title={integrationTitle}
-            desc="Опис, стан і налаштування інтеграції"
-            backLabel="Усі інтеграції"
-            rightAction={saveButton}
-          >
-            {integrationDetail === 'quickteam-plus' && <IntegrationCard
-              title="QuickTeam+"
-              description="Синхронізує клієнтські запити та оновлення з порталу QuickTeam+."
-              logoSrc="/quickteam.png"
-              logoAlt="QuickTeam+"
-              enabled={qtEnabled}
-              onToggle={saveIntegration}
-              toggleDisabled={qtSaving}
-              status={qtEnabled ? 'connected' : 'off'}
-              statusLabel={qtEnabled ? 'Підключено' : 'Вимкнено'}
-              statusMeta={qtEnabled && PORTAL_URL ? (
-                <a
-                  href={PORTAL_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[12px] font-semibold text-ink hover:underline"
-                >
-                  Відкрити портал <ExternalLink size={11} />
-                </a>
-              ) : null}
-            />}
-
-            {/* Telegram bot — group task capture */}
-            {integrationDetail === 'telegram' && <IntegrationCard
-              title="Telegram"
-              description="Створюйте задачі прямо з робочої Telegram-групи та автоматично додавайте їх у вибраний проєкт."
-              logoSrc="/integrations/telegram.svg"
-              logoAlt="Telegram"
-              enabled={telegramGroupStatus.connected || telegramGroupSetupOpen}
-              onToggle={toggleTelegramGroup}
-              toggleDisabled={
-                telegramGroupLoading ||
-                (!telegramGroupStatus.configured && !telegramGroupStatus.connected)
-              }
-              status={telegramGroupStatus.connected ? 'connected' : telegramGroupSetupOpen ? 'pending' : telegramGroupStatus.configured ? 'off' : 'unavailable'}
-              statusLabel={telegramGroupStatus.connected ? 'Підключено' : telegramGroupSetupOpen ? 'Налаштування' : telegramGroupStatus.configured ? 'Вимкнено' : 'Недоступно'}
-              statusMeta={telegramGroupStatus.connected ? (
-                <span className="text-[12px] text-muted">
-                  {telegramGroupStatus.chatTitle || 'Telegram-група'}
-                  {telegramGroupProjectId && projects.find(project => project.id === telegramGroupProjectId)?.name
-                    ? ` → ${projects.find(project => project.id === telegramGroupProjectId).name}`
-                    : ''}
-                </span>
-              ) : !telegramGroupStatus.configured ? (
-                <span className="text-[11px] text-muted">Інтеграцію не налаштовано в цьому середовищі.</span>
-              ) : null}
-            >
-              {telegramGroupStatus.connected ? (
-                <div className="space-y-3">
-                  <IntegrationNote title="Як створити задачу в групі">
-                    <p><IntegrationCode>/task Назва задачі</IntegrationCode> — швидка команда.</p>
-                    <p>
-                      <IntegrationCode>
-                        @{telegramGroupStatus.username || 'quick_team_bot'} Назва задачі
-                      </IntegrationCode>
-                      {' '}— звичайне звернення до бота.
-                    </p>
-                    <p>Наступні рядки повідомлення стануть описом задачі.</p>
-                  </IntegrationNote>
-                  <Button
-                    style="ghost"
-                    size="sm"
-                    icon={RefreshCw}
-                    onClick={() => refreshTelegramGroup().catch(error => showToast(error.message, 'error'))}
-                  >
-                    Перевірити підключення
-                  </Button>
-                </div>
-              ) : telegramGroupSetupOpen ? (
-                <IntegrationSteps
-                  steps={[
-                    {
-                      title: 'Оберіть проєкт QuickTeam',
-                      description: 'Усі нові задачі з цієї Telegram-групи потраплятимуть саме сюди.',
-                      content: (
-                        <div className="mt-2 max-w-[420px]">
-                          <Select
-                            value={telegramGroupProjectId}
-                            onChange={setTelegramGroupProjectId}
-                            options={[
-                              { value: '', label: 'Оберіть проєкт' },
-                              ...projects.filter(project => project.status !== 'archived').map(project => ({ value: project.id, label: project.name })),
-                            ]}
-                          />
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Додайте бота в Telegram-групу',
-                      description: 'Telegram відкриється в новій вкладці. Виберіть потрібну групу та підтвердьте додавання.',
-                      content: (
-                        <Button
-                          style="secondary"
-                          size="sm"
-                          icon={ExternalLink}
-                          className="mt-2"
-                          onClick={connectTelegramGroup}
-                          loading={telegramGroupLoading}
-                          disabled={!telegramGroupProjectId}
-                        >
-                          Відкрити Telegram
-                        </Button>
-                      ),
-                    },
-                    {
-                      title: 'Підтвердьте групу командою',
-                      description: telegramGroupConnect?.command
-                        ? 'Скопіюйте одноразову команду та надішліть її в доданій групі протягом 30 хвилин.'
-                        : 'Після додавання бота тут з’явиться одноразова команда.',
-                      content: telegramGroupConnect?.command ? (
-                        <IntegrationNote className="mt-2 max-w-[620px]">
-                          <div className="flex items-center gap-2">
-                          <IntegrationCode className="min-w-0 flex-1 select-all break-all">{telegramGroupConnect.command}</IntegrationCode>
-                          <Button
-                            style="ghost"
-                            size="icon-sm"
-                            icon={Copy}
-                            onClick={() => {
-                              navigator.clipboard.writeText(telegramGroupConnect.command);
-                              showToast('Команду скопійовано');
-                            }}
-                            aria-label="Копіювати команду"
-                          />
-                          </div>
-                        </IntegrationNote>
-                      ) : null,
-                    },
-                    {
-                      title: 'Перевірте підключення',
-                      description: 'Після надсилання команди поверніться сюди. QuickTeam покаже назву групи та готовий приклад команди.',
-                      content: (
-                        <Button
-                          style="ghost"
-                          size="sm"
-                          icon={RefreshCw}
-                          className="mt-2"
-                          onClick={() => refreshTelegramGroup().catch(error => showToast(error.message, 'error'))}
-                        >
-                          Перевірити
-                        </Button>
-                      ),
-                    },
-                  ]}
-                />
-              ) : null}
-            </IntegrationCard>}
-
-            {/* BuggyBag Portal */}
-            {integrationDetail === 'buggybag' && <IntegrationCard
-              title="BuggyBag Portal"
-              description="Перетворює баг-репорти клієнтів на задачі QuickTeam разом зі скріншотами та технічними даними."
-              logoSrc="/bug-logo.png"
-              logoAlt="BuggyBag"
-              enabled={buggyBagEnabled}
-              onToggle={toggleBuggyBag}
-              toggleDisabled={buggyBagLoading}
-              status={buggyBagEnabled ? 'connected' : 'off'}
-              statusLabel={buggyBagEnabled ? 'Підключено' : 'Вимкнено'}
-              statusMeta={(
-                <a
-                  href="https://buggy-bag.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[12px] font-semibold text-ink hover:underline"
-                >
-                  Відкрити BuggyBag <ExternalLink size={11} />
-                </a>
-              )}
-            >
-              {buggyBagEnabled && (
-                <IntegrationNote title="Вставте ці дані в налаштуваннях BuggyBag">
-                  <div className="grid items-center gap-3 sm:grid-cols-[100px_1fr]">
-                    <span>API Token</span>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <IntegrationCode className="min-w-0 flex-1 select-all truncate">
-                        {buggyBagKey.token || `${buggyBagKey.prefix || 'qt_'}••••••••••••••••`}
-                      </IntegrationCode>
-                      {buggyBagKey.token && (
-                        <Button onClick={() => { navigator.clipboard.writeText(buggyBagKey.token); showToast('Токен скопійовано'); }} style="ghost" size="icon-sm" icon={Copy} aria-label="Копіювати API Token" />
-                      )}
-                    </div>
-                    <span>Org ID</span>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <IntegrationCode className="min-w-0 flex-1 select-all truncate">{activeOrgId}</IntegrationCode>
-                      <Button onClick={() => { navigator.clipboard.writeText(activeOrgId); showToast('ID скопійовано'); }} style="ghost" size="icon-sm" icon={Copy} aria-label="Копіювати ID організації" />
-                    </div>
-                  </div>
-                </IntegrationNote>
-              )}
-            </IntegrationCard>}
-          </Section>
-        );
-      }
-
-      // ──────────────────────────────────────────────────────────────
       case 'billing': {
         const entitlementActive = org?.quickTeam?.entitlement === 'active';
         return (
@@ -4141,13 +3470,9 @@ export default function SettingsPage() {
     />
   );
 
-  // One level up, whatever level you are on. A settings section can be two
-  // deep — «Інтеграції» → одна інтеграція, «Перенесення даних» → одне джерело —
-  // and each of those used to draw its own way back *above* the pane's way
-  // back, so a phone showed two.
+  // One level up. Every section is one level deep, so this is the way out of
+  // the pane.
   const mobileBack = () => {
-    if (activeSection === 'integrations' && integrationDetail) { setIntegrationDetail(''); return; }
-    if (activeSection === 'migration' && migrationProvider) { setMigrationProvider(''); return; }
     requestPaneClose();
   };
 

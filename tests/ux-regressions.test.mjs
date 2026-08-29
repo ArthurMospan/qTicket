@@ -86,12 +86,9 @@ test('requested navigation and readability regressions stay fixed', async () => 
   assert.match(search, /opacity-0 transition-opacity group-hover\/search:/);
   assert.match(search, /group-focus-within\/search:opacity-100/);
   assert.doesNotMatch(team, /lastActivity|Остання активність/);
-  // An integration and a migration source are levels inside the settings
-  // screen, and a level is there at every width — so the way out of one is the
-  // same arrow beside the title at every width, not a labelled ghost button on
-  // a desk and an arrow on a phone.
-  assert.match(settings, /backLabel="Усі інтеграції"/);
-  assert.doesNotMatch(settings, /backAction/);
+  // Every settings section is one level deep, so the way out is the pane's own
+  // arrow beside the title — never a labelled ghost button on its own row.
+  assert.doesNotMatch(settings, /backLabel|backAction/);
   // The bulk bar's pickers are drawn on the dark bar, never as white blocks
   // dropped on top of it, and the bar wraps instead of cropping its last
   // controls inside an invisible scroller.

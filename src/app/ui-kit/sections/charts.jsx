@@ -41,7 +41,7 @@ const DEMO_FLOW = [
 ];
 
 const DEMO_MEMBERS = [
-  { id: 'a', name: 'Артур Моспан', done: 12, open: 4, minutes: 640, focus: 'Переписати імпорт клієнтських даних із YouTrack', state: 'Стабільно' },
+  { id: 'a', name: 'Артур Моспан', done: 12, open: 4, minutes: 640, focus: 'Розібрати чергу звернень клієнта «Ромашка»', state: 'Стабільно' },
   { id: 'b', name: 'Олена Коваль', done: 7, open: 9, minutes: 420, focus: 'Аудит доступів до проєктних дощок', state: 'Високе навантаження' },
   { id: 'c', name: 'Дмитро Гнатюк', done: 3, open: 2, minutes: 95, focus: '', state: 'Стабільно' },
 ];

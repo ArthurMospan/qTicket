@@ -129,31 +129,27 @@ test('one dispatch pass groups its rows into one message per person', () => {
   assert.equal(grouped.get('a').length, 2);
 });
 
-test('channel failures retry only the channel that did not succeed', () => {
+test('a failed delivery retries and a successful one is not rewritten', () => {
   const nowMs = 1_000_000;
   const first = deliveryAttemptUpdate({ attempts: 0 }, {
     nowMs,
     emailRequested: true,
-    emailSucceeded: true,
-    telegramRequested: true,
-    telegramSucceeded: false,
-    telegramError: 'bot blocked',
+    emailSucceeded: false,
+    emailError: 'bounced',
   });
   assert.equal(first.failed, true);
   assert.equal(first.update.status, 'pending');
-  assert.equal(first.update.emailSentAtMs, nowMs);
-  assert.equal(first.update.telegramSentAtMs, undefined);
-  assert.match(first.update.lastError, /bot blocked/);
+  assert.equal(first.update.emailSentAtMs, undefined);
+  assert.match(first.update.lastError, /bounced/);
 
-  const retry = deliveryAttemptUpdate({ attempts: 1, emailSentAtMs: nowMs }, {
+  const retry = deliveryAttemptUpdate({ attempts: 1 }, {
     nowMs: nowMs + 2 * MINUTE,
-    telegramRequested: true,
-    telegramSucceeded: true,
+    emailRequested: true,
+    emailSucceeded: true,
   });
   assert.equal(retry.failed, false);
   assert.equal(retry.update.status, 'sent');
-  assert.equal(retry.update.emailSentAtMs, undefined, 'successful email is not sent or rewritten again');
-  assert.equal(retry.update.telegramSentAtMs, nowMs + 2 * MINUTE);
+  assert.equal(retry.update.emailSentAtMs, nowMs + 2 * MINUTE);
 });
 
 test('a rejected email is not recorded as a successful notification', () => {
@@ -441,7 +437,7 @@ test('a dispatch pass is bounded so a backlog drains instead of timing out', asy
   // And the record is claimed before the outbound send, so a crash mid-send
   // cannot produce a second bell entry on retry.
   const dispatch = source.slice(source.indexOf('export async function dispatchDueNotifications'));
-  assert.ok(dispatch.indexOf('claimNotification(row') < dispatch.indexOf('deliverTelegramNotification'));
+  assert.ok(dispatch.indexOf('claimNotification(row') < dispatch.indexOf('deliverEmail({'));
 });
 
 test('a reminder something else already delivered is not delivered a second time', async () => {
@@ -528,7 +524,6 @@ test('an event-driven message that failed to leave is owed, not lost', async () 
   assert.match(queue, /nextAttemptAtMs: nowMs \+ nextAttemptDelayMs\(1\)/);
   // A channel that went through is not sent again.
   assert.match(queue, /emailSentAtMs: nowMs/);
-  assert.match(queue, /telegramSentAtMs: nowMs/);
   // And a row is only written for somebody actually owed something.
   assert.match(queue, /if \(!owed\.length\) return;/);
 });
@@ -539,7 +534,4 @@ test('the immediate path still knows whether it delivered', async () => {
   // invisible: there was nothing to be false.
   assert.match(route, /return deliverEmail\(\{/);
   assert.match(route, /result\.status === 'rejected' \|\| result\.value !== true/);
-  // A Telegram call that throws means nobody in it was reached, not that
-  // everybody was.
-  assert.match(route, /failedUserIds: telegramTargets\.map\(item => item\.userId\)/);
 });

@@ -88,42 +88,6 @@ test('task time-log PATCH and DELETE use live log state and mutation locks', asy
   assert.match(server, /invoiceMutationVersion: FieldValue\.increment\(1\)/);
 });
 
-test('YouTrack work-log writes share the estimate-reservation lock', async () => {
-  const importer = await readSource('src/lib/server/youtrackImporter.js');
-  const functionStart = importer.indexOf('async function importWorkItems(');
-  const functionEnd = importer.indexOf(
-    '\nasync function enqueueLinks(',
-    functionStart,
-  );
-  const source = importer.slice(functionStart, functionEnd);
-  const reservationRead = source.indexOf(
-    'transaction.get(estimateReservationRef)',
-  );
-  const unchangedNoop = source.indexOf(
-    'if (changedLogs === 0) return skippedIds',
-    reservationRead,
-  );
-  const reservationGuard = source.indexOf(
-    'if (estimateReservationSnapshot.exists)',
-    unchangedNoop,
-  );
-  const rawLogWrite = source.indexOf(
-    'transaction.set(row.ref, row.fields',
-    reservationGuard,
-  );
-
-  assert.match(
-    source,
-    /invoiceSourcelessReservationId\(job\.organizationId, projectId, issueId\)/,
-  );
-  assert.match(source, /collection\('invoiceEstimateReservations'\)/);
-  assert.match(source, /youTrackImportedWorkLogMatches\(current, row\.fields\)/);
-  assert.ok(reservationRead > 0);
-  assert.ok(unchangedNoop > reservationRead);
-  assert.ok(reservationGuard > unchangedNoop && reservationGuard < rawLogWrite);
-  assert.match(source, /YOUTRACK_TIME_ESTIMATE_ALREADY_INVOICED/);
-});
-
 test('task time-log clients use APIs and contain no direct mutation primitives', async () => {
   const [service, hook, timesheet] = await Promise.all([
     readSource('src/lib/services/timeLogs.js'),
@@ -142,27 +106,11 @@ test('task time-log clients use APIs and contain no direct mutation primitives',
   assert.doesNotMatch(timesheet, /writeBatch|increment\(|serverTimestamp\(|Timestamp\.fromDate/);
 });
 
-test('all trusted issue creators initialize the accounting mirror', async () => {
-  const [issues, apiV1, telegram, youtrack] = await Promise.all([
-    readSource('src/app/api/issues/route.js'),
-    readSource('src/app/api/v1/tasks/route.js'),
-    readSource('src/lib/server/telegram.js'),
-    readSource('src/lib/server/youtrackImporter.js'),
-  ]);
-  for (const source of [issues, telegram, youtrack]) {
-    assert.match(source, /spentMinutes:\s*0/);
-    assert.match(source, /spentMinutesMirrorVersion:\s*1/);
-    assert.match(source, /timeLogMutationVersion:\s*0/);
-  }
-  assert.equal((apiV1.match(/spentMinutesMirrorVersion:\s*1/g) || []).length, 2);
-
-  assert.match(youtrack, /spentMinutesMirrorVersion !== 1/);
-  assert.match(youtrack, /\.where\('issueId', '==', issueId\)[\s\S]*?\.limit\(1\)/);
-  assert.match(youtrack, /spentMinutesMirrorVersion:\s*1/);
-  assert.match(
-    youtrack,
-    /invoiceMutationVersion: FieldValue\.increment\(1\)/,
-  );
+test('every issue creator initializes the accounting mirror', async () => {
+  const issues = await readSource('src/app/api/issues/route.js');
+  assert.match(issues, /spentMinutes:\s*0/);
+  assert.match(issues, /spentMinutesMirrorVersion:\s*1/);
+  assert.match(issues, /timeLogMutationVersion:\s*0/);
 });
 
 test('reconciliation stamps legacy mirrors even when their numeric sum matches', async () => {
