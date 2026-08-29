@@ -38,86 +38,60 @@ export const TASK_MANAGER_WORDS = Object.freeze([
   'проект',
 ]);
 
-// Every string about the record itself that a screen renders for both readers.
-// Same keys on both sides on purpose — a key that exists in one voice and not
-// the other is a screen that silently falls back to the wrong vocabulary.
+// Every string about the record itself, in the one voice the product speaks.
+//
+// This file briefly held two vocabularies — «інцидент» for support, «звернення»
+// for the client — and that was the mistake, not the fix. One record with two
+// names is a product where the customer's list and the agent's queue are
+// visibly not the same thing, and every shared screen has to remember which
+// reader it is talking to. There is one name.
+export const INCIDENT_TERMS_TABLE = Object.freeze({
+  record: 'Звернення',
+  untitled: 'Звернення без назви',
+  created: 'Звернення створено',
+
+  linkCopied: 'Посилання на звернення скопійовано',
+  copyLink: 'Копіювати посилання на звернення',
+  markedUnread: 'Звернення позначено непрочитаним',
+  options: 'Опції звернення',
+
+  notFound: 'Звернення не знайдено',
+  accessDeniedTitle: 'Немає доступу до звернення',
+  accessDeniedText: 'Звернення видалено або у вас більше немає до нього доступу.',
+  loadFailedTitle: 'Не вдалося завантажити звернення',
+
+  archivedTitle: 'Звернення в архіві',
+  archivedText: 'Звернення закрито й прибрано зі списку активних. Листування та файли збережені без обмеження строку.',
+  cancelledTitle: 'Звернення скасовано',
+  cancelledText: 'Звернення не вважається вирішеним і не показується серед активних. Листування та файли збережені без обмеження строку.',
+
+  descriptionEmpty: 'Опис звернення ще не додано.',
+  unreadDivider: 'Нове у зверненні',
+  mentionMenuHeading: 'Згадати звернення',
+
+  composerTitle: 'Нове звернення',
+  composerSubmit: 'Створити звернення',
+  composerFailed: 'Не вдалося створити звернення',
+  composerSubjectLabel: 'Тема звернення',
+  composerSubjectRequired: 'Вкажіть тему звернення',
+  composerDescriptionLabel: 'Опис звернення',
+});
+
+// The two old names still resolve, and to the same table: a caller that asks
+// for the staff voice and a caller that asks for the client voice must not be
+// able to get different words out of this file again.
 export const INCIDENT_TERMS = Object.freeze({
-  staff: Object.freeze({
-    record: 'Інцидент',
-    untitled: 'Інцидент без назви',
-    created: 'Інцидент створено',
-
-    linkCopied: 'Посилання на інцидент скопійовано',
-    copyLink: 'Копіювати посилання на інцидент',
-    markedUnread: 'Інцидент позначено непрочитаним',
-    options: 'Опції інциденту',
-
-    notFound: 'Інцидент не знайдено',
-    accessDeniedTitle: 'Немає доступу до інциденту',
-    accessDeniedText: 'Інцидент видалено або у вас більше немає доступу до клієнтського простору.',
-    loadFailedTitle: 'Не вдалося завантажити інцидент',
-
-    archivedTitle: 'Інцидент в архіві',
-    archivedText: 'Інцидент прибрано з активної черги. Історія звернення, чат і файли збережені без обмеження строку.',
-    cancelledTitle: 'Інцидент скасовано',
-    cancelledText: 'Інцидент не рахується як вирішений і не показується в активній черзі. Історія звернення збережена без обмеження строку.',
-
-    descriptionEmpty: 'Опис інциденту ще не додано.',
-    unreadDivider: 'Нове в інциденті',
-    mentionMenuHeading: 'Згадати інцидент',
-
-    composerTitle: 'Новий інцидент',
-    composerSubmit: 'Створити інцидент',
-    composerFailed: 'Не вдалося створити інцидент',
-    composerSubjectLabel: 'Тема інциденту',
-    composerSubjectRequired: 'Вкажіть тему інциденту',
-    composerDescriptionLabel: 'Опис інциденту',
-  }),
-  client: Object.freeze({
-    record: 'Звернення',
-    untitled: 'Звернення без назви',
-    created: 'Звернення створено',
-
-    linkCopied: 'Посилання на звернення скопійовано',
-    copyLink: 'Копіювати посилання на звернення',
-    markedUnread: 'Звернення позначено непрочитаним',
-    options: 'Опції звернення',
-
-    notFound: 'Звернення не знайдено',
-    accessDeniedTitle: 'Немає доступу до звернення',
-    // A client has one support space and never chose it, so «клієнтський
-    // простір» names nothing they can act on. What they need to know is that
-    // the link no longer opens for them.
-    accessDeniedText: 'Звернення видалено або у вас більше немає до нього доступу.',
-    loadFailedTitle: 'Не вдалося завантажити звернення',
-
-    archivedTitle: 'Звернення в архіві',
-    archivedText: 'Звернення закрито й прибрано зі списку активних. Листування та файли збережені без обмеження строку.',
-    cancelledTitle: 'Звернення скасовано',
-    cancelledText: 'Команда підтримки скасувала це звернення, тож воно не вважається вирішеним. Листування та файли збережені без обмеження строку.',
-
-    descriptionEmpty: 'Опис звернення ще не додано.',
-    unreadDivider: 'Нове у зверненні',
-    mentionMenuHeading: 'Згадати звернення',
-
-    composerTitle: 'Нове звернення',
-    composerSubmit: 'Створити звернення',
-    composerFailed: 'Не вдалося створити звернення',
-    composerSubjectLabel: 'Тема звернення',
-    composerSubjectRequired: 'Вкажіть тему звернення',
-    composerDescriptionLabel: 'Опис звернення',
-  }),
+  staff: INCIDENT_TERMS_TABLE,
+  client: INCIDENT_TERMS_TABLE,
 });
 
 /**
- * Which vocabulary a shared screen is speaking.
+ * The product's words for a support request.
  *
- * Takes the answer, not the role: the callers already hold `clientViewer` from
- * `isClientRole`, and a second copy of the role model in a content file is a
- * second place for it to go stale.
- *
- * @param {boolean} clientAudience Whether an external client is reading.
+ * Keeps its argument so the call sites read honestly — a shared screen still
+ * knows who is looking, for what it *shows* — but the vocabulary no longer
+ * forks on it.
  */
-export function incidentTerms(clientAudience = false) {
-  return clientAudience ? INCIDENT_TERMS.client : INCIDENT_TERMS.staff;
+export function incidentTerms() {
+  return INCIDENT_TERMS_TABLE;
 }

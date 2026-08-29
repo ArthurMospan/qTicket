@@ -58,12 +58,14 @@ test('the difference between the two is stated where the choice is made', async 
   assert.match(detail, /title=\{terms\.archivedTitle\}/);
   assert.match(detail, /title=\{terms\.cancelledTitle\}/);
   // Archiving preserves the customer record and says exactly what survives.
-  assert.match(INCIDENT_TERMS.staff.archivedText, /Історія звернення, чат і файли/);
-  assert.match(INCIDENT_TERMS.client.archivedText, /Листування та файли/);
+  // One vocabulary: `staff` and `client` are the same table, and this test
+  // asserting the same sentence twice is the point — it fails the moment
+  // somebody forks the record's name again.
+  assert.equal(INCIDENT_TERMS.staff, INCIDENT_TERMS.client);
+  assert.match(INCIDENT_TERMS.staff.archivedText, /Листування та файли/);
   assert.match(bar, /історія, чат і файли залишаться/);
   // Cancelling stays distinct from resolving and says where the record goes.
-  assert.match(INCIDENT_TERMS.staff.cancelledText, /не рахується як вирішений/);
-  assert.match(INCIDENT_TERMS.client.cancelledText, /не вважається вирішеним/);
+  assert.match(INCIDENT_TERMS.staff.cancelledText, /не вважається вирішеним/);
   assert.match(bar, /не рахуватимуться як вирішені/);
   // The confirmation before cancelling is staff-only and still names the list.
   assert.match(detail, /«Архіві» → «Скасовані»/);
