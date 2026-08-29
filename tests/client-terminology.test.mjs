@@ -14,10 +14,15 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { join, relative, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+import { copyStrings, walkSources } from './copy-strings.mjs';
 import {
   CLIENT_FORBIDDEN_WORDS,
+  CLIENT_ONLY_FORBIDDEN_WORDS,
   INCIDENT_TERMS_TABLE,
   incidentTerms,
 } from '../src/lib/content/incidentTerms.mjs';
@@ -132,5 +137,102 @@ test('every published help article is safe to hand a client', () => {
   }
   for (const article of helpArticlesForRole('client_member')) {
     assertClean(JSON.stringify(article), `client-readable help article ${article.id}`);
+  }
+});
+
+// ── The screens themselves, read whole ──────────────────────────────────────
+//
+// Everything above drives a function and reads what it gives back. That is how
+// a catalogue filtered by role, a palette built for `client_admin` and a tab
+// title that falls back are held to the rule — and every one of them passed
+// while `aria-label="Виконавці звернення"` sat in the incident screen the
+// client opens. No function returned it. It was markup, on a control behind
+// `!clientViewer`, in a file the client's browser renders.
+//
+// So the last check is asked file by file, and bluntly: nothing the client
+// renders may contain «виконавець» or «трекер» in a string at all — not in the
+// branch they read, not in the branch they do not. A word kept one condition
+// away from the person it is hidden from is a word this product has already
+// leaked twice by moving the condition.
+//
+// `src/app/(app)` and `src/components` are taken whole, because that is the
+// shape of the product: one authenticated workspace, drawing one set of screens
+// for two audiences. A file there is the client's file until it proves
+// otherwise, and the proof is turning them away — see STAFF_ONLY, whose claim
+// this test verifies rather than believes.
+//
+// Two things it deliberately does not reach. `src/lib` is not scanned: a string
+// there is a value some screen may or may not render, and the tests above are
+// how those get asked. `src/app/ui-kit` is not scanned either — the catalogue
+// is a component reference for the people who build the product, and no client
+// has a route to it.
+
+const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const CLIENT_TREES = ['src/app/(app)', 'src/components'];
+const posix = file => relative(ROOT, file).split(sep).join('/');
+
+// A screen support keeps to itself. «Виконавець» is support's own word for a
+// seat a client cannot hold, and it is legal here — but only because a client
+// who pastes the address is sent home before the screen paints, which is the
+// line asserted below. An entry without that line is a claim, not an exemption.
+const STAFF_ONLY = [
+  {
+    file: 'src/app/(app)/my/page.js',
+    reason: 'The cross-client support queue. A client has one space and no queue across them.',
+  },
+  {
+    file: 'src/app/(app)/overview/page.js',
+    reason: 'The support overview: counters about what the team owes, over every client at once.',
+  },
+];
+
+test('no screen a client renders carries support’s word for a seat', () => {
+  const staffOnly = new Set(STAFF_ONLY.map(entry => entry.file));
+  const problems = [];
+
+  for (const tree of CLIENT_TREES) {
+    for (const file of walkSources(join(ROOT, tree))) {
+      const relativeFile = posix(file);
+      if (staffOnly.has(relativeFile)) continue;
+      for (const { value, line } of copyStrings(file)) {
+        const haystack = String(value).toLocaleLowerCase('uk-UA');
+        const hit = CLIENT_ONLY_FORBIDDEN_WORDS.find(word => haystack.includes(word));
+        if (!hit) continue;
+        problems.push(`${relativeFile}:${line} «${hit}» in ${JSON.stringify(value.trim().slice(0, 120))}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    problems,
+    [],
+    'A client opened an account to send their supplier a problem. Who answers it '
+    + 'is our routing, not a fact about their request — so the control is absent '
+    + 'for them, and the word goes with it. On a screen support shares with the '
+    + 'client the seat is «Відповідальні», which is what the picker, the composer '
+    + 'and the bulk bar already say.\n\n'
+    + problems.join('\n'),
+  );
+});
+
+test('a screen claiming to be support-only sends a client away before it paints', () => {
+  // The exemption list is the part of the check that can rot, so it is not
+  // taken on trust: a staff screen earns its entry by redirecting, and by
+  // rendering nothing at all while the redirect is in flight. Both lines are
+  // the ones `/my` and `/overview` actually carry.
+  assert.equal(STAFF_ONLY.length, 2);
+  for (const entry of STAFF_ONLY) {
+    const source = readFileSync(join(ROOT, entry.file), 'utf8');
+    assert.ok(entry.reason.length >= 40, `${entry.file} needs a reason, not a note`);
+    assert.match(
+      source,
+      /if \(orgRole && clientViewer\) router\.replace\('\/'\);/,
+      `${entry.file} is exempt from the client vocabulary but does not send a client home`,
+    );
+    assert.match(
+      source,
+      /if \(clientViewer\) return null;/,
+      `${entry.file} redirects a client but still paints while the redirect is in flight`,
+    );
   }
 });

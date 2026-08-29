@@ -88,7 +88,7 @@ test('the known board controls, tab icons, headings and breadcrumbs carry access
 
   for (const label of [
     'Стан звернень',
-    'Фільтр за виконавцем',
+    'Фільтр за відповідальним',
     'Фільтр за пріоритетом',
   ]) assert.match(project, new RegExp(`ariaLabel="${label}"`));
 

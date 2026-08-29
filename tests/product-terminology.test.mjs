@@ -24,10 +24,10 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, relative, resolve, sep } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse } from '@babel/parser';
+
+import { copyStrings, walkSources as walk } from './copy-strings.mjs';
 
 import {
   CLIENT_SPACE_WRONG_NAMES,
@@ -39,7 +39,6 @@ import {
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const SRC = join(ROOT, 'src');
-const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.mjs']);
 
 // Two exemptions, both data rather than copy.
 //
@@ -63,66 +62,12 @@ const ALLOWED = [
   },
 ];
 
-function walk(dir, acc = []) {
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) walk(path, acc);
-    else if (SOURCE_EXTENSIONS.has(extname(path))) acc.push(path);
-  }
-  return acc;
-}
-
 const posix = file => relative(ROOT, file).split(sep).join('/');
 
 function allowance(file, value) {
   return ALLOWED.find(entry => (
     entry.file === file && (entry.strings === null || entry.strings.includes(value))
   ));
-}
-
-/**
- * Every string a person could read, with the line it sits on.
- *
- * Import and export specifiers are skipped — a module path is not copy — and so
- * is everything Babel classifies as a comment, which is how the data-model
- * notes about `issues` and `projectId` stay legal.
- */
-function copyStrings(file) {
-  const source = readFileSync(file, 'utf8');
-  const ast = parse(source, {
-    sourceType: 'unambiguous',
-    plugins: ['jsx', 'typescript', 'decorators-legacy', 'classProperties', 'dynamicImport', 'topLevelAwait', 'importAttributes'],
-  });
-
-  const found = [];
-  const skip = new Set();
-
-  const visit = (node, parent) => {
-    if (!node || typeof node.type !== 'string') return;
-
-    if ((parent?.type === 'ImportDeclaration' || parent?.type === 'ExportNamedDeclaration'
-      || parent?.type === 'ExportAllDeclaration') && parent.source === node) {
-      skip.add(node);
-    }
-
-    if (node.type === 'StringLiteral' && !skip.has(node)) {
-      found.push({ value: node.value, line: node.loc?.start.line || 0 });
-    } else if (node.type === 'TemplateElement') {
-      found.push({ value: node.value.cooked ?? node.value.raw, line: node.loc?.start.line || 0 });
-    } else if (node.type === 'JSXText') {
-      found.push({ value: node.value, line: node.loc?.start.line || 0 });
-    }
-
-    for (const key of Object.keys(node)) {
-      if (key === 'loc' || key === 'leadingComments' || key === 'trailingComments' || key === 'innerComments') continue;
-      const child = node[key];
-      if (Array.isArray(child)) for (const item of child) visit(item, node);
-      else if (child && typeof child.type === 'string') visit(child, node);
-    }
-  };
-
-  visit(ast.program, null);
-  return found;
 }
 
 function offences(words) {

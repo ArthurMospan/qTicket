@@ -271,12 +271,12 @@ On Windows with Firebase CLI 15 and Node 24, the rules assertions can finish suc
 - Client roles are scoped by `project.team`. They may see all incidents in their assigned client project, create an incident, read its conversation, reply, and attach files. **The conversation on an incident is fully shared: everything support writes, the client reads.** There is no staff-only note inside an incident and no composer switch that keeps a reply «for us» — a second, hidden thread on the customer's own record is a thing the product deliberately does not have, and support discusses a case out of band instead. What stays internal is the support-side `audit` feed and control of the record: a client cannot change status, priority or assignee, enter organization or project settings, or reach another client's queue. Firestore rules and server routes enforce the boundary; hiding controls is only defensive UI.
 - A `client_admin` may invite only `client_member` users, into exactly one project the client admin already belongs to. A `client_member` cannot invite users. Internal owners/admins retain organization-wide administration.
 - The inherited internal `member` role remains a support agent to avoid weakening proven QuickTeam mechanics during the fork; it is not a client role.
-- Owners and admins may delete another person's comment or group-channel message, never edit one. Direct rooms are neither readable nor moderatable by them.
+- Owners and admins may delete another person's comment, never edit one: an edited comment still carries its author's name.
 - Taking access away deletes the `orgMemberships` document and archives it under `orgMembershipArchive`, and removes the person from `project.team`. Their incidents, comments and watches are never rewritten. Restoring the archived seat returns the same role, position and projects. Leaving on your own uses the same route and needs no privilege.
 - Projects and incidents are created through server APIs so sequential incident keys and audit records are atomic.
 - Incident hierarchy, logical links and status transitions are validated by server APIs; external clients cannot bypass their execution invariants.
 - Cloudinary signing, notifications/email, invitations and the QuickTeam contract endpoints are authenticated and rate-limited.
-- User documents are private; shared team profile fields and presence are organization-scoped.
+- User documents are private; shared team profile fields are organization-scoped.
 
 ## Data model
 
@@ -286,9 +286,8 @@ Primary collections:
 - `projects` (client workspaces) and `stages`
 - `issues` (incidents), with the shared `comments` subcollection and the staff-only `audit` one
 - `issueLinks`
-- `notifications`; presence under `organizations/{orgId}/presence`
+- `notifications`; the typing indicator under `issues/{issueId}/presence/typing`
 - `system/notificationSweep` — the scheduled sweep's watermark and last counts. Server-written only; Firestore rules have no `system` match, so browsers cannot read or forge it.
-- organization-scoped `channels`, `messages` and `readState`
 
 Archiving, cancelling and deleting an incident are separate, and mean three different things.
 
