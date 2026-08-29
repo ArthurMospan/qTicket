@@ -238,12 +238,15 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // second name for it.
   const terms = incidentTerms();
   const canEditIssue = can(orgRole, 'edit:issue');
-  // Where «назад» goes from this screen. `/{projectId}` is the tenant's
-  // customer-administration surface and it sends a client straight back to the
-  // portal, so for a client every way out of a request — the crumb, the link
-  // under «Звернення не знайдено» and Escape — pointed at a bounce. Their list
-  // is «Мої звернення» at `/`.
-  const backHref = clientViewer ? '/' : `/${projectId}`;
+  // Where «назад» goes from this screen: the space this request is in, for
+  // both sides of the desk. It used to be `/` for a client, from when their
+  // portal was a screen of its own and `/{projectId}` was the staff board that
+  // would have bounced them — and that has not been true since the two became
+  // one screen. `/` is now the door rather than the room, so every way out of a
+  // request went through a redirect; a client whose space is archived went
+  // through it to «простір ще не налаштовано», because the door picks the first
+  // active space rather than the one they were reading.
+  const backHref = `/${projectId}`;
   const timeZone = organizationTimeZone(activeOrg);
   const {
     issues,
@@ -570,7 +573,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     };
     useWorkspaceStore.setState({
       breadcrumbs: clientViewer
-        ? [{ label: 'Мої звернення', href: '/' }, leaf]
+        ? [{ label: 'Мої звернення', href: backHref }, leaf]
         : [
           { label: 'Клієнти', href: '/clients' },
           { label: project?.name || '...', href: `/${projectId}` },
@@ -578,7 +581,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         ]
     });
     return () => useWorkspaceStore.setState({ breadcrumbs: [] });
-  }, [canonicalIssuePath, clientViewer, project?.name, issue?.issueKey, projectId, isModal, showToast, terms.copyLink, terms.linkCopied]);
+  }, [backHref, canonicalIssuePath, clientViewer, project?.name, issue?.issueKey, projectId, isModal, showToast, terms.copyLink, terms.linkCopied]);
 
   // Whether the open draft says anything the task does not. Everything that can
   // be edited in place (status, sprint, labels…) writes straight through, so the
@@ -673,8 +676,8 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         ) : (
           <div className="text-center">
             <p className="text-[16px] font-bold text-ink mb-2">{terms.notFound}</p>
-            {/* Back to where this reader actually came from: a client has no
-                board to return to, and the route would only bounce them. */}
+            {/* Back to the space the request is in — the same screen both
+                sides of the desk read it from. */}
             <Link href={backHref} className="text-[13px] text-ink hover:underline">← Повернутись</Link>
           </div>
         )}

@@ -45,7 +45,17 @@ export default function QuickTeamLoginPage() {
         sessionStorage.setItem('qt_active_org_id', data.organizationId);
         sessionStorage.setItem('qt_org_selected_this_session', '1');
         sessionStorage.setItem('just_logged_in', 'true');
-        router.replace(withNotificationOrganization(data.returnTo || '/overview', data.organizationId));
+        // `returnTo` arrives from QuickTeam and the contract only checks that it
+        // is a same-origin path — `/login` and `/api/…` pass that and are then
+        // refused by `normalizeNotificationLink`, which answers with an empty
+        // string. `router.replace('')` is not a navigation: it resolves to the
+        // page you are already on, and this page is a spinner that says
+        // «Відкриваємо qTicket» for ever. A launch that names a destination we
+        // will not open lands on the staff front door instead of nowhere.
+        const destination = withNotificationOrganization(data.returnTo || '/overview', data.organizationId)
+          || withNotificationOrganization('/overview', data.organizationId)
+          || '/overview';
+        router.replace(destination);
       } catch (launchError) {
         setError(launchError.message || 'Не вдалося відкрити qTicket через QuickTeam.');
       }

@@ -84,13 +84,13 @@ does not read inherited calendar events. For a client role the people result is
 additionally intersected with `project.team` across that client's accessible
 spaces, and the palette publishes incident results only.
 
-The inherited calendar backend is also behind that boundary. Every
-`/api/calendar/*` organization authorization uses the internal
-`access:calendar` role set (`owner`/`admin`/`member`) before the Admin SDK reads
-an event, birthday or reminder; a client membership is not enough. The source
-`calendarEvents` collection is server-only in Firestore Rules for every browser
-role, so bypassing the route cannot enumerate staff events either. Scheduled
-workers keep using the Admin SDK independently of a browser session.
+There is no calendar backend left to keep behind that boundary. `/api/calendar/*`
+was deleted with the planning screens, and `access:calendar` — the internal role
+set that authorized those routes — is out of the matrix with it: a permission
+guarding an address that answers no request is a claim nothing can test. The
+last affordance that still spoke to it, the three reply buttons a legacy
+`calendar_invite` notification drew in the bell, is gone too. Scheduled workers
+keep using the Admin SDK independently of a browser session.
 
 ---
 

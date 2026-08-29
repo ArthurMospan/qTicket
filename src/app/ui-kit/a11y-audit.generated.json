@@ -10,8 +10,8 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 255,
-    "elements": 2174,
+    "files": 254,
+    "elements": 2167,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -208,7 +208,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:456",
+      "location": "src/components/WorkspaceHeader.jsx:401",
       "attributes": [
         "label"
       ]

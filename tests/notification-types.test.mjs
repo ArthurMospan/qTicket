@@ -14,12 +14,11 @@ test('the client draws every type the product can produce', async () => {
   // dead type: `birthday` sat in the client's table, the API rejected it, and
   // the conclusion — «nothing sends it» — was wrong. The sweep did.
   //
-  // The calendar family is the reverse case, and knowingly one-sided for now:
-  // nothing produces `calendar_*` any more, and the icons are still in the
-  // header's table, waiting on the pass that owns that file. So what is
-  // enforced here is the half that still bites — every type the product can
-  // produce must be drawn — plus an exact list of what is left over, which
-  // fails the moment anything else joins it.
+  // The calendar family used to be the reverse case: nothing produced
+  // `calendar_*` any more, and three icons for it sat in the header's table
+  // beside three reply buttons that PATCHed a route deleted with the planning
+  // calendar. They are gone, so the leftover list is empty and stays empty —
+  // an icon for a type nothing sends is dead weight, in either direction.
   const header = await read('../src/components/WorkspaceHeader.jsx');
   const table = header.slice(header.indexOf('const TYPE_CFG = {'));
   const drawn = [...table.slice(0, table.indexOf('\n};')).matchAll(/^\s{2}([a-z_]+)\s*:/gm)]
@@ -28,7 +27,7 @@ test('the client draws every type the product can produce', async () => {
     'A type nobody draws arrives in the bell with no icon.');
   assert.deepEqual(
     drawn.filter(type => !NOTIFICATION_TYPES.includes(type)).sort(),
-    ['calendar_changed', 'calendar_invite', 'calendar_reminder'],
+    [],
     'An icon for a type nothing produces is dead weight.',
   );
 });

@@ -122,10 +122,17 @@ test('the notification card drops the two lines that carried nothing', async () 
   assert.match(card, /tabIndex=\{onOpen \? 0 : undefined\}/);
   assert.match(card, /onClick=\{onOpen\}/);
   assert.doesNotMatch(card, /<button onClick=\{onOpen\}/);
-  // Both controls that do live inside it keep their own click to themselves.
-  assert.match(card, /onClick=\{event => event\.stopPropagation\(\)\}>\{actions\}/);
+  // The one control that does live inside it keeps its own click to itself.
   assert.match(card, /onClick=\{event => \{ event\.stopPropagation\(\); onDismiss\?\.\(\); \}\}/);
-  // The badge on the sender's face could not separate twelve types across far
+  // There is no second one any more: the `actions` slot existed for the three
+  // calendar reply buttons, which PATCHed `/api/calendar/events/[id]` — a route
+  // deleted with the planning calendar, so the buttons could only ever be
+  // refused. The slot went with them.
+  assert.doesNotMatch(card, /\{actions\}/);
+  assert.doesNotMatch(header, /calendarEventId/);
+  assert.doesNotMatch(header, /fetch\(`\/api\/calendar/);
+  assert.doesNotMatch(header, /'calendar_invite'|calendar_invite:/);
+  // The badge on the sender's face could not separate the types across far
   // fewer glyphs, so the face is drawn on its own.
   assert.doesNotMatch(header, /absolute -bottom-\[3px\] -right-\[3px\]/);
 });

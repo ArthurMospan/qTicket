@@ -19,10 +19,10 @@ import {
   UserCheck, AlertCircle, AtSign, CalendarClock, Settings, Trash2, Mail,
   ChevronRight, X, Hash, ArrowLeft,
 } from 'lucide-react';
-import { CalendarIcon, ChatIcon } from '@/lib/design/icons';
+import { ChatIcon } from '@/lib/design/icons';
 import Button from '@/components/ui/Button';
 import IconAction from '@/components/ui/IconAction';
-import { Counter, Dialog, Pill, ResponseChoice, TextAction } from '@/components/ui';
+import { Counter, Dialog, Pill, TextAction } from '@/components/ui';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useRouter, usePathname } from 'next/navigation';
 import { groupNotifications } from '@/lib/utils/notificationGrouping.mjs';
@@ -30,20 +30,25 @@ import { notificationDestinationWithOrganization, notificationOpenLabel } from '
 import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { GLOBAL_NOTIFICATION_Z_INDEX } from '@/lib/utils/overlayLayers.mjs';
 import { useFloatingOverlay } from '@/lib/hooks/useFloatingOverlay';
-import { auth, db } from '@/lib/firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
-import { reportLoadError } from '@/lib/utils/errors';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 import {
   countWorkspaceSearchMatches,
   createProjectSearchScope,
 } from '@/lib/utils/searchScope.mjs';
 import { isClientRole } from '@/lib/utils/can';
+import { RESERVED_SEGMENTS } from '@/lib/utils/clientPortalRoutes.mjs';
 
 // Icon and colour only. Every entry used to carry a `label` as well, drawn in
 // caps above the notification card's title — where it repeated, in the
 // product's own vocabulary, what the title already said in a sentence. The
 // type is now said by the card's button, which names the destination.
+//
+// The three `calendar_*` rows are gone with the reply buttons that stood under
+// them. Nothing produces those types, `/api/calendar/events/[id]` — the address
+// the buttons answered to — was deleted with the planning calendar, and a
+// stored legacy invitation therefore offered «Буду / Можливо / Не буду» to a
+// route that could only refuse. An icon for a type nothing sends is dead
+// weight; three controls that cannot save an answer are worse than dead weight.
 const TYPE_CFG = {
   assigned:       { icon: UserCheck,      color: '#6366f1' },
   commented:      { icon: ChatIcon,       color: '#0891b2' },
@@ -52,9 +57,6 @@ const TYPE_CFG = {
   deadline:       { icon: CalendarClock,  color: '#d97706' },
   alert:          { icon: AlertCircle,    color: '#dc2626' },
   emergency:      { icon: Zap,            color: '#dc2626' },
-  calendar_invite:{ icon: CalendarClock,  color: '#2563eb' },
-  calendar_changed:{ icon: CalendarIcon,  color: '#525252' },
-  calendar_reminder:{ icon: CalendarClock, color: '#111827' },
   test:           { icon: Bell,           color: '#6366f1' },
 };
 
@@ -84,12 +86,11 @@ function NotifIcon({ n, size = 28 }) {
   const cfg  = TYPE_CFG[n.type] || TYPE_CFG.assigned;
   const Icon = cfg.icon;
   // The face, on its own. There used to be a type badge stuck to the corner of
-  // it, and the badge could not do the job it was there for: twelve types share
-  // far fewer glyphs — a comment and a mention carry the same one, and a
-  // deadline, an invitation and a reminder carry the same calendar — so the
-  // only thing separating them was an 18px disc of colour, two of which are
-  // near-identical darks. It answered «one of the calendar three», and stopped.
-  // The type is said in words now, by the button that opens it.
+  // it, and the badge could not do the job it was there for: the types share far
+  // fewer glyphs than there are types — a comment and a mention carry the same
+  // one — so the only thing separating them was an 18px disc of colour, two of
+  // which are near-identical darks. The type is said in words now, by the
+  // button that opens it.
   if (n.actorName || n.actorAvatar) {
     return (
       <div className="shrink-0 mt-[1px]">
@@ -106,30 +107,11 @@ function NotifIcon({ n, size = 28 }) {
 }
 
 // ── Detect header mode from pathname ────────────────────────────────
-function CalendarResponseActions({
-  notification,
-  response,
-  responding,
-  onRespond,
-  surface = 'surface',
-}) {
-  return (
-    <ResponseChoice
-      size="sm"
-      surface={surface}
-      value={response}
-      disabled={responding}
-      onChange={(value, event) => onRespond(notification, value, event)}
-      className="mt-2"
-    />
-  );
-}
-
 function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
-  const EXCLUDED = [
-    'overview', 'clients', 'my', 'team', 'calendar',
-    'settings', 'errors', 'help', 'news',
-  ];
+  // The route boundary's own list, not a second copy of it: the header asks
+  // exactly the question `isClientPortalRoute` asks, and the copy that used to
+  // live here still named the deleted `calendar`.
+  const EXCLUDED = RESERVED_SEGMENTS;
 
   if (!pathname) return { mode: 'default', project: null };
 
@@ -218,8 +200,6 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
   const [bellOpen, setBellOpen] = useState(false);
   const [notifFilter, setNotifFilter] = useState('all'); // 'all' | 'unread'
   const [userOpen, setUserOpen] = useState(false);
-  const [calendarResponses, setCalendarResponses] = useState({});
-  const [respondingNotificationId, setRespondingNotificationId] = useState('');
   const bellRef = useRef(null);
   const notificationPanelRef = useRef(null);
   const userRef = useRef(null);
@@ -320,33 +300,6 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
       .catch(() => showToast('Не вдалося оновити сповіщення', 'error'));
   };
 
-  const handleCalendarResponse = async (notification, response, event) => {
-    event?.stopPropagation();
-    if (!notification.calendarEventId || respondingNotificationId) return;
-    setRespondingNotificationId(notification.id);
-    try {
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) throw new Error('Потрібно увійти знову');
-      const result = await fetch(`/api/calendar/events/${encodeURIComponent(notification.calendarEventId)}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ response }),
-      });
-      const body = await result.json();
-      if (!result.ok) throw new Error(body.error || 'Не вдалося зберегти відповідь');
-      setCalendarResponses(previous => ({ ...previous, [notification.id]: response }));
-      if (!notification.read) await markRead?.(notification.id);
-      showToast(response === 'accepted' ? 'Участь підтверджено' : response === 'tentative' ? 'Відповідь «Можливо» збережено' : 'Відмову збережено', 'success');
-    } catch (error) {
-      showToast(error.message || 'Не вдалося відповісти на запрошення', 'error');
-    } finally {
-      setRespondingNotificationId('');
-    }
-  };
-
   const handleClearRead = () => {
     clearRead?.(activeOrgId)
       .catch(() => showToast('Не вдалося очистити сповіщення', 'error'));
@@ -436,14 +389,6 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
               {row.title}
             </p>
             {n.body && <p className="text-[11px] text-muted mt-[2px] line-clamp-2">{n.body}</p>}
-            {n.type === 'calendar_invite' && n.calendarEventId && (
-              <CalendarResponseActions
-                notification={n}
-                response={calendarResponses[n.id]}
-                responding={respondingNotificationId === n.id}
-                onRespond={handleCalendarResponse}
-              />
-            )}
             <p className="text-[10px] text-faint mt-[3px] flex items-center gap-1">
               <span>{timeAgo(n.createdAt)}</span>
             </p>
@@ -618,15 +563,6 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
               body={card.body}
               time={timeAgo(card.createdAt)}
               tone={card.type === 'emergency' ? 'emergency' : 'default'}
-              actions={card.type === 'calendar_invite' && card.calendarEventId ? (
-                <CalendarResponseActions
-                  notification={card}
-                  response={calendarResponses[card.id]}
-                  responding={respondingNotificationId === card.id}
-                  onRespond={handleCalendarResponse}
-                  surface="canvas"
-                />
-              ) : null}
               openLabel={notificationOpenLabel(card, { record: notificationRecord })}
               onOpen={card.link ? () => handleNotifClick(card) : undefined}
               onDismiss={() => dismissLiveNotif(card.id)}

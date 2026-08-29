@@ -30,7 +30,7 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useOrganizationIssues } from '@/lib/hooks/useOrganizationIssues';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
-import { isClientRole } from '@/lib/utils/can';
+import { can, isClientRole } from '@/lib/utils/can';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
@@ -67,6 +67,7 @@ export default function SupportOverviewPage() {
     projectsError,
   } = useAppContext();
   const clientViewer = isClientRole(orgRole);
+  const canCreateClient = can(orgRole, 'create:project');
   const activeProjects = useMemo(
     () => (projects || []).filter(project => project.status !== 'archived'),
     [projects],
@@ -308,9 +309,15 @@ export default function SupportOverviewPage() {
                   <EmptyState
                     icon={UsersRound}
                     title="Клієнтів ще немає"
-                    description="Створіть окремий простір для першого клієнта."
-                    action="Додати клієнта"
-                    onAction={() => router.push('/clients?new=1')}
+                    description={canCreateClient
+                      ? 'Створіть окремий простір для першого клієнта.'
+                      : 'Простір для клієнта створює адміністратор підтримки.'}
+                    // Only offered to somebody who may actually take it. This
+                    // sent every internal role to `/clients?new=1`, and a member
+                    // does not hold `create:project` — the address opened the
+                    // dialog anyway and the server refused what it submitted.
+                    action={canCreateClient ? 'Додати клієнта' : undefined}
+                    onAction={canCreateClient ? () => router.push('/clients?new=1') : undefined}
                     density="compact"
                     surface="card"
                   />

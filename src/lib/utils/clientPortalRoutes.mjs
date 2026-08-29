@@ -19,7 +19,13 @@
 
 // Paths that name a screen rather than a client space. A space can never be
 // reached under one of these names, whatever its id happens to be.
-const RESERVED_SEGMENTS = Object.freeze([
+//
+// Exported because the workspace header asks the same question — "is this first
+// segment a screen or a client id?" — to decide whether to draw a client's
+// name. It kept its own copy of the answer, and the copy had already drifted:
+// it still named `calendar`, a screen deleted with the planning calendar, and
+// had never heard of half the addresses listed here. One question, one list.
+export const RESERVED_SEGMENTS = Object.freeze([
   'overview', 'my', 'team', 'clients', 'settings',
   'login', 'register', 'onboarding', 'invite', 'errors', 'ui-kit',
   'help', 'news', 'offer', 'privacy', 'terms', 'privacy-policy', 'api',

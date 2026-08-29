@@ -22,7 +22,6 @@ test('клієнтські ролі не керують інцидентом а�
     assert.equal(can(role, 'delete:issue'), false);
     assert.equal(can(role, 'edit:project_settings'), false);
     assert.equal(can(role, 'manage:team'), false);
-    assert.equal(can(role, 'access:calendar'), false);
   }
 });
 

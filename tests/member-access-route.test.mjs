@@ -122,12 +122,11 @@ test('every permission in the matrix is read by something', async () => {
   // all and stay true, which is exactly how `manage:finance` came to document a
   // restriction the product did not have.
   //
-  // `access:calendar` is the one currently in that state, and knowingly: the
-  // planning calendar and every route behind it have been deleted, and the
-  // permission is waiting on the same pass through `can.js` that will take the
-  // matrix entry out. It is listed here rather than tolerated silently, so the
-  // day it is removed this test goes back to demanding nothing be left over.
-  const pendingRemoval = ['access:calendar'];
+  // `access:calendar` was the one in that state, and it has been removed: it
+  // guarded `/api/calendar/*`, deleted with the planning calendar. Nothing is
+  // waiting any more, so this list is empty and the test is back to demanding
+  // that nothing be left over.
+  const pendingRemoval = [];
   const unused = Object.keys(PERMISSIONS).filter(permission => !corpus.includes(`'${permission}'`));
   assert.deepEqual(unused, pendingRemoval);
 });

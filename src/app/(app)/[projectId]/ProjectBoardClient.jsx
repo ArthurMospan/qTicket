@@ -303,6 +303,20 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     router.push('/clients');
   }, [router, showToast]);
 
+  // «Команда клієнта» opens a person where they can actually be found. The rows
+  // used to go to `/team?member=…`, and `/team` is the support roster — it
+  // filters every client role out — so the id it was asked for was never in the
+  // list and the screen selected whoever happened to be first instead. The
+  // profile overlay the layout already mounts answers for any member of the
+  // organization, which is what `HoverCard` uses everywhere else. Widening the
+  // roster to hold customers was the other way to make that link true, and that
+  // is a boundary, not a bug.
+  const openClientProfile = useCallback(memberId => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('member', memberId);
+    router.push(`${window.location.pathname}?${params.toString()}`);
+  }, [router]);
+
   const loading = !resourceContextReady
     || projectsLoading
     || issuesLoading
@@ -569,7 +583,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       members={clientMembers}
                       emptyTitle="Клієнта ще не запрошено"
                       emptyDescription="Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників."
-                      onOpen={memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
+                      onOpen={openClientProfile}
                     />
                   </Surface>
 

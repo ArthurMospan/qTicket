@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 90,
-    "props": 652,
-    "documentedProps": 652,
+    "components": 89,
+    "props": 645,
+    "documentedProps": 645,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -3073,13 +3073,6 @@
       "summary": "One notification, drawn as the card that slides in over the workspace when it arrives: who did it, what happened, and the two things you can do about it. Not a `Toast`.",
       "props": [
         {
-          "name": "actions",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "Extra controls inside the card — the calendar reply buttons."
-        },
-        {
           "name": "body",
           "default": "",
           "type": "string",
@@ -3711,61 +3704,6 @@
           "type": "string",
           "values": [],
           "description": "Placeholder for that picker."
-        }
-      ]
-    },
-    "ResponseChoice": {
-      "file": "src/components/ui/Forms/ResponseChoice.jsx",
-      "summary": "The three answers to a calendar invitation, as one group of toggle buttons.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "disabled",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Blocks every answer while one is saving."
-        },
-        {
-          "name": "onChange",
-          "default": "",
-          "type": "(value: string, event) => void",
-          "values": [],
-          "description": "Fires with the answer that was pressed."
-        },
-        {
-          "name": "size",
-          "default": "'md'",
-          "type": "'tile'|'md'|'sm'",
-          "values": [
-            "md",
-            "sm",
-            "tile"
-          ],
-          "description": "Which of the three geometries to draw; the tile also carries the semantic colours."
-        },
-        {
-          "name": "surface",
-          "default": "'surface'",
-          "type": "'surface'|'canvas'",
-          "values": [
-            "canvas",
-            "surface"
-          ],
-          "description": "What the group sits on, which decides how an unselected answer stays visible."
-        },
-        {
-          "name": "value",
-          "default": "",
-          "type": "'accepted'|'tentative'|'declined'|null",
-          "values": [],
-          "description": "The current answer."
         }
       ]
     },

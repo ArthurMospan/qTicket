@@ -620,13 +620,18 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     return () => clearInterval(timer);
   }, []);
 
-  // Auto-open modal when navigated with ?new=1
+  // `?new=1` is the second door into the composer and it has to be the same
+  // door as the button. It was not: «Новий клієнт» asks `create:project`, which
+  // a member does not hold, while the query opened the dialog for anybody who
+  // arrived with it — and the empty state on the overview offered exactly that
+  // address to every internal role. A member got a form the server was always
+  // going to refuse. The address is still consumed either way, so a refused
+  // `?new=1` cannot sit in the URL waiting for the next reload.
   useEffect(() => {
-    if (clientsRoute && searchParams?.get('new') === '1') {
-      queueMicrotask(() => setShowNewProject(true));
-      router.replace('/clients', { scroll: false });
-    }
-  }, [clientsRoute, searchParams, router]);
+    if (!clientsRoute || !orgRole || searchParams?.get('new') !== '1') return;
+    if (can(orgRole, 'create:project')) queueMicrotask(() => setShowNewProject(true));
+    router.replace('/clients', { scroll: false });
+  }, [clientsRoute, orgRole, searchParams, router]);
 
   // The old QuickTeam fork used the project grid as its front door. qTicket's
   // internal front door is the support overview; keep the inherited grid at a
