@@ -2,11 +2,11 @@
 // src/components/workspace/AgileBoard.jsx — 7-column kanban with DnD and Swimlanes
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import IssueCard from './IssueCard';
-import { Plus, ChevronLeft, ChevronRight, MoreVertical, CheckSquare } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreVertical, CheckSquare } from 'lucide-react';
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from 'react';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import Button from '@/components/ui/Button';
-import { BulkActionBar, ContextMenu, Textarea } from '@/components/ui';
+import { BulkActionBar, ContextMenu } from '@/components/ui';
 import Pill from '@/components/ui/DataDisplay/Pill';
 import { columnOf, compareIssues } from '@/lib/utils/optimistic.mjs';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
@@ -28,50 +28,13 @@ import {
 // One module-level flag means only the very first mount pays that frame.
 let dndReady = false;
 
-function InlineAddForm({ onAdd, onCancel }) {
-  const [title, setTitle] = useState('');
-  const ref = useRef(null);
-
-  const submit = () => {
-    const t = title.trim();
-    if (t) { onAdd(t); setTitle(''); }
-  };
-
-  return (
-    <div className="px-[8px] pb-[8px]">
-      {/* The kit's field, not a hand-written one. This textarea drew a border
-          *and* a focus ring in the same ink, one inside the other, and the
-          browser's own focus outline made a third — three concentric lines
-          around a box for typing a task name into. `Textarea` has one. */}
-      <Textarea
-        ref={ref}
-        autoFocus
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); }
-          if (e.key === 'Escape') { onCancel(); setTitle(''); }
-        }}
-        placeholder="Назва інциденту... (Enter — зберегти)"
-        rows={2}
-        surface="white"
-      />
-      {/* Confirm on the right, the way every dialog in the product ends. */}
-      <div className="mt-[6px] flex justify-end gap-2">
-        {/* Not a second solid button: «Скасувати» is the way out, not a
-            choice of equal weight, and a grey slab on a grey column read as
-            one. */}
-        <Button style="ghost" size="sm" onClick={() => { onCancel(); setTitle(''); }}>
-          Скасувати
-        </Button>
-        <Button style="primary" size="sm" onClick={submit}>
-          Додати
-        </Button>
-      </div>
-    </div>
-  );
-}
-
+// No «+» at the head of a column, and no inline title field under it. Only a
+// client opens a request — support receives it, works it and closes it — so a
+// board is a place requests arrive, never a place they are filed.
+//
+// The inline form that used to stand here called a create handler no shipped
+// screen ever passed it, so the one column control promising to make something
+// would have thrown had anybody finished typing into it.
 export default function AgileBoard({
   issues,
   allIssues,
@@ -80,8 +43,7 @@ export default function AgileBoard({
   project,
   projects = [],
   showProjectName = false,
-  onAddIssue,
-  onRequestAddIssue,
+  showAssignee = true,
   onMoveIssue,
   onBulkUpdate,
   swimlane = 'none',
@@ -168,7 +130,6 @@ export default function AgileBoard({
       : columnIdOf(issue) === column?.id))
     .sort(compareIssueCards);
 
-  const [activeAddColId, setActiveAddColId] = useState(null);
 
   // Whether anything is currently hidden past the left or right edge of the
   // board, so the edge shadows only appear where a column has actually gone
@@ -519,18 +480,6 @@ export default function AgileBoard({
                   </div>
                   <div className="flex items-center gap-1">
                     {columnActionMenu(col, colTotalIssues)}
-                    {!isArchived && !readOnly && !col.isHiddenContainer && (
-                      <Button
-                        onClick={() => onRequestAddIssue
-                          ? onRequestAddIssue(col.id)
-                          : setActiveAddColId(col.id)}
-                        style="ghost"
-                        size="icon-xs"
-                        icon={Plus}
-                        className="hover:!bg-white"
-                        title="Додати інцидент"
-                      />
-                    )}
                   </div>
                 </div>
               );
@@ -650,27 +599,8 @@ export default function AgileBoard({
                           </div>
                           <div className="flex items-center gap-1">
                             {columnActionMenu(col, colIssues)}
-                            {!isArchived && !readOnly && !col.isHiddenContainer && (
-                              <Button
-                                onClick={() => onRequestAddIssue
-                                  ? onRequestAddIssue(col.id)
-                                  : setActiveAddColId(col.id)}
-                                style="ghost"
-                                size="icon-xs"
-                                icon={Plus}
-                                className="hover:!bg-white"
-                                title="Додати інцидент"
-                              />
-                            )}
                           </div>
                         </div>
-                      )}
-
-                      {!readOnly && !onRequestAddIssue && activeAddColId === col.id && !col.isHiddenContainer && (
-                        <InlineAddForm
-                          onAdd={(title) => { onAddIssue(col.id, title, lane.id); setActiveAddColId(null); }}
-                          onCancel={() => setActiveAddColId(null)}
-                        />
                       )}
 
                       {/* Card spacing lives in a margin on the cards, never in
@@ -695,6 +625,7 @@ export default function AgileBoard({
                               ? projects.find(item => item.id === issue.projectId)?.name || project?.name
                               : project?.name}
                             showProjectName={showProjectName}
+                            showAssignee={showAssignee}
                             issueLinks={issueLinks}
                             isArchived={isArchived || readOnly}
                             selected={activeSelectedIssueIds.has(issue.id)}

@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 96,
-    "props": 721,
-    "documentedProps": 721,
+    "props": 723,
+    "documentedProps": 723,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -5359,6 +5359,13 @@
           "description": "Clears selection when a route or filter scope changes."
         },
         {
+          "name": "showAssignee",
+          "default": "true",
+          "type": "boolean",
+          "values": [],
+          "description": "Whether the rows carry an assignee column at all — false for a customer reading their own requests. See `TaskRow`."
+        },
+        {
           "name": "showProjectName",
           "default": "false",
           "type": "boolean",
@@ -5454,6 +5461,13 @@
           "type": "boolean",
           "values": [],
           "description": "Whether the row is showing its selection control instead of priority."
+        },
+        {
+          "name": "showAssignee",
+          "default": "true",
+          "type": "boolean",
+          "values": [],
+          "description": "Whether the row has an assignee column at all. False for a customer reading their own requests: who a request is routed to is how support organises itself, not a fact about the request. Feeding an empty `members` leaked no name, but it left the column printing «Н/В» — which tells the customer a routing decision exists and is empty. The column has to be absent, not empty."
         },
         {
           "name": "showProjectName",

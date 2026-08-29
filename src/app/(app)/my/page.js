@@ -1,18 +1,17 @@
 'use client';
 // src/app/workspace/my/page.js — qTicket's cross-client incident queue
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import AgileBoard from '@/components/workspace/AgileBoard';
-import CreateTaskModal from '@/components/CreateTaskModal';
 import { Alert, PageHeader, StatusTransitionPicker, StatusVisibilityPicker, TaskListView } from '@/components/ui';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
-import { Plus, Settings2, List, Kanban } from 'lucide-react';
+import { Settings2, List, Kanban } from 'lucide-react';
 import { Select, MultiSelect } from '@/components/ui/Select';
 import Tabs from '@/components/ui/Tabs';
 import LoadingSpinner from '@/components/ui/Feedback/LoadingSpinner';
@@ -21,8 +20,8 @@ import Card from '@/components/ui/Layout/Card';
 import Surface from '@/components/ui/Surface';
 import FilterBar from '@/components/ui/FilterBar';
 import Dialog from '@/components/ui/Dialog';
-import { createIssueViaApi, notifyIssueAssigned } from '@/lib/services/issues';
 import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
+import { categorizeIssues, waitingOnUsIssues } from '@/lib/utils/incidentQueueMetrics.mjs';
 import {
   availableStatusesInCategory,
   resolveCategoryStatusId,
@@ -40,8 +39,11 @@ import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 
 
 
-function filterTasks(tasks, filters) {
-  const { projects, status, assigned, priority, type, period } = filters;
+// `waitingOnUsIds` is the set «Чекають на нас» counts, resolved once by
+// `waitingOnUsIssues` and handed in — the tile on the overview and this filter
+// are then literally the same predicate, not two readings of one sentence.
+function filterTasks(tasks, filters, waitingOnUsIds) {
+  const { projects, status, assigned, waiting, priority, type, period } = filters;
   const periodDays = period === '7days' ? 7 : period === '30days' ? 30 : 0;
   const cutoff = periodDays ? Date.now() - periodDays * 24 * 60 * 60 * 1000 : 0;
 
@@ -50,6 +52,7 @@ function filterTasks(tasks, filters) {
     if (status !== 'all' && (t.columnId || t.status) !== status) return false;
     if (assigned === 'unassigned' && (t.assigneeIds || []).length > 0) return false;
     if (assigned !== 'all' && assigned !== 'unassigned' && !(t.assigneeIds || []).includes(assigned)) return false;
+    if (waiting === 'us' && !waitingOnUsIds.has(t.id)) return false;
     if (priority !== 'all' && (t.priority || NO_PRIORITY_ID) !== priority) return false;
     if (type !== 'all' && t.type !== type) return false;
     if (cutoff && timestampMillis(t.createdAt) < cutoff) return false;
@@ -63,8 +66,13 @@ export default function IncidentQueuePage() {
   const { labels, types, priorities, statuses, categoryColumns } = useWorkflowConfig();
   const uid = currentUser?.uid || currentUser?.id;
   const clientViewer = isClientRole(orgRole);
-  const supportMembers = useMemo(
-    () => (members || []).filter(member => !isClientRole(member.role)),
+  // Who «ми» are, for «Чекають на нас» — the same roster this screen already
+  // draws the assignee filter from, so the question costs no extra read.
+  const supportUserIds = useMemo(
+    () => new Set((members || [])
+      .filter(member => !isClientRole(member.role))
+      .map(member => member.id || member.uid)
+      .filter(Boolean)),
     [members],
   );
   const hiddenCategoriesStorageKey = `qt:incident-queue:hidden-categories:${uid || 'anonymous'}:${activeOrgId || 'none'}`;
@@ -111,34 +119,13 @@ export default function IncidentQueuePage() {
   // come back to the laptop to find the board.
   const isMobile = useIsMobile();
   const viewMode = isMobile === true ? 'kanban' : savedViewMode;
-  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
-  // ?new=1 is how anything outside this page asks for the composer — today the
-  // command palette. Derived rather than copied into state on mount: the URL is
-  // already the state, and mirroring it means two sources that can disagree.
+  // There is no composer on this screen and no `?new=1` to open one. Only a
+  // client opens a request; this is the queue support receives it in.
   const router = useRouter();
-  const searchParams = useSearchParams();
   useEffect(() => {
     if (orgRole && clientViewer) router.replace('/');
   }, [clientViewer, orgRole, router]);
-  const composerRequestedByUrl = searchParams.get('new') === '1';
-  // A member profile can ask for the composer with that member already on it.
-  const requestedAssignee = searchParams.get('assignee') || '';
-  const composerAssignees = useMemo(
-    () => (requestedAssignee ? [requestedAssignee] : (uid ? [uid] : [])),
-    [requestedAssignee, uid],
-  );
-  const composerOpen = showCreateTaskModal || composerRequestedByUrl;
-  const closeComposer = () => {
-    setShowCreateTaskModal(false);
-    setCreateTaskCategory(null);
-    if (!composerRequestedByUrl) return;
-    const next = new URLSearchParams(searchParams.toString());
-    next.delete('new');
-    next.delete('assignee');
-    router.replace(next.size ? `/my?${next}` : '/my', { scroll: false });
-  };
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [createTaskCategory, setCreateTaskCategory] = useState(null);
   const [pendingStatusMove, setPendingStatusMove] = useState(null);
   // This board's columns are the five shared status categories, so what a person
   // folds away here is a category too. Kept under its own key: the old value held
@@ -231,8 +218,18 @@ export default function IncidentQueuePage() {
     await applyBulkAction(action, value, selectedIssues);
   };
 
+  // Resolved from the queue already in memory — the same call the «Чекають на
+  // нас» tile on the overview counts, so the tile and this list are one set.
+  const waitingOnUsIds = useMemo(
+    () => new Set(
+      waitingOnUsIssues(categorizeIssues(tasks, statuses), supportUserIds)
+        .map(issue => issue.id),
+    ),
+    [statuses, supportUserIds, tasks],
+  );
+
   const normalizedSearch = myTaskSearch.trim().toLowerCase();
-  const filtered = filterTasks(tasks, filters).filter(t => {
+  const filtered = filterTasks(tasks, filters, waitingOnUsIds).filter(t => {
     const p = projects.find(proj => proj.id === t.projectId);
     if (!p || p.status === 'archived') return false;
     if (!normalizedSearch) return true;
@@ -245,6 +242,7 @@ export default function IncidentQueuePage() {
     filters.projects.join(','),
     filters.status,
     filters.assigned,
+    filters.waiting,
     filters.priority,
     filters.type,
     filters.period,
@@ -282,6 +280,20 @@ export default function IncidentQueuePage() {
                 options={[
                   { value: 'all', label: 'Усі статуси' },
                   ...statuses.map(status => ({ value: status.id, label: status.label })),
+                ]}
+              />
+              {/* Who owes the next word. A status cannot answer it — a request
+                  can stand in «У роботі» all week with the client's question
+                  unanswered — so it is a slice of the queue of its own, and the
+                  address «Чекають на нас» on the overview leads to. */}
+              <Select
+                filterRole="status"
+                variant="ghost"
+                value={filters.waiting}
+                onChange={(val) => setFilters({ waiting: val })}
+                options={[
+                  { value: 'all', label: 'Будь-яка черга' },
+                  { value: 'us', label: 'Чекають на нас' },
                 ]}
               />
               <Select
@@ -405,10 +417,6 @@ export default function IncidentQueuePage() {
               compareIssueCards={compareTaskCards}
               hiddenColumns={hiddenCategories}
               showHiddenLane
-              onRequestAddIssue={categoryId => {
-                setCreateTaskCategory(categoryId);
-                setShowCreateTaskModal(true);
-              }}
               onMoveIssue={handleMoveIssue}
               onBulkUpdate={handleBulkUpdate}
               canArchive={canWhileRoleLoads(orgRole, 'delete:issue')}
@@ -436,50 +444,6 @@ export default function IncidentQueuePage() {
         )}
         </div>
       </div>
-
-      <CreateTaskModal
-        isOpen={composerOpen}
-        onClose={closeComposer}
-        initialCategory={createTaskCategory}
-        initialAssignees={composerAssignees}
-        onSubmit={async (formData) => {
-          if (!formData.projectId) {
-            throw new Error('Будь ласка, оберіть клієнта');
-          }
-          const created = await createIssueViaApi({
-            organizationId: activeOrgId,
-            projectId: formData.projectId,
-            data: {
-              title: formData.title,
-              description: formData.description || '',
-              status: formData.status || 'backlog',
-              priority: formData.priority || NO_PRIORITY_ID,
-              type: formData.type || 'task',
-              assigneeIds: formData.assignees || [],
-              labelIds: formData.labelIds || [],
-              dueDate: formData.dueDate || null,
-              estimateMinutes: formData.estimateMinutes || 0,
-              sprintId: formData.sprintId || null,
-              reporterId: uid,
-              addAssigneesToProjectTeam: formData.addAssigneesToProjectTeam === true,
-            },
-          });
-          notifyIssueAssigned({
-            issueId: created.id,
-            title: formData.title,
-            assigneeIds: formData.assignees || [],
-            actorId: uid,
-            actorName: currentUser?.name || '',
-            projectId: formData.projectId,
-            organizationId: activeOrgId,
-          });
-
-          showToast('Звернення створено');
-          return { ...created, projectId: formData.projectId };
-        }}
-        projects={projects}
-        teamMembers={supportMembers}
-      />
 
       {showSettingsModal && (
         <Dialog

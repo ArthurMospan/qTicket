@@ -40,11 +40,8 @@ import Card from '@/components/ui/Layout/Card';
 import { Select } from '@/components/ui/Select';
 import FilterBar from '@/components/ui/FilterBar';
 import Surface from '@/components/ui/Surface';
-import CreateTaskModal from '@/components/CreateTaskModal';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
-import { createIssueViaApi } from '@/lib/services/issues';
-import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
 
 
@@ -605,7 +602,6 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const searchParams = useSearchParams();
   const router       = useRouter();
   const [showNewProject, setShowNewProject] = useState(false);
-  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
   const clientViewer = isClientRole(orgRole);
   const clientProject = useMemo(
     () => (projects || []).find(project => project.status !== 'archived') || null,
@@ -954,36 +950,5 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
       />
     )}
 
-    {showCreateTaskModal && (
-      <CreateTaskModal
-        isOpen={showCreateTaskModal}
-        onClose={() => setShowCreateTaskModal(false)}
-        onSubmit={async (formData) => {
-          if (!formData.projectId) {
-            throw new Error('Будь ласка, оберіть проєкт');
-          }
-          const created = await createIssueViaApi({
-            organizationId: activeOrgId,
-            projectId: formData.projectId,
-            data: {
-              title: formData.title,
-              description: formData.description || '',
-              status: formData.status || 'backlog',
-              priority: formData.priority || NO_PRIORITY_ID,
-              type: formData.type || 'task',
-              assigneeIds: formData.assignees || [],
-              labelIds: formData.labelIds || [],
-              dueDate: formData.dueDate || null,
-              estimateMinutes: formData.estimateMinutes || 0,
-              sprintId: formData.sprintId || null,
-              addAssigneesToProjectTeam: formData.addAssigneesToProjectTeam === true,
-            },
-          });
-          return { ...created, projectId: formData.projectId };
-        }}
-        projects={projects}
-        teamMembers={members}
-      />
-    )}
   </>);
 }

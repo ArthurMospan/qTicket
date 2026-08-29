@@ -497,14 +497,21 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                   ) : viewMode === 'kanban' ? (
                     <div className="flex min-h-[500px] flex-1 flex-col">
                       {/* One board, two readers. A client gets it `readOnly` —
-                          no drag, no selection, no inline add — and with no
-                          `members`, because who a request is routed to inside
-                          the support team is not their business and the card
-                          draws an assignee only from that list. */}
+                          no drag, no selection — and with no `members`, because
+                          who a request is routed to inside the support team is
+                          not their business and the card draws an assignee only
+                          from that list.
+                          `showAssignee` finishes that job. An empty `members`
+                          leaked no name, but the card still drew the slot the
+                          names go in, and a slot reading «Без учасників» is
+                          itself the announcement: it tells the customer a
+                          routing decision exists and is empty. Absent, not
+                          empty. */}
                       <AgileBoard
                         issues={visibleIssues}
                         allIssues={issues}
                         members={clientViewer ? [] : members}
+                        showAssignee={!clientViewer}
                         projects={[project]}
                         projectId={project.id}
                         project={project}
@@ -521,6 +528,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       issues={visibleIssues}
                       allIssues={issues}
                       members={clientViewer ? [] : members}
+                      showAssignee={!clientViewer}
                       projects={[project]}
                       projectId={project.id}
                       projectName={project.name}

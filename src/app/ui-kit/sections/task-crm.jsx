@@ -274,7 +274,6 @@ export default function TaskCRMSection() {
             projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
             projectId="ui-kit-project"
             project={{ id: 'ui-kit-project', name: 'QuickTeam', hiddenColumns: [] }}
-            onAddIssue={() => {}}
             onMoveIssue={() => {}}
             onBulkUpdate={() => {}}
             canArchive
@@ -298,7 +297,6 @@ export default function TaskCRMSection() {
             showProjectName
             groupBy="category"
             showHiddenLane
-            onAddIssue={() => {}}
             onMoveIssue={() => {}}
             onBulkUpdate={() => {}}
             canArchive

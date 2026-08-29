@@ -166,9 +166,16 @@ test('the variant matrix renders every component that can stand alone', () => {
 // `ColorSwatch size="theme"`. `IconAction size="compact"` went with the dead
 // inline date field beside them. All five stay declared: they are the
 // components' own vocabulary, and the components still ship.
+//
+// Raised 144 -> 155 as the product stopped letting staff open a request. The
+// profile's last action circle took `IconAction size="xl"` and
+// `appearance="contrast"` with it, and the board's inline title field took
+// `Textarea surface="white"`. All three stay declared for the same reason as
+// the rest of this list: they are the components' own vocabulary, and the
+// components still ship.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 153,
+    committed.totals.declaredUnused <= 155,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   // The three status-dialog variants this loop used to guard are gone with the

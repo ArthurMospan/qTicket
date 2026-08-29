@@ -166,17 +166,21 @@ test('saving project settings applies the change to the team, not the snapshot',
   assert.match(modal, /!isClientRole\(member\.role\)/);
 });
 
+// One composer is left in the product — the client's, in their own space —
+// because only a client opens a request. The two staff copies that used to
+// stand beside it went with the rule, so «every composer» is now one file.
 test('every composer forwards the consent to the API, or the box does nothing', async () => {
-  for (const path of [
-    '../src/app/(app)/page.js',
-    '../src/app/(app)/my/page.js',
-    '../src/app/(app)/[projectId]/ProjectBoardClient.jsx',
-  ]) {
-    const source = await read(path);
-    assert.match(
-      source,
-      /addAssigneesToProjectTeam: formData\.addAssigneesToProjectTeam === true/,
-      `${path} drops the project-roster consent on the way to the API`,
+  const source = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+  assert.match(
+    source,
+    /addAssigneesToProjectTeam: formData\.addAssigneesToProjectTeam === true/,
+    'the client composer drops the project-roster consent on the way to the API',
+  );
+  for (const path of ['../src/app/(app)/page.js', '../src/app/(app)/my/page.js']) {
+    assert.doesNotMatch(
+      await read(path),
+      /<CreateTaskModal/,
+      `${path} is a staff screen and must not open a composer`,
     );
   }
 });

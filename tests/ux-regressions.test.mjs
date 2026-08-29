@@ -44,12 +44,16 @@ test('requested navigation and readability regressions stay fixed', async () => 
     read('src/app/(app)/settings/page.js'),
     read('src/components/ui/TaskManagement/BulkActionBar.jsx'),
   ]);
-  assert.match(board, /\{columnActionMenu\(col, colTotalIssues\)\}[\s\S]{0,600}icon=\{Plus\}/);
-  assert.match(board, /\{columnActionMenu\(col, colIssues\)\}[\s\S]{0,600}icon=\{Plus\}/);
+  // The plus that used to stand beside the kebab went with the rule it broke:
+  // only a client opens a request, so no column of any board is a place to file
+  // one. The kebab is the whole column control now.
+  assert.doesNotMatch(board, /icon=\{Plus\}/);
+  assert.doesNotMatch(board, /Додати інцидент/);
+  assert.doesNotMatch(board, /InlineAddForm|onAddIssue|onRequestAddIssue/);
   assert.doesNotMatch(board, /kanban-full-bleed/);
-  // The kebab and the plus beside it are one pair: the same miniature box, the
-  // vertical glyph the rest of the product uses, and a smaller icon size so
-  // three filled dots do not read darker than two hairline strokes.
+  // The kebab keeps its miniature box, the vertical glyph the rest of the
+  // product uses, and a smaller icon size so three filled dots do not read
+  // darker than two hairline strokes.
   assert.match(board, /icon=\{MoreVertical\}\s*\r?\n\s*composition="section-kebab"/);
   // The wrapper is a flex box in the component itself, so no call site has to
   // pass `flex` — which collided with its `inline-block` and left the kebab

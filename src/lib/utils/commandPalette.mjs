@@ -41,15 +41,11 @@ const CLIENT_NAVIGATION = [
 // Actions are deliberately qTicket-native. The inherited task engine still has
 // calendar, sprint and timer code, but the palette must never become a second
 // navigation system that republishes those hidden QuickTeam surfaces.
+//
+// «Нове звернення» is not among them. Only a client opens a request — support
+// receives it, works it and closes it — so the internal palette creates the
+// space a customer writes in, and nothing inside it.
 const INTERNAL_ACTIONS = [
-  {
-    id: 'action-new-issue',
-    label: 'Нове звернення',
-    hint: 'Створити звернення',
-    href: '/my?new=1',
-    icon: 'plus',
-    keywords: 'novyi intsydent new incident request zvernennya stvoryty create',
-  },
   {
     id: 'action-new-client',
     label: 'Новий клієнт',

@@ -51,7 +51,12 @@ function hexToRgba(hex, alpha) {
 // `showStatusName` is for a column that is not a status: on «Мої завдання» the
 // columns are the five shared categories, so a card in «У роботі» could be in
 // «Код-ревʼю» or in «QA» and the column no longer says which.
-export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], index, projectId, projectName, showProjectName = false, showStatusName = false, isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
+// `showAssignee` is off for a customer reading their own board: who a request is
+// routed to is how support organises itself, not a fact about the request. It
+// was already fed an empty `members`, so no name or face leaked — but the slot
+// stayed, printing «Без учасників», which tells a customer a routing decision
+// exists and is empty. The row has to be absent, not empty.
+export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], index, projectId, projectName, showProjectName = false, showStatusName = false, showAssignee = true, isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
   const router   = useRouter();
   const { currentUser, projects = [], activeOrg } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
@@ -354,40 +359,45 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
             </div>
           )}
 
-          {/* Row 6: Footer with task participants and flat modern indigo chat indicator */}
-          <div className="border-t border-line pt-[10px] flex items-center justify-between gap-2 mt-auto">
-            <div className="flex -space-x-[8px] overflow-visible" aria-label="Учасники інциденту">
-              {participants.length > 0 ? (
-                participants.slice(0, 5).map(({ id, member, roles }) => {
-                  const roleLabels = roles.map(role => ({
-                    assignee: 'виконавець',
-                    author: 'автор',
-                    subscriber: 'підписник',
-                  })[role]);
-                  return (
-                    <div
-                      key={id}
-                      title={`${member.name || member.email?.split('@')[0]} · ${roleLabels.join(', ')}`}
-                      className="relative group/avatar"
-                    >
-                      <UserAvatar user={member} size="sm" stacked className="hover:scale-110 hover:z-20 transition-all cursor-pointer" />
-                    </div>
-                  );
-                })
-              ) : (
-                <span className="text-[11px] text-faint italic">Без учасників</span>
-              )}
-              {participants.length > 5 ? (
-                <Pill
-                  tone="neutral"
-                  size="md"
-                  preset="avatar-counter"
-                  title={`Ще ${participants.length - 5} ${plural(participants.length - 5, ['учасник', 'учасники', 'учасників'])}`}
-                >
-                  +{participants.length - 5}
-                </Pill>
-              ) : null}
-            </div>
+          {/* Row 6: Footer with task participants and flat modern indigo chat indicator.
+              The counters keep the right edge whether or not the faces are
+              drawn — `justify-end` when they are not, so a customer's card ends
+              in its message count rather than in a hole where the routing was. */}
+          <div className={`border-t border-line pt-[10px] flex items-center gap-2 mt-auto ${showAssignee ? 'justify-between' : 'justify-end'}`}>
+            {showAssignee && (
+              <div className="flex -space-x-[8px] overflow-visible" aria-label="Учасники інциденту">
+                {participants.length > 0 ? (
+                  participants.slice(0, 5).map(({ id, member, roles }) => {
+                    const roleLabels = roles.map(role => ({
+                      assignee: 'виконавець',
+                      author: 'автор',
+                      subscriber: 'підписник',
+                    })[role]);
+                    return (
+                      <div
+                        key={id}
+                        title={`${member.name || member.email?.split('@')[0]} · ${roleLabels.join(', ')}`}
+                        className="relative group/avatar"
+                      >
+                        <UserAvatar user={member} size="sm" stacked className="hover:scale-110 hover:z-20 transition-all cursor-pointer" />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <span className="text-[11px] text-faint italic">Без учасників</span>
+                )}
+                {participants.length > 5 ? (
+                  <Pill
+                    tone="neutral"
+                    size="md"
+                    preset="avatar-counter"
+                    title={`Ще ${participants.length - 5} ${plural(participants.length - 5, ['учасник', 'учасники', 'учасників'])}`}
+                  >
+                    +{participants.length - 5}
+                  </Pill>
+                ) : null}
+              </div>
+            )}
 
             <TaskCounters
               attachments={attachCount}

@@ -131,7 +131,13 @@ test('serializing ignores keys the schema does not declare', () => {
 test('the shipped schema keeps its agreed keys', () => {
   assert.deepEqual(
     Object.keys(INCIDENT_QUEUE_VIEW_SCHEMA),
-    ['view', 'projects', 'status', 'assigned', 'priority', 'type', 'period'],
+    ['view', 'projects', 'status', 'assigned', 'waiting', 'priority', 'type', 'period'],
   );
   assert.equal(INCIDENT_QUEUE_VIEW_SCHEMA.assignee, undefined);
+  // `waiting=us` is the address «Чекають на нас» on the overview leads to, so
+  // the tile and the filtered list are one set said twice.
+  assert.deepEqual(
+    INCIDENT_QUEUE_VIEW_SCHEMA.waiting,
+    { default: 'all', values: ['all', 'us'] },
+  );
 });
