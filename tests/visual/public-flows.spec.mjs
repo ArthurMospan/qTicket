@@ -141,7 +141,10 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
 
   await page.goto('/privacy-policy', { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/privacy$/);
-  await expectHealthyPage(page, errors);
+  // The staff-only article above is *meant* to 404, and a deliberate 404 still
+  // reaches the console like any other. Without this the run failed on the
+  // very refusal the test had just asserted.
+  await expectHealthyPage(page, errors, [/server responded with a status of 404/]);
 });
 
 test('bulk toolbar remains usable at phone width and opens its confirm flow', async ({ page }) => {
