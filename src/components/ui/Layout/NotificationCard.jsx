@@ -8,10 +8,13 @@ import { X } from 'lucide-react';
  * arrives: who did it, what happened, and the two things you can do about it.
  *
  * Not a `Toast`. A toast reports that something you just did worked and takes
- * itself away; this arrives unasked, names a sender, and can carry a whole
- * calendar reply inside it. The icon and those extra actions are slots rather
- * than props, because deciding which glyph a notification type gets is the
- * product's business, not the kit's.
+ * itself away; this arrives unasked and names a sender. The icon is a slot
+ * rather than a prop, because deciding which glyph a notification type gets is
+ * the product's business, not the kit's.
+ *
+ * It used to carry an `actions` slot too, for the three calendar reply buttons.
+ * The planning calendar and the route those buttons answered to are deleted, so
+ * the slot held nothing and no caller filled it.
  *
  * The card does not place itself. It used to pin its own corner, which meant
  * two of them arriving together sat on top of each other — so the corner is the
@@ -37,7 +40,6 @@ import { X } from 'lucide-react';
  * @param {string} props.body The detail under it, clamped to two lines.
  * @param {string} props.time How long ago, since the card can sit there while nobody is at the desk.
  * @param {'emergency'|'default'} props.tone An emergency draws a different surface.
- * @param {React.ReactNode} props.actions Extra controls inside the card — the calendar reply buttons.
  * @param {string} props.openLabel Where the card goes, in words — it becomes the
  *   card's accessible name after the title, not a second control.
  * @param {() => void} props.onOpen Goes to whatever the notification is about. Without it the card is not a control.
@@ -50,7 +52,6 @@ export default function NotificationCard({
   body,
   time,
   tone = 'default',
-  actions,
   openLabel = 'Перейти',
   onOpen,
   onDismiss,
@@ -66,9 +67,8 @@ export default function NotificationCard({
       aria-label={onOpen ? [title, openLabel].filter(Boolean).join(' — ') : undefined}
       onClick={onOpen}
       onKeyDown={onOpen ? (event => {
-        // The dismiss × and the calendar replies are inside the card and are
-        // real buttons; a space on one of those is that button's, not the
-        // card's.
+        // The dismiss × is inside the card and is a real button; a space on
+        // it is that button's, not the card's.
         if (event.target !== event.currentTarget) return;
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
@@ -82,7 +82,6 @@ export default function NotificationCard({
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-bold text-ink leading-snug">{title}</p>
           {body && <p className="text-[11px] text-muted mt-1 line-clamp-2">{body}</p>}
-          {actions && <div onClick={event => event.stopPropagation()}>{actions}</div>}
           {time && <p className="mt-2 text-[10px] text-faint">{time}</p>}
         </div>
         <button

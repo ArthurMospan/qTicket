@@ -53,9 +53,18 @@ export default function MobileNav({ keyboardOpen = false }) {
   const searchParams = useSearchParams();
   const { projects, activeOrg, activeOrgId, orgRole, allOrgs } = useAppContext();
   const clientViewer = isClientRole(orgRole);
+  // The address the rail already points at, read the same way. `/` is a door
+  // into the client's space and not the space itself, so a tab aimed at `/`
+  // stopped being the current route the moment the redirect landed and could
+  // never light up. Two navigations disagreeing about where «Мої звернення»
+  // lives is the seam; there is one answer and both read it.
+  const clientSpaceHref = useMemo(() => {
+    const space = (projects || []).find(project => project.status !== 'archived');
+    return space ? `/${space.id}` : '/';
+  }, [projects]);
   const visibleTabs = clientViewer
     ? [
-        { href: '/', icon: Folder, label: 'Звернення', exact: true },
+        { href: clientSpaceHref, icon: Folder, label: 'Звернення', exact: clientSpaceHref === '/' },
         ...(orgRole === 'client_admin'
           ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
           : []),

@@ -56,13 +56,12 @@ export const PERMISSIONS = {
   // and have been deleted rather than gated, so there is no permission left to
   // describe.
 
-  // Inherited internal support modules
-  //
-  // qTicket does not publish the planning calendar as a product surface, but
-  // its server routes remain for the retained notification/accounting engine.
-  // They must never become a back door from the client portal into staff
-  // events, birthdays or calendar time.
-  'access:calendar': ['owner', 'admin', 'member'],
+  // The planning calendar is not in this matrix either. `access:calendar` said
+  // owner/admin/member may reach `/api/calendar/*` long after that route and
+  // every screen behind it were deleted — a permission nothing reads is a claim
+  // nothing can test, and this one guarded an address that answers no request.
+  // The last affordance that spoke to it, the three reply buttons on a calendar
+  // invitation in the bell, went with it.
 
   // Issues
   //

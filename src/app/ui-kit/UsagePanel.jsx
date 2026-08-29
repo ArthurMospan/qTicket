@@ -21,11 +21,17 @@ import propsReport from './kit-props.generated.json';
 
 // A dynamic segment has no real id to link to, so the parent screen plus the
 // next step is offered instead of a dead URL.
+//
+// Only the routes the report can actually name. `/[projectId]/portal` and
+// `/analytics/team/[memberId]` were still listed here after the client portal
+// became the same `[projectId]` screen and the analytics section was deleted —
+// entries for screens the scan has not reported in a long time, one of them
+// pointing at an address that only exists to be redirected away from. The
+// staff list of clients is `/clients`; `/` has not been that screen since the
+// support overview became the front door.
 const DYNAMIC_ROUTES = {
-  '/[projectId]': { href: '/', hint: 'відкрий клієнта' },
-  '/[projectId]/issue/[issueId]': { href: '/', hint: 'клієнт → звернення' },
-  '/[projectId]/portal': { href: '/', hint: 'клієнт → портал' },
-  '/analytics/team/[memberId]': { href: '/analytics', hint: 'аналітика → учасник' },
+  '/[projectId]': { href: '/clients', hint: 'відкрий клієнта' },
+  '/[projectId]/issue/[issueId]': { href: '/clients', hint: 'клієнт → звернення' },
 };
 
 function RouteLink({ route }) {

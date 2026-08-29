@@ -143,10 +143,6 @@ const SOURCES = {
   AttributeTrigger: { variant: { literal: ['cell', 'details'] } },
   ColorSwatch: { size: { literal: ['choice', 'theme', 'trigger'] } },
   ListRow: { density: { literal: ['compact', 'roomy'] } },
-  ResponseChoice: {
-    size: { literal: ['md', 'sm', 'tile'] },
-    surface: { literal: ['canvas', 'surface'] },
-  },
   FormGroup: { gap: { literal: ['sm', 'md'] } },
   Tabs: {
     variant: { literal: ['raised', 'underline'] },

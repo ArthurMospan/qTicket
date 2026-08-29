@@ -335,7 +335,12 @@ test('every action the palette offers lands somewhere that answers it', async ()
   // The support queue answers no `?new=1` at all: it has no composer to open,
   // because only a client opens a request.
   assert.doesNotMatch(my, /get\('new'\)/);
-  assert.match(clients, /clientsRoute && searchParams\?\.get\('new'\) === '1'/);
+  assert.match(clients, /if \(!clientsRoute \|\| !orgRole \|\| searchParams\?\.get\('new'\) !== '1'\) return;/);
+  // And it answers it only for somebody who may take it. `?new=1` is the second
+  // door into the composer «Новий клієнт» opens, and it used to be a wider one:
+  // the button asks `create:project`, the address asked nothing, and the empty
+  // state on the overview handed that address to every internal role.
+  assert.match(clients, /if \(can\(orgRole, 'create:project'\)\) queueMicrotask\(\(\) => setShowNewProject\(true\)\);/);
   assert.match(clients, /searchParams\?\.get\('new'\) === '1' \? '\?new=1' : ''/);
   assert.match(board, /params\.get\('new'\) !== '1'/);
   assert.match(board, /setShowComposer\(true\)/);

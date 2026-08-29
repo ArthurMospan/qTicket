@@ -8,14 +8,14 @@
     "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
   },
   "totals": {
-    "componentsWithVariants": 39,
-    "declaredValues": 345,
+    "componentsWithVariants": 38,
+    "declaredValues": 340,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 163,
+    "usedAndPreviewed": 162,
     "usedWithoutPreview": 0,
-    "declaredUnused": 166
+    "declaredUnused": 162
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -662,30 +662,6 @@
       "component": "Popover",
       "prop": "padding",
       "value": "tight",
-      "namespace": null
-    },
-    {
-      "component": "ResponseChoice",
-      "prop": "size",
-      "value": "md",
-      "namespace": null
-    },
-    {
-      "component": "ResponseChoice",
-      "prop": "size",
-      "value": "tile",
-      "namespace": null
-    },
-    {
-      "component": "ResponseChoice",
-      "prop": "surface",
-      "value": "canvas",
-      "namespace": null
-    },
-    {
-      "component": "ResponseChoice",
-      "prop": "surface",
-      "value": "surface",
       "namespace": null
     },
     {
@@ -1511,17 +1487,6 @@
         "roomy"
       ]
     },
-    "ResponseChoice": {
-      "size": [
-        "md",
-        "sm",
-        "tile"
-      ],
-      "surface": [
-        "canvas",
-        "surface"
-      ]
-    },
     "FormGroup": {
       "gap": [
         "md",
@@ -1714,7 +1679,6 @@
     "Counter.appearance.inverse-outline": 1,
     "ListRow.density.compact": 1,
     "Dialog.presentation.dialog": 6,
-    "ResponseChoice.size.sm": 1,
     "Button.size.icon-sm": 5,
     "Button.shape.compact": 2,
     "Button.surface.canvas": 2,
@@ -2021,11 +1985,6 @@
     "Popover.align.start",
     "Popover.padding.default",
     "Popover.padding.tight",
-    "ResponseChoice.size.md",
-    "ResponseChoice.size.sm",
-    "ResponseChoice.size.tile",
-    "ResponseChoice.surface.canvas",
-    "ResponseChoice.surface.surface",
     "Segmented.composition.billing-selection",
     "Segmented.composition.dialog-tabs",
     "Segmented.surface.canvas",

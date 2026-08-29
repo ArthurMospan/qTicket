@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Forms/Textarea';
 import { Select, MultiSelect } from '@/components/ui/Select';
 import Surface from '@/components/ui/Surface';
-import { AttributeTrigger, DetailSection, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, MarkdownViewer, SelectableChip, ResponseChoice, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
+import { AttributeTrigger, DetailSection, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, MarkdownViewer, SelectableChip, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
 import MentionMenu from '@/components/ui/Chat/MentionMenu';
 import MobilePaneBack from '@/components/ui/Navigation/MobilePaneBack';
 import AvatarButton from '@/components/ui/DataDisplay/AvatarButton';
@@ -63,7 +63,6 @@ const VARIANT_BASE = {
     <Segmented value="a" onChange={() => {}} options={[{ value: 'a', label: 'Один' }, { value: 'b', label: 'Два' }]} {...props} />
   ),
   Card: (props) => <Card {...props}><span className="text-[11px] text-muted">Картка</span></Card>,
-  ResponseChoice: (props) => <ResponseChoice value="accepted" onChange={() => {}} {...props} />,
   Tabs: (props) => (
     <Tabs
       activeTab="a"

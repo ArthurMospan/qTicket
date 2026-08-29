@@ -38,13 +38,13 @@
   },
   "kit": {
     "totals": {
-      "components": 90,
-      "used": 90,
+      "components": 89,
+      "used": 89,
       "unused": 0,
-      "covered": 83,
+      "covered": 82,
       "uncovered": 0,
       "routes": 8,
-      "previews": 122,
+      "previews": 121,
       "internal": 7,
       "unlisted": 0
     },
@@ -95,7 +95,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:194",
+      "location": "src/components/MobileNav.jsx:203",
       "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
       "text": "",
       "childElements": [
@@ -111,7 +111,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:259",
+      "location": "src/components/MobileNav.jsx:268",
       "className": "flex min-w-0 items-center gap-[6px] text-left",
       "text": "",
       "childElements": [
@@ -127,7 +127,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:344",
+      "location": "src/components/MobileNav.jsx:353",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -335,7 +335,7 @@
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:344",
+      "location": "src/components/MobileNav.jsx:353",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
@@ -431,7 +431,7 @@
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:541",
+      "location": "src/components/WorkspaceHeader.jsx:486",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

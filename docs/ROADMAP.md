@@ -187,9 +187,9 @@ Completed product slice on 2026-08-28:
 - The static role audit found a second direct-API bypass behind the already
   hidden calendar screen: any organization membership could call
   `/api/calendar/events` and receive staff events and birthdays through the
-  Admin SDK. Every calendar route now requires an internal support role, while
-  `calendarEvents` stays server-only for every browser role in Firestore Rules;
-  client accounts cannot trigger birthday/reminder jobs or mutate legacy events.
+  Admin SDK. The routes were first narrowed to an internal support role and have
+  since been deleted outright, together with `access:calendar` — nothing is left
+  for a client account, or any account, to call.
 - The inherited qTicket-local price list and plan subsystem are removed from
   settings, shared UI, project creation/restoration, invitations, AI and
   integration routes. qTicket no longer stores or switches a plan and applies
