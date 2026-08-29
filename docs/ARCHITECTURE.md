@@ -9,7 +9,7 @@ are in [../AGENTS.md](../AGENTS.md); shared UI has its own contract in
 [UI_KIT_CONTRACT.md](UI_KIT_CONTRACT.md).
 
 - [QuickTeam authority boundary](#quickteam-authority-boundary) — staff provisioning, entitlement and separate sessions
-- [Tasks, subtasks, links and accounting](#задачі-підзадачі-звязки-та-облік) — the inherited incident record, its execution invariants, time and invoices
+- [Tasks, subtasks and links](#задачі-підзадачі-та-звязки) — the inherited incident record and its execution invariants
 - [View state: a screen's filters live in its address](#view-state-a-screens-filters-live-in-its-address) — URL state, the table view
 - [What is new to whom: one feed, one cursor](#what-is-new-to-whom-one-feed-one-cursor) — read/unread, the task history feed
 - [Notification delivery](#notification-delivery) — the two paths and their guarantees
@@ -60,15 +60,14 @@ Firebase token or session cookie.
 The published qTicket route surface is deliberately narrower than the inherited
 task engine. `src/proxy.js` redirects direct visits to `/analytics` and
 `/calendar` into `/overview`, and `/sprints` and `/chat` into `/my`, preserving
-only the active `org` query parameter. Two of those four no longer have a page
-behind the redirect at all: the planning calendar and the sprint board are
-deleted, so the redirect is what keeps a copied bookmark off a 404. `/analytics`
-and `/chat` still have inherited pages, and for those the redirect is the whole
-containment. The public help catalogue follows the same boundary: it describes
-only workflows reachable in qTicket.
+only the active `org` query parameter. Three of those four no longer have a page
+behind the redirect at all: the planning calendar, the sprint board and the
+analytics screen are deleted, so the redirect is only what keeps a copied
+bookmark off a 404. The public help catalogue follows the same boundary twice
+over: it describes only workflows reachable in qTicket, and it publishes to a
+reader only the articles that reader's role may open.
 
-The authenticated shell follows the same rule. Desktop and mobile navigation
-do not subscribe to or render the inherited QuickTeam timer. Client settings
+The authenticated shell follows the same rule. Client settings
 are role-scoped: `client_member` receives personal settings only, while
 `client_admin` additionally receives the employee directory for the single
 client space it may administer. The layout also enforces the external route
@@ -95,17 +94,21 @@ workers keep using the Admin SDK independently of a browser session.
 
 ---
 
-## Задачі, підзадачі, зв’язки та облік
+## Задачі, підзадачі та зв’язки
 
 Цей розділ фіксує успадковану модель робочого елемента. Вона є спільною
-для дошки, списків, аналітики, обліку часу, рахунків та інтеграцій.
+для дошки, списків і черги звернень.
+
+Обліку часу, рахунків і аналітики тут більше немає, і це не пропуск у
+документі: таймер, `timeLogs`, табель, рахунки та денні підсумки видалені з
+продукту. qTicket відповідає на звернення — гроші й години рахує QuickTeam.
 
 ### Ментальна модель
 
 #### Задача
 
 Кожен робочий елемент зберігається в канонічній колекції `issues` і має власний
-ключ, статус, виконавців, оцінку, фактичний час та історію.
+ключ, статус, відповідальних та історію.
 
 Тип (`Фіча`, `Задача`, `Баг`) описує характер роботи, але не створює окремий
 рівень ієрархії. `Епік` не доступний для нових задач. Наявні епіки тимчасово
@@ -114,7 +117,7 @@ workers keep using the Admin SDK independently of a browser session.
 #### Справжня підзадача
 
 Справжня підзадача — це повноцінний `issue` з `parentIssueId`. Вона має власний
-ключ, статус, виконавця, оцінку, фактичний час, коментарі й зв’язки.
+ключ, статус, відповідального, коментарі й зв’язки.
 
 Підтримується один новий рівень:
 
@@ -123,15 +126,13 @@ workers keep using the Admin SDK independently of a browser session.
 └── Підзадача
 ```
 
-Основна задача — повноцінна задача зі своєю ціллю, виконавцем, статусом і
-власним часом. Підзадачі стоять поруч з нею, а не замість неї: в аналітиці
-рахуються всі, і поява підзадачі нічого не забирає з підрахунків. Раніше було
-навпаки — задача випадала з усіх чисел, щойно в неї з'являлась дитина, через що
-графік уже закритого тижня мінявся заднім числом.
+Основна задача — повноцінна задача зі своєю ціллю, відповідальним і статусом.
+Підзадачі стоять поруч з нею, а не замість неї: у лічильниках рахуються всі, і
+поява підзадачі нічого не забирає з підрахунків. Раніше було навпаки — задача
+випадала з усіх чисел, щойно в неї з'являлась дитина.
 
 Нову підзадачу не можна зробити батьком іншої задачі. Legacy-дерева більшої
-глибини залишаються читабельними в аналітиці, але API не дозволяє поглиблювати
-їх.
+глибини залишаються читабельними, але API не дозволяє поглиблювати їх.
 
 «Мої завдання» відбирає картки за виконавцем, але їхній лічильник підзавдань
 не є персональним. `useAllMyTasks` окремо читає дітей своїх задач пакетами
@@ -144,7 +145,7 @@ workers keep using the Admin SDK independently of a browser session.
 #### Чекліст в описі
 
 Markdown-пункти `- [ ]` — легкий чекліст усередині опису. Вони не мають власних
-статусів, виконавців, часу чи аналітики і не блокують завершення задачі.
+статусів чи відповідальних і не блокують завершення задачі.
 
 Старе поле `subtasks[]` не є другим типом підзадачі: воно доступне лише для
 читання й може бути явно перенесене в Markdown-чекліст.
@@ -187,236 +188,6 @@ Markdown-пункти `- [ ]` — легкий чекліст усередині
 перестановку карток. Firestore Rules забороняють клієнту напряму змінювати
 `status`, `columnId`, `completedAt` та `order`.
 
-### Аналітика
-
-Кількість, потік, навантаження й списки уваги рахують кожен канонічний
-`issues`-документ один раз, включно з основною задачею, що має підзадачі.
-Ієрархія не перетворює основну задачу на папку: вона лишається одиницею роботи,
-а її прогрес окремо показується як завершені листові нащадки / усі листові
-нащадки.
-
-Кожен сирий `timeLogs` документ сумується не більше одного разу. Некоректні
-від’ємні, дробові або надмірні значення не впливають на агрегати й не можуть
-створюватися новими клієнтськими записами.
-
-#### Один таймер на користувача
-
-Поточний таймер не є станом вкладки. Авторитетний документ
-`timerStates/{uid}` має максимум один `active` і максимум один `pending` запис
-на обліковий запис. Старт, зупинка й відхилення pending-часу виконуються лише
-серверними маршрутами в транзакції; Firestore Rules дозволяють браузеру читати
-власний документ, але забороняють усі прямі записи. Тому дві вкладки, два
-пристрої або дві організації не можуть мовчки перезаписати один одного.
-
-Кожна сесія таймера зберігає `organizationId`, тип і id джерела, проєкт та
-серверний `startedAt`. Зупинка звіряє очікуваний id: повтор того самого запиту
-ідемпотентний, а стара вкладка отримує конфлікт. Офлайн-зупинка тимчасово тримає
-тільки `{timerId, requestedAt}` під ключем користувача; reconnect відправляє її
-на сервер, який обмежує час моментом старту, моментом reconnect і максимум
-дванадцятьма годинами.
-
-Збереження pending-часу й створення `timeLogs` — одна транзакція з
-детермінованим id за timer session. Повтор запиту повертає вже створений лог і
-не додає хвилини до денного підсумку вдруге. Logout/account switch очищає лише
-екранний стан; серверний таймер нового акаунта завантажується окремим слухачем.
-
-Відлік у браузері використовує server-clock offset з `/api/timer/clock`, а не
-різницю між `startedAt` і голим `Date.now()`. Тому зміщений локальний годинник
-не додає секунди на старті й не спотворює offline stop intent. Звичайна online
-зупинка взагалі не передає клієнтський timestamp: момент фіксує сервер.
-
-`taskMinutes` і `eventMinutes` — дві частини одного факту: реально
-зафіксованого часу. Заплановані `startAt` / `endAt` події не підміняють лог і не
-додаються до діаграми часу.
-
-Новий time-log зберігає `sourceTitle`, а task-log також `sourceKey`. На живому
-джерелі інтерфейс показує актуальну назву, snapshot є лише запасним підписом на
-час між видаленням джерела й фінальним purge або для незмінного облікового
-сліду. Запис часу не повинен ставати безіменним через порядок фонової чистки.
-
-Період закриття й цикл використовують тільки явний достовірний `completedAt`.
-`updatedAt` не є запасною датою завершення: редагування закритої задачі не
-закриває її повторно. Legacy-задачі YouTrack без маркера `importedAt` також не
-потрапляють у ці метрики, бо старий імпортер міг записати час міграції замість
-дати завершення у джерелі. Вони залишаються в історії та загальній кількості,
-але не створюють фальшивий сплеск у конкретному періоді.
-
-#### Вікно, а не історія
-
-Задачі — скінченна множина: один документ на одну одиницю роботи. Записи часу —
-ні. Один пишеться щоразу, коли хтось зупиняє таймер, кожною людиною, щодня, і
-жоден не видаляється. Екран показував «за 30 днів», а читав усе від першого дня
-проєкту й відкидав зайве вже в браузері — тобто вартість відкриття росла з
-віком робочого простору, а не з розміром періоду.
-
-Тому період — це межа запиту, а не фільтр після нього.
-`useWorkspaceAnalytics` не читає жодного логу без явного `timeLogWindow`:
-викликач називає проміжок, який збирається малювати, і цей проміжок стає
-`where('loggedAt', …)`. Вікна рахує один модуль
-`src/lib/utils/analyticsWindow.mjs`, і той самий модуль дає компонентам їхній
-власний предикат, щоб межа запиту й межа малювання не розійшлися у дві різні
-відповіді:
-
-- «Огляд» і «Команда» — `periodTimeLogWindow`: обраний період,
-  вирівняний до локальної півночі. Вирівнювання навмисне: «Огляд» перечитує
-  годинник щохвилини, і межа, що рухається разом із ним, перебудовувала б запит
-  шістдесят разів на годину;
-- «Табель» — `timesheetTimeLogWindow`: рівно той тиждень або місяць, який
-  показано. Гортання назад **пересуває** вікно, а не розширює його;
-- сторінка учасника читає період для «Огляду» й «Роботи», але перемикається на
-  точний тиждень або місяць, щойно відкрито його «Табель»;
-- «Рахунок» читає сирі логи свого проєкту власним хуком
-  (`useProjectAllTimeLogs`): рахунок — це кожна невиставлена година, а не
-  період, і жодний агрегат його не замінює.
-
-Задачі й логи — два окремі підписники всередині хука, бо живуть за різними
-годинниками: набір задач змінюється зі зміною проєктів, вікно логів — коли
-людина перемикає період або гортає табель. В одному ефекті зміна періоду
-перечитувала б усі задачі організації, щоб відповісти на питання про години.
-
-Запит task-логів має дві нерівності — `issueId != ''` і діапазон по `loggedAt`,
-— тож складений індекс містить обидва поля: `(organizationId, projectId,
-issueId, loggedAt)`. Порядок не на вибір: Firestore добирає індекс за порядком
-полів у наборі фільтрів, а не за тим, який діапазон вибірковіший. Варіант
-`(…, loggedAt, issueId)` виглядав кращим планом і просто не є індексом, яким цей
-запит можна обслужити — прод відповів `FAILED_PRECONDITION` і назвав правильний
-порядок.
-
-#### Денні підсумки
-
-Вікно робить вартість пропорційною періоду, але «за 90 днів» по активній
-команді — це все ще тисячі документів заради чотирьох чисел. Денний підсумок
-проєкту — один невеликий документ, і девʼяносто днів коштують девʼяносто
-читань незалежно від того, скільки роботи в них було.
-
-    analyticsRollups/{organizationId}_{projectId}_{YYYY-MM-DD}
-
-Поля: `taskMinutes`, `eventMinutes`, `cancelledTaskMinutes`, `minutesByUser`,
-`cancelledMinutesByUser`, `version`. `projectId` порожній для командного часу
-календаря без проєкту — та сама межа, яку вже проводять сирі логи й
-`firestore.rules`. День береться в часовому поясі організації: до якого дня
-належить запис — це факт про робочий простір, а не про того, хто відкрив звіт.
-
-**Похідне, а не джерело правди.** Кожна цифра виводиться з `timeLogs`, і
-`scripts/backfill-analytics-rollups.mjs` перебудовує будь-яку з них із нуля
-(runbook — у [MIGRATIONS.md](MIGRATIONS.md)). Агрегат без способу відновлення —
-це дані, які баг псує назавжди.
-
-**І не гроші.** Рахунок читає точні `sourceTimeLogIds` кожної позиції і не має
-права читати підсумок: хвилини, зведені за день, не можуть сказати, які саме
-хвилини вже виставлені.
-
-**Дельти, а не інкременти.** Запис часу можна відредагувати й видалити, тож
-кожна зміна — це старий запис назовні й новий усередину. 30 хв, виправлені на
-45, зсувають день на +15; інкремент нового значення зробив би з двох правок 75.
-
-**Скасування — окрема цифра.** Задачу скасовують після того, як години вже
-пораховані, і скасування оборотне. Тому `taskMinutes` лишається тим, що
-записали, а `cancelledTaskMinutes` — тією частиною, що належить скасованим
-задачам; читач віднімає одне від одного. Повернення задачі — точна інверсія, а
-перебудова рахує обидві цифри незалежно, тож розбіжність між ними видно, а не
-ховається всередині одного числа. Архівні задачі не коригуються взагалі.
-
-**Лічильників задач тут немає.** Задачі — скінченна колекція, яку екрани
-аналітики й так читають заради дощок, відкритих лічильників і списку уваги.
-Рахувати їх із підсумку не дало б нічого, зате поставило б другого письменника
-на кожен перехід статусу. Без межі росте саме час — його й зводимо.
-
-**Конкуренція.** Firestore тримає ~1 запис на секунду на документ, але цей
-документ ніколи не найзавантаженіший у власній транзакції: кожен task-лог і так
-пише `issues/{id}` і `projects/{id}`, кожен календарний — `calendarEvents/{id}`
-і `projects/{id}`. Документ проєкту приймає логи всіх днів усіх задач проєкту,
-підсумок — логи одного дня. Шардити довелося б спочатку `projects/{id}`.
-Арифметика погоджується: пʼятдесят людей по десять записів — це пʼятсот записів
-на робочий день, розподілених ще й по проєктах.
-
-**Хто що читає.** «Огляд» і «Команда» — це суми, тож вони читають дні: плитки,
-«Куди пішов час», колонка часу в «По проєктах», хвилини кожної людини в
-командній таблиці. «Продуктивність» описує потік задач і часу не читає.
-Календар завантажується лише там, де потрібні назви подій або рахунок, а не при
-кожному відкритті аналітики.
-
-Денний підсумок знає проєкт, дату й того, хто списав годину. Він не знає, проти
-якої задачі, тож не може відповісти на «час на задачах, призначених Анні», на
-пошук чи на фільтр за пріоритетом і типом — це питання про задачі, а не про дні.
-Тому агрегат — швидкий шлях, а записи — точний: щойно вмикається такий фільтр,
-той самий період читається з логів, за тими самими днями, бо обидві межі дає
-один `periodDayRange`.
-
-«Табель» читає записи завжди — це сітка «хто що списав проти якої задачі», а не
-сума. «Рахунок» читає сирі логи свого проєкту. Сторінка окремої людини теж читає
-записи: вона малює її табель.
-
-Помилка одного обовʼязкового читання зупиняє весь звіт і показує повторну
-спробу. Частково прочитані колекції не публікуються як правдивий нуль: нуль —
-це результат успішного запиту, а не запасне значення для збою мережі чи
-відсутнього індексу.
-
-«За 30 днів» тепер означає тридцять цілих днів у поясі організації, включно з
-сьогоднішнім, а не «останні 720 годин». Так підсумок і записи говорять про той
-самий проміжок — і так підпис під плиткою нарешті збігається з тим, що
-порахували.
-
-Точки запису: `applyTaskTimeLogMutation` (створення, зміна, видалення
-task-логу), маршрут календарного часу, маршрут скасування задачі, чистка
-tombstone у `issueTrash.js`, каскад видалення проєкту та YouTrack-імпортер.
-`tests/analytics-rollups.test.mjs` перевіряє, що жоден із них не змінює хвилини
-без підсумку.
-
-### Облік часу задач
-
-- Створення, зміна й видалення task-логів проходять лише через автентифіковані
-  серверні API.
-- Лог, `issues.spentMinutes` і версія бухгалтерського стану проєкту
-  змінюються в одній транзакції.
-- Учасник може змінювати лише власні логи; owner/admin — логи учасників свого
-  проєкту.
-- Лог, який уже потрапив у рахунок, незмінний.
-- Legacy-задача з історією логів без підтвердженої версії дзеркала fail-closed
-  до явної звірки.
-
-### Рахунки
-
-- Оцінка ніколи не стає грошима: рахунок рахується лише з фактичних логів, а
-  робота без зафіксованого часу отримує суму вручну. Джерело `estimate`
-  лишилося тільки на вже виставлених рахунках.
-- Ієрархія задач на рахунок не впливає: основна задача виставляється за своїм
-  фактичним часом так само, як будь-яка інша.
-- Фактична позиція рахунку зберігає точні `sourceTimeLogIds`.
-- Хвилини позиції на сервері мають точно дорівнювати сумі сирих джерел.
-- Після створення рахунку кожне джерело отримує `invoiceId` і `billedAt` та
-  стає незмінним.
-- Детерміновані reservation-документи і транзакція не дозволяють двом
-  паралельним рахункам використати одне джерело.
-- Номер рахунку генерує серверна послідовність організації на календарний рік,
-  тому два проєкти однієї організації не можуть отримати однаковий номер.
-- Новий невиставлений лог тієї самої задачі можна включити в наступний рахунок;
-  вже виставлені логи не потрапляють у нову позицію.
-- Позиція без фактичних логів резервує сам `itemId`, щоб ту саму роботу не
-  виставили двічі.
-- Старі рахунки без `itemId` і `sourceTimeLogIds` консервативно блокують задачі
-  з тим самим стабільним ключем. Такі збіги потребують ручної звірки, бо
-  автоматично вгадати історичні джерела безпечно неможливо.
-- Чернетку можна анулювати. Рахунок залишається в історії зі статусом `void`,
-  а його точні маркери й reservation-документи звільняються в одній транзакції.
-
-Видалення задачі з виставленими логами блокується, щоб не знищити аудиторський
-ланцюжок рахунку.
-
-### Час календарних подій
-
-- Подія без проєкту може мати org-scoped час для командної аналітики, але такий
-  час не є позицією рахунку.
-- Час події з проєктом належить точному occurrence і може потрапити лише в
-  рахунок цього проєкту.
-- `eventId`, `occurrenceStartAt` і `projectId` разом утворюють ідентичність
-  джерела; їх не можна непомітно змінювати після появи логів.
-- Спільний трекінг доступний лише для подій із видимістю `team`. Події
-  `participants` і `private` не створюють нових спільних таймлогів, щоб їхній
-  опис не витікав у командні аналітичні запити.
-- Повторення рахуються в UTC з календарною арифметикою. Точний occurrence
-  залишається валідним навіть для щомісячної серії, створеної багато років тому.
-
 ### Локалізація системних довідників
 
 Стабільні технічні id залишаються незмінними й англомовними — наприклад,
@@ -433,7 +204,7 @@ tombstone у `issueTrash.js`, каскад видалення проєкту т�
 
 Англійські назви відомих legacy-defaults локалізуються лише за точним
 стабільним id. Власні назви організації не перекладаються й не перезаписуються.
-Типи календаря є фіксованою семантикою для поведінки та аналітики, але їхні
+Типи календаря є фіксованою семантикою для поведінки, але їхні
 людські назви локалізовані.
 
 ### Серверні точки запису
@@ -443,19 +214,11 @@ tombstone у `issueTrash.js`, каскад видалення проєкту т�
 - `PATCH /api/issues/:id/status` — статус і атомарна перестановка;
 - `GET|POST|DELETE /api/issues/:id/links` — канонічні логічні зв’язки;
 - `POST /api/issues/:id/legacy-checklist` — явне перенесення старого чекліста;
-- `POST /api/issues/:id/time-logs` — списання часу на задачу;
-- `PATCH|DELETE /api/issues/:id/time-logs/:logId` — зміна або видалення
-  невиставленого task-логу;
-- `DELETE /api/issues/:id` — ієрархічне видалення;
-- `POST|PATCH|DELETE /api/calendar/events/:id/time-logs` — час точного
-  occurrence командної події;
-- `POST /api/invoices` — перевірений рахунок і резервування джерел;
-- `POST /api/invoices/:id/void` — атомарне анулювання чернетки.
+- `DELETE /api/issues/:id` — ієрархічне видалення.
 
 ### Міграція legacy-даних
 
-Операційні інструкції для ієрархії v2, звірки дзеркала task-часу та
-класифікації календарного часу — у [MIGRATIONS.md](MIGRATIONS.md).
+Операційні інструкції для ієрархії v2 — у [MIGRATIONS.md](MIGRATIONS.md).
 
 ---
 
@@ -496,14 +259,10 @@ setState({ priority: 'high' });   // a patch, never a whole state
   a hand-edited link must still open the screen.
 - `type: 'list'` serialises as `a,b,c`. Its default is `[]`.
 
-Shipped schema: `INCIDENT_QUEUE_VIEW_SCHEMA`. `SPRINTS_VIEW_SCHEMA` went with
-the sprint board — a schema is a description of a screen's address, and there is
-no longer a screen at that address.
-Аналітика має окрему перевірену серіалізацію в
-`analyticsUrlState.mjs`: вкладка, проєкти, виконавець, пріоритет, тип, період,
-пошук і точний тиждень або місяць табеля переживають перезавантаження та
-передаються посиланням. Сторінка учасника успадковує проєкти й період командної
-аналітики.
+Shipped schema: `INCIDENT_QUEUE_VIEW_SCHEMA`, and it is the only one. A schema
+is a description of a screen's address, so `SPRINTS_VIEW_SCHEMA` went with the
+sprint board and `analyticsUrlState.mjs` went with the analytics screen: there
+is no longer a screen at either address.
 
 ### The four rules
 
@@ -528,17 +287,18 @@ no longer a screen at that address.
 
 ### Deliberate omissions
 
-- **Search is not in the address.** `projectSearch`, `myTaskSearch` and
-  `analyticsSearch` live in the workspace store and are driven by the header,
-  which is shared chrome. Binding a store to the address in both directions is a
-  second source of truth, which is the thing this change exists to remove.
+- **Search is not in the address.** `projectSearch` and `myTaskSearch` live in
+  the workspace store and are driven by the header, which is shared chrome.
+  Binding a store to the address in both directions is a second source of truth,
+  which is the thing this change exists to remove.
 - **The old per-filter `localStorage` keys are not migrated.** `qt_board_sprint_*`,
   `qt_board_assignee_*`, `qt_board_priority_*`, `qt_board_type_*` and
   `qt_project_view_*` are no longer read or written. Filters reset once, and the
   alternative was carrying a migration shim indefinitely.
-- **`/analytics` не конвертовано.** Воно вже зберігає власні періоди, вкладки
-  й date anchor у своїй адресі. `/calendar` колись стояв тут із власною лексикою
-  дати й режиму — екрана більше немає, тож і винятку немає.
+- **The screens that once had their own dialect of an address are gone.**
+  `/analytics` kept its own periods, tabs and date anchor, and `/calendar` its
+  own date and mode vocabulary. Neither screen exists, so neither is an
+  exception to convert.
 
 ### Extending it
 
@@ -548,21 +308,21 @@ Add a key to a schema; there is nothing else to register.
 
 ## What is new to whom: one feed, one cursor
 
-A task tells an internal reader three kinds of news — somebody replied to the
-client, somebody left a staff-only note, and somebody changed the support-side
-record. The client sees only the public conversation and current
-customer-facing incident state. The product used to treat messages and changes
-as unrelated: messages had a boundary and a count, changes had a feed entry
-nobody marked, and the dot on a card stood for both without saying which.
+An incident tells an internal reader two kinds of news — somebody wrote in the
+conversation, and somebody changed the support-side record. The client sees the
+conversation and the current customer-facing state. The product used to treat
+messages and changes as unrelated: messages had a boundary and a count, changes
+had a feed entry nobody marked, and the dot on a card stood for both without
+saying which.
 
-Public replies remain in `issues/{id}/comments`. Internal notes deliberately use
-`issues/{id}/internalNotes`: Firestore authorizes whole documents, and a
-visibility field cannot safely hide legacy comments that never carried one.
-Only internal roles subscribe to `internalNotes`, `audit` and time logs; rules
-also refuse those reads to both client roles. The shared unread cursor continues
-to describe public customer-visible activity and audited support changes for
-staff. Internal-note delivery uses staff-only notifications and never writes a
-preview onto the client-readable issue document.
+The conversation lives in `issues/{id}/comments` and is shared in full:
+everything support writes there, the client reads. There is no second,
+staff-only thread on the customer's own record — that was the owner's decision,
+not an unfinished feature, and a composer switch that keeps a reply «for us» is
+not to be reintroduced. What stays internal is the `audit` feed: only internal
+roles subscribe to it, and rules refuse that read to both client roles. The
+shared unread cursor describes conversation activity for everybody and audited
+support changes for staff.
 
 ### The pieces
 
@@ -583,10 +343,9 @@ preview onto the client-readable issue document.
   document of its own, because the task itself is subscribed to by every board
   and card that shows it and a heartbeat written there would cost each of them a
   read.
-- `src/lib/hooks/useComments.js` — one public-comments subscription for every
-  project participant and a second `internalNotes` subscription only for staff.
-  New staff messages carry an explicit `public`/`internal` composer choice; a
-  public reply can never quote an internal note.
+- `src/lib/hooks/useComments.js` — one comments subscription, the same one for
+  every participant of the client space, staff and client alike. There is no
+  second subscription and no per-message visibility to keep in step with it.
 
 ### The rules
 
@@ -595,7 +354,7 @@ preview onto the client-readable issue document.
    timeline knew how to say five, so a moved deadline left no trace anywhere in
    the product. Adding a field to `AUDITED_ISSUE_FIELDS` and giving it a label in
    the same module is the whole change.
-2. **Nothing names a status, priority, type, label or sprint from a table of its
+2. **Nothing names a status, priority, type or label from a table of its
    own.** `describeAuditEvent` is handed the live workflow, and statuses resolve
    through `statusLabel`. A hard-coded map of seven status ids is what made a
    project that renamed «QA» read somebody else's word for it, and a project that
@@ -648,17 +407,9 @@ preview onto the client-readable issue document.
 
 ### Deliberate omissions
 
-- **Time logs do not move the boundary.** Logging time deliberately does not
-  touch `lastActivityAt` (see the comment in `issueReadState.mjs`), so counting it
-  here would draw a line for something no card ever announced.
 - **Comments are not audit entries.** A message is its own thing in the feed with
   its own read receipts; mirroring it into the history would be a second copy of
   the same fact.
-- **Internal notes do not write public activity mirrors or read receipts.** A
-  `lastActivityText`, mention tally or receipt on the client-readable issue or
-  public comment would disclose that private collaboration exists. Staff are
-  notified directly; a later staff-only queue projection may add card-level
-  unread state without weakening this boundary.
 - **Creating a task is not a change to it.** A new task is new in full; it has no
   fields that changed.
 - **Marking a selection read is not implemented.** `ISSUE_BULK_ACTIONS` is a
@@ -680,10 +431,12 @@ example to copy.
 
 The inherited notification engine has event-driven and time-driven paths. In
 the current qTicket beta only in-app delivery is exposed in product settings.
-Email and Telegram provider code is retained but is not a published capability
-until a real provider is configured, verified and covered by the acceptance
-flow. The sections below document the retained delivery mechanics without
-promising those external channels to users.
+Email provider code is retained but is not a published capability until a real
+provider is configured, verified and covered by the acceptance flow. The second
+messenger is not retained at all: the Telegram integration and its sender are
+deleted, and `'telegram'` survives only as a stale entry in
+`notificationChannels.mjs` that nothing can deliver. The sections below document
+the retained delivery mechanics without promising email to users.
 
 ### Event-driven notifications
 
@@ -693,14 +446,14 @@ attempts the enabled external channels. No scheduler is involved.
 
 This path is intentionally low-latency and stays that way: the message is
 attempted the moment the event happens. A provider that is down no longer ends
-there, though. Every recipient whose email or Telegram failed gets a row in the
+there, though. Every recipient whose email failed gets a row in the
 same `scheduledNotifications` outbox the scheduled reminders use, and the
 dispatcher retries it on the usual backoff.
 
 Two details make that row behave: it carries `attempts: 1`, because the request
 already spent an attempt and the dispatcher would otherwise read the record it
 just wrote as somebody else's delivery and close the row unsent; and it carries
-`emailSentAtMs` / `telegramSentAtMs` for whichever channel did succeed, so a
+`emailSentAtMs` for a channel that did succeed, so a
 retry sends only what is still owed. The row id is the notification document's
 id, which keeps the claim — and therefore the guarantee against a third
 delivery — exactly where it already was.
@@ -792,9 +545,10 @@ wanted; a week late is a reminder about something that is over.
 ### Хто помічає, що розсилка стала
 
 Between 3 and 27 August 2026 the sweep did not run once: the schedule that
-drives it was switched off, and nothing said so. No deadline reminders, no
-calendar reminders, no birthday greetings, no emptying of «Нещодавно видалене»,
-for twenty-four days. Every part of the system behaved correctly — the watermark
+drives it was switched off, and nothing said so. No deadline reminders and no
+emptying of «Нещодавно видалене», for twenty-four days, and every reminder the
+sweep carried then is still carried by it now. Every part of the system behaved
+correctly — the watermark
 in `system/notificationSweep` was accurate the whole time. It had no reader.
 
 `readSweepHealth` is the reader, and `.github/workflows/sweep-watchdog.yml` is
@@ -816,10 +570,10 @@ read every series ever created — and are now bounded forward by the reminder
 lead and capped by `RECURRING_SCAN_LIMIT`, which logs loudly rather than
 silently dropping events.
 
-Email and Telegram outcomes are tracked separately. If email succeeds and
-Telegram fails, only Telegram is retried; a successful channel is not sent a
-second time. Telegram failures are recorded per recipient, so one successful
-digest cannot hide another recipient's blocked bot.
+Each channel's outcome is tracked separately, and a successful one is never
+sent a second time — a retry sends only what is still owed. Failures are
+recorded per recipient, so one successful digest cannot hide another
+recipient's bounced address.
 
 A channel the deployment does not have is not a channel that failed. With
 neither `RESEND_API_KEY` nor `BREVO_API_KEY` set, `deliverEmail` is a soft no-op
@@ -896,9 +650,7 @@ claim before outbound delivery.
 
 - Show `system/notificationSweep` health and last successful materialisation in
   Settings.
-- Show the last successful email/Telegram delivery and terminal channel errors.
-- Mark a Telegram connection as needing attention after a permanent recipient
-  error.
+- Show the last successful email delivery and terminal channel errors.
 
 ## Вартість читання
 
@@ -934,10 +686,10 @@ claim before outbound delivery.
 більш ніж одному екрану.
 
 І це виявилось найдорожчим із трьох. Запит коштує рівно стільки, скільки
-документів він повернув, **кожному слухачеві окремо**. Задачі читали чотири
-незалежні підписки — головна, «Мої завдання», дошка, аналітика, — тож один запис
-в одну задачу списував до чотирьох читань на вкладку, а на чотирьох вкладках до
-шістнадцяти. За вечір 26→27.08.2026 із 49 000 витрачених читань приблизно 34 500
+документів він повернув, **кожному слухачеві окремо**. Тоді задачі читали чотири
+незалежні підписки — головна, «Мої завдання», дошка й екран звітів, — тож один
+запис в одну задачу списував до чотирьох читань на вкладку, а на чотирьох
+вкладках до шістнадцяти. За вечір 26→27.08.2026 із 49 000 витрачених читань приблизно 34 500
 припали саме на це: не на запити, а на доставки змін уже відкритим слухачам.
 
 Тепер підписка одна. `useOrganizationIssues` читає задачі всіх доступних
@@ -948,7 +700,6 @@ claim before outbound delivery.
 | --- | --- |
 | «Мої завдання» | `issues`, відфільтровані за виконавцем |
 | Дошка / екран задачі | `documents`, звужені до одного проєкту |
-| Аналітика | `issues`, `allIssues`, `cancelledIssues` |
 | **Головна** | **нічого — вона більше не читає задачі** |
 
 П'ятсот задач — ніщо для браузера і не ніщо для квоти. Тому окремої підписки на
@@ -979,9 +730,10 @@ claim before outbound delivery.
 
 **Чому запитів на активність два.** `issueActivity` читає `lastActivityAt`, а
 за його відсутності падає на `createdAt`. Це не деталь: на проді 326 із 720
-задач не мають позначки активності взагалі, бо імпортер із YouTrack навмисно її
-не пише — `lastActivityAt` це ще й курсор непрочитаного, і проставити його на
+задач не мають позначки активності взагалі, бо старий імпортер навмисно її
+не писав — `lastActivityAt` це ще й курсор непрочитаного, і проставити його на
 імпорті означало б засвітити три сотні задач непрочитаними для всіх одразу.
+Імпортера вже немає, а записи, які він лишив, є.
 Один `orderBy('lastActivityAt')` тихо викинув би половину простору, і два
 реальні проєкти намалювали б один рядок там, де картка розрахована на три.
 Firestore не вміє сортувати за «це поле, або те, якщо першого немає», тож
@@ -996,18 +748,15 @@ Firestore не вміє сортувати за «це поле, або те, я
 - Живий слухач над колекцією або має `limit()`, або внесений у
   `BOUNDED_WITHOUT_LIMIT` у `tests/firestore-read-cost.test.mjs` з причиною, чому
   він не може рости. Тест падає на новому необмеженому слухачі.
-- Історія, що росте вічно (повідомлення, коментарі, журнал змін, списаний час),
-  відкривається вікном найновішого і розширюється на вимогу — спільний елемент
+- Історія, що росте вічно (повідомлення, коментарі, журнал змін), відкривається
+  вікном найновішого і розширюється на вимогу — спільний елемент
   `LoadOlderButton`.
-- Звітний екран читає рівно той період, який показує. Період — це
-  `where('loggedAt', …)`, а не `.filter()` після читання всієї колекції; див.
-  «Аналітика» → «Вікно, а не історія». `tests/firestore-read-cost.test.mjs`
-  падає, якщо в `useWorkspaceAnalytics` зʼявиться запит `timeLogs` без вікна.
+- Екран, який показує період, читає рівно той період: межа періоду — це
+  `where(…)` у самому запиті, а не `.filter()` після читання всієї колекції.
 - Живий слухач лишається там, де людина діє з даними, поки вони змінюються:
-  дошка, задача, чат, планування спринту, архів. Звіт — не з них. Аналітика
-  бере один замір (`live: false`), показує `RefreshStamp` — «Оновлено о HH:MM» —
-  і кнопку взяти новий. Екран, який перестав оновлюватись і не сказав про це,
-  гірший за слухача, якого прибрали.
+  дошка, звернення, розмова, архів. Одноразовий замір (`live: false`) показує
+  `RefreshStamp` — «Оновлено о HH:MM» — і кнопку взяти новий. Екран, який
+  перестав оновлюватись і не сказав про це, гірший за слухача, якого прибрали.
 - Те, що вже відоме під час запису, записується під час запису. Назва згаданої
   задачі, імʼя автора, кількість повідомлень у каналі — це поля, а не запити.
 - Прочитане — це курсор на розмову, а не позначка в кожному повідомленні.
@@ -1063,8 +812,8 @@ Firestore не вміє сортувати за «це поле, або те, я
 ### Скільки важить задача
 
 Заміряно на проді 27.08.2026, бо про вагу документа не можна здогадуватись:
-720 задач, 2 729 KiB, у середньому 3 881 B на документ. 672 з них імпортовані з
-YouTrack і несуть 96% усієї ваги.
+720 задач, 2 729 KiB, у середньому 3 881 B на документ. 672 з них прийшли
+старим імпортом і несуть 96% усієї ваги.
 
 | Поле | Вага | Частка | Хто читає |
 | --- | --- | --- | --- |
@@ -1097,8 +846,8 @@ YouTrack і несуть 96% усієї ваги.
 Наступний крок уже зроблений наполовину: `projects/{id}.issueCounts` тримає
 `total`, `delivered` і `overdue`, і їх підтримують ті самі серверні маршрути,
 що вже пишуть задачі. Модель — у `src/lib/utils/projectIssueCounts.mjs`, запис —
-у `src/lib/server/projectIssueCounts.js`, і обидва списані з
-`analyticsRollups`: **дельти, не інкременти**. Одна зміна — це стара форма
+у `src/lib/server/projectIssueCounts.js`, і обидва тримаються
+**дельтами, а не інкрементами**. Одна зміна — це стара форма
 задачі, знята з підсумку, і нова, додана до нього; тому задача, перенесена між
 проєктами, лишає обидва лічильники правильними, а скасування симетричне до
 повернення.
@@ -1137,9 +886,8 @@ YouTrack і несуть 96% усієї ваги.
 цифра рахується заново й пишеться як абсолютний підсумок, тож помилка в дельті —
 це тимчасово неправильне число, а не назавжди.
 
-Дві дії не виражаються дельтою взагалі й тому перебудовують усе: редагування
-workflow (воно змінює, що означає «delivered» для кожної задачі одразу) та
-завершення імпорту з YouTrack (він пише задачі по одній, тисячами кроків).
+Одна дія не виражається дельтою взагалі й тому перебудовує все: редагування
+workflow — воно змінює, що означає «delivered», для кожної задачі одразу.
 
 Читач вимагає, щоб за цифрами хоч раз стояв повний перерахунок:
 `projectIssueCounts()` повертає `null` для блоку без `countedAt`, і екран

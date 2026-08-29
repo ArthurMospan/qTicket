@@ -2047,8 +2047,8 @@
             "src/app/(app)/team/page.js:138",
             "src/components/InviteMemberDialog.jsx:192",
             "src/components/UserStatusDialog.jsx:71",
-            "src/components/WorkspaceInfoCenter.jsx:138",
-            "src/components/WorkspaceInfoCenter.jsx:87",
+            "src/components/WorkspaceInfoCenter.jsx:102",
+            "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/workspace/AgileBoard.jsx:64",
             "src/components/workspace/AgileBoard.jsx:67",
             "src/components/workspace/IssueDetail.jsx:1312",
@@ -2207,7 +2207,7 @@
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:147",
             "src/components/UserStatusDialog.jsx:114",
-            "src/components/WorkspaceInfoCenter.jsx:138",
+            "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55"
           ]
         },
@@ -2243,7 +2243,7 @@
             "src/components/WorkspaceHeader.jsx:363",
             "src/components/WorkspaceHeader.jsx:374",
             "src/components/WorkspaceHelpMenu.jsx:85",
-            "src/components/WorkspaceInfoCenter.jsx:87",
+            "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/workspace/AgileBoard.jsx:411",
             "src/components/workspace/AgileBoard.jsx:492",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -2332,7 +2332,7 @@
             "src/components/UserStatusDialog.jsx:114",
             "src/components/UserStatusDialog.jsx:71",
             "src/components/WorkspaceHelpMenu.jsx:85",
-            "src/components/WorkspaceInfoCenter.jsx:87",
+            "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
             "src/components/profile/ProfileView.jsx:175",
             "src/components/workspace/AgileBoard.jsx:411",
@@ -2384,7 +2384,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:138",
+            "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/workspace/UnifiedTimeline.jsx:1786"
           ]
         }
@@ -2463,8 +2463,8 @@
             "src/components/UserStatusDialog.jsx:114",
             "src/components/UserStatusDialog.jsx:71",
             "src/components/WorkspaceHelpMenu.jsx:85",
-            "src/components/WorkspaceInfoCenter.jsx:138",
-            "src/components/WorkspaceInfoCenter.jsx:87",
+            "src/components/WorkspaceInfoCenter.jsx:102",
+            "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
             "src/components/profile/ProfileView.jsx:175",
             "src/components/workspace/AgileBoard.jsx:411",
@@ -2578,8 +2578,8 @@
             "src/components/WorkspaceHeader.jsx:363",
             "src/components/WorkspaceHeader.jsx:374",
             "src/components/WorkspaceHelpMenu.jsx:85",
-            "src/components/WorkspaceInfoCenter.jsx:138",
-            "src/components/WorkspaceInfoCenter.jsx:87",
+            "src/components/WorkspaceInfoCenter.jsx:102",
+            "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:55",
             "src/components/profile/ProfileView.jsx:175",
             "src/components/workspace/AgileBoard.jsx:411",
@@ -2721,8 +2721,8 @@
             "src/components/UserStatusDialog.jsx:71",
             "src/components/WorkspaceHeader.jsx:363",
             "src/components/WorkspaceHeader.jsx:374",
-            "src/components/WorkspaceInfoCenter.jsx:138",
-            "src/components/WorkspaceInfoCenter.jsx:87",
+            "src/components/WorkspaceInfoCenter.jsx:102",
+            "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/profile/ProfileView.jsx:175",
             "src/components/workspace/AgileBoard.jsx:492",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3204,7 +3204,7 @@
           ],
           "files": [
             "src/components/InviteMemberDialog.jsx:155",
-            "src/components/WorkspaceInfoCenter.jsx:127"
+            "src/components/WorkspaceInfoCenter.jsx:151"
           ]
         }
       },
@@ -3226,7 +3226,7 @@
             "src/app/(app)/settings/page.js:572",
             "src/components/CreateTaskModal.jsx:433",
             "src/components/InviteMemberDialog.jsx:155",
-            "src/components/WorkspaceInfoCenter.jsx:127",
+            "src/components/WorkspaceInfoCenter.jsx:151",
             "src/components/workspace/IssueDetail.jsx:1778"
           ]
         },
@@ -3270,7 +3270,7 @@
             "src/components/CreateTaskModal.jsx:433",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/UserStatusDialog.jsx:105",
-            "src/components/WorkspaceInfoCenter.jsx:127",
+            "src/components/WorkspaceInfoCenter.jsx:151",
             "src/components/workspace/IssueDetail.jsx:1778"
           ]
         }
@@ -3777,7 +3777,7 @@
             "src/app/(app)/page.js:189",
             "src/app/(app)/settings/page.js:2455",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:381"
           ]
         },
@@ -3917,7 +3917,7 @@
             "src/app/(app)/settings/page.js:2725",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:563",
-            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
             "src/components/workspace/IssueDetail.jsx:1471",
@@ -4013,7 +4013,7 @@
             "src/app/(app)/settings/page.js:2725",
             "src/app/(app)/settings/page.js:620",
             "src/app/(app)/settings/page.js:635",
-            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
             "src/components/workspace/UnifiedTimeline.jsx:1503",
@@ -4096,7 +4096,7 @@
             "src/app/(app)/settings/page.js:635",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:563",
-            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/AgileBoard.jsx:501",
             "src/components/workspace/AgileBoard.jsx:518",
             "src/components/workspace/AgileBoard.jsx:558",
@@ -4157,7 +4157,7 @@
             "src/app/(app)/settings/page.js:635",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:563",
-            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/profile/ProfileView.jsx:403",
             "src/components/workspace/AgileBoard.jsx:501",
             "src/components/workspace/AgileBoard.jsx:518",
@@ -4254,7 +4254,7 @@
             "src/app/(app)/settings/page.js:620",
             "src/app/(app)/settings/page.js:635",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceInfoCenter.jsx:111",
+            "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/profile/ProfileView.jsx:403",
             "src/components/workspace/IssueCard.jsx:300",
             "src/components/workspace/IssueCard.jsx:312",
@@ -4660,7 +4660,7 @@
           "files": [
             "src/components/CreateTaskModal.jsx:380",
             "src/components/InviteMemberDialog.jsx:126",
-            "src/components/WorkspaceInfoCenter.jsx:245",
+            "src/components/WorkspaceInfoCenter.jsx:269",
             "src/components/profile/ProfileModal.jsx:28"
           ]
         },
@@ -4729,7 +4729,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:245"
+            "src/components/WorkspaceInfoCenter.jsx:269"
           ]
         }
       },
@@ -4762,7 +4762,7 @@
           ],
           "files": [
             "src/app/(app)/my/page.js:486",
-            "src/components/WorkspaceInfoCenter.jsx:245"
+            "src/components/WorkspaceInfoCenter.jsx:269"
           ]
         },
         "eyebrow": {
@@ -4813,7 +4813,7 @@
           "files": [
             "src/components/SupportDialog.jsx:48",
             "src/components/UserStatusDialog.jsx:62",
-            "src/components/WorkspaceInfoCenter.jsx:245"
+            "src/components/WorkspaceInfoCenter.jsx:269"
           ]
         }
       }
@@ -4918,8 +4918,8 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:152",
-            "src/components/WorkspaceInfoCenter.jsx:200"
+            "src/components/WorkspaceInfoCenter.jsx:176",
+            "src/components/WorkspaceInfoCenter.jsx:224"
           ]
         }
       },
@@ -4952,8 +4952,8 @@
             "src/app/(app)/page.js:820",
             "src/app/(app)/page.js:903",
             "src/app/(app)/team/page.js:147",
-            "src/components/WorkspaceInfoCenter.jsx:152",
-            "src/components/WorkspaceInfoCenter.jsx:200",
+            "src/components/WorkspaceInfoCenter.jsx:176",
+            "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/profile/ProfileView.jsx:432",
             "src/components/workspace/UnifiedTimeline.jsx:1394"
           ]
@@ -4971,8 +4971,8 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:71",
             "src/app/(app)/overview/page.js:227",
             "src/app/(app)/overview/page.js:298",
-            "src/components/WorkspaceInfoCenter.jsx:152",
-            "src/components/WorkspaceInfoCenter.jsx:200"
+            "src/components/WorkspaceInfoCenter.jsx:176",
+            "src/components/WorkspaceInfoCenter.jsx:224"
           ]
         },
         "(default)": {
@@ -5120,7 +5120,7 @@
           ],
           "files": [
             "src/components/WorkspaceHeader.jsx:391",
-            "src/components/WorkspaceInfoCenter.jsx:255",
+            "src/components/WorkspaceInfoCenter.jsx:279",
             "src/components/workspace/UnifiedTimeline.jsx:1666"
           ]
         }
@@ -5140,7 +5140,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:255"
+            "src/components/WorkspaceInfoCenter.jsx:279"
           ]
         }
       }
@@ -5195,7 +5195,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:79"
+            "src/components/WorkspaceInfoCenter.jsx:94"
           ]
         }
       },
@@ -5233,7 +5233,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:79"
+            "src/components/WorkspaceInfoCenter.jsx:94"
           ]
         }
       }
@@ -5452,7 +5452,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceInfoCenter.jsx:164"
+            "src/components/WorkspaceInfoCenter.jsx:188"
           ]
         },
         "small": {

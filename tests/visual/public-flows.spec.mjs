@@ -11,7 +11,9 @@ const DEV_SERVER_NOISE = /webpack-hmr|WebSocket connection to 'ws:/;
 // hand — only a person can pick one worth typing — but what it must find comes
 // from the same function the page searches with, so a rewritten article moves
 // the expectation with it.
-const HELP_QUERY = 'багато інцидентів';
+// `/help` publishes the catalogue a client may read, so the query has to name
+// one of those — a staff-only article has no page at this address.
+const HELP_QUERY = 'прикріпити файл';
 
 async function preparePage(page) {
   const errors = [];
@@ -124,10 +126,14 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
   }).toPass({ timeout: 45_000 });
   await expect(page.getByRole('link', { name: expectedMatches[0].title })).toBeVisible();
 
-  await page.goto('/help/kanban-and-bulk-actions', { waitUntil: 'domcontentloaded' });
-  await page.getByRole('link', { name: /Робота з інцидентами/ }).click();
+  await page.goto('/help/attachments', { waitUntil: 'domcontentloaded' });
+  await page.getByRole('link', { name: /Робота зі зверненнями/ }).click();
   await expect(page).toHaveURL(/\/help\?category=work$/);
-  await expect(page.getByRole('button', { name: 'Робота з інцидентами' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Робота зі зверненнями' })).toHaveAttribute('aria-pressed', 'true');
+
+  // A staff-only article is not published at a public address at all.
+  const staffOnly = await page.goto('/help/kanban-and-bulk-actions', { waitUntil: 'domcontentloaded' });
+  expect(staffOnly?.status()).toBe(404);
 
   await page.goto('/privacy-policy', { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/privacy$/);

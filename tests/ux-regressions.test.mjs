@@ -173,7 +173,9 @@ test('help, news and versions are read in place; contracts keep their own addres
   assert.match(consent, /href="\/terms"/);
   assert.match(consent, /href="\/privacy"/);
   assert.doesNotMatch(consent, /href="\/offer"/);
-  assert.match(centre, /HELP_ARTICLES/);
+  // The centre reads the catalogue by role: «?» is in the rail for an external
+  // client too, and the support team's manual is not theirs to read.
+  assert.match(centre, /helpArticlesForRole\(role\)/);
   assert.match(centre, /NEWS_ARTICLES/);
 });
 
