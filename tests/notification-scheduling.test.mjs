@@ -49,9 +49,13 @@ test('qTicket delivers notifications in the app and nowhere else', async () => {
     settings.indexOf("case 'notifications'"),
     settings.indexOf("case 'localization'"),
   );
-  assert.match(notificationSection, /id: 'inapp'/);
-  assert.match(notificationSection, /title: 'На сайті'/);
-  assert.doesNotMatch(notificationSection, /id: 'email'|id: 'telegram'/);
+  // One card, written out rather than built by a factory: there is nothing for
+  // a second channel to be, so there is no channel argument either.
+  assert.match(notificationSection, /notifMatrix\.inapp\[row\.key\]/);
+  assert.match(notificationSection, /setChannelEvent\('inapp', row\.key, value\)/);
+  assert.match(notificationSection, /title="На сайті"/);
+  assert.doesNotMatch(notificationSection, /'email'|'telegram'/);
+  assert.doesNotMatch(notificationSection, /channelCard/);
 });
 
 test('development avoids persistent multi-tab leases while production keeps offline cache', async () => {

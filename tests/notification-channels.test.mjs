@@ -17,7 +17,6 @@ test('a brand-new account keeps the defaults it had before the matrix', () => {
   const matrix = resolveNotificationMatrix({});
   for (const { key } of NOTIFICATION_EVENTS) {
     assert.equal(matrix.inapp[key], EVENT_DEFAULTS[key], `inapp/${key}`);
-    assert.equal(matrix.telegram[key], EVENT_DEFAULTS[key], `telegram/${key}`);
   }
   // Email only ever accepted assigned/mentioned/deadline.
   assert.deepEqual(matrix.email, {
@@ -40,21 +39,20 @@ test('a legacy document keeps meaning exactly what it meant', () => {
     statusChanged: true,
     deadline: false,
     emailEnabled: true,
+    // A document written while the Telegram integration existed still carries
+    // this. Nothing reads it now, and it must not resurrect a column.
     telegramEnabled: true,
   };
   const matrix = resolveNotificationMatrix(legacy);
 
-  // In-app and Telegram received everything the event flags allowed.
-  // chatMessage had no flag in the legacy shape and no switch anywhere, so it
-  // falls back to what the channel policy was already doing: everything.
+  // In-app received everything the event flags allowed. chatMessage had no flag
+  // in the legacy shape and no switch anywhere, so it falls back to what the
+  // channel policy was already doing: everything.
   assert.deepEqual(matrix.inapp, {
     assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
     chatMessage: true,
   });
-  assert.deepEqual(matrix.telegram, {
-    assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
-    chatMessage: true,
-  });
+  assert.equal(matrix.telegram, undefined);
 
   // Email intersected the flags with its hardcoded type list, which is why
   // "Зміна статусу" was on yet no status email ever arrived.
@@ -77,28 +75,27 @@ test('an explicit choice wins over the legacy fallback', () => {
 });
 
 test('false is honoured and never mistaken for "unset"', () => {
+  // `assigned` is one of the three types email always carried, so an explicit
+  // false is the only thing that tells "off" apart from "never chosen".
   const matrix = resolveNotificationMatrix({
-    channels: { telegram: { assigned: false } },
-    telegramEnabled: true,
+    channels: { email: { assigned: false } },
+    emailEnabled: true,
   });
-  assert.equal(matrix.telegram.assigned, false);
+  assert.equal(matrix.email.assigned, false);
   assert.equal(shouldDeliver({
-    channels: { telegram: { assigned: false } },
-    telegramEnabled: true,
-  }, 'telegram', 'assigned'), false);
+    channels: { email: { assigned: false } },
+    emailEnabled: true,
+  }, 'email', 'assigned'), false);
 });
 
 test('a channel master switch overrides every cell in its column', () => {
   const preferences = {
     emailEnabled: false,
-    telegramEnabled: false,
     channels: {
       email: { assigned: true },
-      telegram: { assigned: true },
     },
   };
   assert.equal(shouldDeliver(preferences, 'email', 'assigned'), false);
-  assert.equal(shouldDeliver(preferences, 'telegram', 'assigned'), false);
   // In-app has no master, so its cells decide on their own.
   assert.equal(shouldDeliver(preferences, 'inapp', 'assigned'), true);
 });
@@ -112,27 +109,23 @@ test('in-app is always reachable as a channel but still respects its cells', () 
 test('channels are independent of one another', () => {
   const preferences = {
     emailEnabled: true,
-    telegramEnabled: true,
     channels: {
       inapp: { commented: false },
-      email: { commented: false },
-      telegram: { commented: true },
+      email: { commented: true },
     },
   };
-  assert.equal(shouldDeliver(preferences, 'inapp', 'commented'), false);
-  assert.equal(shouldDeliver(preferences, 'email', 'commented'), false);
-  // Telegram must still fire even though nothing lands in the bell — that
+  // Email must still fire even though nothing lands in the bell — that
   // independence is the whole point of the matrix.
-  assert.equal(shouldDeliver(preferences, 'telegram', 'commented'), true);
+  assert.equal(shouldDeliver(preferences, 'inapp', 'commented'), false);
+  assert.equal(shouldDeliver(preferences, 'email', 'commented'), true);
 });
 
 test('types with no per-event switch follow their channel policy', () => {
-  const off = { emailEnabled: false, telegramEnabled: false };
-  const on = { emailEnabled: true, telegramEnabled: true };
+  // In-app has no master switch, so a switchless type is recorded in the bell
+  // whatever else the document says.
   for (const type of ['alert', 'emergency', 'test']) {
-    assert.equal(shouldDeliver(off, 'telegram', type), false, `${type} muted`);
-    assert.equal(shouldDeliver(on, 'telegram', type), true, `${type} allowed`);
-    assert.equal(shouldDeliver(off, 'inapp', type), true, `${type} in-app`);
+    assert.equal(shouldDeliver({ emailEnabled: false }, 'inapp', type), true, `${type} in-app`);
+    assert.equal(shouldDeliver({ emailEnabled: true }, 'inapp', type), true, `${type} in-app`);
   }
 });
 
@@ -146,8 +139,8 @@ test('email stays narrow for switchless types so chat cannot flood a mailbox', (
 });
 
 test('status_changed maps to the statusChanged key, not to its own name', () => {
-  const preferences = { telegramEnabled: true, channels: { telegram: { statusChanged: true } } };
-  assert.equal(shouldDeliver(preferences, 'telegram', 'status_changed'), true);
+  const preferences = { emailEnabled: true, channels: { email: { statusChanged: true } } };
+  assert.equal(shouldDeliver(preferences, 'email', 'status_changed'), true);
 });
 
 test('an unknown channel is refused rather than defaulting to send', () => {
@@ -174,31 +167,45 @@ test('filterRecipients splits one audience per channel', () => {
 
 test('channel defaults mirror what the settings page starts from', () => {
   assert.deepEqual(CHANNEL_DEFAULTS, {
-    sound: true, popup: true, emailEnabled: false, telegramEnabled: false,
+    sound: true, popup: true, emailEnabled: false,
   });
 });
 
-test('chat can be silenced on Telegram without disconnecting Telegram', () => {
-  // Before it had a key, chat_message fell through to the channel policy, which
-  // said yes to everything: connecting Telegram meant a push per message in
-  // every channel, and the only remedy was to disconnect.
-  const on = { telegramEnabled: true };
-  assert.equal(shouldDeliver(on, 'telegram', 'chat_message'), true, 'default is unchanged');
+// The Telegram integration was deleted with the other inherited messengers, so
+// the column delivered nowhere while a stored `telegramEnabled` still read back
+// as a preference somebody had set. A channel that cannot carry anything is not
+// a channel that happens to be switched off.
+test('there is no Telegram channel, whatever a stored document says', () => {
+  assert.deepEqual(NOTIFICATION_CHANNELS, ['inapp', 'email']);
+  assert.equal(Object.hasOwn(CHANNEL_DEFAULTS, 'telegramEnabled'), false);
 
-  const muted = { telegramEnabled: true, channels: { telegram: { chatMessage: false } } };
-  assert.equal(shouldDeliver(muted, 'telegram', 'chat_message'), false);
-  // And muting chat leaves the rest of the column alone.
-  assert.equal(shouldDeliver(muted, 'telegram', 'mentioned'), true);
-  // The bell keeps its own answer.
-  assert.equal(shouldDeliver(muted, 'inapp', 'chat_message'), true);
+  const stored = { telegramEnabled: true, channels: { telegram: { assigned: true } } };
+  assert.equal(isChannelEnabled(stored, 'telegram'), false);
+  assert.equal(shouldDeliver(stored, 'telegram', 'assigned'), false);
+  assert.equal(shouldDeliver(stored, 'telegram', 'alert'), false);
+  assert.equal(resolveNotificationMatrix(stored).telegram, undefined);
 });
 
-test('qTicket settings offer every published incident event and no workspace-chat event', async () => {
+// «Сповіщення» belongs to the client roles — an internal seat's preferences
+// arrive from QuickTeam — so the rows are the events a client can be the
+// subject of. «Терміни вирішення» is not one of them: that reminder only ever
+// goes to an assignee, and a client is never an assignee.
+const CLIENT_UNREACHABLE_EVENT_KEYS = ['deadline'];
+
+test('qTicket settings offer every incident event a client can be the subject of', async () => {
   const { readFile } = await import('node:fs/promises');
   const page = await readFile(new URL('../src/app/(app)/settings/page.js', import.meta.url), 'utf8');
   const rows = page.slice(page.indexOf('const eventRows = ['), page.indexOf('].filter(row =>'));
   for (const key of QTICKET_NOTIFICATION_EVENT_KEYS) {
+    if (CLIENT_UNREACHABLE_EVENT_KEYS.includes(key)) {
+      assert.doesNotMatch(rows, new RegExp(`key: '${key}'`), `${key} cannot reach a client`);
+      continue;
+    }
     assert.match(rows, new RegExp(`key: '${key}'`), `${key} has no row in Settings`);
   }
+  // The reminder itself still exists and still reaches an assignee — it is only
+  // the client's switch for it that does not.
+  assert.ok(QTICKET_NOTIFICATION_EVENT_KEYS.includes('deadline'));
+  assert.doesNotMatch(rows, /Терміни вирішення/);
   assert.doesNotMatch(rows, /key: 'chatMessage'/);
 });

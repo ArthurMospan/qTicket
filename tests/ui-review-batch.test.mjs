@@ -275,7 +275,10 @@ test('both entry points to project settings offer the same capabilities', async 
 });
 
 // qTicket profiles expose only support work. Calendar planning and emergency
-// calls belong to QuickTeam and must not leak into this product.
+// calls belong to QuickTeam and must not leak into this product — and neither
+// does managing the seat: who holds one is decided in QuickTeam and re-sent on
+// the next provisioning sync, so «Керування доступом» led to a roster that can
+// only be read.
 test('a member profile offers qTicket actions only', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
   const composer = await read('../src/components/CreateTaskModal.jsx');
@@ -286,7 +289,6 @@ test('a member profile offers qTicket actions only', async () => {
   assert.doesNotMatch(profile, />\s*Виклик\s*</);
   for (const label of [
     'Створити інцидент і призначити учасника',
-    'Інші дії з учасником',
   ]) {
     assert.match(profile, new RegExp(`label="${label}"`), `${label} must be an icon action`);
   }
@@ -294,8 +296,11 @@ test('a member profile offers qTicket actions only', async () => {
   // somebody up, and the product has one conversation — the incident's.
   assert.doesNotMatch(profile, /Написати повідомлення/);
   assert.doesNotMatch(profile, /Екстрений виклик|Створити подію|\/calendar\?new=1/);
-  // Access management stays in the admin-only menu.
-  assert.match(profile, /\.\.\.\(isAdminOrOwner \? \[/);
+  // Nothing here administers the seat: no menu, and no link into a settings
+  // section that can only list who QuickTeam sent.
+  assert.doesNotMatch(profile, /Керування доступом/);
+  assert.doesNotMatch(profile, /section=team&user=/);
+  assert.doesNotMatch(profile, /<ContextMenu/);
 
   // Incident creation lands somewhere that knows what to do with it.
   assert.match(profile, /\/my\?new=1&assignee=/);
@@ -354,7 +359,7 @@ test('the palette says it is searching rather than that it found nothing', async
   assert.match(palette, /searching \? 'Шукаємо…' : `Нічого не знайдено за «\$\{query\}»`/);
 });
 
-// The qTicket action and the optional admin menu share one kit treatment.
+// The one qTicket action left on a profile carries the kit treatment.
 test('the member profile actions are one declared size and one declared appearance', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
   const button = await read('../src/components/ui/Button.jsx');
@@ -372,14 +377,10 @@ test('the member profile actions are one declared size and one declared appearan
 // no text anywhere near them.
 test('every profile action circle carries a tooltip as well as a label', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
-  for (const content of ['Створити інцидент', 'Ще дії']) {
+  for (const content of ['Створити інцидент']) {
     assert.match(profile, new RegExp(`<Tooltip content="${content}">`), content);
   }
-  // The menu is wrapped, not its trigger: ContextMenu clones the trigger to
-  // attach its own onClick, and Tooltip forwards nothing to what it wraps — so
-  // a Tooltip in the trigger slot would swallow the click that opens the menu.
-  assert.match(profile, /<Tooltip content="Ще дії">\s*<ContextMenu/);
-  assert.doesNotMatch(profile, /trigger=\{\s*<Tooltip/);
+  assert.doesNotMatch(profile, /<Tooltip content="Ще дії">/);
 });
 
 // The board column and the task list section are two places that fold a group
@@ -404,13 +405,32 @@ test('every collapse control that folds a group of tasks is the same button', as
   }
 });
 
-test('the sidebar theme picker never nests a ColorSwatch button in another button', async () => {
+// The theme picker it used to guard is gone: QuickTeam owns the brand and
+// re-sends it on the next provisioning sync, so «Організація і бренд» shows the
+// name, the logo and the rail colour and offers nothing to change them with.
+test('«Організація і бренд» reports the QuickTeam brand and never edits it', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
-  const themePicker = settings.slice(
-    settings.indexOf('const buttonNode = ('),
-    settings.indexOf("if (opt.id === 'custom')"),
+  const section = settings.slice(
+    settings.indexOf("case 'workspace': {"),
+    settings.indexOf("case 'billing': {"),
   );
-  assert.match(themePicker, /<label[\s\S]*group\/theme/);
-  assert.doesNotMatch(themePicker, /<button[\s\S]*group\/theme/);
-  assert.match(themePicker, /<ColorSwatch/);
+
+  // One source of truth for what the tenant's brand is — the same pair the
+  // client rail and the invitation landing page paint themselves from.
+  assert.match(section, /resolveOrganizationPortalBrand\(org\)/);
+  assert.match(section, /organizationPortalBackground\(brand\)/);
+  assert.match(section, /Брендинг керується в QuickTeam/);
+  // Named, shown, and said where it is changed.
+  assert.match(section, /label="Назва організації"/);
+  assert.match(section, /label="Логотип клієнтського порталу"/);
+  assert.match(section, /label="Колір бічної панелі"/);
+
+  // Nothing on this screen writes the brand, and nothing previews a change to
+  // it — a colour wheel, an upload and a live preview all belonged to an editor
+  // whose value the next sync overwrote.
+  assert.doesNotMatch(settings, /persistBranding|saveOrgName/);
+  assert.doesNotMatch(settings, /setSidebarPreview|clearSidebarPreview/);
+  assert.doesNotMatch(settings, /@uiw\/react-color|<Colorful/);
+  assert.doesNotMatch(settings, /setOrgCustomBranding|setSidebarColor|setSidebarTheme/);
+  assert.doesNotMatch(section, /<ImageUpload|<ColorSwatch|<ToggleSwitch/);
 });

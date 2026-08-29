@@ -157,9 +157,18 @@ test('the variant matrix renders every component that can stand alone', () => {
 // densities, the meter tones — and the components that declared them went with
 // them wherever they had no other reader. What stays declared is vocabulary the
 // incident screens still ship.
+//
+// Raised 139 -> 144 when the brand stopped being editable inside qTicket.
+// QuickTeam owns the tenant's name, logo and rail colour and re-sends them on
+// every provisioning sync, so «Організація і бренд» reports them and offers
+// nothing to change them with. That took the last call site for the hex field
+// (`color-hex`, shared by Button, Input and IconAction) and for the 44px
+// `ColorSwatch size="theme"`. `IconAction size="compact"` went with the dead
+// inline date field beside them. All five stay declared: they are the
+// components' own vocabulary, and the components still ship.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 139,
+    committed.totals.declaredUnused <= 144,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   for (const key of ['Input.composition.status-entry', 'Button.composition.status-submit', 'Dialog.size.status']) {

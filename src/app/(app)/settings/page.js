@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 // src/app/workspace/settings/page.js — Redesigned Settings (clean, no emoji, QT-style)
 import { Children, createContext, isValidElement, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Image from 'next/image';
@@ -33,30 +32,28 @@ import { auth, createGitHubProvider, db, googleProvider } from '@/lib/firebase';
 import { linkWithPopup, unlink } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import {
-  User, Bell, Zap, Users, GitBranch,
+  User, Bell, Users, GitBranch,
   Shapes, Check, Plus, Trash2, Edit2, X, Save,
-  Building, LogOut, Download, RefreshCw, Mail, Star,
+  Building, LogOut, RefreshCw, Mail,
   ExternalLink, AlertTriangle,
-  ToggleLeft, ToggleRight, Receipt,
-  Globe, Tag as TagIcon, GripVertical, Send,
-  Archive, ArchiveRestore, Bug, Lock,
+  Globe, Tag as TagIcon, GripVertical,
+  Archive, ArchiveRestore, Lock,
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Alert, Button, Card, ColorSwatch, DatePicker, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, Popover, PriorityBadge, Select, SidebarLayout, Surface, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
+import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Surface, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import ImageUpload from '@/components/ui/ImageUpload';
-import { sendNotification } from '@/lib/hooks/useNotifications';
 import {
   CHANNEL_DEFAULTS,
   EVENT_DEFAULTS,
   QTICKET_NOTIFICATION_EVENT_KEYS,
   resolveNotificationMatrix,
 } from '@/lib/utils/notificationChannels.mjs';
-import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
-// The colour wheel is reached by opening one section of one screen, so it
-// loads then rather than with the settings page.
-const Colorful = dynamic(() => import('@uiw/react-color').then(module => module.Colorful), { ssr: false });
+import {
+  organizationPortalBackground,
+  resolveOrganizationPortalBrand,
+} from '@/lib/utils/organizationBranding.mjs';
 import InviteMemberDialog from '@/components/InviteMemberDialog';
 import {
   DEFAULT_STATUSES,
@@ -374,46 +371,6 @@ function InlineEditField({ value, onChange, saved, onSave, placeholder = '', typ
   );
 }
 
-function InlineDateField({ value, onChange, saved, onSave, placeholder = 'Оберіть дату' }) {
-  const dirty = (value ?? '') !== (saved ?? '');
-  const [saving, setSaving] = useState(false);
-  const commit = async () => {
-    if (!dirty || saving) return;
-    setSaving(true);
-    try { await onSave(); } finally { setSaving(false); }
-  };
-  return (
-    <div className="flex w-full items-center gap-1.5 sm:w-[260px]">
-      <DatePicker
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="min-w-0 flex-1"
-        yearRange={{ min: new Date().getFullYear() - 100, max: new Date().getFullYear() }}
-      />
-      {dirty && (
-        <>
-          <IconAction
-            onClick={commit}
-            disabled={saving}
-            label="Зберегти"
-            icon={Check}
-            size="compact"
-            appearance="primary"
-          />
-          <IconAction
-            onClick={() => onChange(saved ?? '')}
-            label="Скасувати"
-            icon={X}
-            size="compact"
-            appearance="soft"
-          />
-        </>
-      )}
-    </div>
-  );
-}
-
 function GitHubLogo({ size = 16 }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true">
@@ -722,9 +679,6 @@ export default function SettingsPage() {
   const clientSettingsSections = clientAdmin
     ? CLIENT_ADMIN_SETTINGS_SECTIONS
     : CLIENT_SETTINGS_SECTIONS;
-  const quickTeamManaged = Boolean(
-    org?.quickTeam?.sourceOrganizationId || org?.portalBranding?.source === 'quickteam',
-  );
   const currentUserId = currentUser?.uid || currentUser?.id;
   const clientProjectIds = useMemo(() => (
     clientViewer
@@ -907,7 +861,6 @@ export default function SettingsPage() {
   const [labels,     setLabels]     = useState(DEFAULT_LABELS);
   const [positions,  setPositions]  = useState(DEFAULT_POSITIONS);
   const [wfLoading,  setWfLoading]  = useState(true);
-  const [showSavedCheck, setShowSavedCheck] = useState(false);
   const applyWorkflowPayload = useCallback(payload => {
     // React batches these setters into one commit. Keeping this as one
     // complete payload prevents a mixed A/B workflow during org switches.
@@ -918,25 +871,17 @@ export default function SettingsPage() {
     setPositions(payload.positions);
   }, []);
 
-  const triggerSavedSuccess = () => {
-    setShowSavedCheck(true);
-    setTimeout(() => setShowSavedCheck(false), 2500);
-  };
-
 
   // ── Profile ──
   const [displayName,   setDisplayName]   = useState('');
   const [customAvatar,  setCustomAvatar]  = useState('');
   const [customAvatarStoragePath, setCustomAvatarStoragePath] = useState('');
   const [customAvatarResourceType, setCustomAvatarResourceType] = useState('image');
-  const [skillsInput,   setSkillsInput]   = useState('');
 
-  // Saved values + whether any profile field is unsaved (for the leave guard).
-  const savedSkills = Array.isArray(currentUser?.skills) ? currentUser.skills.join(', ') : '';
+  // Whether any profile field is unsaved (for the leave guard).
   const profileDirty =
     displayName !== (currentUser?.name || '') ||
-    customAvatar !== (currentUser?.customAvatar || '') ||
-    skillsInput !== savedSkills;
+    customAvatar !== (currentUser?.customAvatar || '');
 
   // Discard unsaved profile edits (used when the user chooses to leave without
   // saving — otherwise the derived profileDirty stays true and the guard would
@@ -946,37 +891,13 @@ export default function SettingsPage() {
     setCustomAvatar(currentUser?.customAvatar || '');
     setCustomAvatarStoragePath(currentUser?.customAvatarStoragePath || '');
     setCustomAvatarResourceType(currentUser?.customAvatarResourceType || 'image');
-    setSkillsInput(Array.isArray(currentUser?.skills) ? currentUser.skills.join(', ') : '');
   }, [currentUser]);
 
   // ── Workspace ──
-  const [orgName,         setOrgName]         = useState('');
-  const [orgLogo,         setOrgLogo]         = useState('');
-  const [orgLogoStoragePath, setOrgLogoStoragePath] = useState('');
-  const [orgLogoResourceType, setOrgLogoResourceType] = useState('image');
-  const [orgCustomBranding, setOrgCustomBranding] = useState(false);
-  const [sidebarTheme,    setSidebarTheme]    = useState('dark');     // 'dark' | 'light' | 'custom'
-  const [sidebarColor,    setSidebarColor]    = useState('#1f1f1f');  // HEX for custom theme
-  const setSidebarPreview = useWorkspaceStore(s => s.setSidebarPreview);
-  const clearSidebarPreview = useWorkspaceStore(s => s.clearSidebarPreview);
-  // Live preview: push changes to sidebar in real-time.
-  useEffect(() => {
-    if (orgCustomBranding) {
-      setSidebarPreview({
-        theme: sidebarTheme,
-        color: sidebarColor,
-        customBranding: true,
-        logo: orgLogo
-      });
-    } else {
-      clearSidebarPreview();
-    }
-  }, [orgCustomBranding, sidebarTheme, sidebarColor, orgLogo, setSidebarPreview, clearSidebarPreview]);
-
-  // Leaving Settings drops the live preview so the sidebar falls back to the
-  // saved org document (which branding auto-save has already persisted).
-  useEffect(() => () => clearSidebarPreview(), [clearSidebarPreview]);
-
+  // Nothing to hold: «Організація і бренд» reads the QuickTeam snapshot off the
+  // organization document and writes nothing back, so there is no draft name,
+  // no draft logo, no draft rail colour — and no live preview to push into the
+  // sidebar, because nothing on this screen can change what the sidebar shows.
 
   // ── Notifications ──
   // `channels` is the event × channel matrix; the flat per-event flags beside it
@@ -988,7 +909,6 @@ export default function SettingsPage() {
     ...EVENT_DEFAULTS,
     channels: resolveNotificationMatrix({}),
   });
-  const [notifSaving, setNotifSaving] = useState(false);
   const notifMatrix = useMemo(() => resolveNotificationMatrix(notif), [notif]);
 
   // Ticking a cell. The in-app column also mirrors into the legacy flat flag.
@@ -1008,8 +928,6 @@ export default function SettingsPage() {
   // auto-save effects below. null until the first render establishes it.
   const notifBaseline = useRef(null);
   const locBaseline = useRef(null);
-  // Debounces the branding colour picker, which fires continuously while dragging.
-  const brandColorTimer = useRef(null);
   // Last workflow value known to match the server — process settings auto-save
   // (no manual button), so this guards against re-writing freshly hydrated data.
   const wfBaseline = useRef(null);
@@ -1026,7 +944,6 @@ export default function SettingsPage() {
   const [timeFormat, setTimeFormat] = useState('24h');
   const [timezone, setTimezone] = useState('Europe/Kyiv');
   const [language, setLanguage] = useState('ua');
-  const [locSaving, setLocSaving] = useState(false);
 
   // ── Team invite ──
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -1062,7 +979,6 @@ export default function SettingsPage() {
         if (currentUser.customAvatar && !customAvatar) setCustomAvatar(currentUser.customAvatar);
         setCustomAvatarStoragePath(currentUser.customAvatarStoragePath || '');
         setCustomAvatarResourceType(currentUser.customAvatarResourceType || 'image');
-        setSkillsInput(Array.isArray(currentUser.skills) ? currentUser.skills.join(', ') : '');
         if (currentUser.localization) {
           const loc = {
             dateFormat: currentUser.localization.dateFormat || 'DD.MM.YYYY',
@@ -1081,19 +997,6 @@ export default function SettingsPage() {
       });
     }
   }, [currentUser]); // eslint-disable-line
-
-  useEffect(() => {
-    queueMicrotask(() => {
-      if (currentUser?.name && !displayName) setDisplayName(currentUser.name);
-      if (org?.name && !orgName) setOrgName(org.name);
-      if (org?.logo && !orgLogo) setOrgLogo(org.logo);
-      setOrgLogoStoragePath(org?.logoStoragePath || '');
-      setOrgLogoResourceType(org?.logoResourceType || 'image');
-      if (org?.customBranding !== undefined) setOrgCustomBranding(Boolean(org.customBranding));
-      if (org?.sidebarTheme) setSidebarTheme(org.sidebarTheme);
-      if (org?.sidebarColor) setSidebarColor(org.sidebarColor);
-    });
-  }, [currentUser?.name, org?.name, org?.logo, org?.logoStoragePath, org?.logoResourceType, org?.customBranding, org?.sidebarTheme, org?.sidebarColor]); // eslint-disable-line
 
   useEffect(() => {
     queueMicrotask(() => refreshAuthProviders());
@@ -1324,27 +1227,6 @@ export default function SettingsPage() {
     return true;
   };
 
-  const saveLocalization = async () => {
-    const uid = currentUser?.uid || currentUser?.id;
-    if (!uid) return;
-    setLocSaving(true);
-    try {
-      await updateDoc(doc(db, 'users', uid), {
-        localization: {
-          dateFormat,
-          firstDayOfWeek,
-          timeFormat,
-          timezone,
-          language,
-        },
-        updatedAt: serverTimestamp()
-      });
-      showToast('Параметри локалізації збережено');
-      triggerSavedSuccess();
-    } catch { showToast('Помилка збереження', 'error'); }
-    setLocSaving(false);
-  };
-
   const handleConnectGitHub = async () => {
     const firebaseUser = auth.currentUser;
     if (!firebaseUser) return showToast('Потрібно увійти повторно', 'error');
@@ -1364,10 +1246,13 @@ export default function SettingsPage() {
         ? 'GitHub уже підключено'
         : error.code === 'auth/credential-already-in-use'
           ? 'Цей GitHub уже підключений до іншого акаунта'
+          // «Способи входу» is a client's section, and a client cannot open
+          // our Firebase console — so no message here names our OAuth
+          // application, its keys or where they live.
           : error.code === 'auth/operation-not-allowed'
-            ? 'GitHub треба увімкнути у Firebase Authentication'
+            ? 'Підключення GitHub зараз недоступне'
             : error.code === 'auth/invalid-credential' || error.message?.includes('Bad credentials')
-              ? 'GitHub відхилив OAuth-ключ. Оновіть Client ID і Client Secret у Firebase'
+              ? 'GitHub відхилив підключення. Спробуйте пізніше або напишіть у підтримку'
             : 'Не вдалося підключити GitHub';
       showToast(message, 'error');
     } finally {
@@ -1390,7 +1275,7 @@ export default function SettingsPage() {
         : error.code === 'auth/credential-already-in-use'
           ? 'Цей Google акаунт уже підключений до іншого користувача'
           : error.code === 'auth/operation-not-allowed'
-            ? 'Google треба увімкнути у Firebase Authentication'
+            ? 'Підключення Google зараз недоступне'
             : error.code === 'auth/requires-recent-login'
               ? 'Увійдіть повторно і спробуйте підключити Google ще раз'
               : 'Не вдалося підключити Google';
@@ -1443,7 +1328,7 @@ export default function SettingsPage() {
     if (!firebaseUser) return showToast('Потрібно увійти повторно', 'error');
     const clientId = process.env.NEXT_PUBLIC_ONEB_CLIENT_ID || 'dummy_client_id';
     if (clientId === 'dummy_client_id') {
-      return showToast('OneB Client ID не налаштований', 'error');
+      return showToast('Підключення OneB зараз недоступне', 'error');
     }
     setAuthMethodLoading('oneb-connect');
     try {
@@ -1487,52 +1372,6 @@ export default function SettingsPage() {
       showToast(error.message || 'Не вдалося відключити OneB', 'error');
     } finally {
       setAuthMethodLoading(null);
-    }
-  };
-
-  // Org name is text → deliberate save on blur (no button, no writes while you
-  // type). Only writes when the name actually changed.
-  const saveOrgName = async () => {
-    if (!activeOrgId) return;
-    const trimmed = orgName.trim();
-    if (!trimmed || trimmed === (org?.name || '')) return;
-    try {
-      await updateDoc(doc(db, 'organizations', activeOrgId), { name: trimmed, updatedAt: serverTimestamp() });
-      showToast('Назву організації збережено');
-    } catch { showToast('Помилка збереження', 'error'); }
-  };
-
-  // Branding (logo / toggle / theme / colour) persists the instant you change
-  // it — it already live-previews in the sidebar, so a Save button was just
-  // friction. Writes fire only from explicit user actions (never an effect), so
-  // there is no spurious save on load. Takes current state + the just-changed
-  // value and writes the derived document. The colour picker is debounced by
-  // its caller because it fires continuously while dragging.
-  const persistBranding = async (patch = {}, { rethrow = false } = {}) => {
-    if (!activeOrgId) return;
-    const next = {
-      orgCustomBranding,
-      orgLogo,
-      orgLogoStoragePath,
-      orgLogoResourceType,
-      sidebarTheme,
-      sidebarColor,
-      ...patch,
-    };
-    const brandingValue = next.orgCustomBranding && (next.orgLogo || '').trim() ? true : false;
-    try {
-      await updateDoc(doc(db, 'organizations', activeOrgId), {
-        logo: (next.orgLogo || '').trim(),
-        logoStoragePath: next.orgLogoStoragePath || '',
-        logoResourceType: next.orgLogoResourceType || '',
-        customBranding: brandingValue,
-        sidebarTheme: brandingValue ? next.sidebarTheme : 'dark',
-        sidebarColor: brandingValue && next.sidebarTheme === 'custom' ? next.sidebarColor : '#1f1f1f',
-        updatedAt: serverTimestamp(),
-      });
-    } catch (error) {
-      showToast('Помилка збереження', 'error');
-      if (rethrow) throw error;
     }
   };
 
@@ -1663,33 +1502,6 @@ export default function SettingsPage() {
     activeOrgId,
     queueWorkflowMutation,
   ]);
-
-  const saveNotifications = async () => {
-    const uid = currentUser?.uid || currentUser?.id;
-    if (!uid) return;
-    setNotifSaving(true);
-    try {
-      await setDoc(doc(db, 'users', uid, 'settings', 'notifications'), { ...notif, updatedAt: serverTimestamp() });
-      showToast('Налаштування збережено');
-      triggerSavedSuccess();
-    } catch { showToast('Помилка збереження', 'error'); }
-    setNotifSaving(false);
-  };
-
-  // Send a test notification to yourself — checks the whole pipeline (sound/popup/push)
-  const sendTestNotification = async () => {
-    const uid = currentUser?.uid || currentUser?.id;
-    if (!uid) return;
-    await sendNotification({
-      userIds: [uid],
-      type: 'test',
-      title: 'Тестове сповіщення',
-      body: 'Все працює! Так виглядатимуть сповіщення про події у воркспейсі.',
-      organizationId: activeOrgId,
-      actor: { id: uid, name: currentUser?.name || '', avatar: currentUser?.avatar || '' },
-    });
-    showToast('Тестове сповіщення надіслано');
-  };
 
   // Leaving is the same server call as being deactivated — the route tells the
   // two apart by the id — so the person keeps everything they did here and an
@@ -2078,12 +1890,6 @@ export default function SettingsPage() {
   };
 
   // ── Section renderer ─────────────────────────────────────────────
-  // Every section now saves without a header button (process settings & org
-  // branding auto-save; profile saves inline per field), so section headers no
-  // longer carry a Save button. Kept as null so existing rightAction props are
-  // harmless no-ops.
-  const saveButton = null;
-
   // Process settings auto-save (no Save button, no status pill — same silent
   // behaviour as Notifications/Localization). Each section gets a reset-to-
   // defaults footer at the very bottom instead, with a short explanation.
@@ -2157,7 +1963,7 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'profile': return (
-        <Section title="Особистий профіль" desc="Ваша інформація відображається у команді підтримки та інцидентах" rightAction={saveButton}>
+        <Section title="Особистий профіль" desc="Ваша інформація відображається у команді підтримки та інцидентах">
           <Card preset="borderless" padding="lg">
             <Row label="Аватар" desc="Квадратне зображення виглядає найкраще — інші обрізаються по центру">
               <ImageUpload
@@ -2188,63 +1994,51 @@ export default function SettingsPage() {
         // until a verified sender domain exists, and Telegram is not part of
         // the add-on contract yet. Do not advertise dormant providers as
         // switches a customer can turn on.
+        // «Сповіщення» belongs to the client roles — an internal seat's
+        // preferences come from QuickTeam — so the rows are the events a client
+        // can actually be the subject of. «Терміни вирішення» is not one of
+        // them: that reminder only ever goes to an assignee, and a client is
+        // never an assignee. A switch for a message that cannot arrive is a
+        // promise the product does not keep.
         const eventRows = [
           { key: 'assigned',      label: 'Інцидент призначено мені', desc: 'Хтось призначив інцидент на тебе або створив новий одразу з тобою' },
-          // «Сповіщення» is client-visible too, and a client is never a
-          // «виконавець» — that word describes a seat they cannot hold.
+          // A client is never a «виконавець» — that word describes a seat they
+          // cannot hold.
           { key: 'commented',     label: 'Нове повідомлення',        desc: 'Там, де ти автор або учасник розмови' },
           { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в розмові інциденту' },
           { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли інцидент переходить на інший етап' },
-          { key: 'deadline',      label: 'Терміни вирішення',        desc: 'Нагадування про наближення або прострочення терміну' },
         ].filter(row => QTICKET_NOTIFICATION_EVENT_KEYS.includes(row.key));
 
-        // Every line is the shared <Row>, so all three cards land on the same
-        // label column and the same right-hand control column.
-        const channelCard = ({ id, icon: ChannelIcon, title, caption, master, available, offNote, showDesc = false, footer = null }) => (
-          <Card preset="borderless" padding="lg">
-            {/* The channel switch is the big one: it governs every row in the
-                card below it. The rows are `sm`, so the difference in size says
-                which is which without a word. */}
-            <CardHeading icon={ChannelIcon} title={title} caption={caption} action={master} />
-
-            {available ? eventRows.map(row => (
-              <Row key={row.key} label={row.label} desc={showDesc ? row.desc : undefined}>
-                <ToggleSwitch
-                  checked={notifMatrix[id][row.key] === true}
-                  onChange={value => setChannelEvent(id, row.key, value)}
-                  size="sm"
-                  ariaLabel={`${row.label} — ${title}`}
-                />
-              </Row>
-            )) : (
-              <p className="py-[14px] text-[12px] leading-relaxed text-faint">{offNote}</p>
-            )}
-
-            {footer}
-          </Card>
-        );
-
+        // One card, drawn directly. It used to be a factory taking a master
+        // switch and an «канал вимкнено» note, because there were three cards —
+        // the email and Telegram columns went with the providers behind them,
+        // and a factory that builds one thing is a parameter list nobody reads.
+        // Every line is the shared <Row>, so the labels and the switches line up.
         return (
-          <Section title="Сповіщення" desc="Оберіть, про які події qTicket повідомляє всередині застосунку" rightAction={saveButton}>
-            {channelCard({
-              id: 'inapp',
-              icon: Bell,
-              title: 'На сайті',
-              caption: 'Дзвіночок у шапці робочого простору',
-              available: true,
-              showDesc: true,
-              footer: (
-                <div className="mt-1 border-t border-line pt-1">
-                  <Row label="Звук" desc="Короткий сигнал при новому сповіщенні">
-                    <ToggleSwitch checked={notif.sound} onChange={v => setNotif(p => ({ ...p, sound: v }))} size="sm" />
-                  </Row>
-                  <Row label="Спливаючі сповіщення" desc="Картка внизу екрана, коли подія стається в реальному часі">
-                    <ToggleSwitch checked={notif.popup} onChange={v => setNotif(p => ({ ...p, popup: v }))} size="sm" />
-                  </Row>
-                </div>
-              ),
-            })}
+          <Section title="Сповіщення" desc="Оберіть, про які події qTicket повідомляє всередині застосунку">
+            <Card preset="borderless" padding="lg">
+              <CardHeading icon={Bell} title="На сайті" caption="Дзвіночок у шапці робочого простору" />
 
+              {eventRows.map(row => (
+                <Row key={row.key} label={row.label} desc={row.desc}>
+                  <ToggleSwitch
+                    checked={notifMatrix.inapp[row.key] === true}
+                    onChange={value => setChannelEvent('inapp', row.key, value)}
+                    size="sm"
+                    ariaLabel={`${row.label} — На сайті`}
+                  />
+                </Row>
+              ))}
+
+              <div className="mt-1 border-t border-line pt-1">
+                <Row label="Звук" desc="Короткий сигнал при новому сповіщенні">
+                  <ToggleSwitch checked={notif.sound} onChange={v => setNotif(p => ({ ...p, sound: v }))} size="sm" />
+                </Row>
+                <Row label="Спливаючі сповіщення" desc="Картка внизу екрана, коли подія стається в реальному часі">
+                  <ToggleSwitch checked={notif.popup} onChange={v => setNotif(p => ({ ...p, popup: v }))} size="sm" />
+                </Row>
+              </div>
+            </Card>
           </Section>
         );
       }
@@ -2322,7 +2116,7 @@ export default function SettingsPage() {
         });
 
         return (
-        <Section title="Локалізація та регіон" desc="Налаштуйте відображення дати, часу та формату календаря відповідно до вашого регіону" rightAction={saveButton}>
+        <Section title="Локалізація та регіон" desc="Налаштуйте відображення дати, часу та формату календаря відповідно до вашого регіону">
           <Card preset="borderless" padding="lg">
             <Row label="Мова інтерфейсу" desc="Наразі інтерфейс доступний лише українською">
               <Select
@@ -2383,220 +2177,62 @@ export default function SettingsPage() {
       }
 
       // ──────────────────────────────────────────────────────────────
+      // The brand is QuickTeam's. It arrives in the `portalBranding` snapshot
+      // and is re-sent on the next provisioning sync, so an editor here was a
+      // second place to change one setting — and the qTicket copy is the one
+      // the next snapshot overwrites. The section stays because somebody has
+      // to be able to see the brand qTicket is wearing; it no longer pretends
+      // to own it.
       case 'workspace': {
-        if (quickTeamManaged) {
-          const syncedLogo = org?.portalBranding?.logo || org?.logo || '';
-          const syncedTheme = {
-            dark: 'Темна',
-            light: 'Світла',
-            custom: 'Колір організації',
-          }[org?.portalBranding?.sidebarTheme] || 'Темна';
-          return (
-            <Section
-              title="Організація і бренд"
-              desc="Назва та оформлення клієнтського порталу синхронізуються з QuickTeam"
-            >
-              <Alert
-                variant="info"
-                title="Брендинг керується в QuickTeam"
-                description="Змініть назву, логотип або тему в QuickTeam, а потім синхронізуйте qTicket у налаштуваннях інтеграції. Тут ці дані доступні тільки для перегляду."
-                className="mb-4"
-              />
-              <Card preset="borderless" padding="lg">
-                <Row label="Назва організації" desc="Її бачить внутрішня команда та клієнти">
-                  <p className="text-[13px] font-semibold text-ink">{org?.name || 'Без назви'}</p>
-                </Row>
-                <Row label="Логотип клієнтського порталу" desc="Надходить із брендингу QuickTeam">
-                  {syncedLogo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={syncedLogo} alt="Логотип організації" className="h-[44px] w-[44px] rounded-[10px] border border-line object-cover" />
-                  ) : (
-                    <Pill tone="neutral" size="md">Не встановлено</Pill>
-                  )}
-                </Row>
-                <Row label="Тема порталу" desc="Застосовується у бічній панелі клієнта">
-                  <Pill tone="ink-subtle" size="md">{syncedTheme}</Pill>
-                </Row>
-                <Row label="Джерело даних" desc="qTicket не створює окрему копію налаштувань бренду">
-                  <Pill tone="success" size="md">Синхронізовано з QuickTeam</Pill>
-                </Row>
-              </Card>
-            </Section>
-          );
-        }
-
-        const handleBrandingToggle = (val) => {
-          setOrgCustomBranding(val);
-          persistBranding({ orgCustomBranding: val });
-        };
-        const handleThemeChange = (newTheme) => { setSidebarTheme(newTheme); persistBranding({ sidebarTheme: newTheme }); };
-        const handleColorChange = (newColor) => {
-          setSidebarColor(newColor);
-          if (brandColorTimer.current) clearTimeout(brandColorTimer.current);
-          brandColorTimer.current = setTimeout(() => persistBranding({ sidebarColor: newColor }), 400);
-        };
-
-        const THEME_OPTIONS = [
-          { id: 'dark',   label: 'Темна',     bg: SIDEBAR_PRESETS.dark },
-          { id: 'light',  label: 'Світла',    bg: SIDEBAR_PRESETS.light },
-          { id: 'custom', label: 'Ваш колір', bg: sidebarColor },
-        ];
-
+        // The same two functions the client rail and the invitation landing
+        // page paint themselves from — never a second copy of the ternary.
+        const brand = resolveOrganizationPortalBrand(org);
+        const railColor = organizationPortalBackground(brand);
+        const themeLabel = {
+          dark: 'Темна',
+          light: 'Світла',
+          custom: 'Колір організації',
+        }[brand.sidebarTheme] || 'Темна';
         return (
-        <Section title="Загальні" desc="Загальні налаштування вашої організації" rightAction={saveButton}>
-          {/* Zone 1: Organization */}
-          <Card preset="borderless" padding="lg">
-            <GroupLabel label="Організація" />
-            <Row label="Назва організації" desc="Видима всім у вашій організації">
-              <InlineEditField value={orgName} onChange={setOrgName} saved={org?.name || ''} onSave={saveOrgName} className="w-[260px]" />
-            </Row>
-            <Row label="Логотип організації" desc="Квадратне зображення виглядає найкраще — інші обрізаються по центру">
-              <ImageUpload
-                value={orgLogo}
-                storagePath={orgLogoStoragePath}
-                resourceType={orgLogoResourceType}
-                organizationId={activeOrgId}
-                kind="logos"
-                onChange={async (url, asset) => {
-                  await persistBranding({
-                    orgLogo: url,
-                    orgLogoStoragePath: asset?.storagePath || '',
-                    orgLogoResourceType: asset?.resourceType || '',
-                  }, { rethrow: true });
-                  setOrgLogo(url);
-                  setOrgLogoStoragePath(asset?.storagePath || '');
-                  setOrgLogoResourceType(asset?.resourceType || 'image');
-                }}
-                theme="light"
-                showLabel={false}
-                showHint={false}
-              />
-            </Row>
-            {/* The organisation ID used to sit here, under "Загальні". Nothing
-                on this screen asks for it: it is an argument to an API call,
-                and the place to print it is the instructions that tell you to
-                make that call. Settings is where you change what the
-                organisation *is*, not where you look up its key. */}
-          </Card>
-
-          {/* Zone 2: Branding. Legacy standalone workspaces cannot pass the
-              QuickTeam entitlement boundary; this branch remains only while
-              their stored settings are migrated or removed. */}
-          <Card preset="borderless" padding="lg">
-            <GroupLabel label="Брендинг" />
-            {!orgLogo && (
-              <p className="text-[12px] text-muted mb-3">Завантажте логотип організації, щоб розблокувати налаштування брендингу</p>
-            )}
-            <Row label="Брендинг у сайдбарі" desc="Замінити логотип QuickTeam на логотип вашої організації для всіх учасників">
-              <div className="flex items-center gap-[12px]">
-                {/* Show org logo preview when branding is on */}
-                {orgCustomBranding && orgLogo && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={orgLogo}
-                    alt="Логотип"
-                    className="w-[32px] h-[32px] rounded-[8px] object-cover border border-line"
-                  />
+          <Section
+            title="Організація і бренд"
+            desc="Назва та оформлення клієнтського порталу синхронізуються з QuickTeam"
+          >
+            <Alert
+              variant="info"
+              title="Брендинг керується в QuickTeam"
+              description="Назву, логотип і колір бічної панелі змінюють у QuickTeam → Налаштування → Інтеграції → qTicket і синхронізують звідти. Тут вони доступні тільки для перегляду."
+              className="mb-4"
+            />
+            <Card preset="borderless" padding="lg">
+              <Row label="Назва організації" desc="Її бачить внутрішня команда та клієнти">
+                <p className="text-[13px] font-semibold text-ink">{brand.name}</p>
+              </Row>
+              <Row label="Логотип клієнтського порталу" desc="Надходить із брендингу QuickTeam">
+                {brand.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={brand.logo} alt="Логотип організації" className="h-[44px] w-[44px] rounded-[10px] border border-line object-cover" />
+                ) : (
+                  <Pill tone="neutral" size="md">Не встановлено</Pill>
                 )}
-                <ToggleSwitch
-                  checked={orgCustomBranding}
-                  onChange={handleBrandingToggle}
-                  disabled={!orgLogo}
-                />
-              </div>
-            </Row>
-
-            {/* Theme picker — visible only when branding is ON */}
-            {orgCustomBranding && orgLogo && (
-              <>
-                <div className="pt-[12px]">
-                  <p className="text-[13px] font-medium text-ink mb-[2px]">Тема сайдбару</p>
-                  <p className="text-[12px] text-muted mb-[12px]">Оберіть колірну схему бічної панелі</p>
-                  <div className="flex flex-wrap gap-[16px]">
-                    {THEME_OPTIONS.map(opt => {
-                      const isActive = sidebarTheme === opt.id;
-                      const isCustomUnselected = opt.id === 'custom' && !isActive;
-
-                      const buttonNode = (
-                        <label
-                          key={opt.id}
-                          className="flex cursor-pointer flex-col items-center gap-[6px] group/theme"
-                        >
-                          <ColorSwatch
-                            size="theme"
-                            selected={isActive}
-                            label={opt.label}
-                            onClick={() => handleThemeChange(opt.id)}
-                            color={isCustomUnselected
-                              ? 'conic-gradient(#ef4444, #f59e0b, #22c55e, #3b82f6, #8b5cf6, #ec4899, #ef4444)'
-                              : opt.bg}
-                          />
-                          <span className={`text-[11px] font-medium transition-colors ${isActive ? 'text-ink' : 'text-muted group-hover/theme:text-ink'}`}>{opt.label}</span>
-                        </label>
-                      );
-
-                      if (opt.id === 'custom') {
-                        return (
-                          <Popover
-                            key={opt.id}
-                            position="top"
-                            trigger={buttonNode}
-                            hideCloseIcon
-                          >
-                            {({ close }) => (
-                              <div className="flex flex-col gap-[16px] w-[220px]">
-                                <Colorful
-                                  color={sidebarColor}
-                                  onChange={(color) => handleColorChange(color.hex)}
-                                  disableAlpha={true}
-                                />
-                                <div className="flex items-center gap-[10px]">
-                                  <div
-                                    className="w-[28px] h-[28px] rounded-[6px] shrink-0 border border-line"
-                                    style={{ backgroundColor: sidebarColor }}
-                                  />
-                                  <Input
-                                    value={sidebarColor}
-                                    onChange={e => {
-                                      const v = e.target.value;
-                                      setSidebarColor(v);
-                                      if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) {
-                                        handleColorChange(v);
-                                      }
-                                    }}
-                                    composition="color-hex"
-                                    size="md"
-                                    placeholder="#1a365d"
-                                  />
-                                </div>
-                                {/* «Скасувати» повертає збережений колір організації;
-                                    хрестика зверху немає — він наїжджав на пікер */}
-                                <div className="flex gap-[8px]">
-                                  <Button
-                                    style="secondary" size="sm" className="flex-1"
-                                    onClick={() => { handleColorChange(org?.sidebarColor || '#1f1f1f'); close(); }}
-                                  >
-                                    Скасувати
-                                  </Button>
-                                  <Button style="primary" size="sm" className="flex-1" onClick={close}>
-                                    Готово
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </Popover>
-                        );
-                      }
-
-                      return buttonNode;
-                    })}
-                  </div>
+              </Row>
+              <Row label="Колір бічної панелі" desc="Тло, яким пофарбована рейка клієнта">
+                <div className="flex items-center gap-[10px]">
+                  {/* The colour is data out of the organization document, so it
+                      is an inline style rather than a token. */}
+                  <div
+                    className="h-[28px] w-[28px] rounded-[6px] border border-line"
+                    style={{ backgroundColor: railColor }}
+                  />
+                  <Pill tone="ink-subtle" size="md">{themeLabel}</Pill>
                 </div>
-              </>
-            )}
-          </Card>
-        </Section>
-      );
+              </Row>
+              <Row label="Джерело даних" desc="qTicket не створює окрему копію налаштувань бренду">
+                <Pill tone="success" size="md">Синхронізовано з QuickTeam</Pill>
+              </Row>
+            </Card>
+          </Section>
+        );
       }
 
 

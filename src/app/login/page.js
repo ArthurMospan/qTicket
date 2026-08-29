@@ -42,11 +42,15 @@ function getInitialOneBLoading() {
   return Boolean(params.get('code')) || params.get('oneb') === 'success';
 }
 
+// Whoever reads this is trying to get in, not to fix our OAuth application.
+// The keys, the redirect URI and the Firebase console are ours; naming them to
+// a customer hands them a task they cannot do and a detail they must not have.
+// Every message here says what happened and what they can do next instead.
 function authErrorMessage(code) {
-  if (code === 'oauth') return 'Не вдалося увійти через OAuth. Спробуйте ще раз.';
-  if (code === 'oneb_token') return 'Помилка авторизації в OneB: перевірте Client ID, Secret і redirect URI.';
-  if (code === 'oneb_no_client_id') return 'OneB Client ID не налаштований.';
-  if (code === 'oneb_no_client_secret') return 'OneB Client Secret не налаштований.';
+  if (code === 'oauth') return 'Не вдалося завершити вхід. Спробуйте ще раз.';
+  if (code === 'oneb_token' || code === 'oneb_no_client_id' || code === 'oneb_no_client_secret') {
+    return 'Вхід через OneB зараз недоступний. Скористайтеся іншим способом входу або напишіть у підтримку.';
+  }
   if (code === 'oneb_already_linked') return 'Цей OneB акаунт уже підключений до іншого користувача.';
   if (code === 'oneb_session') return 'Не вдалося підтвердити поточну сесію. Увійдіть ще раз і повторіть підключення OneB.';
   if (code === 'oneb_state') return 'Термін дії посилання для входу минув або воно відкрите не в тому браузері. Почніть вхід через OneB заново.';
@@ -79,13 +83,13 @@ function providerErrorMessage(error, providerName) {
     error?.message?.includes('api.github.com/user') ||
     error?.message?.includes('Bad credentials')
   )) {
-    return 'GitHub відхилив OAuth-ключ. Потрібно оновити Client ID і Client Secret провайдера GitHub у Firebase.';
+    return 'GitHub відхилив вхід. Скористайтеся іншим способом входу або напишіть у підтримку.';
   }
   if (error?.code === 'auth/account-exists-with-different-credential') {
     return 'Акаунт із цією поштою уже має інший спосіб входу.';
   }
   if (error?.code === 'auth/operation-not-allowed') {
-    return `${providerName} ще не увімкнений у Firebase Authentication.`;
+    return `Вхід через ${providerName} зараз недоступний. Скористайтеся іншим способом входу.`;
   }
   return `Не вдалося увійти через ${providerName}. Спробуйте ще раз.`;
 }
@@ -180,7 +184,7 @@ export default function LoginPage() {
     setError('');
     const clientId = process.env.NEXT_PUBLIC_ONEB_CLIENT_ID || 'dummy_client_id';
     if (clientId === 'dummy_client_id') {
-      setError('OneB Client ID не налаштований.');
+      setError('Вхід через OneB зараз недоступний. Скористайтеся іншим способом входу або напишіть у підтримку.');
       return;
     }
 

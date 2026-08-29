@@ -84,11 +84,10 @@ export default function ProfileView({ user, onClose }) {
     { id: 'tasks', label: `Інциденти (${allActiveTasks.length})` },
   ];
 
-  const memberMenu = [
-    ...(isAdminOrOwner ? [
-      { label: 'Керування доступом', icon: Shield, onClick: () => leaveFor(`/settings?section=team&user=${uid}`) },
-    ] : []),
-  ];
+  // The admin menu is gone with the thing it managed. Who holds a qTicket seat
+  // is decided in QuickTeam and re-sent whole on the next provisioning sync, so
+  // its one item led into a settings section that can only list who was sent —
+  // an action that promised to change something and then showed a list.
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-white relative">
@@ -147,18 +146,6 @@ export default function ProfileView({ user, onClose }) {
                   onClick={() => leaveFor(`/my?new=1&assignee=${encodeURIComponent(uid)}`)}
                 />
               </Tooltip>
-              {/* The tooltip goes around the menu, not around its trigger:
-                  ContextMenu clones the trigger to attach its own onClick, and
-                  Tooltip does not forward props to what it wraps — so a Tooltip
-                  as the trigger would swallow the click that opens the menu. */}
-              {memberMenu.length > 0 && <Tooltip content="Ще дії">
-                <ContextMenu
-                  trigger={
-                    <IconAction label="Інші дії з учасником" icon={MoreVertical} size="xl" appearance="contrast" />
-                  }
-                  items={memberMenu}
-                />
-              </Tooltip>}
             </div>
           )}
         </div>

@@ -47,7 +47,7 @@ const OUT_OF_SCOPE = new Set([
 // Colour as data, not as styling. Keyed by file, each entry says why.
 const DATA_COLORS = {
   'src/app/(app)/page.js': 'fallback colour for a priority that carries none',
-  'src/app/(app)/settings/page.js': 'the palette a person picks a brand colour from, and the stored sidebarColor',
+  'src/app/(app)/settings/page.js': 'the palette a status, type, priority or label colour is picked from, and the colour a new one starts with',
   'src/components/SearchModal.jsx': 'fallback colour for a type that carries none',
   'src/components/workspace/AgileBoard.jsx': 'the synthetic «Приховані» lane carries a colour like every other lane',
   'src/components/workspace/IssueCard.jsx': 'fallback colours for a type or status that carries none',

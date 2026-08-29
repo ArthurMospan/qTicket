@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
-    "@uiw/react-color": "^2.10.3",
     "cloudinary": "^2.10.0",
     "emoji-picker-react": "^4.19.1",
     "firebase": "^12.17.1",
