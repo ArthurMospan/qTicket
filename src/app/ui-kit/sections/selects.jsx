@@ -53,12 +53,12 @@ export default function SelectsSection() {
       <PreviewBlock title="Ghost Select & MultiSelect" description="Безмежові селектори для панелей фільтрів (FilterBar). Висота: 28px (вбудована в FilterBar висотою 36px). Кольори: фон transparent (hover #ebebeb), текст #1f1f1f, маркер #9a9a9a. Скруглення: 8px. Активуються при наведенні, мають уніфікований шрифт (font-medium). Контекст context=&quot;stacked&quot; розтягує кожен контрол на всю ширину — його використовує PageHeader у мобільній модалці фільтрів." fullWidth>
         <FilterBar>
           <Select filterRole="type" options={typeOpts} value={v4} onChange={setV4} placeholder="Всі типи" variant="ghost" />
-          <MultiSelect filterRole="member" options={memberOpts} value={v5} onChange={setV5} placeholder="Всі виконавці" searchPlaceholder="Шукати..." variant="ghost" />
+          <MultiSelect filterRole="member" options={memberOpts} value={v5} onChange={setV5} placeholder="Всі відповідальні" searchPlaceholder="Шукати..." variant="ghost" />
         </FilterBar>
       </PreviewBlock>
 
       {/* ─── Inline Attribute Select ─── */}
-      <PreviewBlock title="Inline Attribute Select" description="Ультракомпактний селектор для бічних панелей деталей та таблиць. Висота: 22px. Кольори: bg-transparent, текст #1f1f1f. Скруглення: 10px. Охоплює ховер-ефектом (#ebebeb) увесь стовпчик разом із заголовком. Атрибути з кількома значеннями (виконавці) використовують MultiSelect із compact + showSelectedAvatars — стек аватарів і «Ім’я +N» замість «Обрано (N)»." fullWidth>
+      <PreviewBlock title="Inline Attribute Select" description="Ультракомпактний селектор для бічних панелей деталей та таблиць. Висота: 22px. Кольори: bg-transparent, текст #1f1f1f. Скруглення: 10px. Охоплює ховер-ефектом (#ebebeb) увесь стовпчик разом із заголовком. Атрибути з кількома значеннями (відповідальні) використовують MultiSelect із compact + showSelectedAvatars — стек аватарів і «Ім’я +N» замість «Обрано (N)»." fullWidth>
         <div className="max-w-[200px] bg-[#f4f4f5] p-4 rounded-[12px]">
           <div className="hover:bg-[#ebebeb] p-2 -m-2 rounded-[10px] transition-colors flex flex-col gap-[4px] w-full cursor-pointer" onClick={e => { if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
             <span className="text-[10px] font-bold text-[#9a9a9a] uppercase tracking-wider">Статус</span>
@@ -70,7 +70,7 @@ export default function SelectsSection() {
             />
           </div>
           <div className="mt-3 hover:bg-[#ebebeb] p-2 -m-2 rounded-[10px] transition-colors flex flex-col gap-[4px] w-full cursor-pointer" onClick={e => { if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-            <span className="text-[10px] font-bold text-[#9a9a9a] uppercase tracking-wider">Виконавці</span>
+            <span className="text-[10px] font-bold text-[#9a9a9a] uppercase tracking-wider">Відповідальні</span>
             <MultiSelect
               compact
               showSelectedAvatars
@@ -104,8 +104,8 @@ export default function SelectsSection() {
       {/* ─── MultiSelect with Search ─── */}
       <PreviewBlock title="MultiSelect with Search" description="Множинний вибір із вбудованим пошуковим рядком. Висота: 36px. Кольори: фон #f4f4f5, чекбокси опцій #1f1f1f при виборі. Скруглення: 10px. Має вбудовану валідацію порожнього пошуку." fullWidth>
         <div className="max-w-[300px]">
-          <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Виконавці</label>
-          <MultiSelect options={memberOpts} value={v3} onChange={setV3} placeholder="Оберіть виконавців..." searchPlaceholder="Шукати учасника..." />
+          <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Відповідальні</label>
+          <MultiSelect options={memberOpts} value={v3} onChange={setV3} placeholder="Оберіть відповідальних..." searchPlaceholder="Шукати учасника..." />
         </div>
       </PreviewBlock>
 

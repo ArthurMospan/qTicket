@@ -23,6 +23,10 @@ import {
   searchMinimumLength,
 } from '@/lib/utils/searchRanking.mjs';
 
+// The two external roles, project-scoped: what they may reach, and where a
+// person holding one can be opened.
+const CLIENT_ROLES = ['client_admin', 'client_member'];
+
 const WEIGHTS = { key: [100, 80, 50], name: [90, 60, 40], body: [0, 0, 20] };
 
 // Ranking happens in memory, so answering a question means reading the whole
@@ -93,7 +97,7 @@ export async function GET(request) {
     // app: a plain member could previously find the titles of tasks in projects
     // they are not on and cannot open. Owners/admins still see everything.
     const isPrivileged = ['owner', 'admin'].includes(authorization.membership?.role);
-    const isClientViewer = ['client_admin', 'client_member'].includes(authorization.membership?.role);
+    const isClientViewer = CLIENT_ROLES.includes(authorization.membership?.role);
     let scopedProject = null;
     let scopedProjectSnapshot = null;
     if (projectId) {
@@ -237,6 +241,19 @@ export async function GET(request) {
       document.id,
       document.data(),
     ]));
+    // The screen a person can be opened on. «Команда» is the support roster and
+    // it filters client roles out, so a customer contact sent there was never in
+    // the list it selects from — the screen selected whoever happened to be
+    // first instead. A customer is reachable in their own client space, through
+    // the profile overlay the authenticated layout already mounts for any
+    // member of the organization. (A client reader is not a case here: the
+    // palette hands them no people at all.)
+    const clientSpaceOf = userId => projectRecords
+      .filter(project => project.status !== 'archived'
+        && Array.isArray(project.team)
+        && project.team.includes(userId))
+      .map(project => project.id)
+      .sort()[0] || null;
     const people = memberships
       .map(membership => {
         const profile = profilesById.get(membership.userId) || {};
@@ -256,6 +273,10 @@ export async function GET(request) {
         id: entry.membership.userId,
         name: entry.profile.name || entry.profile.email || 'Учасник',
         email: entry.profile.email || '',
+        role: entry.membership.role || 'member',
+        spaceId: CLIENT_ROLES.includes(entry.membership.role)
+          ? clientSpaceOf(entry.membership.userId)
+          : null,
       }));
 
     const events = [];

@@ -204,6 +204,15 @@ test('qTicket search answers with support people and clients beside incidents', 
   assert.equal(byGroup.person.label, 'Артур Моспан');
   // A person result has to land on that person, not on the top of the list.
   assert.equal(byGroup.person.href, '/team?member=u1');
+
+  // …and on a screen that holds them. «Команда» is the support roster and it
+  // filters client roles out, so a customer contact opened there was never in
+  // the list it selects from — it selected whoever was first instead. The
+  // server says where the person is reachable and the command obeys it.
+  const [customer] = searchCommands({
+    people: [{ id: 'u7', name: 'Ірина Бондар', email: 'iryna@acme.ua', role: 'client_admin', spaceId: 'acme' }],
+  });
+  assert.equal(customer.href, '/acme?member=u7');
   assert.equal(byGroup.project.href, '/p9');
   assert.equal(byGroup.event, undefined, 'calendar events are not qTicket search results');
   for (const command of commands) {
@@ -366,4 +375,16 @@ test('the global search surface names the one record the product has', async () 
   assert.doesNotMatch(modal, /описанню завдання/);
   assert.match(header, /placeholder: 'Пошук звернень\.\.\.'/);
   assert.doesNotMatch(header, /Пошук по спринтах і завданнях|Пошук в аналітиці|Пошук у календарі/);
+});
+
+// The other half of the same fix: `spaceId` is a fact about where a person can
+// be found, and only the server holds the roster it comes from.
+test('search answers with the space a person can be opened in', async () => {
+  const route = await read('../src/app/api/search/route.js');
+  assert.match(route, /const CLIENT_ROLES = \['client_admin', 'client_member'\];/);
+  // Only a customer contact moves: the support team is on «Команда».
+  assert.match(route, /spaceId: CLIENT_ROLES\.includes\(entry\.membership\.role\)/);
+  assert.match(route, /role: entry\.membership\.role \|\| 'member',/);
+  // An archived space is not somewhere to send anybody.
+  assert.match(route, /clientSpaceOf = userId => projectRecords[\s\S]{0,120}project\.status !== 'archived'/);
 });

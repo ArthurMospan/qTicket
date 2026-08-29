@@ -224,7 +224,8 @@ test('клієнтський глобальний пошук не відкрив
     read('../src/components/WorkspaceCommandPalette.jsx'),
   ]);
 
-  assert.match(route, /const isClientViewer = \['client_admin', 'client_member'\]\.includes/);
+  assert.match(route, /const CLIENT_ROLES = \['client_admin', 'client_member'\];/);
+  assert.match(route, /const isClientViewer = CLIENT_ROLES\.includes/);
   assert.match(route, /isClientViewer[\s\S]{0,260}visibleProjectIds\?\.has\(project\.id\)/);
   assert.match(route, /const events = \[\]/);
   assert.match(paletteHost, /clientViewer[\s\S]{0,80}\? EMPTY_MATCHES/);

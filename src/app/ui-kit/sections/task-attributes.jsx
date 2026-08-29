@@ -52,7 +52,7 @@ export default function TaskAttributesSection() {
                 </div>
 
                 <div className={attributeItemClass}>
-                  <span className={attributeLabelClass}>Виконавець</span>
+                  <span className={attributeLabelClass}>Відповідальний</span>
                   <Select compact value={memberVal} onChange={setMemberVal} options={memberOpts} buttonClassName={compactSelectClass} />
                 </div>
 

@@ -218,12 +218,21 @@ const dedupe = commands => {
 
 export function searchCommands({ people = [], projects = [] } = {}) {
   return [
+    // Where a person is opened is decided by where they can be found, and the
+    // server answers that with the result: `spaceId` is the client space a
+    // customer contact is reachable in, and null for the support team. Without
+    // it every result went to «Команда», which is the support roster and
+    // filters client roles out — so asking for a customer by name landed on a
+    // screen that selected whoever happened to be first in a list they were
+    // never in.
     ...people.slice(0, 6).map(person => ({
       id: `person-${person.id}`,
       group: 'person',
       label: person.name || 'Учасник',
       hint: person.email || '',
-      href: `/team?member=${encodeURIComponent(person.id)}`,
+      href: person.spaceId
+        ? `/${person.spaceId}?member=${encodeURIComponent(person.id)}`
+        : `/team?member=${encodeURIComponent(person.id)}`,
       icon: 'user',
     })),
     ...projects.slice(0, 6).map(project => ({

@@ -494,21 +494,26 @@ in-app. Незавершені запити дедуплікуються окр�
 
 ### Time-driven notifications
 
-Calendar reminders and deadline notifications use
-`scheduledNotifications/{id}`. Each row has its own delivery time, status,
+qTicket has exactly one time-driven notification left: the resolution date on a
+request. The planning calendar and its events were deleted, and with them
+`/api/calendar/*`, `syncCalendarEventReminderRows` and the recurring-series scan
+this chapter used to describe — a deadline is now the only thing the outbox is
+ever about, and `calendar_reminder` is not a type any code still writes or
+reads.
+
+Deadline notifications use `scheduledNotifications/{id}`. Each row has its own delivery time, status,
 attempt count, per-channel success timestamps and last error. Deterministic row
 IDs make repeated materialisation and dispatch idempotent.
 
 **A row is written when the deadline is set, not found by a scan later.** This
 is the part that took two attempts to get right, and the first attempt is what
 made reminders unaffordable. Asking «is anything due?» costs the whole `issues`
-and `calendarEvents` collections, and ninety-nine passes in a hundred pay that
-to find nothing. But a reminder is a consequence of a write: somebody types a
+collection, and ninety-nine passes in a hundred pay that to find nothing. But a reminder is a consequence of a write: somebody types a
 deadline, and at that instant it is fully known who has to be told and when.
 
 So every server route that can change that writes the row —
-`syncIssueReminderRows` from the task routes, `syncCalendarEventReminderRows`
-from the calendar routes. Moving the deadline rewrites the row; finishing,
+`syncIssueReminderRows`, from the task routes. Moving the deadline rewrites the
+row; finishing,
 cancelling, archiving or deleting the task leaves nothing wanted, and what is
 pending is cancelled. A task's own fields are still written straight from the
 browser, and the browser cannot write this queue — no Firestore rule describes
@@ -530,7 +535,7 @@ passes cost three different amounts:
   nightly because «Нещодавно видалене» promises twenty-four hours, and a nightly
   pass would stretch that to forty-eight.
 - `materialise` — nightly, and now a safety net rather than the mechanism. It
-  performs bounded reads of upcoming calendar events and issues, fills the
+  performs a bounded read of upcoming issues, fills the
   outbox 48 hours ahead, corrects moved reminders and cancels pending rows whose
   source is no longer valid. It is what catches a write-time sync that failed,
   or a change made directly in the database.
@@ -572,13 +577,11 @@ Twelve hours of silence rather than three, because the watermark is written by
 the hourly and nightly passes (dispatch deliberately writes nothing), and an
 hourly GitHub `cron` is hourly on a quiet day and three-hourly on a loaded one.
 
-The scan that remains is bounded on both sides. Deadlines are read back one week
-(`DEADLINE_FLOOR_MS`), because that is as far as an overdue nag can still reach.
-One-off calendar events are read inside the reminder window. Recurring ones used
-to have no window at all — a series' start is in the past forever, so the query
-read every series ever created — and are now bounded forward by the reminder
-lead and capped by `RECURRING_SCAN_LIMIT`, which logs loudly rather than
-silently dropping events.
+The scan that remains is bounded on both sides: deadlines are read back one week
+(`DEADLINE_FLOOR_MS`), because that is as far as an overdue nag can still reach,
+and forward by the materialisation lead. The unbounded half of this scan was the
+recurring calendar series — a series' start is in the past forever, so the query
+read every series ever created — and it went with the calendar itself.
 
 Each channel's outcome is tracked separately, and a successful one is never
 sent a second time — a retry sends only what is still owed. Failures are
@@ -615,8 +618,8 @@ twice.
 `pruneReadNotifications` runs on the hourly `maintenance` pass and
 deletes records that are read and older than `READ_NOTIFICATION_TTL_MS` (30
 days), bounded to 100 per pass because deletions are writes and the daily write
-budget is the tighter of the two free-tier limits. For the two types this outbox
-produces — `deadline` and `calendar_reminder` — it first reads the scheduled row
+budget is the tighter of the two free-tier limits. For the one type this outbox
+still produces — `deadline` — it first reads the scheduled row
 of the same id and keeps the record while that row is still `pending`: a pending
 row is a retry in flight, and a retry recreates the document it cannot find.
 Every other type came from an event that happened once and cannot repeat, so its
