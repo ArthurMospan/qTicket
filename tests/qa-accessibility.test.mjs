@@ -88,15 +88,16 @@ test('the known board controls, tab icons, headings and breadcrumbs carry access
   ]);
 
   for (const label of [
-    'Стан інцидентів',
+    'Стан звернень',
     'Фільтр за виконавцем',
     'Фільтр за пріоритетом',
   ]) assert.match(project, new RegExp(`ariaLabel="${label}"`));
 
   assert.match(mine, /title: 'Дошка', ariaLabel: 'Дошка'/);
   assert.match(mine, /title: 'Список', ariaLabel: 'Список'/);
-  // The customer page is a focused list, not a second board/table surface.
-  assert.doesNotMatch(project, /ariaLabel: 'Дошка'|ariaLabel: 'Таблиця'/);
+  // The customer page carries the same two views, named the same way.
+  assert.match(project, /title: 'Дошка', ariaLabel: 'Дошка'/);
+  assert.doesNotMatch(project, /ariaLabel: 'Таблиця'/);
   assert.doesNotMatch(mine, /ariaLabel: 'Таблиця'/);
   assert.match(topHeader, /aria-label=\{unreadCount > 0/);
   assert.match(topHeader, /aria-label="Відкрити меню користувача"/);

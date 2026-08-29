@@ -54,19 +54,21 @@ test('the client half of the vocabulary carries none of the task manager', () =>
   assert.equal(incidentTerms(), INCIDENT_TERMS.staff);
 });
 
-test('the client portal file speaks only the client vocabulary', async () => {
-  // The whole file, comments included: nothing in it is read by support, so a
-  // task-manager word here is either shipped copy or a note that will become
-  // shipped copy the next time somebody edits the line under it.
-  const portal = await readFile(
-    new URL('../src/components/client/ClientIncidentPortal.jsx', import.meta.url),
+test('the screen a client lands on is the screen support opens', async () => {
+  // There is no client-only file to scan any more, and that is the point: the
+  // words a client reads come out of `INCIDENT_TERMS_TABLE` above, on the same
+  // component support renders. What is asserted here is that the shared screen
+  // names the record with the shared word and does not fall back to a second
+  // one of its own.
+  const board = await readFile(
+    new URL('../src/app/(app)/[projectId]/ProjectBoardClient.jsx', import.meta.url),
     'utf8',
   );
-  assertClean(portal, 'ClientIncidentPortal.jsx');
-  // And it is the client's own word, not support's: the portal is «Мої
-  // звернення», so what it offers to create is a «звернення».
-  assert.match(portal, /Мої звернення/);
-  assert.doesNotMatch(portal, /інцидент/i);
+  assert.match(board, /INCIDENT_TERMS_TABLE\.composerSubmit/);
+  assert.match(board, /INCIDENT_TERMS_TABLE\.created/);
+  // The composer is the client's action, and it is the client's form.
+  assert.match(board, /canOpenIncident = clientViewer/);
+  assert.match(board, /clientMode/);
 });
 
 test('the Ctrl+K palette a client opens offers nothing from a task manager', () => {

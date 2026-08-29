@@ -222,8 +222,15 @@ test('only the cross-project board groups by category', async () => {
   // board must mean the same thing by dropping a card in the same place.
   assert.doesNotMatch(projectPage, /groupBy=/);
   assert.doesNotMatch(projectPage, /resolveCategoryStatusId/);
-  assert.doesNotMatch(projectPage, /<AgileBoard|groupBy=|hiddenGroupIds=/);
-  assert.match(projectPage, /statusCategoryOf\(issue\.columnId \|\| issue\.status, statuses\)/);
+  assert.match(projectPage, /<AgileBoard/);
+  assert.doesNotMatch(projectPage, /groupBy=|hiddenGroupIds=/);
+  // The category of a row is resolved in one place for every queue screen —
+  // the counters above the list and the rows inside it read the same function.
+  assert.match(projectPage, /categorizeIssues\(issues, statuses\)/);
+  const queueMetrics = await read('../src/lib/utils/incidentQueueMetrics.mjs');
+  assert.match(queueMetrics, /statusCategoryOf\(issue\.columnId \|\| issue\.status, statuses\)/);
+  // One word, one number: «У роботі» counts a record being checked too.
+  assert.match(queueMetrics, /entry\.category === 'in-progress' \|\| entry\.category === 'review'/);
 
   // The board still remembers folded columns per grouping — a category id and a
   // status id are different columns even when they share a name.

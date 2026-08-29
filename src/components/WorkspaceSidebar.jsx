@@ -10,7 +10,7 @@ import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui
 import {
   ArrowUpRight,
   Folder, Users, Settings, ChevronsUpDown,
-  Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen, UserRound,
+  Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
@@ -135,16 +135,26 @@ export default function WorkspaceSidebar() {
     // всередині створення задачі (CreateTaskModal → AudioTaskPanel).
     { href: '/settings',   icon: Settings,      label: 'Налаштування' },
   ];
+  // A client has exactly one space, and it is a real address — the same
+  // `[projectId]` screen support opens. `/` only redirects into it, so a rail
+  // entry pointing at `/` went inactive the moment the redirect landed. It
+  // points at the space itself as soon as the spaces are known.
+  const clientSpaceHref = useMemo(() => {
+    const space = (projects || []).find(project => project.status !== 'archived');
+    return space ? `/${space.id}` : '/';
+  }, [projects]);
   const topNav = clientViewer
     ? [
-        { href: '/', icon: Folder, label: 'Мої звернення', exact: true },
+        { href: clientSpaceHref, icon: Folder, label: 'Мої звернення', exact: clientSpaceHref === '/' },
         ...(orgRole === 'client_admin'
           ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
           : []),
-        { href: '/settings?section=profile', icon: UserRound, label: 'Мій профіль', section: 'profile' },
+        // The same destination the internal rail ends with, under the same
+        // name. «Мій профіль» was a third word for one screen.
+        { href: '/settings', icon: Settings, label: 'Налаштування', section: 'profile' },
       ]
     : internalNav;
-  const homeHref = clientViewer ? '/' : '/overview';
+  const homeHref = clientViewer ? clientSpaceHref : '/overview';
   // Staff arrive through a signed QuickTeam launch, which replaces the entry it
   // came from — so the browser's own «back» is not a way back. The rail carries
   // the return instead. Only for an internal seat of a QuickTeam-provisioned
@@ -218,32 +228,23 @@ export default function WorkspaceSidebar() {
                     />
                   </Link>
                 ) : isBranded ? (
-                  /* ── Branded logo: hover flips to reveal qTicket (CSS),
-                       click goes home ── */
+                  /* The tenant's mark, and only the tenant's. This used to be
+                     a card that flipped on hover to show the qTicket logo on
+                     its back: a white-label rail that revealed its vendor to
+                     anybody who moved a pointer across the corner. A brand the
+                     tenant chose does not turn over — on either side. */
                   <Link
                     href={homeHref}
-                    className="group/logo relative block w-[32px] h-[32px] shrink-0 [perspective:1000px]"
-                    // The tooltip only ever appears on hover, and by then the
-                    // logo has already flipped: telling the reader to hover was
-                    // an instruction for something they had just done.
+                    className="block w-[32px] h-[32px] shrink-0 transition-opacity hover:opacity-80"
                     title="На головну"
                     aria-label="На головну"
                   >
-                    <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover/logo:[transform:rotateY(180deg)]">
-                      {/* Front: org logo */}
-                      <span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={orgLogoToUse}
-                          alt={activeOrg?.name || 'Logo'}
-                          className="w-[32px] h-[32px] rounded-[8px] object-cover"
-                        />
-                      </span>
-                      {/* Back: qTicket mark */}
-                      <span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                        <Image src={theme.isDark ? '/logo-min.svg' : '/logo-min-dark.svg'} alt="QT" width={32} height={32} loading="eager" className="object-contain" />
-                      </span>
-                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={orgLogoToUse}
+                      alt={activeOrg?.name || 'Logo'}
+                      className="w-[32px] h-[32px] rounded-[8px] object-cover"
+                    />
                   </Link>
                 ) : (
                   <Link href={homeHref} className="flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity">

@@ -12,7 +12,7 @@ import {
 } from '@/lib/utils/projectIssueCounts.mjs';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ExternalLink, Archive, ArchiveRestore, Plus, Folder, Clock, Users, TrendingUp, Target, ArrowRight, MoreVertical, Trash2, User, Settings2 } from 'lucide-react';
+import { ExternalLink, Archive, ArchiveRestore, Inbox, Plus, Folder, Clock, Users, TrendingUp, Target, ArrowRight, MoreVertical, Trash2, User, Settings2 } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
@@ -46,7 +46,6 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { createIssueViaApi } from '@/lib/services/issues';
 import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
-import ClientIncidentPortal from '@/components/client/ClientIncidentPortal';
 
 
 // ── Project Card ─────────────────────────────────────────────────────────────
@@ -600,7 +599,7 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
 }
 
 export default function WorkspacePage({ clientsRoute = false } = {}) {
-  const { projects, projectsLoading, projectsError, currentUser, activeOrgId, orgRole } = useAppContext();
+  const { projects, projectsLoading, projectsError, activeOrgId, orgRole } = useAppContext();
   const showToast = useWorkspaceStore(s => s.showToast);
   const { members, loading: orgLoading } = useOrganization();
   const { statuses } = useWorkflowConfig();
@@ -643,6 +642,20 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     if (clientsRoute || !orgRole || clientViewer) return;
     router.replace(searchParams?.get('new') === '1' ? '/clients?new=1' : '/overview');
   }, [clientViewer, clientsRoute, orgRole, router, searchParams]);
+
+  // A client has exactly one space, so `/` is not a screen for them — it is a
+  // door into it. There used to be a second, bespoke screen behind this branch:
+  // its own list, its own board, its own words for the same records. The client
+  // opens the space itself now, the same `[projectId]` route support opens, and
+  // the role decides what is inside it rather than which one is rendered.
+  //
+  // The query string travels: `?new=1` from Ctrl+K must still open the composer
+  // once the space has painted.
+  useEffect(() => {
+    if (!clientViewer || clientsRoute || !clientProject) return;
+    const suffix = searchParams?.get('new') === '1' ? '?new=1' : '';
+    router.replace(`/${clientProject.id}${suffix}`);
+  }, [clientProject, clientViewer, clientsRoute, router, searchParams]);
 
   // This screen no longer reads tasks at all.
   //
@@ -787,22 +800,40 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const workspaceScopeFailure = workspaceLoadErrorKind === 'permission-denied'
     || workspaceLoadErrorKind === 'not-found';
 
-  if (!clientsRoute && !clientViewer) {
+  if (clientViewer && !clientsRoute) {
+    // Still on the way in: either the spaces have not arrived yet, or they
+    // have and the redirect above is in flight.
+    if (projectsLoading || clientProject) {
+      return (
+        <div className="flex min-h-[320px] flex-1 items-center justify-center" role="status" aria-busy="true">
+          <LoadingSpinner size="md" label="Відкриваємо ваш простір…" />
+        </div>
+      );
+    }
+    // Invited, but nobody has prepared a space to invite them into. This is a
+    // real state and not an error: it says who fixes it.
     return (
-      <div className="flex min-h-[320px] flex-1 items-center justify-center" role="status" aria-busy="true">
-        <LoadingSpinner size="md" label="Відкриваємо огляд підтримки…" />
+      <div className="qt-nav-scroll flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent">
+        <div className="workspace-page-layout min-h-full">
+          <PageHeader title="Мої звернення" />
+          <Surface preset="panel" padding="lg">
+            <EmptyState
+              icon={Inbox}
+              title="Простір підтримки ще не налаштовано"
+              description="Адміністратор має додати вас до підготовленого простору."
+              context="page"
+            />
+          </Surface>
+        </div>
       </div>
     );
   }
 
-  if (clientViewer) {
+  if (!clientsRoute) {
     return (
-      <ClientIncidentPortal
-        project={clientProject}
-        projectsLoading={projectsLoading}
-        currentUser={currentUser}
-        orgRole={orgRole}
-      />
+      <div className="flex min-h-[320px] flex-1 items-center justify-center" role="status" aria-busy="true">
+        <LoadingSpinner size="md" label="Відкриваємо огляд підтримки…" />
+      </div>
     );
   }
 

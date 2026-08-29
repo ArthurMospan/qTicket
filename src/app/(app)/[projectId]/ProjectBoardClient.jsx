@@ -13,11 +13,10 @@ import {
   LoadingSpinner,
   PageHeader,
   Pill,
-  PriorityBadge,
   Select,
-  StatusPill,
   Surface,
-  TaskIdentity,
+  Tabs,
+  TaskListView,
   UserAvatar,
 } from '@/components/ui';
 import {
@@ -25,11 +24,14 @@ import {
   CheckCircle2,
   CircleDotDashed,
   Inbox,
+  Kanban,
+  List,
   Plus,
   Settings2,
   UserPlus,
   UsersRound,
 } from 'lucide-react';
+import AgileBoard from '@/components/workspace/AgileBoard';
 import BoardConfigModal from '@/components/workspace/BoardConfigModal';
 import CreateTaskModal from '@/components/CreateTaskModal';
 import InviteMemberDialog from '@/components/InviteMemberDialog';
@@ -37,12 +39,14 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useIssues } from '@/lib/hooks/useIssues';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
-import { can, isClientRole } from '@/lib/utils/can';
-import { issuePath } from '@/lib/utils/issueKeys.mjs';
+import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
+import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
+import { canWhileRoleLoads, can, isClientRole } from '@/lib/utils/can';
+import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
-import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
+import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
@@ -50,34 +54,16 @@ import { userFacingErrorMessage } from '@/lib/utils/errors';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
 const PROJECT_TABS = [
-  { id: 'incidents', label: 'Інциденти' },
+  { id: 'incidents', label: 'Звернення' },
   { id: 'people', label: 'Люди' },
   { id: 'settings', label: 'Налаштування' },
 ];
 
 const SCOPE_OPTIONS = [
   { value: 'open', label: 'Відкриті' },
-  { value: 'all', label: 'Усі інциденти' },
+  { value: 'all', label: 'Усі звернення' },
   { value: 'resolved', label: 'Вирішені' },
 ];
-
-function assigneeIdsOf(issue) {
-  if (Array.isArray(issue?.assigneeIds)) return issue.assigneeIds.filter(Boolean);
-  if (Array.isArray(issue?.assignees)) return issue.assignees.filter(Boolean);
-  return issue?.assigneeId ? [issue.assigneeId] : [];
-}
-
-function formatUpdatedAt(value) {
-  const millis = timestampMillis(value);
-  if (!millis) return 'дату не вказано';
-  return new Intl.DateTimeFormat('uk-UA', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(millis));
-}
 
 function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
   if (members.length === 0) {
@@ -140,10 +126,11 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const scopedProjectId = resourceContextReady ? projectId : null;
   const project = projects?.find(candidate => candidate.id === projectId);
   const {
-    issues,
+    issues: storedIssues,
     loading: issuesLoading,
     error: issuesError,
     createIssue,
+    moveIssue,
   } = useIssues(scopedProjectId, { includeLinks: false });
   const {
     members,
@@ -162,9 +149,27 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const [scope, setScope] = useState('open');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  // The board is the first thing both audiences see. «Де воно зараз» is the
+  // question this screen exists to answer, and a pipeline answers it at a
+  // glance where a list answers it one row at a time.
+  const [viewMode, setViewMode] = useState('kanban');
   const [showComposer, setShowComposer] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showClientInvite, setShowClientInvite] = useState(false);
+  const workspaceSearch = useWorkspaceStore(state => state.workspaceSearch);
+
+  // The selection and its optimistic patches. A client never selects anything —
+  // `onBulkUpdate` is simply not handed to the board or the list below — but the
+  // hook is the one source of the issue array either way, so it is not a branch.
+  const {
+    issues,
+    applyBulkAction,
+    bulkProgress,
+  } = useBulkIssueActions({
+    issues: storedIssues,
+    organizationId: activeOrgId,
+    showToast,
+  });
 
   useEffect(() => {
     if (resourceOrganizationId && resourceOrganizationId !== activeOrgId) {
@@ -172,20 +177,18 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     }
   }, [activeOrgId, resourceOrganizationId, switchOrg]);
 
-  // External users have the focused «Мої звернення» portal at `/`. This route
-  // is the tenant's customer-administration surface and must never expose it.
+  // `?new=1` — from Ctrl+K, or carried here by the redirect at `/` — opens the
+  // composer once. Consumed immediately so a refresh never reopens it.
   useEffect(() => {
-    if (clientViewer) router.replace('/');
-  }, [clientViewer, router]);
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('new') !== '1') return;
+    queueMicrotask(() => setShowComposer(true));
+    params.delete('new');
+    const query = params.toString();
+    router.replace(`/${projectId}${query ? `?${query}` : ''}`, { scroll: false });
+  }, [projectId, router]);
 
-  const memberById = useMemo(
-    () => new Map((members || []).map(member => [member.id || member.uid, member])),
-    [members],
-  );
-  const statusById = useMemo(
-    () => new Map((statuses || []).map(status => [status.id, status])),
-    [statuses],
-  );
   const projectMembers = useMemo(() => {
     const roster = new Set(Array.isArray(project?.team) ? project.team : []);
     return activeMembers(members).filter(member => roster.has(member.id || member.uid));
@@ -204,34 +207,37 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     user: member,
   })), [supportMembers]);
 
-  const categorizedIssues = useMemo(() => (issues || []).map(issue => ({
-    issue,
-    category: statusCategoryOf(issue.columnId || issue.status, statuses),
-  })), [issues, statuses]);
-  const metrics = useMemo(() => {
-    const open = categorizedIssues.filter(item => item.category !== 'done');
-    return {
-      open: open.length,
-      new: open.filter(item => item.category === 'backlog' || item.category === 'todo').length,
-      active: open.filter(item => item.category === 'in-progress' || item.category === 'review').length,
-      resolved: categorizedIssues.filter(item => item.category === 'done').length,
-      unassigned: open.filter(item => assigneeIdsOf(item.issue).length === 0).length,
-    };
-  }, [categorizedIssues]);
-  const visibleIssues = useMemo(() => categorizedIssues
-    .filter(({ issue, category }) => {
-      if (scope === 'open' && category === 'done') return false;
-      if (scope === 'resolved' && category !== 'done') return false;
-      const assignees = assigneeIdsOf(issue);
-      if (assigneeFilter === 'unassigned' && assignees.length > 0) return false;
-      if (assigneeFilter !== 'all' && assigneeFilter !== 'unassigned' && !assignees.includes(assigneeFilter)) return false;
-      return priorityFilter === 'all' || (issue.priority || NO_PRIORITY_ID) === priorityFilter;
-    })
-    .map(item => item.issue)
-    .sort((left, right) => (
-      timestampMillis(right.updatedAt || right.createdAt)
-      - timestampMillis(left.updatedAt || left.createdAt)
-    )), [assigneeFilter, categorizedIssues, priorityFilter, scope]);
+  const categorizedIssues = useMemo(
+    () => categorizeIssues(issues, statuses),
+    [issues, statuses],
+  );
+  const metrics = useMemo(() => incidentQueueMetrics(categorizedIssues), [categorizedIssues]);
+  const visibleIssues = useMemo(() => {
+    const query = workspaceSearch.trim().toLocaleLowerCase('uk-UA');
+    return categorizedIssues
+      .filter(({ issue, category }) => {
+        if (scope === 'open' && category === 'done') return false;
+        if (scope === 'resolved' && category !== 'done') return false;
+        // Who is working on it is internal routing, so the filter that asks the
+        // question is not offered to a client — and the state it holds cannot
+        // be allowed to narrow their list behind their back either.
+        if (!clientViewer) {
+          const assignees = assigneeIdsOf(issue);
+          if (assigneeFilter === 'unassigned' && assignees.length > 0) return false;
+          if (assigneeFilter !== 'all' && assigneeFilter !== 'unassigned' && !assignees.includes(assigneeFilter)) return false;
+        }
+        if (priorityFilter !== 'all' && (issue.priority || NO_PRIORITY_ID) !== priorityFilter) return false;
+        if (!query) return true;
+        return [issue.issueKey, issue.title, issue.description]
+          .some(value => String(value || '').toLocaleLowerCase('uk-UA').includes(query));
+      })
+      .map(item => item.issue)
+      .sort((left, right) => (
+        timestampMillis(right.updatedAt || right.createdAt)
+        - timestampMillis(left.updatedAt || left.createdAt)
+      ));
+  }, [assigneeFilter, categorizedIssues, clientViewer, priorityFilter, scope, workspaceSearch]);
+  usePublishLocalSearchResults(workspaceSearch, visibleIssues.length);
 
   const actor = useMemo(() => ({
     userId: currentUser?.uid || currentUser?.id,
@@ -251,9 +257,22 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
       estimateMinutes: formData.estimateMinutes || 0,
       addAssigneesToProjectTeam: formData.addAssigneesToProjectTeam === true,
     }, actor);
-    showToast('Інцидент створено');
+    showToast(INCIDENT_TERMS_TABLE.created);
     return { ...created, projectId };
   }, [actor, createIssue, projectId, showToast]);
+
+  // Dragging a card is a workflow decision, and the workflow is internal. The
+  // client's board is the same board in `readOnly`, so this handler is never
+  // reached from their side — the drag context refuses the drop before it.
+  const handleMoveIssue = useCallback(
+    (issueId, columnId, position) => moveIssue(issueId, columnId, position, actor),
+    [actor, moveIssue],
+  );
+
+  const handleBulkUpdate = useCallback(
+    (action, value, selectedIssues) => applyBulkAction(action, value, selectedIssues),
+    [applyBulkAction],
+  );
 
   const handleArchiveProject = useCallback(async id => {
     try {
@@ -295,16 +314,23 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const canInviteClient = can(orgRole, 'manage:team');
   const isArchived = project?.status === 'archived';
   const isReadOnly = isArchived;
-  const tabs = PROJECT_TABS.map(tab => ({
-    ...tab,
-    count: tab.id === 'incidents'
-      ? visibleIssues.length
-      : tab.id === 'people'
-        ? projectMembers.length
-        : 0,
-  }));
-
-  if (clientViewer) return null;
+  // Only a client opens a request. Support receives it, works it and closes it —
+  // an agent filing a customer's request on their behalf is how a support desk
+  // stops being able to say who asked for what. The composer is therefore the
+  // one action on this screen that belongs to the client and not to staff.
+  const canOpenIncident = clientViewer && !isReadOnly;
+  // A client's space has one thing in it: their requests. Its team and its
+  // settings are the tenant's administration of a customer, not the customer's
+  // own screen — same component, fewer tabs.
+  const tabs = (clientViewer ? PROJECT_TABS.filter(tab => tab.id === 'incidents') : PROJECT_TABS)
+    .map(tab => ({
+      ...tab,
+      count: tab.id === 'incidents'
+        ? visibleIssues.length
+        : tab.id === 'people'
+          ? projectMembers.length
+          : 0,
+    }));
 
   if (loading) {
     return (
@@ -320,10 +346,10 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         <Surface preset="panel" padding="lg" className="w-full max-w-[460px]">
           <EmptyState
             icon={Inbox}
-            title="Клієнтський простір не знайдено"
+            title="Простір не знайдено"
             description="Його видалено або у вас більше немає доступу."
-            action="До клієнтів"
-            onAction={() => router.replace('/clients')}
+            action={clientViewer ? null : 'До клієнтів'}
+            onAction={clientViewer ? null : () => router.replace('/clients')}
             context="page"
           />
         </Surface>
@@ -342,7 +368,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
             onTabChange={setActiveTab}
             actions={(
               <div className="flex items-center gap-2">
-                {canManageProject && (
+                {canManageProject && !clientViewer && (
                   <Button
                     onClick={() => setShowSettings(true)}
                     icon={Settings2}
@@ -352,7 +378,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     aria-label="Налаштування клієнта"
                   />
                 )}
-                {!isReadOnly && (
+                {canOpenIncident && (
                   <Button
                     onClick={() => setShowComposer(true)}
                     icon={Plus}
@@ -361,8 +387,22 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     color="dark"
                     collapseAt="sm"
                   >
-                    Створити інцидент
+                    {INCIDENT_TERMS_TABLE.composerSubmit}
                   </Button>
+                )}
+                {/* Desktop only: below md the board has nowhere to go and the
+                    list is the only view. Same control for both readers. */}
+                {activeTab === 'incidents' && (
+                  <div className="max-md:hidden">
+                    <Tabs
+                      tabs={[
+                        { id: 'kanban', icon: Kanban, title: 'Дошка', ariaLabel: 'Дошка' },
+                        { id: 'list', icon: List, title: 'Список', ariaLabel: 'Список' },
+                      ]}
+                      activeTab={viewMode}
+                      onTabChange={setViewMode}
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -370,24 +410,26 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
               <FilterBar>
                 <Select
                   filterRole="status"
-                  ariaLabel="Стан інцидентів"
+                  ariaLabel="Стан звернень"
                   variant="ghost"
                   value={scope}
                   onChange={setScope}
                   options={SCOPE_OPTIONS}
                 />
-                <Select
-                  filterRole="member"
-                  ariaLabel="Фільтр за виконавцем"
-                  variant="ghost"
-                  value={assigneeFilter}
-                  onChange={setAssigneeFilter}
-                  options={[
-                    { value: 'all', label: 'Усі виконавці' },
-                    { value: 'unassigned', label: 'Без виконавця' },
-                    ...supportAssigneeOptions,
-                  ]}
-                />
+                {!clientViewer && (
+                  <Select
+                    filterRole="member"
+                    ariaLabel="Фільтр за виконавцем"
+                    variant="ghost"
+                    value={assigneeFilter}
+                    onChange={setAssigneeFilter}
+                    options={[
+                      { value: 'all', label: 'Усі виконавці' },
+                      { value: 'unassigned', label: 'Без виконавця' },
+                      ...supportAssigneeOptions,
+                    ]}
+                  />
+                )}
                 <Select
                   filterRole="priority"
                   ariaLabel="Фільтр за пріоритетом"
@@ -415,87 +457,81 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
               {isArchived && (
                 <Alert
                   variant="info"
-                  title="Клієнтський простір в архіві"
-                  description="Історія та інциденти доступні, але нові звернення тут не створюються."
+                  title="Простір в архіві"
+                  description="Історія та листування доступні, але нові звернення тут не створюються."
                 />
               )}
 
               {activeTab === 'incidents' && (
                 <>
                   <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    <KpiCard icon={Inbox} value={metrics.open} label="Відкриті" sub={`${metrics.unassigned} без виконавця`} />
+                    <KpiCard
+                      icon={Inbox}
+                      value={metrics.open}
+                      label="Відкриті"
+                      // Who has not picked one up yet is a fact about the
+                      // support queue, said to the people who staff it.
+                      sub={clientViewer ? 'у цьому просторі' : `${metrics.unassigned} без виконавця`}
+                    />
                     <KpiCard icon={Plus} value={metrics.new} label="Нові" sub="очікують першої реакції" />
                     <KpiCard icon={CircleDotDashed} value={metrics.active} label="У роботі" sub="разом із перевіркою" />
                     <KpiCard icon={CheckCircle2} value={metrics.resolved} label="Вирішені" sub="у цьому просторі" />
                   </div>
 
-                  <Surface preset="panel" padding="md">
-                    <div className="mb-4 flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="ui-type-section-title text-ink">Інциденти клієнта</h2>
-                        <p className="mt-1 text-[12px] text-muted">
-                          Окрема черга цього клієнта. Загальна черга підтримки залишається у розділі «Інциденти».
-                        </p>
-                      </div>
-                      <Pill tone={metrics.open ? 'info' : 'success'} size="sm" shape="badge">
-                        {metrics.open ? `${metrics.open} відкритих` : 'Усе вирішено'}
-                      </Pill>
-                    </div>
-
-                    {visibleIssues.length === 0 ? (
+                  {visibleIssues.length === 0 ? (
+                    <Surface preset="panel" padding="md">
                       <EmptyState
                         icon={Inbox}
-                        title={issues.length === 0 ? 'Інцидентів ще немає' : 'За цими фільтрами нічого немає'}
+                        title={issues.length === 0 ? 'Звернень ще немає' : 'За цими фільтрами нічого немає'}
                         description={issues.length === 0
-                          ? 'Створіть перший інцидент від імені підтримки або запросіть адміністратора клієнта.'
-                          : 'Змініть стан, виконавця або пріоритет у фільтрах.'}
-                        action={!isReadOnly && issues.length === 0 ? 'Створити інцидент' : null}
-                        onAction={!isReadOnly && issues.length === 0 ? () => setShowComposer(true) : null}
+                          ? clientViewer
+                            ? 'Якщо виникла проблема або запитання, створіть звернення — команда підтримки відповість у ньому.'
+                            : 'Клієнт ще не звертався. Запросіть його адміністратора, щоб він міг це зробити.'
+                          : 'Змініть стан або пріоритет у фільтрах.'}
+                        action={canOpenIncident && issues.length === 0 ? INCIDENT_TERMS_TABLE.composerSubmit : null}
+                        onAction={canOpenIncident && issues.length === 0 ? () => setShowComposer(true) : null}
                         density="compact"
                         surface="card"
                       />
-                    ) : (
-                      <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
-                        {visibleIssues.map(issue => {
-                          const status = statusById.get(issue.columnId || issue.status);
-                          const category = statusCategoryOf(issue.columnId || issue.status, statuses);
-                          const assigneeId = assigneeIdsOf(issue)[0];
-                          const assignee = assigneeId ? memberById.get(assigneeId) : null;
-                          return (
-                            <ListRow
-                              key={issue.id}
-                              density="roomy"
-                              onClick={() => {
-                                const href = issuePath(issue, project);
-                                if (href) router.push(href);
-                              }}
-                              className="flex items-center gap-3"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <TaskIdentity issue={issue} project={project} done={category === 'done'} />
-                                <p className="mt-1 truncate text-[13px] font-bold text-ink">
-                                  {issue.title || 'Інцидент без назви'}
-                                </p>
-                                <p className="mt-1 text-[11px] text-faint">
-                                  Оновлено {formatUpdatedAt(issue.updatedAt || issue.createdAt)}
-                                </p>
-                              </div>
-                              <div className="hidden shrink-0 items-center gap-2 md:flex">
-                                <PriorityBadge priority={issue.priority} priorities={priorities} />
-                                <StatusPill label={status?.label || 'Без статусу'} color={status?.color} />
-                              </div>
-                              {assignee ? (
-                                <UserAvatar user={assignee} size="sm" tooltip />
-                              ) : (
-                                <Pill tone="warning" size="sm" shape="badge">Без виконавця</Pill>
-                              )}
-                              <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
-                            </ListRow>
-                          );
-                        })}
-                      </Card>
-                    )}
-                  </Surface>
+                    </Surface>
+                  ) : viewMode === 'kanban' ? (
+                    <div className="flex min-h-[500px] flex-1 flex-col">
+                      {/* One board, two readers. A client gets it `readOnly` —
+                          no drag, no selection, no inline add — and with no
+                          `members`, because who a request is routed to inside
+                          the support team is not their business and the card
+                          draws an assignee only from that list. */}
+                      <AgileBoard
+                        issues={visibleIssues}
+                        allIssues={issues}
+                        members={clientViewer ? [] : members}
+                        projects={[project]}
+                        projectId={project.id}
+                        project={project}
+                        readOnly={clientViewer}
+                        isArchived={isArchived}
+                        onMoveIssue={clientViewer ? undefined : handleMoveIssue}
+                        onBulkUpdate={clientViewer ? undefined : handleBulkUpdate}
+                        canArchive={!clientViewer && canWhileRoleLoads(orgRole, 'delete:issue')}
+                        selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}`}
+                      />
+                    </div>
+                  ) : (
+                    <TaskListView
+                      issues={visibleIssues}
+                      allIssues={issues}
+                      members={clientViewer ? [] : members}
+                      projects={[project]}
+                      projectId={project.id}
+                      projectName={project.name}
+                      onBulkUpdate={clientViewer ? undefined : handleBulkUpdate}
+                      bulkProgress={clientViewer ? null : bulkProgress}
+                      canArchive={!clientViewer && canWhileRoleLoads(orgRole, 'delete:issue')}
+                      selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}`}
+                      emptyTitle="Звернень не знайдено"
+                      emptyDescription="Змініть стан або пріоритет у фільтрах."
+                    />
+                  )}
                 </>
               )}
 
@@ -609,28 +645,36 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         />
       )}
 
-      <CreateTaskModal
-        isOpen={showComposer}
-        onClose={() => setShowComposer(false)}
-        onSubmit={handleCreateIssue}
-        stages={project?.stages || []}
-        teamMembers={supportMembers}
-        projectContext={{
-          id: project.id,
-          name: project.name,
-          hiddenColumns: project.hiddenColumns || [],
-        }}
-        entity="incident"
-      />
+      {/* The composer belongs to the client. `clientMode` is what makes it the
+          two fields they need instead of the agent's form — it is passed here,
+          not re-implemented. */}
+      {canOpenIncident && (
+        <CreateTaskModal
+          isOpen={showComposer}
+          onClose={() => setShowComposer(false)}
+          onSubmit={handleCreateIssue}
+          stages={project?.stages || []}
+          teamMembers={[]}
+          projectContext={{
+            id: project.id,
+            name: project.name,
+            hiddenColumns: project.hiddenColumns || [],
+          }}
+          entity="incident"
+          clientMode
+        />
+      )}
 
-      <InviteMemberDialog
-        isOpen={showClientInvite}
-        onClose={() => setShowClientInvite(false)}
-        inviteMember={inviteMember}
-        projectIds={[project.id]}
-        spaceName={project.name}
-        clientAdminMode
-      />
+      {!clientViewer && (
+        <InviteMemberDialog
+          isOpen={showClientInvite}
+          onClose={() => setShowClientInvite(false)}
+          inviteMember={inviteMember}
+          projectIds={[project.id]}
+          spaceName={project.name}
+          clientAdminMode
+        />
+      )}
     </>
   );
 }

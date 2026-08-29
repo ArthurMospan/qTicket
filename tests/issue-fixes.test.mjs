@@ -248,8 +248,8 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(projectPage, /title="Налаштування клієнта"/);
   assert.ok(
     projectPage.indexOf('title="Налаштування клієнта"')
-      < projectPage.indexOf('Створити інцидент'),
-    'project settings must be immediately available before incident creation',
+      < projectPage.indexOf('{canOpenIncident && ('),
+    'project settings must be immediately available before the composer',
   );
   assert.match(projectPage, /<BoardConfigModal[\s\S]{0,160}project=\{project\}[\s\S]{0,240}canManageTeam=\{can\(orgRole, 'manage:team'\)\}/);
   assert.match(settingsDialog, /size="sm"/);
