@@ -2298,10 +2298,10 @@
         },
         {
           "name": "heading",
-          "default": "'Згадати інцидент'",
+          "default": "'Згадати звернення'",
           "type": "string",
           "values": [],
-          "description": "What the sheet is offering to mention. Supplied"
+          "description": "What the sheet is offering to mention. Kept as"
         },
         {
           "name": "issues",
@@ -4202,7 +4202,7 @@
     },
     "StatusTransitionPicker": {
       "file": "src/components/ui/TaskManagement/StatusTransitionPicker.jsx",
-      "summary": "Chooses the exact project status after a card was dropped on a shared category in «Мої завдання».",
+      "summary": "Chooses the exact project status after a card was dropped on a shared category in «Звернення».",
       "props": [
         {
           "name": "busy",
@@ -4636,7 +4636,7 @@
         },
         {
           "name": "unreadLabel",
-          "default": "'Є нове в інциденті'",
+          "default": "'Є нове у зверненні'",
           "type": "string",
           "values": [],
           "description": "What the new thing is — a comment, a status change, edits. The dot already says that there is something; the tooltip is where the reader learns what, and it is free: the task document that drew this row carries the kind of the last activity."
@@ -4732,14 +4732,14 @@
         },
         {
           "name": "emptyDescription",
-          "default": "'Змініть фільтри або створіть новий інцидент.'",
+          "default": "'Змініть фільтри або створіть нове звернення.'",
           "type": "string",
           "values": [],
           "description": "Sentence under it."
         },
         {
           "name": "emptyTitle",
-          "default": "'Інцидентів не знайдено'",
+          "default": "'Звернень не знайдено'",
           "type": "string",
           "values": [],
           "description": "Headline of the empty state."

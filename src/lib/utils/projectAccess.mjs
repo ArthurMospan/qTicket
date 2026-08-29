@@ -40,9 +40,9 @@ export function hasProjectAccess(project, role, uid) {
  * and must not be reported as a permission problem.
  */
 export function projectWriteError(project, organizationId, role, uid) {
-  if (!project || project.organizationId !== organizationId) return 'Проєкт задачі не знайдено';
-  if (project.deletionPending === true) return 'Проєкт уже видаляється';
-  if (!hasProjectAccess(project, role, uid)) return 'Ви не входите до команди цього проєкту';
+  if (!project || project.organizationId !== organizationId) return 'Клієнтський простір звернення не знайдено';
+  if (project.deletionPending === true) return 'Клієнтський простір уже видаляється';
+  if (!hasProjectAccess(project, role, uid)) return 'Ви не входите до команди цього клієнта';
   return '';
 }
 
@@ -60,7 +60,7 @@ export function hasRecordedTeam(project) {
  *
  * A task's assignee has to be able to reach its project — otherwise the task is
  * not work assigned to somebody, it is a note about them. The workspace could
- * produce exactly that: «Команда» → a member → «Створити завдання» offers every
+ * produce exactly that: «Команда» → a member → «Створити звернення» offers every
  * project, the composer offered the whole organization as assignees, and the
  * server only ever checked that an assignee was in the organization. The result
  * was a task its own assignee could not find, whose avatar the board then

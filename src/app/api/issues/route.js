@@ -94,7 +94,7 @@ export async function POST(request) {
       : submittedData;
     if (!projectId || typeof data.title !== 'string' || !data.title.trim() || data.title.trim().length > 240) {
       // Shown verbatim to whoever posted it, and an external client posts here
-      // too: «назва завдання» is the one vocabulary their screen must not have.
+      // too, so it names the record the way every other screen does.
       return NextResponse.json({ error: 'Потрібні коректний клієнтський простір і тема' }, { status: 400 });
     }
     if (data.parentEpicId) {
@@ -105,13 +105,13 @@ export async function POST(request) {
     }
     if (Array.isArray(data.subtasks) && data.subtasks.length > 0) {
       return NextResponse.json({
-        error: 'Вкладені пункти треба додавати як чекліст в описі або як окремі підзавдання',
+        error: 'Вкладені пункти треба додавати як чекліст в описі або як окремі дочірні звернення',
         code: 'LEGACY_SUBTASKS_UNSUPPORTED',
       }, { status: 400 });
     }
     if (data.type === 'epic') {
       return NextResponse.json({
-        error: 'Епік є лише legacy-типом і недоступний для нових завдань',
+        error: 'Цей тип застарілий і недоступний для нових звернень',
         code: 'LEGACY_EPIC_TYPE',
       }, { status: 400 });
     }
@@ -120,7 +120,7 @@ export async function POST(request) {
     let parentIssueKey = '';
     if (parentIssueId === undefined) {
       return NextResponse.json({
-        error: 'Некоректний ідентифікатор батьківського завдання',
+        error: 'Некоректний ідентифікатор основного звернення',
         code: 'INVALID_PARENT_ID',
       }, { status: 400 });
     }
@@ -169,7 +169,7 @@ export async function POST(request) {
     // Being in the organization was the only thing ever asked of an assignee,
     // and it is not enough: `project.team` is what opens a project, so a task
     // could be handed to somebody who could not open the project it was in.
-    // They then had a task in «Мої завдання» whose project 404'd for them, and
+    // They then had a task in «Звернення» whose project 404'd for them, and
     // a card on a board that dropped their face because the board resolves
     // faces from the team they were not in.
     let assigneesToAddToTeam = [];
@@ -194,8 +194,8 @@ export async function POST(request) {
       if (lockedOut.length && (!isPrivileged || !addAssigneesToProjectTeam)) {
         return NextResponse.json({
           error: isPrivileged
-            ? 'Виконавець не входить до складу проєкту. Позначте «Додати до складу проєкту», щоб додати його разом зі створенням завдання.'
-            : 'Виконавець не входить до складу проєкту. Попросіть власника або адміністратора додати його до проєкту.',
+            ? 'Виконавець не входить до складу клієнта. Позначте «Додати до складу», щоб додати його разом зі створенням звернення.'
+            : 'Виконавець не входить до складу клієнта. Попросіть власника або адміністратора додати його.',
           code: 'ASSIGNEE_OUTSIDE_PROJECT',
         }, { status: 403 });
       }
@@ -204,7 +204,7 @@ export async function POST(request) {
       // only because the caller asked for it.
       if (addAssigneesToProjectTeam && !isPrivileged) {
         return NextResponse.json({
-          error: 'Додавати учасників до проєкту може лише власник або адміністратор',
+          error: 'Додавати учасників до складу клієнта може лише власник або адміністратор',
           code: 'PROJECT_TEAM_FORBIDDEN',
         }, { status: 403 });
       }
@@ -455,9 +455,8 @@ export async function POST(request) {
     }
     return routeErrorResponse(error, {
       context: 'Issue POST',
-      // The composer supplies the noun in its own title — «інцидент» or
-      // «звернення», depending on who is looking. This is the sentence under
-      // it, so it says what went wrong and names nothing.
+      // The composer already names the record in its own title. This is the
+      // sentence under it, so it says what went wrong and names nothing.
       fallbackMessage: 'Не вдалося зберегти. Спробуйте ще раз',
     });
   }

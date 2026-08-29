@@ -140,12 +140,12 @@ const STATE_BASE = {
     <AvatarButton user={{ id: 'kit', name: 'Артур Моспан' }} label={long ? LONG_LABEL : 'Профіль'} {...state} />
   ),
   MarkdownViewer: ({ long, ...state }) => (
-    <MarkdownViewer content={long ? LONG_TEXT : 'Опис завдання'} {...state} />
+    <MarkdownViewer content={long ? LONG_TEXT : 'Опис звернення'} {...state} />
   ),
   StatusVisibilityPicker: ({ long, ...state }) => (
     <div className="w-full max-w-[260px]">
       <StatusVisibilityPicker
-        statuses={[{ id: 'backlog', label: 'Беклог', color: '#9a9a9a' }, { id: 'doing', label: long ? LONG_LABEL : 'В роботі', color: '#3b82f6' }]}
+        statuses={[{ id: 'backlog', label: 'Новий', color: '#9a9a9a' }, { id: 'doing', label: long ? LONG_LABEL : 'В роботі', color: '#3b82f6' }]}
         hiddenStatusIds={[]}
         onChange={() => {}}
         {...state}

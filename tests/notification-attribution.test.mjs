@@ -89,12 +89,12 @@ test('project activity names only who the activity record says acted', async () 
   assert.match(page, /const isExternalActor = isExternalActorId\(actorId\)/);
 
   // Every activity type reads as itself; "created" used to render as "updated".
-  for (const verb of ['створив інцидент', 'змінив статус інциденту', 'відновив інцидент', 'написав у чаті інциденту']) {
+  for (const verb of ['створив звернення', 'змінив статус звернення', 'відновив звернення', 'написав у чаті звернення']) {
     assert.ok(page.includes(verb), verb);
   }
   // And an unattributed event is phrased without a person rather than with a
   // blank one.
-  for (const event of ['Створено інцидент', 'Змінено статус інциденту', 'Оновлено інцидент']) {
+  for (const event of ['Створено звернення', 'Змінено статус звернення', 'Оновлено звернення']) {
     assert.ok(page.includes(event), event);
   }
 });

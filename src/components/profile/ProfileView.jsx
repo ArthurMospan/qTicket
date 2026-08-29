@@ -81,7 +81,7 @@ export default function ProfileView({ user, onClose }) {
 
   const tabsConfig = [
     { id: 'profile', label: 'Профіль' },
-    { id: 'tasks', label: `Інциденти (${allActiveTasks.length})` },
+    { id: 'tasks', label: `Звернення (${allActiveTasks.length})` },
   ];
 
   // The admin menu is gone with the thing it managed. Who holds a qTicket seat
@@ -206,8 +206,8 @@ export default function ProfileView({ user, onClose }) {
             {allActiveTasks.length === 0 ? (
               <EmptyState
                 icon={TaskIcon}
-                title="Немає активних інцидентів"
-                description="Інциденти, призначені на учасника, з’являться тут автоматично"
+                title="Немає активних звернень"
+                description="Звернення, призначені на учасника, з’являться тут автоматично"
               />
             ) : (
               <>

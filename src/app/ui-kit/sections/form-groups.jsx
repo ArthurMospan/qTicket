@@ -10,7 +10,7 @@ export default function FormGroupsSection() {
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock title="Form Group Layouts" component="FormGroup" description="Контейнери для полів форми. Зв'язують заголовок Label (атом) та поле вводу (Input). Обов'язкове поле позначається текстом «обов'язково» праворуч у заголовку (не червоною зірочкою), помилка — червоною рамкою поля й текстом під ним." fullWidth>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]">
-          <FormGroup label="Назва проєкту">
+          <FormGroup label="Назва клієнта">
             <Input placeholder="Введіть назву..." />
           </FormGroup>
 

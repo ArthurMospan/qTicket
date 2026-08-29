@@ -1,50 +1,75 @@
 // src/lib/content/incidentTerms.mjs
-// One record, two readers, two words for it.
+// One record, one name: «звернення».
 //
 // qTicket runs on an inherited task engine and keeps it: the collection is
 // `issues`, the composer is still `CreateTaskModal`, and none of that is going
-// to be renamed for the sake of a label. What a client reads is a different
-// question. To an external `client_admin`/`client_member` this product is their
-// supplier's support desk — they opened an account to send a problem, not to be
-// handed somebody else's project tracker — so a «завдання», a «спринт» or a
-// «виконавець» on their screen is not jargon, it is the wrong product.
+// to be renamed for the sake of a label. What a person reads is a different
+// question, and the answer is the same for everybody. The client's portal is
+// «Мої звернення», the support queue is «Звернення», the settings section is
+// «Статуси звернень» and the audit line says «Створено звернення». One word.
 //
-// The portal the owner accepted is titled «Мої звернення», so «звернення» is
-// the client's word for the record and everything a client can read says it.
-// Internal support keeps «інцидент», which is what the queue, the settings and
-// the help centre call the same document. The two vocabularies met on the
-// screens both audiences share — the incident page, its conversation, the
-// composer, the palette — and that is exactly where one of them used to win by
-// accident. They live here instead, side by side, so a shared surface has to
-// name which reader it is talking to.
+// This file used to hold two vocabularies picked by role — «інцидент» for
+// support, «звернення» for the client — and that was the mistake, not the fix.
+// A record with two names is a product where the customer's list and the
+// agent's queue are visibly not the same thing: every shared screen had to
+// remember which reader it was addressing, an email or a bell row that reaches
+// both could name neither, and three sessions in a row let one of the two win
+// by accident on a screen that belonged to the other.
 //
-// `tests/client-terminology.test.mjs` holds the client half clean.
+// So this table is the only place the noun is spelled, and there is only one
+// table. A screen that wants the word asks for it here; a screen that hardcodes
+// it is what `tests/product-terminology.test.mjs` fails on.
 
-// The stems a client must never meet. Stems, not words: Ukrainian declines, and
-// «завдання» hides in «завданням» exactly as «проєкт» hides in «у проєкті».
-export const TASK_MANAGER_WORDS = Object.freeze([
-  'завданн',
+// Every other name the record has been called. Stems, not words: Ukrainian
+// declines, and «завдання» hides in «завданням» exactly as «інцидент» hides in
+// «в інциденті».
+//
+// «завдан» rather than «завданн» on purpose — the double-н stem misses the
+// genitive plural «завдань», and that is exactly where a leak survived the
+// previous sweep of this vocabulary.
+export const RECORD_WRONG_NAMES = Object.freeze([
+  'інцидент',
+  'завдан',
   'задач',
   'таск',
   'спринт',
   'беклог',
-  'виконавець',
-  'виконавц',
-  'трекер',
   'епік',
-  // The client's own support space is theirs, not a «проєкт» of somebody's
-  // portfolio. Both spellings, because the inherited copy uses both.
+]);
+
+// A client's support space is theirs, not a «проєкт» of somebody's portfolio,
+// and to support it is the client. Both spellings, because the inherited copy
+// used both. Internally the collection is still `projects` and the field is
+// still `projectId` — this list is about what a person reads, not about what
+// the database calls it.
+export const CLIENT_SPACE_WRONG_NAMES = Object.freeze([
   'проєкт',
   'проект',
 ]);
 
+// The stems no user-visible string in `src/` may contain, for any reader.
+export const TASK_MANAGER_WORDS = Object.freeze([
+  ...RECORD_WRONG_NAMES,
+  ...CLIENT_SPACE_WRONG_NAMES,
+]);
+
+// Forbidden on top of the above wherever an external client can read. These are
+// not a second name for the record; they are the inherited task manager showing
+// through the walls of somebody else's support desk. Support still says
+// «Виконавці» among themselves, and that is a separate question from this one.
+export const CLIENT_ONLY_FORBIDDEN_WORDS = Object.freeze([
+  'виконавець',
+  'виконавц',
+  'трекер',
+]);
+
+// What a client-readable surface is checked against: everything.
+export const CLIENT_FORBIDDEN_WORDS = Object.freeze([
+  ...TASK_MANAGER_WORDS,
+  ...CLIENT_ONLY_FORBIDDEN_WORDS,
+]);
+
 // Every string about the record itself, in the one voice the product speaks.
-//
-// This file briefly held two vocabularies — «інцидент» for support, «звернення»
-// for the client — and that was the mistake, not the fix. One record with two
-// names is a product where the customer's list and the agent's queue are
-// visibly not the same thing, and every shared screen has to remember which
-// reader it is talking to. There is one name.
 export const INCIDENT_TERMS_TABLE = Object.freeze({
   record: 'Звернення',
   untitled: 'Звернення без назви',
@@ -77,20 +102,12 @@ export const INCIDENT_TERMS_TABLE = Object.freeze({
   composerDescriptionLabel: 'Опис звернення',
 });
 
-// The two old names still resolve, and to the same table: a caller that asks
-// for the staff voice and a caller that asks for the client voice must not be
-// able to get different words out of this file again.
-export const INCIDENT_TERMS = Object.freeze({
-  staff: INCIDENT_TERMS_TABLE,
-  client: INCIDENT_TERMS_TABLE,
-});
-
 /**
  * The product's words for a support request.
  *
- * Keeps its argument so the call sites read honestly — a shared screen still
- * knows who is looking, for what it *shows* — but the vocabulary no longer
- * forks on it.
+ * Takes nothing. It used to take the reader's role, and a function that asks
+ * who is looking before it tells you what something is called is a two-name
+ * product waiting to happen again.
  */
 export function incidentTerms() {
   return INCIDENT_TERMS_TABLE;

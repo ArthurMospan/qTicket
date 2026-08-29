@@ -32,7 +32,7 @@ const NAV_OPACITY = 0.88;
 
 const TABS = [
   { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
-  { href: '/my',       icon: TaskIcon,        label: 'Інциденти' },
+  { href: '/my',       icon: TaskIcon,        label: 'Звернення' },
   { href: '/clients',  icon: Folder,          label: 'Клієнти' },
 ];
 

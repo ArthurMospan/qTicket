@@ -9,7 +9,7 @@ import { Input } from './Input';
 //
 // const confirm = useConfirm();
 //
-// if (!(await confirm({ title: 'Видалити спринт?', danger: true }))) return;
+// if (!(await confirm({ title: 'Видалити звернення?', danger: true }))) return;
 //
 // const typed = await confirm({
 //   title: 'Видалення організації',

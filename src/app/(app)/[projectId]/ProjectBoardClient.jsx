@@ -550,7 +550,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       <div>
                         <h2 className="ui-type-section-title text-ink">Команда клієнта</h2>
                         <p className="mt-1 text-[12px] text-muted">
-                          Зовнішні користувачі бачать тільки цей простір і його інциденти.
+                          Зовнішні користувачі бачать тільки цей простір і його звернення.
                         </p>
                       </div>
                       {canInviteClient && (
@@ -667,7 +667,6 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
             name: project.name,
             hiddenColumns: project.hiddenColumns || [],
           }}
-          entity="incident"
           clientMode
         />
       )}

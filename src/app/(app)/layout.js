@@ -288,7 +288,7 @@ export default function WorkspaceLayout({ children }) {
         </div>
         <h1 className="ui-type-page-title text-ink mb-2">Доступ заборонено</h1>
         <p className="text-[14px] text-muted max-w-[320px] mb-8">
-          Ви намагаєтесь увійти у внутрішній простір команди. Щоб керувати своїми проєктами, перейдіть на клієнтський портал.
+          Ви намагаєтесь увійти у внутрішній простір команди. Щоб працювати зі своїми зверненнями, перейдіть на клієнтський портал.
         </p>
         {portalUrl ? (
           <a href={portalUrl}

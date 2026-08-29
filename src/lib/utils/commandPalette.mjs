@@ -65,9 +65,9 @@ const INTERNAL_ACTIONS = [
   },
 ];
 
-// The palette a client opens sits behind «Мої звернення», so it says
-// «звернення» too — «Створити інцидент» was the second name for the record on
-// the one surface that had already given them the first.
+// The palette a client opens sits behind «Мої звернення», and it says the same
+// word the portal behind it does. There is one name for the record, and a
+// palette action is not a place that gets to invent a second.
 const CLIENT_ACTIONS = [
   {
     id: 'action-new-issue',
@@ -115,8 +115,8 @@ export function buildCommands({
 }
 
 // Subsequence matching, scored so that the thing you were obviously aiming at
-// wins. Typing "ні" should reach «Новий інцидент» before it reaches anything
-// that merely contains an н and a з.
+// wins. Typing "зв" should reach «Створити звернення» before it reaches
+// anything that merely contains a з and a в.
 export function fuzzyScore(text, query) {
   const haystack = String(text || '').toLowerCase();
   const needle = String(query || '').trim().toLowerCase();

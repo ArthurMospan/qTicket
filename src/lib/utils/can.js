@@ -43,7 +43,7 @@ export const PERMISSIONS = {
   // `manage:team` is the invitation and project-team permission — it is not
   // one undivided "team management" right, because the product splits it:
   // inviting and deactivating are owner+admin, while ownership stays in QuickTeam.
-  'manage:team': ['owner', 'admin'],          // Запрошення, склад команди проєкту
+  'manage:team': ['owner', 'admin'],          // Запрошення, склад команди клієнта
   // A client administrator may invite a client member only into a project
   // they already belong to. The invitation route enforces that project scope;
   // this permission must never be used as a substitute for `manage:team`.

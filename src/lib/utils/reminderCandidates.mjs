@@ -159,8 +159,8 @@ export function deadlineReminderCandidates(
         issueKey: issue.issueKey || '',
         type: 'deadline',
         title: overdue
-          ? `${issue.issueKey || 'Завдання'}: дедлайн прострочено${overdueDays > 0 ? ` на ${overdueDays} дн` : ''}`
-          : `${issue.issueKey || 'Завдання'}: дедлайн ${dueLabel}`,
+          ? `${issue.issueKey || 'Звернення'}: дедлайн прострочено${overdueDays > 0 ? ` на ${overdueDays} дн` : ''}`
+          : `${issue.issueKey || 'Звернення'}: дедлайн ${dueLabel}`,
         body: issue.title || '',
         deliverAtMs,
       });

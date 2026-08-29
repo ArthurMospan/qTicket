@@ -40,7 +40,7 @@ export async function POST(request, context) {
     );
     const initialTombstone = await tombstoneRef.get();
     if (!initialTombstone.exists) {
-      return NextResponse.json({ error: 'Задачу не знайдено серед нещодавно видалених', code: 'TOMBSTONE_NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ error: 'Звернення не знайдено серед нещодавно видалених', code: 'TOMBSTONE_NOT_FOUND' }, { status: 404 });
     }
     const initial = initialTombstone.data();
     if (
@@ -49,7 +49,7 @@ export async function POST(request, context) {
       || initial.issue?.organizationId !== organizationId
       || initial.issue?.id !== issueId
     ) {
-      return NextResponse.json({ error: 'Пошкоджений запис видаленої задачі', code: 'INVALID_TOMBSTONE_SCOPE' }, { status: 409 });
+      return NextResponse.json({ error: 'Пошкоджений запис видаленого звернення', code: 'INVALID_TOMBSTONE_SCOPE' }, { status: 409 });
     }
 
     const countDeltas = await projectIssueCountDeltasFor(db, organizationId);
@@ -60,7 +60,7 @@ export async function POST(request, context) {
       countDeltas.reset();
       const tombstoneSnap = await transaction.get(tombstoneRef);
       if (!tombstoneSnap.exists) {
-        throw restoreError('TOMBSTONE_NOT_FOUND', 404, 'Задачу не знайдено серед нещодавно видалених');
+        throw restoreError('TOMBSTONE_NOT_FOUND', 404, 'Звернення не знайдено серед нещодавно видалених');
       }
       const tombstone = tombstoneSnap.data();
       if (!canRestoreIssueTombstone(tombstone)) {
@@ -73,7 +73,7 @@ export async function POST(request, context) {
         || issue.organizationId !== organizationId
         || issue.id !== issueId
       ) {
-        throw restoreError('INVALID_TOMBSTONE_SCOPE', 409, 'Пошкоджений запис видаленої задачі');
+        throw restoreError('INVALID_TOMBSTONE_SCOPE', 409, 'Пошкоджений запис видаленого звернення');
       }
 
       const issueRef = db.collection('issues').doc(issueId);
@@ -81,17 +81,17 @@ export async function POST(request, context) {
       const liveIssue = await transaction.get(issueRef);
       const project = await transaction.get(projectRef);
       if (liveIssue.exists) {
-        throw restoreError('ISSUE_ALREADY_EXISTS', 409, 'Задачу вже відновлено');
+        throw restoreError('ISSUE_ALREADY_EXISTS', 409, 'Звернення вже відновлено');
       }
       if (
         !project.exists
         || project.data().organizationId !== organizationId
         || project.data().deletionPending === true
       ) {
-        throw restoreError('PROJECT_NOT_AVAILABLE', 409, 'Проєкт задачі більше недоступний');
+        throw restoreError('PROJECT_NOT_AVAILABLE', 409, 'Клієнтський простір звернення більше недоступний');
       }
       if (!hasProjectAccess(project.data(), authorization.membership?.role, authorization.user.uid)) {
-        throw restoreError('PROJECT_FORBIDDEN', 403, 'Ви не входите до команди цього проєкту');
+        throw restoreError('PROJECT_FORBIDDEN', 403, 'Ви не входите до команди цього клієнта');
       }
 
       const now = FieldValue.serverTimestamp();
@@ -146,7 +146,7 @@ export async function POST(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue restore',
-      fallbackMessage: 'Не вдалося відновити задачу',
+      fallbackMessage: 'Не вдалося відновити звернення',
     });
   }
 }

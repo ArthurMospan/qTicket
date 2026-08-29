@@ -27,7 +27,7 @@ async function loadAuthorizedIssue(request, issueId) {
   const issueRef = db.collection('issues').doc(issueId);
   const issueSnap = await issueRef.get();
   if (!issueSnap.exists) {
-    return { error: 'Завдання не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
+    return { error: 'Звернення не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
   }
 
   const issue = issueSnap.data();
@@ -48,7 +48,7 @@ async function loadAuthorizedIssue(request, issueId) {
     !projectSnap.exists
     || projectSnap.data().organizationId !== issue.organizationId
   ) {
-    return { error: 'Проєкт завдання не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
+    return { error: 'Клієнтський простір звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
   }
 
   const role = authorization.membership?.role;
@@ -58,7 +58,7 @@ async function loadAuthorizedIssue(request, issueId) {
     && !(Array.isArray(projectTeam) && projectTeam.includes(authorization.user.uid))
   ) {
     return {
-      error: 'Ви не входите до команди цього проєкту',
+      error: 'Ви не входите до команди цього клієнта',
       code: 'PROJECT_ACCESS_DENIED',
       status: 403,
     };
@@ -95,7 +95,7 @@ export async function PATCH(request, context) {
     const parentIssueId = normalizeParentIssueId(body?.parentIssueId);
     if (parentIssueId === undefined) {
       return NextResponse.json({
-        error: 'Некоректний ідентифікатор батьківського завдання',
+        error: 'Некоректний ідентифікатор основного звернення',
         code: 'INVALID_PARENT_ID',
       }, { status: 400 });
     }
@@ -118,7 +118,7 @@ export async function PATCH(request, context) {
         throw hierarchyTransactionError({
           code: 'ISSUE_NOT_FOUND',
           status: 404,
-          message: 'Завдання не знайдено',
+          message: 'Звернення не знайдено',
         });
       }
       const current = currentSnap.data();
@@ -129,7 +129,7 @@ export async function PATCH(request, context) {
         throw hierarchyTransactionError({
           code: 'ISSUE_SCOPE_CHANGED',
           status: 409,
-          message: 'Область завдання змінилася. Оновіть сторінку',
+          message: 'Область звернення змінилася. Оновіть сторінку',
         });
       }
       if (
@@ -139,14 +139,14 @@ export async function PATCH(request, context) {
         throw hierarchyTransactionError({
           code: 'PROJECT_NOT_FOUND',
           status: 404,
-          message: 'Проєкт завдання не знайдено',
+          message: 'Клієнтський простір звернення не знайдено',
         });
       }
       if (projectSnap.data().deletionPending === true) {
         throw hierarchyTransactionError({
           code: 'PROJECT_DELETING',
           status: 409,
-          message: 'Проєкт уже видаляється',
+          message: 'Клієнтський простір уже видаляється',
         });
       }
 
@@ -209,8 +209,8 @@ export async function PATCH(request, context) {
         //
         // A subtask card shows the task it hangs under, and it used to find
         // that task by searching the issues that happened to be loaded on the
-        // same screen. The parent is usually not among them — another sprint,
-        // another column, past the page — so the identifier slot fell through
+        // same screen. The parent is usually not among them — another column,
+        // another client, past the page — so the identifier slot fell through
         // to the words «Батьківське завдання», which read as if that were the
         // task's number. This transaction has already read the parent to
         // validate the move; keeping its key costs nothing and means no card
@@ -245,7 +245,7 @@ export async function PATCH(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue parent PATCH',
-      fallbackMessage: 'Не вдалося змінити ієрархію завдання',
+      fallbackMessage: 'Не вдалося змінити ієрархію звернення',
     });
   }
 }

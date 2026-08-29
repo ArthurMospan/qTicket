@@ -55,7 +55,7 @@ export const STATUS_CATEGORY_ICONS = {
 // the settings page and the API must always describe the same workflow.
 //
 // `category` is the shared layer of a status: the label is this organization's
-// business, the category is what «Мої завдання», analytics and billing read.
+// business, the category is what «Звернення», analytics and billing read.
 // See src/lib/utils/statusCategories.mjs.
 export const DEFAULT_STATUSES = [{
   id: 'backlog',
@@ -121,9 +121,9 @@ export function getCompletedAtMillis(issue) {
   return reliableCompletedAtMillis(issue);
 }
 
-// QUI-130. «Задача» leads because it is the default: most issues are tasks, and
-// the list should open on the one you reach for. («Завдання» is the entity —
-// what the whole product calls an issue; «Задача» is one of its three types.)
+// QUI-130. «Звернення» leads because it is the default: most records are a
+// plain request, and the list should open on the one you reach for. The record
+// and its default type share the word on purpose — the product has one.
 export const DEFAULT_TYPES = DEFAULT_TASK_TYPES.map(type => ({ ...type }));
 export const DEFAULT_PRIORITIES = DEFAULT_SYSTEM_PRIORITIES;
 // Labels are organization taxonomy, not universal workflow. Existing saved

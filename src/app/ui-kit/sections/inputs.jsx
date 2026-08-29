@@ -37,7 +37,7 @@ export default function InputsSection() {
           {/* Третій стан — для шапки списку, де вибрана частина рядків. Клік
               з нього дає «вибрано», бо «частково» це не те, чим можна стати. */}
           <Checkbox indeterminate onChange={() => {}} label="Вибрано частину" id="chk-indeterminate" />
-          <ToggleSwitch checked={tgl} onChange={setTgl} label="Активний спринт" />
+          <ToggleSwitch checked={tgl} onChange={setTgl} label="Показувати архівні" />
         </div>
       </PreviewBlock>
 
@@ -111,7 +111,7 @@ export default function InputsSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="Project Status Visibility" description="Shared picker для створення й налаштувань проєкту. Беклог заблокований як обов’язкова fallback-колонка." fullWidth>
+      <PreviewBlock title="Project Status Visibility" description="Shared picker для створення й налаштувань клієнта. Перший статус заблокований як обов’язкова fallback-колонка." fullWidth>
         <div className="max-w-[520px]">
           <StatusVisibilityPicker
             statuses={DEFAULT_STATUSES}
@@ -121,7 +121,7 @@ export default function InputsSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="Date Picker" description="Живий DatePicker, який використовується в інцидентах і налаштуваннях." fullWidth>
+      <PreviewBlock title="Date Picker" description="Живий DatePicker, який використовується у зверненнях і налаштуваннях." fullWidth>
         <div className="grid max-w-[532px] gap-3 sm:grid-cols-2">
           <div>
             <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Оберіть дату</label>
@@ -161,7 +161,7 @@ export default function InputsSection() {
       <PreviewBlock title="Validation State" description="error prop shows red border + error message below." fullWidth>
         <div className="max-w-[400px] flex flex-col gap-[10px]">
           <Input placeholder="Email" error="Невірна адреса електронної пошти" defaultValue="bad@" />
-          <Input placeholder="Назва проєкту" error="Поле обов'язкове" />
+          <Input placeholder="Назва клієнта" error="Поле обов'язкове" />
         </div>
       </PreviewBlock>
 
@@ -174,7 +174,7 @@ export default function InputsSection() {
 
       <PreviewBlock title="Textarea" component="Textarea" description="Багаторядкові текстові області. Кольори: фон #f4f4f5, фокус-рамка #1f1f1f. Скруглення: 10px. Зміна розміру (resize) вимкнена за замовчуванням." fullWidth>
         <div className="max-w-[500px] flex flex-col gap-[10px]">
-          <Textarea placeholder="Опис завдання або проєкту..." rows={3} />
+          <Textarea placeholder="Опис звернення..." rows={3} />
           <Textarea placeholder="Великий опис..." rows={6} />
         </div>
       </PreviewBlock>
@@ -182,7 +182,7 @@ export default function InputsSection() {
       <PreviewBlock title="Form label pattern" component="Label" description="Always 11px, bold, uppercase, tracking-wider, color #9a9a9a." fullWidth>
         <div className="max-w-[400px] flex flex-col gap-[16px]">
           <div>
-            <Label htmlFor="kit-project-name" required className="mb-[6px] block">Назва проєкту</Label>
+            <Label htmlFor="kit-project-name" required className="mb-[6px] block">Назва клієнта</Label>
             <Input id="kit-project-name" placeholder="Наприклад: Редизайн сайту" />
           </div>
           <div>

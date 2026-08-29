@@ -79,7 +79,7 @@ const GROUPS = [
     title: 'Організми (Organisms)',
     items: [
       { id: 'task-crm',     label: 'Task Rows',          icon: TaskIcon },
-      { id: 'task-elements', label: 'Задачі — власні елементи', icon: TaskIcon },
+      { id: 'task-elements', label: 'Звернення — власні елементи', icon: TaskIcon },
       { id: 'dialogs',      label: 'Dialogs & Modals',   icon: MessageSquare },
     ]
   },
@@ -90,7 +90,7 @@ const GROUPS = [
       { id: 'page-headers',      label: 'Page Header (Шапка)',            icon: Type },
       { id: 'sidebar-layout',    label: 'Workspace Shell',                icon: PanelLeftOpen },
       { id: 'inner-nav-layout',  label: 'SidebarLayout — 2 контексти',    icon: List },
-      { id: 'detail-layout',     label: 'Деталі задачі й події',          icon: TaskIcon },
+      { id: 'detail-layout',     label: 'Деталі звернення',          icon: TaskIcon },
     ]
   },
   {

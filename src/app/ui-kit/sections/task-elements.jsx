@@ -42,13 +42,13 @@ export default function TaskElementsSection() {
   return (
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
-        title="Назва завдання в режимі редагування"
+        title="Назва звернення в режимі редагування"
         description="Заголовок, у який можна писати: розмір h1, без коробки, з лінійкою знизу. Навмисно не варіант Input — той малює заливку, рамку й падінги утилітами, а тут їх немає; варіант міг би тільки намагатися їх скасувати, і виграв би той клас, який Tailwind згенерував пізніше, а не той, що написаний останнім."
         filePath="src/components/ui/Forms/TitleInput.jsx"
         component="TitleInput"
         fullWidth
       >
-        <TitleInput value={title} onChange={e => setTitle(e.target.value)} placeholder="Назва завдання..." />
+        <TitleInput value={title} onChange={e => setTitle(e.target.value)} placeholder="Назва звернення..." />
       </PreviewBlock>
 
       <PreviewBlock
@@ -64,8 +64,8 @@ export default function TaskElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Опис завдання — дві шкали читання"
-        description="md — панель попереднього перегляду в редакторі, lg — опис завдання, який читають. Раніше друге задавалося className на місці виклику, і половина того перевизначення не діяла: розмір застосовувався, а міжрядковий інтервал — ні, бо базовий leading-relaxed генерується пізніше за leading-7."
+        title="Опис звернення — дві шкали читання"
+        description="md — панель попереднього перегляду в редакторі, lg — опис звернення, який читають. Раніше друге задавалося className на місці виклику, і половина того перевизначення не діяла: розмір застосовувався, а міжрядковий інтервал — ні, бо базовий leading-relaxed генерується пізніше за leading-7."
         filePath="src/components/ui/DataDisplay/MarkdownViewer.jsx"
         component="MarkdownViewer"
         fullWidth
@@ -113,7 +113,7 @@ export default function TaskElementsSection() {
         <div className="flex flex-wrap items-end gap-[16px]">
           {[[false, false, 'details'], [false, true, 'details · натиснутий'], [true, false, 'details · condensed']].map(([condensed, active, role]) => (
             <div key={role} className="flex w-[120px] flex-col items-center gap-[6px]">
-              <AttributeTrigger variant="details" condensed={condensed} active={active} aria-label="Деталі завдання">
+              <AttributeTrigger variant="details" condensed={condensed} active={active} aria-label="Деталі звернення">
                 <Settings2 size={14} />
                 <span>Деталі</span>
               </AttributeTrigger>
@@ -136,7 +136,7 @@ export default function TaskElementsSection() {
 
       <PreviewBlock
         title="Тип файлу"
-        description="Квадрат перед назвою файлу — і єдине місце в продукті, де вирішується, як виглядає файл. Картинка показує себе, відео — власний перший кадр зі значком відтворення, решта отримує гліф і відтінок своєї родини. Родину визначає `attachmentKinds.mjs`, спільний із чатом, тому .xlsx зелений і в задачі, і в каналі."
+        description="Квадрат перед назвою файлу — і єдине місце в продукті, де вирішується, як виглядає файл. Картинка показує себе, відео — власний перший кадр зі значком відтворення, решта отримує гліф і відтінок своєї родини. Родину визначає `attachmentKinds.mjs`, спільний із чатом, тому .xlsx зелений і у зверненні, і в каналі."
         filePath="src/components/ui/Attachments/FileThumb.jsx"
         component="FileThumb"
         fullWidth
@@ -153,7 +153,7 @@ export default function TaskElementsSection() {
 
       <PreviewBlock
         title="Аудіо, яке чути на місці"
-        description="Плеєр, а не посилання на лайтбокс. Стан читається з самого <audio>, бо браузер ставить на паузу й без нас; доріжка — справжній slider зі стрілками, Home і End. Два плеєри одночасно не грають: старт зупиняє решту. Той самий компонент стоїть у вкладеннях задачі, у чаті та в клієнтському порталі."
+        description="Плеєр, а не посилання на лайтбокс. Стан читається з самого <audio>, бо браузер ставить на паузу й без нас; доріжка — справжній slider зі стрілками, Home і End. Два плеєри одночасно не грають: старт зупиняє решту. Той самий компонент стоїть у вкладеннях звернення, у чаті та в клієнтському порталі."
         filePath="src/components/ui/Attachments/AudioPlayer.jsx"
         component="AudioPlayer"
         fullWidth
@@ -164,7 +164,7 @@ export default function TaskElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Вкладення завдання"
+        title="Вкладення звернення"
         description="Уся зона від мініатюри до назви відкриває файл і підсвічується разом; завантаження та видалення лишаються окремими діями. Аудіофайл виняток: рядок сам стає плеєром, бо відкривати чорний повноекранний перегляд заради дванадцяти секунд голосу — не те, чого хтось хотів."
         filePath="src/components/ui/TaskManagement/AttachmentRow.jsx"
         component="AttachmentRow"
@@ -193,8 +193,8 @@ export default function TaskElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Масові дії із завданнями"
-        description="Плаваюча панель зʼявляється після команди «Вибрати всі» у кебабі або після Shift+кліку по завданню. Контрастні селектори містять основні атрибути, а дедлайн, оцінка, дублювання й архівація зібрані в меню. Поки дія виконується, панель рахує зроблене замість того, щоб мовчки заблокуватись. На реальній дошці панель закріплена над нижнім краєм."
+        title="Масові дії зі зверненнями"
+        description="Плаваюча панель зʼявляється після команди «Вибрати всі» у кебабі або після Shift+кліку по зверненню. Контрастні селектори містять основні атрибути, а дедлайн, оцінка, дублювання й архівація зібрані в меню. Поки дія виконується, панель рахує зроблене замість того, щоб мовчки заблокуватись. На реальній дошці панель закріплена над нижнім краєм."
         filePath="src/components/ui/TaskManagement/BulkActionBar.jsx"
         component="BulkActionBar"
         fullWidth
@@ -207,7 +207,7 @@ export default function TaskElementsSection() {
               memberOptions={[{ value: 'kit-arthur', label: 'Артур Моспан', user: demoUser }]}
               priorityOptions={[{ value: 'medium', label: 'Середній' }]}
               labelOptions={[{ value: 'design', label: 'Дизайн', dotColor: '#8b5cf6' }]}
-              typeOptions={[{ value: 'task', label: 'Завдання' }]}
+              typeOptions={[{ value: 'task', label: 'Звернення' }]}
               canArchive
               onApply={() => {}}
               onClear={() => {}}
@@ -224,7 +224,7 @@ export default function TaskElementsSection() {
               memberOptions={[{ value: 'kit-arthur', label: 'Артур Моспан', user: demoUser }]}
               priorityOptions={[{ value: 'medium', label: 'Середній' }]}
               labelOptions={[{ value: 'design', label: 'Дизайн', dotColor: '#8b5cf6' }]}
-              typeOptions={[{ value: 'task', label: 'Завдання' }]}
+              typeOptions={[{ value: 'task', label: 'Звернення' }]}
               canArchive
               onApply={() => {}}
               onClear={() => {}}
@@ -250,8 +250,8 @@ export default function TaskElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Звʼязок між задачами"
-        description="Тип звʼязку, задача, на яку він вказує, і відвʼязування на наведення. Тут же виходить назовні позначка «Потребує перевірки» — старий звʼязок «підзавдання», напрямок якого не відновлюється автоматично."
+        title="Звʼязок між зверненнями"
+        description="Тип звʼязку, звернення, на яке він вказує, і відвʼязування на наведення. Тут же виходить назовні позначка «Потребує перевірки» — старий звʼязок «дочірнє», напрямок якого не відновлюється автоматично."
         filePath="src/components/ui/TaskManagement/IssueLinkRow.jsx"
         component="IssueLinkRow"
         fullWidth
@@ -274,7 +274,7 @@ export default function TaskElementsSection() {
 
       <PreviewBlock
         title="Чіпи вибору"
-        description="Натискний чіп: виконавець на новій задачі, мітка на новій задачі. Це перемикач, а не посилання — стан несе aria-pressed, тож вибране й невибране це два стани одного контрола. Мітка бере колір із бази під час рендера, чого не виражає жоден клас."
+        description="Натискний чіп: виконавець на новому зверненні, мітка на новому зверненні. Це перемикач, а не посилання — стан несе aria-pressed, тож вибране й невибране це два стани одного контрола. Мітка бере колір із бази під час рендера, чого не виражає жоден клас."
         filePath="src/components/ui/Forms/SelectableChip.jsx"
         component="SelectableChip"
         fullWidth
@@ -295,7 +295,7 @@ export default function TaskElementsSection() {
           </SelectableChip>
           <SelectableChip shape="label" selected={false} onClick={() => {}}>
             <TagIcon size={10} className="shrink-0 opacity-70" />
-            беклог
+            новий
           </SelectableChip>
         </div>
       </PreviewBlock>

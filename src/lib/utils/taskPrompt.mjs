@@ -31,7 +31,7 @@ export function buildTaskAiPrompt({
   const checklistItems = Array.isArray(issue.subtasks) ? issue.subtasks : [];
   const labels = Array.isArray(issue.labelIds) ? issue.labelIds : [];
   const context = [
-    ['Проєкт', projectName],
+    ['Клієнт', projectName],
     ['Ключ', issue.issueKey],
     ['Тип', typeName || issue.type],
     ['Статус', statusName || issue.status || issue.columnId],
@@ -44,8 +44,8 @@ export function buildTaskAiPrompt({
   ].filter(([, value]) => clean(String(value || '')));
 
   const sections = [
-    'Допоможи якісно виконати наступну задачу. Спочатку коротко переформулюй очікуваний результат, потім запропонуй план виконання. Якщо контексту недостатньо — не вигадуй факти, а постав конкретні уточнювальні запитання.',
-    `## Задача\n${clean(issue.title) || 'Без назви'}`,
+    'Допоможи якісно опрацювати це звернення. Спочатку коротко переформулюй очікуваний результат, потім запропонуй план виконання. Якщо контексту недостатньо — не вигадуй факти, а постав конкретні уточнювальні запитання.',
+    `## Звернення\n${clean(issue.title) || 'Без назви'}`,
   ];
 
   if (context.length) {
@@ -58,7 +58,7 @@ export function buildTaskAiPrompt({
 
   sections.push([
     '## Формат відповіді',
-    '1. Розуміння задачі та критерії готовності.',
+    '1. Розуміння звернення та критерії готовності.',
     '2. Ризики, залежності й відсутні дані.',
     '3. Покроковий план.',
     '4. Конкретний результат або перший готовий варіант.',

@@ -19,7 +19,7 @@ test('legacy Epic remains readable in configuration but is never creatable', () 
     error: {
       code: 'LEGACY_EPIC_TYPE',
       status: 400,
-      message: 'Епік є лише legacy-типом і недоступний для нових завдань',
+      message: 'Цей тип застарілий і недоступний для нових звернень',
     },
   });
 });

@@ -26,7 +26,7 @@ const robotoCondensed = Roboto_Condensed({
 // the emails already resolve against, so there is one answer to "what is our
 // origin" rather than three.
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-const OG_DESCRIPTION = 'Система інцидентів і клієнтської підтримки';
+const OG_DESCRIPTION = 'Система звернень і клієнтської підтримки';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -37,7 +37,7 @@ export const metadata = {
     default: 'qTicket',
     template: '%s · qTicket',
   },
-  description: 'Система інцидентів і клієнтської підтримки qTicket',
+  description: 'Система звернень і клієнтської підтримки qTicket',
   // A workspace link is pasted into a chat dozens of times a day. Without this
   // it unfurled as the bare host: no name, no mark, no hint of what it opens.
   openGraph: {

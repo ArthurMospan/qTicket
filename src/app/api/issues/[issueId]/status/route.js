@@ -83,7 +83,7 @@ export async function PATCH(request, context) {
     const initialIssueSnap = await issueRef.get();
     if (!initialIssueSnap.exists) {
       return jsonError(
-        'Завдання не знайдено',
+        'Звернення не знайдено',
         404,
         'ISSUE_NOT_FOUND',
       );
@@ -154,7 +154,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'ISSUE_NOT_FOUND',
           404,
-          'Завдання не знайдено',
+          'Звернення не знайдено',
         );
       }
 
@@ -166,14 +166,14 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'ISSUE_SCOPE_CHANGED',
           409,
-          'Область завдання змінилася. Оновіть сторінку',
+          'Область звернення змінилася. Оновіть сторінку',
         );
       }
       if (current.deletionPending === true) {
         throw apiTransactionError(
           'ISSUE_DELETING',
           409,
-          'Завдання вже видаляється',
+          'Звернення вже видаляється',
         );
       }
       if (
@@ -183,7 +183,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Проєкт завдання не знайдено',
+          'Клієнтський простір звернення не знайдено',
         );
       }
 
@@ -192,7 +192,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Проєкт уже видаляється',
+          'Клієнтський простір уже видаляється',
         );
       }
       if (
@@ -205,7 +205,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'PROJECT_ACCESS_DENIED',
           403,
-          'Ви не входите до команди цього проєкту',
+          'Ви не входите до команди цього клієнта',
         );
       }
 
@@ -228,7 +228,7 @@ export async function PATCH(request, context) {
             requestedStatus,
             Array.isArray(workflow.statuses) ? workflow.statuses : [],
           )}» прихована `
-            + 'у налаштуваннях цього проєкту. Увімкніть її або виберіть інший статус',
+            + 'у налаштуваннях цього клієнта. Увімкніть її або виберіть інший статус',
           { statusId: requestedStatus },
         );
       }
@@ -307,7 +307,7 @@ export async function PATCH(request, context) {
           throw apiTransactionError(
             'ORDER_ISSUE_NOT_FOUND',
             409,
-            'Одне із завдань для перестановки вже не існує. Оновіть дошку',
+            'Одне зі звернень для перестановки вже не існує. Оновіть дошку',
             { issueId: update.issueId },
           );
         }
@@ -316,7 +316,7 @@ export async function PATCH(request, context) {
           throw apiTransactionError(
             'ORDER_ISSUE_SCOPE_MISMATCH',
             400,
-            'Усі завдання для перестановки мають належати тому самому проєкту',
+            'Усі звернення для перестановки мають належати тому самому клієнтському простору',
             { issueId: update.issueId },
           );
         }
@@ -324,7 +324,7 @@ export async function PATCH(request, context) {
           throw apiTransactionError(
             'ORDER_ISSUE_DELETING',
             409,
-            'Одне із завдань для перестановки вже видаляється. Оновіть дошку',
+            'Одне зі звернень для перестановки вже видаляється. Оновіть дошку',
             { issueId: update.issueId },
           );
         }
@@ -501,7 +501,7 @@ export async function PATCH(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue status PATCH',
-      fallbackMessage: 'Не вдалося змінити статус завдання',
+      fallbackMessage: 'Не вдалося змінити статус звернення',
     });
   }
 }

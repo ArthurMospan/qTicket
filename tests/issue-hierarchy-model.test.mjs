@@ -84,7 +84,7 @@ test('one-level hierarchy rejects self, cross-project, nested parent and parent-
   }), {
     code: 'ISSUE_HAS_CHILDREN',
     status: 409,
-    message: 'Завдання з підзавданнями не можна зробити підзавданням',
+    message: 'Звернення з дочірніми не можна зробити дочірнім',
     childCount: 2,
   });
 });

@@ -95,7 +95,7 @@ export default function TaskRow({
 
   const typeObj = types.find(t => t.id === task.type) || {
     id: task.type || 'task',
-    label: task.type === 'epic' ? 'Епік (legacy)' : 'Інцидент',
+    label: task.type === 'epic' ? 'Застарілий тип' : 'Звернення',
     color: task.type === 'epic' ? '#8b5cf6' : '#9a9a9a',
   };
   const typeLabel = typeObj.label;
@@ -183,7 +183,7 @@ export default function TaskRow({
             checked={selected}
             onChange={() => onSelect(task.id)}
             size="sm"
-            ariaLabel={`Вибрати інцидент ${task.issueKey || task.title}`}
+            ariaLabel={`Вибрати звернення ${task.issueKey || task.title}`}
           />
         </span>
       ) : (
@@ -232,7 +232,7 @@ export default function TaskRow({
   const blockedBadge = isBlocked ? (
     <span
       className="flex items-center gap-[4px] text-[10px] font-medium px-[6px] py-[1.5px] rounded-[4px] shrink-0 bg-danger-soft text-danger"
-      title="Заблоковано іншим інцидентом"
+      title="Заблоковано іншим зверненням"
     >
       <Lock size={10} />
       Заблоковано
@@ -260,7 +260,7 @@ export default function TaskRow({
       ? `flex items-center gap-[3px] text-[9px] font-bold shrink-0 ml-1 ${isOverdue ? 'text-danger' : 'text-muted'}`
       : `flex items-center gap-[4px] text-[11px] font-semibold shrink-0 ${isOverdue ? 'text-danger' : 'text-muted'}`}>
       <CalendarIcon size={dense ? 10 : 12} strokeWidth={2} className="shrink-0" />
-      {/* Прострочене завдання друкує лише «Прострочено» — так само, як картка
+      {/* Прострочене звернення друкує лише «Прострочено» — так само, як картка
           на дошці. Дата, яка вже минула, нічого не додає до цього слова, а
           два написи поспіль коштували рядку ширини, якої йому бракує. */}
       {isOverdue
@@ -273,7 +273,7 @@ export default function TaskRow({
     <div className={dense
       ? 'flex items-center gap-[4px] text-[9px] text-muted font-bold shrink-0 ml-1'
       : 'flex items-center gap-[5px] text-[11px] text-muted font-semibold shrink-0'}>
-      <span className="text-ink">{childDone}/{childAll} дочірніх інцидентів</span>
+      <span className="text-ink">{childDone}/{childAll} дочірніх звернень</span>
       <div className="flex gap-[2px]">
         {Array.from({ length: childAll }).map((_, idx) => (
           <div

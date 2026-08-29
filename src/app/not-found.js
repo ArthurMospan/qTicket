@@ -22,7 +22,7 @@ export default function NotFound() {
         <p className="ui-type-display-title text-faint">404</p>
         <h1 className="ui-type-detail-title text-ink mt-2 mb-2">Сторінку не знайдено</h1>
         <p className="text-[13px] text-muted mb-6">
-          Можливо, посилання застаріло, або проєкт чи завдання видалили.
+          Можливо, посилання застаріло, або клієнтський простір чи звернення видалили.
         </p>
         <Link
           href="/"

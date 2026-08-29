@@ -31,22 +31,20 @@ import { issuePath } from '@/lib/utils/issueKeys.mjs';
 
 
 
-// `initialCategory` is what the «+» on a category column of «Мої завдання»
+// `initialCategory` is what the «+» on a category column of «Звернення»
 // asks for: the composer has no project yet, and a category has a different
 // status in every project, so the status can only be resolved once a project is
 // chosen — and again if it is changed.
-export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers = [], projects = null, projectContext = null, initialStatus = null, initialCategory = null, initialAssignees = null, entity = 'incident', clientMode = false }) {
+export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers = [], projects = null, projectContext = null, initialStatus = null, initialCategory = null, initialAssignees = null, clientMode = false }) {
   const router = useRouter();
   const { currentUser, activeOrg, orgRole } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
   const { labels: availableLabels = [], statuses = [], types = [], priorities = [] } = useWorkflowConfig();
-  const incidentComposer = entity === 'incident';
-  // The same composer opens for three readers, and each has its own word for
-  // what it is about to create. `clientMode` is the one that matters: the
-  // external client whose portal is «Мої звернення» was being asked to create
-  // an «інцидент» — a second name for the record, on the one screen where they
-  // had already been given the first.
-  const terms = incidentTerms(clientMode);
+  // The same composer opens for support and for the client, and both of them
+  // are creating the one thing this product has: a «звернення». `clientMode`
+  // still decides what the form *offers* — status, priority and assignee are
+  // not a client's to set — but never what the record is called.
+  const terms = incidentTerms();
   const [form, setForm] = useState({
     title: '', description: '', status: 'backlog',
     priority: NO_PRIORITY_ID, type: 'task',
@@ -75,7 +73,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
   // right now rather than from whatever list the caller happened to pass.
   //
   // Three of the four places that open this composer handed it the whole
-  // organization — «Мої завдання», «Спринти» and the projects page all ask for
+  // organization — «Звернення», «Огляд» and the clients page all ask for
   // a project *inside* the dialog, so there was no project to scope by when
   // they built their list. The result was a task assigned to somebody who is
   // not on its project: they cannot open it, and the board silently drops their
@@ -104,7 +102,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
   }, [selectedProject]);
 
   // Anyone the composer was opened with stays on the list even when they are
-  // not on the project — «Команда» → учасник → «Створити завдання» is exactly
+  // not on the project — «Команда» → учасник → «Створити звернення» is exactly
   // that case, and dropping the person the dialog was opened for would be a
   // stranger answer than saying what will happen to them.
   const preselected = useMemo(() => new Set(initialAssignees || []), [initialAssignees]);
@@ -308,9 +306,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
   const handleSubmit = async (e) => {
     e.preventDefault();
     const nextErrors = {};
-    if (!form.title.trim()) nextErrors.title = incidentComposer ? terms.composerSubjectRequired : 'Вкажіть назву завдання';
+    if (!form.title.trim()) nextErrors.title = terms.composerSubjectRequired;
     if (projects && projects.length > 0 && !form.projectId) {
-      nextErrors.projectId = incidentComposer ? 'Оберіть клієнта' : 'Оберіть проєкт';
+      nextErrors.projectId = 'Оберіть клієнта';
     }
     if (Object.keys(nextErrors).length) {
       setFieldErrors(nextErrors);
@@ -322,12 +320,8 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
     if (!clientMode && assigneesLockedOut.length > 0 && !addToProjectTeam) {
       setFieldErrors({});
       setError(mayGrantProjectAccess
-        ? incidentComposer
-          ? 'Позначте «Додати до команди підтримки клієнта» або приберіть відповідального, який не має доступу.'
-          : 'Позначте «Додати до складу проєкту» або приберіть виконавця, який не має доступу.'
-        : incidentComposer
-          ? 'Приберіть відповідального, який не входить до команди підтримки клієнта.'
-          : 'Приберіть виконавця, який не входить до складу проєкту.');
+        ? 'Позначте «Додати до команди підтримки клієнта» або приберіть відповідального, який не має доступу.'
+        : 'Приберіть відповідального, який не входить до команди підтримки клієнта.');
       return;
     }
     setFieldErrors({});
@@ -367,10 +361,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
       }
     } catch (err) {
       console.error('[CreateTask]', err);
-      setError(userFacingErrorMessage(
-        err,
-        incidentComposer ? terms.composerFailed : 'Не вдалося створити завдання',
-      ));
+      setError(userFacingErrorMessage(err, terms.composerFailed));
     } finally {
       setLoading(false);
     }
@@ -380,7 +371,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
     <Dialog
       isOpen={isOpen}
       onClose={closeAndReset}
-      title={incidentComposer ? terms.composerTitle : 'Нове завдання'}
+      title={terms.composerTitle}
       size="lg"
       bodyPadding="flush"
       isDirty={draftTouched}
@@ -407,7 +398,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
             disabled={!clientMode && creatableTypes.length === 0}
             loading={loading}
           >
-            {loading ? 'Створення...' : incidentComposer ? terms.composerSubmit : 'Створити завдання'}
+            {loading ? 'Створення...' : terms.composerSubmit}
           </Button>
         </>
       )}
@@ -422,32 +413,32 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
             <div role="alert" className="lg:col-span-2">
               <Alert
                 variant="error"
-                title={incidentComposer ? terms.composerFailed : 'Не вдалося створити завдання'}
+                title={terms.composerFailed}
                 description={error}
               />
             </div>
           )}
 
           {/* Title */}
-          <FormGroup label={incidentComposer ? terms.composerSubjectLabel : 'Назва'} required error={fieldErrors.title} className="lg:col-span-2">
+          <FormGroup label={terms.composerSubjectLabel} required error={fieldErrors.title} className="lg:col-span-2">
             <Input
               ref={titleInputRef}
               autoFocus
               value={form.title}
               onChange={e => set('title', e.target.value)}
-              placeholder={incidentComposer ? 'Коротко опишіть проблему або запит' : 'Що потрібно зробити?'}
+              placeholder="Коротко опишіть проблему або запит"
               error={Boolean(fieldErrors.title)}
             />
           </FormGroup>
 
           {/* Project Selector (if projects passed) */}
           {projects && projects.length > 0 && (
-            <FormGroup label={incidentComposer ? 'Клієнт' : 'Проєкт'} required error={fieldErrors.projectId}>
+            <FormGroup label="Клієнт" required error={fieldErrors.projectId}>
               <Select
                 value={form.projectId}
                 onChange={val => set('projectId', val)}
                 options={projects.map(p => ({ value: p.id, label: p.name }))}
-                placeholder={incidentComposer ? 'Оберіть клієнта...' : 'Оберіть проєкт...'}
+                placeholder="Оберіть клієнта..."
               />
             </FormGroup>
           )}
@@ -468,17 +459,13 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
               <Alert
                 variant="warning"
                 title={assigneesJoiningProject.length === 1
-                  ? incidentComposer
-                    ? 'Цього працівника немає в команді підтримки клієнта'
-                    : 'Цього учасника немає в проєкті'
-                  : incidentComposer
-                    ? 'Цих працівників немає в команді підтримки клієнта'
-                    : 'Цих учасників немає в проєкті'}
+                  ? 'Цього працівника немає в команді підтримки клієнта'
+                  : 'Цих працівників немає в команді підтримки клієнта'}
               >
                 <div className="flex flex-col gap-2">
                   <span>
                     {assigneesJoiningProject.map(m => m.name || m.email).join(', ')} — не у
-                    {incidentComposer ? ' команді підтримки клієнта' : ' складі проєкту'}
+                    {' команді підтримки клієнта'}
                     {selectedProject?.name ? ` «${selectedProject.name}»` : ''}.
                   </span>
                   {mayGrantProjectAccess ? (
@@ -486,13 +473,11 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
                       size="sm"
                       checked={addToProjectTeam}
                       onChange={setAddToProjectTeam}
-                      label={`${incidentComposer ? 'Додати до команди підтримки клієнта' : 'Додати до проєкту'}${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`}
+                      label={`Додати до команди підтримки клієнта${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`}
                     />
                   ) : (
                     <span>
-                      {incidentComposer
-                        ? 'Призначити не вдасться — попросіть власника або адміністратора додати працівника до підтримки цього клієнта.'
-                        : 'Призначити не вдасться — попросіть власника або адміністратора додати до проєкту.'}
+                      Призначити не вдасться — попросіть власника або адміністратора додати працівника до підтримки цього клієнта.
                     </span>
                   )}
                 </div>
@@ -502,13 +487,13 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
 
           {/* Description */}
           <div className="flex flex-col gap-[6px] lg:col-span-2">
-            <Label>{incidentComposer ? terms.composerDescriptionLabel : 'Опис'}</Label>
+            <Label>{terms.composerDescriptionLabel}</Label>
             <MarkdownEditor
               value={form.description}
               onChange={(val) => set('description', val)}
               onUploadFiles={handleUploadFiles}
               uploading={uploadingFiles}
-              placeholder={incidentComposer ? 'Опишіть ситуацію, очікуваний результат і додайте файли або посилання…' : 'Додайте деталі, чеклісти, посилання...'}
+              placeholder="Опишіть ситуацію, очікуваний результат і додайте файли або посилання…"
               minHeight="120px"
             />
           </div>
@@ -547,11 +532,11 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
               />
             </div>
             <div className="flex flex-col gap-[6px]">
-                <Label>{incidentComposer ? 'Термін вирішення' : 'Дедлайн'}</Label>
+                <Label>Термін вирішення</Label>
               <DatePicker
                 value={form.dueDate}
                 onChange={value => set('dueDate', value)}
-                placeholder={incidentComposer ? 'Без терміну' : 'Без дедлайну'}
+                placeholder="Без терміну"
               />
             </div>
           </div>
@@ -561,7 +546,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
           {!clientMode && assignableMembers.length > 0 && (
             <div className="flex flex-col gap-[6px] lg:col-span-2">
               <div className="flex items-center justify-between gap-3">
-                <Label>{incidentComposer ? 'Відповідальні' : 'Виконавці'}</Label>
+                <Label>Відповідальні</Label>
                 <span className="text-[10px] font-medium text-muted">Можна вибрати кількох</span>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -582,9 +567,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
                       selected={selected}
                       disabled={lockedOut && !mayGrantProjectAccess}
                       title={joining
-                        ? incidentComposer
-                          ? `Не входить до команди підтримки клієнта${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`
-                          : `Не входить до складу проєкту${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`
+                        ? `Не входить до команди підтримки клієнта${selectedProject?.name ? ` «${selectedProject.name}»` : ''}`
                         : undefined}
                       onClick={() => toggleAssignee(uid)}
                     >
@@ -595,11 +578,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
                   );
                 })}
               </div>
-              {!incidentComposer && (
-                <p className="text-[10px] leading-[1.4] text-muted">
-                  У персональній аналітиці завдання врахується кожному вибраному виконавцю.
-                </p>
-              )}
             </div>
           )}
 

@@ -108,7 +108,7 @@ export default function TaskCRMSection() {
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
         title="Status Transition Picker — точний статус після drop"
-        description="На крос-проєктній дошці користувач кидає картку в спільну категорію. Якщо у її проєкті там кілька реальних колонок, центральний діалог повторює вигляд дошки: показує їхні назви й кольори, дає обрати точну колонку та підтвердити перенесення. За одного кандидата він не відкривається взагалі."
+        description="На крос-клієнтській дошці користувач кидає картку в спільну категорію. Якщо у її клієнта там кілька реальних колонок, центральний діалог повторює вигляд дошки: показує їхні назви й кольори, дає обрати точну колонку та підтвердити перенесення. За одного кандидата він не відкривається взагалі."
         filePath="src/components/ui/TaskManagement/StatusTransitionPicker.jsx"
         component="StatusTransitionPicker"
       >
@@ -136,8 +136,8 @@ export default function TaskCRMSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Task Identity — ключ, батьківське завдання, проєкт"
-        description="Порядок від завдання назовні: свій ключ → під ким висить → у якому проєкті. Усі три моноширинні: два з них ідентифікатори, а третій шрифт на рядку в 10px читався як шов, а не як різниця. Розрізняються вагою і кольором — вагу має лише власний ключ, решта контекст. Спільний line-height на всі три, інакше кожен рахує свою висоту рядка від свого шрифту і назва проєкту сидить нижче за ключі. Іконка справжня, а не символ «↳», у якого немає однакових метрик у різних шрифтах. Ключ не вигадується: завдання без ключа не показує нічого замість «PRE-a3f2» зі шматка id документа. Завдання в категорії «Готово» показує свій ключ закресленим — закреслюється саме ключ, ручка, за яку більше не треба братися, а не назва: назва лишається правдою і для зробленого завдання."
+        title="Task Identity — ключ, основне звернення, клієнт"
+        description="Порядок від звернення назовні: свій ключ → під ким висить → у якого клієнта. Усі три моноширинні: два з них ідентифікатори, а третій шрифт на рядку в 10px читався як шов, а не як різниця. Розрізняються вагою і кольором — вагу має лише власний ключ, решта контекст. Спільний line-height на всі три, інакше кожен рахує свою висоту рядка від свого шрифту і назва клієнта сидить нижче за ключі. Іконка справжня, а не символ «↳», у якого немає однакових метрик у різних шрифтах. Ключ не вигадується: звернення без ключа не показує нічого замість «PRE-a3f2» зі шматка id документа. Звернення в категорії «Готово» показує свій ключ закресленим — закреслюється саме ключ, ручка, за яку більше не треба братися, а не назва: назва лишається правдою і для вирішеного звернення."
         filePath="src/components/ui/TaskManagement/TaskIdentity.jsx"
       >
         <div className="flex flex-col gap-3">
@@ -173,12 +173,12 @@ export default function TaskCRMSection() {
 
       <PreviewBlock
         title="Task Row (List View)"
-        description="Один shared row для project і cross-project контекстів; назву проєкту вмикає лише semantic prop showProjectName. Рядок має дві компоновки, і друга — не перша з flex-wrap: від md це один рядок, нижче md — маленька картка, де ім’я, назва й те, що задача несе, отримують по лінії. Звузьте вікно — назва перестане тиснутись у третину ширини, спринт і мітки перестануть обрізатись об край, а цифри піднімуться з 9px до читабельних 11px."
+        description="Один shared row для project і cross-project контекстів; назву клієнта вмикає лише semantic prop showProjectName. Рядок має дві компоновки, і друга — не перша з flex-wrap: від md це один рядок, нижче md — маленька картка, де ім’я, назва й те, що звернення несе, отримують по лінії. Звузьте вікно — назва перестане тиснутись у третину ширини, тип і мітки перестануть обрізатись об край, а цифри піднімуться з 9px до читабельних 11px."
         filePath="src/components/ui/TaskManagement/TaskRow.jsx"
         fullWidth
       >
         <div className="bg-[#f4f4f5] p-6 rounded-[16px] flex flex-col gap-[8px]">
-          <p className="ui-type-eyebrow uppercase tracking-wider text-muted">Project context — назва проєкту прихована</p>
+          <p className="ui-type-eyebrow uppercase tracking-wider text-muted">Project context — назва клієнта прихована</p>
           <TaskRow
             issue={task1}
             allIssues={demoIssues}
@@ -186,7 +186,7 @@ export default function TaskCRMSection() {
             labels={demoLabels}
             projectName="QuickTeam"
           />
-          <p className="ui-type-eyebrow mt-2 uppercase tracking-wider text-muted">Cross-project context — назва проєкту видима</p>
+          <p className="ui-type-eyebrow mt-2 uppercase tracking-wider text-muted">Cross-project context — назва клієнта видима</p>
           <TaskRow
             issue={task2}
             allIssues={demoIssues}
@@ -224,7 +224,7 @@ export default function TaskCRMSection() {
 
       <PreviewBlock
         title="Task List View — живий shared organism"
-        description="Саме цей organism рендерить обидва списки: hiddenGroupIds збирає відповідні задачі в секцію «Приховані», а showProjectName додає проєкт лише у cross-project view. Кожну секцію можна згорнути кнопкою праворуч (той самий ghost icon, що згортає колонку канбану); розділювальної лінії під заголовком немає — секції відділяє відступ."
+        description="Саме цей organism рендерить обидва списки: hiddenGroupIds збирає відповідні звернення в секцію «Приховані», а showProjectName додає клієнта лише у cross-project view. Кожну секцію можна згорнути кнопкою праворуч (той самий ghost icon, що згортає колонку канбану); розділювальної лінії під заголовком немає — секції відділяє відступ."
         filePath="src/components/ui/TaskManagement/TaskListView.jsx"
         fullWidth
       >
@@ -243,7 +243,7 @@ export default function TaskCRMSection() {
 
       <PreviewBlock
         title="Task List View — групування за категоріями"
-        description="groupBy=&quot;category&quot; — той самий organism на крос-проєктному списку «Мої завдання». Секції тут не статуси, а спільні категорії, тому назви статусів різних проєктів не змагаються за одну секцію."
+        description="groupBy=&quot;category&quot; — той самий organism на крос-клієнтському списку «Звернення». Секції тут не статуси, а спільні категорії, тому назви статусів різних клієнтів не змагаються за одну секцію."
         filePath="src/components/ui/TaskManagement/TaskListView.jsx"
         fullWidth
       >
@@ -262,7 +262,7 @@ export default function TaskCRMSection() {
 
       <PreviewBlock
         title="Agile Board — живий shared organism"
-        description="Та сама Kanban-дошка використовується в проєкті та в «Мої завдання». Відмінності контексту задаються явними props, а не другою копією верстки."
+        description="Та сама Kanban-дошка використовується на дошці клієнта та в «Зверненнях». Відмінності контексту задаються явними props, а не другою копією верстки."
         filePath="src/components/workspace/AgileBoard.jsx"
         fullWidth
       >
@@ -283,7 +283,7 @@ export default function TaskCRMSection() {
 
       <PreviewBlock
         title="Agile Board — колонки-категорії"
-        description="groupBy=&quot;category&quot; — режим «Моїх завдань». Колонки не статуси, а пʼять спільних категорій. Великі колонки віртуалізують лише DOM поза viewport, але не ховають задачі за кнопкою."
+        description="groupBy=&quot;category&quot; — режим списку «Звернення». Колонки не статуси, а пʼять спільних категорій. Великі колонки віртуалізують лише DOM поза viewport, але не ховають звернення за кнопкою."
         filePath="src/components/workspace/AgileBoard.jsx"
         fullWidth
       >

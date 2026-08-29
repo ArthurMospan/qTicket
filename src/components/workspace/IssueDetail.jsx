@@ -97,7 +97,7 @@ const SHOW_INHERITED_TASK_PLANNING = false;
 // The same wording Settings uses when you walk away from an unsaved field.
 const UNSAVED_EDIT_PROMPT = {
   title: 'Незбережені зміни',
-  message: 'У вас є незбережені зміни в інциденті. Ви впевнені, що хочете піти без збереження?',
+  message: 'У вас є незбережені зміни у зверненні. Ви впевнені, що хочете піти без збереження?',
   confirmText: 'Піти',
   cancelText: 'Повернутись',
   danger: true,
@@ -127,9 +127,8 @@ function makeAttachmentId() {
 }
 function nowMs() { return Date.now(); }
 
-// `copiedMessage` rather than a literal: this screen is one of the two an
-// external client reaches, and the record it copies a link to is a «звернення»
-// to them and an «інцидент» to support. See `incidentTerms`.
+// `copiedMessage` rather than a literal: every string about the record comes
+// out of `incidentTerms`, so this helper cannot grow a second name for it.
 async function copyIssueUrl(path, showToast, copiedMessage) {
   const issueUrl = `${window.location.origin}${path}`;
   try {
@@ -233,17 +232,17 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const { projects, currentUser, activeOrg, activeOrgId, orgRole } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const internalViewer = Boolean(orgRole) && !clientViewer;
-  // This screen is shared: support works an «інцидент» here and the client
-  // whose portal is «Мої звернення» reads about a «звернення». Every string
-  // about the record itself comes from here so neither word can leak into the
-  // other's screen.
-  const terms = incidentTerms(clientViewer);
+  // This screen is shared: support works a «звернення» here and the client
+  // whose portal is «Мої звернення» reads about the same one. Every string
+  // about the record itself comes from here, so the screen cannot grow a
+  // second name for it.
+  const terms = incidentTerms();
   const canEditIssue = can(orgRole, 'edit:issue');
   // Where «назад» goes from this screen. `/{projectId}` is the tenant's
   // customer-administration surface and it sends a client straight back to the
-  // portal, so for a client every way out of an incident — the crumb, the link
-  // under «Інцидент не знайдено» and Escape — pointed at a bounce. Their list of
-  // incidents is «Мої звернення» at `/`.
+  // portal, so for a client every way out of a request — the crumb, the link
+  // under «Звернення не знайдено» and Escape — pointed at a bounce. Their list
+  // is «Мої звернення» at `/`.
   const backHref = clientViewer ? '/' : `/${projectId}`;
   const timeZone = organizationTimeZone(activeOrg);
   const {
@@ -278,12 +277,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // project they aren't a team member of) was unresolvable and rendered empty.
   const { members } = useOrganization();
 
-  // Кого можна покликати в цій задачі.
+  // Кого можна покликати в цьому зверненні.
   //
   // `members` вище — це вся організація, і для розвʼязування імен так і треба.
   // Але пікер згадок — не довідник імен, а пропозиція: «покликати цю людину
-  // сюди». Він працював з того самого списку, тож у задачі одного проєкту можна
-  // було тегнути людину, якої в цьому проєкті немає, — для неї ця задача просто
+  // сюди». Він працював з того самого списку, тож у зверненні одного клієнта
+  // можна було тегнути людину, якої в цьому просторі немає, — для неї це звернення просто
   // не існує, і сповіщення вело б у нікуди.
   //
   // Склад проєкту — це `project.team`, і саме його продукт показує скрізь, де
@@ -327,10 +326,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     setTaskPaneSelection({ issueId, pane });
   };
   // Below lg the page shows one pane at a time, so the pane switch is the whole
-  // navigation of this screen. The first tab is named by `terms.record` —
-  // «Інцидент» for support, «Звернення» for the client — because the strip is
-  // this screen's whole navigation and it is the first word either of them
-  // reads on it.
+  // navigation of this screen. The first tab is named by `terms.record` rather
+  // than by a literal, because the strip is this screen's whole navigation and
+  // its first word is the first word anybody reads here.
   const compactTaskTab = taskPane;
   const handleCompactTabChange = (id) => {
     handleTaskPaneChange(id);
@@ -694,7 +692,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const selectedTypeId = isEditing ? draft.type : issue.type;
   const legacyEpicType = {
     id: 'epic',
-    label: 'Епік (legacy)',
+    label: 'Застарілий тип',
     color: '#8b5cf6',
     icon: taskTypeIcon('epic'),
   };
@@ -830,7 +828,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         closedStatusIds,
       });
       if (blockers.dependencies.length > 0) {
-        showToast(`Інцидент ще блокують: ${blockers.dependencies.length}`, 'error');
+        showToast(`Звернення ще блокують: ${blockers.dependencies.length}`, 'error');
         return;
       }
     }
@@ -883,15 +881,15 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const handleParentChange = async nextParentIssueId => {
     if (parentSaving) return;
     if (nextParentIssueId && childIssues.length > 0) {
-      showToast('Інцидент із дочірніми інцидентами не можна зробити дочірнім', 'error');
+      showToast('Звернення з дочірніми не можна зробити дочірнім', 'error');
       return;
     }
     try {
       setParentSaving(true);
       await setIssueParent(issueId, nextParentIssueId || null);
-      showToast(nextParentIssueId ? 'Основний інцидент змінено' : 'Інцидент став самостійним');
+      showToast(nextParentIssueId ? 'Основне звернення змінено' : 'Звернення стало самостійним');
     } catch (error) {
-      showToast(error.message || 'Не вдалося змінити основний інцидент', 'error');
+      showToast(error.message || 'Не вдалося змінити основне звернення', 'error');
     } finally {
       setParentSaving(false);
     }
@@ -929,7 +927,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     const target = (issue.attachments || []).find(a => a.id === id);
     if (!(await confirmDialog({
       title: 'Видалити вкладення?',
-      message: `${target?.name || 'Файл'} буде видалено з інциденту і зі сховища. Це не можна скасувати.`,
+      message: `${target?.name || 'Файл'} буде видалено зі звернення і зі сховища. Це не можна скасувати.`,
       confirmText: 'Видалити',
       danger: true,
     }))) return;
@@ -946,7 +944,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     const title = subtaskText.trim();
     if (!title || creatingSubtask) return;
     if (parentIssueId) {
-      showToast('Дочірній інцидент не може мати власні дочірні інциденти', 'error');
+      showToast('Дочірнє звернення не може мати власні дочірні', 'error');
       return;
     }
     // A new subtask starts where planned work starts — the category says which
@@ -959,7 +957,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       || 'backlog';
     const childTypeId = creatableTypes.find(type => type.id === 'task')?.id || creatableTypes[0]?.id;
     if (!childTypeId) {
-      showToast('Спершу додайте активний тип інциденту в налаштуваннях', 'error');
+      showToast('Спершу додайте активний тип звернення в налаштуваннях', 'error');
       return;
     }
     try {
@@ -977,9 +975,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       }, actor);
       setSubtaskText('');
       setShowSubInput(false);
-      showToast(`${created.issueKey || 'Дочірній інцидент'} створено`);
+      showToast(`${created.issueKey || 'Дочірнє звернення'} створено`);
     } catch (error) {
-      showToast(error.message || 'Не вдалося створити дочірній інцидент', 'error');
+      showToast(error.message || 'Не вдалося створити дочірнє звернення', 'error');
     } finally {
       setCreatingSubtask(false);
     }
@@ -1012,7 +1010,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         hiddenStatusIds: activeHiddenCols,
       }) || 'backlog';
       const created = await createIssue({
-        title: `${issue.title || 'Інцидент'} (копія)`,
+        title: `${issue.title || 'Звернення'} (копія)`,
         description: issue.description || '',
         type: issue.type || 'task',
         priority: issue.priority || NO_PRIORITY_ID,
@@ -1023,23 +1021,23 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         dueDate: parseDueDate(issue.dueDate, { timeZone })?.toISOString() || null,
         parentIssueId: existingParentIssueId(issue),
       }, actor);
-      showToast('Копію інциденту створено');
+      showToast('Копію звернення створено');
       if (isModal && onClose) onClose();
       navigateAfterOverlayClose(() => router.push(issuePath(created, project || projectId)));
     } catch (error) {
-      showToast(error.message || 'Не вдалося дублювати інцидент', 'error');
+      showToast(error.message || 'Не вдалося дублювати звернення', 'error');
     }
   };
 
   const handleArchive = async (archived) => {
     if (archived && !(await confirmDialog({
       title: `Архівувати ${issue.issueKey}?`,
-      message: 'Інцидент зникне з активної черги, але вся історія звернення, чат і файли залишаться в «Архіві». Повернути його можна будь-коли.',
+      message: 'Звернення зникне з активної черги, але вся його історія, чат і файли залишаться в «Архіві». Повернути його можна будь-коли.',
       confirmText: 'Архівувати',
     }))) return;
     try {
       await setIssueArchived(issueId, archived);
-      showToast(archived ? 'Інцидент в архіві' : 'Інцидент повернуто з архіву');
+      showToast(archived ? 'Звернення в архіві' : 'Звернення повернуто з архіву');
     } catch (error) {
       showToast(error.message || 'Не вдалося змінити стан архіву', 'error');
     }
@@ -1048,7 +1046,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const handleCancel = async (cancelled) => {
     if (cancelled && !(await confirmDialog({
       title: `Скасувати ${issue.issueKey}?`,
-      message: 'Скасований інцидент зникає з активної черги й не рахується як вирішений. Історія звернення зберігається у «Архіві» → «Скасовані», а повернути його можна будь-коли.',
+      message: 'Скасоване звернення зникає з активної черги й не рахується як вирішене. Його історія зберігається в «Архіві» → «Скасовані», а повернути його можна будь-коли.',
       confirmText: 'Так, скасувати',
       // The dismiss button is «Скасувати» everywhere else, and here that is the
       // name of the action itself — two buttons side by side, one meaning "do
@@ -1058,7 +1056,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     }))) return;
     try {
       await setIssueCancelled(issueId, cancelled);
-      showToast(cancelled ? 'Інцидент скасовано' : 'Інцидент повернуто');
+      showToast(cancelled ? 'Звернення скасовано' : 'Звернення повернуто');
     } catch (error) {
       showToast(error.message || 'Не вдалося змінити стан скасування', 'error');
     }
@@ -1068,29 +1066,29 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     if (!(await confirmDialog({
       title: `Видалити ${issue.issueKey}?`,
       message: childIssues.length > 0
-        ? `Інцидент буде прибрано з ${childIssues.length} дочірніми інцидентами в ієрархії. Одразу після видалення дію можна скасувати.`
-        : 'Інцидент буде прибрано. Одразу після видалення дію можна скасувати.',
+        ? `Звернення буде прибрано з ${childIssues.length} дочірніми зверненнями в ієрархії. Одразу після видалення дію можна скасувати.`
+        : 'Звернення буде прибрано. Одразу після видалення дію можна скасувати.',
       confirmText: 'Видалити', danger: true,
     }))) return;
     try {
       const deletion = await deleteIssue(issueId, childIssues.length > 0 ? { childPolicy: 'promote' } : undefined);
       router.push(`/${projectId}`);
-      showToast('Інцидент видалено', 'success', {
+      showToast('Звернення видалено', 'success', {
         duration: 30000,
         action: {
           label: 'Скасувати',
           onClick: () => {
             void restoreIssue(issueId, deletion.organizationId).then(() => {
-              showToast('Інцидент відновлено');
+              showToast('Звернення відновлено');
               router.push(canonicalIssuePath);
             }).catch(error => {
-              showToast(error.message || 'Не вдалося відновити інцидент', 'error');
+              showToast(error.message || 'Не вдалося відновити звернення', 'error');
             });
           },
         },
       });
     } catch (error) {
-      showToast(error.message || 'Не вдалося видалити інцидент', 'error');
+      showToast(error.message || 'Не вдалося видалити звернення', 'error');
     }
   };
 
@@ -1129,7 +1127,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         </>
       ) : (
         <>
-          {!isArchived && canEditIssue && <Button style="secondary" size="icon-lg" icon={Pencil} onClick={enterEdit} aria-label="Редагувати інцидент" title="Редагувати інцидент" />}
+          {!isArchived && canEditIssue && <Button style="secondary" size="icon-lg" icon={Pencil} onClick={enterEdit} aria-label="Редагувати звернення" title="Редагувати звернення" />}
           <ContextMenu
             trigger={(
               <Button
@@ -1188,7 +1186,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 ? [{ label: 'Повернути з архіву', icon: ArchiveRestore, onClick: () => handleArchive(false) }]
                 : []),
               ...(isIssueCancelled && canWhileRoleLoads(orgRole, 'edit:issue')
-                ? [{ label: 'Повернути інцидент', icon: Undo2, onClick: () => handleCancel(false) }]
+                ? [{ label: 'Повернути звернення', icon: Undo2, onClick: () => handleCancel(false) }]
                 : []),
             ]}
           />
@@ -1252,7 +1250,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     "this hangs under that" had two glyphs depending on which
                     screen you happened to be reading it on. */}
                 <ParentTaskIcon size={12} strokeWidth={2} className="shrink-0" />
-                <span className="shrink-0">Дочірній інцидент для</span>
+                <span className="shrink-0">Дочірнє звернення для</span>
                 <Link
                   href={issuePath(parentIssue || { id: parentIssueId }, project || projectId)}
                   className="min-w-0 truncate font-semibold text-ink hover:underline"
@@ -1263,7 +1261,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       put a 20-character Firestore id where a task key belongs.
                       The child records its parent's key when the link is made,
                       which is what names it in every one of those cases. */}
-                  {parentIssue?.issueKey || issue?.parentIssueKey || 'Основний інцидент'}
+                  {parentIssue?.issueKey || issue?.parentIssueKey || 'Основне звернення'}
                   {parentIssue?.title ? ` — ${parentIssue.title}` : ''}
                 </Link>
                 {!isArchived && canEditIssue && (
@@ -1273,8 +1271,8 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     icon={X}
                     onClick={() => handleParentChange(null)}
                     disabled={parentSaving}
-                    aria-label="Відв’язати від основного інциденту"
-                    title="Зробити самостійним інцидентом"
+                    aria-label="Відв’язати від основного звернення"
+                    title="Зробити самостійним зверненням"
                     className="shrink-0"
                   />
                 )}
@@ -1286,7 +1284,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
                 {isEditing ? (
-                  <TitleInput autoFocus value={draft.title} onChange={e => setDraft(d => ({ ...d, title: e.target.value }))} placeholder="Назва інциденту..." />
+                  <TitleInput autoFocus value={draft.title} onChange={e => setDraft(d => ({ ...d, title: e.target.value }))} placeholder="Назва звернення..." />
                 ) : (
                   <h1 className="ui-type-page-title text-ink tracking-tight leading-tight">{issue.title}</h1>
                 )}
@@ -1335,7 +1333,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         icon={Undo2}
                         onClick={() => handleCancel(false)}
                       >
-                        Повернути інцидент
+                        Повернути звернення
                       </Button>
                     )}
                   </div>
@@ -1347,7 +1345,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 fact, and the task is where both are visible at once:
 
                   a member — cannot open the project at all, so the task sits in
-                  their «Мої завдання» pointing at a 404;
+                  their «Звернення» pointing at a 404;
                   an owner or an admin — opens it fine, but nothing records that
                   they work here, so the project card draws no face for them.
 
@@ -1505,7 +1503,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     <MultiSelect
                       compact
                       showSelectedAvatars
-                      ariaLabel="Виконавці інциденту"
+                      ariaLabel="Виконавці звернення"
                       disabled={isArchived}
                       value={issue.assigneeIds || []}
                       onChange={setAssignees}
@@ -1559,7 +1557,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         active={showDetailsDropdown}
                         className="max-sm:px-0"
                         aria-expanded={showDetailsDropdown}
-                        aria-label="Деталі інциденту"
+                        aria-label="Деталі звернення"
                         title={`Пріоритет: ${PRIORITIES.find(item => item.id === issue.priority)?.label || 'не вказано'} · Тип: ${TYPES.find(item => item.id === issue.type)?.label || 'не вказано'}`}
                       >
                         <Settings2 size={14} />
@@ -1611,23 +1609,23 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           />
                         </div>
                         {SHOW_INHERITED_TASK_PLANNING && <div className="flex flex-col gap-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Основний інцидент</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Основне звернення</span>
                           <Select
                             disabled={isArchived || childIssues.length > 0 || parentSaving}
                             value={parentIssueId || ''}
                             onChange={handleParentChange}
                             options={[
-                              { value: '', label: 'Самостійний інцидент' },
+                              { value: '', label: 'Самостійне звернення' },
                               ...parentCandidates.map(candidate => ({
                                 value: candidate.id,
                                 label: `${candidate.issueKey || candidate.id} — ${candidate.title}`,
                               })),
                             ]}
-                            placeholder={childIssues.length > 0 ? 'Це основний інцидент' : 'Самостійний інцидент'}
+                            placeholder={childIssues.length > 0 ? 'Це основне звернення' : 'Самостійне звернення'}
                           />
                           {childIssues.length > 0 && (
                             <span className="text-[10px] leading-relaxed text-faint">
-                              Спершу відв’яжіть дочірні інциденти, щоб змінити рівень.
+                              Спершу відв’яжіть дочірні звернення, щоб змінити рівень.
                             </span>
                           )}
                         </div>}
@@ -1680,7 +1678,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       onChange={description => setDraft(d => ({ ...d, description }))}
                       onUploadFiles={handleUploadAttachments}
                       uploading={uploadingAttach}
-                      placeholder="Додай детальний опис інциденту..."
+                      placeholder="Додай детальний опис звернення..."
                       minHeight="320px"
                     />
                   )}
@@ -1727,7 +1725,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 <DetailSection
                   density="group"
                   icon={TaskIcon}
-                  title="Дочірні інциденти"
+                  title="Дочірні звернення"
                   count={childIssues.length}
                   // At the right edge, over the bar it reads — not trailing the
                   // count Pill, where it read as part of the title and said one
@@ -1778,10 +1776,10 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                               setSubtaskText('');
                             }
                           }}
-                          placeholder="Назва дочірнього інциденту"
+                          placeholder="Назва дочірнього звернення"
                         />
                         <p className="text-[10px] leading-relaxed text-muted">
-                          Дочірній інцидент отримає власний ключ, статус, виконавців, час і аналітику.
+                          Дочірнє звернення отримає власний ключ, статус, відповідальних і власну історію.
                         </p>
                         <div className="flex justify-end gap-2">
                           <Button style="secondary" size="sm" onClick={() => { setShowSubInput(false); setSubtaskText(''); }}>Скасувати</Button>
@@ -1792,7 +1790,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             loading={creatingSubtask}
                             onClick={handleAddSubtask}
                           >
-                            Створити дочірній інцидент
+                            Створити дочірнє звернення
                           </Button>
                         </div>
                       </Surface>
@@ -1823,7 +1821,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 ) : null}
               >
               <p className="text-[10px] leading-relaxed text-muted">
-                Це старий формат. Нові чеклісти додавайте як checkbox в описі інциденту.
+                Це старий формат. Нові чеклісти додавайте як checkbox в описі звернення.
               </p>
               <div className="h-[4px] bg-line rounded-full mb-1 overflow-hidden">
                 <div className="h-full bg-success-solid rounded-full transition-all" style={{ width: `${(checklistDone / checklistAll) * 100}%` }} />
@@ -1857,7 +1855,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     const otherProjectId = otherIssue?.projectId || projectId;
                     const otherProject = projects?.find(candidate => candidate.id === otherProjectId);
                     const otherKey = otherIssue?.issueKey || perspective.otherIssueId;
-                    const otherTitle = otherIssue?.title || 'Пов’язаний інцидент';
+                    const otherTitle = otherIssue?.title || 'Пов’язане звернення';
                     const requiresReview = link.requiresReview || link.legacyRelationType === 'subtask-of';
 
                     return (
@@ -1900,13 +1898,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           options={ISSUE_LINK_OPTIONS}
                         />
                         <Select
-                          ariaLabel="Пов’язаний інцидент"
+                          ariaLabel="Пов’язане звернення"
                           value={linkTargetId}
                           onChange={setLinkTargetId}
                           className="w-full"
                           dropdownClassName="w-full max-w-none"
                           disabled={availableLinkIssues.length === 0}
-                          placeholder="Немає доступних інцидентів у проєкті"
+                          placeholder="Немає доступних звернень"
                           options={availableLinkIssues
                             .map(item => ({
                               value: item.id,
@@ -1978,14 +1976,14 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       })}
                     />
                     {SHOW_INHERITED_TASK_PLANNING && !parentIssueId && <Button
-                      aria-label="Додати дочірній інцидент"
+                      aria-label="Додати дочірнє звернення"
                       style="secondary"
                       size="sm"
                       composition="inline-add-action"
                       icon={Plus}
                       onClick={() => setShowSubInput(value => !value)}
                     >
-                      <span className="sm:hidden">Дочірній</span><span className="hidden sm:inline">Додати дочірній інцидент</span>
+                      <span className="sm:hidden">Дочірнє</span><span className="hidden sm:inline">Додати дочірнє звернення</span>
                     </Button>}
                     {SHOW_INHERITED_TASK_PLANNING && <Button
                       aria-label="Додати зв’язок"

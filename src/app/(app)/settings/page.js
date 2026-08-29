@@ -152,8 +152,8 @@ const NAV = [
   { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
   { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
   { id: 'billing',       label: 'Доступ qTicket', icon: ShieldCheck,     group: 'Організація', adminOnly: true },
-  { id: 'statuses',      label: 'Статуси інцидентів', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
-  { id: 'types',         label: 'Типи інцидентів',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
+  { id: 'statuses',      label: 'Статуси звернень', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
+  { id: 'types',         label: 'Типи звернень',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
   { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
   { id: 'labels',        label: 'Мітки',            icon: TagIcon,       group: 'Процес підтримки', adminOnly: true },
   { id: 'archives',      label: 'Архів і видалене', icon: Archive,       group: 'Інше' },
@@ -788,18 +788,18 @@ export default function SettingsPage() {
   const handleUnarchiveIssue = async (issue) => {
     try {
       await setIssueArchived(issue.id, false);
-      showToast(`${issue.issueKey || 'Інцидент'} повернуто з архіву`);
+      showToast(`${issue.issueKey || 'Звернення'} повернуто з архіву`);
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося повернути інцидент'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося повернути звернення'), 'error');
     }
   };
 
   const handleUncancelIssue = async (issue) => {
     try {
       await setIssueCancelled(issue.id, false);
-      showToast(`${issue.issueKey || 'Інцидент'} повернуто в роботу`);
+      showToast(`${issue.issueKey || 'Звернення'} повернуто в роботу`);
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося повернути інцидент'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося повернути звернення'), 'error');
     }
   };
 
@@ -809,7 +809,7 @@ export default function SettingsPage() {
       showToast(`${item.issueKey} відновлено`);
       await loadDeletedIssues();
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося відновити інцидент'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося відновити звернення'), 'error');
     }
   };
   // Системний «назад» на телефоні повертає до списку розділів
@@ -1591,7 +1591,7 @@ export default function SettingsPage() {
         + 'без нього не рахуються прогрес, швидкість і рахунок';
     }
     if (closing === next.length) {
-      return 'Потрібен щонайменше один відкритий статус — інакше нові інциденти '
+      return 'Потрібен щонайменше один відкритий статус — інакше нові звернення '
         + 'одразу вважатимуться закритими';
     }
     return null;
@@ -1664,7 +1664,7 @@ export default function SettingsPage() {
     if (!target) return;
     if (!(await confirmDialog({
       title: 'Видалити статус?',
-      message: `Усі інциденти зі статусом «${targetStatus.label}» буде атомарно переміщено в «${target.label}». Продовжити?`,
+      message: `Усі звернення зі статусом «${targetStatus.label}» буде атомарно переміщено в «${target.label}». Продовжити?`,
       confirmText: 'Видалити й перемістити',
       danger: true,
     }))) return;
@@ -1696,7 +1696,7 @@ export default function SettingsPage() {
       setStatuses(nextStatuses);
       showToast(
         result.migratedIssues > 0
-          ? `Статус видалено, переміщено завдань: ${result.migratedIssues}`
+          ? `Статус видалено, переміщено звернень: ${result.migratedIssues}`
           : 'Статус видалено',
       );
     } catch (error) {
@@ -1739,7 +1739,7 @@ export default function SettingsPage() {
       message: movedLabels.length > 0
         // Naming them is the whole point: this is the only reset in settings
         // that moves tasks, and the person pressing it should know which.
-        ? `${scope} Стандартний набір не містить ${movedLabels.join(', ')} — інциденти з цих статусів буде переміщено у стандартний статус тієї самої категорії. Цю дію не можна скасувати.`
+        ? `${scope} Стандартний набір не містить ${movedLabels.join(', ')} — звернення з цих статусів буде переміщено у стандартний статус тієї самої категорії. Цю дію не можна скасувати.`
         : `${scope} Цю дію не можна скасувати.`,
       confirmText: movedLabels.length > 0 ? 'Скинути й перемістити' : 'Скинути',
       cancelText: 'Залишити',
@@ -1793,7 +1793,7 @@ export default function SettingsPage() {
       setStatuses(DEFAULT_STATUSES);
       showToast(
         result.migratedIssues > 0
-          ? `Статуси скинуто, переміщено завдань: ${result.migratedIssues}`
+          ? `Статуси скинуто, переміщено звернень: ${result.migratedIssues}`
           : 'Статуси скинуто',
       );
     } catch (error) {
@@ -1847,7 +1847,7 @@ export default function SettingsPage() {
       accountDeletion.projectCount > 0
         && `${accountDeletion.projectCount} ${plural(accountDeletion.projectCount, ['простору', 'просторів', 'просторів'])}`,
       accountDeletion.assignedIssueCount > 0
-        && `${accountDeletion.assignedIssueCount} ${plural(accountDeletion.assignedIssueCount, ['інциденту', 'інцидентів', 'інцидентів'])}`,
+        && `${accountDeletion.assignedIssueCount} ${plural(accountDeletion.assignedIssueCount, ['звернення', 'звернень', 'звернень'])}`,
     ].filter(Boolean);
 
     // Typed confirmation, not a second «Ви впевнені?». Nothing here can be
@@ -1896,7 +1896,7 @@ export default function SettingsPage() {
   const workflowResetConfig = {
     statuses: {
       noun: 'статуси',
-      hint: 'Перетягуйте статуси між категоріями. Категорія визначає поведінку інциденту в загальній черзі та показниках підтримки.',
+      hint: 'Перетягуйте статуси між категоріями. Категорія визначає поведінку звернення в загальній черзі та показниках підтримки.',
       // Statuses are the one section whose reset moves real work, so it does
       // not go through the debounced autosave. The handler is called from the
       // button below rather than held on this object: a closure stored on a
@@ -1906,7 +1906,7 @@ export default function SettingsPage() {
     },
     types: {
       noun: 'типи',
-      hint: '«Задача» лишається системним типом. Стандартні типи мають власні іконки, а створені вручну позначаються зіркою.',
+      hint: '«Звернення» лишається системним типом. Стандартні типи мають власні іконки, а створені вручну позначаються зіркою.',
       apply: () => setTypes(DEFAULT_TYPES),
     },
     priorities: {
@@ -1963,7 +1963,7 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'profile': return (
-        <Section title="Особистий профіль" desc="Ваша інформація відображається у команді підтримки та інцидентах">
+        <Section title="Особистий профіль" desc="Ваша інформація відображається у команді підтримки та зверненнях">
           <Card preset="borderless" padding="lg">
             <Row label="Аватар" desc="Квадратне зображення виглядає найкраще — інші обрізаються по центру">
               <ImageUpload
@@ -1978,7 +1978,7 @@ export default function SettingsPage() {
                 showHint={false}
               />
             </Row>
-            <Row label="Ім'я" desc="Показується у команді підтримки та інцидентах">
+            <Row label="Ім'я" desc="Показується у команді підтримки та зверненнях">
               <InlineEditField value={displayName} onChange={setDisplayName} saved={currentUser?.name || ''} onSave={() => saveProfileField('name', displayName)} className="w-[260px]" />
             </Row>
             <Row label="Email" desc="Використовується для входу та запрошень">
@@ -2001,12 +2001,12 @@ export default function SettingsPage() {
         // never an assignee. A switch for a message that cannot arrive is a
         // promise the product does not keep.
         const eventRows = [
-          { key: 'assigned',      label: 'Інцидент призначено мені', desc: 'Хтось призначив інцидент на тебе або створив новий одразу з тобою' },
+          { key: 'assigned',      label: 'Звернення призначено мені', desc: 'Хтось призначив звернення на тебе або створив нове одразу з тобою' },
           // A client is never a «виконавець» — that word describes a seat they
           // cannot hold.
           { key: 'commented',     label: 'Нове повідомлення',        desc: 'Там, де ти автор або учасник розмови' },
-          { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в розмові інциденту' },
-          { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли інцидент переходить на інший етап' },
+          { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в розмові звернення' },
+          { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли звернення переходить на інший етап' },
         ].filter(row => QTICKET_NOTIFICATION_EVENT_KEYS.includes(row.key));
 
         // One card, drawn directly. It used to be a factory taking a master
@@ -2284,7 +2284,7 @@ export default function SettingsPage() {
         <Section
           title={clientViewer ? 'Співробітники клієнта' : 'Команда підтримки'}
           desc={clientViewer
-            ? 'Люди, які мають доступ до вашого клієнтського простору та його інцидентів.'
+            ? 'Люди, які мають доступ до вашого клієнтського простору та його звернень.'
             : 'Внутрішні працівники, яким власник надав доступ у QuickTeam.'}
           rightAction={clientAdmin && clientProjectIds.length === 1 ? (
           <Button
@@ -2352,7 +2352,7 @@ export default function SettingsPage() {
           && !(!isClosingCategory(status.category) && openStatuses.length === 1)
         );
         return (
-        <Section title="Статуси інцидентів" desc="Налаштуйте етапи, через які проходять звернення клієнтів.">
+        <Section title="Статуси звернень" desc="Налаштуйте етапи, через які проходять звернення клієнтів.">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -2450,7 +2450,7 @@ export default function SettingsPage() {
           },
         ]);
         return (
-        <Section title="Типи інцидентів" desc="Налаштуйте, як команда класифікує звернення клієнтів.">
+        <Section title="Типи звернень" desc="Налаштуйте, як команда класифікує звернення клієнтів.">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -2495,7 +2495,7 @@ export default function SettingsPage() {
           listLabel: () => 'Пріоритети',
         });
         return (
-        <Section title="Пріоритети інцидентів" desc="Налаштуйте рівні терміновості клієнтських звернень.">
+        <Section title="Пріоритети звернень" desc="Налаштуйте рівні терміновості клієнтських звернень.">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -2565,7 +2565,7 @@ export default function SettingsPage() {
       }
 
       case 'labels': return (
-        <Section title="Мітки інцидентів" desc="Спільні мітки для класифікації звернень">
+        <Section title="Мітки звернень" desc="Спільні мітки для класифікації звернень">
           {wfLoading ? (
             <div className="py-12 flex items-center justify-center">
               <LoadingSpinner size="md" />
@@ -2857,14 +2857,14 @@ export default function SettingsPage() {
         // width it needs instead of squeezing it into a section header.
         const archiveTabs = [
           { id: 'projects', label: 'Клієнти', count: archivedProjects.length },
-          { id: 'issues', label: 'Інциденти', count: archivedIssueList.length },
+          { id: 'issues', label: 'Звернення', count: archivedIssueList.length },
           { id: 'cancelled', label: 'Скасовані', count: cancelledIssueList.length },
           { id: 'deleted', label: 'Нещодавно видалене', count: deletedIssues.items.length },
         ];
         return (
           <Section
             title="Архів і видалене"
-            desc="Архівовані інциденти зникають з активної черги, але зберігають історію та показники. Скасовані не рахуються як робота. Обидва типи зберігаються без строку, а нещодавно видалені можна відновити протягом доби"
+            desc="Архівовані звернення зникають з активної черги, але зберігають історію та показники. Скасовані не рахуються як робота. Обидва типи зберігаються без строку, а нещодавно видалені можна відновити протягом доби"
           >
             <div className="w-full overflow-x-auto">
               <Tabs
@@ -2911,8 +2911,8 @@ export default function SettingsPage() {
                   <div className="flex justify-center py-12"><LoadingSpinner size="md" /></div>
                 ) : archivedIssueList.length === 0 ? (
                   <ArchiveEmpty
-                    title="Немає архівованих інцидентів"
-                    hint="Архівуйте завершені інциденти: вони зникнуть з активної черги, але вся історія та розмова збережуться"
+                    title="Немає архівованих звернень"
+                    hint="Архівуйте завершені звернення: вони зникнуть з активної черги, але вся історія та розмова збережуться"
                   />
                 ) : (
                   <ArchiveIssueRows
@@ -2934,8 +2934,8 @@ export default function SettingsPage() {
                   <div className="flex justify-center py-12"><LoadingSpinner size="md" /></div>
                 ) : cancelledIssueList.length === 0 ? (
                   <ArchiveEmpty
-                    title="Немає скасованих інцидентів"
-                    hint="Скасовані інциденти не входять до активної черги, але лишаються тут і можуть бути повернуті"
+                    title="Немає скасованих звернень"
+                    hint="Скасовані звернення не входять до активної черги, але лишаються тут і можуть бути повернуті"
                   />
                 ) : (
                   <ArchiveIssueRows
@@ -2958,7 +2958,7 @@ export default function SettingsPage() {
                 ) : deletedIssues.items.length === 0 ? (
                   <ArchiveEmpty
                     title="Нічого не видаляли"
-                    hint="Видалений інцидент зберігається тут одну добу, протягом якої його можна відновити"
+                    hint="Видалене звернення зберігається тут одну добу, протягом якої його можна відновити"
                   />
                 ) : (
                   <div className="flex flex-col divide-y divide-canvas -my-3">

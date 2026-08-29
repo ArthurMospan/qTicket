@@ -31,7 +31,7 @@
 // Sharing one listener between visits fixed the repeated *query*. It did
 // nothing about the other half of the bill, which turned out to be the larger
 // one: four separate listeners were reading the same documents at the same
-// time — this one for the dashboard, `useAllMyTasks` for «Мої завдання»,
+// time — this one for the dashboard, `useAllMyTasks` for «Звернення»,
 // `useIssues` for the board and the task screen, `useWorkspaceAnalytics` for
 // the reports. Firestore bills a delivery per listener, so one person editing
 // one task in one of four open tabs paid up to sixteen reads for a single
@@ -109,7 +109,7 @@ function createProjectScopedStore(collectionName, organizationId, projectIds) {
       { includeMetadataChanges: true },
       documentSnapshot => {
         // An empty cache is not proof that a workspace is empty. Publishing one
-        // is how a deep link to a task renders «Задачу не знайдено» for a second
+        // is how a deep link to a task renders «Звернення не знайдено» for a second
         // while Firestore is still reaching the server — so the first snapshot
         // of a chunk only counts once something answered it.
         if (!delivered.has(chunkIndex)

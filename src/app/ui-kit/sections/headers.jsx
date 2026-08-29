@@ -26,7 +26,7 @@ export default function HeadersSection() {
           <TopHeader
             mode="search"
             searchValue="ретро"
-            searchPlaceholder="Пошук по моїх інцидентах..."
+            searchPlaceholder="Пошук по моїх зверненнях..."
             searchLocalResultCount={0}
             searchOutsideResultCount={4}
             onSearchEscalate={() => {}}
@@ -35,7 +35,7 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація простору клієнта з розсувним пошуком інцидентів. Склад підтримки видно у вкладці «Люди», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація простору клієнта з розсувним пошуком звернень. Склад підтримки видно у вкладці «Люди», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="project"
@@ -45,7 +45,7 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="4) Хлібні крихти детального перегляду (Breadcrumbs Mode)" description="Повний шлях до конкретного інциденту в просторі клієнта." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="4) Хлібні крихти детального перегляду (Breadcrumbs Mode)" description="Повний шлях до конкретного звернення в просторі клієнта." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="breadcrumbs"
@@ -124,10 +124,10 @@ export default function HeadersSection() {
           />
           <NotificationCard
             icon={<span className="grid h-[32px] w-[32px] shrink-0 place-items-center rounded-[10px] bg-white text-ink"><CalendarClock size={16} /></span>}
-            title="Ігор Лисенко написав у завданні"
+            title="Ігор Лисенко написав у зверненні"
             body="Переніс дедлайн на понеділок — встигнемо зібрати демо."
             time="щойно"
-            openLabel="Відкрити чат завдання"
+            openLabel="Відкрити чат звернення"
             onOpen={() => {}}
             onDismiss={() => {}}
           />

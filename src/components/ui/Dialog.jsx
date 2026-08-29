@@ -13,7 +13,7 @@ import { useOverlayHistory } from '@/lib/hooks/useOverlayHistory';
 // CLAUDE.md UI Kit policy: content differs, chrome doesn't.
 //
 // const [open, setOpen] = useState(false);
-// <Dialog isOpen={open} onClose={() => setOpen(false)} title="Новий спринт"
+// <Dialog isOpen={open} onClose={() => setOpen(false)} title="Нове звернення"
 //   footer={<>
 //     <Button style="secondary" size="md" onClick={() => setOpen(false)}>Скасувати</Button>
 //     <Button style="primary" size="md" onClick={handleSave}>Зберегти</Button>

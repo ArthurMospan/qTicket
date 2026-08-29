@@ -13,7 +13,7 @@ export default function IssueModal({ issue, onClose }) {
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-label={issue.title || 'Завдання'}
+        aria-label={issue.title || 'Звернення'}
         data-ui-surface="local" className="relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
         onClick={e => e.stopPropagation()}
       >

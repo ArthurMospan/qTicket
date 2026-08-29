@@ -31,13 +31,13 @@ export default function FiltersSection() {
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
         title="Filter Bar — Projects Page"
-        description="Точний filter slot головної сторінки проєктів, а не довільна toolbar-композиція."
+        description="Точний filter slot головної сторінки клієнтів, а не довільна toolbar-композиція."
         filePath="src/app/(app)/page.js"
         fullWidth
       >
         <PageHeader
-          title="Проєкти"
-          actions={<Button style="primary" color="dark" size="lg" icon={Plus}>Новий проєкт</Button>}
+          title="Клієнти"
+          actions={<Button style="primary" color="dark" size="lg" icon={Plus}>Новий клієнт</Button>}
           filters={(
             <FilterBar context="projects">
               <Select filterRole="member" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant="ghost" />

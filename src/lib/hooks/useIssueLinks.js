@@ -46,7 +46,7 @@ async function performRequest(issueId, method, body) {
     method,
     ...(body ? { body: JSON.stringify(body) } : {}),
     cache: 'no-store',
-  }, 'Не вдалося завантажити зв’язки завдання');
+  }, 'Не вдалося завантажити зв’язки звернення');
 }
 
 export function useIssueLinks(issueId) {

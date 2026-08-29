@@ -29,8 +29,8 @@ export default function ButtonsSection() {
               </tr>
               <tr className="align-middle">
                 <td className="py-4 text-[13px] font-semibold text-[#1f1f1f]">З іконкою</td>
-                <td className="py-4"><Button style="primary" size="lg" icon={Plus}>Новий проєкт</Button></td>
-                <td className="py-4"><Button style="primary" size="md" icon={Plus}>Новий проєкт</Button></td>
+                <td className="py-4"><Button style="primary" size="lg" icon={Plus}>Новий клієнт</Button></td>
+                <td className="py-4"><Button style="primary" size="md" icon={Plus}>Новий клієнт</Button></td>
                 <td className="py-4"><Button style="primary" size="sm" icon={Plus}>Додати</Button></td>
               </tr>
               <tr className="align-middle">
@@ -47,7 +47,7 @@ export default function ButtonsSection() {
               </tr>
               <tr className="align-middle">
                 <td className="py-4 text-[13px] font-semibold text-[#1f1f1f]">Небезпечна дія (danger, color=red)</td>
-                <td className="py-4"><Button style="primary" color="red" size="lg" icon={Trash2}>Видалити проєкт</Button></td>
+                <td className="py-4"><Button style="primary" color="red" size="lg" icon={Trash2}>Видалити клієнта</Button></td>
                 <td className="py-4"><Button style="primary" color="red" size="md" icon={Trash2}>Видалити</Button></td>
                 <td className="py-4"><Button style="primary" color="red" size="sm" icon={Trash2}>Видалити</Button></td>
               </tr>
@@ -95,7 +95,7 @@ export default function ButtonsSection() {
               </tr>
               <tr className="align-middle">
                 <td className="py-4 text-[13px] font-semibold text-[#1f1f1f]">Небезпечна дія (danger, color=red)</td>
-                <td className="py-4"><Button style="secondary" color="red" size="lg" icon={Trash2}>Видалити проєкт</Button></td>
+                <td className="py-4"><Button style="secondary" color="red" size="lg" icon={Trash2}>Видалити клієнта</Button></td>
                 <td className="py-4"><Button style="secondary" color="red" size="md" icon={Trash2}>Видалити</Button></td>
                 <td className="py-4"><Button style="secondary" color="red" size="sm" icon={Trash2}>Видалити</Button></td>
               </tr>
@@ -160,8 +160,8 @@ export default function ButtonsSection() {
         fullWidth
       >
         <div className="flex flex-wrap items-center gap-[8px]">
-          <Button aria-label="Додати підзавдання" style="secondary" size="sm" composition="inline-add-action" icon={Plus}>
-            <span className="sm:hidden">Підзавдання</span><span className="hidden sm:inline">Додати підзавдання</span>
+          <Button aria-label="Додати дочірнє звернення" style="secondary" size="sm" composition="inline-add-action" icon={Plus}>
+            <span className="sm:hidden">Дочірнє</span><span className="hidden sm:inline">Додати дочірнє звернення</span>
           </Button>
           <Button aria-label="Додати зв’язок" style="secondary" size="sm" composition="inline-add-action" icon={Plus}>
             <span className="sm:hidden">Зв’язок</span><span className="hidden sm:inline">Додати зв’язок</span>

@@ -85,8 +85,8 @@ const bulkActionNames = ISSUE_BULK_ACTIONS
 
 // One record, one name. «Звернення» is what the client's portal calls it and
 // what the support queue calls it, so it is what these articles call it: a help
-// centre that says «інцидент» to somebody whose sidebar says «Звернення» has
-// told them there are two different things.
+// centre that invents a second word for the record has told the reader there
+// are two different things.
 const HELP_ARTICLE_CATALOGUE = Object.freeze([
   {
     id: 'organizations-and-roles', slug: 'organizations-and-roles', coverage: ['organizations-roles-invitations'],

@@ -37,7 +37,7 @@ test('a status is read out in the words its own project uses', () => {
 test('every audited field has a phrase, not just the first three', () => {
   const said = field => describeAuditEvent({ action: `changed_${field}`, from: null, to: null }, CONTEXT);
   for (const field of AUDITED_ISSUE_FIELDS) {
-    assert.notEqual(said(field), 'Оновлено завдання', field);
+    assert.notEqual(said(field), 'Оновлено звернення', field);
   }
 });
 
@@ -165,12 +165,12 @@ test('a bulk change reads in the same words a single edit produces', () => {
 });
 
 test('an action with no phrase names itself instead of claiming an update', () => {
-  assert.equal(describeAuditEvent({ action: 'created' }, CONTEXT), 'Створено завдання');
+  assert.equal(describeAuditEvent({ action: 'created' }, CONTEXT), 'Створено звернення');
   assert.equal(
     describeAuditEvent({ action: 'експортував баг з Buggy Bag' }, CONTEXT),
     'експортував баг з Buggy Bag',
   );
-  assert.equal(describeAuditEvent({}, CONTEXT), 'Оновлено завдання');
+  assert.equal(describeAuditEvent({}, CONTEXT), 'Оновлено звернення');
 });
 
 test('arrays are compared by content, so a save is not a change', () => {

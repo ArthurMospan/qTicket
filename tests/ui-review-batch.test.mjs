@@ -47,7 +47,7 @@ test('qTicket headers distinguish global screens from client spaces', async () =
   assert.match(workspaceHeader, /pathname\.startsWith\('\/clients'\)/);
   assert.match(workspaceHeader, /placeholder: 'Пошук клієнтів\.\.\.'/);
   assert.match(topHeader, /\{ label: 'Клієнти', href: '\/clients' \}/);
-  assert.match(topHeader, /Пошук інцидентів клієнта/);
+  assert.match(topHeader, /Пошук звернень клієнта/);
   assert.doesNotMatch(topHeader, /Назва проєкту|label: 'Проєкти'/);
   assert.match(kit, /Client Space Mode/);
   assert.match(kit, /INC-104: Не працює імпорт/);

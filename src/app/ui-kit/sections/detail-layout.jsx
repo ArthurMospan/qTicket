@@ -75,7 +75,7 @@ export default function DetailLayoutSection() {
 
       <PreviewBlock
         title="DetailLayout context=&quot;task&quot;"
-        description="Та сама колонка плюс рейка розмови праворуч — 1520px разом, тобто текст задачі стоїть рівно там, де текст події. Рейка липка й заввишки як сам скролпорт, тому вона стоїть на місці й гортає себе, а не сторінку."
+        description="Та сама колонка плюс рейка розмови праворуч — 1520px разом, тобто текст звернення стоїть рівно там, де текст будь-якого іншого запису. Рейка липка й заввишки як сам скролпорт, тому вона стоїть на місці й гортає себе, а не сторінку."
         filePath="src/components/ui/Layout/DetailLayout.jsx"
         component="DetailLayout"
         fullWidth
@@ -94,12 +94,12 @@ export default function DetailLayoutSection() {
               <div className="flex flex-wrap items-center gap-2 rounded-[12px] bg-canvas px-3 py-2">
                 <Pill tone="neutral" size="md">У роботі</Pill>
                 <Pill tone="neutral" size="md">Артур</Pill>
-                <Pill tone="neutral" size="md">Спринт 12</Pill>
+                <Pill tone="neutral" size="md">Високий</Pill>
               </div>
             )}
             aside={(
               <div className="flex h-full flex-col items-center justify-center rounded-[16px] bg-canvas text-[11px] font-semibold text-muted">
-                Чат задачі
+                Чат звернення
               </div>
             )}
           >
@@ -109,8 +109,8 @@ export default function DetailLayoutSection() {
                 <DetailSection density="group" icon={Paperclip} title="Вкладення" count={2}>
                   <p className="text-[12px] text-muted">Список файлів</p>
                 </DetailSection>
-                <DetailSection density="group" icon={TaskIcon} title="Підзавдання" count={3} meta="1/3 · 2 ще в роботі">
-                  <p className="text-[12px] text-muted">Рядки підзавдань</p>
+                <DetailSection density="group" icon={TaskIcon} title="Дочірні звернення" count={3} meta="1/3 · 2 ще в роботі">
+                  <p className="text-[12px] text-muted">Рядки дочірніх звернень</p>
                 </DetailSection>
                 <DetailSection density="group" icon={Link2} title="Зв’язки" count={1}>
                   <p className="text-[12px] text-muted">Рядки зв’язків</p>

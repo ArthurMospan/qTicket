@@ -61,8 +61,8 @@ export default function TaskIdentity({
     )
     : '';
   const parentTitle = parentIssue?.title
-    ? `Основний інцидент: ${parentIssue.title}`
-    : `Основний інцидент ${parentKey}`;
+    ? `Основне звернення: ${parentIssue.title}`
+    : `Основне звернення ${parentKey}`;
   // An arrow with nothing after it is not a quieter fact, it is a broken one:
   // it takes up the room a relation would take and names nothing, so the line
   // reads as a parent that is somehow both there and not. The relation is drawn

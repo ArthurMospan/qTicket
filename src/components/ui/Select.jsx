@@ -61,7 +61,7 @@ function OptionIdentity({ option, size = 14 }) {
 // label at 34px from the edge of the control, a 16px priority halo at 36px, and
 // an 8px status dot at 28px. Three stacked fields — Тип, Пріоритет, Статус —
 // therefore started their values at three different places, which is what makes
-// «Беклог» look pushed out of line with the two fields above it. The marks keep
+// «Новий» look pushed out of line with the two fields above it. The marks keep
 // their own sizes; they are just centred in a slot of one width.
 const MARK_SLOT = 'flex h-[14px] w-[14px] shrink-0 items-center justify-center';
 

@@ -12,7 +12,7 @@ import {
   isCancelledIssue,
   withoutCancelledIssues,
 } from '../src/lib/utils/issueCancel.mjs';
-import { INCIDENT_TERMS } from '../src/lib/content/incidentTerms.mjs';
+import { INCIDENT_TERMS_TABLE, incidentTerms } from '../src/lib/content/incidentTerms.mjs';
 
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
@@ -42,7 +42,7 @@ test('cancelling is its own action, beside archiving and deleting', async () => 
   // Offered on the task itself next to the other two, and taken back from
   // there too.
   assert.match(detail, /label: 'Скасувати', icon: Ban/);
-  assert.match(detail, /label: 'Повернути інцидент', icon: Undo2/);
+  assert.match(detail, /label: 'Повернути звернення', icon: Undo2/);
   assert.match(bar, /label: `Скасувати \(\$\{count\}\)`/);
 });
 
@@ -52,25 +52,25 @@ test('the difference between the two is stated where the choice is made', async 
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/app/(app)/settings/page.js'),
   ]);
-  // The incident page states both to whoever opened it, and it is opened by
-  // support and by the external client, so the sentences live in the shared
-  // vocabulary and the page picks the reader's.
+  // The record's page states both to whoever opened it, and it is opened by
+  // support and by the external client, so the sentences come out of the one
+  // table and the page cannot spell them itself.
   assert.match(detail, /title=\{terms\.archivedTitle\}/);
   assert.match(detail, /title=\{terms\.cancelledTitle\}/);
+  // One table, no role in front of it: `incidentTerms()` takes no argument, so
+  // there is nowhere left to fork the record's name.
+  assert.equal(incidentTerms(), INCIDENT_TERMS_TABLE);
+  assert.equal(incidentTerms.length, 0);
   // Archiving preserves the customer record and says exactly what survives.
-  // One vocabulary: `staff` and `client` are the same table, and this test
-  // asserting the same sentence twice is the point — it fails the moment
-  // somebody forks the record's name again.
-  assert.equal(INCIDENT_TERMS.staff, INCIDENT_TERMS.client);
-  assert.match(INCIDENT_TERMS.staff.archivedText, /Листування та файли/);
+  assert.match(INCIDENT_TERMS_TABLE.archivedText, /Листування та файли/);
   assert.match(bar, /історія, чат і файли залишаться/);
   // Cancelling stays distinct from resolving and says where the record goes.
-  assert.match(INCIDENT_TERMS.staff.cancelledText, /не вважається вирішеним/);
+  assert.match(INCIDENT_TERMS_TABLE.cancelledText, /не вважається вирішеним/);
   assert.match(bar, /не рахуватимуться як вирішені/);
   // The confirmation before cancelling is staff-only and still names the list.
   assert.match(detail, /«Архіві» → «Скасовані»/);
   // And the archive screen says which list means which.
-  assert.match(settings, /Архівовані інциденти зникають з активної черги, але зберігають історію та показники/);
+  assert.match(settings, /Архівовані звернення зникають з активної черги, але зберігають історію та показники/);
   assert.match(settings, /Скасовані не рахуються як робота/);
 });
 

@@ -133,7 +133,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
   // "Nothing was asked" is not "nothing was found". On a page refresh the uid,
   // the organization and the project list all arrive a beat after the first
   // render, and reporting `loading: false` with an empty list there is what
-  // made the task page flash «Задачу не знайдено» before the task appeared.
+  // made the task page flash «Звернення не знайдено» before the task appeared.
   const loading = Boolean(projectId) && (
     issuesLoading || authLoading || orgLoading || projectsLoading || !currentUserId
   );
@@ -200,10 +200,10 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
       && data.columnId !== undefined
       && data.status !== data.columnId
     ) {
-      throw new Error('Статус і колонка задачі мають збігатися');
+      throw new Error('Статус і колонка звернення мають збігатися');
     }
     if (data.completedAt !== undefined && !hasStatusUpdate) {
-      throw new Error('Дата завершення керується статусом задачі');
+      throw new Error('Дата завершення керується статусом звернення');
     }
     const requestedStatus = data.columnId ?? data.status;
     const directData = { ...data };
@@ -294,7 +294,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
     });
     const result = await response.json();
     if (!response.ok) {
-      throw createResponseError(response, result, 'Не вдалося видалити задачу');
+      throw createResponseError(response, result, 'Не вдалося видалити звернення');
     }
     return result;
   }, []);
@@ -312,7 +312,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
     });
     const result = await response.json();
     if (!response.ok) {
-      throw createResponseError(response, result, 'Не вдалося відновити задачу');
+      throw createResponseError(response, result, 'Не вдалося відновити звернення');
     }
     return result;
   }, []);
@@ -334,7 +334,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
       });
       const result = await response.json();
       if (!response.ok) {
-        throw createResponseError(response, result, 'Не вдалося змінити основну задачу');
+        throw createResponseError(response, result, 'Не вдалося змінити основне звернення');
       }
       return result;
     } catch (error) {
@@ -363,7 +363,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
       if (includeLinks && !linksReady) {
         throw new Error(linksError
           ? 'Не вдалося перевірити залежності. Оновіть сторінку й повторіть.'
-          : 'Зачекайте, перевіряємо залежності задачі');
+          : 'Зачекайте, перевіряємо залежності звернення');
       }
       const blockers = issueCompletionBlockers({
         issueId,
@@ -372,7 +372,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
         closedStatusIds,
       });
       if (blockers.children.length > 0) {
-        throw new Error(`Спершу закрийте підзавдання: ${blockers.children.length} ще в роботі`);
+        throw new Error(`Спершу закрийте дочірні звернення: ${blockers.children.length} ще в роботі`);
       }
       if (blockers.dependencies.length > 0) {
         const names = blockers.dependencies
@@ -380,7 +380,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
           .map(blocker => blocker.issueKey || blocker.title)
           .filter(Boolean)
           .join(', ');
-        throw new Error(`Задачу ще блокують: ${names || blockers.dependencies.length}`);
+        throw new Error(`Звернення ще блокують: ${names || blockers.dependencies.length}`);
       }
     }
     const oldColumnId = issue.columnId || issue.status;
@@ -420,9 +420,9 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
         sendNotification({
           userIds: recipients,
           type: 'status_changed',
-          // The key names the record for both readers. Without one there is
-          // nothing neutral left to call it — support says «інцидент», the
-          // client says «звернення» — so the title says only what happened.
+          // The key names the record, and a bell row has no room to repeat it
+          // in words as well: with a key the title says which one, without a
+          // key it says only what happened.
           title: issue.issueKey ? `${issue.issueKey}: статус змінено` : 'Статус змінено',
           body: `${issue.title || ''} → ${statusLabel(newColumnId, statuses)}`,
           link: issuePath(issue, projectId),

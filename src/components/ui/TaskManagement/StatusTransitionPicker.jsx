@@ -9,7 +9,7 @@ import IssueCard from '@/components/workspace/IssueCard';
 
 /**
  * Chooses the exact project status after a card was dropped on a shared
- * category in «Мої завдання». The choices deliberately reuse the board-column
+ * category in «Звернення». The choices deliberately reuse the board-column
  * composition so this feels like finishing the drag, not learning a new UI.
  *
  * @param {boolean} props.isOpen Whether the dialog is visible.
@@ -45,7 +45,7 @@ export default function StatusTransitionPicker({
   const reduceMotion = useReducedMotion();
 
   const activeStatus = statuses.find(status => status.id === activeStatusId) || statuses[0];
-  const issueKey = issue?.issueKey || 'Інцидент';
+  const issueKey = issue?.issueKey || 'Звернення';
 
   useEffect(() => {
     if (!isOpen || !activeStatusId) return undefined;

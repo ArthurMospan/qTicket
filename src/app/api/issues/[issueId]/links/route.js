@@ -51,7 +51,7 @@ async function loadIssueAndAuthorization(request, issueId) {
   const issueRef = db.collection('issues').doc(issueId);
   const issueSnap = await issueRef.get();
   if (!issueSnap.exists) {
-    return { error: 'Завдання не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
+    return { error: 'Звернення не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
   }
   const issue = issueSnap.data();
   const authorization = await authorizeOrgRequest(
@@ -75,7 +75,7 @@ async function ensureProjectMutationAccess(loaded) {
     !projectSnap.exists
     || projectSnap.data().organizationId !== issue.organizationId
   ) {
-    return { error: 'Проєкт завдання не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
+    return { error: 'Клієнтський простір звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
   }
   if (
     authorization.membership?.role === 'member'
@@ -85,7 +85,7 @@ async function ensureProjectMutationAccess(loaded) {
     )
   ) {
     return {
-      error: 'Ви не входите до команди цього проєкту',
+      error: 'Ви не входите до команди цього клієнта',
       code: 'PROJECT_ACCESS_DENIED',
       status: 403,
     };
@@ -168,7 +168,7 @@ export async function GET(request, context) {
   } catch (error) {
     return routeErrorResponse(error, {
       context: 'Issue links GET',
-      fallbackMessage: 'Не вдалося завантажити зв’язки завдання',
+      fallbackMessage: 'Не вдалося завантажити зв’язки звернення',
     });
   }
 }
@@ -206,7 +206,7 @@ export async function POST(request, context) {
     });
     if (!requested) {
       return NextResponse.json({
-        error: 'Некоректний тип зв’язку або вибране те саме завдання',
+        error: 'Некоректний тип зв’язку або вибране те саме звернення',
         code: 'INVALID_ISSUE_LINK',
       }, { status: 400 });
     }
@@ -253,7 +253,7 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'ISSUE_SCOPE_CHANGED',
           409,
-          'Область завдання змінилася. Оновіть сторінку',
+          'Область звернення змінилася. Оновіть сторінку',
         );
       }
       if (
@@ -263,21 +263,21 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'TARGET_ISSUE_NOT_FOUND',
           404,
-          'Пов’язане завдання не знайдено',
+          'Пов’язане звернення не знайдено',
         );
       }
       if (targetSnap.data().projectId !== loadedIssue.projectId) {
         throw apiTransactionError(
           'CROSS_PROJECT_LINK',
           400,
-          'Логічні зв’язки можна створювати лише в межах одного проєкту',
+          'Логічні зв’язки можна створювати лише в межах одного клієнтського простору',
         );
       }
       if (sourceSnap.data().deletionPending === true || targetSnap.data().deletionPending === true) {
         throw apiTransactionError(
           'ISSUE_DELETING',
           409,
-          'Неможливо змінити зв’язки завдання, яке видаляється',
+          'Неможливо змінити зв’язки звернення, яке видаляється',
         );
       }
       if (
@@ -287,14 +287,14 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Проєкт завдання не знайдено',
+          'Клієнтський простір звернення не знайдено',
         );
       }
       if (projectSnap.data().deletionPending === true) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Проєкт уже видаляється',
+          'Клієнтський простір уже видаляється',
         );
       }
       const statusConflict = issueBlockLinkStatusConflict({
@@ -328,7 +328,7 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'ISSUE_LINK_EXISTS',
           409,
-          'Зв’язок між цими завданнями вже існує',
+          'Зв’язок між цими зверненнями вже існує',
         );
       }
 
@@ -392,7 +392,7 @@ export async function POST(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue links POST',
-      fallbackMessage: 'Не вдалося створити зв’язок завдання',
+      fallbackMessage: 'Не вдалося створити зв’язок звернення',
     });
   }
 }
@@ -456,14 +456,14 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Проєкт завдання не знайдено',
+          'Клієнтський простір звернення не знайдено',
         );
       }
       if (projectSnap.data().deletionPending === true) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Проєкт уже видаляється',
+          'Клієнтський простір уже видаляється',
         );
       }
       const links = db.collection('issueLinks');
@@ -515,7 +515,7 @@ export async function DELETE(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue links DELETE',
-      fallbackMessage: 'Не вдалося видалити зв’язок завдання',
+      fallbackMessage: 'Не вдалося видалити зв’язок звернення',
     });
   }
 }

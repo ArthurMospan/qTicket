@@ -61,7 +61,7 @@ function normalizeWorkflowSection(section, items) {
   ) {
     return mutationError(
       'MISSING_SYSTEM_TASK_TYPE',
-      'Системний тип «Задача» не можна видалити',
+      'Системний тип «Звернення» не можна видалити',
       { section, requiredIds: [SYSTEM_TASK_TYPE_ID] },
     );
   }
@@ -152,7 +152,7 @@ function normalizeWorkflowSection(section, items) {
   if (terminal.length === statuses.length) {
     return mutationError(
       'MISSING_OPEN_STATUS',
-      'Потрібен щонайменше один незавершальний статус — інакше нові завдання '
+      'Потрібен щонайменше один незавершальний статус — інакше нові звернення '
         + 'одразу вважатимуться закритими',
       { section },
     );

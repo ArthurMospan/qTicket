@@ -35,7 +35,7 @@ const FIELD_LABELS = Object.freeze({
   type: 'тип',
   dueDate: 'дедлайн',
   labelIds: 'мітки',
-  parentIssueId: 'основну задачу',
+  parentIssueId: 'основне звернення',
 });
 
 const FACT_ONLY_TEXT = Object.freeze({
@@ -59,14 +59,14 @@ const ACTION_FIELDS = Object.freeze({
 
 /** Actions that are a fact rather than a change, in the words the feed says. */
 const ACTION_TEXT = Object.freeze({
-  created: 'Створено завдання',
-  imported: 'Завдання імпортовано',
-  restored: 'Завдання відновлено',
-  archived: 'Завдання відправлено в архів',
-  unarchived: 'Завдання повернуто з архіву',
-  cancelled: 'Завдання скасовано',
-  uncancelled: 'Скасування завдання відмінено',
-  'legacy-subtasks-migrated': 'Підзавдання перенесено в опис',
+  created: 'Створено звернення',
+  imported: 'Звернення імпортовано',
+  restored: 'Звернення відновлено',
+  archived: 'Звернення відправлено в архів',
+  unarchived: 'Звернення повернуто з архіву',
+  cancelled: 'Звернення скасовано',
+  uncancelled: 'Скасування звернення відмінено',
+  'legacy-subtasks-migrated': 'Старий чекліст перенесено в опис',
 });
 
 const BULK_ACTION_PREFIX = 'bulk_';
@@ -203,7 +203,7 @@ function describeBulkEvent(entry, actionId, context) {
     ));
   if (sentences.length > 0) return sentences.join('; ');
   const label = ISSUE_BULK_ACTION_BY_ID.get(actionId)?.label;
-  return label ? `Масова дія: ${label.toLocaleLowerCase('uk-UA')}` : 'Оновлено завдання';
+  return label ? `Масова дія: ${label.toLocaleLowerCase('uk-UA')}` : 'Оновлено звернення';
 }
 
 /**
@@ -223,16 +223,16 @@ export function describeAuditEvent(entry, context = {}) {
   const action = typeof entry?.action === 'string' ? entry.action : '';
   if (ACTION_TEXT[action]) return ACTION_TEXT[action];
   if (action === 'parent-changed') {
-    return entry?.to ? 'Основну задачу змінено' : 'Завдання відкріплено від основної задачі';
+    return entry?.to ? 'Основне звернення змінено' : 'Звернення відкріплено від основного';
   }
   // Assigning work may put somebody on the project, and that is a change to the
   // project rather than to the task — but this task is where it was decided, so
   // this is where it has to be readable.
   if (action === 'project-team-granted') {
     const ids = idsOf(entry?.to);
-    if (ids.length === 0) return 'Виконавців додано до складу проєкту';
+    if (ids.length === 0) return 'Виконавців додано до складу клієнта';
     const names = ids.map(id => nameOf(context?.members, id, 'учасник')).join(', ');
-    return `До складу проєкту додано: ${names}`;
+    return `До складу клієнта додано: ${names}`;
   }
   if (action.startsWith(BULK_ACTION_PREFIX)) {
     return describeBulkEvent(entry, action.slice(BULK_ACTION_PREFIX.length), context);
@@ -243,7 +243,7 @@ export function describeAuditEvent(entry, context = {}) {
   if (!field || !FIELD_LABELS[field]) {
     // An action this build has no phrase for still names itself rather than
     // pretending the task was merely "updated".
-    return action && !action.startsWith('changed_') ? action : 'Оновлено завдання';
+    return action && !action.startsWith('changed_') ? action : 'Оновлено звернення';
   }
 
   const from = entry.from ?? entry.oldValue;

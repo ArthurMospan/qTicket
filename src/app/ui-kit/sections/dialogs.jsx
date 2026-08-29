@@ -17,7 +17,7 @@ function ConfirmDialogPreview() {
 
   const openConfirm = async () => {
     const accepted = await confirm({
-      title: 'Видалити проєкт?',
+      title: 'Видалити клієнта?',
       message: 'Ви видаляєте «Редизайн сайту». Цю дію неможливо скасувати.',
       confirmText: 'Видалити',
       danger: true,
@@ -47,23 +47,23 @@ const DIALOG_VARIANTS = [
     label: 'bodyPadding="flush"',
     props: { bodyPadding: 'flush', size: 'lg' },
     note: 'Тіло без відступу — вміст сам керує своїми полями й може йти на всю ширину.',
-    where: 'Створення завдання · Профіль користувача',
-    open: 'Мої завдання → «Створити завдання»',
+    where: 'Створення звернення · Профіль користувача',
+    open: 'Дошка клієнта → «Створити звернення»',
   },
   {
     id: 'responsive',
     label: 'bodyPadding="responsive"',
     props: { bodyPadding: 'responsive', size: 'md' },
     note: 'Вужчий відступ на мобільному, звичайний на десктопі.',
-    where: 'Деталі задачі · Подія календаря',
-    open: 'Проєкт → задача → «Зафіксувати час»',
+    where: 'Довідковий центр',
+    open: 'Сайдбар → «?» → «Довідка»',
   },
   {
     id: 'spacious',
     label: 'bodyPadding="spacious"',
     props: { bodyPadding: 'spacious', size: 'sm' },
     note: 'Просторі форми, де поля не мають тиснутись до країв.',
-    where: 'Мої завдання · Зміна статусу користувача',
+    where: 'Звернення · Зміна статусу користувача',
     open: 'Клац на свій аватар → «Змінити статус»',
   },
   {
@@ -80,23 +80,23 @@ const DIALOG_VARIANTS = [
     props: { bodyPadding: 'horizontal', size: 'sm' },
     note: 'Підтвердження без тексту: сам заголовок уже все сказав, тож вертикального відступу під тілом немає — лишається тільки бічний.',
     where: 'Будь-яке підтвердження без пояснення — ConfirmProvider',
-    open: 'Проєкт → «Видалити проєкт»',
+    open: 'Клієнт → «Видалити клієнта»',
   },
   {
     id: 'sticky-head',
     label: 'bodyPadding="sticky-head"',
     props: { bodyPadding: 'sticky-head', size: 'lg' },
     note: 'Тіло віддає свій верхній відступ першому дочірньому елементу, коли той — sticky top-0. Поле пошуку тоді прилипає до самого верху: перший рядок не обрізається, а прокручені рядки не визирають над полем.',
-    where: 'Спринти → «Додати існуюче завдання»',
-    open: 'Спринти → «+» у шапці спринта → «Додати існуюче»',
+    where: 'Довгий список із пошуком у шапці',
+    open: 'Поки лише тут, у каталозі',
   },
   {
     id: 'sheet',
     label: 'presentation="sheet"',
     props: { presentation: 'sheet', size: 'sm', bodyPadding: 'spacious' },
     note: 'Висувна панель збоку замість центрованої модалки — не окремий компонент, а той самий Dialog.',
-    where: 'Мої завдання → налаштування вигляду',
-    open: 'Мої завдання → іконка фільтрів праворуч',
+    where: 'Звернення → налаштування вигляду',
+    open: 'Звернення → іконка фільтрів праворуч',
   },
   {
     id: 'status',
@@ -123,11 +123,11 @@ export default function DialogsSection() {
       <div className="flex flex-col gap-[32px]">
       <PreviewBlock title="Standard Dialog" component="Dialog" description="Спільний chrome: sm 440px, md 560px, lg 760px, xl 960px. Приклад нижче — sm dialog.">
         <Button style="primary" size="lg" onClick={() => setOpen1(true)}>Відкрити форму</Button>
-        <Dialog isOpen={open1} onClose={() => setOpen1(false)} title="Редагувати проєкт" size="sm">
+        <Dialog isOpen={open1} onClose={() => setOpen1(false)} title="Редагувати клієнта" size="sm">
           <div className="flex flex-col gap-[16px]">
             <div>
               <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Назва *</label>
-              <Input placeholder="Назва проєкту..." />
+              <Input placeholder="Назва клієнта..." />
             </div>
             <div>
               <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Опис</label>
@@ -199,16 +199,16 @@ export default function DialogsSection() {
 
       <PreviewBlock
         title="Project Settings Dialog"
-        description="Точний shared organism з проєкту: правий sm sheet, як форма створення проєкту."
+        description="Точний shared organism з екрана клієнта: правий sm sheet, як форма створення клієнта."
         filePath="src/components/ui/TaskManagement/ProjectSettingsForm.jsx"
       >
         <Button style="secondary" size="lg" icon={Settings} onClick={() => setProjectSettingsOpen(true)}>
-          Налаштування проєкту
+          Налаштування клієнта
         </Button>
         <Dialog
           isOpen={projectSettingsOpen}
           onClose={() => setProjectSettingsOpen(false)}
-          title="Налаштування проєкту"
+          title="Налаштування клієнта"
           size="sm"
           footer={(
             <>
@@ -247,11 +247,11 @@ export default function DialogsSection() {
 
       <PreviewBlock
         title="CreateTaskModal — large sheet"
-        description="Живий великий організм створення задачі. Він використовує Dialog size=lg, тому ширина, заголовок, close та footer не дублюються локально."
+        description="Живий великий організм створення звернення. Він використовує Dialog size=lg, тому ширина, заголовок, close та footer не дублюються локально."
         filePath="src/components/CreateTaskModal.jsx"
       >
         <Button style="primary" size="lg" icon={Plus} onClick={() => setCreateTaskOpen(true)}>
-          Створити завдання
+          Створити звернення
         </Button>
         <CreateTaskModal
           isOpen={createTaskOpen}

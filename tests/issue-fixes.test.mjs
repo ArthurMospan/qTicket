@@ -42,7 +42,7 @@ test('QUI-77 keeps task detail additions compact and floating menus stationary',
   assert.doesNotMatch(mainSections, /border-t border-line/);
   assert.doesNotMatch(mainSections, /<FormGroup label="(?:Зв’язок|Завдання)"/);
   assert.match(mainSections, /ariaLabel="Тип зв’язку"/);
-  assert.match(mainSections, /ariaLabel="Пов’язаний інцидент"/);
+  assert.match(mainSections, /ariaLabel="Пов’язане звернення"/);
   assert.match(select, /aria-label=\{ariaLabel\}/);
   assert.match(
     mainSections,
@@ -188,7 +188,7 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(projectPage, /<BoardConfigModal[\s\S]{0,160}project=\{project\}[\s\S]{0,240}canManageTeam=\{can\(orgRole, 'manage:team'\)\}/);
   assert.match(settingsDialog, /size="sm"/);
   assert.doesNotMatch(settingsDialog, /presentation="dialog"/);
-  assert.match(settingsDialog, /title: 'Приховати етапи інцидентів\?'/);
+  assert.match(settingsDialog, /title: 'Приховати етапи звернень\?'/);
   assert.match(settingsDialog, /updateProjectSettings\(project\.id/);
   assert.match(settingsDialog, /<ProjectSettingsForm/);
   // QUI-98: settings and create render the same shared form, and archiving or

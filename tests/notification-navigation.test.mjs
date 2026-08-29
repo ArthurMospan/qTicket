@@ -70,11 +70,11 @@ test('keeps a calendar event deep link scoped to the right organization', () => 
 // The card's button names its destination, and that is where the notification's
 // type now lives.
 test('a notification names its destination in words', () => {
-  // The bell is shared with the external client, so a label either names the
-  // destination without naming the record, or takes the reader's word for it.
+  // The bell is shared with the external client, and there is one word for the
+  // record, so the default and what a caller can pass are the same word.
   assert.equal(notificationOpenLabel({ type: 'commented', issueId: 'issue-1' }), 'Відкрити обговорення');
-  assert.equal(notificationOpenLabel({ type: 'assigned', issueId: 'issue-1' }), 'Відкрити інцидент');
-  assert.equal(notificationOpenLabel({ type: 'deadline', issueId: 'issue-1' }), 'Відкрити інцидент');
+  assert.equal(notificationOpenLabel({ type: 'assigned', issueId: 'issue-1' }), 'Відкрити звернення');
+  assert.equal(notificationOpenLabel({ type: 'deadline', issueId: 'issue-1' }), 'Відкрити звернення');
   assert.equal(
     notificationOpenLabel({ type: 'status_changed', issueId: 'issue-1' }, { record: 'звернення' }),
     'Відкрити звернення',

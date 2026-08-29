@@ -68,7 +68,7 @@ function serializedDate(value) {
 
 function duplicateData(issue) {
   return {
-    title: `Копія — ${issue.title || issue.issueKey || 'Завдання'}`.slice(0, 240),
+    title: `Копія — ${issue.title || issue.issueKey || 'Звернення'}`.slice(0, 240),
     description: typeof issue.description === 'string' ? issue.description : '',
     status: issue.columnId || issue.status,
     priority: issue.priority || NO_PRIORITY_ID,
@@ -159,7 +159,7 @@ function noticeForAction({ issue, nextIssue, actionId, organizationId, actorId }
     userIds = issueParticipants(issue, { actorId });
     type = 'status_changed';
     // Neutral without a key: a status change reaches the external client who
-    // opened the record, and «Задача» is the one word they must never read.
+    // opened the record, and the key says which one better than the noun would.
     title = issue.issueKey ? `${issue.issueKey}: статус змінено` : 'Статус змінено';
   } else if (actionId.startsWith('assignees-')) {
     const previous = new Set(issue.assigneeIds || []);
@@ -207,7 +207,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Потрібна коректна організація' }, { status: 400 });
     }
     if (!rawIssueIds.length || rawIssueIds.length > MAX_BULK_ISSUES || !issueIds.length || issueIds.length > MAX_BULK_ISSUES) {
-      return NextResponse.json({ error: `Дозволено від 1 до ${MAX_BULK_ISSUES} задач` }, { status: 400 });
+      return NextResponse.json({ error: `Дозволено від 1 до ${MAX_BULK_ISSUES} звернень` }, { status: 400 });
     }
     const valueError = validateBulkActionValue(actionId, body.value);
     if (!action || valueError) return NextResponse.json({ error: valueError || 'Невідома масова дія' }, { status: 400 });
@@ -269,9 +269,9 @@ export async function POST(request) {
 
     const results = await inChunks(issues, async issue => {
       try {
-        if (issue.missing) throw new Error('Завдання не знайдено');
-        if (issue.organizationId !== organizationId) throw new Error('Завдання не належить активній організації');
-        if (issue.deletionPending === true) throw new Error('Завдання вже видаляється');
+        if (issue.missing) throw new Error('Звернення не знайдено');
+        if (issue.organizationId !== organizationId) throw new Error('Звернення не належить активній організації');
+        if (issue.deletionPending === true) throw new Error('Звернення вже видаляється');
         const project = projects.get(issue.projectId);
         const accessError = projectAccessError(project, organizationId, authorization);
         if (accessError) throw new Error(accessError);
@@ -307,7 +307,7 @@ export async function POST(request) {
               hiddenStatusIds: project.hiddenColumns || [],
             })
             : body.value.id;
-          if (!requestedStatus) throw new Error(`У проєкті «${project.name || project.id}» немає доступного статусу цієї категорії`);
+          if (!requestedStatus) throw new Error(`У клієнта «${project.name || project.id}» немає доступного статусу цієї категорії`);
           const internal = jsonRequest(new URL(`/api/issues/${encodeURIComponent(issue.id)}/status`, request.url), request, 'PATCH', { status: requestedStatus });
           await responseResult(await transitionIssueStatus(internal, { params: Promise.resolve({ issueId: issue.id }) }));
           return {
@@ -333,9 +333,9 @@ export async function POST(request) {
         await db.runTransaction(async transaction => {
           const freshSnap = await transaction.get(issueRef);
           const freshProjectSnap = await transaction.get(projectRef);
-          if (!freshSnap.exists) throw new Error('Завдання більше не існує');
+          if (!freshSnap.exists) throw new Error('Звернення більше не існує');
           const fresh = { ...freshSnap.data(), id: freshSnap.id };
-          if (fresh.organizationId !== organizationId || fresh.projectId !== issue.projectId) throw new Error('Область задачі змінилася');
+          if (fresh.organizationId !== organizationId || fresh.projectId !== issue.projectId) throw new Error('Область звернення змінилася');
           const freshProject = freshProjectSnap.exists
             ? { ...freshProjectSnap.data(), id: freshProjectSnap.id }
             : null;
@@ -367,7 +367,7 @@ export async function POST(request) {
             ? assigneesOutsideProject(freshProject, valueMemberships, uid => valueRoles.get(uid) ?? null)
             : [];
           if (outsideProject.length) {
-            throw new Error(`У проєкті «${freshProject?.name || issue.projectId}» цей виконавець не входить до складу проєкту — додайте його на вкладці «Команда»`);
+            throw new Error(`У клієнта «${freshProject?.name || issue.projectId}» цей виконавець не входить до складу команди — додайте його на вкладці «Команда»`);
           }
           const now = FieldValue.serverTimestamp();
           transaction.update(issueRef, {
