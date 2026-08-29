@@ -67,6 +67,9 @@ const ACTION_TEXT = Object.freeze({
   cancelled: 'Звернення скасовано',
   uncancelled: 'Скасування звернення відмінено',
   'legacy-subtasks-migrated': 'Старий чекліст перенесено в опис',
+  // The request stays here and stays open; the work it asks for is being
+  // done in QuickTeam. The client reads this line like every other one.
+  'quickteam-transferred': 'Створено завдання в QuickTeam',
 });
 
 const BULK_ACTION_PREFIX = 'bulk_';

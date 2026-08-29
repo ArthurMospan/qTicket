@@ -40,11 +40,13 @@ import {
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const SRC = join(ROOT, 'src');
 
-// Two exemptions, both data rather than copy.
+// Three exemptions. Two are data rather than copy; the third is the one place
+// where these words are the right ones.
 //
 // Keep this list short. An entry is a claim that a person never reads the
-// string, and the only way that claim stays true is if there are few enough of
-// them to check by eye.
+// string — or, for the third kind, that what they read is not qTicket's record
+// at all — and the only way those claims stay true is if there are few enough
+// of them to check by eye.
 const ALLOWED = [
   {
     file: 'src/lib/content/incidentTerms.mjs',
@@ -60,14 +62,34 @@ const ALLOWED = [
       + 'string on the other side of the colon.',
     strings: ['Беклог', 'Задача'],
   },
+  {
+    files: [
+      'src/app/api/integrations/quickteam/projects/route.js',
+      'src/app/api/issues/[issueId]/quickteam-task/route.js',
+      'src/components/workspace/IssueDetail.jsx',
+      'src/components/workspace/QuickTeamTransferDialog.jsx',
+      'src/lib/utils/issueAuditEvents.mjs',
+    ],
+    reason:
+      'The transfer to QuickTeam, and only it. In QuickTeam a «завдання» really '
+      + 'is a завдання and a «проєкт» really is a проєкт — those are that '
+      + 'product’s own words for its own records, and calling them «звернення» '
+      + 'here would describe something QuickTeam does not have. The exemption is '
+      + 'narrow by construction: the string must name QuickTeam, so it cannot '
+      + 'quietly cover a sentence about a qTicket record.',
+    mentions: 'QuickTeam',
+  },
 ];
 
 const posix = file => relative(ROOT, file).split(sep).join('/');
 
 function allowance(file, value) {
-  return ALLOWED.find(entry => (
-    entry.file === file && (entry.strings === null || entry.strings.includes(value))
-  ));
+  return ALLOWED.find(entry => {
+    const named = entry.files ? entry.files.includes(file) : entry.file === file;
+    if (!named) return false;
+    if (entry.mentions) return String(value).includes(entry.mentions);
+    return entry.strings === null || entry.strings.includes(value);
+  });
 }
 
 function offences(words) {
@@ -109,16 +131,24 @@ test('a support space is named by whose it is, never «проєкт»', () => {
   );
 });
 
-test('the whitelist is two entries long and both of them say why', () => {
+test('the whitelist is three entries long and all of them say why', () => {
   // The exemptions are the part of this test that can rot. A list nobody looks
   // at grows one honest-looking line at a time until the rule it protects is
   // gone, so the size of it is asserted as well as its contents.
-  assert.equal(ALLOWED.length, 2);
+  assert.equal(ALLOWED.length, 3);
   const files = walk(SRC).map(posix);
   for (const entry of ALLOWED) {
-    assert.ok(entry.reason.length >= 40, `${entry.file} needs a reason, not a note`);
-    assert.ok(files.includes(entry.file), `${entry.file} is whitelisted but does not exist`);
+    const named = entry.files || [entry.file];
+    assert.ok(entry.reason.length >= 40, `${named.join(', ')} needs a reason, not a note`);
+    for (const file of named) {
+      assert.ok(files.includes(file), `${file} is whitelisted but does not exist`);
+    }
   }
+  // The QuickTeam exemption is only ever as wide as the word it requires. An
+  // entry that stopped naming the other product would exempt whole files.
+  const quickTeam = ALLOWED.find(entry => entry.mentions);
+  assert.equal(quickTeam.mentions, 'QuickTeam');
+  assert.equal(quickTeam.strings, undefined);
 });
 
 test('the one table spells the record, and spells it one way', () => {

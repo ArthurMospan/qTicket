@@ -43,8 +43,10 @@ CLOUDINARY_API_SECRET=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_PORTAL_URL=
 
-# Where the staff rail's «QuickTeam» return link points. Leave blank and the
-# link is not drawn — qTicket never guesses the workspace origin.
+# Where the staff rail's «QuickTeam» return link points, and where a transferred
+# request is sent — «Створити завдання в QuickTeam» needs this and the shared
+# secret below. Leave blank and neither is offered: qTicket never guesses the
+# workspace origin.
 NEXT_PUBLIC_QUICKTEAM_URL=
 
 # QuickTeam staff provisioning and one-click launch (same secret on both servers)

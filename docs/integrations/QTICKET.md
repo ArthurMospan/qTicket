@@ -182,6 +182,47 @@ Two deliberate exceptions to the rules above:
 A failure to reach qTicket is not a failure of the QuickTeam rail: the badge is
 simply absent, and the row still opens the product.
 
+## Transferring a request into a QuickTeam task
+
+The one call that goes the other way: qTicket signs, QuickTeam verifies. Same
+secret, same headers, same five-minute window; qTicket reads QuickTeam's origin
+from `NEXT_PUBLIC_QUICKTEAM_URL`.
+
+Support opens a request, chooses **«Створити завдання в QuickTeam»**, and picks
+the QuickTeam project in a dialog. Two endpoints answer it:
+
+- `POST /api/integrations/qticket/projects` — the projects that person may write
+  to in QuickTeam, asked at the moment of choosing. qTicket keeps no copy of
+  them; a stale copy is how somebody is offered a place they can no longer
+  write to.
+- `POST /api/integrations/qticket/tasks` — creates the task. The body carries
+  `projectId` and an `incident` — its qTicket id, key, title and the description
+  qTicket composed, including the link back. QuickTeam invents no prose about a
+  record it cannot read.
+
+**Idempotent on the qTicket request id.** QuickTeam claims
+`qticketTransfers/{hash}` before it writes the task and deletes the claim if the
+write fails, so a second press returns the first task (`status: "existing"`)
+rather than making a second one, and a failed attempt does not lock the request
+out. A press that arrives while another is still in flight is refused with
+`transfer_in_progress`.
+
+The task is written through QuickTeam's own `createIssueForActor` — the same
+path its composer uses — so the issue key, the project counters, the audit row
+and the reminder rows are the ones any task there would have. The person who
+pressed the button is its author; QuickTeam authorizes them by the
+`sourceUserId` provisioning gave qTicket, and refuses when the add-on is
+inactive, when that person is not in the staff selection, or when their seat is
+gone.
+
+**The request stays a request.** Nothing here closes it, moves it or hides it:
+the client keeps writing in it and support keeps answering. What changes on this
+side is a stored `issue.quickTeamTask` (task id, key, project, url) and one
+audit line, «Створено завдання в QuickTeam», which the client reads like every
+other line in the history. The audit document id is derived from the task id, so
+a repeated press writes the same line about the same fact rather than a second
+one.
+
 ## Source of truth
 
 | Data | Authority |
@@ -194,6 +235,7 @@ simply absent, and the row still opens the product.
 | Incidents, shared client discussion and workflow | qTicket |
 | A transferred task after explicit export | QuickTeam |
 
-The later incident-to-task action is a separate idempotent server contract. It
-must not reuse the staff launch code or turn either database into a mirror of
-the other.
+The incident-to-task action above is that separate idempotent contract. It
+reuses neither the staff launch code nor any session, and turns neither database
+into a mirror of the other: qTicket stores a link to the task, QuickTeam stores
+the id of the request it came from, and neither reads the other's records.

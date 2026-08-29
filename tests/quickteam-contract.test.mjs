@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
+  createQuickTeamSignedRequest,
+  quickTeamAppConfig,
   normalizeQuickTeamLaunch,
   normalizeQuickTeamProvision,
   normalizeQuickTeamUnread,
@@ -241,4 +243,75 @@ test('the unread badge answers with a number and only for an enabled staff seat'
   const bell = await readFile(new URL('../src/app/api/notifications/unread-counts/route.js', import.meta.url), 'utf8');
   assert.match(bell, /unreadInAppCount\(db, uid, organizationId\)/);
   assert.doesNotMatch(bell, /\.where\('inapp', '==', false\)/);
+});
+
+// Той самий конверт, але в інший бік: тепер підписує qTicket.
+test('qTicket signs its own requests to QuickTeam with the one shared envelope', () => {
+  const environment = {
+    NEXT_PUBLIC_QUICKTEAM_URL: 'https://quickteam.example.com/',
+    QUICKTEAM_QTICKET_SHARED_SECRET: secret,
+  };
+  assert.deepEqual(quickTeamAppConfig(environment), {
+    origin: 'https://quickteam.example.com',
+    secret,
+    configured: true,
+  });
+  assert.equal(quickTeamAppConfig({ NEXT_PUBLIC_QUICKTEAM_URL: 'https://q.example' }).configured, false);
+  assert.equal(quickTeamAppConfig({ QUICKTEAM_QTICKET_SHARED_SECRET: secret }).configured, false);
+
+  const request = createQuickTeamSignedRequest({ version: 1, projectId: 'p1' }, {
+    environment,
+    timestamp: 2_000_000_000,
+    nonce: 'nonce_0123456789abcdef',
+  });
+  assert.equal(request.origin, 'https://quickteam.example.com');
+  assert.equal(
+    request.headers['X-QT-Signature'],
+    signQuickTeamRequest(secret, {
+      timestamp: 2_000_000_000,
+      nonce: 'nonce_0123456789abcdef',
+      body: request.body,
+    }),
+  );
+  // Підпис накриває саме ті байти, які поїдуть.
+  assert.deepEqual(JSON.parse(request.body), { version: 1, projectId: 'p1' });
+});
+
+// «Створити завдання в QuickTeam»: звернення лишається тут і відкритим, а
+// робота живе там. Перенос — це посилання й рядок в історії, не зміна статусу.
+test('the transfer sends what QuickTeam needs and keeps the request open', async () => {
+  const [route, proxy, client, detail] = await Promise.all([
+    readFile(new URL('../src/app/api/issues/[issueId]/quickteam-task/route.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/app/api/integrations/quickteam/projects/route.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/server/quickteamTransfer.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/workspace/IssueDetail.jsx', import.meta.url), 'utf8'),
+  ]);
+
+  // Внутрішнє рішення про внутрішню роботу: клієнт має `create:issue`, але
+  // сюди не потрапляє ні через маршрут, ні через меню.
+  for (const source of [route, proxy]) {
+    assert.match(source, /rolesFor\('edit:issue'\)/);
+    assert.match(source, /isClientRole\(authorization\.membership\?\.role\)/);
+  }
+  assert.match(detail, /internalViewer && canWhileRoleLoads\(orgRole, 'edit:issue'\)/);
+
+  // Особу називає QuickTeam, а не браузер: секрет лишається на сервері, а
+  // `sourceUserId` дістається зі звʼязку, який записало провіження.
+  assert.match(client, /quickTeamIdentities'\)\s*\.where\('qTicketUserId', '==', qTicketUserId\)/s);
+  assert.match(route, /const sourceUserId = await quickTeamSourceUserId\(authorization\.user\.uid\);/);
+  assert.match(route, /QUICKTEAM_IDENTITY_MISSING/);
+
+  // Звернення нікуди не зникає: ні статусу, ні архіву, ні скасування.
+  assert.doesNotMatch(route, /columnId|archivedAt|cancelledAt/);
+  assert.match(route, /issueRef\.set\(\{ quickTeamTask, updatedAt: now \}, \{ merge: true \}\)/);
+  // Лишається слід: поле з посиланням і рядок історії з детермінованим id,
+  // щоб друге натискання не написало другий рядок про той самий факт.
+  assert.match(route, /quickTeamTask/);
+  assert.match(route, /audit'\)\.doc\(`quickteam-\$\{answer\.taskId\}`\)/);
+  assert.match(route, /action: 'quickteam-transferred'/);
+
+  // Опис, який читатимуть у QuickTeam, складає qTicket — разом із посиланням
+  // назад. Інакше сусідній продукт вигадував би слова про чужий запис.
+  assert.match(route, /Перенесено зі звернення/);
+  assert.match(route, /incidentUrl/);
 });

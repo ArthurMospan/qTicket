@@ -45,13 +45,14 @@ import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
 import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
+import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig';
 import useWorkspaceStore       from '@/store/useWorkspaceStore';
 import { sendNotification }    from '@/lib/hooks/useNotifications';
 import {
-  AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff,
+  AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff, ExternalLink,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
   Maximize2, User, Users, CircleDot, Ban, Undo2,
@@ -311,6 +312,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // is: it has been put aside, and the one action it offers is coming back. A
   // cancelled task is read-only on the same terms — editing work that has been
   // called off is how it quietly comes back to life in somebody's list.
+  // The transfer overlay, and the answer it comes back with. The stored field
+  // is the truth on the next read; this is what redraws the menu now.
+  const [showQuickTeamTransfer, setShowQuickTeamTransfer] = useState(false);
+  const [quickTeamTask, setQuickTeamTask] = useState(null);
+  const transferredTask = quickTeamTask || issue?.quickTeamTask || null;
   const isIssueArchived = isArchivedIssue(issue);
   const isIssueCancelled = isCancelledIssue(issue);
   const isArchived = project?.status === 'archived' || isIssueArchived || isIssueCancelled;
@@ -1151,6 +1157,25 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 }] : []),
                 // Two different things, and they finally read as two: putting a
                 // task aside for good, and deleting it with a clock running.
+                // Moving the work is not moving the request: it stays here,
+                // open, and the customer keeps writing in it. Once it has been
+                // transferred the row stops offering to do it again and starts
+                // pointing at what was made — pressing it twice would return
+                // the same task anyway, and a menu that hides that is a menu
+                // that invites the second press.
+                ...(internalViewer && canWhileRoleLoads(orgRole, 'edit:issue')
+                  ? [transferredTask?.url
+                    ? {
+                      label: 'Відкрити завдання в QuickTeam',
+                      icon: ExternalLink,
+                      onClick: () => window.open(transferredTask.url, '_blank', 'noopener,noreferrer'),
+                    }
+                    : {
+                      label: 'Створити завдання в QuickTeam',
+                      icon: ExternalLink,
+                      onClick: () => setShowQuickTeamTransfer(true),
+                    }]
+                  : []),
                 ...(canWhileRoleLoads(orgRole, 'edit:issue')
                   ? [
                     { label: 'Архівувати', icon: Archive, onClick: () => handleArchive(true) },
@@ -1935,6 +1960,22 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 )}
             </DetailSection>
       </DetailLayout>
+
+      {internalViewer && (
+        <QuickTeamTransferDialog
+          isOpen={showQuickTeamTransfer}
+          onClose={() => setShowQuickTeamTransfer(false)}
+          organizationId={activeOrgId}
+          issueId={issueId}
+          issueKey={issue?.issueKey || ''}
+          onTransferred={answer => {
+            setQuickTeamTask(answer?.quickTeamTask || null);
+            showToast(answer?.status === 'existing'
+              ? 'Це звернення вже перенесено — відкрийте його в QuickTeam'
+              : 'Створено в QuickTeam');
+          }}
+        />
+      )}
     </>
   );
 }

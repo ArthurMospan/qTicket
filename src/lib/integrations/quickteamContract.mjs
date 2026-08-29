@@ -166,3 +166,40 @@ export function normalizeQuickTeamLaunch(value) {
     },
   };
 }
+
+// ── Outbound: qTicket asking QuickTeam ───────────────────────────────
+//
+// The same envelope in the other direction. qTicket verifies what QuickTeam
+// signs during provisioning and launch; this is what qTicket signs when it
+// transfers a request into a QuickTeam task. One secret, one signature format,
+// two directions — a second scheme would be a second thing to get wrong.
+
+export function quickTeamAppConfig(environment = process.env) {
+  const origin = String(environment.NEXT_PUBLIC_QUICKTEAM_URL || '').trim().replace(/\/$/, '');
+  const secret = String(environment.QUICKTEAM_QTICKET_SHARED_SECRET || '');
+  return {
+    origin,
+    secret,
+    configured: /^https?:\/\//.test(origin) && secret.length >= 32,
+  };
+}
+
+export function createQuickTeamSignedRequest(payload, {
+  environment = process.env,
+  timestamp = Math.floor(Date.now() / 1000),
+  nonce = randomBytes(24).toString('base64url'),
+} = {}) {
+  const config = quickTeamAppConfig(environment);
+  if (!config.configured) throw new Error('QuickTeam integration is not configured');
+  const body = JSON.stringify(payload);
+  return {
+    origin: config.origin,
+    body,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-QT-Timestamp': String(timestamp),
+      'X-QT-Nonce': nonce,
+      'X-QT-Signature': signQuickTeamRequest(config.secret, { timestamp, nonce, body }),
+    },
+  };
+}
