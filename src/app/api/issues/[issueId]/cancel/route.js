@@ -4,10 +4,6 @@ import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
-  analyticsRollupDeltasFor,
-  writeAnalyticsRollupDeltas,
-} from '@/lib/server/analyticsRollups';
-import {
   projectIssueCountDeltasFor,
   writeProjectIssueCountDeltas,
 } from '@/lib/server/projectIssueCounts';
@@ -62,13 +58,11 @@ export async function PATCH(request, context) {
     }
 
     const projectRef = db.collection('projects').doc(issue.projectId);
-    const rollupDeltas = await analyticsRollupDeltasFor(db, issue.organizationId);
     const countDeltas = await projectIssueCountDeltasFor(db, issue.organizationId);
     const result = await db.runTransaction(async transaction => {
-      // Firestore re-runs this body on contention; both accumulators live
-      // outside it and would otherwise move their totals once per attempt.
+      // Firestore re-runs this body on contention; the accumulator lives outside
+      // it and would otherwise move its totals once per attempt.
       countDeltas.reset();
-      rollupDeltas.reset();
       const [currentSnap, projectSnap] = await Promise.all([
         transaction.get(issueRef),
         transaction.get(projectRef),
@@ -105,28 +99,6 @@ export async function PATCH(request, context) {
         return { changed: false, issueKey: current.issueKey || issueId };
       }
 
-      // Cancelling and un-cancelling both move this task's hours across the
-      // line between «logged» and «still counts», so both need the hours.
-      const timeLogs = await transaction.get(
-        db.collection('timeLogs').where('issueId', '==', issueId),
-      );
-      const ownLogs = timeLogs.docs
-        .map(document => ({ ...document.data(), id: document.id }))
-        .filter(log => (
-          log.organizationId === current.organizationId
-          && log.projectId === current.projectId
-        ));
-
-      // The daily totals keep «what was logged» and «what somebody has since
-      // called off» as two figures, so this moves hours from one to the other
-      // and back without ever rewriting what the day recorded. One write per
-      // distinct day this task has hours on — which is a property of one task,
-      // not of the workspace, and rides inside the same transaction as the flag
-      // itself so the two can never disagree.
-      for (const log of ownLogs) {
-        rollupDeltas.addCancellation(log, cancelled ? 1 : -1);
-      }
-
       // Work that is not going to happen is not one of the tasks the numbers
       // are about, so it leaves the project's counters as well. Un-cancelling
       // is the same call with the two shapes the other way round.
@@ -154,7 +126,6 @@ export async function PATCH(request, context) {
         action: cancelled ? 'cancelled' : 'uncancelled',
         createdAt: now,
       });
-      writeAnalyticsRollupDeltas({ writer: transaction, db, deltas: rollupDeltas });
       writeProjectIssueCountDeltas({ writer: transaction, db, deltas: countDeltas });
       return { changed: true, issueKey: current.issueKey || issueId };
     });

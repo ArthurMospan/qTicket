@@ -166,12 +166,11 @@ function sortLocations(entries) {
 // Which product surface a control belongs to.
 //
 // These are not strays to be folded into generic components — they are the
-// working parts of Calendar, Chat, Analytics and the rest. Each surface has
-// its own section in /ui-kit for the same reason chat does: a control only
-// makes sense next to the others it works with.
+// working parts of Chat, the board and the rest. Each surface has its own
+// section in /ui-kit for the same reason chat does: a control only makes
+// sense next to the others it works with.
 const STRUCTURES = [
   { id: 'chat', label: 'Чат', file: /(?:\/chat\/|Chat[A-Z]|ChatAttachments|MessageContent|UnifiedTimeline|HoverCard)/ },
-  { id: 'calendar', label: 'Календар', file: /calendar/i },
   { id: 'ai-call', label: 'AI-дзвінок', file: /(?:ai-call|AudioTask)/i },
   { id: 'tasks', label: 'Задачі', file: /(?:IssueDetail|IssueCard|CreateTaskModal|TaskRow|TaskListView|AttachmentViewer|Markdown)/ },
   { id: 'board', label: 'Дошка й проєкт', file: /(?:AgileBoard|BoardConfig|\(app\)\/\[projectId\]|\(app\)\/page\.js)/ },

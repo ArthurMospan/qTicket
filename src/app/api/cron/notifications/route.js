@@ -22,9 +22,9 @@ function presentedSecretMatches(header, expected) {
 //                         no state write; safe every minute.
 //   ?mode=maintenance   — empty «Нещодавно видалене» past its window and expire
 //                         read records. Two bounded queries; hourly.
-//   ?mode=materialise   — restock the outbox from the source data and post
-//                         birthday greetings. Nightly; a safety net, because the
-//                         rows are written when the deadline is set.
+//   ?mode=materialise   — restock the outbox from the tasks themselves.
+//                         Nightly; a safety net, because the rows are written
+//                         when the deadline is set.
 //   ?mode=health        — read the watermark and say whether anything has come
 //                         to run the sweep lately. Sweeps nothing, writes
 //                         nothing, costs one read; answers 503 when the sweep

@@ -3,8 +3,8 @@ name: Sweep watchdog
 # Somebody has to notice when the notification sweep stops.
 #
 # It stopped once already, between 3 and 27 August 2026, and it stopped
-# completely: no deadline reminders, no calendar reminders, no birthday
-# greetings, no emptying of «Нещодавно видалене». Twenty-four days. Every part
+# completely: no deadline reminders, no emptying of «Нещодавно видалене».
+# Twenty-four days. Every part
 # of the system behaved correctly the entire time — the sweep writes down when
 # it last ran, and that record was accurate to the minute. It simply had no
 # reader. The outage was found by hand, three and a half weeks later.

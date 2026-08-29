@@ -143,31 +143,6 @@ test('the composer scopes assignees to the project selected inside it', async ()
   assert.match(modal, /disabled=\{lockedOut && !mayGrantProjectAccess\}/);
 });
 
-// The other half of the same door. «Команда» → учасник → «Створити подію» went
-// through a route that only ever checked that a participant was in the
-// organization: a guest could be invited to an event whose project 404s for
-// them, and no roster was written or refused either way.
-test('an event with a project asks the same two questions a task does', async () => {
-  for (const path of [
-    '../src/app/api/calendar/events/route.js',
-    '../src/app/api/calendar/events/[eventId]/route.js',
-  ]) {
-    const route = await read(path);
-    assert.match(route, /assigneesOutsideProject\(/, `${path} never checks participant access`);
-    assert.match(route, /assigneesOffProjectTeam\(/, `${path} never checks the project roster`);
-    assert.match(route, /addParticipantsToProjectTeam/, `${path} has no consent to act on`);
-    assert.match(route, /CALENDAR_PARTICIPANT_OUTSIDE_PROJECT/);
-    // Written on the flag and on nothing else, exactly as the task route.
-    assert.match(route, /team: FieldValue\.arrayUnion/);
-  }
-
-  const dialog = await read('../src/components/workspace/calendar/CalendarEventDialog.jsx');
-  assert.match(dialog, /const \[addToProjectTeam, setAddToProjectTeam\] = useState\(false\);/);
-  assert.match(dialog, /participantsLockedOutOfProject\.length > 0 && !addToProjectTeam/);
-  assert.match(dialog, /addParticipantsToProjectTeam: addToProjectTeam && participantsOffProjectRoster\.length > 0/);
-  assert.match(dialog, /if \(key === 'projectId'\) setAddToProjectTeam\(false\);/);
-});
-
 // Saving project settings used to write the roster it read when the dialog
 // opened. Anybody added to the project in between — by a task that had just
 // granted them access, or by somebody else in another tab — was dropped by a

@@ -5,7 +5,6 @@ import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { deliverEmail, emailConfigured } from '@/lib/server/email';
 import { generateEmailTemplate } from '@/lib/utils/sendEmail';
 import { shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
-import { reminderLabel } from '@/lib/utils/reminderCandidates.mjs';
 import {
   DISPATCH_BATCH,
   OUTBOX_COLLECTION,
@@ -47,7 +46,7 @@ async function commitInChunks(db, writes) {
 // The shared half of «write down what is wanted, cancel what is not».
 //
 // `pendingRows` is what the caller believes it owns: the whole window for the
-// nightly sweep, one task's or one event's rows for a write that just happened.
+// nightly sweep, one task's rows for a write that just happened.
 // Everything else is identical, and it has to be — a row written by the sweep
 // and a row written when somebody set the deadline are the same row, or the
 // reminder goes out twice.
@@ -81,14 +80,13 @@ async function reconcile(candidates, { pendingRows, windowStartMs, windowEndMs, 
     if (!current) {
       batch.set(outboxRef().doc(id), {
         ...outboxRow(candidate, { nowMs }),
-        occurrenceStartMs: Number(candidate.occurrenceStart) || null,
         createdAt: FieldValue.serverTimestamp(),
       });
       created += 1;
       continue;
     }
     // A row that already went out is history. Re-materialising must never
-    // resurrect it, which is also what stops a moved event from re-notifying
+    // resurrect it, which is also what stops a moved deadline from re-notifying
     // everyone who was already told.
     if (current.status !== 'pending') continue;
     const changes = outboxRowChanges(current, candidate);
@@ -125,7 +123,7 @@ async function reconcile(candidates, { pendingRows, windowStartMs, windowEndMs, 
 
 // Writes the rows for every reminder that will come due inside the window, and
 // cancels the pending rows in that window that the source data no longer
-// justifies — an event that moved, a task someone finished.
+// justifies — a deadline that moved, a task someone finished.
 export async function materialiseCandidates(candidates, { windowStartMs, windowEndMs, nowMs }) {
   const pendingSnapshot = await outboxRef()
     .where('status', '==', 'pending')
@@ -142,13 +140,12 @@ export async function materialiseCandidates(candidates, { windowStartMs, windowE
 }
 
 // How many pending rows one source may own. A task produces one row per
-// assignee per day-key it nags on; an event, one per participant per occurrence
-// per configured reminder. Fifty is far past either, and a ceiling here is what
-// keeps a per-write reconciliation from ever becoming a collection scan.
+// assignee per day-key it nags on. Fifty is far past that, and a ceiling here is
+// what keeps a per-write reconciliation from ever becoming a collection scan.
 const SCOPED_ROW_LIMIT = 50;
 
 /**
- * The same reconciliation, for the rows one task or one calendar event owns.
+ * The same reconciliation, for the rows one task owns.
  *
  * This is what turns the outbox from something that is *found* into something
  * that is *written*. Setting a deadline is the moment the reminder becomes
@@ -162,7 +159,7 @@ const SCOPED_ROW_LIMIT = 50;
  *
  * @param {object[]} candidates What this source produces now — empty when the
  *   source is gone, which is how a deletion cancels its rows.
- * @param {{issueId?: string, calendarEventId?: string}} scope The source.
+ * @param {{issueId?: string}} scope The source.
  */
 export async function reconcileScopedRows(candidates, {
   scope,
@@ -170,12 +167,11 @@ export async function reconcileScopedRows(candidates, {
   windowEndMs,
   nowMs = Date.now(),
 }) {
-  const field = scope?.issueId ? 'issueId' : 'calendarEventId';
-  const value = scope?.issueId || scope?.calendarEventId || '';
-  if (!value) throw new Error('reconcileScopedRows needs an issueId or a calendarEventId');
+  const value = scope?.issueId || '';
+  if (!value) throw new Error('reconcileScopedRows needs an issueId');
 
   const pendingSnapshot = await outboxRef()
-    .where(field, '==', value)
+    .where('issueId', '==', value)
     .where('status', '==', 'pending')
     .select('status', 'type', 'deliverAtMs')
     .limit(SCOPED_ROW_LIMIT)
@@ -220,16 +216,6 @@ async function loadRecipientContext(rows) {
   };
 }
 
-// A calendar reminder materialised two hours early would otherwise announce the
-// distance it had when it was written down. The row keeps the occurrence, and
-// the wording is produced here, at the moment it is actually sent.
-function rowBody(row, nowMs) {
-  if (row.type !== 'calendar_reminder' || !Number.isFinite(Number(row.occurrenceStartMs))) {
-    return row.body || '';
-  }
-  return reminderLabel(Number(row.occurrenceStartMs) - nowMs);
-}
-
 async function claimNotification(row, { inapp, body, nowMs }) {
   const db = getAdminDb();
   try {
@@ -242,7 +228,6 @@ async function claimNotification(row, { inapp, body, nowMs }) {
       issueId: row.issueId || '',
       projectId: row.projectId || '',
       organizationId: row.organizationId,
-      ...(row.calendarEventId ? { calendarEventId: row.calendarEventId } : {}),
       actorId: row.actorId || 'quickteam-system',
       actorName: row.actorName || 'QuickTeam',
       actorAvatar: '',
@@ -335,7 +320,7 @@ export async function dispatchDueNotifications({ nowMs = Date.now(), limit = DIS
 
     const preferences = context.preferences.get(row.userId) || {};
     const profile = context.profiles.get(row.userId) || {};
-    const body = rowBody(row, nowMs);
+    const body = row.body || '';
     const inapp = shouldDeliver(preferences, 'inapp', row.type);
     // `emailsPossible` first, because a channel that does not exist is not a
     // channel that failed.

@@ -2,7 +2,6 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { deleteProjectAnalyticsRollups } from '@/lib/server/analyticsRollups';
 import {
   projectIssueCountDeltasFor,
   projectIssueCountIncrements,
@@ -360,8 +359,9 @@ export async function DELETE(request, context) {
     if (loaded.error) return NextResponse.json({ error: loaded.error }, { status: loaded.status });
     const { db, ref, project } = loaded;
 
-    // The project lock makes this guard conflict with calendar mutations
-    // before the deletion marker closes all later creation paths.
+    // The project lock: the deletion marker is what closes every later creation
+    // path, and it is set inside a transaction so a write already in flight
+    // either lands before it or fails against it.
     await db.runTransaction(async transaction => {
       const current = await transaction.get(ref);
       if (
@@ -371,20 +371,6 @@ export async function DELETE(request, context) {
         throw new Error('NOT_FOUND');
       }
 
-      const calendarEvents = await transaction.get(
-        db.collection('calendarEvents')
-          .where('organizationId', '==', project.organizationId)
-          .where('projectId', '==', projectId)
-          .limit(1),
-      );
-      if (!calendarEvents.empty) {
-        throw projectTransactionError(
-          'PROJECT_HAS_CALENDAR_EVENTS',
-          409,
-          'Спочатку перенесіть або видаліть усі календарні події цього проєкту',
-          { calendarEventId: calendarEvents.docs[0].id },
-        );
-      }
       if (current.data().deletionPending !== true) {
         transaction.update(ref, {
           deletionPending: true,
@@ -414,10 +400,6 @@ export async function DELETE(request, context) {
       simpleRefs.slice(offset, offset + 400).forEach(documentRef => batch.delete(documentRef));
       await batch.commit();
     }
-    // The project's days go with the project. Correcting each day's totals
-    // would be arithmetic in service of documents that no longer describe
-    // anything — there is no project left for them to be about.
-    await deleteProjectAnalyticsRollups(db, project.organizationId, projectId);
     for (const issue of issues.docs) await db.recursiveDelete(issue.ref);
 
     await db.collection('organizations').doc(project.organizationId).update({

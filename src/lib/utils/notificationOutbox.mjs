@@ -98,7 +98,7 @@ export const READ_NOTIFICATION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 // The types this outbox produces. A record of any other type was written by an
 // event that happened once and cannot happen again, so nothing can resend it.
-export const OUTBOX_BACKED_TYPES = new Set(['deadline', 'calendar_reminder']);
+export const OUTBOX_BACKED_TYPES = new Set(['deadline']);
 
 /**
  * Which read records may actually be deleted.
@@ -149,7 +149,6 @@ export function outboxRow(candidate, { nowMs = Date.now() } = {}) {
     link: candidate.link || '',
     issueId: candidate.issueId || '',
     projectId: candidate.projectId || '',
-    calendarEventId: candidate.calendarEventId || '',
     actorId: candidate.actorId || 'quickteam-system',
     actorName: candidate.actorName || 'QuickTeam',
     allowEmail: candidate.allowEmail !== false,
@@ -165,8 +164,8 @@ export function outboxRow(candidate, { nowMs = Date.now() } = {}) {
 }
 
 // Fields a re-materialisation is allowed to correct on a row that has not been
-// delivered yet. An event whose start moved keeps its identity — same event,
-// same person, same occurrence — and only its timing and wording change.
+// delivered yet. A deadline that moved keeps its identity — same task, same
+// person, same day — and only its timing and wording change.
 const MUTABLE_FIELDS = ['deliverAtMs', 'title', 'body', 'link'];
 
 export function outboxRowChanges(existing, candidate) {
@@ -185,14 +184,13 @@ export function outboxRowChanges(existing, candidate) {
 }
 
 // A pending row inside the materialised window whose source no longer produces
-// it — the event was deleted or moved out, the task was completed — should not
-// fire. Rows outside the window are left alone: this pass has no opinion about
+// it — the task was completed, or its deadline was cleared — should not fire. Rows outside the window are left alone: this pass has no opinion about
 // them, and cancelling on absence would delete everything the window cannot see.
 //
 // And only a row that has a source at all. The outbox holds two kinds, and they
-// cancel by opposite rules. A reminder is *derived*: when the deadline or the
-// occurrence it came from stops saying it, the row is wrong and must go. A retry
-// row is not derived from anything — it is a debt. The event already happened,
+// cancel by opposite rules. A reminder is *derived*: when the deadline it came
+// from stops saying it, the row is wrong and must go. A retry row is not derived
+// from anything — it is a debt. The event already happened,
 // the person was already told in the app, and the row exists only because their
 // email did not answer. Nothing that happens to the task afterwards can make
 // that debt untrue.

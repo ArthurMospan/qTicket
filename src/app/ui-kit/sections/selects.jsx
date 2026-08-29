@@ -6,7 +6,6 @@ import { DEFAULT_STATUSES, DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks
 import { PreviewBlock } from '../preview';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { prioritySelectOptions } from '@/lib/utils/priorities.mjs';
-import { MAX_CALENDAR_REMINDERS } from '@/lib/utils/calendarReminders.mjs';
 
 export default function SelectsSection() {
   const [v1, setV1] = useState('');
@@ -14,7 +13,7 @@ export default function SelectsSection() {
   const [v3, setV3] = useState([]);
   const [v4, setV4] = useState('task');
   const [v5, setV5] = useState([]);
-  const [limitedValues, setLimitedValues] = useState([5, 10, 15, 30, 60]);
+  const [limitedValues, setLimitedValues] = useState(['backlog', 'todo', 'in-progress']);
   const [v6, setV6] = useState('in-progress');
   const [v7, setV7] = useState('');
 
@@ -110,22 +109,15 @@ export default function SelectsSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="MultiSelect — ліміт вибору" description="Після п’ятого вибору решта опцій недоступні, але кожне обране значення можна зняти." fullWidth>
+      <PreviewBlock title="MultiSelect — ліміт вибору" description="Після третього вибору решта опцій недоступні, але кожне обране значення можна зняти." fullWidth>
         <div className="max-w-[300px]">
           <MultiSelect
-            options={[
-              { value: 5, label: 'За 5 хвилин' },
-              { value: 10, label: 'За 10 хвилин' },
-              { value: 15, label: 'За 15 хвилин' },
-              { value: 30, label: 'За 30 хвилин' },
-              { value: 60, label: 'За 1 годину' },
-              { value: 120, label: 'За 2 години' },
-            ]}
+            options={statusOpts}
             value={limitedValues}
             onChange={setLimitedValues}
-            maxSelected={MAX_CALENDAR_REMINDERS}
-            placeholder="Додати нагадування"
-            searchPlaceholder="Знайти інтервал..."
+            maxSelected={3}
+            placeholder="Оберіть статуси..."
+            searchPlaceholder="Знайти статус..."
           />
         </div>
       </PreviewBlock>

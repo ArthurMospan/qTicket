@@ -4,73 +4,15 @@ import { readFile } from 'node:fs/promises';
 import {
   MAX_REMINDER_LOOKBACK_MS,
   REMINDER_LOOKBACK_MS,
-  calendarReminderCandidates,
   clampReminderLookback,
   dayKeyInTimeZone,
   deadlineReminderCandidates,
   overdueNagDue,
-  reminderLabel,
 } from '../src/lib/utils/reminderCandidates.mjs';
 
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
-
-test('calendar reminders are produced server-side for accepted participants only', () => {
-  const nowMs = Date.parse('2026-07-29T08:45:00.000Z');
-  const candidates = calendarReminderCandidates([{
-    id: 'event-1',
-    organizationId: 'org-1',
-    organizerId: 'owner-1',
-    title: 'Синк команди',
-    startAt: '2026-07-29T09:00:00.000Z',
-    participantIds: ['member-1', 'member-2'],
-    participantResponses: { 'member-1': 'accepted', 'member-2': 'declined' },
-    reminderMinutes: [15],
-    recurrence: { frequency: 'none' },
-  }], { nowMs });
-
-  assert.equal(candidates.length, 1);
-  assert.equal(candidates[0].userId, 'member-1');
-  assert.equal(
-    candidates[0].id,
-    `calendar_reminder_event-1_member-1_${Date.parse('2026-07-29T09:00:00.000Z')}_15`,
-  );
-  assert.equal(candidates[0].body, 'До початку 15 хв');
-});
-
-test('a removed recurring occurrence does not produce a reminder', () => {
-  const occurrence = '2026-07-29T09:00:00.000Z';
-  const candidates = calendarReminderCandidates([{
-    id: 'event-series',
-    organizationId: 'org-1',
-    organizerId: 'owner-1',
-    title: 'Щоденний синк',
-    startAt: occurrence,
-    participantIds: ['member-1'],
-    reminderMinutes: [15],
-    recurrence: { frequency: 'daily', interval: 1, until: '' },
-    excludedOccurrenceStarts: [occurrence],
-  }], { nowMs: Date.parse('2026-07-29T08:45:00.000Z') });
-
-  assert.equal(candidates.length, 0);
-});
-
-test('calendar reminder look-back catches a missed scheduler tick without duplicates', () => {
-  const candidates = calendarReminderCandidates([{
-    id: 'event-2',
-    organizationId: 'org-1',
-    title: 'Реліз',
-    startAt: '2026-07-29T09:00:00.000Z',
-    participantIds: ['member-1'],
-    reminderMinutes: [15],
-  }], {
-    nowMs: Date.parse('2026-07-29T08:49:00.000Z'),
-  });
-
-  assert.equal(candidates.length, 1);
-  assert.equal(candidates[0].id, 'calendar_reminder_event-2_member-1_1785315600000_15');
-});
 
 test('deadline candidates skip terminal issues and dedupe the overdue nag per day', () => {
   const nowMs = Date.parse('2026-07-29T09:00:00.000Z');
@@ -110,39 +52,6 @@ test('day keys honor the organization timezone', () => {
   const instant = Date.parse('2026-07-28T21:30:00.000Z');
   assert.equal(dayKeyInTimeZone(instant, 'Europe/Kyiv'), '2026-07-29');
   assert.equal(dayKeyInTimeZone(instant, 'America/New_York'), '2026-07-28');
-});
-
-test('a late sweep says how late it is instead of repeating the configured lead', () => {
-  // The scheduler that drives the sweep runs roughly hourly, so "нагадати за 15
-  // хвилин" is routinely delivered after the meeting has started. Announcing
-  // "До початку 15 хв" then is worse than silence.
-  const start = Date.parse('2026-07-29T09:00:00.000Z');
-  const candidates = calendarReminderCandidates([{
-    id: 'event-late',
-    organizationId: 'org-1',
-    title: 'Синк команди',
-    startAt: '2026-07-29T09:00:00.000Z',
-    participantIds: ['member-1'],
-    reminderMinutes: [15],
-  }], {
-    nowMs: start + 40 * MINUTE,
-    lookBackMs: 2 * 60 * MINUTE,
-  });
-
-  assert.equal(candidates.length, 1);
-  assert.equal(candidates[0].body, 'Подія почалася 40 хв тому');
-  // Same occurrence, same id: a late delivery is still one delivery.
-  assert.equal(candidates[0].id, `calendar_reminder_event-late_member-1_${start}_15`);
-});
-
-test('reminder labels read naturally on both sides of the start', () => {
-  assert.equal(reminderLabel(15 * MINUTE), 'До початку 15 хв');
-  assert.equal(reminderLabel(90 * MINUTE), 'До початку 1 год 30 хв');
-  assert.equal(reminderLabel(120 * MINUTE), 'До початку 2 год');
-  assert.equal(reminderLabel(2 * DAY), 'До початку 2 дн');
-  assert.equal(reminderLabel(0), 'Подія починається зараз');
-  assert.equal(reminderLabel(-5 * MINUTE), 'Подія почалася 5 хв тому');
-  assert.equal(reminderLabel(-125 * MINUTE), 'Подія почалася 2 год 5 хв тому');
 });
 
 test('the look-back stretches to cover a missed scheduler gap and stops at half a day', () => {
@@ -207,7 +116,7 @@ test('the sweep remembers materialisation separately and never advances it on fa
     'the watermark must be written after the sweep, not before',
   );
 
-  // Both scheduled queries are bounded on both sides.
+  // The scheduled query is bounded on both sides.
   assert.match(source, /\.where\('dueDate', '>=', Timestamp\.fromMillis\(nowMs - DEADLINE_FLOOR_MS\)\)/);
-  assert.match(source, /\.where\('startAt', '<=', Timestamp\.fromMillis\(nowMs \+ CALENDAR_LEAD_MS\)\)/);
+  assert.match(source, /\.where\('dueDate', '<=', Timestamp\.fromMillis\(nowMs \+ DEADLINE_HORIZON_MS \+ lookAheadMs\)\)/);
 });

@@ -38,11 +38,9 @@ export { default as MediaPlayButton } from './MediaPlayButton'
 export { default as FileThumb } from './Attachments/FileThumb'
 export { default as AudioPlayer } from './Attachments/AudioPlayer'
 
-// ===== CALENDAR =====
-// What is left of the calendar's own vocabulary now that the planning screen is
-// gone: a day cell and the date in its corner, both of which the timesheet's
-// month grid still draws. The entry tile and the hour strip left with the
-// screen that was the only thing clicking them.
+// ===== TITLE =====
+// The one-line heading a record is renamed in place with. The planning
+// calendar it was written beside is gone; the incident page still types here.
 export { default as TitleInput } from './Forms/TitleInput'
 
 // ===== BUTTON COMPONENTS =====

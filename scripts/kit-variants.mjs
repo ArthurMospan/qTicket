@@ -158,7 +158,6 @@ const SOURCES = {
   Tag: { size: { literal: ['small', 'default'] } },
   ChatComposerCore: { variant: { literal: ['timeline', 'workspace'] } },
   ChatComposerDock: { composition: { css: ['.chat-composer-dock', 'data-ui-composition'] } },
-  TaskAttributesPanel: { context: { literal: ['calendar', 'task'] } },
   SidebarLayout: { context: { map: ['Layout/SidebarLayout.jsx', 'CONTEXTS'] } },
   MobilePaneBack: { context: { map: ['Navigation/MobilePaneBack.jsx', 'CONTEXTS'] } },
   DetailLayout: { context: { map: ['Layout/DetailLayout.jsx', 'CONTEXTS'] } },

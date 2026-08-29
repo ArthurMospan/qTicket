@@ -60,7 +60,6 @@ test('a create dialog reports the missing field instead of disabling its submit'
 
 test('every dialog that requires a name says so in the same place', async () => {
   const cases = [
-    ['../src/components/workspace/calendar/CalendarEventDialog.jsx', /setTitleError\('Вкажіть назву події'\)/, 'calendar-event-form'],
     ['../src/app/(app)/chat/page.js', /setNewChannelNameError\('Вкажіть назву каналу'\)/, 'create-channel-form'],
   ];
   for (const [file, message, formId] of cases) {

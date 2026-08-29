@@ -12,9 +12,9 @@
 import { notificationConversationId, notificationDestination } from './notificationNavigation.mjs';
 
 // Types that repeat inside one conversation and say the same thing each time.
-// `assigned`, `status_changed` and the calendar family are deliberately absent:
-// two status changes on one task are two different facts, and collapsing them
-// would hide the newer one behind a number.
+// `assigned` and `status_changed` are deliberately absent: two status changes on
+// one task are two different facts, and collapsing them would hide the newer one
+// behind a number.
 const GROUPABLE_TYPES = new Set(['commented', 'mentioned', 'chat_message']);
 
 /**

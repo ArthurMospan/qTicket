@@ -16,7 +16,6 @@ import {
 } from '../src/lib/utils/notificationOutbox.mjs';
 import {
   addDaysToDayKey,
-  calendarReminderCandidates,
   deadlineReminderCandidates,
   zonedHourToUtcMs,
 } from '../src/lib/utils/reminderCandidates.mjs';
@@ -56,24 +55,26 @@ test('retries back off and then stop', () => {
 
 test('re-materialising corrects timing and wording but never identity or state', () => {
   const candidate = {
-    id: 'calendar_reminder_e1_u1_123_15',
+    id: 'deadline_i1_u1_2026-08-12',
     userId: 'u1',
     organizationId: 'org',
-    type: 'calendar_reminder',
-    title: 'Синк',
-    body: 'До початку 15 хв',
-    link: '/calendar/event/e1',
+    projectId: 'p1',
+    issueId: 'i1',
+    type: 'deadline',
+    title: 'QT-1: дедлайн 12 серпня',
+    body: 'Задача',
+    link: '/p1/issue/QT-1',
     deliverAtMs: 5_000,
   };
   const stored = outboxRow(candidate);
   assert.equal(stored.status, 'pending');
   assert.equal(stored.attempts, 0);
 
-  // The event moved half an hour later.
-  const moved = { ...candidate, deliverAtMs: 5_000 + 30 * MINUTE, title: 'Синк (перенесено)' };
+  // The deadline moved half an hour later.
+  const moved = { ...candidate, deliverAtMs: 5_000 + 30 * MINUTE, title: 'QT-1: дедлайн 13 серпня' };
   assert.deepEqual(outboxRowChanges(stored, moved), {
     deliverAtMs: 5_000 + 30 * MINUTE,
-    title: 'Синк (перенесено)',
+    title: 'QT-1: дедлайн 13 серпня',
     nextAttemptAtMs: 5_000 + 30 * MINUTE,
   });
   // Nothing changed means no write.
@@ -164,31 +165,6 @@ test('a rejected email is not recorded as a successful notification', () => {
   assert.match(outcome.update.lastError, /provider rejected/);
 });
 
-test('candidates carry the moment they should arrive, not the moment they were found', () => {
-  const start = Date.parse('2026-08-10T09:00:00.000Z');
-  const nowMs = start - 3 * HOUR;
-  const [candidate] = calendarReminderCandidates([{
-    id: 'e1',
-    organizationId: 'org',
-    title: 'Синк',
-    startAt: new Date(start).toISOString(),
-    participantIds: ['u1'],
-    reminderMinutes: [15],
-  }], { nowMs, lookAheadMs: 4 * HOUR });
-
-  assert.ok(candidate, 'a reminder three hours away is visible to a look-ahead pass');
-  assert.equal(candidate.deliverAtMs, start - 15 * MINUTE);
-  // And it is invisible without one, which is the old behaviour.
-  assert.equal(calendarReminderCandidates([{
-    id: 'e1',
-    organizationId: 'org',
-    title: 'Синк',
-    startAt: new Date(start).toISOString(),
-    participantIds: ['u1'],
-    reminderMinutes: [15],
-  }], { nowMs }).length, 0);
-});
-
 test('an overdue nag is delivered at a readable hour, in the organization timezone', () => {
   const nowMs = Date.parse('2026-08-10T00:30:00.000Z');
   const [candidate] = deadlineReminderCandidates([{
@@ -214,7 +190,7 @@ test('an overdue nag is delivered at a readable hour, in the organization timezo
 
 test('an upcoming deadline is announced twenty-four hours out', () => {
   const due = Date.parse('2026-08-12T15:00:00.000Z');
-  const [candidate] = deadlineReminderCandidates([{
+  const issue = {
     id: 'i1',
     organizationId: 'org',
     projectId: 'p1',
@@ -223,15 +199,27 @@ test('an upcoming deadline is announced twenty-four hours out', () => {
     dueDate: new Date(due).toISOString(),
     assigneeIds: ['u1'],
     status: 'in-progress',
-  }], {
-    nowMs: due - 30 * HOUR,
-    lookAheadMs: 12 * HOUR,
+  };
+  const context = {
     closedStatusIdsByOrganization: new Map([['org', new Set(['done'])]]),
     timeZonesByOrganization: new Map([['org', 'Europe/Kyiv']]),
+  };
+  const [candidate] = deadlineReminderCandidates([issue], {
+    ...context,
+    nowMs: due - 30 * HOUR,
+    lookAheadMs: 12 * HOUR,
   });
 
-  assert.ok(candidate);
+  // The candidate carries the moment it should arrive, not the moment it was
+  // found: six hours before this pass ran, not now.
+  assert.ok(candidate, 'a reminder six hours away is visible to a look-ahead pass');
   assert.equal(candidate.deliverAtMs, due - 24 * HOUR);
+  // And it is invisible without one, which is what makes the look-ahead the
+  // thing that turns «what is due?» into «what will be?».
+  assert.equal(
+    deadlineReminderCandidates([issue], { ...context, nowMs: due - 30 * HOUR }).length,
+    0,
+  );
 });
 
 test('a wall-clock hour resolves to the right instant on both sides of DST', () => {
@@ -318,11 +306,10 @@ test('a dispatch pass reads the outbox and nothing else', async () => {
 
 // A reminder is written down when it becomes knowable, not found later.
 //
-// Materialising by scanning is what made a reminder cost the whole issue and
-// calendarEvents collections on every pass. The row is a consequence of a
-// write, so it is written by the write: the route that accepts a deadline
-// records who has to be told and when, and the nightly scan is what catches
-// whatever that missed.
+// Materialising by scanning is what made a reminder cost the whole issue
+// collection on every pass. The row is a consequence of a write, so it is
+// written by the write: the route that accepts a deadline records who has to be
+// told and when, and the nightly scan is what catches whatever that missed.
 test('setting a deadline writes its reminder down, rather than leaving it to be found', async () => {
   const [jobs, outbox] = await Promise.all([
     read('../src/lib/server/reminderJobs.js'),
@@ -332,11 +319,10 @@ test('setting a deadline writes its reminder down, rather than leaving it to be 
   // One reconciliation, two ways of naming what it owns — so a row written by
   // the sweep and a row written by a deadline edit are the same row.
   assert.match(outbox, /export async function reconcileScopedRows\(/);
-  assert.match(outbox, /\.where\(field, '==', value\)/);
+  assert.match(outbox, /\.where\('issueId', '==', value\)/);
   assert.match(outbox, /\.where\('status', '==', 'pending'\)/);
   assert.match(outbox, /\.limit\(SCOPED_ROW_LIMIT\)/);
   assert.match(jobs, /export async function syncIssueReminderRows\(/);
-  assert.match(jobs, /export async function syncCalendarEventReminderRows\(/);
 
   // Every server route that can change when somebody must be reminded.
   const callers = [
@@ -356,13 +342,6 @@ test('setting a deadline writes its reminder down, rather than leaving it to be 
       `${file} changes when a reminder is owed and must say so`,
     );
   }
-  for (const file of [
-    'src/app/api/calendar/events/route.js',
-    'src/app/api/calendar/events/[eventId]/route.js',
-  ]) {
-    assert.match(await read(`../${file}`), /syncCalendarEventReminderRows/, file);
-  }
-
   // And the route that recomputes on the browser's behalf verifies the token
   // before it reads anything. Reading the task first — to learn which
   // organization to authorize against — is an unauthenticated Firestore read
@@ -390,7 +369,6 @@ test('setting a deadline writes its reminder down, rather than leaving it to be 
     .filter(entry => entry.collectionGroup === 'scheduledNotifications')
     .map(entry => entry.fields.map(field => field.fieldPath).join(','));
   assert.ok(paths.includes('issueId,status'), 'a task\'s own rows need (issueId, status)');
-  assert.ok(paths.includes('calendarEventId,status'), 'an event\'s own rows need (calendarEventId, status)');
 });
 
 // The scan that remains is the safety net, and a safety net still has to be
@@ -401,15 +379,13 @@ test('the nightly scan is bounded on both sides', async () => {
     read('../src/lib/server/reminderJobs.js'),
     read('../src/lib/utils/reminderCandidates.mjs'),
   ]);
-  // Deadlines: a week back, because that is what an overdue nag can still reach.
+  // A week back, because that is what an overdue nag can still reach; a day
+  // plus the materialising lead forward. Without the floor this read every
+  // issue that had ever slipped its deadline, on every pass, forever.
   assert.match(candidates, /DEADLINE_FLOOR_MS = 7 \* 24 \* 60 \* 60 \* 1000/);
-  // One-off events already had a window. Recurring ones did not have one at
-  // all: their start is in the past forever, so the query read every series
-  // ever created, with no ceiling and no edge.
-  assert.match(jobs, /const RECURRING_SCAN_LIMIT = 500;/);
-  const recurring = jobs.slice(jobs.indexOf('const recurringQuery'));
-  assert.match(recurring, /\.where\('startAt', '<=', Timestamp\.fromMillis\(nowMs \+ CALENDAR_LEAD_MS\)\)/);
-  assert.match(recurring, /\.limit\(RECURRING_SCAN_LIMIT\)/);
+  const scan = jobs.slice(jobs.indexOf('export async function collectDeadlineCandidates'));
+  assert.match(scan, /\.where\('dueDate', '>=', Timestamp\.fromMillis\(nowMs - DEADLINE_FLOOR_MS\)\)/);
+  assert.match(scan, /\.where\('dueDate', '<=', Timestamp\.fromMillis\(nowMs \+ DEADLINE_HORIZON_MS \+ lookAheadMs\)\)/);
 });
 
 test('the outbox query has an index to run against', async () => {
@@ -500,7 +476,7 @@ test('expiry runs on the slow pass, and pays for what it deletes and nothing els
   assert.match(prune, /\.limit\(limit\)/);
   assert.match(prune, /\.select\('type'\)/);
   // The guard is only read for the types that can be resent at all.
-  assert.match(prune, /record\.type === 'deadline' \|\| record\.type === 'calendar_reminder'/);
+  assert.match(prune, /record\.type === 'deadline'/);
   assert.match(prune, /expirableNotificationIds\(records, rows\)/);
   // Never on the every-minute dispatch pass — and no longer only on the
   // nightly one either. «Нещодавно видалене» promises twenty-four hours, and a

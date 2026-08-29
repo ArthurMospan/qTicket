@@ -76,9 +76,9 @@ export function notificationConversationId(notification) {
 }
 
 // What the card's button says. «Перейти» was the only word it ever said, for
-// five different destinations — a task's chat, the task itself, a conversation,
-// a calendar event, a colleague's profile — so the one thing a button is for,
-// naming where it takes you, was the one thing it did not do.
+// four different destinations — a task's chat, the task itself, a conversation,
+// a colleague's profile — so the one thing a button is for, naming where it
+// takes you, was the one thing it did not do.
 //
 // This is also where the notification's type now lives on the card. It used to
 // be a capitalised label above the title, repeating in worse words what the
@@ -95,9 +95,6 @@ const OPEN_LABELS = {
   commented: 'Відкрити обговорення',
   mentioned: 'Відкрити обговорення',
   chat_message: 'Відкрити розмову',
-  calendar_invite: 'Відкрити подію',
-  calendar_changed: 'Відкрити подію',
-  calendar_reminder: 'Відкрити подію',
   emergency: 'Відкрити профіль',
   alert: 'Відкрити профіль',
 };

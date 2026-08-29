@@ -129,7 +129,7 @@ test('channels are independent of one another', () => {
 test('types with no per-event switch follow their channel policy', () => {
   const off = { emailEnabled: false, telegramEnabled: false };
   const on = { emailEnabled: true, telegramEnabled: true };
-  for (const type of ['alert', 'emergency', 'calendar_reminder', 'test']) {
+  for (const type of ['alert', 'emergency', 'test']) {
     assert.equal(shouldDeliver(off, 'telegram', type), false, `${type} muted`);
     assert.equal(shouldDeliver(on, 'telegram', type), true, `${type} allowed`);
     assert.equal(shouldDeliver(off, 'inapp', type), true, `${type} in-app`);
@@ -140,7 +140,7 @@ test('email stays narrow for switchless types so chat cannot flood a mailbox', (
   const on = { emailEnabled: true };
   assert.equal(shouldDeliver(on, 'email', 'alert'), true);
   assert.equal(shouldDeliver(on, 'email', 'emergency'), true);
-  for (const type of ['chat_message', 'calendar_reminder', 'calendar_invite', 'calendar_changed', 'test']) {
+  for (const type of ['chat_message', 'test']) {
     assert.equal(shouldDeliver(on, 'email', type), false, `${type} must not email`);
   }
 });

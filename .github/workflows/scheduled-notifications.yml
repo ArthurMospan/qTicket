@@ -1,8 +1,7 @@
 name: Scheduled notifications
 
-# Vercel Hobby allows one cron run per day, which is useless for calendar
-# reminders that need to fire minutes before an event, so the sweep is driven
-# from here.
+# Vercel Hobby allows one cron run per day, which is useless for a queue that
+# has to be drained every minute, so the sweep is driven from here.
 #
 # GitHub does not honour `*/5 * * * *` either. Measured on this repository, a
 # five-minute schedule actually starts a run roughly once an hour during the day
@@ -25,10 +24,9 @@ name: Scheduled notifications
 #   nightly pass would stretch that to forty-eight.
 #
 # materialise (twice a day) — the safety net. Rebuilds the outbox from the
-#   source data and posts birthday greetings. This is the expensive pass — it
-#   reads deadlines and calendar events rather than an indexed queue — and it
-#   used to run every twenty minutes, which is what made the sweep unaffordable
-#   on a free tier at all.
+#   tasks themselves. This is the expensive pass — it reads deadlines rather
+#   than an indexed queue — and it used to run every twenty minutes, which is
+#   what made the sweep unaffordable on a free tier at all.
 #
 #   Twice rather than once because a day-scale reminder belongs to a day in the
 #   organization's timezone: the pass that writes it has to run while it is
@@ -98,7 +96,7 @@ jobs:
       group: scheduled-notifications-materialise
     steps:
       - uses: actions/checkout@v5
-      - name: Restock the outbox from the source data, and greet the birthdays
+      - name: Restock the outbox from the tasks themselves
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}

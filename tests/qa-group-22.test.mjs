@@ -50,37 +50,6 @@ test('invalid issue bodies do not consume the 60-per-minute creation limit', asy
   assert.match(route, /enforceRateLimit\('issue-create', authorization\.user\.uid, 60, 60\)/);
 });
 
-test('calendar rejects inverted ranges in the form and server normalizer', async () => {
-  const [dialog, server] = await Promise.all([
-    read('src/components/workspace/calendar/CalendarEventDialog.jsx'),
-    read('src/lib/server/calendarEvents.js'),
-  ]);
-  assert.match(dialog, /if \(endAt <= startAt\) throw new Error\('Завершення має бути пізніше за початок'\)/);
-  // What this is about is the order: the payload is built — and therefore the
-  // range is validated — before anything is sent. The save now carries one more
-  // field beside the payload (the project-roster consent), so it is the build
-  // reaching `onSave` that is asserted, not the shape of its argument.
-  assert.match(dialog, /payload = calendarEventFormPayload\(form, currentUserId\);[\s\S]*?await onSave\(\{\s*\.\.\.payload,/);
-  assert.match(server, /if \(endAt\.toMillis\(\) <= startAt\.toMillis\(\)\)/);
-});
-
-test('recurring events expose occurrence scope without changing recurrence maths', async () => {
-  const [hook, page, dialog, route, recurrence] = await Promise.all([
-    read('src/lib/hooks/useCalendarEvents.js'),
-    read('src/components/workspace/calendar/CalendarEventPage.jsx'),
-    read('src/components/workspace/calendar/CalendarEventDialog.jsx'),
-    read('src/app/api/calendar/events/[eventId]/route.js'),
-    read('src/lib/utils/calendarRecurrence.mjs'),
-  ]);
-  assert.match(hook, /excludedOccurrenceStarts/);
-  assert.match(page, /Лише це входження/);
-  assert.match(page, /Кількість видимих входжень/);
-  assert.match(dialog, /scope !== 'occurrence'/);
-  assert.match(route, /body\.scope === 'occurrence'/);
-  assert.match(route, /seriesOccurrenceStartAt: occurrenceStartAt/);
-  assert.doesNotMatch(recurrence, /excludedOccurrenceStarts|seriesOccurrenceStartAt/);
-});
-
 test('authenticated workspace mounts one toast host', async () => {
   const layout = await read('src/app/(app)/layout.js');
   assert.equal(layout.match(/<WorkspaceToastHost\s*\/>/g)?.length, 1);

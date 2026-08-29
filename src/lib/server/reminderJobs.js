@@ -10,7 +10,6 @@ import {
   DEADLINE_FLOOR_MS,
   DEADLINE_HORIZON_MS,
   REMINDER_LOOKBACK_MS,
-  calendarReminderCandidates,
   clampReminderLookback,
   dayKeyInTimeZone,
   deadlineReminderCandidates,
@@ -35,19 +34,6 @@ const DELIVERY_CONCURRENCY = 10;
 // The sweep's own memory of when it last ran. Server-written only; Firestore
 // rules have no `system` match, so the browser cannot read or forge it.
 const SWEEP_STATE_PATH = ['system', 'notificationSweep'];
-// How far ahead a calendar reminder can be configured. Bounds the query that
-// used to read the entire calendarEvents collection on every pass — 288 passes a
-// day against a Spark project with a 50k daily read cap.
-const CALENDAR_LEAD_MS = 8 * 24 * 60 * 60 * 1000;
-const RECURRING_FREQUENCIES = ['daily', 'weekly', 'monthly', 'yearly'];
-// How many recurring series one pass will consider. A series that has not
-// started yet cannot produce an occurrence inside the window, so the query is
-// bounded forward; backwards there is no edge — a standing weekly meeting from
-// two years ago is still due on Thursday — and what bounds it instead is how
-// many series the workspace has ever created, which is the same kind of bound
-// as «projects of one organization». This is the ceiling on that assumption,
-// and it is loud when it is reached rather than silently dropping events.
-const RECURRING_SCAN_LIMIT = 500;
 
 function sweepStateRef() {
   const db = getAdminDb();
@@ -106,7 +92,7 @@ async function loadRecipientContext(candidates) {
   };
 }
 
-async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
+async function claimAndDeliver(candidate, context) {
   const membership = context.memberships.get(`${candidate.organizationId}_${candidate.userId}`);
   if (
     !membership ||
@@ -119,9 +105,7 @@ async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
   const preferences = context.preferences.get(candidate.userId) || {};
   const profile = context.profiles.get(candidate.userId) || {};
   const inapp = shouldDeliver(preferences, 'inapp', candidate.type);
-  const email = allowEmail &&
-    shouldDeliver(preferences, 'email', candidate.type) &&
-    Boolean(profile.email);
+  const email = shouldDeliver(preferences, 'email', candidate.type) && Boolean(profile.email);
   if (!inapp && !email) return { claimed: 0, email: 0 };
 
   const db = getAdminDb();
@@ -136,7 +120,6 @@ async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
       issueId: candidate.issueId || '',
       projectId: candidate.projectId || '',
       organizationId: candidate.organizationId,
-      ...(candidate.calendarEventId ? { calendarEventId: candidate.calendarEventId } : {}),
       actorId: candidate.actorId || 'quickteam-system',
       actorName: candidate.actorName || 'QuickTeam',
       actorAvatar: '',
@@ -178,128 +161,6 @@ function summarize(results) {
     }),
     { claimed: 0, email: 0 },
   );
-}
-
-const CALENDAR_FIELDS = [
-  'organizationId',
-  'title',
-  'startAt',
-  'participantIds',
-  'participantResponses',
-  'reminderMinutes',
-  'recurrence',
-  'excludedOccurrenceStarts',
-  'organizerId',
-];
-
-// Two bounded queries instead of one unbounded scan. A one-off event only
-// matters while its start is inside the reminder window; a recurring one has a
-// start in the past forever, so it is fetched by its recurrence instead. Every
-// event the old full scan returned is still covered, at a fraction of the reads.
-//
-// Only the global sweep takes this path. The authenticated diagnostic route
-// already narrows to one organization and one participant — both covered by an
-// existing composite index — and adding a range on top would need two more.
-async function loadReminderEvents({ nowMs, lookBackMs, organizationId, recipientId }) {
-  const db = getAdminDb();
-  if (organizationId || recipientId) {
-    let query = db.collection('calendarEvents');
-    if (organizationId) query = query.where('organizationId', '==', organizationId);
-    if (recipientId) query = query.where('participantIds', 'array-contains', recipientId);
-    const snapshot = await query.select(...CALENDAR_FIELDS).get();
-    return snapshot.docs.map(document => ({ ...document.data(), id: document.id }));
-  }
-
-  const recurringQuery = db.collection('calendarEvents')
-    .where('recurrence.frequency', 'in', RECURRING_FREQUENCIES)
-    // Forward edge. A series whose first occurrence is past the lead cannot
-    // reach into this window, and if it could the query above would have it.
-    .where('startAt', '<=', Timestamp.fromMillis(nowMs + CALENDAR_LEAD_MS))
-    .select(...CALENDAR_FIELDS)
-    .limit(RECURRING_SCAN_LIMIT);
-  const [upcoming, recurring] = await Promise.all([
-    db.collection('calendarEvents')
-      .where('startAt', '>=', Timestamp.fromMillis(nowMs - lookBackMs))
-      .where('startAt', '<=', Timestamp.fromMillis(nowMs + CALENDAR_LEAD_MS))
-      .select(...CALENDAR_FIELDS)
-      .get(),
-    recurringQuery.get().catch(error => {
-      // Deployments are not atomic with Firestore index creation. The unbounded
-      // shape still works while (recurrence.frequency, startAt) is building.
-      if (error?.code !== 9 && error?.code !== 'failed-precondition') throw error;
-      console.warn('[reminder-job] Recurring-window index is not ready; scanning unbounded');
-      return db.collection('calendarEvents')
-        .where('recurrence.frequency', 'in', RECURRING_FREQUENCIES)
-        .select(...CALENDAR_FIELDS)
-        .get();
-    }),
-  ]);
-  if (recurring.size >= RECURRING_SCAN_LIMIT) {
-    console.warn(
-      `[reminder-job] ${RECURRING_SCAN_LIMIT} recurring events reached the scan ceiling; `
-      + 'reminders for the rest of them are not being materialised',
-    );
-  }
-
-  const events = new Map();
-  for (const document of [...upcoming.docs, ...recurring.docs]) {
-    events.set(document.id, { ...document.data(), id: document.id });
-  }
-  return [...events.values()];
-}
-
-// A calendar reminder is deliberately not emailed: it is a nudge minutes
-// before a meeting, and an inbox is the wrong place for one.
-function decorateCalendarCandidate(candidate) {
-  const occurrence = new Date(candidate.occurrenceStart).toISOString();
-  return {
-    ...candidate,
-    allowEmail: false,
-    link: withNotificationOrganization(
-      `/calendar/event/${encodeURIComponent(candidate.calendarEventId)}?occurrence=${encodeURIComponent(occurrence)}`,
-      candidate.organizationId,
-    ),
-  };
-}
-
-export async function collectCalendarCandidates({
-  nowMs = Date.now(),
-  lookBackMs = REMINDER_LOOKBACK_MS,
-  lookAheadMs = 0,
-  organizationId = '',
-  recipientId = '',
-} = {}) {
-  const events = await loadReminderEvents({ nowMs, lookBackMs, organizationId, recipientId });
-  return calendarReminderCandidates(events, { nowMs, lookBackMs, lookAheadMs, recipientId })
-    .map(decorateCalendarCandidate);
-}
-
-export async function runCalendarReminderSweep({
-  nowMs = Date.now(),
-  organizationId = '',
-  recipientId = '',
-  lookBackMs = REMINDER_LOOKBACK_MS,
-} = {}) {
-  const events = await loadReminderEvents({ nowMs, lookBackMs, organizationId, recipientId });
-  const candidates = calendarReminderCandidates(events, { nowMs, lookBackMs, recipientId }).map(candidate => {
-    const occurrence = new Date(candidate.occurrenceStart).toISOString();
-    return {
-      ...candidate,
-      link: withNotificationOrganization(
-        `/calendar/event/${encodeURIComponent(candidate.calendarEventId)}?occurrence=${encodeURIComponent(occurrence)}`,
-        candidate.organizationId,
-      ),
-    };
-  });
-  if (!candidates.length) return { candidates: 0, claimed: 0, email: 0 };
-
-  const context = await loadRecipientContext(candidates);
-  const results = await mapWithConcurrency(
-    candidates,
-    DELIVERY_CONCURRENCY,
-    candidate => claimAndDeliver(candidate, context, { allowEmail: false }),
-  );
-  return { candidates: candidates.length, ...summarize(results) };
 }
 
 // What the sweep and a single write both need to know about an organization
@@ -381,41 +242,6 @@ export async function syncIssueReminderRows({ issueId, issue = undefined, nowMs 
 
   return reconcileScopedRows(candidates, {
     scope: { issueId },
-    windowStartMs: nowMs - REMINDER_LOOKBACK_MS,
-    windowEndMs: nowMs + MATERIALISE_LEAD_MS,
-    nowMs,
-  });
-}
-
-/**
- * The same, for one calendar event. Creating or moving an event writes its
- * reminders down; deleting it, or removing somebody from it, takes them away.
- *
- * @param {{eventId: string, event?: object|null, nowMs?: number}} options
- */
-export async function syncCalendarEventReminderRows({
-  eventId,
-  event = undefined,
-  nowMs = Date.now(),
-}) {
-  if (!eventId) return { created: 0, updated: 0, cancelled: 0 };
-  const db = getAdminDb();
-  let source = event;
-  if (source === undefined) {
-    const snapshot = await db.collection('calendarEvents').doc(eventId).get();
-    source = snapshot.exists ? { ...snapshot.data(), id: snapshot.id } : null;
-  }
-
-  const candidates = source?.organizationId
-    ? calendarReminderCandidates([{ ...source, id: eventId }], {
-      nowMs,
-      lookBackMs: REMINDER_LOOKBACK_MS,
-      lookAheadMs: MATERIALISE_LEAD_MS,
-    }).map(decorateCalendarCandidate)
-    : [];
-
-  return reconcileScopedRows(candidates, {
-    scope: { calendarEventId: eventId },
     windowStartMs: nowMs - REMINDER_LOOKBACK_MS,
     windowEndMs: nowMs + MATERIALISE_LEAD_MS,
     nowMs,
@@ -542,16 +368,13 @@ export const MATERIALISE_INTERVAL_MS = 11 * 60 * 60 * 1000;
 export async function materialiseScheduledNotifications({ nowMs = Date.now(), lookBackMs } = {}) {
   const windowStartMs = nowMs - (lookBackMs ?? REMINDER_LOOKBACK_MS);
   const windowEndMs = nowMs + MATERIALISE_LEAD_MS;
-  const [calendar, deadlines] = await Promise.all([
-    collectCalendarCandidates({ nowMs, lookBackMs, lookAheadMs: MATERIALISE_LEAD_MS }),
-    collectDeadlineCandidates({ nowMs, lookAheadMs: MATERIALISE_LEAD_MS }),
-  ]);
-  const result = await materialiseCandidates([...calendar, ...deadlines], {
+  const deadlines = await collectDeadlineCandidates({ nowMs, lookAheadMs: MATERIALISE_LEAD_MS });
+  const result = await materialiseCandidates(deadlines, {
     windowStartMs,
     windowEndMs,
     nowMs,
   });
-  return { ...result, candidates: calendar.length + deadlines.length };
+  return { ...result, candidates: deadlines.length };
 }
 
 // One pass. `mode` exists so the cheap half can be driven on a tight schedule
@@ -574,7 +397,7 @@ const PRUNE_BATCH = 100;
 //
 // Production had four of them on 27.08, from 5, 6, 7 and 9 August, left behind
 // by the days the scheduler was switched off. Nothing was wrong with them; there
-// was simply nobody to tell that the meeting they were about had happened three
+// was simply nobody to tell that the deadline they were about had passed three
 // weeks ago.
 //
 // Seven days rather than the reconciliation window, because those are different
@@ -657,7 +480,7 @@ export async function pruneReadNotifications({ nowMs = Date.now(), limit = PRUNE
   // Only the types this outbox produces can be resent at all, so only those are
   // worth a read of their scheduled row. Everything else came from an event that
   // happened once.
-  const guarded = records.filter(record => record.type === 'deadline' || record.type === 'calendar_reminder');
+  const guarded = records.filter(record => record.type === 'deadline');
   const rows = new Map();
   if (guarded.length) {
     const rowSnaps = await db.getAll(
@@ -694,11 +517,10 @@ export async function pruneReadNotifications({ nowMs = Date.now(), limit = PRUNE
  *                  records. Hourly, because «Нещодавно видалене» promises
  *                  twenty-four hours and a nightly pass would make it up to
  *                  forty-eight.
- *   materialise  — restock the outbox from the source data
- *                  greetings. Nightly. The rows themselves are written when
- *                  somebody sets a deadline or moves an event; this is the pass
- *                  that catches whatever a failed write or a direct database
- *                  edit left behind.
+ *   materialise  — restock the outbox from the tasks themselves. Nightly. The
+ *                  rows are written when somebody sets a deadline; this is the
+ *                  pass that catches whatever a failed write or a direct
+ *                  database edit left behind.
  *   full         — all three, with materialising self-throttled internally.
  *
  * See docs/ARCHITECTURE.md.

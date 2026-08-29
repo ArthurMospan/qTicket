@@ -23,9 +23,6 @@ export const REQUESTABLE_NOTIFICATION_TYPES = [
   'chat_message',
   'alert',
   'emergency',
-  'calendar_invite',
-  'calendar_changed',
-  'calendar_reminder',
   'test',
 ];
 
@@ -130,9 +127,8 @@ export function isChannelEnabled(preferences = {}, channel) {
   return false;
 }
 
-// Types outside NOTIFICATION_EVENTS — alert, emergency, the calendar family and
-// test — have no switch of their own in Settings, so a channel
-// policy decides. In-app records them all and Telegram takes them all, which is
+// Types outside NOTIFICATION_EVENTS — alert, emergency and test — have no
+// switch of their own in Settings, so a channel policy decides. In-app records them all and Telegram takes them all, which is
 // what both already did. Email stays narrow on purpose: it used to run off a
 // hardcoded whitelist, and opening it up would mean a mail per chat message.
 const KEYLESS_TYPE_POLICY = {
