@@ -15,7 +15,7 @@ test('every top-level workspace destination names itself in the tab', () => {
   assert.equal(routeTitle('/overview'), 'Огляд');
   assert.equal(routeTitle('/clients'), 'Клієнти');
   // Same words as the sidebar entry and the page heading.
-  assert.equal(routeTitle('/my'), 'Інциденти');
+  assert.equal(routeTitle('/my'), 'Звернення');
   assert.equal(routeTitle('/chat'), 'Чат');
   assert.equal(routeTitle('/analytics'), 'Аналітика');
   assert.equal(routeTitle('/team'), 'Команда');

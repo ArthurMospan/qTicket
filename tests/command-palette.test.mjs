@@ -55,7 +55,7 @@ test('archived projects are not destinations', () => {
 test('a query finds the thing you were aiming at, not merely something matching', () => {
   const commands = buildCommands({ projects, allowedPermissions: ['create:project'] });
 
-  assert.equal(rankCommands(commands, 'новий інцидент')[0].id, 'action-new-issue');
+  assert.equal(rankCommands(commands, 'нове звернення')[0].id, 'action-new-issue');
   assert.equal(rankCommands(commands, 'новий клієнт')[0].id, 'action-new-client');
   assert.equal(rankCommands(commands, 'retro')[0].id, 'project-p1');
 });

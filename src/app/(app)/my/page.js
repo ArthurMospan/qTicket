@@ -186,7 +186,7 @@ export default function IncidentQueuePage() {
     } catch (err) {
       console.error(err);
       showToast(
-        `Не вдалося перемістити інцидент — зміни не збережено${err?.message ? `: ${err.message}` : ''}`,
+        `Не вдалося перемістити звернення — зміни не збережено${err?.message ? `: ${err.message}` : ''}`,
         'error',
       );
       return false;
@@ -261,22 +261,7 @@ export default function IncidentQueuePage() {
     <div className={`flex-1 h-full bg-transparent ${viewMode === 'kanban' ? 'overflow-hidden' : 'qt-nav-scroll overflow-y-auto overflow-x-hidden hide-scrollbar'}`}>
       <div className={`workspace-page-layout ${viewMode === 'kanban' ? 'h-full pb-0' : 'min-h-full pb-[120px]'}`}>
         <PageHeader
-          title="Інциденти"
-          actions={
-            <div className="flex gap-2">
-              <Button
-                onClick={() => { setCreateTaskCategory(null); setShowCreateTaskModal(true); }}
-                icon={Plus}
-                size="lg"
-                style="primary"
-                color="dark"
-                collapseAt="sm"
-                title="Створити інцидент"
-              >
-                Створити інцидент
-              </Button>
-            </div>
-          }
+          title="Звернення"
           filters={
             <div className="flex items-center justify-between w-full">
               <FilterBar>
@@ -491,7 +476,7 @@ export default function IncidentQueuePage() {
             organizationId: activeOrgId,
           });
 
-          showToast('Інцидент створено');
+          showToast('Звернення створено');
           return { ...created, projectId: formData.projectId };
         }}
         projects={projects}
@@ -523,8 +508,8 @@ export default function IncidentQueuePage() {
             <h3 className="ui-type-card-title mb-2 text-ink">Видимість колонок</h3>
             <p className="mb-4 text-[13px] text-muted">
               Ці колонки — категорії статусів, спільні для всіх проєктів: скільки б
-              статусів не було в налаштуваннях, кожен інцидент належить рівно до
-              однієї категорії. На дошці та у режимі «Списком» інциденти прихованих
+              статусів не було в налаштуваннях, кожне звернення належить рівно до
+              однієї категорії. На дошці та у режимі «Списком» звернення прихованих
               категорій збираються в окрему секцію «Приховані».
             </p>
             <StatusVisibilityPicker

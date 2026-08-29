@@ -128,7 +128,7 @@ export default function WorkspaceSidebar() {
 
   const internalNav = [
     { href: '/overview',   icon: LayoutDashboard, label: 'Огляд' },
-    { href: '/my',         icon: TaskIcon,        label: 'Інциденти' },
+    { href: '/my',         icon: TaskIcon,        label: 'Звернення' },
     { href: '/clients',    icon: Folder,          label: 'Клієнти' },
     { href: '/team',       icon: Users,           label: 'Команда' },
     // «Дзвінок → задачі» свідомо НЕ в сайдбарі: це не окремий екран, а вкладка

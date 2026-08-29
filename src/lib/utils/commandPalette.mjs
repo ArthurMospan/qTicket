@@ -14,7 +14,7 @@ export const GROUP_LABELS = {
   action: 'Дії',
   navigation: 'Перейти',
   project: 'Клієнти',
-  issue: 'Інциденти',
+  issue: 'Звернення',
   person: 'Люди',
 };
 
@@ -23,7 +23,7 @@ export const GROUP_LABELS = {
 // search is exactly the friction the palette exists to remove.
 const INTERNAL_NAVIGATION = [
   { id: 'nav-overview', label: 'Огляд', href: '/overview', icon: 'overview', keywords: 'ohliad overview dashboard support pidtrymka' },
-  { id: 'nav-incidents', label: 'Інциденти', href: '/my', icon: 'issue', keywords: 'intsydenty incidents requests zvernennya queue cherha' },
+  { id: 'nav-incidents', label: 'Звернення', href: '/my', icon: 'issue', keywords: 'intsydenty incidents requests zvernennya queue cherha' },
   { id: 'nav-clients', label: 'Клієнти', href: '/clients', icon: 'folder', keywords: 'kliyenty clients customers projects proekty' },
   { id: 'nav-team', label: 'Команда', href: '/team', icon: 'users', keywords: 'komanda team support people ludy' },
   { id: 'nav-settings', label: 'Налаштування', href: '/settings', icon: 'settings', keywords: 'nalashtuvannya settings preferences profile workflow' },
@@ -44,8 +44,8 @@ const CLIENT_NAVIGATION = [
 const INTERNAL_ACTIONS = [
   {
     id: 'action-new-issue',
-    label: 'Новий інцидент',
-    hint: 'Створити інцидент',
+    label: 'Нове звернення',
+    hint: 'Створити звернення',
     href: '/my?new=1',
     icon: 'plus',
     keywords: 'novyi intsydent new incident request zvernennya stvoryty create',
@@ -202,7 +202,7 @@ export function issueCommands(results = [], projects = []) {
   return results.slice(0, 8).map(issue => ({
     id: `issue-${issue.id}`,
     group: 'issue',
-    label: issue.title || 'Інцидент',
+    label: issue.title || 'Звернення',
     hint: [issue.issueKey, projects.find(item => item.id === issue.projectId)?.name]
       .filter(Boolean).join(' · '),
     href: issuePath(issue, projects.find(item => item.id === issue.projectId) || issue.projectId),
