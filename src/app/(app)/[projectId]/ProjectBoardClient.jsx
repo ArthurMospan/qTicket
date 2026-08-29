@@ -419,13 +419,13 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                 {!clientViewer && (
                   <Select
                     filterRole="member"
-                    ariaLabel="Фільтр за виконавцем"
+                    ariaLabel="Фільтр за відповідальним"
                     variant="ghost"
                     value={assigneeFilter}
                     onChange={setAssigneeFilter}
                     options={[
-                      { value: 'all', label: 'Усі виконавці' },
-                      { value: 'unassigned', label: 'Без виконавця' },
+                      { value: 'all', label: 'Усі відповідальні' },
+                      { value: 'unassigned', label: 'Без відповідального' },
                       ...supportAssigneeOptions,
                     ]}
                   />
@@ -471,7 +471,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       label="Відкриті"
                       // Who has not picked one up yet is a fact about the
                       // support queue, said to the people who staff it.
-                      sub={clientViewer ? 'у цьому просторі' : `${metrics.unassigned} без виконавця`}
+                      sub={clientViewer ? 'у цьому просторі' : `${metrics.unassigned} без відповідального`}
                     />
                     <KpiCard icon={Plus} value={metrics.new} label="Нові" sub="очікують першої реакції" />
                     <KpiCard icon={CircleDotDashed} value={metrics.active} label="У роботі" sub="разом із перевіркою" />

@@ -51,7 +51,7 @@ import { DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig
 import useWorkspaceStore       from '@/store/useWorkspaceStore';
 import { sendNotification }    from '@/lib/hooks/useNotifications';
 import {
-  AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, CheckSquare, Square, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff,
+  AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
   Maximize2, User, Users, CircleDot, Ban, Undo2,
@@ -59,7 +59,7 @@ import {
 import { ParentTaskIcon, TaskIcon } from '@/lib/design/icons';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
-import { auth, db } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, deleteDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { uploadFile } from '@/lib/utils/uploadFile';
 import { deleteFileFromCloudinary } from '@/lib/services/fileUpload';
@@ -375,7 +375,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const [linkRelation, setLinkRelation] = useState('relates-to');
   const [linkTargetId, setLinkTargetId] = useState('');
   const [linkSaving, setLinkSaving] = useState(false);
-  const [migratingChecklist, setMigratingChecklist] = useState(false);
   const [parentSaving, setParentSaving] = useState(false);
   const [viewerMat,    setViewerMat]    = useState(null); // lightbox
   const [uploadingAttach, setUploadingAttach] = useState(false);
@@ -727,8 +726,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const reporterMember = members.find(m => (m.id || m.uid) === issue.reporterId) || reporterMatchByEmail || null;
   const reporter = reporterMember || { name: issue.reporterName || 'Зовнішній автор' };
   const isExternalReporter = !reporterMember;
-  const checklistDone = (issue.subtasks || []).filter(s => s.done).length;
-  const checklistAll = (issue.subtasks || []).length;
   const parentIssueId = existingParentIssueId(issue);
   const parentIssue = issues.find(candidate => candidate.id === parentIssueId) || null;
   const childIssues = issues
@@ -766,7 +763,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const hasSecondaryBlocks = issueLabels.length > 0 || (
     SHOW_INHERITED_TASK_PLANNING && (
       childIssues.length > 0 || showSubInput
-      || checklistAll > 0
       || currentIssueLinks.length > 0 || showLinkInput
     )
   );
@@ -980,26 +976,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       showToast(error.message || 'Не вдалося створити дочірнє звернення', 'error');
     } finally {
       setCreatingSubtask(false);
-    }
-  };
-
-  const handleMoveLegacyChecklistToDescription = async () => {
-    if (migratingChecklist) return;
-    try {
-      setMigratingChecklist(true);
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) throw new Error('Потрібна авторизація');
-      const response = await fetch(`/api/issues/${encodeURIComponent(issueId)}/legacy-checklist`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Не вдалося перенести чекліст');
-      showToast('Чекліст перенесено в опис');
-    } catch (error) {
-      showToast(error.message || 'Не вдалося перенести чекліст', 'error');
-    } finally {
-      setMigratingChecklist(false);
     }
   };
 
@@ -1503,7 +1479,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     <MultiSelect
                       compact
                       showSelectedAvatars
-                      ariaLabel="Виконавці звернення"
+                      ariaLabel="Відповідальні за звернення"
                       disabled={isArchived}
                       value={issue.assigneeIds || []}
                       onChange={setAssignees}
@@ -1799,52 +1775,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 </DetailSection>
               )}
 
-              {/* LEGACY CHECKLIST — new lightweight steps live in description Markdown */}
-              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && checklistAll > 0 && (
-              <DetailSection
-                density="group"
-                icon={CheckSquare}
-                title="Старий чекліст"
-                meta={`${checklistDone}/${checklistAll}`}
-                className="pt-2"
-                action={!isArchived && canEditIssue ? (
-                  <Button
-                    style="ghost"
-                    size="sm"
-                    onClick={handleMoveLegacyChecklistToDescription}
-                    loading={migratingChecklist}
-                    disabled={migratingChecklist}
-                    className="ml-auto"
-                  >
-                    Перенести в опис
-                  </Button>
-                ) : null}
-              >
-              <p className="text-[10px] leading-relaxed text-muted">
-                Це старий формат. Нові чеклісти додавайте як checkbox в описі звернення.
-              </p>
-              <div className="h-[4px] bg-line rounded-full mb-1 overflow-hidden">
-                <div className="h-full bg-success-solid rounded-full transition-all" style={{ width: `${(checklistDone / checklistAll) * 100}%` }} />
-              </div>
-              <div className="flex flex-col gap-[6px]">
-                 {(issue.subtasks || []).map((s, i) => (
-                  <div
-                    key={s.id || i}
-                    data-ui-surface="nested-card"
-                    data-ui-padding="row"
-                    className="ui-surface flex items-center gap-3 border border-line"
-                  >
-                    {s.done
-                      ? <CheckSquare size={16} className="shrink-0 text-success" />
-                      : <Square size={16} className="shrink-0 text-faint" />}
-                    <span className={`text-[13px] font-medium ${s.done ? 'line-through text-faint' : 'text-ink'}`}>
-                      {s.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              </DetailSection>
-              )}
               {/* ISSUE LINKS */}
               {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
               <DetailSection density="group" icon={Link2} title="Зв’язки" count={currentIssueLinks.length} className="pt-2">

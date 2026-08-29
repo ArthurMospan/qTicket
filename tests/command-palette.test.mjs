@@ -303,7 +303,9 @@ test('the cheat sheet covers more than the palette', async () => {
   }
   // Each of these is a real handler in the product, and each was missing.
   assert.ok(labels.some(label => label.includes('тексту')), 'the markdown editor keys');
-  assert.ok(labels.some(label => label.includes('чаті')), 'send, newline and mentions');
+  // There is one conversation and it lives inside a request; the group used to
+  // be «У чаті та в коментарях», back when a chat screen existed to be in.
+  assert.ok(labels.some(label => label.includes('розмові')), 'send, newline and mentions');
   assert.ok(labels.some(label => label.includes('вкладення')), 'zooming an image');
   assert.ok(labels.some(label => label.includes('вкладках')), 'moving between tabs');
 });

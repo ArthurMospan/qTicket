@@ -202,7 +202,11 @@ test('the approved follow-up decisions stay encoded in the product', () => {
   assert.match(createTask, /types\.filter\(type => type\.id !== 'epic'\)/);
   assert.match(createTask, /options=\{creatableTypes\.map/);
   assert.match(issueDetail, /parentIssueId: issueId/);
-  assert.match(issueDetail, /legacy-checklist/);
+  // The legacy checklist is data the engine left behind, not a feature: the
+  // screen has no route to migrate it from and no block to draw it in. The
+  // whole-database migration in scripts/migrate-issue-hierarchy-v2.mjs is the
+  // only thing that still moves it.
+  assert.doesNotMatch(issueDetail, /legacy-checklist/);
   assert.doesNotMatch(issueDetail, /update\(\{\s*subtasks|subtasks:\s*arrayUnion/);
   assert.match(issueDetail, /ISSUE_LINK_OPTIONS/);
   // QUI-127 approved the opposite of what this used to assert: a subtask keeps

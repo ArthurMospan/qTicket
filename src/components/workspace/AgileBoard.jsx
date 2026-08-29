@@ -292,7 +292,7 @@ export default function AgileBoard({
          const member = members.find(m => (m.id || m.uid) === uid);
          return {
            id: `assignee-${uid}`,
-           title: member ? member.name : 'Без виконавця',
+           title: member ? member.name : 'Без відповідального',
            issues: uIssues
          };
       });

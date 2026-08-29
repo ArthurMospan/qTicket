@@ -369,7 +369,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
                 {participants.length > 0 ? (
                   participants.slice(0, 5).map(({ id, member, roles }) => {
                     const roleLabels = roles.map(role => ({
-                      assignee: 'виконавець',
+                      assignee: 'відповідальний',
                       author: 'автор',
                       subscriber: 'підписник',
                     })[role]);

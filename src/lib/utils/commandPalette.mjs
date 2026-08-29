@@ -38,9 +38,9 @@ const CLIENT_NAVIGATION = [
 // `permission` is checked against `can(orgRole, …)` by the caller, so this file
 // stays free of the permission model.
 //
-// Actions are deliberately qTicket-native. The inherited task engine still has
-// calendar, sprint and timer code, but the palette must never become a second
-// navigation system that republishes those hidden QuickTeam surfaces.
+// Actions are deliberately qTicket-native. The calendar, the sprints and the
+// timer the inherited engine came with are deleted, and the palette is the last
+// place they could come back through — a shortcut to a screen is a screen.
 //
 // «Нове звернення» is not among them. Only a client opens a request — support
 // receives it, works it and closes it — so the internal palette creates the

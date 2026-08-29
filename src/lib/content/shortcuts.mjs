@@ -66,7 +66,7 @@ export const SHORTCUT_GROUPS = Object.freeze([
     ]),
   }),
   Object.freeze({
-    label: 'У чаті та в коментарях',
+    label: 'У розмові звернення',
     items: Object.freeze([
       Object.freeze({ keys: ['↵'], label: 'Надіслати' }),
       Object.freeze({ keys: ['⇧', '↵'], label: 'Новий рядок замість надсилання' }),
