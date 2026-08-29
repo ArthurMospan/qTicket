@@ -2,15 +2,18 @@
 // Which events exist, which channels can carry them, and how a stored
 // preferences document answers "send this notification type to this channel?".
 //
-// Pure and dependency-free on purpose: the settings UI, the notifications API
-// route and the Telegram sender all have to agree, and before this module they
-// did not. Each channel had its own rule buried in whichever file delivered it —
-// a single set of per-event switches gated the notification record, email then
-// silently dropped every type outside a hardcoded list, and Telegram received
-// everything that had been created with no per-event control at all. None of
-// that was visible in Settings, so the page promised choices it did not make.
+// Pure and dependency-free on purpose: the settings UI and the notifications
+// API route have to agree, and before this module they did not. Each channel
+// had its own rule buried in whichever file delivered it — a single set of
+// per-event switches gated the notification record, and email then silently
+// dropped every type outside a hardcoded list. None of that was visible in
+// Settings, so the page promised choices it did not make.
+//
+// There is no `telegram` channel any more. The integration that carried it was
+// deleted with the other inherited messengers, so the column delivered nowhere
+// while a stored `telegramEnabled` still read as a preference somebody had set.
 
-export const NOTIFICATION_CHANNELS = ['inapp', 'email', 'telegram'];
+export const NOTIFICATION_CHANNELS = ['inapp', 'email'];
 
 // Every notification type the product can produce, split by who may ask for it.
 //
@@ -44,9 +47,7 @@ export const NOTIFICATION_EVENTS = [
   { key: 'mentioned', type: 'mentioned' },
   { key: 'statusChanged', type: 'status_changed' },
   { key: 'deadline', type: 'deadline' },
-  // Chat had no switch of its own, so it rode the channel policy below: turning
-  // Telegram on meant a Telegram push for every message in every channel you
-  // are in, and the only way to stop that was to disconnect Telegram entirely.
+  // Chat has no switch of its own and rides the channel policy below.
   { key: 'chatMessage', type: 'chat_message' },
 ];
 
@@ -86,7 +87,6 @@ export const CHANNEL_DEFAULTS = {
   sound: true,
   popup: true,
   emailEnabled: false,
-  telegramEnabled: false,
 };
 
 // Types email used to accept, hardcoded in the route. Kept only to reproduce
@@ -126,18 +126,16 @@ export function resolveNotificationMatrix(preferences = {}) {
 export function isChannelEnabled(preferences = {}, channel) {
   if (channel === 'inapp') return true;
   if (channel === 'email') return preferences?.emailEnabled === true;
-  if (channel === 'telegram') return preferences?.telegramEnabled === true;
   return false;
 }
 
 // Types outside NOTIFICATION_EVENTS — alert, emergency, the calendar family and
-// test — have no switch of their own in Settings, so a channel
-// policy decides. In-app records them all and Telegram takes them all, which is
-// what both already did. Email stays narrow on purpose: it used to run off a
-// hardcoded whitelist, and opening it up would mean a mail per chat message.
+// test — have no switch of their own in Settings, so a channel policy decides.
+// In-app records them all, which is what it already did. Email stays narrow on
+// purpose: it used to run off a hardcoded whitelist, and opening it up would
+// mean a mail per chat message.
 const KEYLESS_TYPE_POLICY = {
   inapp: () => true,
-  telegram: () => true,
   email: type => type === 'alert' || type === 'emergency',
 };
 

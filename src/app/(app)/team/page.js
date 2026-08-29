@@ -29,8 +29,12 @@ import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchR
 import { useOrganizationPresence } from '@/lib/hooks/useOrganizationPresence';
 import { formatLastSeenUk, isPresenceOnline } from '@/lib/utils/presence.mjs';
 
-// ── Invite Modal ─────────────────────────────────────────────────────────────
 // ── Main Page ────────────────────────────────────────────────────────────────
+// A roster, and only a roster. Who holds a qTicket seat is decided in QuickTeam
+// — «Налаштування» → «Інтеграції» → «qTicket» — and re-sent whole on the next
+// provisioning sync, so this screen has no invite, no role picker and no way to
+// take a seat away: every one of them would be a second place to change one
+// setting, and the qTicket copy is the one the next snapshot overwrites.
 export default function TeamPage() {
   const { currentUser } = useAppContext();
   const { members, loading, error: membersError } = useOrganization();
