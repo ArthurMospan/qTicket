@@ -6,7 +6,11 @@ import {
   CONTROLLED_HELP_FEATURES,
   HELP_ARTICLES,
   HELP_CATEGORIES,
+  HELP_ROLE_ORDER,
+  PUBLIC_HELP_ARTICLES,
+  PUBLIC_HELP_ARTICLE_BY_SLUG,
   REQUIRED_HELP_COVERAGE,
+  helpArticlesForRole,
 } from '../src/lib/content/helpArticles.mjs';
 import { LEGAL_DOCUMENTS } from '../src/lib/content/legalDocuments.mjs';
 import { PRODUCT_VERSION } from '../src/lib/content/product.mjs';
@@ -56,21 +60,77 @@ test('qTicket help publishes only reachable support workflows', () => {
     'support',
   ]);
 
-  const publicText = HELP_ARTICLES.map(flattenArticle).join(' ');
-  for (const inheritedFeature of [
-    'спринти й беклог',
-    'як рахувати витрачений час',
-    'аналітика й рахунки',
-    'перенести завдання з youtrack',
-    'канали й особисті переписки',
+  // Not «no article names a deleted feature» — no article may name one at all,
+  // in any sentence. Each of these was a whole published topic once.
+  const catalogueText = HELP_ARTICLES.map(flattenArticle).join(' ');
+  for (const deletedFeature of [
+    'спринт', 'беклог', 'табел', 'рахунок', 'рахунк', 'аналітик', 'таймер',
+    'списан', 'youtrack', 'telegram', 'quickteam+', 'календар', 'день народження',
+    'перенесення даних', 'оцінк', 'внутрішня нотатка', 'внутрішні нотатки',
   ]) {
-    assert.ok(!publicText.includes(inheritedFeature), `${inheritedFeature} is not public qTicket help`);
+    assert.ok(!catalogueText.includes(deletedFeature), `"${deletedFeature}" is not a qTicket feature any more`);
   }
+});
+
+// One record, one name. The sidebar, the portal and the queue all say
+// «звернення»; a help centre that says «інцидент» has told the reader there are
+// two different things and left them to guess which one they have.
+test('the help centre calls the record what the product calls it', () => {
+  for (const article of HELP_ARTICLES) {
+    const text = flattenArticle(article);
+    for (const word of ['інцидент', 'завданн', 'задач', 'виконавц', 'виконавець']) {
+      assert.ok(!text.includes(word), `${article.id} still says "${word}"`);
+    }
+  }
+});
+
+// The «?» button is in the rail for every role, so the catalogue behind it is
+// read by role or it is the support team's manual handed to a customer.
+test('a client role cannot reach a staff-only article', () => {
+  for (const article of HELP_ARTICLES) {
+    assert.ok(HELP_ROLE_ORDER.includes(article.minimumRole), `${article.id} has a real minimumRole`);
+  }
+
+  const staffOnly = HELP_ARTICLES.filter(article => article.minimumRole === 'member').map(article => article.id);
+  assert.ok(staffOnly.length > 0, 'the support manual is not empty');
+
+  for (const role of ['client_member', 'client_admin']) {
+    const readable = new Set(helpArticlesForRole(role).map(article => article.id));
+    for (const id of staffOnly) {
+      assert.equal(readable.has(id), false, `${role} must not reach ${id}`);
+    }
+    // And a related-article link never points at one either.
+    for (const article of helpArticlesForRole(role)) {
+      assert.ok(article.relatedIds.every(id => readable.has(id)), `${article.id} links only where ${role} may go`);
+    }
+  }
+
+  // Support reads everything; nothing is hidden from the people answering.
+  assert.equal(helpArticlesForRole('member').length, HELP_ARTICLES.length);
+  assert.equal(helpArticlesForRole('owner').length, HELP_ARTICLES.length);
+});
+
+test('the public pages publish the client catalogue and nothing above it', async () => {
+  // `/help` is prerendered and served before anyone signs in, so its reader is
+  // the least privileged one there is.
+  assert.deepEqual(
+    PUBLIC_HELP_ARTICLES.map(article => article.id),
+    helpArticlesForRole('client_member').map(article => article.id),
+  );
+  assert.ok(PUBLIC_HELP_ARTICLES.length > 0 && PUBLIC_HELP_ARTICLES.length < HELP_ARTICLES.length);
+  for (const article of HELP_ARTICLES) {
+    if (article.minimumRole === 'client_member') continue;
+    assert.equal(PUBLIC_HELP_ARTICLE_BY_SLUG.has(article.slug), false, `${article.slug} has no public page`);
+  }
+
+  // A published page must never print an internal role id at a customer.
+  const articlePage = await readFile(new URL('../src/app/(public)/help/[slug]/page.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(articlePage, /minimumRole/);
 });
 
 test('the public help shell introduces qTicket rather than the inherited task manager', async () => {
   const explorer = await readFile(new URL('../src/app/(public)/help/HelpExplorer.jsx', import.meta.url), 'utf8');
-  assert.match(explorer, /інструкції про інциденти, клієнтські простори, команду підтримки/);
+  assert.match(explorer, /інструкції про звернення, розмову з підтримкою/);
   assert.doesNotMatch(explorer, /задачі, команду, спринти, час, інтеграції/);
 });
 

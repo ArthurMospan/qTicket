@@ -4,14 +4,17 @@ This file contains current owner guardrails and confirmed open work. Completed i
 
 ## Product guardrails
 
-- qTicket is a shared multi-tenant SaaS add-on activated for an existing QuickTeam organization. It has no standalone registration or organization creation. QuickTeam provisions the tenant, branding and selected support staff; qTicket then owns client spaces, invitations and incidents. qTicket, QuickTeam, and QuickTeam+ remain separate products and data stores that may all exist in parallel.
+- qTicket is a shared multi-tenant SaaS add-on activated for an existing QuickTeam organization. It has no standalone registration or organization creation. QuickTeam provisions the tenant, branding and selected support staff; qTicket then owns client spaces, invitations and incidents. qTicket and QuickTeam remain separate products and data stores.
 - Organization roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. The first three belong to the tenant's support team. Client roles are restricted to their assigned project: they can see and create incidents and reply in an incident, while workflow, assignment, priority, and settings remain internal-only. A client admin may invite only client members into that same project.
 - Staff identity and incident-to-task transfer integrate with QuickTeam through explicit server-side contracts. External clients authenticate in qTicket's own Firebase project; project-scoped invitations are bound to the verified email returned by the sign-in provider. Do not couple the products' primary Firebase sessions or data models.
 - QuickTeam is the authority for the internal organization, branding,
   entitlement and enabled support staff. qTicket must refuse direct changes to
   synchronized internal seats, ownership and entitlement. qTicket remains the
   authority for client projects, external invitations, incidents and workflow.
-- `issues` is the canonical incident collection. `tasks` is legacy/read-only and must not receive new features. The internal collection name stays stable during the fork; user-facing qTicket copy calls these records incidents.
+- `issues` is the canonical incident collection. `tasks` is legacy/read-only and must not receive new features. The internal collection name stays stable during the fork; every user-facing string calls the record **«звернення»**, and it is one word for both audiences — the client's portal and the support queue name the same thing the same way.
+- **The conversation on an incident is one shared thread.** Everything support writes there, the client reads. There is no internal note, no staff-only mode in the composer and no second collection beside `comments` — the owner removed it after it shipped, and a smaller version of it (a «draft» reply, a hidden mention, a private quote) is the same feature under another name. When support needs to discuss a case among themselves, they do it somewhere that is not the customer's own record.
+- **The client and the support team see the same interface.** The difference between them is what the client is *not* shown — internal controls, other customers' queues, organization settings — never a second product built for customers. A screen both audiences reach is one screen that knows who is looking; a screen only clients reach exists only where support genuinely has no equivalent.
+- **The team and the brand are administered in QuickTeam's qTicket integration, not inside qTicket.** Staff seats, roles, identity, organization name, logo and colour arrive in the signed snapshot and are read-only here; a second editor for any of them is a copy that loses. What qTicket's own settings own is the support process and its record: statuses, types, priorities, labels and the archive. A settings section that does not administer one of those does not belong in qTicket.
 - qTicket does not publish a price list, sell or switch subscriptions, or use a
   browser-visible plan as a security boundary. QuickTeam owns the add-on's
   commercial state and sends only the server-side `active`/`inactive`
@@ -20,8 +23,8 @@ This file contains current owner guardrails and confirmed open work. Completed i
   roles, identity and removal. qTicket may render that synchronized directory
   read-only for assignment and support operations, but must not duplicate its
   administration. A separate **Команда** surface earns primary navigation only
-  if it adds incident-specific operational value such as workload or assigned
-  clients; a copied name/role roster belongs in contextual pickers and profiles
+  if it adds incident-specific operational value such as who is answering which
+  client; a copied name/role roster belongs in contextual pickers and profiles
   instead. External client employees remain qTicket-owned because
   `client_admin` manages them inside one client project.
 - **The owner has rejected these outright. Do not propose them, do not build a
@@ -31,8 +34,9 @@ This file contains current owner guardrails and confirmed open work. Completed i
   incident waits for the client; satisfaction ratings after resolution (CSAT);
   conditional form builders; canned-response macros; an inbound support
   mailbox; automatic routing or assignment rules; a knowledge base; any qTicket
-  billing, price list or checkout; and the inherited planning calendar, sprints
-  and timesheets. What survives from those categories is deliberately manual:
+  billing, price list or checkout; staff-only notes inside an incident; and the
+  inherited planning calendar, sprints, timers, timesheets, invoices and
+  analytics. What survives from those categories is deliberately manual:
   «Очікує відповіді» is a status a person chooses, a resolution date is a date
   a person sets, and an incident is assigned by a person.
 - Organization deletion stays disabled until an owner-only, idempotent server cascade safely handles Firestore and external files and has integration coverage.
@@ -70,7 +74,7 @@ Completed foundation:
 
 Completed product slice on 2026-08-28:
 
-- Internal primary navigation is now **Огляд**, **Інциденти**, **Клієнти**,
+- Internal primary navigation is now **Огляд**, **Звернення**, **Клієнти**,
   **Команда**, **Налаштування**. Task-planning surfaces are no longer primary
   qTicket navigation, and the legacy project dashboard is reached through
   `/clients` rather than acting as the internal home screen.
@@ -132,12 +136,12 @@ Completed product slice on 2026-08-28:
   removed from qTicket settings navigation; the rates and organization-deletion
   panels were deleted outright in the 2026-08-29 slice below.
 - The incident composer and detail view no longer expose audio tasks, sprints,
-  time tracking, estimates, task hierarchy, task links or QuickTeam+ chat.
+  time tracking, estimates, task hierarchy or task links.
   Internal support keeps status, responsible staff, priority, type, resolution
   target, labels, description, attachments and the shared client conversation.
 - Direct visits to inherited task-manager routes are contained at the request
   boundary: `/analytics` and `/calendar` return to **Огляд**, while `/sprints`
-  and `/chat` return to **Інциденти**. The active organization is preserved and
+  and `/chat` return to **Звернення**. The active organization is preserved and
   legacy view filters are discarded.
 - The planning calendar and the sprint board are now deleted, not merely
   hidden. `src/app/(app)/calendar`, `src/app/(app)/calendar/event/[eventId]`
@@ -148,18 +152,14 @@ Completed product slice on 2026-08-28:
   `sprintSearch`/`calendarSearch` store slices and the `manage:sprints`
   permission, whose only call site was the deleted screen. The redirects stay:
   a copied bookmark lands in the nearest supported workflow instead of on a
-  404. The `calendarEvents` server machinery is deliberately untouched —
-  `/api/calendar/*`, `reminderJobs`, the notification outbox, the Firestore
-  rule that keeps `calendarEvents` server-only for every browser role, and the
-  `sprints` collection with its stored `issue.sprintId` values, which are an
+  404. What was left standing then — the `calendarEvents` server machinery and
+  the event-detail component chain — is being removed in its own slice; the
+  `sprints` collection and the stored `issue.sprintId` values are an
   organization's own history and are not rewritten.
-- Public help is now a qTicket catalogue of 13 implemented topics. Articles for
-  time tracking, invoices, analytics, YouTrack and workspace chat remain
-  inherited implementation material and are not published as available qTicket
-  features. The sprint and planning-calendar articles are deleted outright:
-  unpublished was the right answer while the screens still existed, and a help
-  article for a screen that does not exist is not material for later.
-- Notification settings expose only in-app delivery. Email and Telegram remain
+- The help centre is a qTicket catalogue of 13 implemented topics, and every
+  article for a deleted screen is deleted rather than unpublished: keeping one
+  «for later» is keeping a description of a product nobody can buy.
+- Notification settings expose only in-app delivery. Email remains
   hidden until a real provider is configured and verified; the beta does not
   promise channels that cannot deliver. The panel itself is now a client
   surface only — see the settings-ownership entry below for what internal staff
@@ -262,12 +262,11 @@ Completed product slice on 2026-08-29:
   together with `PositionItem` and the whole-catalogue branch of the workflow
   reset. `positions` data is still hydrated and saved with the workflow document
   because «Команда підтримки» reads a member's position label. «Інтеграції» and
-  «Перенесення даних» stay hidden rather than deleted: `tests/ux-regressions`,
-  `tests/qa-group-26` and `tests/integration-auth-retry` still assert against
-  their code, and `docs/integrations/TELEGRAM.md` and
-  `docs/integrations/YOUTRACK_MIGRATION.md` still describe them as the screen
-  their contract is operated from. The repository rule is to preserve what is
-  still referenced.
+  «Перенесення даних» were kept hidden rather than deleted while something still
+  referenced them; nothing does now — the third-party integrations, the import
+  wizard and the `docs/integrations/` contracts that described them are all
+  gone, and the one remaining contract is
+  [QTICKET.md](integrations/QTICKET.md).
 - Client-facing surfaces now carry the tenant's brand rather than qTicket's.
   `AuthLayout` takes an optional brand and paints the shell from the same
   `--sb-*` theme the workspace rail uses, so one organization colour cannot
@@ -324,56 +323,38 @@ Internal support users:
 
 1. **Огляд** — support workload, status counts, unassigned incidents and recent
    activity across all client projects.
-2. **Інциденти** — one global queue with list and Kanban views; project/client,
+2. **Звернення** — one global queue with list and Kanban views; project/client,
    status, priority, assignee and date filters.
 3. **Клієнти** — client projects, their team, configuration and incident counts.
 4. **Команда** — the tenant's internal support team.
-5. **Налаштування** — organization, workflows, invitations and integrations.
+5. **Налаштування** — statuses, types, priorities, labels and the archive. The
+   team and the brand are administered in QuickTeam's qTicket integration.
 
 External client users:
 
 1. **Мої звернення** — incidents in the one client project available to the
    signed-in user.
-2. **Створити інцидент** — a prominent action, not a buried task-manager modal.
+2. **Створити звернення** — a prominent action, not a buried task-manager modal.
 3. **Співробітники** — available only to `client_admin`, who may invite
    `client_member` users into that same project.
-4. **Інцидент** — visible status, description, attachments and shared
-   conversation; no workflow, priority, assignee or organization controls.
+4. **Звернення** — the same screen support opens, minus the internal controls:
+   visible status, description, attachments and the shared conversation.
 
-Time tracking, invoices, AI task estimation and QuickTeam+ portal controls are
-not primary qTicket navigation. Do not delete their inherited backend code
-merely to hide them; remove them from qTicket surfaces first, then delete only
-when references and migrations are understood.
-
-Sprints and planning calendars have finished that sequence. Their screens were
-removed from qTicket navigation, then contained at the request boundary, and
-their references are now audited and the screens deleted. What remains is
-deliberate and is not a leftover to clean up later:
-
-- **`calendarEvents` server machinery stays.** `/api/calendar/*` and
-  `src/lib/server/reminderJobs.js` drive birthday greetings, deadline reminders
-  and the notification outbox, which are live qTicket features. Those routes
-  keep requiring an internal support role and `calendarEvents` stays
-  server-only for every browser role in Firestore Rules. Deleting a screen is
-  not a reason to relax a rule.
-- **Stored sprint data stays.** The `sprints` collection, its index and
-  `issue.sprintId` are an organization's own record. Nothing rewrites them, and
-  `useSprints` still serves the incident detail.
-- **The event detail component chain stays, for now.** `EventModal`,
-  `CalendarEventPage`, `CalendarEventDialog`, `useCalendarEventTimeLogs` and
-  the `TimePicker` kit component are only reachable through
-  `openEventQuickView`, which the deleted calendar screen was the only caller
-  of. They are the last browser client of the calendar API routes that remain,
-  and they are entangled with the shared `DetailLayout context="event"` and
-  `TaskAttributesPanel context="calendar"` kit contract. Removing them is a
-  slice of its own, taken together with a decision about the API routes.
+The inherited planning modules — sprints, the planning calendar, the timer,
+time logs, timesheets, invoices and the analytics screens — have finished the
+sequence they were put through: removed from qTicket surfaces, contained at the
+request boundary, then audited and deleted with the code behind them. Two
+things deliberately survive their screens and are not leftovers to clean up:
+the `sprints` collection with its stored `issue.sprintId` values, and whatever
+`analyticsRollups` documents an organization already has. They are that
+organization's own record, and nothing rewrites them.
 
 ### Active build sequence and handoff rule
 
 1. **Completed:** implement role-aware qTicket navigation and the internal
    **Огляд** screen using only shared components from `src/components/ui`.
 2. **Completed:** turn the inherited cross-project board into the global
-   **Інциденти** queue and remove sprint/task-manager controls from that surface.
+   **Звернення** queue and remove sprint/task-manager controls from that surface.
 3. **Completed:** rebuild the external client entry and incident
    creation/detail around the simple client journey above while preserving the
    rule-enforced permission boundary.
@@ -415,11 +396,11 @@ The competitors validate behaviors, not qTicket's ownership model or UI.
 | --- | --- | --- |
 | Staff/customer identity and organization boundary | **Adopt** the restricted B2B portal pattern | Staff enters only from signed QuickTeam provisioning/launch; a client account exists only after a project-scoped invitation. No local registration or organization creation. |
 | Client company visibility and administration | **Adapt** organization-level customer visibility | One qTicket client project is the customer's support space. `client_admin` invites only `client_member` into that project; no arbitrary cross-project sharing or request participants. |
-| Public reply versus internal note | **Adopt** | Public `comments` remain shared with clients. Staff-only `internalNotes` are a separate Firestore collection, explicitly selected in the composer, excluded from client subscriptions and notifications, and protected by rules. Support-side `audit` is staff-only. |
+| Public reply versus internal note | **Reject** | Every competitor here has a private note beside the reply; qTicket does not, and the owner removed it after it shipped. One incident, one conversation, and everything support writes in it the client reads. What stays staff-only is the `audit` feed, which records what changed rather than what anyone said. Do not reopen this as a draft, a hidden mention or a private quote. |
 | Queue and assignment | **Adapt** | Keep one opinionated global incident queue with project, status, priority, assignee and date filters plus manual assignment. Reject custom queue builders, support groups and automatic routing until real volume proves they are needed. |
 | SLA and business hours | **Reject** | The owner rejected the whole category: no service-level policy, no promised first-response or resolution time, no business-hours calendar, no automatic pause while an incident waits for the client, and no post-resolution satisfaction rating. «Очікує відповіді» stays a status a person chooses, and a resolution date stays a date a person sets. Do not reopen this as a smaller version of itself. |
 | Request forms | **Adapt** | Incident types provide customer-friendly categories; add only proven type-specific required fields. Reject a general conditional form builder in the MVP. |
-| Audit and notifications | **Adapt** | Clients receive public replies and customer-facing status; staff receives internal notes and the support audit. In-app delivery stays split by audience. Email remains disconnected until Resend is intentionally enabled. |
+| Audit and notifications | **Adapt** | Everyone on an incident receives its replies and its status; the support audit is staff-only, and so are the notifications about it. Email remains disconnected until Resend is intentionally enabled. |
 | Internal team administration | **Reject duplication** | QuickTeam remains authoritative for staff enablement, roles and profile data. qTicket keeps only operational pickers and contextual read-only profiles, refuses every mutation of a QuickTeam-managed seat, and offers no internal role and no link into an internal seat anywhere. The invite link exists again for clients only: it may carry `client_admin` or `client_member` and nothing else, refused at the create route, in the accept transaction and in Firestore Rules. Client employees remain qTicket-owned. |
 | Pricing, billing and inherited planning modules | **Reject for qTicket MVP** | No local plans, prices, checkout, invoices, timesheets, sprints, calendar or AI surface. qTicket consumes only QuickTeam's signed active/inactive entitlement. |
 
@@ -435,27 +416,26 @@ workflow or security gap.
   client administrator copies the generated login instruction into a messenger.
 - **Completed:** the user-facing terminology pass on qTicket routes. The
   canonical collection and the inherited internal code stay `issues`/task-oriented
-  and were not touched; what changed is what a client can read. A client's
-  surfaces now say **«звернення»** throughout — the portal was already «Мої
-  звернення» and the composer, the incident page, the palette and the toasts
-  said «інцидент» beside it, which is two names for one record on the one
-  screen that had already given the reader the first. Internal support keeps
-  «інцидент». `src/lib/content/incidentTerms.mjs` holds both halves, a shared
-  screen picks the reader's by role, and `tests/client-terminology.test.mjs`
-  fails on the first task-manager word that comes back into the client copy,
-  the client portal file, the client palette, the client tab title, the
-  notification labels or the published help. Copy on a surface both audiences
-  read at once and whose reader cannot be known when it is written — a
-  notification title, a digest subject, an emailed comment, the shortcut sheet —
-  names the conversation or the incident key instead of the record.
+  and were not touched; what changed is what anybody reads. Every surface now
+  says **«звернення»** — one record, one name, for the support team and the
+  client alike. The two-vocabulary version of this («інцидент» for staff,
+  «звернення» for the client) was the wrong fix: a customer's list and an
+  agent's queue that are visibly not the same thing is a product with a seam in
+  it, and every shared screen had to remember which reader it was addressing.
+  `src/lib/content/incidentTerms.mjs` is the one table, and
+  `tests/client-terminology.test.mjs` fails on the first task-manager word that
+  comes back into the copy, the portal, the palette, the tab title, the
+  notification labels or the published help.
 - Still open in the same area, and not terminology: a `client_admin` who opens
   «Налаштування» → «Акаунт» is offered «Вийти з організації» and account
   deletion, and a client's incident breadcrumb is drawn by the internal detail
   screen. Both now use client wording; whether a client should be offered them
   at all is a product question for the acceptance flow.
-- **Completed:** incident conversation now has explicit «Відповідь клієнту» and
-  staff-only «Внутрішня нотатка» modes. The latter is stored under separately
-  ruled `internalNotes`; clients cannot subscribe to it or the support audit.
+- **Reversed:** the incident conversation briefly had «Відповідь клієнту» and
+  staff-only «Внутрішня нотатка» modes, stored under a separately ruled
+  `internalNotes` collection. The owner removed both. The conversation is one
+  shared thread — see the guardrail — and the composer offers no choice about
+  who reads what.
 - Add the explicit server-to-server «Створити завдання у QuickTeam» action.
   The first version is manual, idempotent, records the QuickTeam task identity
   on the incident, and never shares Firebase sessions or databases.
@@ -475,14 +455,6 @@ workflow or security gap.
 - Delete all organization-scoped Firestore data and external files safely.
 - Cover authorization, partial failure, and retry behavior before enabling the Settings action.
 
-### QuickTeam+ convergence and hardening
-
-- Converge the modern OAuth/secondary-Firebase flow and the legacy portal route instead of growing both independently.
-- Remove the split configuration between `NEXT_PUBLIC_QTPLUS_URL` and `NEXT_PUBLIC_PORTAL_URL`.
-- Enforce a clear uniqueness policy for portal-project links.
-- Provide a reconnect path for revoked/invalid grants on already linked projects.
-- Tighten provider rules and add live cross-repository smoke coverage before a broad client rollout.
-
 ### Status categories
 
 A status has a local label and a shared category (see the README). qTicket's
@@ -496,15 +468,15 @@ one of the tasks every report has to remember to subtract. An organization that
 had created a status under the old «Скасовано» section keeps it as an ordinary
 open status — deliberately visible rather than silently re-read as «Вирішено»,
 which is what its stored `isDone: true` would otherwise have meant. The one-time
-cleanup is by hand and takes a minute: cancel those tasks with the new action,
-then delete the status in «Налаштування» → «Статуси інцидентів». No script.
+cleanup is by hand and takes a minute: cancel those records with the new action,
+then delete the status in «Налаштування», in the statuses section. No script.
 
 **«Очікує відповіді» is the shared waiting category.** Historical built-in
 labels «На перевірці», `Review` and `In Review` are presented with the qTicket
 label on read. Custom labels remain untouched. The historical ids
 `code-review`, `qa` and `client-approval` still resolve to this category.
 
-The global «Інциденти» board groups by these categories. Moving a card resolves
+The global «Звернення» board groups by these categories. Moving a card resolves
 the matching local status from that incident's client space, so a global drop
 never writes a status that the client space does not own.
 
@@ -513,9 +485,9 @@ never writes a status that the client space does not own.
 - Add a “hide completed” toggle to My Tasks, enabled by default.
 - Implement a verified email-change flow with recent re-authentication.
 - Continue accessibility and mobile-layout checks on the main workspace flows.
-- Ask for the Web Notification permission. In-app, email and Telegram exist;
-  the one channel that reaches a laptop with the tab in the background is the
-  one never requested.
+- Ask for the Web Notification permission. In-app exists and email is wired but
+  disconnected; the one channel that reaches a laptop with the tab in the
+  background is the one never requested.
 - Recover from an expired session in one place. Two files translate an expired
   token into Ukrainian; everywhere else it surfaces as a generic failure, and a
   half-written form is lost with it.
@@ -540,17 +512,15 @@ unread instead of a mark inside every message, and writes a mark only where the
 ✓✓ receipt genuinely needs one (the newest message of each author, which covers
 everything older); the bell collapses a conversation into one row; read records
 expire after thirty days without ever deleting a claim something could still
-resend; and event-driven email and Telegram failures land in the same outbox the
+resend; and event-driven email failures land in the same outbox the
 reminders use.
 
-One item of that list turned out to be wrong as written. **`birthday` is not a
-dead type.** `ALLOWED_TYPES` does reject it, but that route is not how it is
-sent: `createBirthdayNotifications` in `lib/server/reminderJobs.js` writes it
-straight through the Admin SDK on the daily greeting sweep, and it reaches real
-bells. The route rejects it on purpose — a greeting is addressed to a whole
-organization on somebody else's behalf, and no browser should be able to send
-one. What was actually wrong was that three lists disagreed in three files with
-nothing holding them together; the registry in `notificationChannels.mjs`
+One item of that list was argued over at length — whether `birthday` was a dead
+notification type — and the argument is now moot: qTicket does not greet the
+customer's staff on their birthday, and `createBirthdayNotifications` is gone
+with the rest of it. What the argument was actually about survives and was worth
+fixing: three lists of notification types disagreed in three files with nothing
+holding them together. The registry in `notificationChannels.mjs`
 (`REQUESTABLE_NOTIFICATION_TYPES` / `SYSTEM_NOTIFICATION_TYPES`) and
 `tests/notification-types.test.mjs` now do.
 
@@ -580,40 +550,37 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the two paths and their guarantees.
 - When QuickTeam moves to its own server: run the worker in-process on a real
   interval and drop the external trigger.
 - Send a digest instead of an interruption per event. A daily or end-of-day
-  summary («3 задачі на завтра, 1 прострочена») is usually the only kind of
+  summary («3 звернення на завтра, 1 прострочене») is usually the only kind of
   notification people keep switched on.
 
-### Задачі в аналітиці: лічильники замість повного набору
+### Лічильники замість повного набору звернень
 
-Час у звітах більше не читається сирим — денні підсумки в `analyticsRollups`
-відповідають на «скільки годин за період» одним документом на проєкт на день
-(див. ARCHITECTURE → «Аналітика»). Задачі так і лишились єдиною колекцією, яку
-екран аналітики читає повністю.
+Екранів звітності вже немає, але питання лишилось: набір звернень читається
+повністю там, де потрібне лише число. `projects/{id}.issueCounts` відповідає на
+`total`/`delivered`/`overdue` без читання колекції (ARCHITECTURE → «Лічильники
+задач на проєкті»), а решту рахує сам набір.
 
-Це не забули — це поки що не можна зробити чесно, і ось чому:
+Замінити читання набору запитом `count()` поки не можна чесно, і ось чому:
 
-- Немає поля, за яким «відкриті» можна порахувати `count()`. Закритість задачі
-  живе в категорії її статусу, а статуси налаштовуються по проєктах, тож запит
-  мусив би бути `columnId in [...]` — а `in` тримає щонайбільше 30 значень.
+- Немає поля, за яким «відкриті» можна порахувати `count()`. Закритість запису
+  живе в категорії його статусу, а статуси налаштовуються по клієнтських
+  просторах, тож запит мусив би бути `columnId in [...]` — а `in` тримає
+  щонайбільше 30 значень.
 - `archivedAt` і `cancelledAt` відсутні на документі, поки не виставлені, а
   Firestore не вміє питати «поля немає». `count()` без цього рахував би
-  архівні й скасовані задачі, тобто давав би відповідь, гіршу за поточну.
-- Дві знахідки з «Що потребує уваги» взагалі не виражаються запитом:
-  «заблоковані залежностями» читає `issueLinks`, «без оцінки» — категорію
-статусу проєкту. Списки за ними доводиться будувати з повного набору.
-- А `useIssues.js` і `issueCancel.mjs` навмисно фільтрують у місці читання, а
-  не в запиті, саме тому, що кожен потік задач і так обмежений проєктом.
+  архівні й скасовані записи, тобто давав би відповідь, гіршу за поточну.
+- `useIssues.js` і `issueCancel.mjs` навмисно фільтрують у місці читання, а
+  не в запиті, саме тому, що кожен потік звернень і так обмежений простором.
 
-Щоб це зрушити, потрібне денормалізоване поле стану на самій задачі
+Щоб це зрушити, потрібне денормалізоване поле стану на самому записі
 (`open`/`delivered`), яке пишуть ті самі серверні маршрути, що вже пишуть
-статус, плюс backfill `archivedAt`/`cancelledAt` у явний `null`. Це той самий
-крок, що вже описаний в ARCHITECTURE → «Що лишилось дорогим навмисно» як
-лічильники на документі проєкту. Робити його варто лише після вимірювання
-реального обсягу даних: він змінює те, що картка може показувати наживо, але не
-повинен створювати локальний тариф або штучне обмеження qTicket.
+статус, плюс backfill `archivedAt`/`cancelledAt` у явний `null`. Робити його
+варто лише після вимірювання реального обсягу даних: він змінює те, що картка
+може показувати наживо, але не повинен створювати локальний тариф або штучне
+обмеження qTicket.
 
-Поки цього немає, вартість обмежена вікном і тим, що задача — скінченна
-множина: вона росте з обсягом роботи, а не з віком робочого простору.
+Поки цього немає, вартість обмежена тим, що звернення — скінченна множина: вона
+росте з обсягом роботи, а не з віком робочого простору.
 
 ### Operational facts worth knowing
 
@@ -650,11 +617,12 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the two paths and their guarantees.
 Do not start these without an explicit owner decision:
 
 - Mobile/PWA experience.
-- Intake forms for external requests.
 - Goals/OKR tracking.
-- User-configurable automation rules.
-- AI project summaries and task assistance.
-- A client-safe AI status digest delivered through QuickTeam+.
+- AI summaries and assistance of any kind.
+
+Two entries left this list by being rejected rather than deferred, and they are
+in the guardrails above: intake forms for external requests (a conditional form
+builder), and user-configurable automation or routing rules.
 
 Commercial billing, checkout and subscription contracts belong to QuickTeam,
 not to the qTicket product backlog. qTicket consumes only the signed add-on

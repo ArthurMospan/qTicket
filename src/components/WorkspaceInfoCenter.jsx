@@ -23,11 +23,12 @@ import { ArrowLeft, Newspaper, Search, Tag } from 'lucide-react';
 import { Button, Card, Dialog, EmptyState, Pill, Segmented } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import {
-  HELP_ARTICLES,
   HELP_CATEGORIES,
   articleSearchText,
+  helpArticlesForRole,
 } from '@/lib/content/helpArticles.mjs';
 import { NEWS_ARTICLES } from '@/lib/content/releaseContent.mjs';
+import { useAppContext } from '@/lib/context/AppContext';
 import { useLocalization } from '@/lib/hooks/useLocalization';
 
 export const INFO_CENTER_PANES = Object.freeze(['help', 'news']);
@@ -39,13 +40,27 @@ const PANE_OPTIONS = [
 
 const CATEGORY_LABEL = new Map(HELP_CATEGORIES.map(category => [category.id, category.label]));
 
-// Built once at module load: the search index never changes at runtime, and
-// rebuilding it on every keystroke made a 20-article filter feel like work.
-const SEARCHABLE_ARTICLES = HELP_ARTICLES.map(article => ({
-  ...article,
-  categoryLabel: CATEGORY_LABEL.get(article.category) || '',
-  searchText: articleSearchText(article),
-}));
+// The catalogue is read by role. The «?» button is in the rail for everybody,
+// including an external client, and this dialog used to hand that client the
+// support team's manual — how to set up a client space, how to configure the
+// workflow, how to change forty records at once.
+//
+// Built once per role and kept: the catalogue never changes at runtime, and
+// rebuilding a search index on every keystroke made a small filter feel like
+// work.
+const SEARCHABLE_BY_ROLE = new Map();
+
+function searchableArticles(role) {
+  const key = role || '';
+  if (!SEARCHABLE_BY_ROLE.has(key)) {
+    SEARCHABLE_BY_ROLE.set(key, helpArticlesForRole(role).map(article => ({
+      ...article,
+      categoryLabel: CATEGORY_LABEL.get(article.category) || '',
+      searchText: articleSearchText(article),
+    })));
+  }
+  return SEARCHABLE_BY_ROLE.get(key);
+}
 
 function ArticleBody({ sections }) {
   return (
@@ -94,14 +109,23 @@ function HelpPane({ openArticle, onOpenArticle, onCloseArticle }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const { formatDate } = useLocalization();
+  const { orgRole } = useAppContext();
+
+  const articles = useMemo(() => searchableArticles(orgRole), [orgRole]);
+  // Only the categories this reader has something in. A chip that can only
+  // answer «Нічого не знайдено» is a category the product is pretending to have.
+  const categories = useMemo(() => {
+    const present = new Set(articles.map(article => article.category));
+    return HELP_CATEGORIES.filter(item => present.has(item.id));
+  }, [articles]);
 
   const filtered = useMemo(() => {
     const words = query.trim().toLocaleLowerCase('uk-UA').split(/\s+/).filter(Boolean);
-    return SEARCHABLE_ARTICLES.filter(article => {
+    return articles.filter(article => {
       if (category !== 'all' && article.category !== category) return false;
       return words.every(word => article.searchText.includes(word));
     });
-  }, [category, query]);
+  }, [articles, category, query]);
 
   if (openArticle) {
     return (
@@ -134,7 +158,7 @@ function HelpPane({ openArticle, onOpenArticle, onCloseArticle }) {
       />
 
       <div className="flex flex-wrap gap-[6px]" aria-label="Категорії довідки">
-        {[{ id: 'all', label: 'Усі' }, ...HELP_CATEGORIES].map(item => (
+        {[{ id: 'all', label: 'Усі' }, ...categories].map(item => (
           <Button
             key={item.id}
             style={category === item.id ? 'primary' : 'secondary'}

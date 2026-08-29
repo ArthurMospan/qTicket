@@ -19,7 +19,7 @@ import {
   TASK_MANAGER_WORDS,
   incidentTerms,
 } from '../src/lib/content/incidentTerms.mjs';
-import { HELP_ARTICLES } from '../src/lib/content/helpArticles.mjs';
+import { HELP_ARTICLES, helpArticlesForRole } from '../src/lib/content/helpArticles.mjs';
 import { buildCommands, issueCommands } from '../src/lib/utils/commandPalette.mjs';
 import { routeTitle, workspaceDocumentTitle } from '../src/lib/utils/documentTitle.mjs';
 import { notificationOpenLabel } from '../src/lib/utils/notificationNavigation.mjs';
@@ -121,9 +121,16 @@ test('the notification centre names the record in the reader’s own word', () =
 });
 
 test('every published help article is safe to hand a client', () => {
-  // `HELP_ARTICLES` has no audience filter and the help button sits in the rail
-  // for every role, so the published catalogue *is* client-facing copy.
+  // The catalogue is filtered by role now (`helpArticlesForRole`), and the
+  // articles a client reaches are asserted below in their own right. This still
+  // reads the whole catalogue: the support team's word for the record is the
+  // client's word for it, so a task-manager word is wrong in a staff article
+  // too — and an article moved down to `client_member` must not be able to
+  // carry one in with it.
   for (const article of HELP_ARTICLES) {
     assertClean(JSON.stringify(article), `help article ${article.id}`);
+  }
+  for (const article of helpArticlesForRole('client_member')) {
+    assertClean(JSON.stringify(article), `client-readable help article ${article.id}`);
   }
 });
