@@ -26,14 +26,11 @@ test('external links accept only absolute HTTP and HTTPS URLs', () => {
   }
 });
 
-test('calendar and integration links are guarded while saving and rendering', async () => {
-  const [dialog, page, server, linkCard, issueDetail, telegram] = await Promise.all([
+test('calendar links are guarded while saving and rendering', async () => {
+  const [dialog, page, server] = await Promise.all([
     read('../src/components/workspace/calendar/CalendarEventDialog.jsx'),
     read('../src/components/workspace/calendar/CalendarEventPage.jsx'),
     read('../src/lib/server/calendarEvents.js'),
-    read('../src/components/workspace/qtplus/cards/LinkCard.jsx'),
-    read('../src/components/workspace/IssueDetail.jsx'),
-    read('../src/lib/utils/telegramMessage.mjs'),
   ]);
 
   assert.match(dialog, /meetingUrl = safeExternalUrl\(typed\.meetingUrl\)/);
@@ -41,9 +38,6 @@ test('calendar and integration links are guarded while saving and rendering', as
   assert.match(page, /const meetingUrl = safeExternalUrl\(rawMeetingUrl\)/);
   assert.match(page, /href=\{safeMeetingUrl\}/);
   assert.match(server, /meetingUrl = safeExternalUrl\(typed\.meetingUrl\)/);
-  assert.match(linkCard, /const url = safeExternalUrl\(view\.url\)/);
-  assert.match(issueDetail, /safeExternalUrl\(issue\.importMetadata\?\.sourceUrl\)/);
-  assert.match(telegram, /safeExternalUrl\(item\.url\)/);
   assert.doesNotMatch(dialog, /href=\{event\.meetingUrl\}/);
   assert.doesNotMatch(page, /href=\{event\.meetingUrl\}/);
 });

@@ -5,7 +5,6 @@ import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { generateEmailTemplate } from '@/lib/utils/sendEmail';
 import { deliverEmail } from '@/lib/server/email';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
-import { deliverTelegramNotification } from '@/lib/server/telegram';
 import { REQUESTABLE_NOTIFICATION_TYPES, shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
 import { OUTBOX_COLLECTION, nextAttemptDelayMs } from '@/lib/utils/notificationOutbox.mjs';
 import { hasProjectAccess } from '@/lib/utils/projectAccess.mjs';
@@ -35,12 +34,10 @@ async function sendEmail({ email, type, title, body, link }) {
 // path, and the per-channel stamps stop a channel that succeeded from being sent
 // a second time.
 async function queueFailedChannels({
-  db, recipients, recordIdByUser, emailFailed, telegramFailed,
-  emailWanted, telegramWanted, payload, actor,
+  db, recipients, recordIdByUser, emailFailed, emailWanted, payload, actor,
 }) {
   const nowMs = Date.now();
-  const owed = recipients.filter(item =>
-    emailFailed.has(item.userId) || telegramFailed.has(item.userId));
+  const owed = recipients.filter(item => emailFailed.has(item.userId));
   if (!owed.length) return;
   const batch = db.batch();
   for (const item of owed) {
@@ -59,14 +56,10 @@ async function queueFailedChannels({
       allowEmail: emailWanted.has(item.userId),
       status: 'pending',
       attempts: 1,
-      lastError: [
-        emailFailed.has(item.userId) ? 'email delivery failed' : '',
-        telegramFailed.has(item.userId) ? 'telegram delivery failed' : '',
-      ].filter(Boolean).join('; '),
+      lastError: emailFailed.has(item.userId) ? 'email delivery failed' : '',
       deliverAtMs: nowMs,
       nextAttemptAtMs: nowMs + nextAttemptDelayMs(1),
       ...(emailWanted.has(item.userId) && !emailFailed.has(item.userId) ? { emailSentAtMs: nowMs } : {}),
-      ...(telegramWanted.has(item.userId) && !telegramFailed.has(item.userId) ? { telegramSentAtMs: nowMs } : {}),
       materialisedAtMs: nowMs,
       createdAt: FieldValue.serverTimestamp(),
     }, { merge: true });
@@ -187,9 +180,9 @@ export async function POST(request) {
     ]);
     const sender = senderSnap.exists ? senderSnap.data() : {};
     // Each channel decides for itself. Previously one set of switches gated the
-    // notification record and the other channels rode along on it, so muting an
-    // event in the bell also silenced the email and the Telegram message — the
-    // three are independent columns now.
+    // notification record and the other channel rode along on it, so muting an
+    // event in the bell also silenced the email — the two are independent
+    // columns now.
     const recipients = userIdsToNotify.map((userId, index) => ({
       userId,
       prefs: settingsSnaps[index].exists ? settingsSnaps[index].data() : {},
@@ -198,8 +191,7 @@ export async function POST(request) {
     const audienceFor = channel => recipients.filter(item => shouldDeliver(item.prefs, channel, type));
     const inappAudience = audienceFor('inapp');
     const emailAudience = audienceFor('email');
-    const telegramAudience = audienceFor('telegram');
-    const reached = new Set([...inappAudience, ...emailAudience, ...telegramAudience].map(item => item.userId));
+    const reached = new Set([...inappAudience, ...emailAudience].map(item => item.userId));
 
     const notificationData = (delivery, { inapp }) => ({
         userId: delivery.userId, type, title, body, link: scopedLink, issueId, projectId, organizationId, channelId,
@@ -216,9 +208,9 @@ export async function POST(request) {
 
     // One claim per recipient, covering every channel. The notification document
     // doubles as the "already told them" marker, so a repeated poll — the daily
-    // deadline sweep is the real case — must not resend the email or the
-    // Telegram message either. Claiming only for the bell would have let both
-    // external channels fire on every pass for anyone who muted the bell.
+    // deadline sweep is the real case — must not resend the email either.
+    // Claiming only for the bell would have let the external channel fire on
+    // every pass for anyone who muted the bell.
     let delivered = reached;
     // Which document carries each recipient's record. The id is also the id of
     // the retry row below, so a retry claims the record already written rather
@@ -259,22 +251,6 @@ export async function POST(request) {
       })
       .map(item => item.userId));
 
-    const telegramTargets = telegramAudience.filter(item => delivered.has(item.userId));
-    const telegramResult = telegramTargets.length
-      ? await deliverTelegramNotification({
-        userIds: telegramTargets.map(item => item.userId),
-        title,
-        body,
-        link: scopedLink,
-        type,
-      }).catch(error => {
-        console.warn('[notifications] Telegram delivery failed:', error.message);
-        // The call itself failed, so nobody in it was reached.
-        return { delivered: 0, failedUserIds: telegramTargets.map(item => item.userId) };
-      })
-      : { delivered: 0, failedUserIds: [] };
-    const telegramFailed = new Set(telegramResult.failedUserIds || []);
-
     // This path is the low-latency one and stays that way: the message is
     // attempted the moment the event happens. What it did not have was anywhere
     // to put a provider that was down — a failed email was a line in a log and
@@ -287,9 +263,7 @@ export async function POST(request) {
       recipients: recipients.filter(item => delivered.has(item.userId)),
       recordIdByUser,
       emailFailed,
-      telegramFailed,
       emailWanted: new Set(emailTargets.map(item => item.userId)),
-      telegramWanted: new Set(telegramTargets.map(item => item.userId)),
       payload: { type, title, body, link: scopedLink, issueId, projectId, organizationId },
       actor: { id: authorization.user.uid, name: sender.name || authorization.user.name || '' },
     });

@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 229,
-    "parsedFiles": 229,
+    "productFiles": 217,
+    "parsedFiles": 217,
     "parseErrors": 0,
     "nativeControls": 20,
     "structures": {
@@ -25,7 +25,7 @@
     "manualModalShells": 0,
     "manualPills": 0,
     "manualSurfaces": 0,
-    "localSurfaceExceptions": 35,
+    "localSurfaceExceptions": 29,
     "manualIconButtons": 0,
     "headingStyles": 0,
     "sharedChromeOverrides": 0,
@@ -387,7 +387,6 @@
     "chat": "Чат",
     "calendar": "Календар",
     "analytics": "Аналітика",
-    "qtplus": "QuickTeam+",
     "ai-call": "AI-дзвінок",
     "tasks": "Задачі",
     "board": "Дошка й проєкт",
@@ -510,17 +509,17 @@
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/settings/page.js:551",
+      "location": "src/app/(app)/settings/page.js:527",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     },
     {
-      "location": "src/app/(app)/settings/page.js:571",
+      "location": "src/app/(app)/settings/page.js:547",
       "tag": "div",
       "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
     },
     {
-      "location": "src/app/(app)/settings/page.js:615",
+      "location": "src/app/(app)/settings/page.js:591",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
@@ -543,31 +542,6 @@
       "location": "src/components/AudioTaskPanel.jsx:279",
       "tag": "div",
       "className": "rounded-[14px] border border-line bg-white p-4 transition-opacity ${…}"
-    },
-    {
-      "location": "src/components/integrations/IntegrationCard.jsx:36",
-      "tag": "div",
-      "className": "rounded-[10px] border border-line bg-canvas p-3 ${…}"
-    },
-    {
-      "location": "src/components/integrations/IntegrationCard.jsx:95",
-      "tag": "div",
-      "className": "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-white"
-    },
-    {
-      "location": "src/components/integrations/YouTrackImportCard.jsx:579",
-      "tag": "div",
-      "className": "rounded-[10px] bg-white p-2"
-    },
-    {
-      "location": "src/components/integrations/YouTrackImportCard.jsx:675",
-      "tag": "div",
-      "className": "grid items-center gap-2 rounded-[10px] bg-white p-2 sm:grid-cols-[minmax(180px,1fr)_minmax(220px,1fr)]"
-    },
-    {
-      "location": "src/components/migrations/DataMigrationSettings.jsx:90",
-      "tag": "div",
-      "className": "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border border-line bg-white"
     },
     {
       "location": "src/components/SearchModal.jsx:43",
@@ -633,11 +607,6 @@
       "location": "src/components/workspace/IssueModal.jsx:11",
       "tag": "div",
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
-    },
-    {
-      "location": "src/components/workspace/qtplus/chat/ChatMessage.jsx:96",
-      "tag": "div",
-      "className": "rounded-[16px] rounded-bl-none bg-white p-3 text-ink"
     },
     {
       "location": "src/components/workspace/TimesheetTab.jsx:887",

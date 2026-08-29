@@ -46,12 +46,11 @@ test('stable API codes map to human task-form messages', () => {
 });
 
 test('comment composers lock synchronously against a same-tick double submit', async () => {
-  const [timeline, plus, workspace] = await Promise.all([
+  const [timeline, workspace] = await Promise.all([
     read('src/components/workspace/UnifiedTimeline.jsx'),
-    read('src/components/workspace/qtplus/chat/ChatComposer.jsx'),
     read('src/app/(app)/chat/page.js'),
   ]);
-  for (const source of [timeline, plus, workspace]) {
+  for (const source of [timeline, workspace]) {
     assert.match(source, /sendingRef\.current/);
     assert.match(source, /sendingRef\.current = true/);
     assert.match(source, /sendingRef\.current = false/);

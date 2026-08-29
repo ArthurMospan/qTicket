@@ -7,8 +7,7 @@ const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 test('scheduled notifications require a production bearer secret', async () => {
   const source = await read('../src/app/api/cron/notifications/route.js');
   assert.match(source, /process\.env\.CRON_SECRET/);
-  // Compared in constant time, the way the Telegram webhook secret and the API
-  // keys already are — this was the last secret here still on `!==`.
+  // Compared in constant time — this was the last secret here still on `!==`.
   assert.match(source, /timingSafeEqual/);
   assert.match(source, /presentedSecretMatches\(request\.headers\.get\('authorization'\), cronSecret\)/);
   assert.doesNotMatch(source, /!== `Bearer/);
@@ -44,7 +43,7 @@ test('a schedule invokes the notification sweep independently of a browser', asy
   assert.doesNotMatch(header, /useDeadlineReminders/);
 });
 
-test('qTicket hides dormant channels while cleanup stays independent of bot credentials', async () => {
+test('qTicket delivers notifications in the app and nowhere else', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
   const notificationSection = settings.slice(
     settings.indexOf("case 'notifications'"),
@@ -53,11 +52,6 @@ test('qTicket hides dormant channels while cleanup stays independent of bot cred
   assert.match(notificationSection, /id: 'inapp'/);
   assert.match(notificationSection, /title: 'На сайті'/);
   assert.doesNotMatch(notificationSection, /id: 'email'|id: 'telegram'/);
-
-  const route = await read('../src/app/api/integrations/telegram/route.js');
-  const deleteHandler = route.slice(route.indexOf('export async function DELETE'));
-  assert.match(deleteHandler, /\.collection\('private'\)\.doc\('telegram'\)\.delete\(\)/);
-  assert.doesNotMatch(deleteHandler, /telegramStatus|ensureTelegramWebhook|TELEGRAM_BOT_TOKEN/);
 });
 
 test('development avoids persistent multi-tab leases while production keeps offline cache', async () => {

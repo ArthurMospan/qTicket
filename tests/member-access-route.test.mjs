@@ -110,7 +110,6 @@ test('every permission in the matrix is read by something', async () => {
     'src/components/WorkspaceSidebar.jsx',
     'src/components/WorkspaceCommandPalette.jsx',
     'src/components/workspace/IssueDetail.jsx',
-    'src/components/workspace/QtPlusProjectTab.jsx',
     'src/components/workspace/UnifiedTimeline.jsx',
     'src/lib/bulk/issueBulkActions.mjs',
     'src/app/api/issues/bulk/route.js',

@@ -1,5 +1,4 @@
 import { ISSUE_BULK_ACTIONS } from '../bulk/issueBulkActions.mjs';
-import { INTEGRATIONS, INTEGRATION_STATES } from './integrations.mjs';
 import { STATUS_CATEGORY_IDS, STATUS_CATEGORIES } from '../utils/statusCategories.mjs';
 
 export const HELP_CATEGORIES = Object.freeze([
@@ -47,12 +46,6 @@ export const CONTROLLED_HELP_FEATURES = Object.freeze([
 
 const UPDATED_AT = '2026-08-17';
 const categoryNames = STATUS_CATEGORY_IDS.map(id => `${id} — ${STATUS_CATEGORIES[id].label}`);
-const availableIntegrations = INTEGRATIONS
-  .filter(item => item.state === 'available')
-  .map(item => `${item.label} — ${INTEGRATION_STATES[item.state]}`);
-const plannedIntegrations = INTEGRATIONS
-  .filter(item => item.state === 'planned')
-  .map(item => `${item.label} — ${INTEGRATION_STATES[item.state]}`);
 const QTICKET_BULK_ACTION_IDS = new Set([
   'status',
   'assignees-add', 'assignees-remove', 'assignees-replace', 'assignees-clear',
@@ -225,26 +218,6 @@ const ALL_HELP_ARTICLES = Object.freeze([
       { id: 'channel', title: 'Поки що — всередині застосунку', paragraphs: ['qTicket показує сповіщення під дзвіночком і, за бажанням, короткою карткою та звуком. Пошта навмисно не показується, доки для неї немає підтвердженого домену; Telegram також не входить у поточну qTicket-конфігурацію.'] },
       { id: 'what', title: 'Про що вам повідомлять', paragraphs: ['Призначення інциденту, нова відповідь, згадка, зміна статусу та наближення терміну вирішення. Про власні дії сповіщення не створюються.'] },
       { id: 'settings', title: 'Кому це налаштовується', paragraphs: ['Якщо ви заходите в qTicket як представник клієнта, відкрийте «Налаштування» → «Сповіщення» і окремо вимкніть непотрібні типи подій, звук або спливаючу картку. Зміна діє тільки для вашого акаунта.'], bullets: ['Внутрішня команда підтримки такого розділу не має: обліковий запис працівника належить QuickTeam, і qTicket не тримає його другої копії. Працівник отримує стандартний набір — усі пʼять типів подій, звук і спливаючу картку.'] },
-    ],
-  },
-  {
-    id: 'integrations', slug: 'integrations', coverage: ['integrations'],
-    title: 'Інтеграції', category: 'insights', summary: 'Що QuickTeam уміє підключити сьогодні і що заплановано.',
-    keywords: ['інтеграція', 'quickteam+', 'телеграм', 'клієнт', 'портал', 'підключити'], updatedAt: UPDATED_AT,
-    relatedRoutes: ['/settings?section=integrations'], minimumRole: 'member', relatedIds: ['notifications', 'youtrack-import'],
-    sections: [
-      { id: 'available', title: 'Працює зараз', paragraphs: ['QuickTeam+ — окремий портал для клієнтів: ви відкриваєте йому потрібний проєкт, і клієнт бачить погоджений зріз роботи, не заходячи у ваш робочий простір. Telegram приймає завдання з підключеної групи й доставляє сповіщення. BuggyBag збирає зворотний звʼязок віджетом.'], bullets: availableIntegrations },
-      { id: 'planned', title: 'У планах', paragraphs: ['Ці провайдери в списку є, але поки нічого не роблять — жодних даних вони не переносять.'], bullets: plannedIntegrations },
-    ],
-  },
-  {
-    id: 'youtrack-import', slug: 'youtrack-import', coverage: ['youtrack-import'],
-    title: 'Перенести завдання з YouTrack', category: 'insights', summary: 'Як переїхати, не наробивши дублікатів.',
-    keywords: ['youtrack', 'імпорт', 'перенести', 'переїхати', 'міграція'], updatedAt: UPDATED_AT,
-    relatedRoutes: ['/settings?section=migrations'], minimumRole: 'admin', relatedIds: ['integrations', 'statuses-and-categories'],
-    sections: [
-      { id: 'flow', title: 'Як це відбувається', paragraphs: ['Розділ доступний власнику й адміністратору. Ви вказуєте адресу свого YouTrack і токен доступу, обираєте проєкт, дивитесь попередній перегляд — скільки завдань і які саме приїдуть, — і зіставляєте статуси YouTrack зі своїми. Тільки після цього запускається сам імпорт.'], bullets: ['Токен зберігається на сервері й назад у браузер не повертається.', 'Якщо імпорт запустити ще раз, уже перенесені завдання не задублюються.', 'Спершу зробіть попередній перегляд — він нічого не змінює.', 'Імпорт належить тому, хто його запустив: продовжити його може лише ця людина, зупинити — вона або власник організації. Решта бачить перебіг, але не керує ним.', 'Поки чужий імпорт не завершено, новий не запускається — інакше дві розкладки статусів писали б в одні й ті самі проєкти.'] },
-      { id: 'limits', title: 'З інших систем', paragraphs: [`${plannedIntegrations.join(', ')}. Для них імпорту поки немає — переносити доведеться вручну.`] },
     ],
   },
   {

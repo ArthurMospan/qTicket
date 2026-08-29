@@ -3,7 +3,6 @@ import 'server-only';
 
 import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { deliverEmail, emailConfigured } from '@/lib/server/email';
-import { deliverTelegramNotification } from '@/lib/server/telegram';
 import { generateEmailTemplate } from '@/lib/utils/sendEmail';
 import { BIRTHDAY_NOTIFICATION_TYPE, shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
@@ -16,7 +15,6 @@ import {
   dayKeyInTimeZone,
   deadlineReminderCandidates,
 } from '@/lib/utils/reminderCandidates.mjs';
-import { telegramAppLink } from '@/lib/server/telegram';
 import {
   dispatchDueNotifications,
   materialiseCandidates,
@@ -115,7 +113,7 @@ async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
     membership.orgId !== candidate.organizationId ||
     membership.userId !== candidate.userId
   ) {
-    return { claimed: 0, email: 0, telegram: null };
+    return { claimed: 0, email: 0 };
   }
 
   const preferences = context.preferences.get(candidate.userId) || {};
@@ -124,8 +122,7 @@ async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
   const email = allowEmail &&
     shouldDeliver(preferences, 'email', candidate.type) &&
     Boolean(profile.email);
-  const telegram = shouldDeliver(preferences, 'telegram', candidate.type);
-  if (!inapp && !email && !telegram) return { claimed: 0, email: 0, telegram: null };
+  if (!inapp && !email) return { claimed: 0, email: 0 };
 
   const db = getAdminDb();
   const ref = db.collection('notifications').doc(candidate.id);
@@ -149,7 +146,7 @@ async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
     });
   } catch (error) {
     if (error.code === 6 || error.code === 'already-exists') {
-      return { claimed: 0, email: 0, telegram: null };
+      return { claimed: 0, email: 0 };
     }
     throw error;
   }
@@ -170,53 +167,16 @@ async function claimAndDeliver(candidate, context, { allowEmail = true } = {}) {
     })
     : 0;
 
-  // Telegram is not sent here. A sweep that has been waiting three hours for the
-  // scheduler routinely claims several reminders for one person at once, and
-  // sending each on its own turned "you have things to look at" into six
-  // near-identical pings. The claimed items are handed back and delivered as one
-  // digest per recipient below.
-  return {
-    claimed: 1,
-    email: emailResult,
-    telegram: telegram
-      ? {
-        userId: candidate.userId,
-        type: candidate.type,
-        title: candidate.title,
-        body: candidate.body,
-        url: telegramAppLink(candidate.link),
-      }
-      : null,
-  };
+  return { claimed: 1, email: emailResult };
 }
 
-async function deliverTelegramDigests(results) {
-  const itemsByUserId = new Map();
-  for (const result of results) {
-    if (!result?.telegram) continue;
-    const list = itemsByUserId.get(result.telegram.userId) || [];
-    list.push(result.telegram);
-    itemsByUserId.set(result.telegram.userId, list);
-  }
-  if (!itemsByUserId.size) return 0;
-  const delivery = await deliverTelegramNotification({
-    userIds: [...itemsByUserId.keys()],
-    itemsByUserId,
-  }).catch(error => {
-    console.warn('[reminder-job] Telegram delivery failed:', error.message);
-    return { delivered: 0 };
-  });
-  return delivery.delivered || 0;
-}
-
-function summarize(results, telegramDelivered = 0) {
+function summarize(results) {
   return results.reduce(
     (summary, result) => ({
       claimed: summary.claimed + (result?.claimed || 0),
       email: summary.email + (result?.email || 0),
-      telegram: summary.telegram,
     }),
-    { claimed: 0, email: 0, telegram: telegramDelivered },
+    { claimed: 0, email: 0 },
   );
 }
 
@@ -331,7 +291,7 @@ export async function runCalendarReminderSweep({
       ),
     };
   });
-  if (!candidates.length) return { candidates: 0, claimed: 0, email: 0, telegram: 0 };
+  if (!candidates.length) return { candidates: 0, claimed: 0, email: 0 };
 
   const context = await loadRecipientContext(candidates);
   const results = await mapWithConcurrency(
@@ -339,7 +299,7 @@ export async function runCalendarReminderSweep({
     DELIVERY_CONCURRENCY,
     candidate => claimAndDeliver(candidate, context, { allowEmail: false }),
   );
-  return { candidates: candidates.length, ...summarize(results, await deliverTelegramDigests(results)) };
+  return { candidates: candidates.length, ...summarize(results) };
 }
 
 // What the sweep and a single write both need to know about an organization
@@ -517,7 +477,7 @@ export async function collectDeadlineCandidates({ nowMs = Date.now(), lookAheadM
 export async function runDeadlineReminderSweep({ nowMs = Date.now() } = {}) {
   const candidates = (await collectDeadlineCandidates({ nowMs }))
     .filter(candidate => Number(candidate.deliverAtMs) <= nowMs);
-  if (!candidates.length) return { candidates: 0, claimed: 0, email: 0, telegram: 0 };
+  if (!candidates.length) return { candidates: 0, claimed: 0, email: 0 };
 
   const context = await loadRecipientContext(candidates);
   const results = await mapWithConcurrency(
@@ -525,7 +485,7 @@ export async function runDeadlineReminderSweep({ nowMs = Date.now() } = {}) {
     DELIVERY_CONCURRENCY,
     candidate => claimAndDeliver(candidate, context),
   );
-  return { candidates: candidates.length, ...summarize(results, await deliverTelegramDigests(results)) };
+  return { candidates: candidates.length, ...summarize(results) };
 }
 
 function birthdayParts(nowMs, timeZone) {
@@ -956,7 +916,7 @@ export async function runScheduledNotificationSweep({ nowMs = Date.now(), mode =
   // pass goes out in it rather than waiting for the next one.
   const dispatched = wantsDispatch
     ? await dispatchDueNotifications({ nowMs })
-    : { skipped: true, due: 0, sent: 0, failed: 0, telegram: 0, email: 0 };
+    : { skipped: true, due: 0, sent: 0, failed: 0, email: 0 };
 
   const birthdays = wantsMaterialise
     ? await runBirthdaySweep({ nowMs, lastScanAtMs: state.lastBirthdayScanAtMs })
@@ -1020,7 +980,6 @@ export async function runScheduledNotificationSweep({ nowMs = Date.now(), mode =
         cancelled: materialised.cancelled || 0,
         sent: dispatched.sent || 0,
         failed: dispatched.failed || 0,
-        telegram: dispatched.telegram || 0,
         birthdays: birthdays.created || 0,
         purgedIssues: issueTrash.purged || 0,
         prunedNotifications: prunedNotifications.deleted || 0,

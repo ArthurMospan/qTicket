@@ -362,13 +362,12 @@ test('the analytics screens read days, and open records only when a day cannot a
 // that can change how many minutes exist has to change the rollup in the same
 // breath, and that is checked mechanically rather than remembered.
 test('every path that changes logged minutes changes the daily totals with them', async () => {
-  const [taskLogs, calendarLogs, cancel, trash, project, importer] = await Promise.all([
+  const [taskLogs, calendarLogs, cancel, trash, project] = await Promise.all([
     read('src/lib/server/taskTimeLogs.js'),
     read('src/app/api/calendar/events/[eventId]/time-logs/route.js'),
     read('src/app/api/issues/[issueId]/cancel/route.js'),
     read('src/lib/server/issueTrash.js'),
     read('src/app/api/projects/[projectId]/route.js'),
-    read('src/lib/server/youtrackImporter.js'),
   ]);
 
   // Task create, edit and delete all pass through one function, and it refuses
@@ -391,10 +390,6 @@ test('every path that changes logged minutes changes the daily totals with them'
   // Deleting for real removes the hours; deleting a project removes its days.
   assert.match(trash, /removePurgedTimeLogsFromRollups/);
   assert.match(project, /deleteProjectAnalyticsRollups/);
-
-  // An import is an edit like any other.
-  assert.match(importer, /rollupDeltas\.add\(row\.previous, -1/);
-  assert.match(importer, /rollupDeltas\.add\(row\.fields, 1/);
 });
 
 test('a retried transaction does not log the same minutes twice', async () => {
@@ -422,11 +417,6 @@ test('a retried transaction does not log the same minutes twice', async () => {
     assert.equal(resets, bodies, `${file} resets the accumulator at the top of every transaction that uses it`);
     assert.ok(resets > 0, `${file} never resets a rollup accumulator that outlives its transaction`);
   }
-
-  // The importer is the one that does not need it, because it builds the
-  // accumulator inside the body — which is the other way to be correct.
-  const importer = await read('src/lib/server/youtrackImporter.js');
-  assert.match(importer, /const rollupDeltas = new AnalyticsRollupDeltas\(rollupTimeZone\)/);
 });
 
 test('the rollup is never allowed to become the money', async () => {

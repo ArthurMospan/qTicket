@@ -1277,21 +1277,6 @@ test('invoices are readable by billing admins but all writes use the server API'
   }));
 });
 
-test('API keys cannot be read from the private path or written onto the organization document', async () => {
-  await environment.withSecurityRulesDisabled(async context => {
-    await setDoc(doc(context.firestore(), 'organizations', 'org-a', 'private', 'apiKeys'), {
-      keys: [{ id: 'secret', tokenHash: 'hash' }],
-    });
-  });
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  const adminDb = environment.authenticatedContext('admin-a').firestore();
-  await assertFails(getDoc(doc(memberDb, 'organizations', 'org-a', 'private', 'apiKeys')));
-  await assertFails(getDoc(doc(adminDb, 'organizations', 'org-a', 'private', 'apiKeys')));
-  await assertFails(updateDoc(doc(adminDb, 'organizations', 'org-a'), {
-    apiKeys: [{ token: 'plaintext' }],
-  }));
-});
-
 test('notifications can only be created by the server API', async () => {
   const db = environment.authenticatedContext('member-a').firestore();
   await assertFails(setDoc(doc(db, 'notifications', 'same-org'), {
@@ -1898,60 +1883,26 @@ test('a member on no project team gets an empty project list and cannot query al
   )));
 });
 
-// users/{uid}/private/qtplus holds a sealed QuickTeam+ refresh token. It is
-// written only by the Admin SDK in /api/integrations/qtplus/*, and is denied to
-// every client — including the account's own owner, who has no use for it.
-test('the sealed QuickTeam+ token is unreachable even for the account owner', async () => {
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertFails(getDoc(doc(db, 'users', 'member-a', 'private', 'qtplus')));
-  await assertFails(setDoc(doc(db, 'users', 'member-a', 'private', 'qtplus'), { qtUserId: 'x' }));
-  await assertFails(deleteDoc(doc(db, 'users', 'member-a', 'private', 'qtplus')));
-});
-
-test('the sealed QuickTeam+ token is unreachable for anyone else', async () => {
-  const db = environment.authenticatedContext('admin-a').firestore();
-  await assertFails(getDoc(doc(db, 'users', 'member-a', 'private', 'qtplus')));
-  await assertFails(setDoc(doc(db, 'users', 'member-a', 'private', 'qtplus'), { qtUserId: 'x' }));
-});
-
-test('YouTrack import queues and external identity tables are server-only', async () => {
-  await environment.withSecurityRulesDisabled(async context => {
-    const db = context.firestore();
-    await setDoc(doc(db, 'imports', 'import-a'), { organizationId: 'org-a', provider: 'youtrack' });
-    await setDoc(doc(db, 'imports', 'import-a', 'items', '00000000'), { status: 'pending' });
-    await setDoc(doc(db, 'externalObjectLinks', 'link-a'), { organizationId: 'org-a' });
-    await setDoc(doc(db, 'externalActors', 'actor-a'), { organizationId: 'org-a' });
-  });
-  const ownerDb = environment.authenticatedContext('owner-a').firestore();
-  await assertFails(getDoc(doc(ownerDb, 'imports', 'import-a')));
-  await assertFails(getDoc(doc(ownerDb, 'imports', 'import-a', 'items', '00000000')));
-  await assertFails(getDoc(doc(ownerDb, 'externalObjectLinks', 'link-a')));
-  await assertFails(getDoc(doc(ownerDb, 'externalActors', 'actor-a')));
-  await assertFails(setDoc(doc(ownerDb, 'imports', 'forged'), { organizationId: 'org-a' }));
-});
-
-test('locking users/{uid}/private did not lock users/{uid}/settings', async () => {
+test('users/{uid}/settings stays reachable by its own owner', async () => {
   const db = environment.authenticatedContext('member-a').firestore();
   await assertSucceeds(setDoc(doc(db, 'users', 'member-a', 'settings', 'prefs'), { theme: 'dark' }));
   await assertSucceeds(getDoc(doc(db, 'users', 'member-a', 'settings', 'prefs')));
 });
 
-// The QuickTeam+ personal card gates on this flag, so members must be able to
-// read it; flipping it is an admin decision. No rule was added for this — the
-// existing organizations/{orgId}/settings rule already says exactly that, and
-// this test is here to keep it true.
-test('a member reads the QuickTeam+ org flag but cannot flip it', async () => {
+// An organization settings document other than `workflow` is readable by every
+// member of that organization and writable only by an admin or the owner.
+test('a member reads an org settings document but cannot write it', async () => {
   const memberDb = environment.authenticatedContext('member-a').firestore();
-  await assertSucceeds(getDoc(doc(memberDb, 'organizations', 'org-a', 'settings', 'integrations')));
-  await assertFails(setDoc(doc(memberDb, 'organizations', 'org-a', 'settings', 'integrations'), {
-    qtPortalEnabled: true,
+  await assertSucceeds(getDoc(doc(memberDb, 'organizations', 'org-a', 'settings', 'general')));
+  await assertFails(setDoc(doc(memberDb, 'organizations', 'org-a', 'settings', 'general'), {
+    updatedAtMs: 1,
   }));
 });
 
-test('an org admin can flip the QuickTeam+ org flag', async () => {
+test('an org admin writes an org settings document', async () => {
   const adminDb = environment.authenticatedContext('admin-a').firestore();
-  await assertSucceeds(setDoc(doc(adminDb, 'organizations', 'org-a', 'settings', 'integrations'), {
-    qtPortalEnabled: true,
+  await assertSucceeds(setDoc(doc(adminDb, 'organizations', 'org-a', 'settings', 'general'), {
+    updatedAtMs: 1,
   }));
 });
 
@@ -1976,9 +1927,9 @@ test('workflow settings are readable and writable only through the role-filtered
   }));
 });
 
-test('an outsider cannot read the QuickTeam+ org flag', async () => {
+test('an outsider cannot read an org settings document', async () => {
   const db = environment.authenticatedContext('outsider').firestore();
-  await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'settings', 'integrations')));
+  await assertFails(getDoc(doc(db, 'organizations', 'org-a', 'settings', 'general')));
 });
 
 test('a DM participant reads their own room and its messages', async () => {

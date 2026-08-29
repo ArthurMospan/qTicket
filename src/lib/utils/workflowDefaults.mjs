@@ -2,7 +2,7 @@
 // invoice builder and both task-creation APIs.
 //
 // These lists used to be copy-pasted in four places (useWorkflowConfig,
-// useIssues, BillingTab, /api/issues and /api/v1/tasks), each free to drift
+// useIssues, BillingTab and /api/issues), each free to drift
 // from the others. Icons and colours stay in the client hook — only the ids and
 // human labels live here, so this file is importable from server routes too.
 

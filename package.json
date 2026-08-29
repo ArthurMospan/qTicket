@@ -25,10 +25,6 @@
     "test:markdown": "node --test tests/markdown-editor.test.mjs",
     "test:notifications": "node --test tests/notification-navigation.test.mjs",
     "test:oauth-state": "node --test tests/oauth-state.test.mjs",
-    "test:qtplus-exchange": "node --test tests/qtplus-exchange.test.mjs",
-    "test:qtplus-link-model": "node --test tests/qtplus-link-model.test.mjs",
-    "test:qtplus-material-view": "node --test tests/qtplus-material-view.test.mjs",
-    "test:secret-box": "node --test tests/secret-box.test.mjs",
     "test:rules": "node --test tests/firestore.rules.test.mjs",
     "test:rules:emulator": "firebase --project demo-qticket emulators:exec --only firestore \"npm run test:rules\"",
     "migrate:issue-hierarchy": "node scripts/migrate-issue-hierarchy-v2.mjs",
@@ -37,12 +33,10 @@
     "migrate:image-assets": "node scripts/migrate-image-assets.mjs",
     "migrate:chat-attachments": "node scripts/migrate-chat-attachments.mjs",
     "migrate:issue-keys": "node scripts/migrate-issue-keys.mjs",
-    "migrate:api-keys": "node scripts/migrate-api-keys.mjs",
     "cleanup:rate-limits": "node scripts/cleanup-rate-limits.mjs",
     "reconcile:issue-time": "node --env-file-if-exists=.env.local scripts/reconcile-issue-spent-minutes.mjs",
     "backfill:analytics-rollups": "node --env-file-if-exists=.env.local scripts/backfill-analytics-rollups.mjs",
-    "backfill:project-issue-counts": "node --env-file-if-exists=.env.local scripts/backfill-project-issue-counts.mjs",
-    "trim:import-metadata": "node --env-file-if-exists=.env.local scripts/trim-issue-import-metadata.mjs"
+    "backfill:project-issue-counts": "node --env-file-if-exists=.env.local scripts/backfill-project-issue-counts.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

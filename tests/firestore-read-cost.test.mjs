@@ -74,16 +74,11 @@ const BOUNDED_WITHOUT_LIMIT = new Map([
   ['lib/hooks/useProjects.js', 'projects of one organization'],
   ['lib/hooks/useSprints.js', 'sprints of one project'],
   ['lib/hooks/useWorkflowConfig.js', 'one settings document'],
-  ['lib/hooks/useQtPlusEnabled.js', 'one settings document'],
-  ['lib/hooks/usePortalIntegration.js', 'one integration document per project'],
   ['lib/hooks/useUnreadChatCount.js', 'channels and read cursors of one organization'],
   ['components/IssueReadStateBridge.jsx', 'one read cursor per task this user opened'],
   ['app/(app)/chat/page.js', 'presence and channels of one organization'],
   ['lib/hooks/useWorkspaceChat.js', 'channels of one organization; messages ARE limited'],
   ['lib/hooks/useStagesForProject.js', 'stages of one project'],
-  ['lib/portal/usePortalStages.js', 'stages of one project'],
-  ['lib/portal/usePortalStageMaterials.js', 'materials of one stage'],
-  ['lib/portal/usePortalChat.js', 'one portal conversation'],
   ['components/workspace/BillingTab.jsx', 'invoices of one project'],
 
   // Bounded by the work itself, and reviewed as a deliberate cost: this is the

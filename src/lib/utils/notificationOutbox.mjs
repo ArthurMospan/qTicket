@@ -38,9 +38,9 @@ export const DAILY_REMINDER_HOUR = 9;
 
 export const OUTBOX_STATUSES = ['pending', 'sent', 'failed', 'cancelled'];
 
-// Exponential with a ceiling. A blocked bot or a stale chat id fails every
-// time; the point of backing off is to stop spending the retry budget on it
-// within one pass, not to eventually succeed.
+// Exponential with a ceiling. A rejected address fails every time; the point of
+// backing off is to stop spending the retry budget on it within one pass, not to
+// eventually succeed.
 export function nextAttemptDelayMs(attempts) {
   const step = Math.max(0, Math.floor(attempts));
   return Math.min(2 ** step, 32) * 60_000;
@@ -50,19 +50,14 @@ export function deliveryAttemptUpdate(row, {
   nowMs,
   emailRequested = false,
   emailSucceeded = false,
-  telegramRequested = false,
-  telegramSucceeded = false,
   emailError = '',
-  telegramError = '',
 } = {}) {
   const attempts = Number(row?.attempts || 0) + 1;
   const errors = [
     emailRequested && !emailSucceeded ? emailError || 'email delivery failed' : '',
-    telegramRequested && !telegramSucceeded ? telegramError || 'telegram delivery failed' : '',
   ].filter(Boolean);
   const channelUpdates = {
     ...(emailRequested && emailSucceeded ? { emailSentAtMs: nowMs } : {}),
-    ...(telegramRequested && telegramSucceeded ? { telegramSentAtMs: nowMs } : {}),
   };
 
   if (errors.length && attempts < MAX_ATTEMPTS) {
@@ -199,8 +194,8 @@ export function outboxRowChanges(existing, candidate) {
 // occurrence it came from stops saying it, the row is wrong and must go. A retry
 // row is not derived from anything — it is a debt. The event already happened,
 // the person was already told in the app, and the row exists only because their
-// Telegram or their email did not answer. Nothing that happens to the task
-// afterwards can make that debt untrue.
+// email did not answer. Nothing that happens to the task afterwards can make
+// that debt untrue.
 //
 // `/api/notifications` writes those retry rows carrying the `issueId` of the
 // task the event was about, and `deliverAtMs: now` — dead centre of every window
@@ -220,7 +215,7 @@ export function cancellableRowIds(pendingRows, expectedIds, { windowStartMs, win
     .map(row => row.id);
 }
 
-// Groups what one dispatch pass is sending into one Telegram message per person.
+// Groups what one dispatch pass is sending into one digest per person.
 export function groupByRecipient(rows) {
   const byUser = new Map();
   for (const row of rows || []) {

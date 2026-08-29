@@ -10,7 +10,7 @@ import { ChatIcon } from '@/lib/design/icons';
 import { PreviewBlock } from '../preview';
 
 export default function FeedbackSection() {
-  const [qtPlusProject, setQtPlusProject] = useState('');
+  const [clientSpace, setClientSpace] = useState('');
   const [toast, setToast] = useState(null);
   const [offline, setOffline] = useState(false);
   return (
@@ -105,32 +105,32 @@ export default function FeedbackSection() {
           />
           <EmptyState
             icon={Plug}
-            title="Підключіть QuickTeam+"
-            description="Підключіть акаунт, щоб працювати з матеріалами та чатом."
-            action="Підключити QuickTeam+"
+            title="Ще немає клієнтського простору"
+            description="Створіть простір, щоб клієнт міг надіслати перше звернення."
+            action="Створити простір"
             onAction={() => {}}
             context="inset"
             surface="card"
           />
           <EmptyState
             icon={Plug}
-            title="Оберіть проєкт QuickTeam+"
-            description="Привʼяжіть клієнтський проєкт, щоб бачити етапи, матеріали та чат."
+            title="Оберіть клієнтський простір"
+            description="Виберіть простір, щоб побачити його чергу звернень."
             context="inset"
             surface="card"
           >
             <div className="mx-auto flex w-full max-w-[420px] flex-col gap-2 sm:flex-row">
               <Select
-                value={qtPlusProject}
-                onChange={setQtPlusProject}
+                value={clientSpace}
+                onChange={setClientSpace}
                 options={[
-                  { value: 'brand', label: 'Brand redesign' },
-                  { value: 'mobile', label: 'Mobile application' },
+                  { value: 'romashka', label: 'Ромашка' },
+                  { value: 'vector', label: 'Вектор' },
                 ]}
-                placeholder="Оберіть проєкт QuickTeam+"
+                placeholder="Оберіть клієнтський простір"
                 className="min-w-0 flex-1 text-left"
               />
-              <Button style="primary" size="lg" disabled={!qtPlusProject}>Привʼязати</Button>
+              <Button style="primary" size="lg" disabled={!clientSpace}>Відкрити</Button>
             </div>
           </EmptyState>
         </div>

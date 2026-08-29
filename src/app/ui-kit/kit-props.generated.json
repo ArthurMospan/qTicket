@@ -1153,9 +1153,8 @@
         {
           "name": "variant",
           "default": "'workspace'",
-          "type": "'workspace'|'timeline'|'qtplus'",
+          "type": "'workspace'|'timeline'",
           "values": [
-            "qtplus",
             "timeline",
             "workspace"
           ],

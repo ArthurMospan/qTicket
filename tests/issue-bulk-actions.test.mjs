@@ -131,15 +131,14 @@ test('bulk work costs one project touch and one delivery pass, not one per task'
   // inside every transaction.
   assert.doesNotMatch(route, /transaction\.get\(workflowRef\)/);
   // Notifications leave in a single pass. A per-task send meant a per-task
-  // email and Telegram round-trip — minutes of them on a large selection.
+  // email round-trip — minutes of them on a large selection.
   assert.doesNotMatch(route, /createNotification/);
   assert.match(route, /deliverBulkNotifications\(\{/);
 
   const delivery = await read('src/lib/server/bulkNotifications.js');
-  // One membership/settings/profile read for the whole audience, and the
-  // outside channels are a digest per person rather than per task.
+  // One membership/settings/profile read for the whole audience, and email is a
+  // digest per person rather than per task.
   assert.match(delivery, /db\.getAll\([\s\S]*orgMemberships/);
-  assert.match(delivery, /itemsByUserId: telegramItems/);
   assert.match(delivery, /shouldDeliver\(preferences, 'email', event\.type\)/);
 });
 

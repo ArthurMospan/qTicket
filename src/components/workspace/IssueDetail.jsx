@@ -11,8 +11,6 @@ import { hasProjectAccess, hasRecordedTeam, isOnProjectTeam } from '@/lib/utils/
 import { userFacingErrorMessage } from '@/lib/utils/errors';
 import { useStagesForProject } from '@/lib/hooks/useStagesForProject';
 import { useSprints } from '@/lib/hooks/useSprints';
-import { usePortalSession }    from '@/lib/portal/usePortalSession';
-import QtPlusChatPanel from '@/components/workspace/qtplus/chat/QtPlusChatPanel';
 import { useWorkflowConfig }   from '@/lib/hooks/useWorkflowConfig';
 import { resolveCategoryStatusId } from '@/lib/utils/statusCategories.mjs';
 import { ISSUE_LINK_OPTIONS, issueLinkPerspective, useIssueLinks } from '@/lib/hooks/useIssueLinks';
@@ -58,7 +56,7 @@ import { DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig
 import useWorkspaceStore       from '@/store/useWorkspaceStore';
 import { sendNotification }    from '@/lib/hooks/useNotifications';
 import {
-  AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, ExternalLink, X, Plus, Search, Settings2, Share2, Send, CheckSquare, Square, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff,
+  AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, CheckSquare, Square, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
   Maximize2, User, Users, CircleDot, Ban, Undo2,
@@ -70,7 +68,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, deleteDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { uploadFile } from '@/lib/utils/uploadFile';
 import { deleteFileFromCloudinary } from '@/lib/services/fileUpload';
-import { downloadMaterial } from '@/lib/portal/downloadMaterial';
+import { downloadMaterial } from '@/lib/utils/downloadMaterial';
 import { buildTaskAiPrompt } from '@/lib/utils/taskPrompt.mjs';
 import { existingParentIssueId } from '@/lib/utils/issueHierarchyModel.mjs';
 import { issueCompletionBlockers } from '@/lib/utils/issueExecution.mjs';
@@ -87,7 +85,6 @@ import {
   issuePath,
   issueRouteIdentifier,
 } from '@/lib/utils/issueKeys.mjs';
-import { safeExternalUrl } from '@/lib/utils/externalUrls.mjs';
 import { timerDraftNeedsDismissal, timerFeedbackVariant } from '@/lib/utils/timerState.mjs';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 
@@ -111,29 +108,6 @@ const UNSAVED_EDIT_PROMPT = {
   cancelText: 'Повернутись',
   danger: true,
 };
-
-// Таб «QuickTeam+» у чаті завдання. Окремий компонент, щоб usePortalSession
-// (обмін токена з порталом) запускався лише коли таб реально відкрито.
-function IssueQtPlusChat({ qtProjectId, currentUser }) {
-  const { portalUser, loading } = usePortalSession();
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-[12px] text-muted">Підключаємо QuickTeam+…</p>
-      </div>
-    );
-  }
-  if (!portalUser) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-6 text-center">
-        <p className="text-[12px] text-muted">
-          Підключіть свій акаунт QuickTeam+ у <Link href="/settings" className="font-semibold text-ink underline">Налаштуваннях</Link>, щоб бачити цей чат.
-        </p>
-      </div>
-    );
-  }
-  return <QtPlusChatPanel qtProjectId={qtProjectId} portalUser={portalUser} currentUser={currentUser} embedded />;
-}
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -363,11 +337,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const { stages }   = useStagesForProject(projectId);
   const { sprints = [] } = useSprints({ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer });
 
-  // Чат завдання отримує другий таб «QuickTeam+», коли проєкт звʼязано з
-  // проєктом порталу — портальний чат просто як додатковий (IssueQtPlusChat
-  // монтується лише при відкритті таба, щоб не смикати сесію QT+ даремно).
-  const qtplusLink = null;
-  const [chatView, setChatView] = useState('chat');
   const requestedTaskPane = searchParams.get('view') === 'chat' ? 'chat' : 'task';
   const [taskPaneSelection, setTaskPaneSelection] = useState(null);
   const [isCompactTaskLayout, setIsCompactTaskLayout] = useState(true);
@@ -382,23 +351,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     setTaskPaneSelection({ issueId, pane });
   };
   // Below lg the page shows one pane at a time, so the pane switch is the whole
-  // navigation of this screen — and QuickTeam+ was not on it. It was a second
-  // pair of tabs *inside* the chat pane, which meant reaching the portal
-  // conversation on a phone took two switches on two different strips. One
-  // strip now: the record · Чат · QuickTeam+, the last only when the project is
-  // actually linked. The first tab is named by `terms.record` — «Інцидент» for
-  // support, «Звернення» for the client — because the strip is this screen's
-  // whole navigation and it is the first word either of them reads on it.
-  const compactTaskTab = taskPane === 'chat' && chatView === 'qtplus' && qtplusLink?.projectId
-    ? 'qtplus'
-    : taskPane;
+  // navigation of this screen. The first tab is named by `terms.record` —
+  // «Інцидент» for support, «Звернення» for the client — because the strip is
+  // this screen's whole navigation and it is the first word either of them
+  // reads on it.
+  const compactTaskTab = taskPane;
   const handleCompactTabChange = (id) => {
-    if (id === 'qtplus') {
-      setChatView('qtplus');
-      handleTaskPaneChange('chat');
-      return;
-    }
-    if (id === 'chat') setChatView('chat');
     handleTaskPaneChange(id);
   };
   const handleTaskChatUnreadChange = (count) => {
@@ -880,26 +838,8 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const assignees     = (issue.assigneeIds || []).map(uid => members.find(m => (m.id || m.uid) === uid)).filter(Boolean);
   const reporterMatchByEmail = issue.reporterName ? members.find(m => m.email && m.email.toLowerCase() === issue.reporterName.toLowerCase()) : null;
   const reporterMember = members.find(m => (m.id || m.uid) === issue.reporterId) || reporterMatchByEmail || null;
-  const telegramUsername = String(issue.sourceMeta?.telegramUsername || '').replace(/^@/, '').trim();
-  const externalReporterName = issue.source === 'telegram'
-    ? telegramUsername
-      ? `QuickTeam (@${telegramUsername})`
-      : `QuickTeam (${issue.reporterName || 'користувач Telegram'})`
-    : issue.source === 'buggybag'
-      ? 'BuggyBag'
-      : issue.reporterName || 'Зовнішній автор';
-  const reporter = reporterMember || { name: externalReporterName };
+  const reporter = reporterMember || { name: issue.reporterName || 'Зовнішній автор' };
   const isExternalReporter = !reporterMember;
-  const externalReporterSource = issue.source === 'telegram'
-    ? 'Цей інцидент створено через Telegram-бота QuickTeam.'
-    : issue.source === 'youtrack'
-      ? 'Автора перенесено разом з інцидентом із YouTrack.'
-      : issue.source === 'buggybag'
-        ? 'Цей інцидент створено через інтеграцію BuggyBag.'
-        : 'Цей інцидент створено зовнішньою інтеграцією.';
-  const youTrackSourceUrl = issue.source === 'youtrack'
-    ? safeExternalUrl(issue.importMetadata?.sourceUrl)
-    : '';
   const checklistDone = (issue.subtasks || []).filter(s => s.done).length;
   const checklistAll = (issue.subtasks || []).length;
   const parentIssueId = existingParentIssueId(issue);
@@ -1494,16 +1434,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         mobilePane={!isModal && taskPane === 'chat' ? 'aside' : 'content'}
         lead={!isModal ? (
           // The kit's standard strip, not the stepper. `underline` says "you are
-          // at step two of a sequence"; these are three views of one record, and
-          // a third of them only exists on some projects — which a stretched
-          // stepper cannot express without the tabs changing width under you.
+          // at step two of a sequence"; these are two views of one record.
           <div className="page-gutter shrink-0 overflow-x-auto hide-scrollbar bg-white pb-1 pt-2 lg:hidden">
             <Tabs
               composition="pane-switch"
               tabs={[
                 { id: 'task', label: terms.record, icon: TaskIcon },
                 { id: 'chat', label: 'Чат', icon: MessageCircle, count: unreadTaskChatCount },
-                ...(qtplusLink?.projectId ? [{ id: 'qtplus', label: 'QuickTeam+' }] : []),
               ]}
               activeTab={compactTaskTab}
               onTabChange={handleCompactTabChange}
@@ -1677,20 +1614,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                   >
                     <div className="w-[260px]">
                       <p className="text-[13px] font-bold text-ink">Зовнішній автор</p>
-                      <p className="mt-1 text-[12px] leading-relaxed text-muted">{externalReporterSource}</p>
                       <p className="mt-2 text-[11px] leading-relaxed text-faint">
                         Це не учасник організації, тому профіль та особистий чат недоступні.
                       </p>
-                      {youTrackSourceUrl && (
-                        <a
-                          href={youTrackSourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-ink hover:underline"
-                        >
-                          Відкрити в YouTrack <ExternalLink size={11} />
-                        </a>
-                      )}
                     </div>
                   </Popover>
                 ) : (
@@ -1984,52 +1910,19 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         aside={!isModal ? (
           // Chat is only useful on the full task page.
           <div className="flex h-full flex-col overflow-hidden rounded-[16px] bg-canvas">
-            {/* Звʼязаний QT+ проєкт → маленькі таби над чатом */}
-            {/* Below lg the pane switch at the top of the page already carries
-                the QuickTeam+ tab, so this strip stops being a second place to
-                choose from and keeps only the way out to the portal. */}
-            {qtplusLink?.projectId && (
-              <div className={`relative flex min-h-[36px] shrink-0 items-center justify-center bg-canvas px-4 pb-2 pt-3 ${
-                chatView === 'qtplus' ? '' : 'max-lg:hidden'
-              }`}>
-                <div className="max-lg:hidden">
-                  <Tabs
-                    tabs={[{ id: 'chat', label: 'Чат' }, { id: 'qtplus', label: 'QuickTeam+' }]}
-                    activeTab={chatView}
-                    onTabChange={setChatView}
-                  />
-                </div>
-                {chatView === 'qtplus' && process.env.NEXT_PUBLIC_QTPLUS_URL && (
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_QTPLUS_URL}/project/${qtplusLink.projectId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 rounded-[8px] p-2 text-muted transition-colors hover:bg-white hover:text-ink"
-                    title="Відкрити проєкт у QuickTeam+"
-                    aria-label="Відкрити проєкт у QuickTeam+"
-                  >
-                    <ExternalLink size={13} />
-                  </a>
-                )}
-              </div>
-            )}
             <div className="flex min-h-0 flex-1 flex-col">
-              {chatView === 'qtplus' && qtplusLink?.projectId ? (
-                <IssueQtPlusChat qtProjectId={qtplusLink.projectId} currentUser={currentUser} />
-              ) : (
-                <UnifiedTimeline
-                  issueId={issueId}
-                  projectId={projectId}
-                  issue={issue}
-                  isArchived={isArchived}
-                  org={activeOrg}
-                  members={members}
-                  mentionMembers={mentionMembers}
-                  sprints={sprints}
-                  isActive={!isCompactTaskLayout || taskPane === 'chat'}
-                  onUnreadCountChange={handleTaskChatUnreadChange}
-                />
-              )}
+              <UnifiedTimeline
+                issueId={issueId}
+                projectId={projectId}
+                issue={issue}
+                isArchived={isArchived}
+                org={activeOrg}
+                members={members}
+                mentionMembers={mentionMembers}
+                sprints={sprints}
+                isActive={!isCompactTaskLayout || taskPane === 'chat'}
+                onUnreadCountChange={handleTaskChatUnreadChange}
+              />
             </div>
           </div>
         ) : null}

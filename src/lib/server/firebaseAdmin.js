@@ -13,7 +13,7 @@ import {
   Timestamp,
   getFirestore,
 } from 'firebase-admin/firestore';
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { isRejectedIdTokenError } from '@/lib/utils/firebaseAuthError.mjs';
 import { hasActiveQuickTeamEntitlement, isQuickTeamManagedOrganization } from '@/lib/utils/quickTeamManaged.mjs';
 
@@ -139,46 +139,6 @@ export async function authorizeOrgRequest(request, organizationId, allowedRoles 
   }
 
   return { user: authResult.user, membership, organization: organizationSnap.data() || null };
-}
-
-// Only from the server-only document. The second argument used to be the
-// organization document, read as a fallback — which is the member-readable one
-// the keys were being moved off. With the plaintext branch gone a key found
-// there could not authenticate anyway, so the fallback was reading a place it
-// could no longer trust for an answer it could no longer use.
-export async function getOrganizationApiKeys(organizationId) {
-  const privateSnap = await getAdminDb()
-    .collection('organizations').doc(organizationId)
-    .collection('private').doc('apiKeys').get();
-  return privateSnap.exists ? (privateSnap.data().keys || []) : [];
-}
-
-export function hashApiKey(token) {
-  return createHash('sha256').update(token).digest('hex');
-}
-
-// A key is a digest here and nowhere a token.
-//
-// There used to be a branch above this one: «Temporary compatibility for legacy
-// keys until the private-key migration runs», accepting `key.token === token`.
-// The migration it named was never written, so the branch was permanent — and
-// what it kept working was a key stored as its own plaintext on
-// `organizations/{orgId}`, a document every member of that organization may
-// read, granting whatever /api/v1 grants. It also compared with `===`, which is
-// the one comparison in this file that leaks its own timing.
-//
-// `npm run migrate:api-keys` reports zero legacy keys in production, so the
-// branch was removed rather than left to be permanent twice over. Run that
-// script before deploying this to any other project.
-export function isValidApiKey(keys, token) {
-  if (!token || !Array.isArray(keys)) return false;
-  const candidate = Buffer.from(hashApiKey(token), 'hex');
-  return keys.some(key => {
-    if (key.active === false) return false;
-    if (!key.tokenHash) return false;
-    const expected = Buffer.from(key.tokenHash, 'hex');
-    return expected.length === candidate.length && timingSafeEqual(expected, candidate);
-  });
 }
 
 export async function enforceRateLimit(scope, subject, limit, windowSeconds) {

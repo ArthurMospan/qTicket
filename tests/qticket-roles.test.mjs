@@ -320,7 +320,7 @@ test('персональні розділи QuickTeam недосяжні вну�
   // Видалені разом із їхніми тілами, а не приховані прапорцем.
   assert.doesNotMatch(settings, /case 'positions':|case 'danger':/);
   assert.doesNotMatch(settings, /function PositionItem/);
-  assert.match(settings, /const HIDDEN_QTICKET_SETTINGS_SECTIONS = new Set\(\['integrations', 'migration'\]\);/);
+  assert.doesNotMatch(settings, /case 'integrations':|case 'migration':/);
 });
 
 // «Безпека» змішувала своє з чужим: сеанси qTicket — це qTicket, а особа,

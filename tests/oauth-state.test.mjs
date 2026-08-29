@@ -8,9 +8,6 @@ import {
   nonceMatches,
   getStateCookieOptions,
   OAUTH_STATE_COOKIE,
-  QTPLUS_STATE_COOKIE,
-  buildQtPlusState,
-  verifyQtPlusState,
 } from '../src/lib/server/oauthState.mjs';
 
 // ── The vulnerability this module exists to close ────────────────────
@@ -118,59 +115,6 @@ test('nonceMatches compares safely and never throws on odd input', () => {
   assert.equal(nonceMatches(nonce, undefined), false);
   assert.equal(nonceMatches(null, nonce), false);
   assert.equal(nonceMatches(nonce, 'a'), false);
-});
-
-// ── QuickTeam+ link flow ─────────────────────────────────────────────
-// Same nonce mechanism, separate cookie: the two flows must not be able to
-// consume each other's state.
-
-test('QT+ state uses its own cookie, separate from OneB', () => {
-  assert.equal(QTPLUS_STATE_COOKIE, 'qt_qtplus_state');
-  assert.notEqual(QTPLUS_STATE_COOKIE, OAUTH_STATE_COOKIE);
-});
-
-test('QT+ state rejects a stateless callback — the attacker payload', () => {
-  const nonce = createStateNonce();
-  assert.equal(verifyQtPlusState('{"r":"/settings"}', nonce), null);
-  assert.equal(verifyQtPlusState('', nonce), null);
-  assert.equal(verifyQtPlusState('not-json', nonce), null);
-});
-
-test('QT+ state rejects a nonce that does not match the cookie', () => {
-  const state = buildQtPlusState({ redirectTo: '/', nonce: createStateNonce() });
-  assert.equal(verifyQtPlusState(state, createStateNonce()), null);
-  assert.equal(verifyQtPlusState(state, ''), null);
-});
-
-test('QT+ state round-trips with its nonce, raw and URL-encoded', () => {
-  const nonce = createStateNonce();
-  const state = buildQtPlusState({ redirectTo: '/settings?section=qtplus', nonce });
-
-  assert.deepEqual(verifyQtPlusState(state, nonce), {
-    redirectTo: '/settings?section=qtplus',
-    nonce,
-  });
-  assert.deepEqual(verifyQtPlusState(encodeURIComponent(state), nonce), {
-    redirectTo: '/settings?section=qtplus',
-    nonce,
-  });
-});
-
-test('QT+ state returns the redirect target unsanitised for the caller to judge', () => {
-  const nonce = createStateNonce();
-  const state = buildQtPlusState({ redirectTo: 'https://evil.test', nonce });
-  assert.equal(verifyQtPlusState(state, nonce).redirectTo, 'https://evil.test');
-});
-
-test('a OneB state cannot be replayed as a QT+ state', () => {
-  // Both flows carry `n`; only the cookie tells them apart. If a OneB state
-  // could satisfy the QT+ callback, the OneB nonce cookie would unlock it.
-  const nonce = createStateNonce();
-  const onebState = buildOneBState({ mode: 'link', redirectTo: '/', nonce });
-  const qtPlusResult = verifyQtPlusState(onebState, nonce);
-  // It parses (same shape), but it can only ever be presented with the QT+
-  // cookie, which a OneB flow never sets.
-  assert.equal(qtPlusResult?.nonce, nonce);
 });
 
 test('state cookie is httpOnly and survives the cross-site callback redirect', () => {

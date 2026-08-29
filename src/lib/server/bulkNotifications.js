@@ -3,7 +3,6 @@ import 'server-only';
 
 import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { deliverEmail } from '@/lib/server/email';
-import { deliverTelegramNotification, telegramAppLink } from '@/lib/server/telegram';
 import { generateEmailTemplate } from '@/lib/utils/sendEmail';
 import { shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
@@ -13,16 +12,16 @@ import { withNotificationOrganization } from '@/lib/utils/notificationNavigation
 // A bulk operation used to call POST /api/notifications once per task. Each of
 // those calls verified the token again, re-read the project and the task,
 // re-read every recipient's membership, settings and profile, and then — the
-// part that actually cost the minutes — awaited an email round-trip and a
-// Telegram round-trip. Moving fifty tasks with three participants each meant a
-// hundred and fifty emails sent one after another while the toolbar sat frozen,
-// and enough calls to trip the notification route's own rate limit, so the tail
-// of the operation silently told nobody anything.
+// part that actually cost the minutes — awaited an email round-trip. Moving
+// fifty tasks with three participants each meant a hundred and fifty emails
+// sent one after another while the toolbar sat frozen, and enough calls to trip
+// the notification route's own rate limit, so the tail of the operation
+// silently told nobody anything.
 //
-// The reads happen once here for the whole operation, and the outside channels
-// are a digest: one email and one Telegram message per person, however many
-// tasks they were involved in. The bell keeps a row per task, because that is
-// where a per-task link is worth having and a batched write costs nothing.
+// The reads happen once here for the whole operation, and email is a digest:
+// one message per person, however many tasks they were involved in. The bell
+// keeps a row per task, because that is where a per-task link is worth having
+// and a batched write costs nothing.
 
 // Firestore refuses a batch over 500 writes.
 const BATCH_LIMIT = 400;
@@ -41,7 +40,7 @@ function chunked(values, size) {
 
 /**
  * Sends one notification per (event, recipient) to the bell, and one digest per
- * recipient to email and Telegram.
+ * recipient to email.
  *
  * @param {string} organizationId Scope every recipient and record is checked against.
  * @param {{uid: string, name?: string, avatar?: string}} actor Who performed the operation; never notified about it.
@@ -102,8 +101,7 @@ export async function deliverBulkNotifications({
       const preferences = prefs.get(uid) || {};
       const inapp = shouldDeliver(preferences, 'inapp', event.type);
       const email = shouldDeliver(preferences, 'email', event.type);
-      const telegram = shouldDeliver(preferences, 'telegram', event.type);
-      if (!inapp && !email && !telegram) continue;
+      if (!inapp && !email) continue;
       records.push({
         uid,
         // False when this recipient asked for the event on another channel only:
@@ -126,9 +124,8 @@ export async function deliverBulkNotifications({
           createdAt: FieldValue.serverTimestamp(),
         },
       });
-      const bucket = perRecipient.get(uid) || { email: [], telegram: [] };
+      const bucket = perRecipient.get(uid) || { email: [] };
       if (email) bucket.email.push(event);
-      if (telegram) bucket.telegram.push(event);
       perRecipient.set(uid, bucket);
     }
   }
@@ -166,29 +163,7 @@ export async function deliverBulkNotifications({
       });
     });
 
-  // Telegram: the sender already knows how to put several items in one message
-  // and applies the per-event switch to each of them, so the whole operation is
-  // one chat message per person.
-  const telegramItems = new Map();
-  for (const [uid, bucket] of perRecipient) {
-    if (!bucket.telegram.length) continue;
-    telegramItems.set(uid, bucket.telegram.map(event => ({
-      type: event.type,
-      title: event.title,
-      body: event.body || '',
-      url: telegramAppLink(event.link),
-    })));
-  }
-
-  await Promise.all([
-    Promise.allSettled(emailJobs),
-    telegramItems.size
-      ? deliverTelegramNotification({
-        userIds: [...telegramItems.keys()],
-        itemsByUserId: telegramItems,
-      }).catch(error => console.warn('[bulk] Telegram delivery failed:', error.message))
-      : Promise.resolve(null),
-  ]);
+  await Promise.allSettled(emailJobs);
 
   return { recipients: perRecipient.size, records: records.length };
 }

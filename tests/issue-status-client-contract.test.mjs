@@ -49,20 +49,11 @@ test('every board writes a position it planned, never a raw index', async () => 
 });
 
 test('a task nobody has positioned yet sorts above the ones somebody has', async () => {
-  // One sign, every writer. `+next` buried Telegram and imported tasks at the
-  // bottom of the column and a fixed 0 collided with the first planned slot.
-  for (const path of [
-    '../src/app/api/issues/route.js',
-    '../src/lib/server/telegram.js',
-    '../src/lib/server/youtrackImporter.js',
-  ]) {
-    const source = await read(path);
-    assert.match(source, /order: -next,/, path);
-    assert.doesNotMatch(source, /order: next,/, path);
-  }
-  const external = await read('../src/app/api/v1/tasks/route.js');
-  assert.match(external, /const next = Number\(project\.issueCounter \|\| 0\) \+ 1/);
-  assert.match(external, /order: -next/);
+  // One sign, one writer. `+next` buried new tasks at the bottom of the column
+  // and a fixed 0 collided with the first planned slot.
+  const source = await read('../src/app/api/issues/route.js');
+  assert.match(source, /order: -next,/);
+  assert.doesNotMatch(source, /order: next,/);
 });
 
 test('browser Firestore writes cannot bypass execution fields', async () => {

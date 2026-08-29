@@ -48,8 +48,6 @@ test('settings API actions no longer replace server errors with generic toasts',
   const settings = await read('../src/app/(app)/settings/page.js');
 
   for (const fallback of [
-    'Не вдалося згенерувати API ключ',
-    'Не вдалося видалити API ключ',
     'Не вдалося вийти з організації',
   ]) {
     assert.match(settings, new RegExp(`userFacingErrorMessage\\([^)]*'${fallback}'`));

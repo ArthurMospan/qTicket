@@ -63,8 +63,6 @@ test('no path that creates a task invents a priority for it', async () => {
     'src/components/AudioTaskPanel.jsx',
     'src/components/workspace/IssueDetail.jsx',
     'src/app/api/issues/route.js',
-    'src/app/api/v1/tasks/route.js',
-    'src/lib/server/telegram.js',
   ];
   for (const path of paths) {
     const source = await readFile(new URL(`../${path}`, import.meta.url), 'utf8');

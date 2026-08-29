@@ -75,12 +75,12 @@ export default function ChatComposerSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Task Timeline & QuickTeam+ composers"
-        description="Спільне ядро ChatComposerCore з двома продуктовими оболонками: timeline має attachment-control, QuickTeam+ — компактну shell без нього. Межу росту поля кожна оболонка оголошує своїм max-height у класі, а не константою в модулі — інакше її не змінила б жодна медіазапит."
+        title="Task Timeline composer"
+        description="Спільне ядро ChatComposerCore у продуктовій оболонці таймлайну з attachment-control. Межу росту поля оболонка оголошує своїм max-height у класі, а не константою в модулі — інакше її не змінила б жодна медіазапит."
         filePath="src/components/workspace/UnifiedTimeline.jsx"
         fullWidth
       >
-        <div className="grid w-full grid-cols-1 gap-[16px] lg:grid-cols-2">
+        <div className="grid w-full grid-cols-1 gap-[16px]">
           <div className="flex h-[210px] flex-col overflow-hidden rounded-[16px] bg-canvas">
             <div className="flex-1 p-4 text-[12px] text-muted">Task timeline</div>
             <ChatComposerDock composition="timeline-composer">
@@ -90,20 +90,6 @@ export default function ChatComposerSection() {
                 onChange={() => {}}
                 placeholder="Написати повідомлення..."
                 leading={<Button className="self-center rounded-full" style="ghost" size="icon-sm" icon={Paperclip} type="button" aria-label="Додати файл" />}
-                onSubmit={() => {}}
-                canSubmit={false}
-              />
-            </ChatComposerDock>
-          </div>
-
-          <div className="flex h-[210px] flex-col overflow-hidden rounded-[16px] bg-canvas">
-            <div className="flex-1 p-4 text-[12px] text-muted">QuickTeam+ chat</div>
-            <ChatComposerDock composition="timeline-composer">
-              <ChatComposerCore
-                variant="qtplus"
-                value=""
-                onChange={() => {}}
-                placeholder="Повідомлення…"
                 onSubmit={() => {}}
                 canSubmit={false}
               />
