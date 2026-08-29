@@ -397,6 +397,12 @@ test('the issue trash is server-only, including for organization admins', async 
   }));
 });
 
+// The list is shorter than it was, and deliberately. `spentMinutes`, its two
+// mirror counters and `timeLogMutationVersion` were named here because the
+// server owned them; the product no longer has time logs, so the fields are not
+// server-owned any more — they are simply not fields. The rule denies a fixed
+// list of keys, so an unlisted name is writable exactly the way `title` is, and
+// asserting a denial for a key nothing reads would be testing a typo.
 test('issue execution fields can only be changed by the authoritative status API', async () => {
   const memberDb = environment.authenticatedContext('member-a').firestore();
   const issueRef = doc(memberDb, 'issues', 'issue-a');
@@ -405,10 +411,6 @@ test('issue execution fields can only be changed by the authoritative status API
   await assertFails(updateDoc(issueRef, { columnId: 'done' }));
   await assertFails(updateDoc(issueRef, { completedAt: new Date() }));
   await assertFails(updateDoc(issueRef, { order: 10 }));
-  await assertFails(updateDoc(issueRef, { spentMinutes: 999 }));
-  await assertFails(updateDoc(issueRef, { spentMinutesMirrorVersion: 999 }));
-  await assertFails(updateDoc(issueRef, { timeLogMutationVersion: 999 }));
-  await assertFails(updateDoc(issueRef, { spentMinutesReconciledAt: new Date() }));
 });
 
 test('an inactive QuickTeam add-on closes existing staff and client sessions', async () => {
@@ -1030,8 +1032,6 @@ test('issues and project lifecycle mutations cannot bypass server APIs', async (
   await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { issueLinkVersion: 99 }));
   await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { issueHierarchyVersion: 99 }));
   await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { issueStatusVersion: 99 }));
-  await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { invoiceMutationVersion: 99 }));
-  await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { timeLogImportVersion: 99 }));
   await assertFails(updateDoc(doc(adminDb, 'projects', 'project-a'), { deletionPending: true }));
 });
 
