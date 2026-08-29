@@ -32,7 +32,7 @@ export async function unreadInAppCount(db, uid, organizationId) {
   return Math.max(0, total - externalOnly);
 }
 
-export async function aggregateCount(query) {
+async function aggregateCount(query) {
   const snapshot = await query.count().get();
   return Number(snapshot.data().count) || 0;
 }
