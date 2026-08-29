@@ -8,7 +8,6 @@ const CONTEXT_GRIDS = {
   // there is, and the one control on the strip people reported missing with a
   // thumb. It is 44px on a phone and unchanged on a mouse.
   task: 'grid w-full grid-cols-[repeat(3,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(5,minmax(0,1fr))_92px] [&>*]:min-w-0',
-  calendar: 'grid w-full grid-cols-2 items-center gap-1.5 overflow-visible sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_1.1fr_1.15fr_92px] [&>*]:min-w-0',
 };
 
 export function getTaskAttributeChrome({ condensed = false } = {}) {
@@ -80,7 +79,7 @@ export function AttributeTrigger({
  *
  * @param {React.ReactNode} props.primaryChildren The always-visible attributes.
  * @param {React.ReactNode} props.secondaryChildren The attributes behind "Деталі".
- * @param {'task'|'calendar'} props.context Which grid the strip uses; the two records carry different fields.
+ * @param {'task'} props.context Which grid the strip uses.
  * @param {boolean} props.condensed Scrolled state: labels collapse and the rows tighten.
  * @param {boolean} props.compact Denser variant for narrow panes.
  * @param {boolean} props.singleRow Keeps everything on one row instead of wrapping.

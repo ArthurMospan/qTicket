@@ -73,9 +73,6 @@ beforeEach(async () => {
     });
     await setDoc(doc(db, 'issues', 'issue-a'), {
       organizationId: 'org-a', projectId: 'project-a', title: 'Issue A',
-      spentMinutes: 30,
-      spentMinutesMirrorVersion: 1,
-      timeLogMutationVersion: 1,
     });
     await setDoc(doc(db, 'issues', 'issue-a', 'comments', 'member-comment'), {
       authorId: 'member-a', text: 'Member comment',
@@ -86,17 +83,6 @@ beforeEach(async () => {
     await setDoc(doc(db, 'organizations', 'org-a', 'channels', 'general'), { name: 'general', type: 'public' });
     await setDoc(doc(db, 'organizations', 'org-a', 'channels', 'general', 'messages', 'owner-message'), {
       senderId: 'owner-a', text: 'Original', reactions: {}, replyCount: 0,
-    });
-    await setDoc(doc(db, 'timeLogs', 'log-owner'), {
-      organizationId: 'org-a', projectId: 'project-a', issueId: 'issue-a',
-      userId: 'owner-a', spentMinutes: 30,
-    });
-    await setDoc(doc(db, 'calendarEvents', 'staff-meeting'), {
-      organizationId: 'org-a',
-      organizerId: 'member-a',
-      participantIds: ['owner-a', 'member-a'],
-      title: 'Internal support review',
-      visibility: 'team',
     });
     // The two shapes an invitation comes in: an address somebody typed, and a
     // link whose token is the whole credential.
@@ -399,10 +385,9 @@ test('the issue trash is server-only, including for organization admins', async 
 
 // The list is shorter than it was, and deliberately. `spentMinutes`, its two
 // mirror counters and `timeLogMutationVersion` were named here because the
-// server owned them; the product no longer has time logs, so the fields are not
-// server-owned any more — they are simply not fields. The rule denies a fixed
-// list of keys, so an unlisted name is writable exactly the way `title` is, and
-// asserting a denial for a key nothing reads would be testing a typo.
+// server owned them; the product no longer has time logs, and `timeLogs` no
+// longer has a rule of its own — an unmatched path denies by default, so there
+// is nothing left to assert about it that the default does not already say.
 test('issue execution fields can only be changed by the authoritative status API', async () => {
   const memberDb = environment.authenticatedContext('member-a').firestore();
   const issueRef = doc(memberDb, 'issues', 'issue-a');
@@ -630,100 +615,6 @@ test('qTicket clients cannot enter organization chat or another client project',
   await assertFails(getDoc(doc(otherClientDb, 'issues', 'issue-a')));
 });
 
-test('task time-log writes are owned by authenticated server APIs', async () => {
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertFails(setDoc(doc(db, 'timeLogs', 'member-log'), {
-    organizationId: 'org-a', projectId: 'project-a', issueId: 'issue-a',
-    userId: 'member-a', spentMinutes: 15,
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'forged-log'), {
-    organizationId: 'org-a', projectId: 'project-a', issueId: 'issue-a',
-    userId: 'owner-a', spentMinutes: 999,
-  }));
-  await assertFails(updateDoc(doc(db, 'timeLogs', 'log-owner'), { spentMinutes: 999 }));
-});
-
-test('time logs require bounded positive integer minutes and clients cannot forge billing metadata', async () => {
-  const db = environment.authenticatedContext('member-a').firestore();
-  const base = {
-    organizationId: 'org-a',
-    projectId: 'project-a',
-    issueId: 'issue-a',
-    userId: 'member-a',
-  };
-  await assertFails(setDoc(doc(db, 'timeLogs', 'negative-log'), {
-    ...base,
-    spentMinutes: -15,
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'fractional-log'), {
-    ...base,
-    spentMinutes: 1.5,
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'huge-log'), {
-    ...base,
-    spentMinutes: 525601,
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'forged-billed-log'), {
-    ...base,
-    spentMinutes: 15,
-    invoiceId: 'invoice-a',
-    billedAt: new Date(),
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'orphan-log'), {
-    ...base,
-    issueId: '',
-    spentMinutes: 15,
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'task-disguised-as-event'), {
-    ...base,
-    sourceType: 'calendar_event',
-    eventId: 'event-a',
-    occurrenceStartAt: '2026-07-25T09:00:00.000Z',
-    spentMinutes: 15,
-  }));
-});
-
-test('billed time logs are immutable even for their author and organization owner', async () => {
-  await environment.withSecurityRulesDisabled(async context => {
-    await setDoc(doc(context.firestore(), 'timeLogs', 'billed-log'), {
-      organizationId: 'org-a',
-      projectId: 'project-a',
-      issueId: 'issue-a',
-      userId: 'owner-a',
-      spentMinutes: 30,
-      invoiceId: 'invoice-a',
-      billedAt: new Date(),
-    });
-  });
-  const ownerDb = environment.authenticatedContext('owner-a').firestore();
-  const billedRef = doc(ownerDb, 'timeLogs', 'billed-log');
-  await assertFails(updateDoc(billedRef, { description: 'Changed' }));
-  await assertFails(updateDoc(billedRef, { invoiceId: deleteField() }));
-  await assertFails(deleteDoc(billedRef));
-});
-
-test('task time logs require a live issue in the same project and organization', async () => {
-  const db = environment.authenticatedContext('member-a').firestore();
-  await assertFails(setDoc(doc(db, 'timeLogs', 'missing-issue-log'), {
-    organizationId: 'org-a', projectId: 'project-a', issueId: 'missing',
-    userId: 'member-a', spentMinutes: 15,
-  }));
-  await assertFails(setDoc(doc(db, 'timeLogs', 'wrong-project-log'), {
-    organizationId: 'org-a', projectId: 'project-b', issueId: 'issue-a',
-    userId: 'member-a', spentMinutes: 15,
-  }));
-
-  await environment.withSecurityRulesDisabled(async context => {
-    await updateDoc(doc(context.firestore(), 'issues', 'issue-a'), {
-      deletionPending: true,
-    });
-  });
-  await assertFails(setDoc(doc(db, 'timeLogs', 'deleting-issue-log'), {
-    organizationId: 'org-a', projectId: 'project-a', issueId: 'issue-a',
-    userId: 'member-a', spentMinutes: 15,
-  }));
-});
-
 test('authors can delete their own comments but not another authors comments', async () => {
   const db = environment.authenticatedContext('member-a').firestore();
   await assertSucceeds(deleteDoc(doc(db, 'issues', 'issue-a', 'comments', 'member-comment')));
@@ -817,55 +708,6 @@ test('an admin removes a channel message they did not send, but not one in a DM'
   await assertFails(deleteDoc(directMessage(adminDb)));
 });
 
-test('clients cannot delete task time logs, including their own', async () => {
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  await environment.withSecurityRulesDisabled(async context => {
-    await setDoc(doc(context.firestore(), 'timeLogs', 'member-log-delete'), {
-      organizationId: 'org-a', projectId: 'project-a', issueId: 'issue-a',
-      userId: 'member-a', spentMinutes: 10,
-    });
-  });
-  await assertFails(deleteDoc(doc(memberDb, 'timeLogs', 'member-log-delete')));
-  await assertFails(deleteDoc(doc(memberDb, 'timeLogs', 'log-owner')));
-});
-
-test('direct time-log creation stays denied throughout project deletion', async () => {
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  const log = {
-    organizationId: 'org-a',
-    projectId: 'project-a',
-    issueId: 'issue-a',
-    userId: 'member-a',
-    spentMinutes: 15,
-  };
-  await assertFails(setDoc(doc(memberDb, 'timeLogs', 'before-project-delete'), log));
-
-  await environment.withSecurityRulesDisabled(async context => {
-    await updateDoc(doc(context.firestore(), 'projects', 'project-a'), {
-      deletionPending: true,
-    });
-  });
-  await assertFails(setDoc(doc(memberDb, 'timeLogs', 'after-project-delete'), log));
-});
-
-test('calendar source documents are server-only for staff and client browsers', async () => {
-  for (const uid of ['owner-a', 'member-a', 'client-admin-a', 'client-member-a']) {
-    const db = environment.authenticatedContext(uid).firestore();
-    await assertFails(getDoc(doc(db, 'calendarEvents', 'staff-meeting')));
-    await assertFails(getDocs(query(
-      collection(db, 'calendarEvents'),
-      where('organizationId', '==', 'org-a'),
-    )));
-    await assertFails(setDoc(doc(db, 'calendarEvents', `${uid}-forged-event`), {
-      organizationId: 'org-a',
-      organizerId: uid,
-      participantIds: [uid],
-      title: 'Forged event',
-      visibility: 'team',
-    }));
-  }
-});
-
 test('issue audit history is staff-only and clients cannot forge entries', async () => {
   const clientDb = environment.authenticatedContext('client-admin-a').firestore();
   const memberDb = environment.authenticatedContext('member-a').firestore();
@@ -888,10 +730,6 @@ test('issue audit history is staff-only and clients cannot forge entries', async
   await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'member-audit')));
 });
 
-// A summary of hours you may not see is still those hours. The daily totals
-// repeat the raw log's rule rather than relaxing it, and nothing in a browser
-// may write one — they are derived by server transactions and rebuilt by
-// scripts/backfill-analytics-rollups.mjs.
 test('notifications can only be created by the server API', async () => {
   const db = environment.authenticatedContext('member-a').firestore();
   await assertFails(setDoc(doc(db, 'notifications', 'same-org'), {

@@ -5126,12 +5126,9 @@
         {
           "name": "context",
           "default": "",
-          "type": "'task'|'calendar'",
-          "values": [
-            "calendar",
-            "task"
-          ],
-          "description": "Which grid the strip uses; the two records carry different fields."
+          "type": "'task'",
+          "values": [],
+          "description": "Which grid the strip uses."
         },
         {
           "name": "primaryChildren",

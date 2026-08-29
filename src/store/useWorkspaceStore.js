@@ -128,8 +128,8 @@ const useWorkspaceStore = create((set, get) => ({
   showLiveNotif: (notif) => {
     if (!notif?.id) return;
     const expire = get().dismissLiveNotif;
-    // Порожній ключ означає «ця подія не повторюється» — призначення, дедлайн,
-    // подія календаря. Така картка групується сама з собою, тобто ні з чим.
+    // Порожній ключ означає «ця подія не повторюється» — призначення, дедлайн.
+    // Така картка групується сама з собою, тобто ні з чим.
     const conversationKey = notificationGroupKey(notif);
     const groupKey = conversationKey || `id:${notif.id}`;
     let supersededId = null;

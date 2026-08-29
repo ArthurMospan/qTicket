@@ -8,14 +8,14 @@
     "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
   },
   "totals": {
-    "componentsWithVariants": 41,
-    "declaredValues": 351,
+    "componentsWithVariants": 40,
+    "declaredValues": 349,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 190,
+    "usedAndPreviewed": 189,
     "usedWithoutPreview": 0,
-    "declaredUnused": 139
+    "declaredUnused": 138
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -797,12 +797,6 @@
       "namespace": null
     },
     {
-      "component": "TaskAttributesPanel",
-      "prop": "context",
-      "value": "calendar",
-      "namespace": null
-    },
-    {
       "component": "TextAction",
       "prop": "tone",
       "value": "ink",
@@ -1399,12 +1393,6 @@
         "timeline-composer"
       ]
     },
-    "TaskAttributesPanel": {
-      "context": [
-        "calendar",
-        "task"
-      ]
-    },
     "SidebarLayout": {
       "context": [
         "chat",
@@ -1626,7 +1614,6 @@
     "Tabs.composition.pane-switch": 1,
     "Popover.align.start": 1,
     "Popover.padding.default": 1,
-    "TaskAttributesPanel.context.task": 1,
     "MarkdownViewer.size.lg": 1,
     "Surface.preset.compact-bordered-card": 1,
     "Button.composition.inline-add-action": 3,
@@ -1983,7 +1970,6 @@
     "Tabs.variant.underline",
     "Tag.size.default",
     "Tag.size.small",
-    "TaskAttributesPanel.context.task",
     "TextAction.size.lg",
     "TextAction.size.md",
     "TextAction.size.sm",

@@ -147,42 +147,6 @@
       ]
     },
     {
-      "collectionGroup": "timeLogs",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "organizationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "sourceType",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "eventId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "occurrenceStartAt",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "calendarEvents",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "organizationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "participantIds",
-          "arrayConfig": "CONTAINS"
-        }
-      ]
-    },
-    {
       "collectionGroup": "issues",
       "queryScope": "COLLECTION",
       "fields": [
@@ -253,24 +217,6 @@
       ]
     },
     {
-      "collectionGroup": "analyticsRollups",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "organizationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "projectId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "day",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "issues",
       "queryScope": "COLLECTION",
       "fields": [
@@ -294,34 +240,6 @@
         },
         {
           "fieldPath": "status",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "scheduledNotifications",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "calendarEventId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "calendarEvents",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "recurrence.frequency",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "startAt",
           "order": "ASCENDING"
         }
       ]

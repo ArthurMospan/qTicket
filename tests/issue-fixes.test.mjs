@@ -128,34 +128,12 @@ test('QUI-79 reuses the chat attachment viewer on issue details', async () => {
   assert.doesNotMatch(source, /bg-black\/85 backdrop-blur-sm/);
 });
 
-// QUI-71 pinned the calendar event form to the shared date and time controls.
-// `TimePicker` had no reader left once the time ledger was deleted, so the kit
-// deleted it and the assertion has no subject; the DatePicker half of the same
-// rule is still pinned by the tests above.
-
-// The filter half of this test lived on the planning calendar and went with it.
-// What it was guarding is still worth pinning: the label comes from the shared
-// type table, and only the icon and the colours live in the dialog.
-test('QUI-70 derives calendar type presentation from the shared type table', async () => {
-  const dialog = await read('../src/components/workspace/calendar/CalendarEventDialog.jsx');
-
-  assert.match(dialog, /event: \{ color: '#8b5cf6', bg: '#f5f3ff', icon: CalendarIcon \}/);
-  assert.match(
-    dialog,
-    /Object\.entries\(TYPE_PRESENTATION\)\.map\(\s*\(\[value, presentation\]\) => \(\{ value, label: calendarEventTypeLabel\(value\), \.\.\.presentation \}\)/s,
-  );
-});
-
 test('QUI-69 renders people as avatar plus name', async () => {
-  const [eventDialog, eventPage, select, kit] = await Promise.all([
-    read('../src/components/workspace/calendar/CalendarEventDialog.jsx'),
-    read('../src/components/workspace/calendar/CalendarEventPage.jsx'),
+  const [select, kit] = await Promise.all([
     read('../src/components/ui/Select.jsx'),
     readKitShowcase(),
   ]);
 
-  assert.match(eventDialog, /label: memberLabel\(member\),\s*user: member/);
-  assert.match(eventPage, /label: memberLabel\(member\),\s*user: member/);
   assert.match(select, /function OptionIdentity\(\{ option, size = 14 \}\)/);
   assert.match(select, /<OptionIdentity option=\{selectedOption\} \/>/);
   // QUI-106: a MultiSelect of people still shows the person, and once more than

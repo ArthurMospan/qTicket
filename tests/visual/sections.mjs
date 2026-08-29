@@ -16,7 +16,6 @@ export const SECTIONS = [
   { id: 'surfaces', label: 'Surfaces' },
   { id: 'tooltips', label: 'Tooltips' },
   { id: 'task-attributes', label: 'Task Attributes Panel' },
-  { id: 'calendar', label: 'Календар — власні елементи' },
   { id: 'form-groups', label: 'Form Groups' },
   { id: 'filters', label: 'Filter Bar' },
   { id: 'navigation-overlays', label: 'Navigation & Overlays' },

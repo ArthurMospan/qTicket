@@ -10,13 +10,12 @@ const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 // the project list had not arrived yet it cleared its state and reported
 // `loading: false`. On a page refresh those arrive a beat after the first
 // render, so for that beat the screens read the empty result as an answer —
-// «Задачу не знайдено» on the task page, «Подію не знайдено» on the calendar,
-// «Немає доступу до організації» on a notification link. Frightening, and
-// false. While the context is still resolving, the honest answer is a spinner.
+// «Задачу не знайдено» on the task page, «Немає доступу до організації» on a
+// notification link. Frightening, and false. While the context is still
+// resolving, the honest answer is a spinner.
 test('a hook that has not subscribed yet reports loading, not emptiness', async () => {
   const cases = [
     ['../src/lib/hooks/useIssues.js', /issuesLoading \|\| authLoading \|\| orgLoading \|\| projectsLoading \|\| !currentUserId/],
-    ['../src/lib/hooks/useCalendarEvents.js', /setLoading\(Boolean\(authLoading \|\| orgLoading\)\);/],
     ['../src/lib/hooks/useAllMyTasks.js', /const loading = issuesLoading \|\| Boolean\(authLoading \|\| orgLoading \|\| projectsLoading\);/],
   ];
   for (const [file, pattern] of cases) {

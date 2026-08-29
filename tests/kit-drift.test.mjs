@@ -220,13 +220,10 @@ test('the variant manifest is still derived from the implementation', () => {
 test('Popover padding is a named scale, not a raw CSS length', () => {
   const popover = readFileSync(new URL('../src/components/ui/Navigation/Popover.jsx', import.meta.url), 'utf8');
   const issueDetail = readFileSync(new URL('../src/components/workspace/IssueDetail.jsx', import.meta.url), 'utf8');
-  const calendarEvent = readFileSync(new URL('../src/components/workspace/calendar/CalendarEventPage.jsx', import.meta.url), 'utf8');
 
   assert.match(popover, /export const PADDINGS = \{/);
   assert.match(popover, /padding: PADDINGS\[padding\]/);
-  for (const source of [issueDetail, calendarEvent]) {
-    assert.doesNotMatch(source, /padding=(?:"|\{')\d+px/, 'a raw CSS length is back on Popover');
-  }
+  assert.doesNotMatch(issueDetail, /padding=(?:"|\{')\d+px/, 'a raw CSS length is back on Popover');
 });
 
 // Settings, Team and Chat are three different layouts — that was never the

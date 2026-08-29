@@ -26,22 +26,6 @@ test('external links accept only absolute HTTP and HTTPS URLs', () => {
   }
 });
 
-test('calendar links are guarded while saving and rendering', async () => {
-  const [dialog, page, server] = await Promise.all([
-    read('../src/components/workspace/calendar/CalendarEventDialog.jsx'),
-    read('../src/components/workspace/calendar/CalendarEventPage.jsx'),
-    read('../src/lib/server/calendarEvents.js'),
-  ]);
-
-  assert.match(dialog, /meetingUrl = safeExternalUrl\(typed\.meetingUrl\)/);
-  assert.match(dialog, /href=\{safeMeetingUrl\}/);
-  assert.match(page, /const meetingUrl = safeExternalUrl\(rawMeetingUrl\)/);
-  assert.match(page, /href=\{safeMeetingUrl\}/);
-  assert.match(server, /meetingUrl = safeExternalUrl\(typed\.meetingUrl\)/);
-  assert.doesNotMatch(dialog, /href=\{event\.meetingUrl\}/);
-  assert.doesNotMatch(page, /href=\{event\.meetingUrl\}/);
-});
-
 test('attachment policy requires a matching allow-listed extension and MIME', () => {
   assert.deepEqual(uploadFilePolicy({ name: 'photo.png', type: 'image/png', size: 200 }).value, {
     extension: 'png',

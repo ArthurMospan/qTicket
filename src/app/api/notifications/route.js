@@ -9,10 +9,10 @@ import { REQUESTABLE_NOTIFICATION_TYPES, shouldDeliver } from '@/lib/utils/notif
 import { OUTBOX_COLLECTION, nextAttemptDelayMs } from '@/lib/utils/notificationOutbox.mjs';
 import { hasProjectAccess } from '@/lib/utils/projectAccess.mjs';
 
-// What a caller holding a user's token may ask for. System-only types — the
-// birthday greeting — are deliberately absent: they are written by the sweep
-// through the Admin SDK, and nobody should be able to address the whole
-// organization on a colleague's behalf from a browser.
+// What a caller holding a user's token may ask for. Anything the sweep writes
+// on its own is deliberately absent: those go through the Admin SDK, and nobody
+// should be able to address the whole organization on a colleague's behalf from
+// a browser.
 const ALLOWED_TYPES = new Set(REQUESTABLE_NOTIFICATION_TYPES);
 const cleanText = (value, maxLength) => typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 
@@ -50,7 +50,6 @@ async function queueFailedChannels({
     batch.set(db.collection(OUTBOX_COLLECTION).doc(id), {
       ...payload,
       userId: item.userId,
-      calendarEventId: '',
       actorId: actor.id || 'quickteam-system',
       actorName: actor.name || 'QuickTeam',
       allowEmail: emailWanted.has(item.userId),

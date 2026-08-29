@@ -376,7 +376,6 @@ test('high-risk composed previews keep the product markup signatures', () => {
   const projects = readFileSync(new URL('../src/app/(app)/page.js', import.meta.url), 'utf8');
   const settings = readFileSync(new URL('../src/app/(app)/settings/page.js', import.meta.url), 'utf8');
   const issueDetail = readFileSync(new URL('../src/components/workspace/IssueDetail.jsx', import.meta.url), 'utf8');
-  const calendarEvent = readFileSync(new URL('../src/components/workspace/calendar/CalendarEventPage.jsx', import.meta.url), 'utf8');
   const timeline = readFileSync(new URL('../src/components/workspace/UnifiedTimeline.jsx', import.meta.url), 'utf8');
   const composerCore = readFileSync(new URL('../src/components/ui/ChatComposerCore.jsx', import.meta.url), 'utf8');
   const taskAttributes = readFileSync(new URL('../src/components/ui/Layout/TaskAttributesPanel.jsx', import.meta.url), 'utf8');
@@ -403,30 +402,19 @@ test('high-risk composed previews keep the product markup signatures', () => {
   assert.match(kit, /<EmptyState[\s\S]{0,1200}context="page"/);
   assert.doesNotMatch(projects, /<EmptyState[\s\S]{0,320}className="min-h-\[328px\]"/);
 
-  // Both attribute strips condense on scroll (QUI-123). The event card used to
-  // keep its selects pinned at full height inside the sticky header while the
-  // task card collapsed its labels and faded behind it, so the same control
-  // behaved differently depending on which record you had open.
-  //
-  // The scroll container itself is no longer either page's: both hand their
-  // title, strip and sections to `DetailLayout`, which owns the scrollport, the
-  // threshold, the sticky box and the fade. That is what makes "the same page"
-  // true structurally rather than by two files agreeing to match.
+  // The attribute strip condenses on scroll (QUI-123), and the scroll container
+  // is not the page's: the task hands its title, strip and sections to
+  // `DetailLayout`, which owns the scrollport, the threshold, the sticky box and
+  // the fade.
   const detailLayout = readFileSync(new URL('../src/components/ui/Layout/DetailLayout.jsx', import.meta.url), 'utf8');
   assert.match(detailLayout, /scrollTop > 4/);
-  for (const source of [issueDetail, calendarEvent]) {
-    assert.match(source, /getTaskAttributeChrome\(\{ condensed: isHeaderScrolled \}\)/);
-    assert.match(source, /condensed=\{isHeaderScrolled\}/);
-    assert.match(source, /<DetailLayout[\s\S]{0,400}scrolled=\{isHeaderScrolled\}/);
-    assert.match(source, /onScrolledChange=\{setIsHeaderScrolled\}/);
-  }
-  // The header allowance is the difference that made the two pages scroll
-  // differently: the task reserved it above its scroller and the event on it,
-  // so the event's sticky title parked under the fixed header. Neither page
-  // reserves it any more — `.ui-detail-shell` does, once.
-  for (const source of [issueDetail, calendarEvent]) {
-    assert.doesNotMatch(source, /pt-\[56px\]/, 'the fixed-header allowance belongs to the shell');
-  }
+  assert.match(issueDetail, /getTaskAttributeChrome\(\{ condensed: isHeaderScrolled \}\)/);
+  assert.match(issueDetail, /condensed=\{isHeaderScrolled\}/);
+  assert.match(issueDetail, /<DetailLayout[\s\S]{0,400}scrolled=\{isHeaderScrolled\}/);
+  assert.match(issueDetail, /onScrolledChange=\{setIsHeaderScrolled\}/);
+  // The fixed-header allowance belongs to `.ui-detail-shell`, once, rather than
+  // to the page that happens to sit under it.
+  assert.doesNotMatch(issueDetail, /pt-\[56px\]/, 'the fixed-header allowance belongs to the shell');
   // The conversation rail holds still, and one number is why. A sticky box
   // cannot leave its containing block — here the grid area, which ends where
   // the content ends while the scroll runs on for the room under the page. A
@@ -501,7 +489,6 @@ test('high-risk composed previews keep the product markup signatures', () => {
   // time ledger, so there is no shared clock left to keep them honest about.
 
   assert.match(issueDetail, /<TaskAttributesPanel[\s\S]{0,120}context="task"/);
-  assert.match(calendarEvent, /<TaskAttributesPanel[\s\S]{0,180}context="calendar"/);
   // The last column carries «Деталі», which is a target before it is a column:
   // 32px wide next to a 28px condensed height is a 32×28 hit area, and a thumb
   // misses it. 44px on a phone, unchanged from `sm` up where the label is back.
@@ -515,7 +502,6 @@ test('high-risk composed previews keep the product markup signatures', () => {
   for (const source of [issueDetail, kit]) {
     assert.match(source, /<Popover[\s\S]{0,900}triggerClassName="flex h-full w-full items-center justify-center"/);
   }
-  assert.match(taskAttributes, /calendar: 'grid w-full grid-cols-2/);
   assert.match(taskAttributes, /compactSelectClass: 'h-\[22px\][^']*rounded-\[10px\]/);
   assert.match(kit, /getTaskAttributeChrome\(\)/);
   assert.match(kit, /<TaskAttributesPanel[\s\S]{0,120}context="task"/);

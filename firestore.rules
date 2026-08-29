@@ -316,15 +316,6 @@ service cloud.firestore {
       }
     }
 
-    // ── calendarEvents/{eventId} ───────────────────────────────────────
-    // The inherited calendar is an internal support module and all of its
-    // reads and writes go through role-gated server routes. Keeping the source
-    // documents closed also prevents a client from bypassing those routes with
-    // the browser SDK to enumerate staff events or birthdays.
-    match /calendarEvents/{eventId} {
-      allow read, write: if false;
-    }
-
     // ── issues/{issueId} ─────────────────────────────────────────────────
     match /issues/{issueId} {
       allow read: if canAccessIssueData(resource.data);
@@ -527,22 +518,6 @@ service cloud.firestore {
       match /taskComments/{commentId} {
         allow read, write: if false;
       }
-    }
-
-    // ── timeLogs/{id} ────────────────────────────────────────────────────
-    // qTicket does not track time. The collection still holds the inherited
-    // records the retained calendar routes maintain through the Admin SDK, and
-    // no browser reads or writes one.
-    match /timeLogs/{id} {
-      allow read, write: if false;
-    }
-
-    // ── analyticsRollups/{organizationId}_{projectId}_{day} ──────────────
-    // Denormalized daily totals of the inherited time records, written only by
-    // the server transactions that write those records. qTicket publishes no
-    // analytics screen, so no browser reads one either.
-    match /analyticsRollups/{id} {
-      allow read, write: if false;
     }
 
     // ── notifications/{id} — created by the authenticated server route;

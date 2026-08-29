@@ -81,8 +81,13 @@ test('a notification names its destination in words', () => {
     'Відкрити звернення',
   );
   assert.equal(notificationOpenLabel({ type: 'chat_message' }), 'Відкрити розмову');
-  assert.equal(notificationOpenLabel({ type: 'calendar_reminder' }), 'Відкрити подію');
   assert.equal(notificationOpenLabel({ type: 'emergency' }), 'Відкрити профіль');
+  // The planning calendar is gone, and with it the only page «Відкрити подію»
+  // could have opened. A label that names a deleted destination is worse than
+  // no label: it promises a screen and delivers a redirect.
+  for (const type of ['calendar_reminder', 'calendar_invite', 'calendar_changed']) {
+    assert.equal(notificationOpenLabel({ type }), 'Перейти', type);
+  }
   // The same type reaches two different places; the task id is what tells them
   // apart, because a mention in the workspace chat has none.
   assert.equal(notificationOpenLabel({ type: 'mentioned', issueId: 'issue-1' }), 'Відкрити обговорення');
