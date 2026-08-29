@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 255,
-    "elements": 2197,
+    "elements": 2185,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -43,7 +43,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:186",
+      "location": "src/components/profile/ProfileView.jsx:170",
       "attributes": [
         "title"
       ]
@@ -172,7 +172,7 @@
     },
     {
       "element": "Button",
-      "location": "src/components/ui/TaskManagement/TaskListView.jsx:234",
+      "location": "src/components/ui/TaskManagement/TaskListView.jsx:236",
       "attributes": [
         "title",
         "aria-label"

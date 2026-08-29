@@ -44,6 +44,7 @@ function fmtDate(raw, timeZone) {
  * @param {string} props.projectName Its name.
  * @param {boolean} props.showProjectName Whether the row names its project — true only on cross-project lists.
  * @param {boolean} props.showStatusName Whether the row names its status — true only where the section heading cannot, i.e. a category holding several statuses.
+ * @param {boolean} props.showAssignee Whether the row has an assignee column at all. False for a customer reading their own requests: who a request is routed to is how support organises itself, not a fact about the request. Feeding an empty `members` leaked no name, but it left the column printing «Н/В» — which tells the customer a routing decision exists and is empty. The column has to be absent, not empty.
  * @param {() => void} props.onClick Opens the task.
  * @param {boolean} props.selected Whether this task is part of the active bulk selection.
  * @param {boolean} props.selectionActive Whether the row is showing its selection control instead of priority.
@@ -60,6 +61,7 @@ export default function TaskRow({
   projectName,
   showProjectName = false,
   showStatusName = false,
+  showAssignee = true,
   onClick,
   selected = false,
   selectionActive = false,
@@ -400,10 +402,17 @@ export default function TaskRow({
               for «+12». It was 76px, a number sized for nothing in particular,
               and every row with one assignee spent thirty of them on a hole
               between the badges and the face. A remainder in the hundreds is
-              allowed to widen its own row rather than be clipped. */}
-          <span className="flex min-w-[52px] shrink-0 items-center justify-end -space-x-[6px] overflow-visible">
-            {assigneeFaces || <span className="text-[10px] text-faint italic">Н/В</span>}
-          </span>
+              allowed to widen its own row rather than be clipped.
+
+              The floor is also why the column has to be dropped rather than
+              emptied for a customer: 52 reserved pixels ending in an italic
+              «Н/В» is the loudest possible way to say «somebody is meant to be
+              here», on the one screen that must not raise the question. */}
+          {showAssignee && (
+            <span className="flex min-w-[52px] shrink-0 items-center justify-end -space-x-[6px] overflow-visible">
+              {assigneeFaces || <span className="text-[10px] text-faint italic">Н/В</span>}
+            </span>
+          )}
 
         </div>
 
@@ -438,7 +447,7 @@ export default function TaskRow({
           {/* No «Н/В» placeholder here. On a desktop row the empty slot is what
               keeps ten rows aligned down one edge; in a stack of cards it is a
               label that says nothing, taking the place of the faces. */}
-          {assigneeFaces && (
+          {showAssignee && assigneeFaces && (
             <span className="flex shrink-0 items-center -space-x-[6px]">
               {assigneeFaces}
             </span>

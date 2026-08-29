@@ -23,7 +23,13 @@ const projects = [
 test('the catalogue reflects what this person can actually do', () => {
   const member = buildCommands({ projects, allowedPermissions: [] });
   assert.equal(member.some(command => command.id === 'action-new-client'), false);
-  assert.equal(member.some(command => command.id === 'action-new-issue'), true);
+  // Only a client opens a request, so the internal palette cannot create one.
+  assert.equal(member.some(command => command.id === 'action-new-issue'), false);
+  assert.equal(
+    buildCommands({ projects, role: 'client_member' })
+      .some(command => command.id === 'action-new-issue'),
+    true,
+  );
 
   const admin = buildCommands({ projects, allowedPermissions: ['create:project'] });
   assert.equal(admin.some(command => command.id === 'action-new-client'), true);
@@ -55,9 +61,11 @@ test('archived projects are not destinations', () => {
 test('a query finds the thing you were aiming at, not merely something matching', () => {
   const commands = buildCommands({ projects, allowedPermissions: ['create:project'] });
 
-  assert.equal(rankCommands(commands, 'нове звернення')[0].id, 'action-new-issue');
   assert.equal(rankCommands(commands, 'новий клієнт')[0].id, 'action-new-client');
   assert.equal(rankCommands(commands, 'retro')[0].id, 'project-p1');
+  // The client's own palette still reaches the one composer the product has.
+  const clientCommands = buildCommands({ projects, role: 'client_member' });
+  assert.equal(rankCommands(clientCommands, 'створити звернення')[0].id, 'action-new-issue');
 });
 
 test('the wrong keyboard layout still finds the right command', () => {
@@ -112,13 +120,13 @@ test('the actions are the things worth creating, in that order', () => {
     organizationCount: 2,
   });
   assert.deepEqual(commands.filter(command => command.group === 'action').map(command => command.id), [
-    'action-new-issue',
     'action-new-client',
     'action-switch-org',
   ]);
   const byId = Object.fromEntries(commands.map(command => [command.id, command]));
-  assert.equal(byId['action-new-issue'].href, '/my?new=1');
   assert.equal(byId['action-new-client'].href, '/clients?new=1');
+  // The one «створити звернення» in the product belongs to the client, and it
+  // lands in their own space — the same `[projectId]` screen support opens.
   assert.equal(buildCommands({ role: 'client_member' }).find(command => command.id === 'action-new-issue').href, '/?new=1');
   // A cheat sheet is not an action.
   assert.equal(commands.some(command => command.id === 'action-shortcuts'), false);
@@ -322,7 +330,9 @@ test('every action the palette offers lands somewhere that answers it', async ()
   // redirect at `/` and is consumed there.
   const board = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
 
-  assert.match(my, /searchParams\.get\('new'\) === '1'/);
+  // The support queue answers no `?new=1` at all: it has no composer to open,
+  // because only a client opens a request.
+  assert.doesNotMatch(my, /get\('new'\)/);
   assert.match(clients, /clientsRoute && searchParams\?\.get\('new'\) === '1'/);
   assert.match(clients, /searchParams\?\.get\('new'\) === '1' \? '\?new=1' : ''/);
   assert.match(board, /params\.get\('new'\) !== '1'/);

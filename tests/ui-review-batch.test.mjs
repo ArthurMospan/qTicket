@@ -271,30 +271,26 @@ test('both entry points to project settings offer the same capabilities', async 
   assert.match(projectPage, /handleDeleteProject[\s\S]{0,240}router\.push\('\/clients'\)/);
 });
 
-// qTicket profiles expose only support work. Calendar planning and emergency
-// calls belong to QuickTeam and must not leak into this product — and neither
-// does managing the seat: who holds one is decided in QuickTeam and re-sent on
-// the next provisioning sync, so «Керування доступом» led to a roster that can
-// only be read.
+// A qTicket profile answers three questions and takes no actions at all. What
+// used to stand here was a task manager's colleague page: calendar planning,
+// an emergency call, a message, a seat to administer — and, last to go, a
+// «Створити інцидент і призначити учасника» circle, which filed a request in a
+// customer's name and put a colleague on it in one click. Only a client opens a
+// request, so that circle was the rule's last exception on this screen.
 test('a member profile offers qTicket actions only', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
-  const composer = await read('../src/components/CreateTaskModal.jsx');
   const myTasks = await read('../src/app/(app)/my/page.js');
 
-  // Icons only: no labelled Button survives in the action row.
   assert.doesNotMatch(profile, />\s*Написати\s*</);
   assert.doesNotMatch(profile, />\s*Виклик\s*</);
-  // «Написати повідомлення» is not among them: it opened a direct room in the
-  // workspace messenger, and the product has no conversation with a colleague
-  // outside an incident.
+  // No action row at all: no circles, and nothing that opens a composer — a
+  // staff member does not open a request, the client does.
+  assert.doesNotMatch(profile, /<IconAction/);
+  assert.doesNotMatch(profile, /Створити інцидент/);
+  assert.doesNotMatch(profile, /new=1/);
+  // Writing to a colleague is not there either: it opened a direct room in the
+  // workspace messenger, and the product has one conversation — the request's.
   assert.doesNotMatch(profile, /Написати повідомлення/);
-  for (const label of [
-    'Створити інцидент і призначити учасника',
-  ]) {
-    assert.match(profile, new RegExp(`label="${label}"`), `${label} must be an icon action`);
-  }
-  // Writing to a colleague is not one of them: a profile is a place to look
-  // somebody up, and the product has one conversation — the incident's.
   assert.doesNotMatch(profile, /Написати повідомлення/);
   assert.doesNotMatch(profile, /Екстрений виклик|Створити подію|\/calendar\?new=1/);
   // Nothing here administers the seat: no menu, and no link into a settings
@@ -303,10 +299,10 @@ test('a member profile offers qTicket actions only', async () => {
   assert.doesNotMatch(profile, /section=team&user=/);
   assert.doesNotMatch(profile, /<ContextMenu/);
 
-  // Incident creation lands somewhere that knows what to do with it.
-  assert.match(profile, /\/my\?new=1&assignee=/);
-  assert.match(myTasks, /searchParams\.get\('assignee'\)/);
-  assert.match(composer, /assignees: clientMode[\s\S]{0,180}: initialAssignees\?\.length[\s\S]{0,80}\? initialAssignees[\s\S]{0,100}currentUser/);
+  // And nothing is left on the queue to receive such a request: the composer
+  // there is gone, and with it the `assignee` the circle used to carry.
+  assert.doesNotMatch(myTasks, /get\('assignee'\)/);
+  assert.doesNotMatch(myTasks, /<CreateTaskModal/);
 });
 
 // The same count was drawn four different ways for the same question: a
@@ -360,30 +356,26 @@ test('the palette says it is searching rather than that it found nothing', async
   assert.match(palette, /searching \? 'Шукаємо…' : `Нічого не знайдено за «\$\{query\}»`/);
 });
 
-// The one qTicket action left on a profile carries the kit treatment.
-test('the member profile actions are one declared size and one declared appearance', async () => {
+// The action circles counted down to zero. «Ще дії» went with the seat it
+// administered, «Написати» with the second conversation, and the last one —
+// «Створити інцидент» — with the rule that only a client opens a request. A row
+// of one circle was already odd; a row of none is the honest answer, so the row
+// itself is gone rather than standing empty.
+//
+// The 56px circle is still a declared kit size, waiting for the next screen
+// that needs one; nothing in the product renders it today.
+test('a member profile has no action circles left to size', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
   const button = await read('../src/components/ui/Button.jsx');
   const iconAction = await read('../src/components/ui/IconAction.jsx');
   const globals = await read('../src/app/globals.css');
 
-  // One action, not two: the admin «Керування доступом» menu pointed into a
-  // settings section that can only list now, so it went with the editors.
-  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 1);
+  assert.equal((profile.match(/appearance="contrast"/g) || []).length, 0);
+  assert.doesNotMatch(profile, /<IconAction|<Tooltip/);
   assert.match(button, /'icon-xl': 'w-\[56px\] p-0'/);
   assert.match(iconAction, /xl: 'icon-xl'/);
   assert.match(iconAction, /contrast: '!bg-selected !text-ink/);
   assert.match(globals, /data-ui-size='icon-56'\] \{[\s\S]{0,120}--ui-control-height: 56px;/);
-});
-
-// Icons alone name nothing, and these actions are the whole action row — there is
-// no text anywhere near them.
-test('every profile action circle carries a tooltip as well as a label', async () => {
-  const profile = await read('../src/components/profile/ProfileView.jsx');
-  for (const content of ['Створити інцидент']) {
-    assert.match(profile, new RegExp(`<Tooltip content="${content}">`), content);
-  }
-  assert.doesNotMatch(profile, /<Tooltip content="Ще дії">/);
 });
 
 // The board column and the task list section are two places that fold a group

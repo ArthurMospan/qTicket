@@ -13,9 +13,9 @@
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 166,
+    "usedAndPreviewed": 163,
     "usedWithoutPreview": 0,
-    "declaredUnused": 163
+    "declaredUnused": 166
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -354,6 +354,12 @@
     },
     {
       "component": "IconAction",
+      "prop": "appearance",
+      "value": "contrast",
+      "namespace": null
+    },
+    {
+      "component": "IconAction",
       "prop": "composition",
       "value": "chat-message-action",
       "namespace": ".ui-control[data-ui-composition]"
@@ -428,6 +434,12 @@
       "component": "IconAction",
       "prop": "size",
       "value": "compact",
+      "namespace": null
+    },
+    {
+      "component": "IconAction",
+      "prop": "size",
+      "value": "xl",
       "namespace": null
     },
     {
@@ -962,6 +974,12 @@
       "component": "Textarea",
       "prop": "surface",
       "value": "canvas",
+      "namespace": null
+    },
+    {
+      "component": "Textarea",
+      "prop": "surface",
+      "value": "white",
       "namespace": null
     },
     {
@@ -1615,10 +1633,10 @@
     "EmptyState.context.page": 4,
     "Button.size.icon-lg": 5,
     "Button.style.secondary": 40,
-    "Button.size.lg": 17,
-    "Button.style.primary": 26,
-    "Select.filterRole.status": 2,
-    "Select.variant.ghost": 11,
+    "Button.size.lg": 16,
+    "Button.style.primary": 24,
+    "Select.filterRole.status": 3,
+    "Select.variant.ghost": 12,
     "Select.filterRole.member": 3,
     "Select.filterRole.priority": 2,
     "Alert.variant.error": 7,
@@ -1634,7 +1652,7 @@
     "MultiSelect.filterRole.project": 1,
     "Select.filterRole.type": 1,
     "Select.filterRole.date": 2,
-    "Button.size.sm": 28,
+    "Button.size.sm": 26,
     "Dialog.titleContext.dialog": 3,
     "Dialog.size.sm": 7,
     "Dialog.presentation.sheet": 1,
@@ -1650,7 +1668,7 @@
     "Select.filterRole.sort": 1,
     "Surface.composition.chart-panel": 1,
     "Pill.size.md": 16,
-    "Button.style.ghost": 37,
+    "Button.style.ghost": 34,
     "MobilePaneBack.context.pane": 1,
     "Input.composition.inline-edit": 1,
     "IconAction.size.xs": 4,
@@ -1719,13 +1737,10 @@
     "IconAction.size.lg": 2,
     "IconAction.appearance.surface-plain": 2,
     "UserAvatar.size.hero": 1,
-    "IconAction.size.xl": 1,
-    "IconAction.appearance.contrast": 1,
     "Tabs.variant.raised": 1,
     "Pill.appearance.outline": 1,
     "Pill.tone.surface-ink": 1,
-    "Textarea.surface.white": 1,
-    "Button.size.icon-xs": 10,
+    "Button.size.icon-xs": 8,
     "Button.composition.section-kebab": 2,
     "Pill.tone.count": 6,
     "Pill.tone.danger": 2,

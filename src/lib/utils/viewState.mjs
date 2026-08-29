@@ -136,14 +136,18 @@ export function restoredViewQuery(schema, storedQuery, currentQuery) {
 
 // ── The shipped screens ──────────────────────────────────────────────────────
 
-// The qTicket support queue uses `assigned`, not `assignee`: `/my?new=1`
-// already carries `assignee` to prefill the incident composer when it is opened
-// from a profile. One address must not give the same key two meanings.
+// The qTicket support queue uses `assigned`, not `assignee`: an address is read
+// by more than this screen, and one key must not carry two meanings.
+//
+// `waiting` is the queue's own question — who owes the next word — and it is the
+// address «Чекають на нас» on the overview leads to, so the tile and the list
+// are the same set said twice.
 export const INCIDENT_QUEUE_VIEW_SCHEMA = Object.freeze({
   view: { default: 'kanban', values: ['kanban', 'list'] },
   projects: { default: [], type: 'list' },
   status: { default: 'all' },
   assigned: { default: 'all' },
+  waiting: { default: 'all', values: ['all', 'us'] },
   priority: { default: 'all' },
   type: { default: 'all' },
   period: { default: 'all', values: ['all', '7days', '30days'] },

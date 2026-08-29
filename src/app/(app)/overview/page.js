@@ -23,7 +23,7 @@ import {
   ArrowRight,
   CircleDotDashed,
   Inbox,
-  Plus,
+  MessageCircleReply,
   UsersRound,
 } from 'lucide-react';
 import { useAppContext } from '@/lib/context/AppContext';
@@ -104,6 +104,16 @@ export default function SupportOverviewPage() {
     () => new Map((members || []).map(member => [member.id || member.uid, member])),
     [members],
   );
+  // Who «ми» are, for «Чекають на нас». The roster is already on this screen —
+  // it draws the assignee faces from it — so knowing whether the last word in a
+  // request was the customer's costs no read at all.
+  const supportUserIds = useMemo(
+    () => new Set((members || [])
+      .filter(member => !isClientRole(member.role))
+      .map(member => member.id || member.uid)
+      .filter(Boolean)),
+    [members],
+  );
   const statusById = useMemo(
     () => new Map((statuses || []).map(status => [status.id, status])),
     [statuses],
@@ -115,7 +125,10 @@ export default function SupportOverviewPage() {
   // The same counters, from the same rules, as the ones over a single
   // customer's queue. «У роботі» used to mean two different things on the two
   // screens — see `incidentQueueMetrics`.
-  const metrics = useMemo(() => incidentQueueMetrics(categorizedIssues), [categorizedIssues]);
+  const metrics = useMemo(
+    () => incidentQueueMetrics(categorizedIssues, { supportUserIds }),
+    [categorizedIssues, supportUserIds],
+  );
   const openIssues = useMemo(
     () => categorizedIssues.filter(entry => entry.category !== 'done'),
     [categorizedIssues],
@@ -150,22 +163,10 @@ export default function SupportOverviewPage() {
   return (
     <div className="qt-nav-scroll flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent">
       <div className="workspace-page-layout min-h-full pb-[120px]">
-        <PageHeader
-          title="Огляд підтримки"
-          actions={(
-            <Button
-              onClick={() => router.push('/my?new=1')}
-              icon={Plus}
-              size="lg"
-              style="primary"
-              color="dark"
-              collapseAt="sm"
-              title="Створити інцидент"
-            >
-              Створити інцидент
-            </Button>
-          )}
-        />
+        {/* No «Створити інцидент» here. Only a client opens a request — support
+            receives it, works it and closes it — so the front door of the
+            support side has nothing to create. */}
+        <PageHeader title="Огляд підтримки" />
 
         {loading ? (
           <div role="status" aria-busy="true" className="flex min-h-[420px] items-center justify-center">
@@ -184,7 +185,7 @@ export default function SupportOverviewPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-[20px]">
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
               <KpiCard
                 icon={Inbox}
                 value={metrics.open}
@@ -202,6 +203,17 @@ export default function SupportOverviewPage() {
                 value={metrics.active}
                 label="У роботі"
                 sub={`${metrics.review} очікують відповіді`}
+              />
+              {/* The one figure a status board cannot give you. «У роботі» says
+                  what we are doing; this says what we owe — the customer wrote
+                  last and nobody here has answered since. It leads to the same
+                  set it counts: the queue, filtered by the same predicate. */}
+              <KpiCard
+                icon={MessageCircleReply}
+                value={metrics.waitingOnUs}
+                label="Чекають на нас"
+                sub={metrics.waitingOnUs ? 'клієнт написав останнім' : 'усім відповіли'}
+                onClick={() => router.push('/my?waiting=us')}
               />
               <KpiCard
                 icon={UsersRound}
@@ -227,9 +239,7 @@ export default function SupportOverviewPage() {
                   <EmptyState
                     icon={Inbox}
                     title="Інцидентів ще немає"
-                    description="Створіть перший інцидент або запросіть клієнта до підготовленого для нього простору."
-                    action="Створити інцидент"
-                    onAction={() => router.push('/my?new=1')}
+                    description="Запросіть клієнта до підготовленого для нього простору — звернення відкриває він."
                     density="compact"
                     surface="card"
                   />

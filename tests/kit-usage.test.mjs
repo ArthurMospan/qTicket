@@ -190,8 +190,14 @@ test('the approved follow-up decisions stay encoded in the product', () => {
   assert.match(project, /<TaskListView/);
   assert.doesNotMatch(project, /hiddenGroupIds=/);
   assert.match(myTasks, /<AgileBoard[\s\S]{0,500}showHiddenLane/);
-  assert.match(myTasks, /<AgileBoard[\s\S]{0,600}onRequestAddIssue=/);
+  // No board asks anybody for a composer any more: only a client opens a
+  // request, and they open it from their own space.
+  assert.doesNotMatch(myTasks, /onRequestAddIssue=/);
   assert.doesNotMatch(project, /<AgileBoard[\s\S]{0,700}showHiddenLane/);
+  // A customer's copy of the board and the list has no assignee slot at all —
+  // absent, not an empty column announcing a routing decision they never see.
+  assert.match(project, /<AgileBoard[\s\S]{0,400}showAssignee=\{!clientViewer\}/);
+  assert.match(project, /<TaskListView[\s\S]{0,300}showAssignee=\{!clientViewer\}/);
 
   assert.match(createTask, /types\.filter\(type => type\.id !== 'epic'\)/);
   assert.match(createTask, /options=\{creatableTypes\.map/);

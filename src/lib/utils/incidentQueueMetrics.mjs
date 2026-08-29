@@ -13,7 +13,8 @@
 // `active` includes `review`, and the screen that wants to say how many of them
 // are waiting on an answer says so from `review` beside it.
 
-import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
+import { isExternalActorId } from './issueParticipants.mjs';
+import { statusCategoryOf } from './statusCategories.mjs';
 
 /**
  * Who an incident is assigned to, across the three shapes the data has had.
@@ -42,12 +43,59 @@ export function categorizeIssues(issues, statuses) {
 }
 
 /**
+ * Whether the last word in a request was the customer's.
+ *
+ * A status says what the queue is doing; it never says what the queue owes. A
+ * request can stand in «У роботі» for a week with the customer's last question
+ * unanswered, and nothing on any screen says so — the only record of it is who
+ * spoke last, which the issue document already carries as `lastCommentAuthorId`.
+ *
+ * Read as «not one of ours» rather than «is a client». An author who is not a
+ * support member is either the customer or an actor imported with the request
+ * from the system it came from — `isExternalActorId` is that second case, and it
+ * has no membership to look up — and in both readings the answer is still owed
+ * by us.
+ *
+ * @param {object} issue The issue document, as the queue already holds it.
+ * @param {Set<string>|string[]} supportUserIds The organization's own people.
+ */
+export function isWaitingOnUs(issue, supportUserIds) {
+  const authorId = issue?.lastCommentAuthorId;
+  // Nothing has been said in it yet, so nothing is unanswered. A request nobody
+  // has written in is «Нові», and that counter already has it.
+  if (typeof authorId !== 'string' || authorId.length === 0) return false;
+  if (isExternalActorId(authorId)) return true;
+  const support = supportUserIds instanceof Set
+    ? supportUserIds
+    : new Set(supportUserIds || []);
+  // Until we know who «ми» are, nobody can be said to be waiting on us.
+  if (support.size === 0) return false;
+  return !support.has(authorId);
+}
+
+/**
+ * The exact set the «Чекають на нас» counter counts, so the tile above a queue
+ * and the filtered list behind it cannot come apart. A closed request is not
+ * waiting on anybody, whoever wrote in it last.
+ *
+ * @param {{issue: object, category: string}[]} categorized From `categorizeIssues`.
+ * @param {Set<string>|string[]} supportUserIds The organization's own people.
+ * @returns {object[]}
+ */
+export function waitingOnUsIssues(categorized, supportUserIds) {
+  return (categorized || [])
+    .filter(entry => entry.category !== 'done' && isWaitingOnUs(entry.issue, supportUserIds))
+    .map(entry => entry.issue);
+}
+
+/**
  * The counters every incident queue reports, from one set of rules.
  *
  * @param {{issue: object, category: string}[]} categorized From `categorizeIssues`.
- * @returns {{open: number, new: number, active: number, review: number, resolved: number, unassigned: number}}
+ * @param {{supportUserIds?: Set<string>|string[]}} options Who «ми» are, for «Чекають на нас».
+ * @returns {{open: number, new: number, active: number, review: number, resolved: number, unassigned: number, waitingOnUs: number}}
  */
-export function incidentQueueMetrics(categorized) {
+export function incidentQueueMetrics(categorized, { supportUserIds } = {}) {
   const entries = categorized || [];
   const open = entries.filter(entry => entry.category !== 'done');
   return {
@@ -60,5 +108,8 @@ export function incidentQueueMetrics(categorized) {
     review: open.filter(entry => entry.category === 'review').length,
     resolved: entries.filter(entry => entry.category === 'done').length,
     unassigned: open.filter(entry => assigneeIdsOf(entry.issue).length === 0).length,
+    // The customer wrote last and we have not answered. The same call the
+    // filtered list makes, so the number and the list cannot disagree.
+    waitingOnUs: waitingOnUsIssues(entries, supportUserIds).length,
   };
 }
