@@ -653,7 +653,6 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
           isOpen={showComposer}
           onClose={() => setShowComposer(false)}
           onSubmit={handleCreateIssue}
-          stages={project?.stages || []}
           teamMembers={[]}
           projectContext={{
             id: project.id,

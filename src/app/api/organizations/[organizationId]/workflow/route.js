@@ -11,6 +11,7 @@ import {
   recountProjectIssueCounts,
 } from '@/lib/server/projectIssueCounts';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import {
   introducedIssueExecutionViolations,
 } from '@/lib/utils/issueStatusTransition.mjs';
@@ -101,7 +102,10 @@ export async function PATCH(request, context) {
     const authorization = await authorizeOrgRequest(
       request,
       organizationId,
-      ['owner', 'admin'],
+      // The board's columns are project settings; the workflow route is where
+      // they are actually written. `can.js` names that gate and refuses to have
+      // a second one.
+      rolesFor('edit:project_settings'),
     );
     if (authorization.error) {
       return NextResponse.json({

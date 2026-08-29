@@ -77,7 +77,6 @@ const BOUNDED_WITHOUT_LIMIT = new Map([
   ['components/IssueReadStateBridge.jsx', 'one read cursor per task this user opened'],
   ['app/(app)/chat/page.js', 'presence and channels of one organization'],
   ['lib/hooks/useWorkspaceChat.js', 'channels of one organization; messages ARE limited'],
-  ['lib/hooks/useStagesForProject.js', 'stages of one project'],
 
   // Bounded by the work itself, and reviewed as a deliberate cost: this is the
   // task dataset the boards and «Мої завдання» are all made of. It is the

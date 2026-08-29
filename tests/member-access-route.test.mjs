@@ -41,7 +41,7 @@ test('deactivating a member closes their access and leaves their work alone', as
 
 test('legacy member roles stay protected while QuickTeam-managed seats are immutable here', async () => {
   const route = await read('../src/app/api/organizations/[organizationId]/members/[memberId]/route.js');
-  assert.match(route, /authorizeOrgRequest\(request, organizationId, \['owner', 'admin'\]\)/);
+  assert.match(route, /authorizeOrgRequest\(request, organizationId, rolesFor\('manage:member_roles'\)\)/);
   assert.doesNotMatch(route, /Only the owner can change member roles/);
   assert.match(route, /action === 'role' && membership\.role === 'owner'/);
   assert.match(route, /memberId === authorization\.user\.uid/);

@@ -10,7 +10,7 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 271,
+    "files": 270,
     "elements": 2593,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,

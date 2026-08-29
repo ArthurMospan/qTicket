@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { quickTeamLaunchId } from '@/lib/integrations/quickteamContract.mjs';
+import { INTERNAL_ROLES } from '@/lib/utils/can';
 
 export async function POST(request) {
   try {
@@ -33,7 +34,7 @@ export async function POST(request) {
     if (!organization.exists || organization.data()?.quickTeam?.entitlement !== 'active') {
       return NextResponse.json({ error: 'qTicket вимкнено для цієї організації' }, { status: 403 });
     }
-    if (!membership.exists || !['owner', 'admin', 'member'].includes(membership.data()?.role)) {
+    if (!membership.exists || !INTERNAL_ROLES.includes(membership.data()?.role)) {
       return NextResponse.json({ error: 'Доступ до qTicket вимкнено' }, { status: 403 });
     }
     const customToken = await getAdminAuth().createCustomToken(launch.qTicketUserId, {

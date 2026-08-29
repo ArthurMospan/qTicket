@@ -8,7 +8,6 @@ import { useIssues }           from '@/lib/hooks/useIssues';
 import { useOrganization }     from '@/lib/hooks/useOrganization';
 import { hasProjectAccess, hasRecordedTeam, isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
-import { useStagesForProject } from '@/lib/hooks/useStagesForProject';
 import { useWorkflowConfig }   from '@/lib/hooks/useWorkflowConfig';
 import { resolveCategoryStatusId } from '@/lib/utils/statusCategories.mjs';
 import { ISSUE_LINK_OPTIONS, issueLinkPerspective, useIssueLinks } from '@/lib/hooks/useIssueLinks';
@@ -313,8 +312,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const isIssueArchived = isArchivedIssue(issue);
   const isIssueCancelled = isCancelledIssue(issue);
   const isArchived = project?.status === 'archived' || isIssueArchived || isIssueCancelled;
-
-  const { stages }   = useStagesForProject(projectId);
 
   const requestedTaskPane = searchParams.get('view') === 'chat' ? 'chat' : 'task';
   const [taskPaneSelection, setTaskPaneSelection] = useState(null);
@@ -777,7 +774,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   );
   const hasPanelBody = !isEditing || visibleAttachments.length > 0 || hasSecondaryBlocks;
 
-  const allMaterials   = stages.flatMap(s => (s.materials || []).map(m => ({ ...m, stageName: s.title || s.name })));
   const actor          = { userId: currentUser?.id || currentUser?.uid, userName: currentUser?.name };
 
   // ── Edit mode helpers ─────────────────────────────────────────────

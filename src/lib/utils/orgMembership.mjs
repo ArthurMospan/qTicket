@@ -13,11 +13,75 @@
 // is never moved or stripped: that is a record of what happened, not a
 // permission, and rewriting it is how a workspace loses its own history.
 
+import { INTERNAL_ROLES } from './can.js';
+
 export const MEMBERSHIP_COLLECTION = 'orgMemberships';
 export const MEMBERSHIP_ARCHIVE = 'orgMembershipArchive';
 
 export function membershipId(organizationId, userId) {
   return `${organizationId}_${userId}`;
+}
+
+/**
+ * What a QuickTeam staff snapshot does to the seats that are already here.
+ *
+ * QuickTeam owns the support side of the workspace: a person it stops sending
+ * loses their seat, and the same person in a later snapshot gets it back. The
+ * two halves are one rule and are decided together, because getting them apart
+ * is exactly how they came to disagree — the seat was archived without the
+ * client spaces the person worked on, `project.team` was cleared, and the
+ * return path deleted the archive instead of consuming it. Nothing anywhere
+ * remembered the projects, so a colleague who came back came back to nothing.
+ *
+ * @param {object} options
+ * @param {string[]} options.incomingUserIds qTicket uids named by this snapshot.
+ * @param {Array<{userId: string, role: string, positionId?: string, joinedAt?: *,
+ *   invitedBy?: *}>} options.memberships The memberships this organization holds now.
+ * @param {Array<{id: string, team?: string[]}>} options.projects Every client space.
+ * @param {Array<{userId: string, projectIds?: string[]}>} [options.archives]
+ *   The archived seats of people this snapshot names — their way back in.
+ * @returns {{departing: Array<{userId: string, role: string, positionId: string,
+ *   joinedAt: *, invitedBy: *, projectIds: string[]}>, projectIds: string[],
+ *   returning: Array<{userId: string, seat: object, projectIds: string[]}>}}
+ */
+export function quickTeamSeatChanges({
+  incomingUserIds = [],
+  memberships = [],
+  projects = [],
+  archives = [],
+}) {
+  const incoming = new Set(incomingUserIds);
+  const leaving = memberships.filter(membership => (
+    INTERNAL_ROLES.includes(membership.role) && !incoming.has(membership.userId)
+  ));
+  // The client spaces each departing person is on. `project.team` is about to be
+  // cleared of them, so this is the last moment the answer exists.
+  const projectIdsByUser = new Map(leaving.map(membership => [membership.userId, []]));
+  const touchedProjectIds = [];
+  for (const project of projects) {
+    const affected = (project.team || []).filter(uid => projectIdsByUser.has(uid));
+    if (affected.length === 0) continue;
+    for (const uid of affected) projectIdsByUser.get(uid).push(project.id);
+    touchedProjectIds.push(project.id);
+  }
+  return {
+    departing: leaving.map(membership => ({
+      userId: membership.userId,
+      role: membership.role,
+      positionId: membership.positionId || '',
+      joinedAt: membership.joinedAt || null,
+      invitedBy: membership.invitedBy || null,
+      projectIds: projectIdsByUser.get(membership.userId) || [],
+    })),
+    projectIds: touchedProjectIds,
+    returning: archives
+      .filter(archived => incoming.has(archived.userId))
+      .map(archived => ({
+        userId: archived.userId,
+        seat: archived,
+        projectIds: Array.isArray(archived.projectIds) ? archived.projectIds : [],
+      })),
+  };
 }
 
 /**

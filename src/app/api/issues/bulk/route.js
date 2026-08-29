@@ -32,7 +32,7 @@ import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { issueParticipants } from '@/lib/utils/issueParticipants.mjs';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { assigneesOutsideProject, projectWriteError } from '@/lib/utils/projectAccess.mjs';
-import { can } from '@/lib/utils/can';
+import { can, rolesFor } from '@/lib/utils/can';
 import { DEFAULT_ORGANIZATION_TIME_ZONE, zonedDateTimeToUtcMs } from '@/lib/utils/timeZone.mjs';
 
 const ACTION_CONCURRENCY = 8;
@@ -212,10 +212,12 @@ export async function POST(request) {
     const valueError = validateBulkActionValue(actionId, body.value);
     if (!action || valueError) return NextResponse.json({ error: valueError || 'Невідома масова дія' }, { status: 400 });
 
-    const authorization = await authorizeOrgRequest(request, organizationId, ['owner', 'admin', 'member']);
+    // Every bulk action is an edit or a deletion of a task, and the matrix
+    // gives both the same roles — this is the floor. Which of them the chosen
+    // action needs is `can()` immediately below, and whether it may touch *this*
+    // task is `projectAccessError`, per issue.
+    const authorization = await authorizeOrgRequest(request, organizationId, rolesFor('edit:issue'));
     if (authorization.error) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
-    // Whether a role may archive at all comes from the matrix; whether it may
-    // archive *this* task comes from `projectAccessError` below, per issue.
     if (action.permission && !can(authorization.membership?.role, action.permission)) {
       return NextResponse.json({ error: 'Ця масова дія недоступна для вашої ролі' }, { status: 403 });
     }

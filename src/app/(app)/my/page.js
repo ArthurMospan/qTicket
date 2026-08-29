@@ -478,7 +478,6 @@ export default function IncidentQueuePage() {
           return { ...created, projectId: formData.projectId };
         }}
         projects={projects}
-        stages={[]}
         teamMembers={supportMembers}
       />
 

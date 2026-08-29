@@ -5,7 +5,7 @@ import {
   getAdminDb,
 } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { can } from '@/lib/utils/can';
+import { can, rolesFor } from '@/lib/utils/can';
 import { reactivateMembership } from '@/lib/server/orgMembership';
 import {
   MEMBERSHIP_ARCHIVE,
@@ -32,7 +32,7 @@ function validMemberId(value) {
 }
 
 async function authorizeManager(request, organizationId) {
-  return authorizeOrgRequest(request, organizationId, ['owner', 'admin']);
+  return authorizeOrgRequest(request, organizationId, rolesFor('manage:member_roles'));
 }
 
 function errorResponse(error) {

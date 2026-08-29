@@ -509,7 +509,6 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
   const router = useRouter();
   const [name,        setName]        = useState('');
   const [description, setDescription] = useState('');
-  const [visibility,  setVisibility]  = useState('internal');
   const [saving,      setSaving]      = useState(false);
   const [team,        setTeam]        = useState([]);
   const [hiddenColumns, setHiddenColumns] = useState([]);
@@ -529,7 +528,6 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
       const payload = {
         name: name.trim(),
         description: description.trim(),
-        visibility,
         organizationId: orgId,
         team,
         hiddenColumns,
@@ -984,7 +982,6 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
           return { ...created, projectId: formData.projectId };
         }}
         projects={projects}
-        stages={[]}
         teamMembers={members}
       />
     )}

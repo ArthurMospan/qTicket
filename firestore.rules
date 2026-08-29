@@ -295,27 +295,6 @@ service cloud.firestore {
       }
     }
 
-    // ── stages/{stageId} — created only via Admin SDK, no organizationId
-    //    field (scoped through the parent project) ──────────────────────
-    match /stages/{stageId} {
-      allow read: if canAccessProjectById(resource.data.projectId);
-      allow create, delete: if false;
-      allow update: if projectAcceptsNestedWrites(resource.data.projectId) &&
-        canAccessProjectById(resource.data.projectId) &&
-        request.resource.data.projectId == resource.data.projectId;
-
-      match /materials/{materialId} {
-        allow read: if canAccessProjectById(
-          get(/databases/$(database)/documents/stages/$(stageId)).data.projectId
-        );
-        allow create, update, delete: if projectAcceptsNestedWrites(
-          get(/databases/$(database)/documents/stages/$(stageId)).data.projectId
-        ) && canAccessProjectById(
-          get(/databases/$(database)/documents/stages/$(stageId)).data.projectId
-        );
-      }
-    }
-
     // ── calendarEvents/{eventId} ───────────────────────────────────────
     // The inherited calendar is an internal support module and all of its
     // reads and writes go through role-gated server routes. Keeping the source

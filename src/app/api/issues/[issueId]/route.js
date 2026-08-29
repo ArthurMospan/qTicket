@@ -8,6 +8,7 @@ import {
   projectIssueCountIncrements,
 } from '@/lib/server/projectIssueCounts';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import {
   issueTombstoneId,
@@ -44,7 +45,7 @@ export async function DELETE(request, context) {
     const authorization = await authorizeOrgRequest(
       request,
       issue.organizationId,
-      ['owner', 'admin', 'member'],
+      rolesFor('delete:issue'),
     );
     if (authorization.error) {
       return NextResponse.json({

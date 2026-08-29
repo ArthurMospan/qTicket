@@ -11,6 +11,7 @@ import {
   quickTeamOrganizationId,
 } from '@/lib/integrations/quickteamContract.mjs';
 import { readSignedQuickTeamRequest } from '@/lib/server/quickteamIntegration';
+import { INTERNAL_ROLES } from '@/lib/utils/can';
 
 export async function POST(request) {
   try {
@@ -40,7 +41,7 @@ export async function POST(request) {
     if (!organizationSnap.exists || organizationSnap.data()?.quickTeam?.entitlement !== 'active') {
       return NextResponse.json({ error: 'qTicket is not active for this organization', code: 'inactive' }, { status: 403 });
     }
-    if (!membershipSnap?.exists || !['owner', 'admin', 'member'].includes(membershipSnap.data()?.role)) {
+    if (!membershipSnap?.exists || !INTERNAL_ROLES.includes(membershipSnap.data()?.role)) {
       return NextResponse.json({ error: 'User is not enabled for qTicket', code: 'not_enabled' }, { status: 403 });
     }
 
