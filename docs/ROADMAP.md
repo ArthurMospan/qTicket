@@ -353,9 +353,14 @@ Product work still required:
   client access and read-only QuickTeam state. In-app notification preferences are no longer part of that
   retained set for internal roles — the owner removed the panel, and the
   consequence is recorded above.
-- Add the explicit, idempotent server-side transfer from an incident to a
-  QuickTeam task. Billing entitlement follows only after the wider product has a
-  server-side add-on contract.
+- Run the acceptance flow against the two cross-product features that have
+  never served a real request: the unread badge on QuickTeam's rail and
+  «Створити завдання в QuickTeam». Both are implemented and tested on both
+  sides (see [QTICKET.md](integrations/QTICKET.md)); both need
+  `QUICKTEAM_QTICKET_SHARED_SECRET` on the two servers and
+  `NEXT_PUBLIC_QUICKTEAM_URL` in qTicket's deployment, and neither has been
+  exercised end to end. Billing entitlement follows only after the wider product
+  has a server-side add-on contract.
 
 ### Confirmed MVP information architecture
 
@@ -408,9 +413,13 @@ organization's own record, and nothing rewrites them.
    the first synchronized staff launch against the test deployment.
 7. **In progress:** execute the full internal/client acceptance flow with
    separate accounts and correct every concrete product or permission failure.
-8. Only after that flow is accepted, implement the incident-to-QuickTeam-task
-   transfer contract. Any later billing work belongs to QuickTeam; qTicket
-   continues to consume only its active/inactive entitlement.
+8. **Completed ahead of the acceptance flow, at the owner's instruction:** the
+   incident-to-QuickTeam-task transfer, and the unread badge beside QuickTeam's
+   qTicket row. The transfer is idempotent on the request id, creates the task
+   through QuickTeam's own creation path, and leaves the request open with a
+   link and one audit line. What remains for step 7 to prove is that both work
+   against the deployed pair. Any later billing work belongs to QuickTeam;
+   qTicket continues to consume only its active/inactive entitlement.
 
 The exact next implementation task remains step 7: **Налаштування** is audited,
 so what is left is **Команда**, the rest of the static role audit, and then the
