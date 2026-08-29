@@ -85,7 +85,11 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
   await page.setViewportSize({ width: 390, height: 844 });
   const routes = [
     ['/help', 'Відповіді про реальну роботу сервісу'],
-    ['/help/kanban-and-bulk-actions', 'Як змінити багато звернень одразу'],
+    // A client-readable article, and it has to be: the public help centre
+    // publishes only what a customer may read, and the staff manual 404s a
+    // few lines below. This walked a staff slug and expected 200, so one
+    // file asserted both answers for one address.
+    ['/help/creating-issues', 'Як створити звернення'],
     ['/news', 'Новини продукту'],
     ['/terms', 'Умови користування qTicket'],
     ['/privacy', 'Політика конфіденційності qTicket'],
