@@ -26,8 +26,11 @@ work already done is not one of them — that history belongs in Git.
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Product guardrails and confirmed open work |
 | [docs/MIGRATIONS.md](docs/MIGRATIONS.md) | Runbooks for the one-time data migration scripts |
 
-Cross-repository contracts live in `docs/integrations/` (QuickTeam+, Telegram,
-YouTrack). Add a seventh document only when a subject genuinely has no home
+Cross-repository contracts live in `docs/integrations/`. There is one, and one
+is the point: [QTICKET.md](docs/integrations/QTICKET.md), the signed seam to
+QuickTeam. The QuickTeam+, Telegram and YouTrack contracts were deleted with the
+integrations themselves — a ticket system has no import path and no second
+messenger. Add a seventh document only when a subject genuinely has no home
 above — a new file is a place for the next reader not to look.
 
 ## Framework and commands
@@ -79,7 +82,7 @@ above — a new file is a place for the next reader not to look.
 - The reports cannot see that a control moved four pixels. `npm run test:visual` photographs every `/ui-kit` section and diffs it against a committed baseline. Baselines live in `tests/visual/__screenshots__`, are rendered by the `UI Kit screenshots` workflow on Linux, and are never written from a developer machine — locally the same command runs as a smoke test with pixel comparison off. Accept a deliberate visual change by running that workflow with `update_baselines`, which commits the new PNGs.
 - Geometry, spacing and type scales belong in `globals.css` behind a named `composition`; do not reintroduce a free-value prop (`iconSize`, a raw avatar pixel size) that lets a call site hold its own copy of a kit decision.
 - Positioning a component in its parent (`flex-1`, `h-full`, margins) is legitimate composition and is reported as benign. Redefining the component itself is not.
-- qTicket is a separate SaaS add-on to QuickTeam and QuickTeam+; all three may exist in parallel. Do not couple their primary Firebase sessions or databases. Staff identity and later incident-to-task transfer integrate with QuickTeam through explicit server-side contracts; external qTicket clients authenticate through qTicket's own invitation/email flow.
+- qTicket is a separate SaaS add-on to QuickTeam. Do not couple their primary Firebase sessions or databases. Staff identity and later incident-to-task transfer integrate with QuickTeam through explicit server-side contracts; external qTicket clients authenticate through qTicket's own invitation/email flow.
 
 ## Repository hygiene
 
