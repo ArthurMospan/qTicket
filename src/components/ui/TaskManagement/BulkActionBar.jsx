@@ -13,7 +13,6 @@ import {
   Trash2,
   Users,
   X,
-  Zap,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ContextMenu from '@/components/ui/ContextMenu';
@@ -39,7 +38,6 @@ function encodedOptions(options, operations) {
  * @param {object[]} props.priorityOptions Configured priorities, including the explicit none option.
  * @param {object[]} props.labelOptions Configured task labels.
  * @param {object[]} props.typeOptions Creatable task types.
- * @param {object[]} props.sprintOptions Active or planned sprint destinations.
  * @param {boolean} props.canArchive Whether the current role may delete tasks. Archiving needs no permission beyond editing.
  * @param {string} props.archiveDisabledReason Explanation shown when deletion is unavailable.
  * @param {(action: string, value?: unknown) => Promise<unknown>} props.onApply Runs one registry action for the selection.
@@ -54,7 +52,6 @@ export default function BulkActionBar({
   priorityOptions = [],
   labelOptions = [],
   typeOptions = [],
-  sprintOptions = [],
   canArchive = false,
   archiveDisabledReason = 'Видалення доступне owner або admin',
   onApply,
@@ -246,23 +243,6 @@ export default function BulkActionBar({
           size="sm"
           disabled={busy}
           ariaLabel="Змінити тип вибраних інцидентів"
-          buttonClassName={triggerClass}
-        />
-      )}
-      {sprintOptions.length > 0 && (
-        <Select
-          value=""
-          onChange={value => (value === '__backlog__'
-            ? apply('backlog')
-            : apply('sprint', value))}
-          options={[{ value: '__backlog__', label: 'Без спринта' }, ...sprintOptions]}
-          placeholder="Спринт"
-          triggerIcon={Zap}
-          className="ui-bulk-actions__control"
-          compact
-          size="sm"
-          disabled={busy}
-          ariaLabel="Перемістити вибрані інциденти у спринт"
           buttonClassName={triggerClass}
         />
       )}

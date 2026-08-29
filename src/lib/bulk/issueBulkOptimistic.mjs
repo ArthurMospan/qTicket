@@ -39,14 +39,6 @@ export function optimisticBulkPatch(issue, action, value, { statusId = null } = 
       return { dueDate: value };
     case 'deadline-clear':
       return { dueDate: null };
-    case 'estimate':
-      return { estimateMinutes: Number(value) };
-    case 'estimate-clear':
-      return { estimateMinutes: null };
-    case 'sprint':
-      return { sprintId: value };
-    case 'backlog':
-      return { sprintId: null };
     // All three take the task off the screen it was selected on, so all three
     // paint the same local disappearance. What differs is where it lands:
     // «Архів» for one, «Скасовані» for the second, «Нещодавно видалене» for

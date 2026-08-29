@@ -176,8 +176,8 @@ test('patchLanded compares arrays by value, not identity', () => {
 });
 
 test('patchLanded treats a null patch as satisfied by a missing field', () => {
-  assert.equal(patchLanded({ id: 'a' }, { sprintId: null }), true);
-  assert.equal(patchLanded({ id: 'a', sprintId: 's1' }, { sprintId: null }), false);
+  assert.equal(patchLanded({ id: 'a' }, { parentIssueId: null }), true);
+  assert.equal(patchLanded({ id: 'a', parentIssueId: 'i1' }, { parentIssueId: null }), false);
 });
 
 test('prunePatches drops overlays the snapshot has caught up with', () => {
@@ -312,7 +312,7 @@ test('compareIssues is total, so a mixed list sorts the same way every pass', ()
 test('pickPatchableFields keeps only fields that round-trip through Firestore', () => {
   const kept = pickPatchableFields({
     columnId: 'done',
-    sprintId: null,
+    parentIssueId: null,
     assigneeIds: ['u1'],
     // Not patchable: never comes back from the snapshot in the shape we sent.
     dueDate: new Date(),
@@ -320,7 +320,7 @@ test('pickPatchableFields keeps only fields that round-trip through Firestore', 
     updatedAt: { _methodName: 'serverTimestamp' },
   });
 
-  assert.deepEqual(kept, { columnId: 'done', sprintId: null, assigneeIds: ['u1'] });
+  assert.deepEqual(kept, { columnId: 'done', parentIssueId: null, assigneeIds: ['u1'] });
 });
 
 test('pickPatchableFields returns null when nothing is patchable', () => {

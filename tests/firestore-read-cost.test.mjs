@@ -67,33 +67,27 @@ function listeners() {
 // because «it is small today» is how the last two outages started.
 const BOUNDED_WITHOUT_LIMIT = new Map([
   // Bounded by the size of the organization: one document per member, per
-  // project, per channel, per sprint. These grow with the team, not with use.
+  // project, per channel. These grow with the team, not with use.
   ['lib/context/OrgContext.js', 'memberships and organizations of one user'],
   ['lib/hooks/useOrganization.js', 'one organization document and its members'],
   ['lib/hooks/useOrganizationPresence.js', 'one presence document per member'],
   ['lib/hooks/useProjects.js', 'projects of one organization'],
-  ['lib/hooks/useSprints.js', 'sprints of one project'],
   ['lib/hooks/useWorkflowConfig.js', 'one settings document'],
   ['lib/hooks/useUnreadChatCount.js', 'channels and read cursors of one organization'],
   ['components/IssueReadStateBridge.jsx', 'one read cursor per task this user opened'],
   ['app/(app)/chat/page.js', 'presence and channels of one organization'],
   ['lib/hooks/useWorkspaceChat.js', 'channels of one organization; messages ARE limited'],
   ['lib/hooks/useStagesForProject.js', 'stages of one project'],
-  ['components/workspace/BillingTab.jsx', 'invoices of one project'],
 
   // Bounded by the work itself, and reviewed as a deliberate cost: this is the
-  // task dataset the boards, the analytics and «Мої завдання» are all made of.
-  // It is the product's core read, and the one thing left that grows without a
-  // ceiling as the workspace ages. See docs/ARCHITECTURE.md → «Вартість читання».
+  // task dataset the boards and «Мої завдання» are all made of. It is the
+  // product's core read, and the one thing left that grows without a ceiling as
+  // the workspace ages. See docs/ARCHITECTURE.md → «Вартість читання».
   //
   // There is exactly one entry here now, and that is the point: four hooks used
   // to hold four listeners over these same documents, and Firestore bills a
   // delivery to each of them.
   ['lib/hooks/useOrganizationIssues.js', 'tasks and links of the projects this user can open — the whole product reads this one'],
-  ['lib/hooks/useWorkspaceAnalytics.js', 'the time logs, and they ARE windowed by loggedAt'],
-  ['lib/hooks/useTimeLogs.js', 'time logged against one task'],
-  ['lib/hooks/useProjectTimeLogs.js', 'time logged against one project'],
-  ['lib/hooks/useProjectAllTimeLogs.js', 'time logged against one project'],
   ['lib/hooks/useNotifications.js', 'the notification stream, itself limited by query'],
   ['lib/hooks/useAuth.js', 'one user document'],
 ]);
@@ -213,136 +207,13 @@ test('nothing that renders per element resolves itself through search', () => {
   }
 });
 
-// A report is a window, not a history.
-//
-// Tasks are bounded by the work: one document per thing somebody is doing, and
-// a workspace has as many as it has work. Time logs are not bounded by
-// anything. One is written every time a timer stops — by every person, every
-// day — and none is ever removed. The analytics screen said «за 30 днів» and
-// read every one of them, then dropped the rest in the browser, so the cost of
-// opening it grew with the age of the workspace rather than with the period
-// being shown. That is the same shape as both outages: a query with no edge.
-//
-// The period is therefore a bound in the query. These tests hold that edge in
-// place: the hook cannot read logs without a window, the screens have to say
-// which window they are drawing, and the composite indexes those queries need
-// have to exist, because a missing index is a query that fails in production
-// and nowhere else.
-test('the analytics time-log queries are bounded by the period being drawn', async () => {
-  const source = readFileSync(join(root, 'lib', 'hooks', 'useWorkspaceAnalytics.js'), 'utf8');
-
-  // Every timeLogs query in the hook carries the window — counted rather than
-  // parsed, because the thing that must never happen is one more query than
-  // there are bounds.
-  const timeLogQueries = source.match(/collection\(db, 'timeLogs'\)/g) || [];
-  const boundedQueries = source.match(/\.\.\.windowBounds,/g) || [];
-  assert.ok(timeLogQueries.length >= 3, 'expected the task, calendar and org-calendar queries');
-  assert.equal(
-    boundedQueries.length,
-    timeLogQueries.length,
-    'every timeLogs query in this hook must spread the window into itself',
-  );
-  assert.match(source, /where\('loggedAt', '>=', Timestamp\.fromMillis\(sinceMillis\)\)/);
-  assert.match(source, /where\('loggedAt', '<', Timestamp\.fromMillis\(untilMillis\)\)/);
-
-  // …and there is no path that reads them without one. A default window would
-  // be the bug wearing a parameter name.
-  assert.match(source, /const windowedTimeLogs = includeTimeLogs && isTimeLogWindow\(timeLogWindow\)/);
-  assert.match(source, /timeLogWindow is required whenever includeTimeLogs is on/);
-  assert.doesNotMatch(source, /timeLogWindow = \{/);
-});
-
-test('every screen that reads time logs says which window it is drawing', async () => {
-  const callers = [
-    'app/(app)/analytics/page.js',
-    'app/(app)/analytics/team/[memberId]/page.js',
-  ];
-  for (const file of callers) {
-    const source = readFileSync(join(root, file.split('/').join(sep)), 'utf8');
-    assert.match(source, /timeLogWindow/, `${file} must bound its time-log read`);
-    assert.match(
-      source,
-      /dayRangeTimeLogWindow|timesheetTimeLogWindow|memberAnalyticsTimeLogWindow/,
-      `${file} must take its window from analyticsWindow.mjs, not invent one`,
-    );
-    // And the period itself is whole days in the organization's timezone, so
-    // that the daily totals and the records behind them are about the same
-    // stretch of time.
-    assert.match(
-      source,
-      /periodDayRange\(|memberAnalyticsTimeLogWindow/,
-      `${file} must measure its period in days`,
-    );
-  }
-
-  // The screens that do not need hours do not pay for them.
-  const settings = readFileSync(join(root, 'app', '(app)', 'settings', 'page.js'), 'utf8');
-  assert.match(settings, /includeTimeLogs: false/);
-});
-
-// A live listener earns its cost where somebody is acting on the data as it
-// changes — a board they are dragging cards on, a task two people are editing,
-// a conversation. A report is not that. Nobody drags anything on «Огляд»; the
-// numbers are read, and a figure that rewrites itself mid-sentence is a
-// distraction that also holds a listener open over the largest collections in
-// the product for as long as the tab is left up.
-test('the report screens take a reading rather than holding a subscription', () => {
-  const hook = readFileSync(join(root, 'lib', 'hooks', 'useWorkspaceAnalytics.js'), 'utf8');
-  // What `live` governs is the time logs. The tasks are no longer this hook's
-  // to subscribe to or to read once: they come from the shared subscription,
-  // where one live listener serves every screen — which is cheaper than four
-  // screens each buying their own one-off copy of the same documents.
-  assert.match(hook, /useOrganizationIssues\(activeOrgId, projectIds\)/);
-  // One hook, two modes — not two code paths that can drift apart.
-  assert.match(hook, /live = true,/);
-  assert.match(hook, /if \(live\) \{\s*\n\s*return onSnapshot\(/);
-  assert.match(hook, /getDocs\(sourceQuery\)/);
-  // «Оновлено о» is a claim about age, so it is refused while the data is live.
-  assert.match(hook, /readAt: live \? null :/);
-
-  for (const file of [
-    'app/(app)/analytics/page.js',
-    'app/(app)/analytics/team/[memberId]/page.js',
-  ]) {
-    const source = readFileSync(join(root, file.split('/').join(sep)), 'utf8');
-    assert.match(source, /live: false/, `${file} must read rather than subscribe`);
-    // And a screen that stopped updating itself has to say so, and offer a
-    // newer reading. Either half alone is worse than the live listener was.
-    assert.match(source, /<RefreshStamp/, `${file} must say when it was read`);
-    assert.match(source, /onRefresh=\{refresh/, `${file} must offer a newer reading`);
-  }
-
-  // The screens where the data is the thing being worked on keep the default.
-  for (const file of ['app/(app)/my/page.js', 'app/(app)/settings/page.js']) {
-    const source = readFileSync(join(root, file.split('/').join(sep)), 'utf8');
-    assert.doesNotMatch(source, /live: false/, `${file} is a working screen, not a report`);
-  }
-});
-
-test('the windowed time-log queries have the composite indexes they need', () => {
-  const indexes = JSON.parse(
-    readFileSync(fileURLToPath(new URL('../firestore.indexes.json', import.meta.url)), 'utf8'),
-  ).indexes;
-  const paths = indexes
-    .filter(entry => entry.collectionGroup === 'timeLogs')
-    .map(entry => entry.fields.map(field => field.fieldPath).join(','));
-
-  // A range on `loggedAt` next to `issueId != ''` is two inequality fields, so
-  // the index has to carry both — and Firestore chooses the index by the order
-  // the fields appear in the filter set, not by which range is the more
-  // selective. `(…, loggedAt, issueId)` looked like the better plan and was
-  // simply not an index this query can use: production answered
-  // FAILED_PRECONDITION with the ordering below spelled out. Reasoning about
-  // the planner is not the same as asking it.
-  assert.ok(
-    paths.includes('organizationId,projectId,issueId,loggedAt'),
-    'task logs in a window need (organizationId, projectId, issueId, loggedAt)',
-  );
-  assert.ok(
-    paths.includes('organizationId,projectId,sourceType,eventVisibility,loggedAt'),
-    'team calendar logs in a window need their own index ending in loggedAt',
-  );
-});
+// The unbounded collection this file used to spend most of its length on was
+// `timeLogs`: one document every time a timer stopped, for every person, every
+// day, never removed — read thirty days at a time by a report screen that then
+// dropped most of it in the browser. qTicket does not track time, and there is
+// no report screen left to open, so the window those tests held in place has no
+// query behind it any more. What remains of the collection is maintained by the
+// calendar routes through the Admin SDK, which no browser read ever reaches.
 
 // What the product says when the cap is actually reached.
 //

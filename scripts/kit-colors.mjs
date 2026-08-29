@@ -50,7 +50,6 @@ const DATA_COLORS = {
   'src/app/(app)/settings/page.js': 'the palette a person picks a brand colour from, and the stored sidebarColor',
   'src/components/SearchModal.jsx': 'fallback colour for a type that carries none',
   'src/components/workspace/AgileBoard.jsx': 'the synthetic «Приховані» lane carries a colour like every other lane',
-  'src/components/workspace/BillingTab.jsx': 'the invoice print document is injected into a window that cannot see the app CSS',
   'src/components/workspace/IssueCard.jsx': 'fallback colours for a type or status that carries none',
   'src/components/workspace/IssueDetail.jsx': 'fallback colours for a type or priority that carries none',
 };

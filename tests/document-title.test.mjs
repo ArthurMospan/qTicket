@@ -17,13 +17,14 @@ test('every top-level workspace destination names itself in the tab', () => {
   // Same words as the sidebar entry and the page heading.
   assert.equal(routeTitle('/my'), 'Звернення');
   assert.equal(routeTitle('/chat'), 'Чат');
-  assert.equal(routeTitle('/analytics'), 'Аналітика');
   assert.equal(routeTitle('/team'), 'Команда');
   assert.equal(routeTitle('/settings'), 'Налаштування');
-  // The planning calendar and the sprint board are deleted, so there is no
-  // screen for a title to name. Both addresses redirect before anything renders.
+  // The planning calendar, the sprint board and the analytics tree are deleted,
+  // so there is no screen for a title to name. These addresses redirect before
+  // anything renders.
   assert.equal(routeTitle('/calendar'), 'Проєкт');
   assert.equal(routeTitle('/sprints'), 'Проєкт');
+  assert.equal(routeTitle('/analytics'), 'Проєкт');
 });
 
 test('the external portal names the client experience instead of the staff overview', () => {

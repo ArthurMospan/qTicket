@@ -30,11 +30,8 @@ export const PERMISSIONS = {
   // project settings, behind `edit:project_settings`, and the entry that used to
   // sit here was a second name for the same gate that nothing ever called.
 
-  // Sprints are not in this matrix. The permission that guarded creating,
-  // starting and completing one was read by the planning screen and by nothing
-  // else, and that screen is gone — an entry no call site reads is a claim
-  // nothing tests. Stored `sprintId` values and the `sprints` collection rule
-  // are untouched: the data is still somebody's history.
+  // Sprints are not in this matrix, and no longer anywhere else either: the
+  // planning screen, the field and its collection rule are gone.
 
   // Team
   //
@@ -49,16 +46,10 @@ export const PERMISSIONS = {
   'manage:member_roles': ['owner', 'admin'],  // member ↔ admin, /api/organizations/[id]/members/[memberId]
   'deactivate:member': ['owner', 'admin'],    // Забрати доступ, лишивши дані
 
-  // Finance
-  //
-  // Owner *and* admin, because that is what the product actually enforces:
-  // `firestore.rules` lets an org admin read an invoice, `/api/invoices`
-  // authorises `['owner', 'admin']`, and the analytics tab has always shown the
-  // «Рахунок» section to both. This entry said `owner` alone and was never
-  // called by anything — the screen rolled its own check — so the matrix
-  // documented a restriction the product did not have. Rules are authoritative;
-  // the matrix follows them.
-  'manage:finance': ['owner', 'admin'], // Рахунки, ставки, чужі табелі
+  // Money is not in this matrix. qTicket answers incidents; invoices, rates and
+  // timesheets are not part of «клієнт написав → підтримка відповіла → закрили»
+  // and have been deleted rather than gated, so there is no permission left to
+  // describe.
 
   // Inherited internal support modules
   //

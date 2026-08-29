@@ -128,13 +128,6 @@ export async function POST(request) {
         joinedAt: FieldValue.serverTimestamp(),
         invitedBy: authorization.user.uid,
       });
-      batch.set(db.collection('organizations').doc(organizationId)
-        .collection('memberRates').doc(userId), {
-        userId,
-        hourlyRate: 0,
-        updatedBy: authorization.user.uid,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
       batch.update(db.collection('organizations').doc(organizationId), {
         memberDirectoryVersion: FieldValue.increment(1),
       });

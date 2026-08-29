@@ -16,28 +16,6 @@ const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 // shows something at all, not which file it lives in.
 const readKitShowcase = () => readShowcase().everything;
 
-test('QUI-129 renders the project status chart the same way as global analytics', async () => {
-  const [tab, global] = await Promise.all([
-    read('../src/components/workspace/AnalyticsTab.jsx'),
-    read('../src/app/(app)/analytics/page.js'),
-  ]);
-  // The tab squeezed each status label into a fixed 100px column and truncated
-  // every name; the global page put the label above its bar. They then agreed
-  // by copying each other, which is an agreement that lasts until the next
-  // edit — so it is one component now, and "the same way" is structural.
-  const barList = await read('../src/components/ui/Charts/BarList.jsx');
-  assert.match(barList, /<span className="h-2 w-2 shrink-0 rounded-full" style=\{\{ background: item\.color \}\} \/>/);
-  assert.match(barList, /truncate text-\[13px\] font-semibold text-ink/);
-  assert.match(barList, /ui-type-figure shrink-0 text-ink/);
-  for (const source of [tab, global]) {
-    assert.match(source, /<BarList/);
-  }
-  assert.doesNotMatch(tab, /w-\[100px\] text-\[11px\] font-medium text-muted/);
-  // The priority bar multiplied its share by three "to make small bars
-  // visible", which is a chart that misstates its own values.
-  assert.doesNotMatch(tab, /\* 100 \* 3/);
-});
-
 test('QUI-129 and QUI-139 keep the project header free of team avatars', async () => {
   const [topHeader, workspaceHeader, kit] = await Promise.all([
     read('../src/components/ui/Layout/TopHeader.jsx'),
@@ -135,29 +113,16 @@ test('the workflow editor groups statuses by category and moves them by dragging
   assert.doesNotMatch(settings, /!\['backlog', 'done'\]\.includes/);
 });
 
-test('QUI-132 leaves one clock on the time field, and only on touch', async () => {
-  const [timePicker, globals] = await Promise.all([
-    read('../src/components/ui/Forms/TimePicker.jsx'),
-    read('../src/app/globals.css'),
-  ]);
-  assert.match(timePicker, /ui-time-input/);
-  assert.match(globals, /@media \(pointer: fine\)/);
-  assert.match(globals, /\.ui-time-input::-webkit-calendar-picker-indicator/);
-});
-
 test('QUI-133 gives the money input its currency instead of bare padding', async () => {
-  const [input, billing, kit] = await Promise.all([
+  const [input, kit] = await Promise.all([
     read('../src/components/ui/Input.jsx'),
-    read('../src/components/workspace/BillingTab.jsx'),
     readKitShowcase(),
   ]);
   assert.match(input, /money: 'text-right font-bold tabular-nums'/);
   assert.doesNotMatch(input, /pr-\[54px\]/, 'the hardcoded suffix gutter is gone');
   assert.match(input, /suffixText && \(/);
-  // Both call sites hand-drew the suffix, at two different sizes and offsets.
-  assert.match(billing, /suffix=\{`\$\{currency\}\/г`\}/);
-  assert.match(billing, /suffix=\{currency\}/);
-  assert.doesNotMatch(billing, /absolute right-[\d.]+ top-1\/2 -translate-y-1\/2 text-\[(?:9|10)px\]/);
+  // The call sites hand-drew the suffix, at two different sizes and offsets;
+  // the field draws it now, so the catalogue can show the one shape there is.
   assert.match(kit, /preset="money" suffix=/);
 });
 

@@ -1,54 +1,9 @@
 // src/store/useWorkspaceStore.js
 import { create } from 'zustand';
 import {
-  discardPendingUserTimer,
-  startUserTimer,
-  stopUserTimer,
-} from '@/lib/services/userTimer';
-import {
-  timerClockOffsetMillis,
-  timerElapsedSeconds,
-  timerNowMillis,
-} from '@/lib/utils/timerState.mjs';
-import {
   notificationCountTitle,
   notificationGroupKey,
 } from '@/lib/utils/notificationGrouping.mjs';
-
-function formatElapsed(seconds) {
-  const s   = Math.max(0, Math.floor(seconds));
-  const h   = Math.floor(s / 3600);
-  const m   = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  const pad = n => String(n).padStart(2, '0');
-  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
-}
-
-const STOP_INTENT_PREFIX = 'qt_timer_stop_intent:';
-
-function timestampMillis(value) {
-  if (Number.isFinite(value)) return Number(value);
-  if (typeof value?.toMillis === 'function') return value.toMillis();
-  if (Number.isFinite(value?.seconds)) return value.seconds * 1000;
-  const parsed = new Date(value || '').getTime();
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function normalizeTimer(timer) {
-  if (!timer?.id) return null;
-  const startedAt = timestampMillis(timer.startedAt);
-  if (!Number.isFinite(startedAt)) return null;
-  const stoppedAt = timestampMillis(timer.stoppedAt);
-  return {
-    ...timer,
-    startedAt,
-    ...(Number.isFinite(stoppedAt) ? { stoppedAt } : {}),
-  };
-}
-
-function elapsedAt(startedAt, stoppedAt) {
-  return Math.max(0, Math.floor((stoppedAt - startedAt) / 1000));
-}
 
 // How long one live notification card stands, and how many stand at once.
 const LIVE_NOTIF_MS = 6000;
@@ -90,229 +45,27 @@ function tabIsVisible() {
   return typeof document === 'undefined' || document.visibilityState === 'visible';
 }
 
-function stopIntentKey(userId) {
-  return `${STOP_INTENT_PREFIX}${userId}`;
-}
-
-function readStopIntent(userId) {
-  if (typeof window === 'undefined' || !userId) return null;
-  try {
-    const value = JSON.parse(window.localStorage.getItem(stopIntentKey(userId)) || 'null');
-    return value?.timerId && value?.requestedAt ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeStopIntent(userId, intent) {
-  if (typeof window === 'undefined' || !userId) return;
-  try {
-    if (intent) window.localStorage.setItem(stopIntentKey(userId), JSON.stringify(intent));
-    else window.localStorage.removeItem(stopIntentKey(userId));
-  } catch { /* the server state remains authoritative */ }
-}
-
 const useWorkspaceStore = create((set, get) => ({
 
   // ── Quick view ────────────────────────────────────────────────────
-  // A task or an event, read without leaving the screen that named it.
+  // An incident, read without leaving the screen that named it.
   //
   // The panel itself already existed — `IssueModal` over `IssueDetail` — and
-  // exactly one screen opened it, while every other place that names a task
-  // navigated away and made you come back: a mention in chat, a row in
-  // analytics, the two lists on a profile, an event in the calendar. Holding
-  // the choice here rather than in each of those screens is what makes it one
-  // panel instead of six copies of the same state.
+  // exactly one screen opened it, while every other place that names an
+  // incident navigated away and made you come back: a mention in chat, the two
+  // lists on a profile. Holding the choice here rather than in each of those
+  // screens is what makes it one panel instead of six copies of the same state.
   //
   // Not in the address, unlike the profile overlay: this opens from an object
-  // the screen already has in hand, and reconstructing a task from an id in a
-  // query string would mean a fresh read on every screen that can open one.
+  // the screen already has in hand, and reconstructing an incident from an id
+  // in a query string would mean a fresh read on every screen that can open one.
   // `Відкрити на повній сторінці` inside the panel is the shareable path.
-  quickView: null, // { kind: 'issue' | 'event', record }
+  quickView: null, // { kind: 'issue', record }
 
   openIssueQuickView: issue => {
     if (issue?.id) set({ quickView: { kind: 'issue', record: issue } });
   },
-  openEventQuickView: event => {
-    if (event?.id || event?.sourceEventId) set({ quickView: { kind: 'event', record: event } });
-  },
   closeQuickView: () => set({ quickView: null }),
-
-  // ── Timer ─────────────────────────────────────────────────────────
-  activeTimer:    null,   // { issueId, projectId, startedAt, entityType?, ...context }
-  timerElapsed:   0,      // seconds
-  _timerInterval: null,
-  // Minutes a stopped timer produced that nobody has written down yet.
-  // { issueId, projectId, minutes, stoppedAt, entityType?, ...context }
-  pendingTimeLog: null,
-  timerOwnerUserId: null,
-  timerMutationPending: false,
-  timerStopQueued: false,
-  timerClockOffsetMs: 0,
-  timerClockReady: false,
-  _timerAccountGeneration: 0,
-
-  // Returns false when a timer is already running instead of silently
-  // discarding it — replacing it used to throw away the tracked time.
-  startTimer: async (issueId, projectId, context = {}) => {
-    const { activeTimer, pendingTimeLog, timerMutationPending, _timerAccountGeneration } = get();
-    if (activeTimer || pendingTimeLog || timerMutationPending) return false;
-    set({ timerMutationPending: true });
-    try {
-      const result = await startUserTimer({ ...context, issueId, projectId });
-      if (get()._timerAccountGeneration === _timerAccountGeneration) {
-        get().calibrateTimerClock(result.clockSample);
-        get().applyUserTimerState(result.state, result.state?.userId);
-      }
-      return result.state?.active || true;
-    } finally {
-      if (get()._timerAccountGeneration === _timerAccountGeneration) {
-        set({ timerMutationPending: false });
-      }
-    }
-  },
-
-  stopTimer: async () => {
-    const {
-      activeTimer,
-      timerOwnerUserId,
-      timerMutationPending,
-      _timerAccountGeneration,
-    } = get();
-    if (!activeTimer || timerMutationPending) return null;
-    const requestedAt = new Date(timerNowMillis(Date.now(), get().timerClockOffsetMs)).toISOString();
-    set({ timerMutationPending: true });
-    try {
-      // Online stops use the server receipt time. `requestedAt` is reserved for
-      // a stop that could not reach the server and must be replayed later.
-      const result = await stopUserTimer(activeTimer.id);
-      writeStopIntent(timerOwnerUserId, null);
-      if (get()._timerAccountGeneration === _timerAccountGeneration) {
-        get().calibrateTimerClock(result.clockSample);
-        get().applyUserTimerState(result.state, timerOwnerUserId);
-      }
-      return result.state?.pending || null;
-    } catch (error) {
-      if (get()._timerAccountGeneration !== _timerAccountGeneration) return null;
-      // fetch() network failures have no HTTP status even when navigator still
-      // reports online (captive portal, radio hand-off, brief reconnect). Queue
-      // only those; real server responses retain their status and surface.
-      if (
-        typeof navigator !== 'undefined'
-        && (navigator.onLine === false || !Number.isFinite(Number(error?.status)))
-      ) {
-        writeStopIntent(timerOwnerUserId, { timerId: activeTimer.id, requestedAt });
-        const interval = get()._timerInterval;
-        if (interval) clearInterval(interval);
-        set({ _timerInterval: null, timerStopQueued: true });
-        return { ...activeTimer, queued: true };
-      }
-      throw error;
-    } finally {
-      if (get()._timerAccountGeneration === _timerAccountGeneration) {
-        set({ timerMutationPending: false });
-      }
-    }
-  },
-
-  /** The user saved the minutes, or knowingly threw them away. */
-  clearPendingTimeLog: async expectedTimerId => {
-    const pending = get().pendingTimeLog;
-    if (!pending?.id || (expectedTimerId && pending.id !== expectedTimerId)) return null;
-    const generation = get()._timerAccountGeneration;
-    const result = await discardPendingUserTimer(pending.id);
-    if (get()._timerAccountGeneration === generation) {
-      get().calibrateTimerClock(result.clockSample);
-      get().applyUserTimerState(result.state, get().timerOwnerUserId);
-    }
-    return result.state;
-  },
-
-  acknowledgePendingTimeLog: timerId => set(state => (
-    state.pendingTimeLog?.id === timerId ? { pendingTimeLog: null } : {}
-  )),
-
-  calibrateTimerClock: sample => {
-    const offset = timerClockOffsetMillis(sample);
-    if (!Number.isFinite(offset)) return false;
-    const active = get().activeTimer;
-    set({
-      timerClockOffsetMs: offset,
-      timerClockReady: true,
-      ...(active ? { timerElapsed: timerElapsedSeconds(active.startedAt, Date.now(), offset) } : {}),
-    });
-    return true;
-  },
-
-  applyUserTimerState: (state, userId) => {
-    const interval = get()._timerInterval;
-    if (interval) clearInterval(interval);
-    const validState = state && state.userId === userId ? state : null;
-    const active = normalizeTimer(validState?.active);
-    const pending = normalizeTimer(validState?.pending);
-    const stopIntent = readStopIntent(userId);
-    const stopQueued = Boolean(active && stopIntent?.timerId === active.id);
-    set({
-      activeTimer: active,
-      pendingTimeLog: pending,
-      timerOwnerUserId: userId || null,
-      timerElapsed: active
-        ? (stopQueued
-          ? elapsedAt(active.startedAt, new Date(stopIntent.requestedAt).getTime())
-          : timerElapsedSeconds(active.startedAt, Date.now(), get().timerClockOffsetMs))
-        : 0,
-      timerStopQueued: stopQueued,
-      _timerInterval: active && !stopQueued
-        ? setInterval(() => set({
-          timerElapsed: timerElapsedSeconds(active.startedAt, Date.now(), get().timerClockOffsetMs),
-        }), 1000)
-        : null,
-    });
-  },
-
-  clearUserTimerState: () => {
-    const interval = get()._timerInterval;
-    if (interval) clearInterval(interval);
-    set({
-      activeTimer: null,
-      pendingTimeLog: null,
-      timerOwnerUserId: null,
-      timerElapsed: 0,
-      timerStopQueued: false,
-      timerMutationPending: false,
-      _timerInterval: null,
-      _timerAccountGeneration: get()._timerAccountGeneration + 1,
-    });
-  },
-
-  flushQueuedTimerStop: async userId => {
-    const generation = get()._timerAccountGeneration;
-    const intent = readStopIntent(userId);
-    const active = get().timerOwnerUserId === userId ? get().activeTimer : null;
-    if (!intent) return null;
-    if (!active || active.id !== intent.timerId) {
-      writeStopIntent(userId, null);
-      set({ timerStopQueued: false });
-      return null;
-    }
-    try {
-      const result = await stopUserTimer(intent.timerId, intent.requestedAt);
-      writeStopIntent(userId, null);
-      if (get()._timerAccountGeneration === generation) {
-        get().calibrateTimerClock(result.clockSample);
-        get().applyUserTimerState(result.state, userId);
-      }
-      return result.state;
-    } catch (error) {
-      if (error?.status === 409 || error?.status === 404) {
-        writeStopIntent(userId, null);
-        if (get()._timerAccountGeneration === generation) set({ timerStopQueued: false });
-      }
-      return null;
-    }
-  },
-
-  formatElapsed,
 
   // ── Toast ─────────────────────────────────────────────────────────
   toast: null,
@@ -518,8 +271,6 @@ const useWorkspaceStore = create((set, get) => ({
   setMyTaskSearch: (q) => set({ myTaskSearch: q }),
   projectSearch: '',
   setProjectSearch: (q) => set({ projectSearch: q }),
-  analyticsSearch: '',
-  setAnalyticsSearch: (q) => set({ analyticsSearch: q }),
 
   // Local pages publish only their final filtered count. The header uses it to
   // decide whether it needs the broader (and more expensive) search request.
@@ -552,9 +303,9 @@ const useWorkspaceStore = create((set, get) => ({
   clearSidebarPreview: () => set({ sidebarPreview: null }),
 
   // UI state below the AppContext outlives React route trees. On an
-  // organization switch that is useful for account-wide notifications and a
-  // running timer, but dangerous for records that belong to the workspace we
-  // just left. Clear every organization-scoped surface as one transaction.
+  // organization switch that is useful for account-wide notifications, but
+  // dangerous for records that belong to the workspace we just left. Clear
+  // every organization-scoped surface as one transaction.
   resetOrganizationScope: () => {
     const toastTimer = get()._toastTimer;
     if (toastTimer) clearTimeout(toastTimer);
@@ -574,7 +325,6 @@ const useWorkspaceStore = create((set, get) => ({
       workspaceSearch: '',
       myTaskSearch: '',
       projectSearch: '',
-      analyticsSearch: '',
       localSearchFeedback: null,
       chatOnlineUsers: [],
       sidebarPreview: null,

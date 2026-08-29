@@ -4,17 +4,6 @@ import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
-test('issue deletion blocks both billed logs and source-less estimate reservations', async () => {
-  const route = await read('../src/app/api/issues/[issueId]/route.js');
-  const reservationRead = route.indexOf('transaction.get(estimateReservationRef)');
-  const tombstoneWrite = route.indexOf('transaction.create(tombstoneRef');
-
-  assert.ok(reservationRead > 0 && reservationRead < tombstoneWrite);
-  assert.match(route, /invoiceSourcelessReservationId\(/);
-  assert.match(route, /ISSUE_HAS_INVOICE_ESTIMATE/);
-  assert.match(route, /ISSUE_HAS_BILLED_TIME/);
-});
-
 test('issue deletion is reversible until the retention purge', async () => {
   const [removeRoute, restoreRoute, trashServer, detail] = await Promise.all([
     read('../src/app/api/issues/[issueId]/route.js'),
@@ -33,39 +22,6 @@ test('issue deletion is reversible until the retention purge', async () => {
   assert.match(detail, /label: 'Скасувати'/);
   assert.match(detail, /duration: 30000/);
   assert.match(detail, /restoreIssue\(issueId, deletion\.organizationId\)/);
-});
-
-test('actual task time cannot race a source-less estimate invoice reservation', async () => {
-  const [postRoute, itemRoute, taskTimeModel] = await Promise.all([
-    read('../src/app/api/issues/[issueId]/time-logs/route.js'),
-    read('../src/app/api/issues/[issueId]/time-logs/[logId]/route.js'),
-    read('../src/lib/utils/taskTimeLog.mjs'),
-  ]);
-  const reservationRef = postRoute.indexOf(
-    "collection('invoiceEstimateReservations').doc(",
-  );
-  const deterministicId = postRoute.indexOf(
-    'invoiceSourcelessReservationId(organizationId, projectId, issueId)',
-  );
-  const transactionStart = postRoute.indexOf(
-    'await db.runTransaction(async transaction =>',
-  );
-  const reservationRead = postRoute.search(/transaction\.get\(\s*estimateReservationRef,/);
-  const logWrite = postRoute.indexOf(
-    'transaction.create(logRef,',
-    transactionStart,
-  );
-
-  assert.ok(reservationRef > 0 && reservationRef < transactionStart);
-  assert.ok(deterministicId > reservationRef && deterministicId < transactionStart);
-  assert.ok(reservationRead > transactionStart && reservationRead < logWrite);
-  assert.match(
-    taskTimeModel,
-    /reservation\.organizationId[\s\S]*?reservation\.projectId[\s\S]*?reservation\.itemId/,
-  );
-  assert.match(postRoute, /TASK_TIME_ESTIMATE_ALREADY_INVOICED/);
-  assert.doesNotMatch(itemRoute, /invoiceEstimateReservations/);
-  assert.doesNotMatch(itemRoute, /TASK_TIME_ESTIMATE_ALREADY_INVOICED/);
 });
 
 test('hierarchy migration revalidates exact link inputs and live endpoints on apply', async () => {
@@ -99,15 +55,4 @@ test('status API error details can never replace the HTTP status code', async ()
   assert.match(route, /NextResponse\.json\(\{\s*\.\.\.details,\s*error,/);
   assert.doesNotMatch(route, /\{ status: requestedStatus \}/);
   assert.match(route, /\{ statusId: requestedStatus \}/);
-});
-
-test('issue creation validates the canonical organization-wide sprint model', async () => {
-  const route = await read('../src/app/api/issues/route.js');
-
-  assert.match(
-    route,
-    /sprintSnap\.data\(\)\.organizationId !== organizationId/g,
-  );
-  assert.match(route, /sprintSnap\.data\(\)\.status === 'completed'/g);
-  assert.doesNotMatch(route, /sprintSnap\.data\(\)\.projectId !== projectId/);
 });

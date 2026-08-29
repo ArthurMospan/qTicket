@@ -26,7 +26,7 @@ function workflow() {
     types: [{ id: 'task', label: 'Задача', icon: 'task' }],
     priorities: systemPriorities(),
     labels: [],
-    positions: [{ id: 'dev', label: 'Розробник', hourlyRate: 30 }],
+    positions: [{ id: 'dev', label: 'Розробник' }],
   };
 }
 

@@ -11,8 +11,8 @@ rules_version = '2';
 // separates deactivating someone from erasing them.
 //
 // Field-name note: `orgMemberships` docs use `orgId`; every other org-scoped
-// collection (projects, issues, tasks, sprints, timeLogs, issueLinks,
-// invitations) uses `organizationId`. This is intentional (confirmed by
+// collection (projects, issues, tasks, issueLinks, invitations) uses
+// `organizationId`. This is intentional (confirmed by
 // code audit), not a bug — don't "fix" it by renaming one of them without
 // updating every hook that reads it.
 //
@@ -148,34 +148,6 @@ service cloud.firestore {
         canAccessIssueData(get(issuePath).data);
     }
 
-    function isCalendarEventTimeLog(data) {
-      return data.get('issueId', '') == '' &&
-        data.get('sourceType', '') == 'calendar_event';
-    }
-
-    function isTeamCalendarTimeLog(data) {
-      return isCalendarEventTimeLog(data) &&
-        data.get('eventVisibility', '') == 'team';
-    }
-
-    function canAccessTimeLog(data) {
-      // Hours, descriptions and per-person totals are internal support and
-      // billing records. A client may discuss the incident and observe its
-      // workflow history, but project access must never become access to the
-      // support team's time ledger.
-      return isInternalContributor(data.organizationId) && (
-        (
-          isTeamCalendarTimeLog(data) && (
-            data.get('projectId', '') == '' ||
-            canAccessProject(data.projectId, data.organizationId)
-          )
-        ) || (
-          data.get('issueId', '') != '' &&
-          canAccessProject(data.projectId, data.organizationId)
-        )
-      );
-    }
-
     // ── organizations/{orgId} ──────────────────────────────────────────
     match /organizations/{orgId} {
       allow read: if signedIn() && organizationEntitlementActive(orgId) &&
@@ -297,8 +269,6 @@ service cloud.firestore {
             'issueLinkVersion',
             'issueHierarchyVersion',
             'issueStatusVersion',
-            'invoiceMutationVersion',
-            'timeLogImportVersion',
             'deletionPending'
           ])
         ) ||
@@ -377,10 +347,6 @@ service cloud.firestore {
             'parentEpicId',
             'subtasks',
             'deletionPending',
-            'spentMinutes',
-            'spentMinutesMirrorVersion',
-            'spentMinutesReconciledAt',
-            'timeLogMutationVersion',
             'status',
             'columnId',
             'completedAt',
@@ -408,8 +374,8 @@ service cloud.firestore {
       // the organization plus this client space's roster — may write these keys
       // on it, and `hasOnly` is what keeps that narrow. Status, columnId,
       // assignees, priority, labels, deadlines, watchers, hierarchy, the
-      // archive and cancel stamps, `spentMinutes` and every other field are
-      // absent from the list, so none of them can ride along with a reply; the
+      // archive and cancel stamps and every other field are absent from the
+      // list, so none of them can ride along with a reply; the
       // list is disjoint from the server-only denial list above, and the
       // emulator suite sends the real transaction with each of them attached to
       // prove both halves.
@@ -563,60 +529,19 @@ service cloud.firestore {
       }
     }
 
-    // ── sprints/{id} ─────────────────────────────────────────────────────
-    match /sprints/{id} {
-      allow read: if isOrgMember(resource.data.organizationId);
-      allow create: if isOrgAdminOrOwner(request.resource.data.organizationId);
-      allow update: if isOrgAdminOrOwner(resource.data.organizationId) &&
-        request.resource.data.organizationId == resource.data.organizationId;
-      allow delete: if isOrgAdminOrOwner(resource.data.organizationId);
-    }
-
     // ── timeLogs/{id} ────────────────────────────────────────────────────
+    // qTicket does not track time. The collection still holds the inherited
+    // records the retained calendar routes maintain through the Admin SDK, and
+    // no browser reads or writes one.
     match /timeLogs/{id} {
-      allow read: if isOrgMember(resource.data.organizationId) &&
-        canAccessTimeLog(resource.data);
-      allow create, update, delete: if false; // Server APIs own logs and accounting mirrors.
+      allow read, write: if false;
     }
 
     // ── analyticsRollups/{organizationId}_{projectId}_{day} ──────────────
-    // Denormalized daily totals of logged time, written only by the server
-    // transactions that write the logs themselves (and rebuilt from those logs
-    // by scripts/backfill-analytics-rollups.mjs). Derived data, never a source
-    // of truth — and never money: an invoice reads exact sourceTimeLogIds.
-    //
-    // Read access repeats the raw log's rule rather than relaxing it. A rollup
-    // carries per-person minutes for one project, so whoever may not see that
-    // project's time logs may not see its totals either; a summary of data you
-    // cannot read is still that data. Project-less rollups hold team calendar
-    // time. Both are internal support records, never client-portal data.
+    // Denormalized daily totals of the inherited time records, written only by
+    // the server transactions that write those records. qTicket publishes no
+    // analytics screen, so no browser reads one either.
     match /analyticsRollups/{id} {
-      allow read: if isInternalContributor(resource.data.organizationId) && (
-        resource.data.get('projectId', '') == '' ||
-        canAccessProject(resource.data.projectId, resource.data.organizationId)
-      );
-      allow create, update, delete: if false;
-    }
-
-    // ── invoices/{id} ────────────────────────────────────────────────────
-    match /invoices/{id} {
-      allow read: if isOrgAdminOrOwner(resource.data.organizationId);
-      allow create, update, delete: if false; // Created by the authenticated invoice API.
-    }
-
-    // One deterministic reservation per billed time log. These documents are
-    // an internal transaction lock and must never be trusted to a client.
-    match /invoiceTimeLogReservations/{id} {
-      allow read, write: if false;
-    }
-
-    // Source-less estimate/manual invoice rows reserve the billing item itself.
-    match /invoiceEstimateReservations/{id} {
-      allow read, write: if false;
-    }
-
-    // Organization/year invoice counters are server-only transaction locks.
-    match /invoiceNumberSequences/{id} {
       allow read, write: if false;
     }
 
@@ -628,14 +553,6 @@ service cloud.firestore {
         request.resource.data.userId == resource.data.userId &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow create: if false;
-    }
-
-    // One server-owned timer state per account. Every tab and device listens
-    // to this same document; clients may read their own state but every
-    // mutation goes through the transactional timer APIs.
-    match /timerStates/{uid} {
-      allow read: if signedIn() && request.auth.uid == uid;
-      allow create, update, delete: if false;
     }
 
     // ── presence/{uid} ───────────────────────────────────────────────────
@@ -806,12 +723,6 @@ service cloud.firestore {
     // Secrets are never stored on the member-readable organization document.
     // They are managed by authenticated Admin SDK routes only.
     match /organizations/{orgId}/private/{privateDoc} {
-      allow read, write: if false;
-    }
-
-    // Per-member rates are server-only. Keeping them out of orgMemberships
-    // lets members list their colleagues without exposing payroll data.
-    match /organizations/{orgId}/memberRates/{uid} {
       allow read, write: if false;
     }
   }

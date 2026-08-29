@@ -38,28 +38,6 @@ test('task chat exposes an unread boundary and reads it only after visibility', 
   assert.match(detail, /label: 'Чат'.*count: unreadTaskChatCount/);
 });
 
-test('dense analytics, timesheet and invoice data have dedicated mobile cards', () => {
-  const workspaceAnalytics = read('src/app/(app)/analytics/page.js');
-  const projectAnalytics = read('src/components/workspace/AnalyticsTab.jsx');
-  const timesheet = read('src/components/workspace/TimesheetTab.jsx');
-  const billing = read('src/components/workspace/BillingTab.jsx');
-
-  // The two analytics tables are `DataTable` now, and the stacked layout is
-  // part of it rather than a second block each screen wrote for itself. Both
-  // screens had written it, and only one of the three tables on them had it at
-  // all — the team overview shipped a six-column grid with no phone layout.
-  const dataTable = read('src/components/ui/DataDisplay/DataTable.jsx');
-  assert.match(dataTable, /className="hidden min-w-0 overflow-hidden md:block"/);
-  assert.match(dataTable, /flex flex-col gap-2 md:hidden/);
-  for (const source of [workspaceAnalytics, projectAnalytics]) {
-    assert.match(source, /<DataTable/);
-  }
-  assert.match(timesheet, /space-y-3 lg:hidden/);
-  assert.match(timesheet, /hidden overflow-x-auto rounded-\[16px\] bg-white lg:block/);
-  assert.match(billing, /mb-2 space-y-2 sm:hidden/);
-  assert.match(billing, /hidden w-full sm:table/);
-});
-
 test('the task composer respects the device safe area', () => {
   const css = read('src/app/globals.css');
   assert.match(css, /timeline-composer[^}]*calc\(20px \+ var\(--sab\)\)/s);

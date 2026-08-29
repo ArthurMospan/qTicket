@@ -37,7 +37,13 @@ test('the accessibility contract holds', () => {
 // real bug in the checker that reported a plausible number instead of failing.
 test('the audit still sees what it is supposed to see', () => {
   assert.ok(committed.totals.files > 150, 'the audit walks the whole workspace and the kit');
-  assert.ok(committed.totals.elements > 3000, 'it reads every JSX element in them');
+  // 3000 → 2800 → 2500. Three deletions in one night — the third-party
+  // integrations, then invoices, the timesheet and the analytics screens, then
+  // the client's separate portal — took several hundred elements with them. The
+  // floor still catches a checker that stopped walking, which is what it is for;
+  // it is lowered deliberately each time screens leave, never to make a red
+  // number go away.
+  assert.ok(committed.totals.elements > 2500, 'it reads every JSX element in them');
 
   // Counting any capitalised child as text made every `<button><ChevronRight/>`
   // look named: 12 findings where there were 30.

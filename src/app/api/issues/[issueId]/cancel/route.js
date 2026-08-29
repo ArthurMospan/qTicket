@@ -13,11 +13,6 @@ import {
 } from '@/lib/server/projectIssueCounts';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import { rolesFor } from '@/lib/utils/can';
-import {
-  billedTimeLogDetails,
-  isBilledTimeLog,
-} from '@/lib/utils/issueDeletion.mjs';
-import { invoiceSourcelessReservationId } from '@/lib/server/invoicePayload.mjs';
 
 // Cancelling and un-cancelling a task. Reversible, with no clock on it, and
 // distinct from both of its neighbours: see `src/lib/utils/issueCancel.mjs` for
@@ -67,9 +62,6 @@ export async function PATCH(request, context) {
     }
 
     const projectRef = db.collection('projects').doc(issue.projectId);
-    const estimateReservationRef = db.collection('invoiceEstimateReservations').doc(
-      invoiceSourcelessReservationId(issue.organizationId, issue.projectId, issueId),
-    );
     const rollupDeltas = await analyticsRollupDeltasFor(db, issue.organizationId);
     const countDeltas = await projectIssueCountDeltasFor(db, issue.organizationId);
     const result = await db.runTransaction(async transaction => {
@@ -77,10 +69,9 @@ export async function PATCH(request, context) {
       // outside it and would otherwise move their totals once per attempt.
       countDeltas.reset();
       rollupDeltas.reset();
-      const [currentSnap, projectSnap, estimateReservationSnap] = await Promise.all([
+      const [currentSnap, projectSnap] = await Promise.all([
         transaction.get(issueRef),
         transaction.get(projectRef),
-        transaction.get(estimateReservationRef),
       ]);
       if (!currentSnap.exists) {
         throw cancelError('ISSUE_NOT_FOUND', 404, 'Завдання не знайдено');
@@ -115,9 +106,7 @@ export async function PATCH(request, context) {
       }
 
       // Cancelling and un-cancelling both move this task's hours across the
-      // line between «logged» and «still counts», so both need the hours. The
-      // read used to happen only on the way in, because only the billing guard
-      // needed it.
+      // line between «logged» and «still counts», so both need the hours.
       const timeLogs = await transaction.get(
         db.collection('timeLogs').where('issueId', '==', issueId),
       );
@@ -127,36 +116,6 @@ export async function PATCH(request, context) {
           log.organizationId === current.organizationId
           && log.projectId === current.projectId
         ));
-
-      // The same two guards deletion has, and for a stronger reason. Deleting a
-      // task with billed hours would remove the evidence behind an invoice;
-      // cancelling one would leave the evidence in place and quietly stop
-      // counting it, so a bill and the work behind it would stop agreeing
-      // without anything on screen having changed. Whatever has already been
-      // fixed into an invoice is settled: archive that task instead.
-      if (cancelled) {
-        if (estimateReservationSnap.exists) {
-          const reservation = estimateReservationSnap.data();
-          throw cancelError(
-            'ISSUE_HAS_INVOICE_ESTIMATE',
-            409,
-            'Завдання вже входить у рахунок як оцінка. Його можна архівувати, але не скасувати',
-            { invoiceIds: reservation.invoiceId ? [reservation.invoiceId] : [] },
-          );
-        }
-        const billedLogs = ownLogs.filter(isBilledTimeLog);
-        if (billedLogs.length > 0) {
-          throw cancelError(
-            'ISSUE_HAS_BILLED_TIME',
-            409,
-            'Завдання має зафіксований у рахунок час. Його можна архівувати, але не скасувати',
-            {
-              billedTimeLogCount: billedLogs.length,
-              ...billedTimeLogDetails(billedLogs),
-            },
-          );
-        }
-      }
 
       // The daily totals keep «what was logged» and «what somebody has since
       // called off» as two figures, so this moves hours from one to the other

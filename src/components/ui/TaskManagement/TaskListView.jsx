@@ -41,7 +41,6 @@ const MORE_ROWS = 25;
  * @param {object[]} props.allIssues Every task in scope, for resolving parents and links.
  * @param {object[]} props.members Workspace members, for avatars.
  * @param {object[]} props.labels Label definitions, for the chips.
- * @param {object[]} props.sprints Sprint definitions, for the sprint column.
  * @param {object[]} props.projects Projects, needed when the list spans more than one.
  * @param {object[]} props.issueLinks Relations between tasks.
  * @param {(a: object, b: object) => number} props.compareIssueCards Row order inside a section; the same comparator the board uses, so both views of one list agree on where a new task belongs.
@@ -50,7 +49,6 @@ const MORE_ROWS = 25;
  * @param {string} props.projectId Current project.
  * @param {string} props.projectName Its name, for the per-row project chip.
  * @param {boolean} props.showProjectName Whether each row names its project — true only on cross-project lists.
- * @param {string} props.activeTimerIssueId The task whose timer is running, if any.
  * @param {(action: string, value: unknown, issues: object[]) => Promise<unknown>} props.onBulkUpdate Applies one bulk action to the selected rows.
  * @param {{done: number, total: number}} props.bulkProgress How far the running bulk action has got, for the toolbar to report.
  * @param {boolean} props.canArchive Whether the current role may archive selected tasks.
@@ -64,7 +62,6 @@ export default function TaskListView({
   issueLinks = [],
   members = [],
   labels = [],
-  sprints = [],
   projects = [],
   projectId,
   projectName,
@@ -72,7 +69,6 @@ export default function TaskListView({
   groupBy = 'status',
   compareIssueCards = compareIssues,
   hiddenGroupIds = [],
-  activeTimerIssueId,
   onBulkUpdate,
   bulkProgress = null,
   canArchive = false,
@@ -261,12 +257,10 @@ export default function TaskListView({
                     issueLinks={issueLinks}
                     members={members}
                     labels={labels}
-                    sprints={sprints}
                     projectId={resolvedProjectId}
                     projectName={resolvedProjectName}
                     showProjectName={showProjectName}
                     showStatusName={section.showStatusName}
-                    isTimerActive={activeTimerIssueId === issue.id}
                     selected={activeSelectedIssueIds.has(issue.id)}
                     selectionActive={selectionActive}
                     onSelect={onBulkUpdate ? toggleIssueSelection : undefined}
@@ -316,10 +310,6 @@ export default function TaskListView({
         priorityOptions={prioritySelectOptions(priorities)}
         labelOptions={labels.map(label => ({ value: label.id, label: label.label, dotColor: label.color }))}
         typeOptions={types.filter(type => type.id !== 'epic').map(taskTypeSelectOption)}
-        sprintOptions={sprints.filter(sprint => sprint.status !== 'completed').map(sprint => ({
-          value: sprint.id,
-          label: sprint.name,
-        }))}
         canArchive={canArchive}
         onApply={applyBulkAction}
         onClear={clearSelection}

@@ -357,12 +357,9 @@ test('every surface that spans projects groups by category, never by status name
   assert.match(board, /statusCategoryById\.get\(columnOf\(issue\)\)/);
 });
 
-test('nothing decides completion or «в роботі» by a status’s position any more', async () => {
-  const [dashboard, analytics, analyticsTab, workload, hook, defaults] = await Promise.all([
+test('nothing decides completion by a status’s position any more', async () => {
+  const [dashboard, hook, defaults] = await Promise.all([
     read('../src/app/(app)/page.js'),
-    read('../src/app/(app)/analytics/page.js'),
-    read('../src/components/workspace/AnalyticsTab.jsx'),
-    read('../src/components/workspace/WorkloadTab.jsx'),
     read('../src/lib/hooks/useWorkflowConfig.js'),
     read('../src/lib/utils/workflowDefaults.mjs'),
   ]);
@@ -379,61 +376,27 @@ test('nothing decides completion or «в роботі» by a status’s position
   const counts = await read('../src/lib/server/projectIssueCounts.js');
   assert.match(counts, /resolveDeliveredStatusIds/);
   assert.doesNotMatch(counts, /'done'|\[1\]|slice\(1\)/);
-  for (const [name, source] of [
-    ['analytics', analytics],
-    ['AnalyticsTab', analyticsTab],
-    ['WorkloadTab', workload],
-  ]) {
-    assert.doesNotMatch(source, /columnId === 'in-progress'/, name);
-    assert.match(source, /inProgressStatusIds\(statuses\)/, name);
-  }
-  for (const [name, source] of [['analytics', analytics], ['AnalyticsTab', analyticsTab]]) {
-    assert.doesNotMatch(source, /firstStatusId/, name);
-    assert.match(source, /backlogStatusIds\(statuses\)/, name);
-  }
   // One definition of "finished", shared by the client and the server routes.
   assert.match(hook, /return resolveClosedStatusIds\(list\)/);
   assert.match(defaults, /closedStatusIds\(statuses\)/);
 });
 
 test('what measures output reads delivered; what asks "is there work left" reads closed', async () => {
-  const [dashboard, analytics, analyticsTab, velocity, workload, billing] = await Promise.all([
-    read('../src/app/(app)/page.js'),
-    read('../src/app/(app)/analytics/page.js'),
-    read('../src/components/workspace/AnalyticsTab.jsx'),
-    read('../src/components/workspace/VelocityTab.jsx'),
-    read('../src/components/workspace/WorkloadTab.jsx'),
-    read('../src/components/workspace/BillingTab.jsx'),
-  ]);
+  const dashboard = await read('../src/app/(app)/page.js');
 
-  // Every percentage, every throughput number, and the invoice preset. The
-  // dashboard's percentage is the one that no longer computes itself — it reads
-  // a counter, and the counter is built from the delivered set on the server,
+  // The project card's percentage no longer computes itself — it reads a
+  // counter, and the counter is built from the delivered set on the server,
   // which is the same rule stated one layer down.
   assert.match(dashboard, /deliveredPercent\(counts\)/);
   const projectCounts = await read('../src/lib/utils/projectIssueCounts.mjs');
   assert.match(projectCounts, /statusSet\(deliveredStatusIds\)\.has\(statusId\)/);
-  // The workspace overview no longer carries an all-time «виконано»: a
-  // completion rate over the whole life of a workspace only ever climbs, and it
-  // sat in a row of period figures. What it does still measure as output —
-  // what closed inside the period, and each project's progress — reads
-  // delivered, and only delivered.
-  assert.match(analytics, /const recentDone = issues\.filter\([\s\S]{0,80}deliveredSet\.has/);
-  assert.match(analytics, /const pDone\s+= pIssues\.filter\(i => deliveredSet\.has/);
-  assert.match(analyticsTab, /const done\s+= filteredIssues\.filter\(i => deliveredSet\.has/);
-  // The weekly chart is a hook feeding the shared `ColumnChart` now, but the
-  // set it reads is the same one: velocity measures output, and a task sitting
-  // in review has produced none yet.
-  assert.match(velocity, /function useWeeklyVelocity\([^)]*deliveredSet/);
-  assert.match(workload, /done: issues\.filter\(issue => \(\s*\n\s*deliveredSet\.has/);
-  assert.match(billing, /deliveredStatusIds\.includes\(issue\.columnId \|\| issue\.status\)/);
 
   // And the ones that must stay closed: an unfinished task is overdue when its
-  // date passes, blocks what it blocked, and belongs in the list of open work —
-  // «На перевірці» included, which is exactly why it does not close a task.
-  assert.match(analytics, /isDueDateOverdue\(i\.dueDate, \{ now, timeZone \}\)[\s\S]{0,80}&& !closedSet\.has/);
-  assert.match(velocity, /const openIssues = useMemo\([\s\S]{0,120}!closedSet\.has/);
-  assert.match(workload, /const openItems = memberIssues\.filter\(issue => !closedSet\.has/);
+  // date passes, and it still blocks what it blocked — «На перевірці» included,
+  // which is exactly why it does not close a task.
+  assert.match(projectCounts, /const overdue = !closed && isDueDateOverdue\(/);
+  const execution = await read('../src/lib/utils/issueExecution.mjs');
+  assert.match(execution, /if \(blocker && !closedSet\.has\(issueStatusId\(blocker\)\)\)/);
 });
 
 test('no writer guesses the incoming column by the name «backlog»', async () => {

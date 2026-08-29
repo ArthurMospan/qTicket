@@ -22,7 +22,6 @@ export const ROUTE_TITLES = [
   // a third name for a destination the sidebar and the page already agree on.
   { path: '/my', title: 'Звернення' },
   { path: '/chat', title: 'Чат' },
-  { path: '/analytics', title: 'Аналітика' },
   { path: '/team', title: 'Команда' },
   { path: '/settings', title: 'Налаштування' },
 ];

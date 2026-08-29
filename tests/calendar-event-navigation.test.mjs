@@ -5,10 +5,6 @@ import {
   calendarEventOccurrenceKey,
   findCalendarEvent,
 } from '../src/lib/utils/calendarEventNavigation.mjs';
-import {
-  effectiveTimeLogDate,
-  isCalendarEventTimeLog,
-} from '../src/lib/utils/timeLogDates.mjs';
 
 test('builds a stable details URL for a recurring occurrence', () => {
   const event = {
@@ -36,15 +32,4 @@ test('finds the requested occurrence and falls back to the event series', () => 
     'event-42::two',
   );
   assert.equal(findCalendarEvent(events, 'event-42')?.id, 'event-42::one');
-});
-
-test('calendar time belongs to the occurrence date, not the entry creation date', () => {
-  const log = {
-    sourceType: 'calendar_event',
-    eventId: 'event-42',
-    occurrenceStartAt: '2026-07-25T09:00:00.000Z',
-    loggedAt: { toDate: () => new Date('2026-07-30T12:00:00.000Z') },
-  };
-  assert.equal(isCalendarEventTimeLog(log), true);
-  assert.equal(effectiveTimeLogDate(log)?.toISOString(), '2026-07-25T09:00:00.000Z');
 });

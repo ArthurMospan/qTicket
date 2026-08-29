@@ -27,17 +27,21 @@ test('workflow mutations are authenticated and transactional', async () => {
   );
 });
 
-test('workflow reads are role-filtered and position rates are stored outside the public workflow', async () => {
+test('the workflow a read hands back carries no price on a position', async () => {
   const [route, hook] = await Promise.all([
     read('../src/app/api/organizations/[organizationId]/workflow/route.js'),
     read('../src/lib/hooks/useWorkflowConfig.js'),
   ]);
 
+  // A position is a job title. Documents written before the rates went away
+  // still carry an `hourlyRate` beside one, so the route drops it on the way
+  // out rather than echoing a price back into a product that has none.
   assert.match(route, /export async function GET\(request, context\)/);
-  assert.match(route, /workflowWithProtectedRates\(workflow, ratesSnap\.data\(\)\)/);
-  assert.match(route, /: publicWorkflow\(workflow\)/);
-  assert.match(route, /positionRates: resolvedNextPositionRates/);
+  assert.match(route, /workflow: publicWorkflow\(workflow\)/);
+  assert.match(route, /positions\.map\(\(\{ hourlyRate, \.\.\.position \}\) => position\)/);
   assert.match(route, /workflowVersion: FieldValue\.increment\(1\)/);
+  // And the workflow is read through the route, never straight off the
+  // document the route is the only writer of.
   assert.match(hook, /fetchWorkflowViaApi\(organizationId\)/);
   assert.doesNotMatch(hook, /settings', 'workflow'/);
 });

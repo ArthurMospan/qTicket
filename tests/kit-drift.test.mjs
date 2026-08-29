@@ -143,16 +143,20 @@ test('the variant matrix renders every component that can stand alone', () => {
 // dialog's `Dialog bodyPadding="sticky-head"`, and the sprint backlog's
 // `Surface composition="scroll-pane"`. They stay declared for the same reason
 // the skeleton presets did — they are the components' own vocabulary, and the
-// components themselves are still shipped by the incident screens.
+// components themselves are still shipped by the incident screens. The number
+// grows because the evidence was deleted, not because a call site moved out of
+// the scan's view, which is the thing this ceiling is watching for.
 //
-// Raised 118 → 121 when the third-party integrations, the public API and the
-// migration wizard were deleted: three more values lost their only call sites
-// with the screens that passed them. The number grows because the evidence was
-// deleted, not because a call site moved out of the scan's view, which is the
-// thing this ceiling is watching for.
+// Raised twice in one night, by two deletions that landed together: the
+// third-party integrations, the public API and the migration wizard; and then
+// invoices, the timesheet and the analytics screens. Those were the last call
+// sites for a whole shelf of values — the export menu's sizes, the table
+// densities, the meter tones — and the components that declared them went with
+// them wherever they had no other reader. What stays declared is vocabulary the
+// incident screens still ship.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 121,
+    committed.totals.declaredUnused <= 139,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   for (const key of ['Input.composition.status-entry', 'Button.composition.status-submit', 'Dialog.size.status']) {

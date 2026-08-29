@@ -166,26 +166,28 @@ test('клієнт і підтримка бачать один екран, і з
 });
 
 test('клієнтська сесія не підписується на внутрішні модулі QuickTeam', async () => {
-  const [bridge, sprints, detail, timeline] = await Promise.all([
+  const [bridge, detail, timeline] = await Promise.all([
     read('../src/components/WorkspaceNotificationBridge.jsx'),
-    read('../src/lib/hooks/useSprints.js'),
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/components/workspace/UnifiedTimeline.jsx'),
   ]);
   assert.match(bridge, /const internalViewer = Boolean\(orgRole\) && !isClientRole\(orgRole\)/);
   assert.match(bridge, /useUnreadChatCount\(\{ enabled: internalViewer \}\)/);
-  assert.match(bridge, /useUserTimerState\(internalViewer \? userId : null\)/);
-  assert.match(sprints, /export function useSprints\(\{ enabled = true \} = \{\}\)/);
   assert.match(detail, /const internalViewer = Boolean\(orgRole\) && !clientViewer/);
   assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
-  assert.match(detail, /useSprints\(\{ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer \}\)/);
-  assert.match(detail, /SHOW_INHERITED_TASK_PLANNING && internalViewer \? issueId : null/);
   assert.match(timeline, /const internalViewer = can\(orgRole, 'access:internal_notes'\)/);
   assert.match(timeline, /useComments\(issueId, COMMENT_WINDOW \* historyWindow, \{ includeInternal: internalViewer \}\)/);
   assert.match(timeline, /useAuditLog\(internalViewer \? issueId : null/);
-  assert.match(timeline, /useTimeLogs\(\s*internalViewer \? issueId : null,\s*projectId,\s*\)/);
   assert.match(timeline, /Відповідь клієнту/);
   assert.match(timeline, /Внутрішня нотатка/);
+
+  // Три підписки, які цей тест колись сторожив за роллю, більше не сторожаться
+  // за роллю — їх немає ні для кого. Спринти, таймер і timeLogs пішли разом з
+  // екранами, що їх читали, тому перевіряється відсутність, а не прапорець:
+  // прапорець можна випадково перевернути, а видалений модуль — ні.
+  assert.doesNotMatch(bridge, /useUserTimerState/);
+  assert.doesNotMatch(detail, /useSprints/);
+  assert.doesNotMatch(timeline, /useTimeLogs/);
 });
 
 // Внутрішнє місце в qTicket видає лише підписаний provisioning із QuickTeam.

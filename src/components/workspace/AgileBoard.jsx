@@ -79,9 +79,7 @@ export default function AgileBoard({
   projectId,
   project,
   projects = [],
-  sprints = [],
   showProjectName = false,
-  activeTimerIssueId,
   onAddIssue,
   onRequestAddIssue,
   onMoveIssue,
@@ -697,8 +695,6 @@ export default function AgileBoard({
                               ? projects.find(item => item.id === issue.projectId)?.name || project?.name
                               : project?.name}
                             showProjectName={showProjectName}
-                            sprints={sprints}
-                            isTimerActive={activeTimerIssueId === issue.id}
                             issueLinks={issueLinks}
                             isArchived={isArchived || readOnly}
                             selected={activeSelectedIssueIds.has(issue.id)}
@@ -768,10 +764,6 @@ export default function AgileBoard({
             dotColor: label.color,
           }))}
           typeOptions={types.filter(type => type.id !== 'epic').map(taskTypeSelectOption)}
-          sprintOptions={sprints.filter(sprint => sprint.status !== 'completed').map(sprint => ({
-            value: sprint.id,
-            label: sprint.name,
-          }))}
           canArchive={canArchive}
           onApply={applyBulkAction}
           onClear={clearSelection}

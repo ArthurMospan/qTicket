@@ -24,15 +24,20 @@ import {
   sameStringSet,
   WORKFLOW_MUTATION_SECTIONS,
 } from '@/lib/utils/workflowMutation.mjs';
-import {
-  effectivePositionRates,
-  positionRatesFromWorkflow,
-  publicWorkflow,
-  samePositionRates,
-  workflowWithProtectedRates,
-} from '@/lib/server/workflowBilling';
 
 const MAX_TRANSACTION_WRITES = 450;
+
+// A position is a job title, not a price. Legacy documents still carry an
+// `hourlyRate` beside one, so it is dropped on the way out rather than echoed
+// back to a product that no longer has rates.
+function publicWorkflow(workflow = {}) {
+  return {
+    ...workflow,
+    positions: Array.isArray(workflow.positions)
+      ? workflow.positions.map(({ hourlyRate, ...position }) => position)
+      : workflow.positions,
+  };
+}
 
 function workflowError(code, status, message, details = {}) {
   const error = new Error(code);
@@ -76,21 +81,11 @@ export async function GET(request, context) {
       .doc(organizationId)
       .collection('settings')
       .doc('workflow');
-    const ratesRef = db.collection('organizations')
-      .doc(organizationId)
-      .collection('private')
-      .doc('workflowRates');
-    const [workflowSnap, ratesSnap] = await Promise.all([
-      workflowRef.get(),
-      ratesRef.get(),
-    ]);
+    const workflowSnap = await workflowRef.get();
     const workflow = workflowSnap.data() || {};
-    const canViewBilling = ['owner', 'admin'].includes(authorization.membership.role);
 
     return NextResponse.json({
-      workflow: canViewBilling
-        ? workflowWithProtectedRates(workflow, ratesSnap.data())
-        : publicWorkflow(workflow),
+      workflow: publicWorkflow(workflow),
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     return routeErrorResponse(error, {
@@ -147,15 +142,6 @@ export async function PATCH(request, context) {
 
     const { workflow: requestedWorkflow, statusMigrations } = normalized.value;
     const nextWorkflow = publicWorkflow(requestedWorkflow);
-    const nextPositionRates = positionRatesFromWorkflow(requestedWorkflow);
-    const suppliedPositionRateIds = new Set((Array.isArray(body.workflow?.positions)
-      ? body.workflow.positions
-      : [])
-      .filter(position => (
-        position?.id
-        && Object.prototype.hasOwnProperty.call(position, 'hourlyRate')
-      ))
-      .map(position => position.id));
     const nextStatusIds = nextWorkflow.statuses.map(status => status.id);
     const nextClosedStatusIds = resolveClosedStatusIds(nextWorkflow.statuses);
     const migrationTargetIds = new Set(
@@ -177,7 +163,6 @@ export async function PATCH(request, context) {
       .collection('settings')
       .doc('workflow');
     const orgRef = db.collection('organizations').doc(organizationId);
-    const ratesRef = orgRef.collection('private').doc('workflowRates');
     const migrationBySource = new Map(
       statusMigrations.map(migration => [
         migration.fromStatusId,
@@ -185,24 +170,9 @@ export async function PATCH(request, context) {
       ]),
     );
     const result = await db.runTransaction(async transaction => {
-      const [currentWorkflowSnap, currentRatesSnap] = await Promise.all([
-        transaction.get(workflowRef),
-        transaction.get(ratesRef),
-      ]);
+      const currentWorkflowSnap = await transaction.get(workflowRef);
       const storedWorkflow = currentWorkflowSnap.data() || {};
       const currentWorkflow = publicWorkflow(storedWorkflow);
-      const currentPositionRates = effectivePositionRates(
-        storedWorkflow,
-        currentRatesSnap.data(),
-      );
-      const resolvedNextPositionRates = Object.fromEntries(
-        nextWorkflow.positions.map(position => [
-          position.id,
-          suppliedPositionRateIds.has(position.id)
-            ? nextPositionRates[position.id]
-            : currentPositionRates[position.id] || 0,
-        ]),
-      );
       const currentStatusIds = workflowIds(
         currentWorkflow.statuses,
         DEFAULT_STATUS_IDS,
@@ -217,10 +187,7 @@ export async function PATCH(request, context) {
       );
 
       if (!executionSemanticsChanged) {
-        if (
-          workflowSectionsEqual(currentWorkflow, nextWorkflow)
-          && samePositionRates(currentPositionRates, resolvedNextPositionRates)
-        ) {
+        if (workflowSectionsEqual(currentWorkflow, nextWorkflow)) {
           return {
             changed: false,
             migratedIssues: 0,
@@ -234,11 +201,6 @@ export async function PATCH(request, context) {
           updatedBy: authorization.user.uid,
           updatedAt: FieldValue.serverTimestamp(),
         }, { merge: true });
-        transaction.set(ratesRef, {
-          positionRates: resolvedNextPositionRates,
-          updatedBy: authorization.user.uid,
-          updatedAt: FieldValue.serverTimestamp(),
-        });
         transaction.update(orgRef, {
           workflowVersion: FieldValue.increment(1),
         });
@@ -474,11 +436,6 @@ export async function PATCH(request, context) {
         updatedBy: authorization.user.uid,
         updatedAt: now,
       }, { merge: true });
-      transaction.set(ratesRef, {
-        positionRates: resolvedNextPositionRates,
-        updatedBy: authorization.user.uid,
-        updatedAt: now,
-      });
       transaction.update(orgRef, {
         workflowVersion: FieldValue.increment(1),
       });

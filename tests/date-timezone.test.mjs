@@ -76,9 +76,6 @@ test('deadline UI routes every overdue decision through the shared helper', asyn
     read('../src/components/workspace/IssueCard.jsx'),
     read('../src/components/ui/TaskManagement/TaskRow.jsx'),
     read('../src/components/workspace/IssueDetail.jsx'),
-    read('../src/components/workspace/AnalyticsTab.jsx'),
-    read('../src/components/workspace/WorkloadTab.jsx'),
-    read('../src/app/(app)/analytics/page.js'),
   ]);
 
   for (const source of sources) {

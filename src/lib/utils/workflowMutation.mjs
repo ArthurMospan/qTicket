@@ -126,12 +126,6 @@ function normalizeWorkflowSection(section, items) {
       if (isStatusCategoryId(item.category)) next.category = item.category;
       if (typeof item.isDone === 'boolean') next.isDone = item.isDone;
     }
-    if (section === 'positions') {
-      const hourlyRate = Number(item.hourlyRate);
-      next.hourlyRate = Number.isFinite(hourlyRate)
-        ? Math.min(1_000_000, Math.max(0, hourlyRate))
-        : 0;
-    }
     normalized.push(next);
   }
   if (section === 'priorities' && !hasValidSystemPriorityStructure(normalized)) {

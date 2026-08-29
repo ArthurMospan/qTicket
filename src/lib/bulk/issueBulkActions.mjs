@@ -14,10 +14,6 @@ export const ISSUE_BULK_ACTIONS = Object.freeze([
   { id: 'type', label: 'Змінити тип', value: 'typeId' },
   { id: 'deadline', label: 'Встановити термін вирішення', value: 'date' },
   { id: 'deadline-clear', label: 'Очистити термін вирішення', value: 'none' },
-  { id: 'estimate', label: 'Встановити оцінку', value: 'minutes' },
-  { id: 'estimate-clear', label: 'Очистити оцінку', value: 'none' },
-  { id: 'sprint', label: 'Перемістити у спринт', value: 'sprintId' },
-  { id: 'backlog', label: 'Повернути в backlog', value: 'none' },
   { id: 'duplicate', label: 'Дублювати', value: 'none' },
   // Three actions, because they are three things. `archive` puts finished work
   // aside reversibly and forever, and it stays in the record. `cancel` says the
@@ -55,12 +51,6 @@ export function validateBulkActionValue(actionId, value) {
       && value.every(id => typeof id === 'string' && id.trim() && id.length <= 256)
       ? null
       : 'Потрібен непорожній обмежений список значень';
-  }
-  if (action.value === 'minutes') {
-    const minutes = Number(value);
-    return Number.isFinite(minutes) && minutes >= 0 && minutes <= 525600
-      ? null
-      : 'Оцінка виходить за допустимі межі';
   }
   if (action.value === 'date') {
     const match = typeof value === 'string' ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) : null;

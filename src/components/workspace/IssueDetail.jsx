@@ -5,12 +5,10 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAppContext }        from '@/lib/context/AppContext';
 import { useIssues }           from '@/lib/hooks/useIssues';
-import { useTimeLogs }         from '@/lib/hooks/useTimeLogs';
 import { useOrganization }     from '@/lib/hooks/useOrganization';
 import { hasProjectAccess, hasRecordedTeam, isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
 import { useStagesForProject } from '@/lib/hooks/useStagesForProject';
-import { useSprints } from '@/lib/hooks/useSprints';
 import { useWorkflowConfig }   from '@/lib/hooks/useWorkflowConfig';
 import { resolveCategoryStatusId } from '@/lib/utils/statusCategories.mjs';
 import { ISSUE_LINK_OPTIONS, issueLinkPerspective, useIssueLinks } from '@/lib/hooks/useIssueLinks';
@@ -22,8 +20,6 @@ import Tag from '@/components/ui/DataDisplay/Tag';
 import UnifiedTimeline from '@/components/workspace/UnifiedTimeline';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import AttachmentRow from '@/components/ui/TaskManagement/AttachmentRow';
-import TimeLogRow from '@/components/ui/TaskManagement/TimeLogRow';
-import LiveTimeTracking from '@/components/workspace/LiveTimeTracking';
 import MetaTrigger from '@/components/ui/DataDisplay/MetaTrigger';
 import IssueLinkRow from '@/components/ui/TaskManagement/IssueLinkRow';
 import DescriptionPlaceholder from '@/components/ui/TaskManagement/DescriptionPlaceholder';
@@ -49,7 +45,7 @@ import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCance
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
-import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, Dialog, getTaskAttributeChrome, IconAction, Pill, Popover, Segmented, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
+import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig';
@@ -85,7 +81,6 @@ import {
   issuePath,
   issueRouteIdentifier,
 } from '@/lib/utils/issueKeys.mjs';
-import { timerDraftNeedsDismissal, timerFeedbackVariant } from '@/lib/utils/timerState.mjs';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -110,14 +105,6 @@ const UNSAVED_EDIT_PROMPT = {
 };
 
 // ── Helpers ────────────────────────────────────────────────────────
-
-function fmtMin(min) {
-  if (!min && min !== 0) return '—';
-  const h = Math.floor(min / 60), m = min % 60;
-  if (h === 0) return `${m}хв`;
-  if (m === 0) return `${h}г`;
-  return `${h}г ${m}хв`;
-}
 
 function timeAgo(ts) {
   if (!ts) return '';
@@ -284,13 +271,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const showToast      = useWorkspaceStore(s => s.showToast);
   const confirmDialog  = useConfirm();
   const setBreadcrumbs = useWorkspaceStore(s => s.setBreadcrumbs);
-  const startTimer     = useWorkspaceStore(s => s.startTimer);
-  const stopTimer      = useWorkspaceStore(s => s.stopTimer);
-  // `timerElapsed` is deliberately not among these. The store ticks it once a
-  // second while a timer runs, and a screen that reads it in its own body
-  // re-renders whole once a second — this one is two thousand lines of screen.
-  // LiveTimeTracking reads it instead, so the tick reaches the clock and stops.
-  const activeTimer    = useWorkspaceStore(s => s.activeTimer);
 
   const teamUids = Array.isArray(project?.team) ? project.team : [];
   // Resolve author/assignee names from ALL organization members, not just the
@@ -335,7 +315,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const isArchived = project?.status === 'archived' || isIssueArchived || isIssueCancelled;
 
   const { stages }   = useStagesForProject(projectId);
-  const { sprints = [] } = useSprints({ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer });
 
   const requestedTaskPane = searchParams.get('view') === 'chat' ? 'chat' : 'task';
   const [taskPaneSelection, setTaskPaneSelection] = useState(null);
@@ -367,10 +346,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     ));
   };
 
-  const { logs: timeLogs, totalMinutes: loggedMinutes, addTimeLog, updateTimeLog, deleteTimeLog } = useTimeLogs(
-    SHOW_INHERITED_TASK_PLANNING && internalViewer ? issueId : null,
-    projectId,
-  );
   const {
     links = [],
     refresh: refreshLinks,
@@ -407,16 +382,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const [linkSaving, setLinkSaving] = useState(false);
   const [migratingChecklist, setMigratingChecklist] = useState(false);
   const [parentSaving, setParentSaving] = useState(false);
-  const [timeLogsPage, setTimeLogsPage] = useState(1);
-  const [logForm,      setLogForm]      = useState(null);
-  const [logTab, setLogTab] = useState('spend');
   const [viewerMat,    setViewerMat]    = useState(null); // lightbox
   const [uploadingAttach, setUploadingAttach] = useState(false);
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
   // Which layout is on screen, resolved in JS: the metadata line folds only on
   // a phone, and a media query cannot tell a component to render less.
   const isMobile = useIsMobile();
-  const TIME_LOGS_PER_PAGE = 5;
 
   // ── Edit mode state ───────────────────────────────────────────────
   const [isEditing,    setIsEditing]   = useState(false);
@@ -553,84 +524,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     router.replace(`${canonicalIssuePath}${query ? `?${query}` : ''}`, { scroll: false });
   }, [canonicalIssuePath, isModal, issue, issueLocator, project, router, searchParams]);
 
-  // Minutes a stopped timer produced and nobody has written down yet. They live
-  // in the server-backed store, not in the URL: the canonical-key redirect
-  // above remounts this component a beat after the task loads, and a `logTime`
-  // query param consumed into local state did not survive that — the dialog
-  // vanished a second after it appeared and the tracked time went with it.
-  const pendingTimeLog = useWorkspaceStore(s => s.pendingTimeLog);
-  const clearPendingTimeLog = useWorkspaceStore(s => s.clearPendingTimeLog);
-  const acknowledgePendingTimeLog = useWorkspaceStore(s => s.acknowledgePendingTimeLog);
-  const pendingForThisIssue = Boolean(
-    issueId
-    && pendingTimeLog
-    && pendingTimeLog.entityType !== 'calendar_event'
-    && pendingTimeLog.minutes > 0
-    && pendingTimeLog.issueId === issueId,
-  );
-
-  useEffect(() => {
-    if (!pendingForThisIssue) return;
-    const minutes = pendingTimeLog.minutes;
-    queueMicrotask(() => setLogForm(current => (current || {
-      minutes,
-      desc: '',
-      fromTimer: true,
-      timerSessionId: pendingTimeLog.id,
-    })));
-  }, [pendingForThisIssue, pendingTimeLog?.id, pendingTimeLog?.minutes, pendingTimeLog?.stoppedAt]);
-
-  // The server pending record is authoritative across tabs and devices. A
-  // dialog opened from it cannot remain saveable after another client has
-  // saved or discarded that same timer session.
-  useEffect(() => {
-    const timerSessionId = logForm?.timerSessionId;
-    if (!timerDraftNeedsDismissal(timerSessionId, pendingTimeLog)) return;
-    queueMicrotask(() => setLogForm(current => (
-      current?.timerSessionId === timerSessionId ? null : current
-    )));
-  }, [logForm?.timerSessionId, pendingTimeLog]);
-
-  // Legacy `?logTime=` links (bookmarks, the older mobile nav) still work; the
-  // param is only stripped once its minutes are safely in the store.
-  useEffect(() => {
-    const logTimeParam = searchParams.get('logTime');
-    if (!logTimeParam) return;
-    const minutes = Math.round(Number(logTimeParam));
-    if (!Number.isFinite(minutes) || minutes <= 0) return;
-    if (!pendingForThisIssue) {
-      queueMicrotask(() => setLogForm(current => current || { minutes, desc: '', fromTimer: true }));
-    }
-    const nextSearchParams = new URLSearchParams(searchParams.toString());
-    nextSearchParams.delete('logTime');
-    const nextQuery = nextSearchParams.toString();
-    const nextPath = canonicalIssuePath || pathname;
-    router.replace(nextQuery ? `${nextPath}?${nextQuery}` : nextPath, { scroll: false });
-  }, [canonicalIssuePath, pendingForThisIssue, searchParams, pathname, router]);
-
-  // Closing the dialog on time that is not saved anywhere else has to be a
-  // decision, not an accident — a stray Escape used to be indistinguishable
-  // from throwing the hours away.
-  const closeLogForm = async () => {
-    if (logForm?.fromTimer && logForm.minutes > 0) {
-      const discard = await confirmDialog({
-        title: 'Не зберігати відстежений час?',
-        message: `${logForm.minutes} хв з таймера ще не зафіксовано. Якщо закрити зараз, цей час буде втрачено.`,
-        confirmText: 'Не зберігати',
-        cancelText: 'Повернутись',
-        danger: true,
-      });
-      if (!discard) return;
-      try {
-        await clearPendingTimeLog(logForm.timerSessionId);
-      } catch (error) {
-        showToast(error.message || 'Не вдалося відхилити відстежений час', 'error');
-        return;
-      }
-    }
-    setLogForm(null);
-  };
-
   const copyIssueLink = () => copyIssueUrl(canonicalIssuePath, showToast, terms.linkCopied);
 
   const copyAiPrompt = async () => {
@@ -700,7 +593,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     (draft.title ?? '') !== (issue.title ?? '')
     || (draft.type || '') !== (issue.type || '')
     || (draft.priority || '') !== (issue.priority || '')
-    || (draft.estimateMinutes || 0) !== (issue.estimateMinutes || 0)
     || (draft.description || '') !== (issue.description || '')
     || (draft.dueDate || '') !== toLocalDateInput(parseDueDate(issue.dueDate, { timeZone }), { timeZone })
   ));
@@ -885,17 +777,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   );
   const hasPanelBody = !isEditing || visibleAttachments.length > 0 || hasSecondaryBlocks;
 
-  const spentMin  = loggedMinutes;
-  const estimMin  = isEditing ? (draft.estimateMinutes ?? issue.estimateMinutes ?? 0) : (issue.estimateMinutes || 0);
-  const timePct   = estimMin > 0 ? Math.round((spentMin / estimMin) * 100) : 0;
-  // Over the estimate, close to it, or within it — the two warnings are the
-  // status scale, and the third is the product's own ink, because "within the
-  // estimate" is not a status, it is the ordinary case.
-  const timeColor = timePct >= 100
-    ? 'var(--color-danger)'
-    : timePct >= 75 ? 'var(--color-warning)' : 'var(--color-ink)';
-
-  const isTimerMine    = activeTimer?.issueId === issueId;
   const allMaterials   = stages.flatMap(s => (s.materials || []).map(m => ({ ...m, stageName: s.title || s.name })));
   const actor          = { userId: currentUser?.id || currentUser?.uid, userName: currentUser?.name };
 
@@ -905,7 +786,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       title:           issue.title,
       type:            issue.type     || 'task',
       priority:        issue.priority || NO_PRIORITY_ID,
-      estimateMinutes: issue.estimateMinutes || 0,
       dueDate:         toLocalDateInput(due, { timeZone }),
       description:     issue.description || '',
     });
@@ -919,7 +799,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     if (draft.title           !== issue.title)           patch.title = draft.title.trim();
     if (draft.type            !== issue.type)             patch.type = draft.type;
     if (draft.priority        !== issue.priority)         patch.priority = draft.priority;
-    if (draft.estimateMinutes !== issue.estimateMinutes)  patch.estimateMinutes = draft.estimateMinutes;
     if (draft.description     !== (issue.description||''))patch.description = draft.description;
     // dueDate
     const originalDueInput = toLocalDateInput(due, { timeZone });
@@ -1005,33 +884,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     await update({ watcherIds: isWatching ? arrayRemove(myUid) : arrayUnion(myUid) });
   };
 
-  const handleTimerToggle = async () => {
-    try {
-      if (isTimerMine) {
-        const result = await stopTimer();
-        if (result?.queued) {
-          showToast('Зупинку таймера збережено — час синхронізується після відновлення мережі', 'warning');
-        } else if (result?.minutes > 0) {
-          setLogForm({
-            minutes: result.minutes,
-            desc: '',
-            fromTimer: true,
-            timerSessionId: result.id,
-          });
-        }
-      } else {
-        if (activeTimer) { showToast('Зупини поточний таймер спочатку', 'warning'); return; }
-        const started = await startTimer(issueId, projectId, {
-          entityType: 'issue',
-          organizationId: activeOrgId,
-        });
-        if (!started) showToast('Спершу збережи або відхили попередній відстежений час', 'warning');
-      }
-    } catch (error) {
-      showToast(error.message || 'Не вдалося змінити таймер', timerFeedbackVariant(error));
-    }
-  };
-
   const handleParentChange = async nextParentIssueId => {
     if (parentSaving) return;
     if (nextParentIssueId && childIssues.length > 0) {
@@ -1049,53 +901,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     }
   };
 
-  const handleLogTime = async () => {
-    if (!logForm) return;
-
-    if (logForm.estim !== undefined && logForm.estim !== (estimMin || 0)) {
-      await update({ estimateMinutes: logForm.estim });
-    }
-
-    // The issue's denormalised `spentMinutes` mirror is maintained inside
-    // useTimeLogs, in the same batch as the log itself — writing it here as
-    // well raced with concurrent logs and could drop one of them.
-    if (logForm.minutes > 0) {
-      try {
-        if (logForm.id) {
-          await updateTimeLog(logForm.id, { spentMinutes: logForm.minutes, description: logForm.desc });
-          showToast('Запис оновлено');
-        } else {
-          const uid = currentUser?.id || currentUser?.uid;
-          await addTimeLog(issueId, projectId, uid, logForm.minutes, logForm.desc, {
-            timerSessionId: logForm.timerSessionId,
-          });
-          showToast(`${logForm.minutes} хв зафіксовано`);
-        }
-      } catch (err) {
-        showToast(err.message || 'Не вдалося зберегти час', 'error');
-        return;
-      }
-    } else if (logForm.minutes === 0 && logForm.estim !== undefined && logForm.estim !== (estimMin || 0)) {
-      showToast('Оцінку часу оновлено');
-    }
-    // Saved — the stopped timer's minutes now live in a time log.
-    if (logForm.timerSessionId) acknowledgePendingTimeLog(logForm.timerSessionId);
-    setLogForm(null);
-  };
-
-  const handleDeleteTimeLog = async (log) => {
-    if (!(await confirmDialog({
-      title: 'Видалити запис часу?',
-      message: 'Ви впевнені, що хочете видалити цей запис часу?',
-      confirmText: 'Видалити', danger: true,
-    }))) return;
-    try {
-      await deleteTimeLog(log.id);
-      showToast('Запис часу видалено');
-    } catch (err) {
-      showToast('Помилка видалення: ' + err.message, 'error');
-    }
-  };
 
   // ── Attachments (first-class files on the task, separate from comments) ──
   const handleUploadAttachments = async (fileList) => {
@@ -1173,7 +978,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         parentIssueId: issueId,
         assigneeIds: issue.assigneeIds || [],
         labelIds: [],
-        estimateMinutes: 0,
       }, actor);
       setSubtaskText('');
       setShowSubInput(false);
@@ -1211,9 +1015,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       const duplicateStatus = issue.columnId || issue.status || resolveCategoryStatusId('backlog', STATUSES, {
         hiddenStatusIds: activeHiddenCols,
       }) || 'backlog';
-      const duplicateSprint = sprints.find(sprint => (
-        sprint.id === issue.sprintId && sprint.status !== 'completed'
-      ));
       const created = await createIssue({
         title: `${issue.title || 'Інцидент'} (копія)`,
         description: issue.description || '',
@@ -1224,8 +1025,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         assigneeIds: Array.isArray(issue.assigneeIds) ? issue.assigneeIds : [],
         labelIds: Array.isArray(issue.labelIds) ? issue.labelIds : [],
         dueDate: parseDueDate(issue.dueDate, { timeZone })?.toISOString() || null,
-        estimateMinutes: Number(issue.estimateMinutes) || 0,
-        sprintId: duplicateSprint?.id || null,
         parentIssueId: existingParentIssueId(issue),
       }, actor);
       showToast('Копію інциденту створено');
@@ -1727,22 +1526,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* Sprint */}
-                  {SHOW_INHERITED_TASK_PLANNING && <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-                    <span className={attributeLabelClass}>Спринт</span>
-                      <Select
-                        compact
-                      disabled={isArchived}
-                      value={issue.sprintId || ''}
-                      onChange={val => update({ sprintId: val || null })}
-                      options={[
-                        { value: '', label: 'Без спринта' },
-                        ...sprints.map(s => ({ value: s.id, label: s.name }))
-                      ]}
-                      buttonClassName={compactSelectClass}
-                    />
-                  </div>}
-
                   {/* Due date */}
                   <div className={`max-sm:hidden ${attributeItemClass}`}>
                     <span className={attributeLabelClass}>Термін вирішення</span>
@@ -1763,41 +1546,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       placeholder="Без терміну"
                     />
                   </div>
-
-                  {/* Time tracking */}
-                  {SHOW_INHERITED_TASK_PLANNING && <div
-                    className={`${attributeItemClass} max-sm:px-1.5`}
-                    onClick={event => {
-                      if (isArchived || event.target.closest('button')) return;
-                      setLogForm({ minutes: 0, estim: estimMin || 0, desc: '' });
-                      setLogTab('spend');
-                    }}
-                    // It opens the time log and holds the timer buttons, so it
-                    // is a control that cannot be a `<button>`.
-                    role={isArchived ? undefined : 'button'}
-                    tabIndex={isArchived ? undefined : 0}
-                    onKeyDown={isArchived ? undefined : (keyEvent => {
-                      if (keyEvent.target !== keyEvent.currentTarget) return;
-                      if (keyEvent.key !== 'Enter' && keyEvent.key !== ' ') return;
-                      keyEvent.preventDefault();
-                      setLogForm({ minutes: 0, estim: estimMin || 0, desc: '' });
-                      setLogTab('spend');
-                    })}
-                  >
-                    <span className={attributeLabelClass}><span className="sm:hidden">Час</span><span className="max-sm:hidden">Трекінг часу</span></span>
-                    <LiveTimeTracking
-                      running={isTimerMine}
-                      spentMinutes={spentMin}
-                      restingLabel={fmtMin(spentMin)}
-                      disabled={isArchived}
-                      onToggle={handleTimerToggle}
-                      onOpen={() => {
-                        setLogForm({ minutes: 0, estim: estimMin || 0, desc: '' });
-                        setLogTab('spend');
-                      }}
-                      estimateLabel={estimMin > 0 ? fmtMin(estimMin) : null}
-                    />
-                  </div>}
 
                   {/* Less frequently changed fields */}
                   <Popover
@@ -1829,15 +1577,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     )}
                   >
                       <div className="flex w-[248px] max-w-full flex-col gap-4">
-                        {SHOW_INHERITED_TASK_PLANNING && <div className="flex flex-col gap-1.5 sm:hidden">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Спринт</span>
-                          <Select
-                            disabled={isArchived}
-                            value={issue.sprintId || ''}
-                            onChange={val => update({ sprintId: val || null })}
-                            options={[{ value: '', label: 'Без спринта' }, ...sprints.map(item => ({ value: item.id, label: item.name }))]}
-                          />
-                        </div>}
                         <div className="flex flex-col gap-1.5 sm:hidden">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
                           <DatePicker
@@ -1919,7 +1658,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 org={activeOrg}
                 members={members}
                 mentionMembers={mentionMembers}
-                sprints={sprints}
                 isActive={!isCompactTaskLayout || taskPane === 'chat'}
                 onUnreadCountChange={handleTaskChatUnreadChange}
               />
@@ -1927,125 +1665,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
           </div>
         ) : null}
       >
-
-            {/* LOG TIME FORM MODAL */}
-            {SHOW_INHERITED_TASK_PLANNING && !clientViewer && logForm && (
-              <Dialog
-                isOpen
-                onClose={closeLogForm}
-                title="Трекінг часу"
-                titleContext="dialog"
-                size="md"
-                bodyPadding="responsive"
-                bodyClassName="custom-scrollbar flex flex-col gap-5"
-              >
-                  <Segmented
-                    value={logTab}
-                    onChange={setLogTab}
-                    surface="canvas"
-                    composition="dialog-tabs"
-                    options={[
-                      { value: 'spend', label: 'Зафіксувати час' },
-                      ...(!logForm.id ? [{ value: 'estim', label: 'Оцінка часу' }] : []),
-                    ]}
-                  />
-
-                  {logTab === 'spend' ? (
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <p className="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">Зафіксувати час</p>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Input size="lg" type="number" min="0" placeholder="0" value={Math.floor(logForm.minutes / 60) || ''} onChange={e => {
-                               const hrs = parseInt(e.target.value) || 0;
-                               const mins = logForm.minutes % 60;
-                               setLogForm(f => ({ ...f, minutes: hrs * 60 + mins }));
-                            }} composition="duration-hours" />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-muted pointer-events-none">год</span>
-                          </div>
-                          <div className="relative flex-1">
-                            <Input size="lg" type="number" min="0" max="59" placeholder="0" value={logForm.minutes % 60 || ''} onChange={e => {
-                               const mins = parseInt(e.target.value) || 0;
-                               const hrs = Math.floor(logForm.minutes / 60);
-                               setLogForm(f => ({ ...f, minutes: hrs * 60 + Math.min(mins, 59) }));
-                            }} composition="duration-minutes" />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-muted pointer-events-none">хв</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <p className="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">Запланувати час</p>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Input size="lg" type="number" min="0" placeholder="0" value={Math.floor((logForm.estim || 0) / 60) || ''} onChange={e => {
-                               const hrs = parseInt(e.target.value) || 0;
-                               const mins = (logForm.estim || 0) % 60;
-                               setLogForm(f => ({ ...f, estim: hrs * 60 + mins }));
-                            }} composition="duration-hours" />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-muted pointer-events-none">год</span>
-                          </div>
-                          <div className="relative flex-1">
-                            <Input size="lg" type="number" min="0" max="59" placeholder="0" value={(logForm.estim || 0) % 60 || ''} onChange={e => {
-                               const mins = parseInt(e.target.value) || 0;
-                               const hrs = Math.floor((logForm.estim || 0) / 60);
-                               setLogForm(f => ({ ...f, estim: hrs * 60 + Math.min(mins, 59) }));
-                            }} composition="duration-minutes" />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-muted pointer-events-none">хв</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {logTab === 'spend' && (
-                    <div>
-                      <p className="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">Опис (необовʼязково)</p>
-                      <Input size="lg" type="text" composition="metric-text" placeholder="Що було зроблено?" value={logForm.desc} onChange={e => setLogForm(f => ({ ...f, desc: e.target.value }))} />
-                    </div>
-                  )}
-
-                  <div className="flex gap-3 justify-end mt-2">
-                    <Button style="secondary" size="md" onClick={closeLogForm}>Скасувати</Button>
-                    <Button style="primary" size="md" onClick={handleLogTime}>{logForm.id ? 'Зберегти зміни' : 'Зберегти'}</Button>
-                  </div>
-
-                  <div className="border-t border-line pt-5">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <h4 className="ui-type-item-title text-ink">Журнал часу</h4>
-                      {timeLogs.length > 0 && (
-                        <span className="text-[11px] font-semibold text-muted">
-                          {timeLogs.length} {plural(timeLogs.length, ['запис', 'записи', 'записів'])}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {timeLogs.slice(0, timeLogsPage * TIME_LOGS_PER_PAGE).map(log => {
-                        const logMember = members.find(member => (member.id || member.uid) === log.userId);
-                        const isLogAuthor = log.userId === currentUser?.uid || log.userId === currentUser?.id;
-                        return (
-                          <TimeLogRow
-                            key={log.id}
-                            member={logMember}
-                            spentLabel={fmtMin(log.spentMinutes)}
-                            dateLabel={log.loggedAt?.toDate ? formatDate(log.loggedAt.toDate()) : log.loggedAt ? formatDate(new Date(log.loggedAt)) : ''}
-                            description={log.description}
-                            canEdit={canEditIssue && isLogAuthor && !isArchived}
-                            onEdit={() => { setLogForm({ id: log.id, minutes: log.spentMinutes, desc: log.description || '' }); setLogTab('spend'); }}
-                            onDelete={() => handleDeleteTimeLog(log)}
-                          />
-                        );
-                      })}
-                      {timeLogs.length === 0 && <p className="rounded-[10px] bg-canvas px-3 py-5 text-center text-[12px] text-muted">Час ще не списували</p>}
-                      {timeLogs.length > timeLogsPage * TIME_LOGS_PER_PAGE && (
-                        <Button style="secondary" size="sm" onClick={() => setTimeLogsPage(page => page + 1)}>Показати ще</Button>
-                      )}
-                    </div>
-                  </div>
-              </Dialog>
-            )}
 
               {/* DESCRIPTION */}
               <DetailSection icon={AlignLeft} title="Опис">
@@ -2150,10 +1769,8 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         issueLinks={links}
                         members={members}
                         labels={availableLabels}
-                        sprints={sprints}
                         projectId={child.projectId || projectId}
                         projectName={project?.name}
-                        isTimerActive={activeTimer?.issueId === child.id}
                       />
                     ))}
                     {showSubInput && (

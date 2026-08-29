@@ -118,12 +118,6 @@ export async function POST(request) {
         invitedBy: invitation.invitedBy || null,
         joinedVia: 'invite-link',
       });
-      transaction.set(organizationReference.collection('memberRates').doc(uid), {
-        userId: uid,
-        hourlyRate: 0,
-        updatedBy: uid,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
       // The client space the link is fixed to is the whole of this person's
       // access: `orgMemberships` plus `project.team`, and nothing else.
       transaction.update(projectReference, {

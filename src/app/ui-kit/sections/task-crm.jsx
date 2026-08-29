@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Button, StatusTransitionPicker, TaskCounters, TaskIdentity, TaskListCard, TaskListView } from '@/components/ui';
+import { Button, StatusTransitionPicker, TaskCounters, TaskIdentity, TaskListView } from '@/components/ui';
 import AgileBoard from '@/components/workspace/AgileBoard';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import { DEFAULT_STATUSES, useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
@@ -25,10 +25,6 @@ export default function TaskCRMSection() {
     { id: 'bug', label: 'Баг', color: '#ef4444' }
   ];
 
-  const demoSprints = [
-    { id: 'sprint-1', name: 'Спринт 12' }
-  ];
-
   const task1 = {
     id: 't1',
     issueKey: 'QUI-41',
@@ -41,7 +37,6 @@ export default function TaskCRMSection() {
     dueDate: new Date('2026-07-13T12:00:00Z'),
     subtasks: [{ id: '1', title: 'Кнопки', done: true }, { id: '2', title: 'Інпути', done: false }],
     labelIds: ['frontend', 'design'],
-    sprintId: 'sprint-1'
   };
 
   const task2 = {
@@ -129,7 +124,6 @@ export default function TaskCRMSection() {
             issues={demoIssues}
             members={demoMembers}
             labels={demoLabels}
-            sprints={demoSprints}
             statuses={[
               { id: 'development', label: 'Розробка', color: '#6366f1' },
               { id: 'code-review', label: 'Код-ревʼю', color: '#a855f7' },
@@ -190,7 +184,6 @@ export default function TaskCRMSection() {
             allIssues={demoIssues}
             members={demoMembers}
             labels={demoLabels}
-            sprints={demoSprints}
             projectName="QuickTeam"
           />
           <p className="ui-type-eyebrow mt-2 uppercase tracking-wider text-muted">Cross-project context — назва проєкту видима</p>
@@ -199,7 +192,6 @@ export default function TaskCRMSection() {
             allIssues={demoIssues}
             members={demoMembers}
             labels={demoLabels}
-            sprints={demoSprints}
             projectName="QuickTeam"
             showProjectName
           />
@@ -208,7 +200,6 @@ export default function TaskCRMSection() {
             allIssues={demoIssues}
             members={demoMembers}
             labels={demoLabels}
-            sprints={demoSprints}
             projectName="QuickTeam"
             showProjectName
           />
@@ -217,7 +208,6 @@ export default function TaskCRMSection() {
             allIssues={demoIssues}
             members={demoMembers}
             labels={demoLabels}
-            sprints={demoSprints}
             projectName="QuickTeam"
             showProjectName
           />
@@ -226,7 +216,6 @@ export default function TaskCRMSection() {
             allIssues={demoIssues}
             members={demoMembers}
             labels={demoLabels}
-            sprints={demoSprints}
             projectName="QuickTeam"
             showProjectName
           />
@@ -244,7 +233,6 @@ export default function TaskCRMSection() {
           allIssues={demoIssues}
           members={demoMembers}
           labels={demoLabels}
-          sprints={demoSprints}
           projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
           showProjectName
           hiddenGroupIds={[lastStatusId]}
@@ -264,42 +252,12 @@ export default function TaskCRMSection() {
           allIssues={demoIssues}
           members={demoMembers}
           labels={demoLabels}
-          sprints={demoSprints}
           projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
           showProjectName
           groupBy="category"
           onBulkUpdate={() => {}}
           canArchive
         />
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="Task List Card — плоский список задач"
-        description="Один вигляд для всіх списків задач в аналітиці: «Прострочені» в Огляді, «Поточний фокус» і «Завершено» в Команді, «Нещодавно закриті» в Продуктивності. На відміну від Task List View тут немає групування за статусом — набір уже визначив той, хто його показує. Рядки ті самі TaskRow, тож задача клікабельна скрізь однаково. Картка показує десять рядків і пропонує решту: раніше вона малювала все, що їй дали, а «Усі задачі» одного учасника — це буквально всі його задачі за весь час. Лічильник біля заголовка завжди повний, тож число не розходиться з тим, що за ним."
-        filePath="src/components/ui/TaskManagement/TaskListCard.jsx"
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <TaskListCard
-            title="Прострочені"
-            icon={AlertTriangle}
-            iconClassName="text-red-500"
-            issues={demoLongList}
-            allIssues={demoLongList}
-            members={demoMembers}
-            labels={demoLabels}
-            sprints={demoSprints}
-            projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
-          />
-          <TaskListCard
-            title="Нещодавно закриті завдання"
-            icon={CheckCircle2}
-            iconClassName="text-emerald-600"
-            issues={[]}
-            members={demoMembers}
-            projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
-            emptyText="За вказаний період завдань не закрито"
-          />
-        </div>
       </PreviewBlock>
 
       <PreviewBlock
@@ -316,7 +274,6 @@ export default function TaskCRMSection() {
             projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
             projectId="ui-kit-project"
             project={{ id: 'ui-kit-project', name: 'QuickTeam', hiddenColumns: [] }}
-            sprints={demoSprints}
             onAddIssue={() => {}}
             onMoveIssue={() => {}}
             onBulkUpdate={() => {}}
@@ -338,7 +295,6 @@ export default function TaskCRMSection() {
             members={demoMembers}
             projects={[{ id: 'ui-kit-project', name: 'QuickTeam' }]}
             projectId="ui-kit-my"
-            sprints={demoSprints}
             showProjectName
             groupBy="category"
             showHiddenLane

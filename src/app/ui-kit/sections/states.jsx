@@ -6,9 +6,9 @@ import { Select, MultiSelect } from '@/components/ui/Select';
 import Surface from '@/components/ui/Surface';
 import Tabs from '@/components/ui/Tabs';
 import {
-  Checkbox, ToggleSwitch, DatePicker, TimePicker, FormGroup, Label, IconAction, Pill, Tag,
+  Checkbox, ToggleSwitch, DatePicker, FormGroup, Label, IconAction, Pill, Tag,
   Alert, EmptyState, Card, Segmented, SelectableChip, TextAction, AvatarButton, StatusPill,
-  KpiCard, TimeTrackingControl, StatusVisibilityPicker, MarkdownViewer, ChatComposerCore,
+  KpiCard, StatusVisibilityPicker, MarkdownViewer, ChatComposerCore,
 } from '@/components/ui';
 import kitStates from '../kit-states.generated.json';
 import { Plus, Settings2, Folder } from 'lucide-react';
@@ -81,7 +81,6 @@ const STATE_BASE = {
   DatePicker: ({ long, ...state }) => (
     <DatePicker value="2026-07-12" onChange={() => {}} placeholder={long ? LONG_LABEL : 'Оберіть дату'} {...state} />
   ),
-  TimePicker: ({ long, ...state }) => <TimePicker value="09:30" onChange={() => {}} {...state} />,
   Tabs: ({ long, ...state }) => (
     <Tabs
       tabs={[{ id: 'a', label: long ? LONG_LABEL : 'Огляд' }, { id: 'b', label: 'Час' }]}
@@ -142,16 +141,6 @@ const STATE_BASE = {
   ),
   MarkdownViewer: ({ long, ...state }) => (
     <MarkdownViewer content={long ? LONG_TEXT : 'Опис завдання'} {...state} />
-  ),
-  TimeTrackingControl: ({ long, ...state }) => (
-    <TimeTrackingControl
-      running
-      spentLabel={long ? LONG_LABEL : '2 год 15 хв'}
-      estimateLabel="/ 4 год"
-      onToggle={() => {}}
-      onOpen={() => {}}
-      {...state}
-    />
   ),
   StatusVisibilityPicker: ({ long, ...state }) => (
     <div className="w-full max-w-[260px]">

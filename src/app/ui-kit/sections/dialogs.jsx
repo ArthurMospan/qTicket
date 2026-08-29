@@ -35,6 +35,14 @@ function ConfirmDialogPreview() {
 
 const DIALOG_VARIANTS = [
   {
+    id: 'default',
+    label: 'bodyPadding="default"',
+    props: { bodyPadding: 'default', size: 'sm' },
+    note: 'Звичайний відступ тіла — те, що діалог бере, коли нічого не просить.',
+    where: 'Підказки, налаштування дошки, підтримка',
+    open: 'Будь-який діалог, що не оголошує bodyPadding',
+  },
+  {
     id: 'flush',
     label: 'bodyPadding="flush"',
     props: { bodyPadding: 'flush', size: 'lg' },
@@ -252,7 +260,6 @@ export default function DialogsSection() {
           stages={[]}
           teamMembers={[]}
           projectContext={{ id: 'ui-kit', name: 'UI Kit' }}
-          sprints={[]}
         />
       </PreviewBlock>
       </div>

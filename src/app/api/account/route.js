@@ -218,10 +218,6 @@ export async function DELETE(request) {
         }
         await writer.close();
       }
-
-      // Payroll is personal data and no part of the record of the work.
-      await db.collection('organizations').doc(organizationId)
-        .collection('memberRates').doc(uid).delete().catch(() => {});
     }
 
     // A workspace of one, now of none. Marked rather than deleted: the cascade

@@ -8,14 +8,14 @@
     "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
   },
   "totals": {
-    "componentsWithVariants": 45,
-    "declaredValues": 365,
+    "componentsWithVariants": 41,
+    "declaredValues": 351,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 217,
+    "usedAndPreviewed": 190,
     "usedWithoutPreview": 0,
-    "declaredUnused": 120
+    "declaredUnused": 139
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -32,6 +32,18 @@
       "component": "Alert",
       "prop": "variant",
       "value": "success",
+      "namespace": null
+    },
+    {
+      "component": "AttributeTrigger",
+      "prop": "variant",
+      "value": "cell",
+      "namespace": null
+    },
+    {
+      "component": "AttributeTrigger",
+      "prop": "variant",
+      "value": "details",
       "namespace": null
     },
     {
@@ -103,7 +115,25 @@
     {
       "component": "Button",
       "prop": "composition",
+      "value": "duration-hours",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
+      "value": "duration-minutes",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
       "value": "metric-editor",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
+      "value": "metric-text",
       "namespace": ".ui-control[data-ui-composition]"
     },
     {
@@ -155,63 +185,15 @@
       "namespace": null
     },
     {
-      "component": "CalendarDayCell",
-      "prop": "density",
-      "value": "compact",
+      "component": "Card",
+      "prop": "padding",
+      "value": "md",
       "namespace": null
     },
     {
-      "component": "CalendarDayCell",
-      "prop": "density",
-      "value": "roomy",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayCell",
-      "prop": "state",
-      "value": "default",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayCell",
-      "prop": "state",
-      "value": "outside",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayCell",
-      "prop": "state",
-      "value": "selected",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayCell",
-      "prop": "state",
-      "value": "today",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayCell",
-      "prop": "state",
-      "value": "weekend",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayNumber",
-      "prop": "state",
-      "value": "default",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayNumber",
-      "prop": "state",
-      "value": "outside",
-      "namespace": null
-    },
-    {
-      "component": "CalendarDayNumber",
-      "prop": "state",
-      "value": "today",
+      "component": "Card",
+      "prop": "preset",
+      "value": "bordered",
       "namespace": null
     },
     {
@@ -245,9 +227,9 @@
       "namespace": null
     },
     {
-      "component": "DataTable",
-      "prop": "density",
-      "value": "compact",
+      "component": "DetailLayout",
+      "prop": "context",
+      "value": "event",
       "namespace": null
     },
     {
@@ -299,6 +281,18 @@
       "namespace": null
     },
     {
+      "component": "FilterBar",
+      "prop": "context",
+      "value": "detail",
+      "namespace": null
+    },
+    {
+      "component": "FormGroup",
+      "prop": "gap",
+      "value": "md",
+      "namespace": null
+    },
+    {
       "component": "FormGroup",
       "prop": "gap",
       "value": "sm",
@@ -307,7 +301,25 @@
     {
       "component": "IconAction",
       "prop": "composition",
+      "value": "duration-hours",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
+      "value": "duration-minutes",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
       "value": "metric-editor",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
+      "value": "metric-text",
       "namespace": ".ui-control[data-ui-composition]"
     },
     {
@@ -325,8 +337,32 @@
     {
       "component": "Input",
       "prop": "composition",
+      "value": "duration-hours",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Input",
+      "prop": "composition",
+      "value": "duration-minutes",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Input",
+      "prop": "composition",
       "value": "metric-editor",
       "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Input",
+      "prop": "composition",
+      "value": "metric-text",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Input",
+      "prop": "preset",
+      "value": "money",
+      "namespace": null
     },
     {
       "component": "Label",
@@ -344,12 +380,6 @@
       "component": "MarkdownViewer",
       "prop": "size",
       "value": "md",
-      "namespace": null
-    },
-    {
-      "component": "Meter",
-      "prop": "layout",
-      "value": "stack",
       "namespace": null
     },
     {
@@ -432,6 +462,12 @@
     },
     {
       "component": "Pill",
+      "prop": "appearance",
+      "value": "soft-outline",
+      "namespace": "*[data-ui-pill-appearance]"
+    },
+    {
+      "component": "Pill",
       "prop": "shape",
       "value": "capsule",
       "namespace": "*[data-ui-pill-shape]"
@@ -444,8 +480,20 @@
     },
     {
       "component": "Pill",
+      "prop": "size",
+      "value": "wide-sm",
+      "namespace": "*[data-ui-pill-size]"
+    },
+    {
+      "component": "Pill",
       "prop": "tone",
       "value": "accent",
+      "namespace": "*[data-ui-pill-tone]"
+    },
+    {
+      "component": "Pill",
+      "prop": "tone",
+      "value": "dark",
       "namespace": "*[data-ui-pill-tone]"
     },
     {
@@ -480,14 +528,44 @@
     },
     {
       "component": "ResponseChoice",
+      "prop": "size",
+      "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "ResponseChoice",
+      "prop": "size",
+      "value": "tile",
+      "namespace": null
+    },
+    {
+      "component": "ResponseChoice",
       "prop": "surface",
       "value": "canvas",
       "namespace": null
     },
     {
+      "component": "ResponseChoice",
+      "prop": "surface",
+      "value": "surface",
+      "namespace": null
+    },
+    {
+      "component": "Segmented",
+      "prop": "composition",
+      "value": "billing-selection",
+      "namespace": ".ui-segmented[data-ui-composition]"
+    },
+    {
       "component": "Segmented",
       "prop": "surface",
       "value": "transparent",
+      "namespace": null
+    },
+    {
+      "component": "Select",
+      "prop": "filterRole",
+      "value": "project",
       "namespace": null
     },
     {
@@ -500,6 +578,12 @@
       "component": "Select",
       "prop": "size",
       "value": "lg",
+      "namespace": null
+    },
+    {
+      "component": "Select",
+      "prop": "size",
+      "value": "md",
       "namespace": null
     },
     {
@@ -613,6 +697,12 @@
     {
       "component": "Surface",
       "prop": "composition",
+      "value": "member-chart-panel",
+      "namespace": ".ui-surface[data-ui-composition]"
+    },
+    {
+      "component": "Surface",
+      "prop": "composition",
       "value": "scroll-pane",
       "namespace": ".ui-surface[data-ui-composition]"
     },
@@ -673,6 +763,12 @@
     {
       "component": "Surface",
       "prop": "preset",
+      "value": "bordered-panel",
+      "namespace": null
+    },
+    {
+      "component": "Surface",
+      "prop": "preset",
       "value": "compact-bordered-panel",
       "namespace": null
     },
@@ -701,10 +797,28 @@
       "namespace": null
     },
     {
+      "component": "TaskAttributesPanel",
+      "prop": "context",
+      "value": "calendar",
+      "namespace": null
+    },
+    {
       "component": "TextAction",
       "prop": "tone",
       "value": "ink",
       "namespace": null
+    },
+    {
+      "component": "Textarea",
+      "prop": "composition",
+      "value": "audio-transcript",
+      "namespace": ".ui-textarea[data-ui-composition]"
+    },
+    {
+      "component": "Textarea",
+      "prop": "composition",
+      "value": "long-form",
+      "namespace": ".ui-textarea[data-ui-composition]"
     },
     {
       "component": "Textarea",
@@ -1236,26 +1350,6 @@
         "roomy"
       ]
     },
-    "CalendarDayNumber": {
-      "state": [
-        "default",
-        "outside",
-        "today"
-      ]
-    },
-    "CalendarDayCell": {
-      "state": [
-        "default",
-        "outside",
-        "selected",
-        "today",
-        "weekend"
-      ],
-      "density": [
-        "compact",
-        "roomy"
-      ]
-    },
     "ResponseChoice": {
       "size": [
         "md",
@@ -1336,19 +1430,6 @@
         "section"
       ]
     },
-    "DataTable": {
-      "density": [
-        "comfortable",
-        "compact"
-      ]
-    },
-    "Meter": {
-      "tone": [],
-      "layout": [
-        "inline",
-        "stack"
-      ]
-    },
     "FilterBar": {
       "context": [
         "default",
@@ -1391,45 +1472,33 @@
   "usage": {
     "EmptyState.density.compact": 5,
     "EmptyState.surface.card": 7,
-    "Card.preset.borderless": 22,
+    "Card.preset.borderless": 19,
     "Card.padding.none": 4,
     "ListRow.density.roomy": 4,
-    "UserAvatar.size.md": 7,
-    "Pill.tone.neutral": 18,
-    "Pill.size.sm": 29,
-    "Pill.shape.badge": 25,
-    "LoadingSpinner.size.md": 19,
-    "Surface.preset.panel": 16,
-    "Surface.padding.lg": 8,
+    "UserAvatar.size.md": 4,
+    "Pill.tone.neutral": 9,
+    "Pill.size.sm": 22,
+    "Pill.shape.badge": 20,
+    "LoadingSpinner.size.md": 15,
+    "Surface.preset.panel": 14,
+    "Surface.padding.lg": 6,
     "EmptyState.context.page": 4,
-    "Button.size.icon-lg": 10,
-    "Button.style.secondary": 63,
-    "Button.size.lg": 21,
-    "Button.style.primary": 37,
-    "Select.filterRole.status": 3,
-    "Select.variant.ghost": 17,
-    "Select.filterRole.member": 6,
-    "Select.filterRole.priority": 3,
-    "Alert.variant.error": 8,
-    "Button.size.md": 49,
-    "Alert.variant.info": 7,
-    "Surface.padding.md": 11,
-    "Pill.tone.success": 5,
-    "Meter.layout.inline": 2,
-    "Select.filterRole.project": 1,
-    "MultiSelect.filterRole.project": 5,
-    "MultiSelect.variant.ghost": 5,
-    "Button.style.ghost": 57,
-    "Button.size.icon-sm": 16,
-    "Button.size.sm": 44,
-    "Select.filterRole.type": 3,
-    "Button.size.icon": 14,
-    "Surface.composition.chart-panel": 2,
-    "Surface.composition.member-chart-panel": 1,
-    "FilterBar.context.detail": 1,
+    "Button.size.icon-lg": 5,
+    "Button.style.secondary": 43,
+    "Button.size.lg": 17,
+    "Button.style.primary": 29,
+    "Select.filterRole.status": 2,
+    "Select.variant.ghost": 11,
+    "Select.filterRole.member": 3,
+    "Select.filterRole.priority": 2,
+    "Alert.variant.error": 7,
+    "Button.size.md": 29,
+    "Alert.variant.info": 6,
+    "Surface.padding.md": 10,
+    "Pill.tone.success": 4,
     "MentionMenu.density.composer": 1,
     "ChatComposerCore.variant.workspace": 1,
-    "IconAction.appearance.soft": 9,
+    "IconAction.appearance.soft": 6,
     "IconAction.appearance.quiet": 13,
     "IconAction.composition.chat-composer-action": 2,
     "Counter.size.sm": 11,
@@ -1439,72 +1508,76 @@
     "IconAction.shape.compact": 1,
     "IconAction.appearance.quiet-danger": 4,
     "IconAction.composition.chat-micro-action": 6,
-    "Dialog.size.md": 7,
+    "Dialog.size.md": 3,
     "SidebarLayout.context.chat": 1,
+    "Button.style.ghost": 44,
     "Button.size.icon-xs": 11,
     "Button.composition.workspace-guard": 3,
     "Surface.preset.card": 2,
-    "Surface.padding.none": 3,
+    "Surface.padding.none": 2,
     "EmptyState.context.flexible": 2,
+    "MultiSelect.variant.ghost": 1,
+    "MultiSelect.filterRole.project": 1,
+    "Select.filterRole.type": 1,
     "Select.filterRole.date": 2,
-    "Dialog.titleContext.dialog": 5,
-    "Dialog.size.sm": 8,
+    "Button.size.sm": 35,
+    "Dialog.titleContext.dialog": 3,
+    "Dialog.size.sm": 7,
     "Dialog.presentation.sheet": 1,
     "Dialog.bodyPadding.spacious": 2,
-    "UserAvatar.size.sm": 10,
-    "Pill.tone.warning": 8,
+    "UserAvatar.size.sm": 6,
+    "Pill.tone.warning": 6,
     "Pill.tone.info": 2,
     "Pill.preset.avatar-counter": 2,
-    "IconAction.size.md": 4,
-    "UserAvatar.size.xs": 9,
+    "IconAction.size.md": 3,
+    "UserAvatar.size.xs": 6,
     "FilterBar.context.projects": 1,
     "Select.filterRole.sort": 1,
-    "Pill.size.md": 23,
+    "Surface.composition.chart-panel": 1,
+    "Pill.size.md": 17,
     "MobilePaneBack.context.pane": 1,
     "Input.composition.inline-edit": 1,
     "IconAction.appearance.primary": 2,
     "IconAction.size.compact": 2,
     "ColorSwatch.size.trigger": 1,
     "ColorSwatch.size.choice": 1,
-    "Input.size.sm": 2,
-    "Pill.size.lg": 7,
-    "Pill.weight.medium": 14,
-    "Card.padding.lg": 14,
+    "Input.size.sm": 1,
+    "Pill.size.lg": 6,
+    "Pill.weight.medium": 10,
+    "Button.size.icon": 12,
+    "Card.padding.lg": 11,
     "Label.context.inline": 1,
     "Textarea.composition.settings-note": 1,
-    "ToggleSwitch.size.sm": 6,
+    "ToggleSwitch.size.sm": 4,
     "Pill.tone.ink-subtle": 5,
     "ColorSwatch.size.theme": 1,
     "Input.composition.color-hex": 1,
-    "Input.size.md": 4,
+    "Input.size.md": 2,
     "UserAvatar.size.lg": 2,
     "Button.composition.settings-row-action": 3,
     "Tabs.variant.underline": 1,
     "SidebarLayout.context.settings": 1,
     "SidebarLayout.context.team": 1,
     "Surface.preset.nested-card": 2,
-    "FormGroup.gap.md": 8,
-    "IconAction.size.sm": 7,
-    "Textarea.composition.audio-transcript": 1,
     "IconAction.composition.auth-close": 1,
     "IconAction.appearance.auth-close": 1,
     "IconAction.shape.circle": 3,
-    "Dialog.size.lg": 8,
+    "Dialog.size.lg": 5,
     "Dialog.bodyPadding.flush": 5,
-    "Tabs.composition.pane-switch": 2,
-    "Alert.variant.warning": 9,
+    "Alert.variant.warning": 3,
     "SelectableChip.shape.person": 1,
     "SelectableChip.shape.label": 1,
-    "Surface.padding.sm": 2,
+    "Surface.padding.sm": 1,
     "TextAction.tone.danger": 2,
     "TextAction.size.md": 1,
     "Surface.preset.bordered-card": 1,
-    "TextAction.tone.muted": 8,
+    "TextAction.tone.muted": 6,
     "TextAction.size.sm": 4,
     "Dialog.bodyPadding.invite": 1,
-    "Input.size.lg": 9,
+    "Input.size.lg": 2,
     "Counter.variant.dot": 6,
     "Counter.appearance.sidebar": 4,
+    "IconAction.size.sm": 5,
     "Button.composition.sidebar-help-action": 2,
     "Counter.size.md": 1,
     "Counter.appearance.inverse-outline": 1,
@@ -1515,18 +1588,19 @@
     "Input.composition.status-entry": 1,
     "Button.composition.status-submit": 1,
     "ResponseChoice.size.sm": 1,
+    "Button.size.icon-sm": 9,
     "Button.shape.compact": 2,
     "Button.surface.canvas": 3,
-    "Segmented.surface.canvas": 6,
+    "Segmented.surface.canvas": 3,
     "IconAction.appearance.surface": 1,
     "IconAction.appearance.surface-danger": 1,
     "TextAction.tone.danger-quiet": 1,
-    "Card.preset.bordered-compact": 3,
-    "Card.padding.sm": 2,
+    "Card.preset.bordered-compact": 1,
+    "Card.padding.sm": 1,
     "Button.shape.circle": 2,
     "EmptyState.context.inset": 2,
-    "Dialog.bodyPadding.responsive": 3,
-    "Segmented.composition.dialog-tabs": 2,
+    "Dialog.bodyPadding.responsive": 1,
+    "Segmented.composition.dialog-tabs": 1,
     "Skeleton.preset.logo": 1,
     "Skeleton.tone.sidebar": 3,
     "Skeleton.preset.caption": 2,
@@ -1540,34 +1614,24 @@
     "IconAction.appearance.contrast": 3,
     "Tabs.variant.raised": 1,
     "Pill.appearance.outline": 1,
-    "Pill.tone.surface-ink": 3,
+    "Pill.tone.surface-ink": 1,
     "Textarea.surface.white": 1,
     "Button.composition.section-kebab": 2,
     "Pill.tone.count": 6,
-    "Select.size.md": 1,
-    "Input.preset.money": 2,
-    "Pill.preset.avatar-counter-xs": 2,
-    "Surface.preset.bordered-panel": 2,
-    "Segmented.composition.billing-selection": 1,
-    "Pill.tone.dark": 2,
-    "Pill.tone.danger": 4,
+    "Pill.tone.danger": 2,
     "Tag.size.small": 2,
     "DetailSection.density.group": 5,
     "TextAction.size.lg": 1,
     "DetailLayout.context.task": 1,
+    "Tabs.composition.pane-switch": 1,
     "Popover.align.start": 1,
     "Popover.padding.default": 1,
     "TaskAttributesPanel.context.task": 1,
-    "Input.composition.duration-hours": 4,
-    "Input.composition.duration-minutes": 4,
-    "Input.composition.metric-text": 1,
     "MarkdownViewer.size.lg": 1,
-    "Surface.preset.compact-bordered-card": 2,
+    "Surface.preset.compact-bordered-card": 1,
     "Button.composition.inline-add-action": 3,
-    "Card.preset.bordered": 1,
-    "Card.padding.md": 2,
     "UserAvatar.size.chat-mention": 2,
-    "Pill.tone.surface": 3,
+    "Pill.tone.surface": 1,
     "Pill.size.chat-day": 1,
     "IconAction.size.micro": 6,
     "IconAction.shape.micro": 6,
@@ -1577,18 +1641,6 @@
     "IconAction.composition.chat-composer-cancel": 1,
     "ChatComposerCore.variant.timeline": 1,
     "Button.composition.chat-composer-action": 1,
-    "DataTable.density.comfortable": 1,
-    "Pill.size.wide-sm": 5,
-    "Pill.appearance.soft-outline": 2,
-    "ResponseChoice.size.tile": 1,
-    "LoadingSpinner.size.sm": 3,
-    "DetailLayout.context.event": 1,
-    "TaskAttributesPanel.context.calendar": 1,
-    "AttributeTrigger.variant.cell": 2,
-    "AttributeTrigger.variant.details": 1,
-    "Textarea.composition.long-form": 1,
-    "ResponseChoice.size.md": 1,
-    "ResponseChoice.surface.surface": 1,
     "FileThumb.density.sm": 2,
     "FileThumb.density.lg": 1,
     "UserAvatar.size.chat-inline": 1,
@@ -1602,10 +1654,12 @@
     "Counter.size.xs": 1,
     "FilterBar.context.stacked": 1,
     "Counter.status.muted": 1,
+    "LoadingSpinner.size.sm": 2,
     "Counter.appearance.solid": 1,
-    "Select.size.sm": 6,
+    "Select.size.sm": 5,
     "Input.composition.project-name": 1,
-    "Textarea.composition.project-description": 1
+    "Textarea.composition.project-description": 1,
+    "Pill.preset.avatar-counter-xs": 1
   },
   "previewedValues": [
     "Alert.variant.danger",
@@ -1669,16 +1723,6 @@
     "Button.surface.canvas",
     "Button.surface.danger-subtle",
     "Button.surface.default",
-    "CalendarDayCell.density.compact",
-    "CalendarDayCell.density.roomy",
-    "CalendarDayCell.state.default",
-    "CalendarDayCell.state.outside",
-    "CalendarDayCell.state.selected",
-    "CalendarDayCell.state.today",
-    "CalendarDayCell.state.weekend",
-    "CalendarDayNumber.state.default",
-    "CalendarDayNumber.state.outside",
-    "CalendarDayNumber.state.today",
     "Card.padding.lg",
     "Card.padding.md",
     "Card.padding.none",
@@ -1707,8 +1751,6 @@
     "Counter.status.success",
     "Counter.variant.count",
     "Counter.variant.dot",
-    "DataTable.density.comfortable",
-    "DataTable.density.compact",
     "DetailLayout.context.event",
     "DetailLayout.context.task",
     "DetailSection.density.group",
@@ -1814,8 +1856,6 @@
     "MarkdownViewer.size.md",
     "MentionMenu.density.composer",
     "MentionMenu.density.timeline",
-    "Meter.layout.inline",
-    "Meter.layout.stack",
     "MobilePaneBack.context.level",
     "MobilePaneBack.context.pane",
     "MultiSelect.filterRole.date",
@@ -1943,7 +1983,6 @@
     "Tabs.variant.underline",
     "Tag.size.default",
     "Tag.size.small",
-    "TaskAttributesPanel.context.calendar",
     "TaskAttributesPanel.context.task",
     "TextAction.size.lg",
     "TextAction.size.md",

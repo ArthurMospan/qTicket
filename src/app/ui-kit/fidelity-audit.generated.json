@@ -8,44 +8,43 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 217,
-    "parsedFiles": 217,
+    "productFiles": 176,
+    "parsedFiles": 176,
     "parseErrors": 0,
-    "nativeControls": 20,
+    "nativeControls": 19,
     "structures": {
       "chat": 2,
-      "analytics": 1,
       "settings": 1,
       "shell": 13,
       "other": 3
     },
-    "styledNativeControls": 11,
+    "styledNativeControls": 10,
     "reviewedNativeControls": 8,
     "manualLabels": 0,
     "manualModalShells": 0,
     "manualPills": 0,
     "manualSurfaces": 0,
-    "localSurfaceExceptions": 29,
+    "localSurfaceExceptions": 15,
     "manualIconButtons": 0,
     "headingStyles": 0,
     "sharedChromeOverrides": 0,
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 20,
+    "button": 19,
     "input": 0,
     "textarea": 0,
     "select": 0
   },
   "kit": {
     "totals": {
-      "components": 111,
-      "used": 111,
+      "components": 97,
+      "used": 97,
       "unused": 0,
-      "covered": 104,
+      "covered": 90,
       "uncovered": 0,
-      "routes": 11,
-      "previews": 139,
+      "routes": 9,
+      "previews": 127,
       "internal": 7,
       "unlisted": 0
     },
@@ -251,8 +250,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/analytics",
-        "/analytics/team/[memberId]",
         "/chat",
         "/clients",
         "/my",
@@ -278,8 +275,6 @@
         "/",
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
-        "/analytics",
-        "/analytics/team/[memberId]",
         "/chat",
         "/clients",
         "/my",
@@ -290,7 +285,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:170",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:160",
       "className": "${…} cursor-pointer transition-colors ${…}",
       "text": "",
       "childElements": [],
@@ -301,24 +296,6 @@
       "structure": "chat",
       "routes": [
         "/[projectId]/issue/[issueId]"
-      ]
-    },
-    {
-      "tag": "button",
-      "location": "src/components/workspace/WorkloadTab.jsx:619",
-      "className": "flex min-w-[150px] flex-1 items-center gap-2.5 rounded-[12px] px-3 py-2.5 text-left transition-all ${…}",
-      "text": "",
-      "childElements": [
-        "span"
-      ],
-      "ariaLabel": "",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "IconAction",
-      "structure": "analytics",
-      "routes": [
-        "/analytics",
-        "/analytics/team/[memberId]"
       ]
     },
     {
@@ -386,7 +363,6 @@
   "structureLabels": {
     "chat": "Чат",
     "calendar": "Календар",
-    "analytics": "Аналітика",
     "ai-call": "AI-дзвінок",
     "tasks": "Задачі",
     "board": "Дошка й проєкт",
@@ -434,10 +410,6 @@
     {
       "file": "src/components/workspace/UnifiedTimeline.jsx",
       "count": 1
-    },
-    {
-      "file": "src/components/workspace/WorkloadTab.jsx",
-      "count": 1
     }
   ],
   "repeatedNativeFingerprints": [],
@@ -463,7 +435,7 @@
       "context": "profile-contact-value"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:170",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:160",
       "tag": "button",
       "context": "chat-reply-quote"
     },
@@ -524,26 +496,6 @@
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
     {
-      "location": "src/components/AudioTaskPanel.jsx:202",
-      "tag": "div",
-      "className": "flex items-center gap-3 rounded-[14px] bg-canvas px-4 py-3"
-    },
-    {
-      "location": "src/components/AudioTaskPanel.jsx:244",
-      "tag": "div",
-      "className": "rounded-[14px] bg-canvas p-4"
-    },
-    {
-      "location": "src/components/AudioTaskPanel.jsx:250",
-      "tag": "div",
-      "className": "rounded-[14px] bg-canvas p-4"
-    },
-    {
-      "location": "src/components/AudioTaskPanel.jsx:279",
-      "tag": "div",
-      "className": "rounded-[14px] border border-line bg-white p-4 transition-opacity ${…}"
-    },
-    {
       "location": "src/components/SearchModal.jsx:43",
       "tag": "div",
       "className": "bg-white rounded-[16px] shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-line w-full sm:w-[480px] max-h-[480px] overflow-hidden flex flex-col"
@@ -554,54 +506,14 @@
       "className": "w-5 h-5 flex items-center justify-center rounded-[6px] shrink-0 bg-white border border-line shadow-sm"
     },
     {
-      "location": "src/components/workspace/AgileBoard.jsx:471",
+      "location": "src/components/workspace/AgileBoard.jsx:469",
       "tag": "div",
       "className": "flex flex-col items-center justify-start w-[48px] shrink-0 pt-4 pb-2 bg-canvas rounded-t-[12px] cursor-pointer hover:bg-zone-hover transition-colors"
     },
     {
-      "location": "src/components/workspace/AgileBoard.jsx:558",
+      "location": "src/components/workspace/AgileBoard.jsx:556",
       "tag": "div",
       "className": "sticky left-0 flex items-center bg-canvas rounded-[6px] px-3 py-[6px] mb-2 w-max min-w-[200px]"
-    },
-    {
-      "location": "src/components/workspace/BillingTab.jsx:588",
-      "tag": "div",
-      "className": "bg-canvas rounded-[10px] px-4 py-3 mb-6"
-    },
-    {
-      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:283",
-      "tag": "div",
-      "className": "overflow-hidden rounded-[18px] border border-black/[0.05] bg-white"
-    },
-    {
-      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:294",
-      "tag": "div",
-      "className": "flex items-start gap-2 rounded-[12px] bg-white p-3 ring-1 ring-black/[0.04]"
-    },
-    {
-      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:299",
-      "tag": "div",
-      "className": "flex items-start gap-2 rounded-[12px] bg-white p-3 ring-1 ring-black/[0.04]"
-    },
-    {
-      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:334",
-      "tag": "div",
-      "className": "flex items-center gap-2.5 rounded-[12px] border border-black/[0.05] bg-white p-2.5"
-    },
-    {
-      "location": "src/components/workspace/calendar/CalendarEventDialog.jsx:778",
-      "tag": "div",
-      "className": "overflow-hidden rounded-[14px] border border-line bg-white"
-    },
-    {
-      "location": "src/components/workspace/calendar/CalendarEventPage.jsx:289",
-      "tag": "div",
-      "className": "rounded-[14px] bg-canvas px-4 py-8 text-center"
-    },
-    {
-      "location": "src/components/workspace/EventModal.jsx:16",
-      "tag": "div",
-      "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
     },
     {
       "location": "src/components/workspace/IssueModal.jsx:11",
@@ -609,19 +521,9 @@
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
     },
     {
-      "location": "src/components/workspace/TimesheetTab.jsx:887",
-      "tag": "div",
-      "className": "flex items-center gap-2 bg-canvas rounded-full pl-[4px] pr-[6px] py-[4px]"
-    },
-    {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1744",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1707",
       "tag": "div",
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
-    },
-    {
-      "location": "src/components/workspace/WorkloadTab.jsx:542",
-      "tag": "div",
-      "className": "mb-4 flex flex-wrap items-center gap-2 rounded-[14px] bg-white p-2"
     },
     {
       "location": "src/components/WorkspaceHeader.jsx:545",

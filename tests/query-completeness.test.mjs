@@ -7,15 +7,14 @@ import { COLUMN_VIRTUALIZATION_THRESHOLD } from '../src/lib/utils/boardRendering
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('workspace task listeners expose their complete authorized scope', async () => {
-  const [issues, mine, sprints, analytics, shared] = await Promise.all([
+  const [issues, mine, analytics, shared] = await Promise.all([
     read('src/lib/hooks/useIssues.js'),
     read('src/lib/hooks/useAllMyTasks.js'),
-    read('src/lib/hooks/useSprints.js'),
     read('src/lib/hooks/useWorkspaceAnalytics.js'),
     read('src/lib/hooks/useOrganizationIssues.js'),
   ]);
 
-  for (const source of [issues, mine, sprints, analytics, shared]) {
+  for (const source of [issues, mine, analytics, shared]) {
     assert.doesNotMatch(source, /limit\(/);
     assert.doesNotMatch(source, /hasMore/);
     assert.doesNotMatch(source, /loadMore/);
@@ -25,8 +24,6 @@ test('workspace task listeners expose their complete authorized scope', async ()
   // assignee and still says so.
   assert.match(mine, /issue\.assigneeIds\?\.includes\(userId\)/);
   assert.match(shared, /where\('projectId', 'in', chunk\)/);
-  assert.match(sprints, /orderBy\('createdAt', 'desc'\)/);
-  assert.match(analytics, /includeTimeLogs/);
 });
 
 test('large single-swimlane columns virtualize without hiding tasks behind a button', async () => {
@@ -60,7 +57,7 @@ test('large single-swimlane columns virtualize without hiding tasks behind a but
   assert.doesNotMatch(board, /renderedColIssues|remainingIssueCount|visibleCardLimits/);
 });
 
-// A list of tasks is bounded by the card, and by nothing else.
+// A list of tasks is bounded by the list, and by nothing else.
 //
 // This used to assert the opposite: no slicing anywhere, on the reasoning that
 // a number you cannot get to the rows behind is worse than a long list. The
@@ -70,35 +67,28 @@ test('large single-swimlane columns virtualize without hiding tasks behind a but
 // anything below them.
 //
 // What the rule protects is the *reachability* of the rest, so that is what it
-// checks now: one limit, owned by the card, with a control that lifts it. What
+// checks now: one limit, owned by the list, with a control that lifts it. What
 // stays forbidden is a call site inventing its own limit — that is how the same
 // list ended up showing five rows here and fifty there — and any screen quietly
 // dropping rows with no way to ask for them.
-test('a long list of tasks is bounded by the card, with a way to the rest', async () => {
-  const [taskList, overview, projectAnalytics, workload, velocity] = await Promise.all([
-    read('src/components/ui/TaskManagement/TaskListCard.jsx'),
-    read('src/app/(app)/analytics/page.js'),
-    read('src/components/workspace/AnalyticsTab.jsx'),
-    read('src/components/workspace/WorkloadTab.jsx'),
-    read('src/components/workspace/VelocityTab.jsx'),
+test('a long list of tasks is bounded by the list, with a way to the rest', async () => {
+  const [taskList, myPage] = await Promise.all([
+    read('src/components/ui/TaskManagement/TaskListView.jsx'),
+    read('src/app/(app)/my/page.js'),
   ]);
 
-  // The card owns the limit and the way past it.
+  // The list owns the limit and both ways past it.
   assert.match(taskList, /const INITIAL_ROWS = \d+/);
-  assert.match(taskList, /Показати ще/);
-  assert.match(taskList, /Згорнути/);
-  // And the count beside the title is the whole set, never the visible part —
-  // otherwise the number agrees with the card instead of with the truth.
-  assert.match(taskList, /const total = typeof count === 'number' \? count : issues\.length/);
-  assert.doesNotMatch(taskList, /count=\{visible\.length\}/);
+  assert.match(taskList, /Показати ще \{Math\.min\(MORE_ROWS, remaining\)\}/);
+  assert.match(taskList, /Згорнути\s*\n\s*<\/TextAction>/);
+  // And the count beside a section heading is the whole section, never the
+  // visible part — otherwise the number agrees with the list instead of with
+  // the truth.
+  assert.match(taskList, /<Counter value=\{section\.issues\.length\}/);
 
-  // No call site carries a limit of its own.
+  // No call site carries a limit of its own, and no screen drops rows on its
+  // own account: the list asks, a silent `.slice` does not.
   assert.doesNotMatch(taskList, /props\.limit|\blimit\s*=/);
-  for (const source of [overview, projectAnalytics, workload, velocity]) {
-    assert.doesNotMatch(source, /<TaskListCard[\s\S]{0,500}\b(limit|initialCount|maxRows)=/);
-  }
-  // And no screen drops rows on its own account, which is the part that was
-  // never negotiable: the card asks, a silent `.slice` does not.
-  assert.doesNotMatch(workload, /rows\.slice\(0,|logs\.slice\(0,/);
-  assert.doesNotMatch(velocity, /byProject\.slice\(0,/);
+  assert.doesNotMatch(myPage, /<TaskListView[\s\S]{0,500}\b(limit|initialCount|maxRows)=/);
+  assert.doesNotMatch(myPage, /filtered\.slice\(0,|issues\.slice\(0,/);
 });
