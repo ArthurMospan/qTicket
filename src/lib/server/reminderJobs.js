@@ -4,7 +4,7 @@ import 'server-only';
 import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { deliverEmail, emailConfigured } from '@/lib/server/email';
 import { generateEmailTemplate } from '@/lib/utils/sendEmail';
-import { BIRTHDAY_NOTIFICATION_TYPE, shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
+import { shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
 import {
   DEADLINE_FLOOR_MS,
@@ -488,200 +488,12 @@ export async function runDeadlineReminderSweep({ nowMs = Date.now() } = {}) {
   return { candidates: candidates.length, ...summarize(results) };
 }
 
-function birthdayParts(nowMs, timeZone) {
-  const [year, month, day] = dayKeyInTimeZone(nowMs, timeZone).split('-');
-  return { year, month, day };
-}
-
-// Everyone but the birthday person gets a bell entry pointing at the greeting.
-// Deterministic ids, so a re-run — the scheduled sweep after an on-demand one —
-// writes the same documents rather than a second set.
-async function createBirthdayNotifications({
-  organizationId,
-  memberIds,
-  birthdayUserId,
-  dayKey,
-  name,
-}) {
-  const db = getAdminDb();
-  const recipients = memberIds.filter(userId => userId && userId !== birthdayUserId);
-  if (!recipients.length) return;
-  const link = withNotificationOrganization('/chat', organizationId);
-  const batch = db.batch();
-  for (const userId of recipients) {
-    batch.create(
-      db.collection('notifications').doc(`birthday_${dayKey}_${birthdayUserId}_${userId}`),
-      {
-        userId,
-        type: BIRTHDAY_NOTIFICATION_TYPE,
-        title: `Сьогодні день народження у ${name}`,
-        body: 'Привітайте колегу в загальному чаті 🎉',
-        link,
-        issueId: '',
-        projectId: '',
-        organizationId,
-        actorId: 'quickteam-system',
-        actorName: 'QuickTeam',
-        actorAvatar: '',
-        read: false,
-        inapp: true,
-        createdAt: FieldValue.serverTimestamp(),
-      },
-    );
-  }
-  await batch.commit().catch(error => {
-    // A batch of `create`s fails as a whole if any id already exists, which is
-    // exactly what a repeat pass looks like. Nothing to repair.
-    if (error.code === 6 || error.code === 'already-exists') return;
-    console.warn('[reminder-job] Birthday notifications failed:', error.message);
-  });
-}
-
-// `userId` narrows the scan to one person, and `force` skips the once-a-day
-// claim. Both exist for the same reason: the claim is a cost control, not a
-// correctness one — the greeting itself is idempotent through its document id —
-// and a birthday saved *after* the day's scheduled pass had already claimed the
-// day used to be silently skipped until the following year.
-async function runOrganizationBirthdaySweep(
-  organizationId,
-  timeZone,
-  nowMs,
-  { userId = '', force = false } = {},
-) {
-  const db = getAdminDb();
-  const today = birthdayParts(nowMs, timeZone);
-  const dayKey = `${today.year}_${today.month}_${today.day}`;
-  if (!force) {
-    const claimRef = db.collection('organizations').doc(organizationId)
-      .collection('settings').doc(`birthdaySweep_${dayKey}`);
-    try {
-      await claimRef.create({ claimedAt: FieldValue.serverTimestamp() });
-    } catch (error) {
-      if (error.code === 6 || error.code === 'already-exists') return 0;
-      throw error;
-    }
-  }
-
-  const membershipsSnapshot = await db.collection('orgMemberships')
-    .where('orgId', '==', organizationId)
-    .get();
-  const allMemberships = membershipsSnapshot.docs.map(document => document.data());
-  if (!allMemberships.length) return 0;
-  const memberIds = allMemberships.map(membership => membership.userId).filter(Boolean);
-  const memberships = userId
-    ? allMemberships.filter(membership => membership.userId === userId)
-    : allMemberships;
-  if (!memberships.length) return 0;
-  const profiles = await db.getAll(...memberships.map(membership =>
-    db.collection('users').doc(membership.userId)));
-  let created = 0;
-
-  await mapWithConcurrency(memberships, DELIVERY_CONCURRENCY, async (membership, index) => {
-    const profile = profiles[index]?.exists ? profiles[index].data() : {};
-    const birthday = typeof profile.birthday === 'string'
-      ? profile.birthday
-      : typeof profile.profile?.birthday === 'string'
-        ? profile.profile.birthday
-        : '';
-    if (birthday.slice(5) !== `${today.month}-${today.day}`) return;
-
-    const name = profile.name || profile.email || 'нашого колеги';
-    const greetingId = `birthday_${dayKey}_${membership.userId}`;
-    const messageRef = db.collection('organizations').doc(organizationId)
-      .collection('channels').doc('general').collection('messages').doc(greetingId);
-    try {
-      const text = `🎉 Сьогодні день народження у ${name}! Вітаємо, бажаємо натхнення, крутих результатів і чудового року попереду!`;
-      await messageRef.create({
-        text,
-        attachments: [],
-        senderId: 'quickteam-system',
-        user: 'QuickTeam',
-        avatar: null,
-        system: true,
-        type: 'birthday',
-        birthdayUserId: membership.userId,
-        createdAt: FieldValue.serverTimestamp(),
-        readBy: [],
-      });
-      await db.collection('organizations').doc(organizationId).collection('channels').doc('general').set({
-        name: 'general',
-        type: 'public',
-        lastMessageAt: FieldValue.serverTimestamp(),
-        lastMessageText: text.slice(0, 80),
-        lastMessageSender: 'QuickTeam',
-        lastMessageSenderId: 'quickteam-system',
-        messageCount: FieldValue.increment(1),
-      }, { merge: true });
-      created += 1;
-    } catch (error) {
-      if (error.code !== 6 && error.code !== 'already-exists') throw error;
-      // The greeting was already posted today; the notifications below are
-      // written anyway, because an earlier pass may have posted the message
-      // before this half existed.
-    }
-    await createBirthdayNotifications({
-      organizationId,
-      memberIds,
-      birthdayUserId: membership.userId,
-      dayKey,
-      name,
-    });
-  });
-
-  return created;
-}
-
-// A greeting has to land on the right day, not the right minute. Scanning every
-// organization on all 288 passes of a day bought nothing and cost a full
-// collection read each time; every half hour still puts the greeting in the
-// channel within thirty minutes of local midnight, in any timezone.
-export const BIRTHDAY_SCAN_INTERVAL_MS = 30 * 60 * 1000;
-
-export async function runBirthdaySweep({
-  nowMs = Date.now(),
-  organizationId = '',
-  lastScanAtMs = null,
-  userId = '',
-  force = false,
-} = {}) {
-  const db = getAdminDb();
-  if (!organizationId && Number.isFinite(lastScanAtMs) &&
-      nowMs - lastScanAtMs < BIRTHDAY_SCAN_INTERVAL_MS) {
-    return { created: 0, skipped: true };
-  }
-  const snapshots = organizationId
-    ? [await db.collection('organizations').doc(organizationId).get()]
-    : (await db.collection('organizations').select('timezone').get()).docs;
-  const organizations = snapshots
-    .filter(snapshot => snapshot.exists)
-    .map(snapshot => ({
-      id: snapshot.id,
-      timeZone: snapshot.data()?.timezone || 'Europe/Kyiv',
-    }));
-  const counts = await mapWithConcurrency(
-    organizations,
-    DELIVERY_CONCURRENCY,
-    organization => runOrganizationBirthdaySweep(
-      organization.id,
-      organization.timeZone,
-      nowMs,
-      { userId, force },
-    ),
-  );
-  return {
-    created: counts.reduce((total, count) => total + (count || 0), 0),
-    skipped: false,
-    scannedAtMs: nowMs,
-  };
-}
-
 // Reads the sweep's watermark and reports how much time the next pass has to
 // cover. A first run, or one whose state document was lost, gets the floor.
 export async function readSweepState(nowMs) {
   const snapshot = await sweepStateRef().get().catch(() => null);
   const data = snapshot?.data() || {};
   const lastRunAt = Number(data.lastRunAtMs);
-  const lastBirthdayScanAt = Number(data.lastBirthdayScanAtMs);
   const lastMaterialiseAt = Number(data.lastMaterialiseAtMs);
   const elapsedMs = Number.isFinite(lastRunAt) && lastRunAt <= nowMs
     ? nowMs - lastRunAt
@@ -695,7 +507,6 @@ export async function readSweepState(nowMs) {
     : REMINDER_LOOKBACK_MS;
   return {
     lastRunAtMs: Number.isFinite(lastRunAt) ? lastRunAt : null,
-    lastBirthdayScanAtMs: Number.isFinite(lastBirthdayScanAt) ? lastBirthdayScanAt : null,
     lastMaterialiseAtMs: Number.isFinite(lastMaterialiseAt) ? lastMaterialiseAt : null,
     elapsedMs,
     materialiseElapsedMs,
@@ -883,7 +694,7 @@ export async function pruneReadNotifications({ nowMs = Date.now(), limit = PRUNE
  *                  records. Hourly, because «Нещодавно видалене» promises
  *                  twenty-four hours and a nightly pass would make it up to
  *                  forty-eight.
- *   materialise  — restock the outbox from the source data, and post birthday
+ *   materialise  — restock the outbox from the source data
  *                  greetings. Nightly. The rows themselves are written when
  *                  somebody sets a deadline or moves an event; this is the pass
  *                  that catches whatever a failed write or a direct database
@@ -902,7 +713,7 @@ export async function runScheduledNotificationSweep({ nowMs = Date.now(), mode =
   // learn something only the expensive half uses.
   const state = wantsMaterialise
     ? await readSweepState(nowMs)
-    : { lastRunAtMs: null, lastBirthdayScanAtMs: null, lastMaterialiseAtMs: null,
+    : { lastRunAtMs: null, lastMaterialiseAtMs: null,
       elapsedMs: REMINDER_LOOKBACK_MS, materialiseElapsedMs: REMINDER_LOOKBACK_MS };
   const lookBackMs = clampReminderLookback(state.materialiseElapsedMs);
   const materialiseDue = !Number.isFinite(state.lastMaterialiseAtMs)
@@ -917,10 +728,6 @@ export async function runScheduledNotificationSweep({ nowMs = Date.now(), mode =
   const dispatched = wantsDispatch
     ? await dispatchDueNotifications({ nowMs })
     : { skipped: true, due: 0, sent: 0, failed: 0, email: 0 };
-
-  const birthdays = wantsMaterialise
-    ? await runBirthdaySweep({ nowMs, lastScanAtMs: state.lastBirthdayScanAtMs })
-    : { created: 0, skipped: true };
 
   // Finalising a soft-deleted task and expiring a read record are each one
   // bounded indexed query, and neither may ride the every-minute pass.
@@ -974,13 +781,11 @@ export async function runScheduledNotificationSweep({ nowMs = Date.now(), mode =
       mode,
       previousRunAtMs: state.lastRunAtMs,
       ...(materialised.skipped ? {} : { lastMaterialiseAtMs: nowMs }),
-      ...(birthdays.skipped ? {} : { lastBirthdayScanAtMs: nowMs }),
       counts: {
         materialised: materialised.created || 0,
         cancelled: materialised.cancelled || 0,
         sent: dispatched.sent || 0,
         failed: dispatched.failed || 0,
-        birthdays: birthdays.created || 0,
         purgedIssues: issueTrash.purged || 0,
         prunedNotifications: prunedNotifications.deleted || 0,
         staleRows: staleRows.cancelled || 0,
@@ -997,7 +802,6 @@ export async function runScheduledNotificationSweep({ nowMs = Date.now(), mode =
     sinceLastRunMs: state.lastRunAtMs === null ? null : nowMs - state.lastRunAtMs,
     materialised,
     dispatched,
-    birthdays,
     issueTrash,
     prunedNotifications,
     staleRows,

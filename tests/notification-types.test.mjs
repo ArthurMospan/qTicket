@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
-  BIRTHDAY_NOTIFICATION_TYPE,
   NOTIFICATION_TYPES,
   REQUESTABLE_NOTIFICATION_TYPES,
   SYSTEM_NOTIFICATION_TYPES,
@@ -31,14 +30,4 @@ test('the API accepts exactly the requestable types', async () => {
   for (const type of SYSTEM_NOTIFICATION_TYPES) {
     assert.equal(REQUESTABLE_NOTIFICATION_TYPES.includes(type), false, type);
   }
-});
-
-test('the birthday greeting is live, and is the reason the type exists', async () => {
-  const jobs = await read('../src/lib/server/reminderJobs.js');
-  // The sweep writes it straight through the Admin SDK, which is why it never
-  // appears in the route's allow-list.
-  assert.match(jobs, /type: BIRTHDAY_NOTIFICATION_TYPE,/);
-  assert.match(jobs, /createBirthdayNotifications\(\{/);
-  assert.equal(BIRTHDAY_NOTIFICATION_TYPE, 'birthday');
-  assert.equal(NOTIFICATION_TYPES.includes(BIRTHDAY_NOTIFICATION_TYPE), true);
 });

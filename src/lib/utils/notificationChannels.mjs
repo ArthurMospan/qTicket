@@ -14,13 +14,6 @@ export const NOTIFICATION_CHANNELS = ['inapp', 'email', 'telegram'];
 
 // Every notification type the product can produce, split by who may ask for it.
 //
-// `birthday` is the one type no client can send: the greeting sweep writes it
-// straight through the Admin SDK, because it is addressed to everyone in an
-// organization on somebody else's behalf and nobody should be able to forge
-// that from a browser. It has an icon and it reaches real bells; it is absent
-// from the API's allow-list on purpose, not by oversight, and the type table on
-// the client has to keep covering it. `notification-types.test.mjs` holds the
-// three lists together.
 export const REQUESTABLE_NOTIFICATION_TYPES = [
   'assigned',
   'commented',
@@ -36,9 +29,8 @@ export const REQUESTABLE_NOTIFICATION_TYPES = [
   'test',
 ];
 
-export const BIRTHDAY_NOTIFICATION_TYPE = 'birthday';
 
-export const SYSTEM_NOTIFICATION_TYPES = [BIRTHDAY_NOTIFICATION_TYPE];
+export const SYSTEM_NOTIFICATION_TYPES = [];
 
 export const NOTIFICATION_TYPES = [
   ...REQUESTABLE_NOTIFICATION_TYPES,

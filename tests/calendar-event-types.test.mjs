@@ -131,26 +131,6 @@ test('a moment on the calendar has no end to ask for', () => {
   assert.ok(POINT_EVENT_DURATION_MINUTES > 0);
 });
 
-test('legacy and system types resolve rather than falling back to a generic label', () => {
-  assert.equal(isKnownCalendarEventType('milestone'), true);
-  assert.equal(calendarEventTypeLabel('milestone'), 'Реліз / етап');
-  assert.equal(isKnownCalendarEventType('birthday'), true);
-  assert.equal(calendarEventTypeLabel('birthday'), 'День народження');
-  assert.equal(isKnownCalendarEventType('nonsense'), false);
-  // A birthday is read-only: nothing about it is editable or trackable.
-  assert.equal(calendarEventSupportsTracking('birthday'), false);
-  assert.equal(calendarEventSupportsRsvp('birthday'), false);
-  assert.equal(calendarEventSupportsReminders('birthday'), false);
-});
-
-test('the write route refuses `birthday`, which is generated on read only', async () => {
-  const source = await read('../src/lib/server/calendarEvents.js');
-  assert.match(source, /type === 'birthday' \|\| !isKnownCalendarEventType\(type\)/);
-  // And it derives the end of a point-in-time event instead of trusting one.
-  assert.match(source, /if \(!calendarEventHasDuration\(type\)\) \{/);
-  assert.match(source, /applyCalendarEventTypeRules\(\{/);
-});
-
 test('calendar reminder selection has one explicit five-item limit', async () => {
   const [server, dialog, page, select] = await Promise.all([
     read('../src/lib/server/calendarEvents.js'),
@@ -183,18 +163,4 @@ test('time logging is refused for types that cannot hold hours', async () => {
     /const canTrackTime = event\.visibility === 'team' && typeAllowsTracking/,
   );
   assert.match(source, /CALENDAR_TIME_TYPE_DISABLED/);
-});
-
-test('a birthday saved today is announced without waiting for the next daily claim', async () => {
-  const [jobs, route] = await Promise.all([
-    read('../src/lib/server/reminderJobs.js'),
-    read('../src/app/api/calendar/birthday/route.js'),
-  ]);
-  // The claim is a cost control and must be skippable, or a birthday added
-  // after the day's scheduled pass is silently lost until the next year.
-  assert.match(jobs, /if \(!force\) \{/);
-  assert.match(jobs, /createBirthdayNotifications\(/);
-  assert.match(jobs, /`birthday_\$\{dayKey\}_\$\{birthdayUserId\}_\$\{userId\}`/);
-  assert.match(route, /force: true/);
-  assert.match(route, /userId: authorization\.user\.uid/);
 });

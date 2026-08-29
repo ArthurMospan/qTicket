@@ -3,7 +3,6 @@ import { authorizeOrgRequest } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { rolesFor } from '@/lib/utils/can';
 import {
-  runBirthdaySweep,
   runCalendarReminderSweep,
 } from '@/lib/server/reminderJobs';
 
@@ -23,17 +22,13 @@ export async function POST(request) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }
 
-    const [calendar, birthdays] = await Promise.all([
-      runCalendarReminderSweep({
-        organizationId,
-        recipientId: authorization.user.uid,
-      }),
-      runBirthdaySweep({ organizationId }),
-    ]);
+    const calendar = await runCalendarReminderSweep({
+      organizationId,
+      recipientId: authorization.user.uid,
+    });
     return NextResponse.json({
       created: calendar.claimed,
       telegram: calendar.telegram,
-      birthdayGreetings: birthdays.created,
     });
   } catch (error) {
     return routeErrorResponse(error, {

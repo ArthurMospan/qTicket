@@ -933,7 +933,6 @@ export default function SettingsPage() {
   const [telegram,      setTelegram]      = useState('');
   const [phone,         setPhone]         = useState('');
   const [location,      setLocation]      = useState('');
-  const [birthday,      setBirthday]      = useState('');
   const [skillsInput,   setSkillsInput]   = useState('');
 
   // Saved values + whether any profile field is unsaved (for the leave guard).
@@ -945,7 +944,6 @@ export default function SettingsPage() {
     telegram !== (currentUser?.telegram || '') ||
     phone !== (currentUser?.phone || '') ||
     location !== (currentUser?.location || '') ||
-    birthday !== (currentUser?.birthday || '') ||
     skillsInput !== savedSkills;
 
   // Discard unsaved profile edits (used when the user chooses to leave without
@@ -960,7 +958,6 @@ export default function SettingsPage() {
     setTelegram(currentUser?.telegram || '');
     setPhone(currentUser?.phone || '');
     setLocation(currentUser?.location || '');
-    setBirthday(currentUser?.birthday || '');
     setSkillsInput(Array.isArray(currentUser?.skills) ? currentUser.skills.join(', ') : '');
   }, [currentUser]);
 
@@ -1081,7 +1078,6 @@ export default function SettingsPage() {
         setTelegram(currentUser.telegram || '');
         setPhone(currentUser.phone || '');
         setLocation(currentUser.location || '');
-        setBirthday(currentUser.birthday || '');
         setSkillsInput(Array.isArray(currentUser.skills) ? currentUser.skills.join(', ') : '');
         if (currentUser.localization) {
           const loc = {
@@ -1306,7 +1302,6 @@ export default function SettingsPage() {
     try {
       await updateDoc(doc(db, 'users', uid), { [field]: value, updatedAt: serverTimestamp() });
       showToast('Збережено');
-      if (field === 'birthday') await announceBirthdayIfToday(value);
     } catch { showToast('Помилка збереження', 'error'); }
   };
 
@@ -1325,30 +1320,6 @@ export default function SettingsPage() {
     showToast(url ? 'Аватар збережено' : 'Аватар видалено');
   };
 
-  // The scheduled sweep claims each day once, and by the time anyone opens
-  // Settings it has already run — so a birthday saved *for today* produced no
-  // greeting and no notification until the next year. Ask the server to
-  // announce it now instead. Everything it writes is keyed by day and member,
-  // so the regular sweep landing later changes nothing.
-  const announceBirthdayIfToday = async value => {
-    const organizationId = activeOrgId;
-    if (!organizationId || typeof value !== 'string') return;
-    const match = value.match(/^\d{4}-(\d{2}-\d{2})$/);
-    const today = new Date();
-    const todayKey = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    if (!match || match[1] !== todayKey) return;
-    try {
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) return;
-      await fetch('/api/calendar/birthday', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ organizationId }),
-      });
-    } catch {
-      // The greeting is a nicety, not part of saving the profile field.
-    }
-  };
 
   const handleSectionChange = async (newSection) => {
     if (newSection === activeSection) return true;
@@ -2231,15 +2202,6 @@ export default function SettingsPage() {
             </Row>
             <Row label="Локація">
               <InlineEditField value={location} onChange={setLocation} saved={currentUser?.location || ''} onSave={() => saveProfileField('location', location)} placeholder="Київ, Україна" className="w-[260px]" />
-            </Row>
-            <Row label="День народження" desc="Показується команді у профілі">
-              <InlineDateField
-                value={birthday}
-                onChange={setBirthday}
-                saved={currentUser?.birthday || ''}
-                onSave={() => saveProfileField('birthday', birthday)}
-                placeholder="Оберіть день народження"
-              />
             </Row>
             <div className="flex flex-col gap-2 py-[12px] border-t border-canvas mt-2">
               <Label context="inline">Про себе</Label>

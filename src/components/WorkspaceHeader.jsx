@@ -16,7 +16,7 @@ import NotificationBell     from '@/components/ui/Layout/NotificationBell';
 import NotificationCard     from '@/components/ui/Layout/NotificationCard';
 import Segmented            from '@/components/ui/Segmented';
 import {
-  Bell, Search, CakeSlice, Check, CheckCheck, GitPullRequest, Zap,
+  Bell, Search, Check, CheckCheck, GitPullRequest, Zap,
   UserCheck, AlertCircle, AtSign, CalendarClock, Settings, Trash2, Mail,
   ChevronRight, X, Hash, ArrowLeft,
 } from 'lucide-react';
@@ -57,7 +57,6 @@ const TYPE_CFG = {
   calendar_invite:{ icon: CalendarClock,  color: '#2563eb' },
   calendar_changed:{ icon: CalendarIcon,  color: '#525252' },
   calendar_reminder:{ icon: CalendarClock, color: '#111827' },
-  birthday:       { icon: CakeSlice,      color: '#db2777' },
   test:           { icon: Bell,           color: '#6366f1' },
 };
 
