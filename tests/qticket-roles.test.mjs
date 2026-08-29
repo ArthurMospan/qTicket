@@ -324,12 +324,26 @@ test('клієнтська сесія не може відкрити внутр�
   for (const allowed of ['/', '/settings', '/settings/profile', '/client-a/issue/INC-12']) {
     assert.equal(isClientPortalRoute(allowed), true, `${allowed} має лишатися клієнтським маршрутом`);
   }
-  for (const denied of ['/overview', '/my', '/team', '/clients', '/client-a', '/analytics', '/chat']) {
+  for (const denied of ['/overview', '/my', '/team', '/clients', '/analytics', '/chat']) {
     assert.equal(isClientPortalRoute(denied), false, `${denied} не має відкриватися клієнту`);
   }
 
+  // Своїм простором клієнт користується, чужим — ні, і форма адреси цього не
+  // вирішує: `/overview` виглядає точно так само. Тому межа звіряє id, а не
+  // візерунок. Портал веде клієнта саме сюди — поки цього рядка не було,
+  // сторінка кидала його в `/{projectId}`, layout кидав назад, і клієнт не міг
+  // відкрити qTicket взагалі.
+  assert.equal(isClientPortalRoute('/client-a', ['client-a']), true, 'свій простір відкривається');
+  assert.equal(isClientPortalRoute('/client-b', ['client-a']), false, 'чужий простір — ні');
+  assert.equal(isClientPortalRoute('/client-a'), false, 'без списку просторів нічого не відкривається');
+  // Навіть якби простір назвали як екран, екран лишається екраном.
+  assert.equal(isClientPortalRoute('/overview', ['overview']), false, 'зарезервована назва не стає простором');
+
   const layout = await read('../src/app/(app)/layout.js');
-  assert.match(layout, /const clientRouteDenied = isClientRole\(orgRole\) && !isClientPortalRoute\(pathname\)/);
+  assert.match(layout, /!isClientPortalRoute\(pathname, clientProjectIds\)/);
+  // Поки простори ще вантажаться, нікого не відкидає: рішення на порожньому
+  // списку виганяло б клієнта з власного простору при кожному оновленні.
+  assert.match(layout, /&& !projectsLoading/);
   assert.match(layout, /router\.replace\(`\/\?org=\$\{encodeURIComponent\(activeOrgId\)\}`\)/);
   assert.match(layout, /if \(clientRouteDenied\) \{[\s\S]{0,360}Повертаємо до порталу підтримки/);
 });

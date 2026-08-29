@@ -1,6 +1,6 @@
 'use client';
 // src/app/workspace/layout.js — Sidebar full-height, header only over main content
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import WorkspaceSidebar from '@/components/WorkspaceSidebar';
@@ -156,7 +156,7 @@ function NoOrganizationAccess({ email, onRetry, onSignOut }) {
 
 export default function WorkspaceLayout({ children }) {
   const router = useRouter();
-  const { currentUser, authLoading, activeOrgId, orgLoading, orgError, orgRole, noOrg, signOut, allOrgs } = useAppContext();
+  const { currentUser, authLoading, activeOrgId, orgLoading, orgError, orgRole, noOrg, signOut, allOrgs, projects, projectsLoading } = useAppContext();
   const [needsOrgSelection, setNeedsOrgSelection] = useState(false);
   // null on first render, then the matching nav is mounted. This prevents the
   // hidden nav variant from briefly opening its own Firestore subscriptions.
@@ -179,7 +179,17 @@ export default function WorkspaceLayout({ children }) {
   const signOutAndReturn = async () => { await signOut(); router.replace('/login'); };
 
   const pathname = usePathname();
-  const clientRouteDenied = isClientRole(orgRole) && !isClientPortalRoute(pathname);
+  // The spaces this person actually holds — the boundary needs the ids, not the
+  // shape of the address. While they are still loading nothing is denied yet:
+  // deciding on an empty list would bounce a client off their own space every
+  // time the page is refreshed.
+  const clientProjectIds = useMemo(
+    () => (projects || []).map(project => project.id).filter(Boolean),
+    [projects],
+  );
+  const clientRouteDenied = isClientRole(orgRole)
+    && !projectsLoading
+    && !isClientPortalRoute(pathname, clientProjectIds);
   const isSettings = pathname?.startsWith('/settings');
   const hideHeader = isSettings;
 
