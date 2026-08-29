@@ -16,10 +16,17 @@ test('organization picker counts come from a token-scoped server aggregation', a
   assert.match(route, /\.where\('userId', '==', uid\)/);
   assert.match(route, /db\.collection\('orgMemberships'\)/);
   assert.doesNotMatch(route, /searchParams|request\.json\(/);
-  assert.match(route, /\.where\('read', '==', false\)/);
-  assert.match(route, /\.where\('inapp', '==', false\)/);
-  assert.match(route, /totalByOrganization\[organizationId\] - \(externalOnlyByOrganization\[organizationId\] \|\| 0\)/);
-  assert.match(route, /query\.count\(\)\.get\(\)/);
+  // Що таке «непрочитане» вирішує одна функція на обидві сторони: дзвіночок
+  // тут і бейдж qTicket у рейці QuickTeam. Раніше рецепт жив у цьому файлі, і
+  // друга його копія розійшлася б із першою мовчки.
+  assert.match(route, /unreadInAppCount\(db, uid, organizationId\)/);
+  const counts = await read('../src/lib/server/notificationCounts.js');
+  assert.match(counts, /\.where\('read', '==', false\)/);
+  assert.match(counts, /\.where\('inapp', '==', false\)/);
+  assert.match(counts, /Math\.max\(0, total - externalOnly\)/);
+  assert.match(counts, /query\.count\(\)\.get\(\)/);
+  // Порожня скринька коштує один рахунок, не два.
+  assert.match(counts, /if \(total === 0\) return 0;/);
   assert.match(route, /'Cache-Control': 'private, no-store, max-age=0'/);
 
   assert.match(hook, /'\/api\/notifications\/unread-counts'/);

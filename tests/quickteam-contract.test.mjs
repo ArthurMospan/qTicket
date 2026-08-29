@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import {
   normalizeQuickTeamLaunch,
   normalizeQuickTeamProvision,
+  normalizeQuickTeamUnread,
   quickTeamIdentityId,
   quickTeamOrganizationId,
   quickTeamStaffUid,
@@ -191,4 +192,53 @@ test('provisioning повертає місце тим самим шляхом, �
   // І документ організації більше не носить списку, який ніхто не читає, —
   // а читати його міг кожен клієнт, бо організація йому відкрита.
   assert.doesNotMatch(route, /memberUids/);
+});
+
+// Одне число в чужій рейці. Воно каже «сюди варто зайти» — і більше нічого:
+// ні заголовка звернення, ні клієнта, ні ключа. Друга скринька — це друга
+// скринька, яку треба тримати правдивою.
+test('the unread badge answers with a number and only for an enabled staff seat', async () => {
+  assert.deepEqual(
+    normalizeQuickTeamUnread({ version: 1, sourceOrganizationId: ' org-1 ', sourceUserId: 'user-1' }).data,
+    { sourceOrganizationId: 'org-1', sourceUserId: 'user-1' },
+  );
+  assert.equal(normalizeQuickTeamUnread({ version: 2, sourceOrganizationId: 'o', sourceUserId: 'u' }).error, 'unsupported_version');
+  assert.equal(normalizeQuickTeamUnread({ version: 1, sourceOrganizationId: 'o' }).error, 'invalid_payload');
+
+  const [route, verification, counts] = await Promise.all([
+    readFile(new URL('../src/app/api/integrations/quickteam/unread/route.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/server/quickteamIntegration.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/server/notificationCounts.js', import.meta.url), 'utf8'),
+  ]);
+
+  // Ті самі дві відмови, що й у launch: вимкнене доповнення й не той, кого
+  // QuickTeam надіслав. Організація, яка вимкнула qTicket, перестає
+  // розповідати про себе навіть числом.
+  assert.match(route, /quickTeam\?\.entitlement !== 'active'/);
+  assert.match(route, /INTERNAL_ROLES\.includes\(membershipSnap\.data\(\)\?\.role\)/);
+  assert.ok(
+    route.indexOf("code: 'not_enabled'") < route.indexOf('unreadInAppCount(db, qTicketUserId'),
+    'the count is read after the seat is verified, not before',
+  );
+  // Відповідь — рівно два поля. Заголовок, клієнт чи ключ звернення тут
+  // перетворили б бейдж на другу скриньку.
+  assert.match(
+    route,
+    /NextResponse\.json\(\{\s*version: 1,\s*unread: await unreadInAppCount\(db, qTicketUserId, organizationId\),\s*\}/,
+  );
+
+  // Підпис і пʼятихвилинне вікно лишаються; nonce — ні, і це навмисно.
+  assert.match(route, /readSignedQuickTeamRequest\(request, \{ recordNonce: false \}\)/);
+  assert.match(verification, /export async function readSignedQuickTeamRequest\(request, \{ recordNonce = true \} = \{\}\)/);
+  assert.ok(
+    verification.indexOf('if (!recordNonce) return { body };') > verification.indexOf('if (!verification.ok)'),
+    'an unsigned request is refused before the nonce store is skipped',
+  );
+
+  // Одне визначення «непрочитаного» на обидва боки: дзвіночок тут і бейдж там.
+  assert.match(counts, /export async function unreadInAppCount\(db, uid, organizationId\)/);
+  assert.match(counts, /Math\.max\(0, total - externalOnly\)/);
+  const bell = await readFile(new URL('../src/app/api/notifications/unread-counts/route.js', import.meta.url), 'utf8');
+  assert.match(bell, /unreadInAppCount\(db, uid, organizationId\)/);
+  assert.doesNotMatch(bell, /\.where\('inapp', '==', false\)/);
 });

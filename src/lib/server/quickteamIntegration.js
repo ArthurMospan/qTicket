@@ -20,7 +20,19 @@ function authUserPatch(member, includeEmail) {
   };
 }
 
-export async function readSignedQuickTeamRequest(request) {
+/**
+ * Verify a signed QuickTeam request and return its parsed body.
+ *
+ * `recordNonce` is on for everything that changes something here — a replayed
+ * provisioning snapshot or launch mint must be refused, and the nonce document
+ * is what refuses it. A read-only endpoint passes `false` deliberately: the
+ * unread badge is asked on every rail mount, a nonce costs a transaction with a
+ * write in it, and writes are the tighter of the two free-tier budgets. What a
+ * replay of a read buys an attacker who already holds the signed bytes is the
+ * number they already had. The signature and the five-minute window still
+ * apply, so this is not an unsigned door.
+ */
+export async function readSignedQuickTeamRequest(request, { recordNonce = true } = {}) {
   const declaredLength = Number(request.headers.get('content-length') || 0);
   if (declaredLength > MAX_SIGNED_BODY_BYTES) {
     return { error: 'Payload too large', status: 413, code: 'payload_too_large' };
@@ -55,6 +67,8 @@ export async function readSignedQuickTeamRequest(request) {
   } catch {
     return { error: 'Invalid JSON', status: 400, code: 'invalid_json' };
   }
+
+  if (!recordNonce) return { body };
 
   const db = getAdminDb();
   const nonceRef = db.collection('integrationNonces').doc(quickTeamNonceId(nonce));

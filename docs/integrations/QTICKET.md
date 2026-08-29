@@ -143,6 +143,45 @@ qTicket Firebase custom token.
 Launch codes are single-use. An expired, consumed or revoked staff launch is a
 new launch from QuickTeam, never a reusable fallback password.
 
+## Unread badge
+
+QuickTeam draws one number beside its own qTicket rail row, so somebody working
+in QuickTeam can see that a client wrote without opening the other product.
+
+`POST /api/integrations/quickteam/unread` is signed the same way and receives:
+
+```json
+{
+  "version": 1,
+  "sourceOrganizationId": "quickteam-org-id",
+  "sourceUserId": "quickteam-user-id"
+}
+```
+
+It answers `{ "version": 1, "unread": 3 }` and nothing else — no incident title,
+no client name, no issue key. A badge is a reason to open qTicket, not a copy of
+the bell that lives inside it; the copy would be a second inbox to keep
+truthful. It refuses exactly as a launch does: `inactive` (403) when the add-on
+is off for that organization, `not_enabled` (403) when the person holds no
+internal qTicket seat. An organization that turned qTicket off stops publishing
+counts about itself.
+
+Two deliberate exceptions to the rules above:
+
+- **No nonce is recorded.** Every other signed endpoint stores the nonce before
+  processing and answers `409 replay` to a repeat. This one is asked on every
+  QuickTeam rail mount and changes nothing, while a nonce costs a Firestore
+  transaction with a write in it — the tighter of the two free-tier budgets. A
+  replayed read returns the number the caller already had. The signature and the
+  five-minute clock window still apply.
+- **QuickTeam caches the answer** for 60 seconds per organization and user, so a
+  browser reloading QuickTeam does not turn into one cross-service request per
+  page view. The badge is allowed to be a minute stale; it is a hint, and the
+  number that matters is the one inside qTicket.
+
+A failure to reach qTicket is not a failure of the QuickTeam rail: the badge is
+simply absent, and the row still opens the product.
+
 ## Source of truth
 
 | Data | Authority |

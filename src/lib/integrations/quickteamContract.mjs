@@ -139,6 +139,17 @@ export function normalizeQuickTeamProvision(value) {
   };
 }
 
+// The unread ask carries no more than the launch does: which organization and
+// which QuickTeam person. It names no notification, no incident and no client,
+// and the answer is a single number — a rail badge is not a second inbox.
+export function normalizeQuickTeamUnread(value) {
+  if (value?.version !== QUICKTEAM_CONTRACT_VERSION) return { error: 'unsupported_version' };
+  const sourceOrganizationId = cleanText(value?.sourceOrganizationId);
+  const sourceUserId = cleanText(value?.sourceUserId);
+  if (!sourceOrganizationId || !sourceUserId) return { error: 'invalid_payload' };
+  return { data: { sourceOrganizationId, sourceUserId } };
+}
+
 export function normalizeQuickTeamLaunch(value) {
   if (value?.version !== QUICKTEAM_CONTRACT_VERSION) return { error: 'unsupported_version' };
   const sourceOrganizationId = cleanText(value?.sourceOrganizationId);
