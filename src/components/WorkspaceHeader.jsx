@@ -8,7 +8,6 @@ import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useSearch } from '@/lib/hooks/useSearch';
 import useWorkspaceStore    from '@/store/useWorkspaceStore';
 import UserAvatar           from '@/components/ui/DataDisplay/UserAvatar';
-import UserStatusSetter     from '@/components/UserStatusSetter';
 import SearchModal          from '@/components/SearchModal';
 import TopHeader            from '@/components/ui/Layout/TopHeader';
 import UserMenu             from '@/components/ui/Layout/UserMenu';
@@ -590,11 +589,6 @@ export function WorkspaceHeaderRight({ currentUser, signOut, mode }) {
         </div>
         )}
 
-        {/* ── Status dot (Chat mode only) ── */}
-        {mode === 'chat' && (
-          <UserStatusSetter />
-        )}
-
         {/* ── User avatar ───────────────── */}
         <div ref={userRef}>
           <UserMenu
@@ -811,8 +805,6 @@ export default function WorkspaceHeader() {
         projectSearchActive={projectSearch}
         onProjectSearchToggle={() => setProjectSearch(true)}
         breadcrumbs={breadcrumbs}
-        onlineUsers={chatOnlineUsers}
-        onOnlineUserClick={user => router.push(`/chat?dm=${encodeURIComponent(user.id || user.uid)}`)}
         rightContent={<WorkspaceHeaderRight currentUser={currentUser} signOut={signOut} mode={mode} />}
       />
 

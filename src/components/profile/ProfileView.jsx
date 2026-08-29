@@ -109,6 +109,20 @@ export default function ProfileView({ user, onClose }) {
             <p className="text-[14px] text-muted font-medium">
               {positionName}
             </p>
+            {/* The one contact a support desk needs. The «Контакти» block that
+                used to stand here — Telegram, phone, location — was a social
+                card from the task manager and went with the rest of it; an
+                address is not that. It is how a person signed in, how their
+                invitation was matched, and the only way to reach a client
+                outside their own portal. */}
+            {user.email && (
+              <a
+                href={`mailto:${user.email}`}
+                className="text-[13px] text-muted hover:text-ink transition-colors"
+              >
+                {user.email}
+              </a>
+            )}
           </div>
 
           {/* Actions — 56px circles.
