@@ -123,30 +123,38 @@ test('без поштового провайдера клієнт отримує
   assert.match(login, /GITHUB_LOGIN_ENABLED && <button/);
 });
 
-test('клієнтський інтерфейс створює інцидент і не відкриває керування ним', async () => {
-  const [root, portal, board, detail, composer] = await Promise.all([
+test('клієнт і підтримка бачать один екран, і звернення відкриває клієнт', async () => {
+  const [root, board, detail, composer, sidebar] = await Promise.all([
     read('../src/app/(app)/page.js'),
-    read('../src/components/client/ClientIncidentPortal.jsx'),
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/components/CreateTaskModal.jsx'),
+    read('../src/components/WorkspaceSidebar.jsx'),
   ]);
-  assert.match(root, /<ClientIncidentPortal/);
-  assert.match(portal, /title="Мої звернення"/);
-  // The portal is «Мої звернення», so what it offers to create is a
-  // «звернення» — one word for the record on the client's own screen.
-  assert.match(portal, /CLIENT_TERMS\.composerSubmit/);
+  // There is no second screen for a client any more. `/` is a door into their
+  // own space — the same `[projectId]` route support opens.
+  assert.doesNotMatch(root, /ClientIncidentPortal/);
+  assert.match(root, /router\.replace\(`\/\$\{clientProject\.id\}\$\{suffix\}`\)/);
+  assert.doesNotMatch(board, /router\.replace\('\/'\)/);
+  // One board, one list, one set of columns; the role decides what is inside.
+  assert.match(board, /readOnly=\{clientViewer\}/);
+  assert.match(board, /members=\{clientViewer \? \[\] : members\}/);
+  assert.match(board, /onBulkUpdate=\{clientViewer \? undefined : handleBulkUpdate\}/);
+  assert.match(board, /onMoveIssue=\{clientViewer \? undefined : handleMoveIssue\}/);
+  // Only a client opens a request; support receives, works and closes it.
+  assert.match(board, /const canOpenIncident = clientViewer && !isReadOnly/);
+  assert.match(board, /\{canOpenIncident && \(/);
   assert.equal(INCIDENT_TERMS.client.composerSubmit, 'Створити звернення');
-  assert.doesNotMatch(portal, /інцидент/i);
-  assert.match(portal, /clientMode/);
-  assert.doesNotMatch(portal, /Пріоритет|Виконавці|Спринт|Дедлайн/);
-  assert.match(board, /if \(clientViewer\) router\.replace\('\/'\)/);
-  assert.match(board, /const PROJECT_TABS = \[[\s\S]{0,240}Інциденти[\s\S]{0,120}Люди[\s\S]{0,120}Налаштування/);
+  assert.match(board, /clientMode/);
+  assert.match(board, /entity="incident"/);
   assert.match(board, /clientAdminMode/);
   assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
-  assert.doesNotMatch(board, /useSprints|AgileBoard|AnalyticsTab|QtPlusProjectTab/);
-  assert.match(board, /entity="incident"/);
-  assert.doesNotMatch(board, /clientMode=\{clientViewer\}/);
+  assert.doesNotMatch(board, /useSprints|AnalyticsTab|QtPlusProjectTab/);
+  // The rail is the same component too, with three destinations for a client.
+  assert.match(sidebar, /const topNav = clientViewer/);
+  assert.match(sidebar, /label: 'Мої звернення'/);
+  // The tenant's mark never flips to the vendor's.
+  assert.doesNotMatch(sidebar, /rotateY\(180deg\)/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
   assert.match(detail, /internalViewer \? issueId : null/);
   const clientAttributesStart = detail.indexOf('primaryChildren={clientViewer ? (');

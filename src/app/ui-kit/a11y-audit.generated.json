@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 326,
-    "elements": 3676,
+    "elements": 3631,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -279,7 +279,7 @@
     },
     {
       "element": "a",
-      "location": "src/components/WorkspaceSidebar.jsx:498",
+      "location": "src/components/WorkspaceSidebar.jsx:499",
       "attributes": [
         "title"
       ]

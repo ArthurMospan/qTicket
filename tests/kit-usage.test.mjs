@@ -179,9 +179,12 @@ test('the approved follow-up decisions stay encoded in the product', () => {
   const taskIdentity = readFileSync(new URL('../src/components/ui/TaskManagement/TaskIdentity.jsx', import.meta.url), 'utf8');
   assert.match(taskIdentity, /showProjectName && Boolean\(projectName\)/);
   assert.match(myTasks, /hiddenGroupIds=\{hiddenCategories\}/);
-  // The customer workspace is a simple queue. Per-project board columns still
-  // exist in settings and the global board, but this route renders neither.
-  assert.doesNotMatch(project, /hiddenGroupIds=|<AgileBoard/);
+  // The customer workspace renders the same board and the same list the
+  // support queue does — what differs is what a role may do inside them. It
+  // still folds no columns of its own: hidden statuses are project settings.
+  assert.match(project, /<AgileBoard/);
+  assert.match(project, /<TaskListView/);
+  assert.doesNotMatch(project, /hiddenGroupIds=/);
   assert.match(myTasks, /<AgileBoard[\s\S]{0,500}showHiddenLane/);
   assert.match(myTasks, /<AgileBoard[\s\S]{0,600}onRequestAddIssue=/);
   assert.doesNotMatch(project, /<AgileBoard[\s\S]{0,700}showHiddenLane/);

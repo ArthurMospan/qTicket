@@ -208,11 +208,12 @@ test('every composer forwards the consent to the API, or the box does nothing', 
 
 test('a customer incident row no longer loses the face of someone outside the project team', async () => {
   const workspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
-  // The picker is restricted to the project roster, but resolving an existing
-  // incident uses the organization map. Historical assignment therefore keeps
-  // its face even after the person leaves this customer roster.
-  assert.match(workspace, /new Map\(\(members \|\| \[\]\)\.map\(member => \[member\.id \|\| member\.uid, member\]\)\)/);
-  assert.match(workspace, /const assignee = assigneeId \? memberById\.get\(assigneeId\) : null;/);
+  // The picker is restricted to the project roster, but a card resolves the
+  // face it already carries out of the organization list — so an assignment
+  // keeps its face even after the person leaves this customer roster. The board
+  // and the list are handed that list, not the roster.
+  assert.match(workspace, /members=\{clientViewer \? \[\] : members\}/);
+  assert.match(workspace, /const supportAssigneeOptions = useMemo\(\(\) => supportMembers/);
   const detail = await read('../src/components/workspace/IssueDetail.jsx');
   assert.match(detail, /const assignableIds = new Set\(\[\.\.\.teamUids, \.\.\.\(issue\?\.assigneeIds \|\| \[\]\)\]\);/);
   // And the task itself says so for the tasks that already exist in this state
@@ -303,9 +304,13 @@ test('the comment composer is on the task screen before the membership arrives',
   assert.match(detail, /isClientRole\(orgRole\)/);
   assert.match(detail, /can\(orgRole, 'edit:issue'\)/);
 
-  // The client workspace has no inline mutation controls at all; internal
-  // changes happen on the incident detail or the global incident board.
+  // One screen, two readers: the client's copy of it has no hand on the work.
+  // Dragging a card, selecting rows and picking an assignee are staff actions,
+  // and the client's board is the same board in `readOnly`.
   const workspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
   assert.match(workspace, /isClientRole\(orgRole\)/);
-  assert.doesNotMatch(workspace, /updateIssue|moveIssue|onMoveIssue/);
+  assert.match(workspace, /readOnly=\{clientViewer\}/);
+  assert.match(workspace, /onMoveIssue=\{clientViewer \? undefined : handleMoveIssue\}/);
+  assert.match(workspace, /onBulkUpdate=\{clientViewer \? undefined : handleBulkUpdate\}/);
+  assert.doesNotMatch(workspace, /updateIssue/);
 });

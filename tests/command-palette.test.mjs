@@ -317,12 +317,16 @@ test('choosing a command waits for the palette to give its history entry back', 
 test('every action the palette offers lands somewhere that answers it', async () => {
   const my = await read('../src/app/(app)/my/page.js');
   const clients = await read('../src/app/(app)/page.js');
-  const clientPortal = await read('../src/components/client/ClientIncidentPortal.jsx');
+  // A client's «нове звернення» lands in their own space, which is the same
+  // `[projectId]` screen support opens — the request travels through the
+  // redirect at `/` and is consumed there.
+  const board = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
 
   assert.match(my, /searchParams\.get\('new'\) === '1'/);
   assert.match(clients, /clientsRoute && searchParams\?\.get\('new'\) === '1'/);
-  assert.match(clientPortal, /searchParams\.get\('new'\) !== '1'/);
-  assert.match(clientPortal, /setShowComposer\(true\)/);
+  assert.match(clients, /searchParams\?\.get\('new'\) === '1' \? '\?new=1' : ''/);
+  assert.match(board, /params\.get\('new'\) !== '1'/);
+  assert.match(board, /setShowComposer\(true\)/);
 });
 
 // «Команди» sat above a field that already says what the window is for.

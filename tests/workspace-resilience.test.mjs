@@ -69,9 +69,10 @@ test('failed drag writes explain that the optimistic move did not persist', asyn
   const clientWorkspace = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
   const myTasks = await read('../src/app/(app)/my/page.js');
 
-  // The customer workspace no longer has a local drag surface. Status drag is
-  // organization-wide and belongs to the global incident queue only.
-  assert.doesNotMatch(clientWorkspace, /AgileBoard|onMoveIssue/);
+  // The customer workspace drags for support and refuses to for the client:
+  // one board, and the role decides whether there is a hand on it.
+  assert.match(clientWorkspace, /onMoveIssue=\{clientViewer \? undefined : handleMoveIssue\}/);
+  assert.match(clientWorkspace, /readOnly=\{clientViewer\}/);
   assert.match(myTasks, /зміни не збережено/);
 });
 

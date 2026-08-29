@@ -323,7 +323,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:271",
+      "location": "src/components/WorkspaceSidebar.jsx:272",
       "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
       "text": "",
       "childElements": [
@@ -339,7 +339,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:362",
+      "location": "src/components/WorkspaceSidebar.jsx:363",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -354,7 +354,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:385",
+      "location": "src/components/WorkspaceSidebar.jsx:386",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -369,7 +369,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:451",
+      "location": "src/components/WorkspaceSidebar.jsx:452",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -468,17 +468,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:362",
+      "location": "src/components/WorkspaceSidebar.jsx:363",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:385",
+      "location": "src/components/WorkspaceSidebar.jsx:386",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:451",
+      "location": "src/components/WorkspaceSidebar.jsx:452",
       "tag": "button",
       "context": "branding-action"
     }
@@ -499,12 +499,12 @@
       "className": "w-full max-w-[420px] bg-white border border-line rounded-[16px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center"
     },
     {
-      "location": "src/app/(app)/page.js:172",
+      "location": "src/app/(app)/page.js:171",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/page.js:184",
+      "location": "src/app/(app)/page.js:183",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },

@@ -33,6 +33,7 @@ import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { isClientRole } from '@/lib/utils/can';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
+import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 
@@ -54,12 +55,6 @@ function formatUpdatedAt(value) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(millis));
-}
-
-function assigneeIdsOf(issue) {
-  if (Array.isArray(issue?.assigneeIds)) return issue.assigneeIds.filter(Boolean);
-  if (Array.isArray(issue?.assignees)) return issue.assignees.filter(Boolean);
-  return issue?.assigneeId ? [issue.assigneeId] : [];
 }
 
 export default function SupportOverviewPage() {
@@ -114,23 +109,17 @@ export default function SupportOverviewPage() {
     [statuses],
   );
   const categorizedIssues = useMemo(
-    () => (issues || []).map(issue => ({
-      issue,
-      category: statusCategoryOf(issue.columnId || issue.status, statuses),
-    })),
+    () => categorizeIssues(issues, statuses),
     [issues, statuses],
   );
+  // The same counters, from the same rules, as the ones over a single
+  // customer's queue. «У роботі» used to mean two different things on the two
+  // screens — see `incidentQueueMetrics`.
+  const metrics = useMemo(() => incidentQueueMetrics(categorizedIssues), [categorizedIssues]);
   const openIssues = useMemo(
-    () => categorizedIssues.filter(item => item.category !== 'done'),
+    () => categorizedIssues.filter(entry => entry.category !== 'done'),
     [categorizedIssues],
   );
-  const metrics = useMemo(() => ({
-    open: openIssues.length,
-    new: openIssues.filter(item => item.category === 'backlog' || item.category === 'todo').length,
-    active: openIssues.filter(item => item.category === 'in-progress').length,
-    unassigned: openIssues.filter(item => assigneeIdsOf(item.issue).length === 0).length,
-    review: openIssues.filter(item => item.category === 'review').length,
-  }), [openIssues]);
   const recentIssues = useMemo(
     () => [...(issues || [])]
       .sort((left, right) => timestampMillis(right.updatedAt || right.createdAt)
