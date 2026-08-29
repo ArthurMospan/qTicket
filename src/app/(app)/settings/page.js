@@ -130,10 +130,17 @@ const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set([
 // docs/ROADMAP.md for what internal staff can no longer reach because of it.
 // These stay whole for `client_admin`/`client_member`, whose account belongs to
 // qTicket and to nobody else.
+// «Команда підтримки» went the same way, for the same reason twice over: the
+// staff roster is QuickTeam's, and qTicket already draws it on «Команда», which
+// answers what a support screen is for — which clients a person is on and what
+// they have open. Two doors into one read-only list is one door too many; the
+// section stays for `client_admin`, whose «Співробітники клієнта» is qTicket's
+// own directory and has no screen of its own.
 const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([
   'profile',
   'notifications',
   'localization',
+  'team',
 ]);
 
 const NAV = [
@@ -149,9 +156,12 @@ const NAV = [
   // person does about themselves. They used to live inside «Видалення даних»,
   // which is `adminOnly` — so a plain member had no way to reach any of them.
   { id: 'account',       label: 'Безпека',          icon: ShieldCheck,   group: 'Особисте' },
+  // «Доступ qTicket» is not a section of its own any more. It was two read-only
+  // rows — активовано, і ким — about the same synchronized organization this
+  // one describes, and a rail entry is a promise that there is something to do
+  // behind it. `?section=billing` still resolves; see MERGED_SECTIONS.
   { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
   { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
-  { id: 'billing',       label: 'Доступ qTicket', icon: ShieldCheck,     group: 'Організація', adminOnly: true },
   { id: 'statuses',      label: 'Статуси звернень', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
   { id: 'types',         label: 'Типи звернень',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
   { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
@@ -671,7 +681,9 @@ export default function SettingsPage() {
 
   // Role resolution
   const myMemberInfo = members.find(m => m.id === (currentUser?.uid || currentUser?.id));
-  const myRole = orgRole || myMemberInfo?.role || 'member';
+  // What the product actually knows, before the guess below fills the gap.
+  const resolvedRole = orgRole || myMemberInfo?.role || null;
+  const myRole = resolvedRole || 'member';
   const isAdmin = myRole === 'owner' || myRole === 'admin';
   const isOwner = myRole === 'owner';
   const clientViewer = isClientRole(myRole);
@@ -820,9 +832,21 @@ export default function SettingsPage() {
       const currentSearchParams = new URLSearchParams(settingsQuery);
       // Sections that were merged into another one. An old link, a bookmark and
       // every OAuth callback still name them.
-      const MERGED_SECTIONS = { 'auth-methods': 'account' };
+      const MERGED_SECTIONS = { 'auth-methods': 'account', billing: 'workspace' };
       const rawSection = currentSearchParams.get('section');
       const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
+      // «Команда підтримки» did not go away for staff, it moved: the roster is
+      // «Команда». A bookmark lands on the screen that now holds the answer
+      // rather than on whatever happens to be first in this rail.
+      // The role is read after the first paint and `myRole` guesses «member»
+      // until it arrives, so the raw one is what may be trusted here: guessing
+      // wrong sends a `client_admin` to a staff screen their own layout would
+      // then bounce. Unknown means wait — the effect runs again with the answer.
+      const knownStaff = Boolean(resolvedRole) && !isClientRole(resolvedRole);
+      if (requestedSection === 'team' && knownStaff) {
+        router.replace('/team');
+        return;
+      }
       // The address is the second door into a section and it has to be the same
       // door. An old link to a section this role no longer has — «Особистий
       // профіль» and «Локалізація» for staff — lands on the first section of
@@ -852,7 +876,7 @@ export default function SettingsPage() {
         queueMicrotask(() => showToast(message, 'error'));
       }
     }
-  }, [defaultSection, reachableSections, settingsQuery, showToast]);
+  }, [defaultSection, reachableSections, resolvedRole, router, settingsQuery, showToast]);
 
   // ── Workflow ──
   const [statuses,   setStatuses]   = useState(DEFAULT_STATUSES);
@@ -2188,6 +2212,7 @@ export default function SettingsPage() {
         // page paint themselves from — never a second copy of the ternary.
         const brand = resolveOrganizationPortalBrand(org);
         const railColor = organizationPortalBackground(brand);
+        const entitlementActive = org?.quickTeam?.entitlement === 'active';
         const themeLabel = {
           dark: 'Темна',
           light: 'Світла',
@@ -2196,12 +2221,12 @@ export default function SettingsPage() {
         return (
           <Section
             title="Організація і бренд"
-            desc="Назва та оформлення клієнтського порталу синхронізуються з QuickTeam"
+            desc="Назва, оформлення клієнтського порталу та доступ до доповнення синхронізуються з QuickTeam"
           >
             <Alert
               variant="info"
-              title="Брендинг керується в QuickTeam"
-              description="Назву, логотип і колір бічної панелі змінюють у QuickTeam → Налаштування → Інтеграції → qTicket і синхронізують звідти. Тут вони доступні тільки для перегляду."
+              title="Організація керується в QuickTeam"
+              description="Назву, логотип, колір бічної панелі та активацію доповнення змінюють у QuickTeam → Налаштування → Інтеграції → qTicket і синхронізують звідти. Тут вони доступні тільки для перегляду, а власних тарифів чи перемикача підписки qTicket не має."
               className="mb-4"
             />
             <Card preset="borderless" padding="lg">
@@ -2227,7 +2252,15 @@ export default function SettingsPage() {
                   <Pill tone="ink-subtle" size="md">{themeLabel}</Pill>
                 </div>
               </Row>
-              <Row label="Джерело даних" desc="qTicket не створює окрему копію налаштувань бренду">
+              {/* Was «Доступ qTicket», a section of its own with two read-only
+                  rows in it. It is one fact about this same synchronized
+                  organization, so it is one row here. */}
+              <Row label="Доступ qTicket" desc="Стан доповнення для цієї організації QuickTeam">
+                <Pill tone={entitlementActive ? 'success' : 'warning'} size="md">
+                  {entitlementActive ? 'Активовано' : 'Неактивне'}
+                </Pill>
+              </Row>
+              <Row label="Джерело даних" desc="qTicket не створює окремої копії бренду й комерційного стану">
                 <Pill tone="success" size="md">Синхронізовано з QuickTeam</Pill>
               </Row>
             </Card>
@@ -2236,34 +2269,6 @@ export default function SettingsPage() {
       }
 
 
-
-      // ──────────────────────────────────────────────────────────────
-      case 'billing': {
-        const entitlementActive = org?.quickTeam?.entitlement === 'active';
-        return (
-          <Section
-            title="Доступ qTicket"
-            desc="Стан доповнення для цієї організації QuickTeam"
-          >
-            <Alert
-              variant="info"
-              title="Доступ керується в QuickTeam"
-              description="Активація та склад внутрішньої команди змінюються у QuickTeam. qTicket отримує лише підписаний стан доступу active/inactive і не має власних тарифів чи перемикача підписки."
-              className="mb-4"
-            />
-            <Card preset="borderless" padding="lg">
-              <Row label="Стан доповнення" desc="Доступ qTicket для цієї організації">
-                <Pill tone={entitlementActive ? 'success' : 'warning'} size="md">
-                  {entitlementActive ? 'Активовано' : 'Неактивне'}
-                </Pill>
-              </Row>
-              <Row label="Джерело доступу" desc="qTicket не приймає локальні зміни комерційного стану">
-                <Pill tone="ink-subtle" size="md">QuickTeam</Pill>
-              </Row>
-            </Card>
-          </Section>
-        );
-      }
 
       // ──────────────────────────────────────────────────────────────
       // Everyone may see who is on the team; only owners and admins may change

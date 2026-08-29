@@ -2724,7 +2724,7 @@
           "default": "[]",
           "type": "object[]",
           "values": [],
-          "description": "The people to list."
+          "description": "The people to list. A member with"
         },
         {
           "name": "onSelect",

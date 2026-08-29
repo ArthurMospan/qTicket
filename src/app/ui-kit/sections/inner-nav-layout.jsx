@@ -79,6 +79,9 @@ export default function NavMenuSection() {
                   { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer', online: true },
                   { id: 'petro', name: 'Петро Іванчук', positionName: 'Designer' },
                   { id: 'anna', name: 'Анна Мельник', positionName: 'QA Engineer' },
+                  // `inactive` — місце вимкнули в QuickTeam. Людина лишається
+                  // у списку, бо її імʼя лишається на зверненнях.
+                  { id: 'ihor', name: 'Ігор Левченко', positionName: 'Support Manager', inactive: true },
                 ]}
                 activeId="arthur"
                 action={<Button style="ghost" size="icon-xs" icon={Plus} className="hover:!bg-white" title="Запросити" />}

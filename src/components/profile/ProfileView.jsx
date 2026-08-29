@@ -12,7 +12,7 @@ import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { isOnProjectTeam, isPrivilegedRole } from '@/lib/utils/projectAccess.mjs';
-import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
+import { isActiveMember, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 
 // A support profile answers three questions and no others: who this is, which
 // clients they are on, and what they have open. The task manager this product
@@ -108,6 +108,14 @@ export default function ProfileView({ user, onClose }) {
             <p className="text-[14px] text-muted font-medium">
               {positionName}
             </p>
+            {/* «Команда» lists people whose seat QuickTeam switched off, because
+                their name is still on the work. The row that leads here says so
+                and so does the profile it opens — a page that reads like every
+                other one is a page that says this person can still be given a
+                request. */}
+            {memberRecord && !isActiveMember(memberRecord) && (
+              <Pill tone="warning" size="md" shape="badge">Без доступу</Pill>
+            )}
             {/* The one contact a support desk needs. The «Контакти» block that
                 used to stand here — Telegram, phone, location — was a social
                 card from the task manager and went with the rest of it; an

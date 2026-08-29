@@ -3,7 +3,7 @@
 // src/app/workspace/team/page.js
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
+import { isActiveMember, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { isClientRole } from '@/lib/utils/can';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useMobilePaneBack } from '@/lib/hooks/useMobilePaneBack';
@@ -47,14 +47,24 @@ export default function TeamPage() {
   // Системний «назад» на телефоні повертає до списку команди
   const requestPaneClose = useMobilePaneBack(mobilePane === 'detail', () => setMobilePane('list'));
 
-  const teamMembers = useMemo(() => activeMembers(members)
+  // The roster of record, and the whole of it. Somebody whose seat QuickTeam
+  // switched off keeps their name on every request they answered, every comment
+  // they wrote and every audit line they caused, so a directory that lists only
+  // active people turns all of that into an unknown id — which is why this list
+  // is deliberately not `activeMembers`. They sort last and the row says so.
+  // Pickers stay on `activeMembers`: you cannot hand work to somebody who can
+  // no longer sign in. This screen is not a picker.
+  const teamMembers = useMemo(() => (Array.isArray(members) ? members : [])
     .filter(member => !isClientRole(member.role))
     .map(member => ({
       ...member,
+      inactive: !isActiveMember(member),
       positionName: positions.find(position => position.id === member.positionId)?.label
         || member.title
         || organizationRoleLabel(member.role),
-    })), [members, positions]);
+    }))
+    .sort((left, right) => Number(left.inactive) - Number(right.inactive)),
+  [members, positions]);
 
   const filteredMembers = useMemo(() => teamMembers.filter(m =>
     (m.name || '').toLowerCase().includes(teamSearch.toLowerCase()) ||
@@ -88,15 +98,25 @@ export default function TeamPage() {
     <SidebarLayout
       context="team"
       mobilePane={mobilePane === 'detail' ? 'content' : 'sidebar'}
-      sidebar={
-        <MemberRail
-          members={filteredMembers}
-          activeId={selectedUid}
-          onSelect={member => { setSelectedUid(member.id || member.uid); setMobilePane('detail'); }}
-          loading={loading}
-          action={null}
-        />
-      }
+      sidebar={(
+        <>
+          <MemberRail
+            members={filteredMembers}
+            activeId={selectedUid}
+            onSelect={member => { setSelectedUid(member.id || member.uid); setMobilePane('detail'); }}
+            loading={loading}
+            action={null}
+          />
+          {/* The one thing «Налаштування» → «Команда підтримки» said that this
+              screen did not: where a seat comes from. That section was a second
+              copy of this list and is gone, so the sentence lives here, under
+              the roster it explains, instead of behind a rail entry of its own. */}
+          <p className="shrink-0 border-t border-line px-4 py-3 text-[11px] leading-[16px] text-muted">
+            Склад команди синхронізується з QuickTeam: «Налаштування» → «Інтеграції» → «qTicket».
+            Запрошувати внутрішніх працівників усередині qTicket не потрібно.
+          </p>
+        </>
+      )}
     >
       {/* RIGHT PANEL — mobile: shown only when a member is selected */}
       <div

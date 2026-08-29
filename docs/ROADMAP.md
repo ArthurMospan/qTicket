@@ -238,9 +238,10 @@ Completed product slice on 2026-08-29:
 - **Налаштування** is audited by ownership for internal roles. A section stays
   for `owner`/`admin`/`member` only where qTicket owns the thing it changes and
   QuickTeam holds no copy of it. Internal staff keep incident statuses, incident
-  types, priorities, labels, «Архів і видалене», the read-only «Доступ qTicket»
-  state, «Організація і бренд», «Команда підтримки», and the qTicket half of
-  «Безпека». They lose **Особистий профіль**, **Локалізація** and
+  types, priorities, labels, «Архів і видалене», «Організація і бренд» with the
+  read-only qTicket access state folded into it, and the qTicket half of
+  «Безпека». («Доступ qTicket» and «Команда підтримки» were sections of their
+  own until the second 2026-08-29 pass below.) They lose **Особистий профіль**, **Локалізація** and
   **Сповіщення**: name, avatar, language and role arrive in QuickTeam's signed
   snapshot and are re-sent on the next sync, so a second editor here is a copy
   that loses. Client roles (`client_admin`, `client_member`) keep all three
@@ -274,7 +275,8 @@ Completed product slice on 2026-08-29:
   a flag: «Посади та ставки» (`positions`) and «Видалення даних» (`danger`),
   together with `PositionItem` and the whole-catalogue branch of the workflow
   reset. `positions` data is still hydrated and saved with the workflow document
-  because «Команда підтримки» reads a member's position label. «Інтеграції» and
+  because the rosters — «Команда» and the client directory — read a member's
+  position label. «Інтеграції» and
   «Перенесення даних» were kept hidden rather than deleted while something still
   referenced them; nothing does now — the third-party integrations, the import
   wizard and the `docs/integrations/` contracts that described them are all
@@ -325,15 +327,30 @@ Completed product slice on 2026-08-29:
   no longer sees it anywhere. If it turns out support needs that text, it comes
   back as one line under the header, not as a tab.
 
+- **Налаштування** lost two more sections, both by ownership. «Доступ qTicket»
+  was two read-only rows about the same synchronized organization «Організація
+  і бренд» describes, so it is one row inside it now and `?section=billing`
+  merges there. «Команда підтримки» was a second copy of a roster qTicket does
+  not own, and **Команда** already draws it with the thing a support screen is
+  for beside it — which clients a person is on, what they have open. The
+  section is `client_admin`-only now («Співробітники клієнта», qTicket's own
+  directory, which has no screen of its own), and `?section=team` asked by
+  staff redirects to `/team` — that roster moved, it was not taken away.
+- **Команда** absorbed what only the settings copy had. It lists people whose
+  seat QuickTeam switched off, sorted last, dimmed, «Без доступу» in place of
+  a position they no longer hold, and the profile they open says the same. Only
+  a roster does this: `activeMembers` stays the answer for every picker, since
+  work cannot be handed to somebody who can no longer sign in. The rail also
+  carries the one sentence the deleted section had and this screen did not —
+  where a seat comes from.
+
 Product work still required:
 
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
-- Audit **Команда** by ownership and incident value; **Налаштування** is done
-  (see the 2026-08-29 slice above). Remove duplicate QuickTeam administration
-  and inherited task-manager panels; retain only incident workflow, client
-  access and read-only QuickTeam state until another integration has an accepted
-  support scenario. In-app notification preferences are no longer part of that
+- **Команда** and **Налаштування** are both audited (see the 2026-08-29 slices
+  above): the duplicate roster is gone, and what stays is incident workflow,
+  client access and read-only QuickTeam state. In-app notification preferences are no longer part of that
   retained set for internal roles — the owner removed the panel, and the
   consequence is recorded above.
 - Add the explicit, idempotent server-side transfer from an incident to a

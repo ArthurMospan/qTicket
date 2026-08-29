@@ -405,16 +405,26 @@ test('every collapse control that folds a group of tasks is the same button', as
 // name, the logo and the rail colour and offers nothing to change them with.
 test('«Організація і бренд» reports the QuickTeam brand and never edits it', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
-  const section = settings.slice(
-    settings.indexOf("case 'workspace': {"),
-    settings.indexOf("case 'billing': {"),
-  );
+  const start = settings.indexOf("case 'workspace': {");
+  // The section that used to end this slice was «Доступ qTicket», folded into
+  // this one. An anchor that no longer exists makes `indexOf` return -1 and
+  // `slice` hand back the whole file, which is how a test stops testing.
+  const end = settings.indexOf("case 'team': {");
+  assert.ok(start >= 0 && end > start);
+  const section = settings.slice(start, end);
 
   // One source of truth for what the tenant's brand is — the same pair the
   // client rail and the invitation landing page paint themselves from.
   assert.match(section, /resolveOrganizationPortalBrand\(org\)/);
   assert.match(section, /organizationPortalBackground\(brand\)/);
-  assert.match(section, /Брендинг керується в QuickTeam/);
+  assert.match(section, /Організація керується в QuickTeam/);
+  // «Доступ qTicket» was a rail entry of its own holding two read-only rows
+  // about this same organization. It is one row here, and the old address
+  // still resolves.
+  assert.match(section, /label="Доступ qTicket"/);
+  assert.match(section, /org\?\.quickTeam\?\.entitlement === 'active'/);
+  assert.match(settings, /MERGED_SECTIONS = \{[^}]*billing: 'workspace'/);
+  assert.doesNotMatch(settings, /id: 'billing'/);
   // Named, shown, and said where it is changed.
   assert.match(section, /label="Назва організації"/);
   assert.match(section, /label="Логотип клієнтського порталу"/);

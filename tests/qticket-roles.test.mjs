@@ -282,8 +282,18 @@ test('персональні розділи QuickTeam недосяжні вну�
 
   assert.match(
     settings,
-    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'notifications',\s*'localization',\s*\]\);/,
+    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'notifications',\s*'localization',\s*'team',\s*\]\);/,
   );
+  // «Команда підтримки» не зникла для персоналу, а переїхала: реєстр — це
+  // «Команда». Тому стара адреса веде на екран, який тепер тримає відповідь,
+  // а не на перший-ліпший розділ рейки. І тільки коли роль справді відома:
+  // до відповіді Firestore `myRole` вгадує «member», і здогад відправив би
+  // `client_admin` на штатний екран, з якого його викине layout.
+  assert.match(settings, /const resolvedRole = orgRole \|\| myMemberInfo\?\.role \|\| null;/);
+  assert.match(settings, /const knownStaff = Boolean\(resolvedRole\) && !isClientRole\(resolvedRole\);/);
+  assert.match(settings, /if \(requestedSection === 'team' && knownStaff\) \{\s*router\.replace\('\/team'\);/);
+  // Клієнтський каталог — власний, у qTicket, і свого екрана не має.
+  assert.match(settings, /CLIENT_ADMIN_SETTINGS_SECTIONS = new Set\(\[\s*\.\.\.CLIENT_SETTINGS_SECTIONS,\s*'team',/);
   // Одна відповідь на всі три двері в розділ: рейка, адреса й тіло розділу.
   assert.match(settings, /const reachableSections = useMemo\(/);
   assert.match(settings, /!CLIENT_ONLY_SETTINGS_SECTIONS\.has\(item\.id\) && \(!item\.adminOnly \|\| isAdmin\)/);

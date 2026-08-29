@@ -18,7 +18,9 @@ import EmptyState from '@/components/ui/Feedback/EmptyState';
  * The team rail: a titled, counted list of people.
  *
  * @param {string} props.title Heading above the list.
- * @param {object[]} props.members The people to list.
+ * @param {object[]} props.members The people to list. A member with
+ *   `inactive: true` no longer holds a seat: the row is dimmed and its
+ *   second line says so instead of naming a position they no longer have.
  * @param {string} props.activeId Id of the selected person.
  * @param {(id: string) => void} props.onSelect Selects one.
  * @param {React.ReactNode} props.action Control beside the heading — search, or invite.
@@ -70,6 +72,10 @@ export default function MemberRail({
           members.map(member => {
             const uid = member.id || member.uid;
             const isSelected = uid === activeId;
+            // Somebody whose access was switched off is still in this list,
+            // because their name is still on the work. Dimmed, and named as
+            // what they now are.
+            const inactive = member.inactive === true;
             return (
               <button
                 key={uid}
@@ -77,7 +83,7 @@ export default function MemberRail({
                 onClick={() => onSelect(member)}
                 className={`w-full text-left px-3 py-2 rounded-[8px] transition-colors flex items-center gap-3 ${
                   isSelected ? 'bg-line' : 'hover:bg-line/50'
-                }`}
+                } ${inactive ? 'opacity-60' : ''}`}
               >
                 <div className="relative shrink-0">
                   <UserAvatar user={member} size="md" />
@@ -90,7 +96,7 @@ export default function MemberRail({
                     {member.name || member.email}
                   </span>
                   <span className="text-[11px] font-normal text-muted truncate">
-                    {member.positionName}
+                    {inactive ? 'Без доступу' : member.positionName}
                   </span>
                 </div>
               </button>
