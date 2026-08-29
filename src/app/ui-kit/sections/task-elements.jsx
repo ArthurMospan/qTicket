@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
-import { AttributeTrigger, UserAvatar, AttachmentRow, AudioPlayer, FileThumb, BulkActionBar, TimeLogRow, TimeTrackingControl, MarkdownEditor, MarkdownViewer, AttachmentViewer, TitleInput, DescriptionPlaceholder, IssueLinkRow, SelectableChip } from '@/components/ui';
+import { AttributeTrigger, UserAvatar, AttachmentRow, AudioPlayer, FileThumb, BulkActionBar, MarkdownEditor, MarkdownViewer, AttachmentViewer, TitleInput, DescriptionPlaceholder, IssueLinkRow, SelectableChip } from '@/components/ui';
 import { Settings2, Check, Tag as TagIcon, Users } from 'lucide-react';
 import { ATTACHMENT_KINDS, attachmentKindLabel } from '@/lib/utils/attachmentKinds.mjs';
 import { PreviewBlock } from '../preview';
@@ -36,7 +36,6 @@ export default function TaskElementsSection() {
   const [title, setTitle] = useState('Переробити онбординг');
   const [pickedAssignee, setPickedAssignee] = useState(true);
   const [pickedLabel, setPickedLabel] = useState(true);
-  const [timerRunning, setTimerRunning] = useState(false);
   const [markdown, setMarkdown] = useState('## Опис\n\nПерший екран лишаємо, **другий** переробляємо.\n\n- [x] Зібрати макети\n- [ ] Погодити копірайт');
   const [viewerOpen, setViewerOpen] = useState(false);
 
@@ -105,25 +104,6 @@ export default function TaskElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Трекінг часу"
-        description="22px квадрат пуску/зупинки і сума поруч, яка сама є кнопкою відкриття журналу. Єдине місце в продукті, де контрол червоніє, щоб сказати «йде запис»."
-        filePath="src/components/ui/TaskManagement/TimeTrackingControl.jsx"
-        component="TimeTrackingControl"
-        fullWidth
-      >
-        <div className="flex items-center gap-[24px]">
-          <TimeTrackingControl
-            running={timerRunning}
-            onToggle={() => setTimerRunning(v => !v)}
-            onOpen={() => {}}
-            spentLabel={timerRunning ? '1г 12хв' : '48хв'}
-            estimateLabel="4г"
-          />
-          <span className="text-[10px] text-[#cfcfcf]">натисніть, щоб побачити стан «йде запис»</span>
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
         title="Тригери у смузі атрибутів"
         description="Дві форми одного компонента. variant=&quot;details&quot; — власний контрол смуги, що відкриває поля, які міняють рідше; condensed стискає його з 42 до 28px разом зі скролом шапки. variant=&quot;cell&quot; — комірка атрибута, яка сама відкриває поповер: у календаря таких дві, і вони писалися руками в класі кіту, тобто хром був кітовий, а кнопка ні. Натиснутий вигляд належить лише details — комірка фарбує свій підпис і своє значення сама."
         filePath="src/components/ui/Layout/TaskAttributesPanel.jsx"
@@ -151,27 +131,6 @@ export default function TaskElementsSection() {
               <span className="text-[9px] text-[#cfcfcf]">{role}</span>
             </div>
           ))}
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="Запис у журналі часу"
-        description="Хто списав, скільки, коли, і пара редагувати/видалити, що зʼявляється на наведення. Довго здавалося, що таких списків два з різним виглядом — другий лежав під {false && …} і не рендерився роками."
-        filePath="src/components/ui/TaskManagement/TimeLogRow.jsx"
-        component="TimeLogRow"
-        fullWidth
-      >
-        <div className="flex flex-col gap-[8px]">
-          <TimeLogRow
-            member={demoUser}
-            spentLabel="1г 30хв"
-            dateLabel="12 травня"
-            description="Зібрав макети й звів до одного файлу"
-            canEdit
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
-          <TimeLogRow member={{ name: 'Олена Коваль' }} spentLabel="45хв" dateLabel="12 травня" />
         </div>
       </PreviewBlock>
 
@@ -249,7 +208,6 @@ export default function TaskElementsSection() {
               priorityOptions={[{ value: 'medium', label: 'Середній' }]}
               labelOptions={[{ value: 'design', label: 'Дизайн', dotColor: '#8b5cf6' }]}
               typeOptions={[{ value: 'task', label: 'Завдання' }]}
-              sprintOptions={[{ value: 'sprint-1', label: 'Спринт 12' }]}
               canArchive
               onApply={() => {}}
               onClear={() => {}}
@@ -267,7 +225,6 @@ export default function TaskElementsSection() {
               priorityOptions={[{ value: 'medium', label: 'Середній' }]}
               labelOptions={[{ value: 'design', label: 'Дизайн', dotColor: '#8b5cf6' }]}
               typeOptions={[{ value: 'task', label: 'Завдання' }]}
-              sprintOptions={[{ value: 'sprint-1', label: 'Спринт 12' }]}
               canArchive
               onApply={() => {}}
               onClear={() => {}}

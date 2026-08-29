@@ -299,61 +299,9 @@ test('raw period logs keep task time separate from calendar-event time', () => {
   assert.deepEqual(summary.minutesByUser, { anna: 3001 });
 });
 
-test('the analytics screens read days, and open records only when a day cannot answer', async () => {
-  const [page, workload, memberPage, hook] = await Promise.all([
-    read('src/app/(app)/analytics/page.js'),
-    read('src/components/workspace/WorkloadTab.jsx'),
-    read('src/app/(app)/analytics/team/[memberId]/page.js'),
-    read('src/lib/hooks/useAnalyticsRollups.js'),
-  ]);
-
-  // «Огляд» is handed a figure, never a collection of logs.
-  assert.match(page, /periodTime=\{periodTime\}/);
-  assert.doesNotMatch(page, /<AnalyticsContent[\s\S]{0,400}timeLogs=/);
-  // «Команда» is handed figures per person.
-  assert.match(page, /periodTime=\{teamPeriodTime\}/);
-
-  // A day's total knows the project, the date and who logged the hour — so a
-  // question about tasks (a search, an assignee, a priority, a type) falls back
-  // to the records, over exactly the same days.
-  assert.match(page, /const taskScopedTimeFilter = /);
-  assert.match(page, /const needsRawTimeLogs = urlReady && \(activeTab === 'timesheet'/);
-  assert.match(page, /activeTab === 'overview' && taskScopedTimeFilter/);
-  assert.match(page, /source: 'rollups'/);
-  assert.match(page, /source: 'logs'/);
-
-  // The team table sums; a member's own page draws their timesheet, which is
-  // the records. Exactly one of the two props is ever supplied.
-  assert.match(workload, /periodTime = null,/);
-  assert.match(workload, /summedMinutes === null \? sumRawTimeLogMinutes\(logs\) : summedMinutes/);
-  assert.match(memberPage, /timeLogs=\{memberTimeLogs\}/);
-  assert.doesNotMatch(memberPage, /periodTime=/);
-
-  // And the totals are read once, not subscribed to: a report is a reading
-  // taken at a moment, and it says when.
-  assert.doesNotMatch(hook, /onSnapshot/);
-  assert.match(hook, /getDocs\(/);
-  assert.match(hook, /readAt/);
-  assert.match(hook, /refresh/);
-
-  // A total nothing on screen will draw is still a document somebody paid for,
-  // so the tabs that are about records read no days at all.
-  assert.match(page, /const needsSummedTime = urlReady && \(activeTab === 'workload'/);
-  assert.match(page, /dayRange: needsSummedTime \? periodRange : null/);
-  assert.match(page, /useCalendarEvents\(\{ enabled: calendarIsRequired \}\)/);
-  // Exactly one of the two on every tab — never both, which would be paying
-  // twice for one figure.
-  assert.match(page, /needsRawTimeLogs[\s\S]{0,120}activeTab === 'overview' && taskScopedTimeFilter/);
-  assert.match(page, /needsSummedTime[\s\S]{0,120}activeTab === 'overview' && !taskScopedTimeFilter/);
-
-  // Asking a new question clears the screen; asking the same one again does
-  // not. A report that blanks itself every time somebody checks for newer
-  // numbers teaches people not to check.
-  assert.match(hook, /const askingSomethingElse = targetRef\.current !== target/);
-  assert.match(hook, /if \(askingSomethingElse\) \{[\s\S]{0,120}setLoading\(true\);/);
-  assert.match(hook, /setRefreshing\(true\);/);
-  assert.match(page, /loading=\{recordsRefreshing \|\| rollupsRefreshing\}/);
-});
+// qTicket publishes no analytics screen. The reading helpers above are what the
+// backfill and the rebuild check themselves against, and nothing in the product
+// draws a day — so there is no screen left here to hold to a read budget.
 
 // ── The write paths ──────────────────────────────────────────────────────
 //
@@ -362,22 +310,15 @@ test('the analytics screens read days, and open records only when a day cannot a
 // that can change how many minutes exist has to change the rollup in the same
 // breath, and that is checked mechanically rather than remembered.
 test('every path that changes logged minutes changes the daily totals with them', async () => {
-  const [taskLogs, calendarLogs, cancel, trash, project, importer] = await Promise.all([
-    read('src/lib/server/taskTimeLogs.js'),
+  const [calendarLogs, cancel, trash, project] = await Promise.all([
     read('src/app/api/calendar/events/[eventId]/time-logs/route.js'),
     read('src/app/api/issues/[issueId]/cancel/route.js'),
     read('src/lib/server/issueTrash.js'),
     read('src/app/api/projects/[projectId]/route.js'),
-    read('src/lib/server/youtrackImporter.js'),
   ]);
 
-  // Task create, edit and delete all pass through one function, and it refuses
-  // to run without the deltas rather than skipping them quietly.
-  assert.match(taskLogs, /writeAnalyticsRollupDeltas\(\{ writer: transaction, db, deltas: rollupDeltas \}\)/);
-  assert.match(taskLogs, /if \(!rollupDeltas \|\| !db\)/);
-  assert.match(taskLogs, /TASK_TIME_ROLLUP_MISSING/);
-
-  // Calendar hours: three mutations, three deltas.
+  // Calendar hours are the only ones a route still writes: three mutations,
+  // three deltas.
   assert.equal(
     (calendarLogs.match(/writeAnalyticsRollupDeltas/g) || []).length,
     4,
@@ -391,10 +332,6 @@ test('every path that changes logged minutes changes the daily totals with them'
   // Deleting for real removes the hours; deleting a project removes its days.
   assert.match(trash, /removePurgedTimeLogsFromRollups/);
   assert.match(project, /deleteProjectAnalyticsRollups/);
-
-  // An import is an edit like any other.
-  assert.match(importer, /rollupDeltas\.add\(row\.previous, -1/);
-  assert.match(importer, /rollupDeltas\.add\(row\.fields, 1/);
 });
 
 test('a retried transaction does not log the same minutes twice', async () => {
@@ -408,8 +345,6 @@ test('a retried transaction does not log the same minutes twice', async () => {
   // totals are an aggregate, and an aggregate that is wrong by one entry looks
   // exactly like an aggregate that is right.
   const files = [
-    'src/app/api/issues/[issueId]/time-logs/route.js',
-    'src/app/api/issues/[issueId]/time-logs/[logId]/route.js',
     'src/app/api/calendar/events/[eventId]/time-logs/route.js',
     'src/app/api/issues/[issueId]/cancel/route.js',
   ];
@@ -422,38 +357,15 @@ test('a retried transaction does not log the same minutes twice', async () => {
     assert.equal(resets, bodies, `${file} resets the accumulator at the top of every transaction that uses it`);
     assert.ok(resets > 0, `${file} never resets a rollup accumulator that outlives its transaction`);
   }
-
-  // The importer is the one that does not need it, because it builds the
-  // accumulator inside the body — which is the other way to be correct.
-  const importer = await read('src/lib/server/youtrackImporter.js');
-  assert.match(importer, /const rollupDeltas = new AnalyticsRollupDeltas\(rollupTimeZone\)/);
 });
 
-test('the rollup is never allowed to become the money', async () => {
-  const [invoices, billing, invoicePayload] = await Promise.all([
-    read('src/app/api/invoices/route.js'),
-    read('src/components/workspace/BillingTab.jsx'),
-    read('src/lib/server/invoicePayload.mjs'),
-  ]);
-  for (const source of [invoices, billing, invoicePayload]) {
-    assert.doesNotMatch(source, /analyticsRollup/i);
-  }
-  // And the invariant it protects is still spelled out where it lives.
-  assert.match(invoices, /sourceTimeLogIds/);
-});
-
-test('a browser cannot write a total it is allowed to read', async () => {
+test('a browser can neither read nor write a daily total', async () => {
   const rules = await read('firestore.rules');
-  assert.match(rules, /match \/analyticsRollups\/\{id\} \{/);
-  assert.match(
-    rules,
-    /match \/analyticsRollups\/\{id\} \{[\s\S]{0,600}allow create, update, delete: if false;/,
-  );
-  // Reading a summary of a project's hours is reading that project's hours.
-  assert.match(
-    rules,
-    /match \/analyticsRollups\/\{id\} \{[\s\S]{0,600}canAccessProject\(resource\.data\.projectId, resource\.data\.organizationId\)/,
-  );
+  // The rule used to let a project's members read their own days, because a
+  // screen drew them. No screen does any more, and the transactions that keep
+  // the totals reach Firestore through the Admin SDK, which rules do not gate —
+  // so the collection is closed on both sides rather than left half-open.
+  assert.match(rules, /match \/analyticsRollups\/\{id\} \{\s*allow read, write: if false;/);
 });
 
 test('the backfill can rebuild from nothing and says so when there is nothing to fix', async () => {

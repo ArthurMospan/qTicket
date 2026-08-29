@@ -31,11 +31,11 @@ test('calendar time writes are server-owned, canonical and team-only', async () 
   assert.match(route, /eventVisibility:\s*'team'/);
   assert.match(route, /calendarOrganizerId:\s*event\.organizerId/);
   assert.match(route, /invoiceMutationVersion/);
-  assert.match(rules, /function isTeamCalendarTimeLog/);
-  assert.match(
-    rules,
-    /match \/timeLogs\/\{id\} \{[\s\S]*allow create, update, delete: if false;/,
-  );
+  // The rule that scoped a browser read of `timeLogs` to team events went with
+  // the screens that read it. Nothing in the product opens the collection any
+  // more, so it is closed to browsers outright — which is a stronger statement
+  // of the same contract: these records exist only through this route.
+  assert.match(rules, /match \/timeLogs\/\{id\} \{\s*allow read, write: if false;/);
 });
 
 test('legacy calendar visibility backfill is explicit and dry-run by default', async () => {

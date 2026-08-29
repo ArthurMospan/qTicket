@@ -120,19 +120,6 @@ export class YouTrackClient {
     });
   }
 
-  async workItems(issueId) {
-    try {
-      return await this.listAll(`issues/${encodeURIComponent(issueId)}/timeTracking/workItems`, {
-        fields: `id,date,duration(minutes,presentation),text,type(id,name),created,updated,author(${USER_FIELDS}),creator(${USER_FIELDS})`,
-        top: 100,
-        limit: 20_000,
-      });
-    } catch (error) {
-      if (error.status === 403 || error.status === 404) return [];
-      throw error;
-    }
-  }
-
   async attachments(issueId) {
     try {
       return await this.listAll(`issues/${encodeURIComponent(issueId)}/attachments`, {

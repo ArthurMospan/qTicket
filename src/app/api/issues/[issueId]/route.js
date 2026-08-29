@@ -10,11 +10,6 @@ import {
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import {
-  billedTimeLogDetails,
-  isBilledTimeLog,
-} from '@/lib/utils/issueDeletion.mjs';
-import { invoiceSourcelessReservationId } from '@/lib/server/invoicePayload.mjs';
-import {
   issueTombstoneId,
   issueUndoExpiresAt,
 } from '@/lib/utils/issueTrash.mjs';
@@ -71,13 +66,6 @@ export async function DELETE(request, context) {
     const tombstoneRef = db.collection('deletedIssues').doc(
       issueTombstoneId(issue.organizationId, issueId),
     );
-    const estimateReservationRef = db.collection('invoiceEstimateReservations').doc(
-      invoiceSourcelessReservationId(
-        issue.organizationId,
-        issue.projectId,
-        issueId,
-      ),
-    );
     const countDeltas = await projectIssueCountDeltasFor(db, issue.organizationId);
     const deletion = await db.runTransaction(async transaction => {
       // Firestore re-runs this body on contention; the counter accumulator
@@ -86,7 +74,6 @@ export async function DELETE(request, context) {
       countDeltas.reset();
       const currentSnap = await transaction.get(issueRef);
       const projectSnap = await transaction.get(projectRef);
-      const estimateReservationSnap = await transaction.get(estimateReservationRef);
       const tombstoneSnap = await transaction.get(tombstoneRef);
       if (!currentSnap.exists) {
         throw apiTransactionError(
@@ -129,47 +116,11 @@ export async function DELETE(request, context) {
           projectAccessError,
         );
       }
-      if (estimateReservationSnap.exists) {
-        const reservation = estimateReservationSnap.data();
-        throw apiTransactionError(
-          'ISSUE_HAS_INVOICE_ESTIMATE',
-          409,
-          'Завдання вже входить у рахунок як оцінка і не може бути видалене',
-          {
-            invoiceIds: reservation.invoiceId ? [reservation.invoiceId] : [],
-            estimateReservationId: estimateReservationSnap.id,
-          },
-        );
-      }
       if (tombstoneSnap.exists) {
         throw apiTransactionError(
           'ISSUE_ALREADY_DELETED',
           409,
           'Задачу вже видалено',
-        );
-      }
-
-      const timeLogs = await transaction.get(
-        db.collection('timeLogs').where('issueId', '==', issueId),
-      );
-      const billedLogs = timeLogs.docs
-        .filter(document => {
-          const data = document.data();
-          return data.organizationId === current.organizationId
-            && data.projectId === current.projectId
-            && isBilledTimeLog(data);
-        })
-        .map(document => ({ ...document.data(), id: document.id }));
-      if (billedLogs.length > 0) {
-        const details = billedTimeLogDetails(billedLogs);
-        throw apiTransactionError(
-          'ISSUE_HAS_BILLED_TIME',
-          409,
-          'Завдання має зафіксований у рахунок час і не може бути видалене',
-          {
-            billedTimeLogCount: billedLogs.length,
-            ...details,
-          },
         );
       }
 

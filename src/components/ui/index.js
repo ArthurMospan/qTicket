@@ -22,7 +22,6 @@ export { default as Checkbox } from './Forms/Checkbox'
 export { default as ToggleSwitch } from './Forms/ToggleSwitch'
 export { Select } from './Select'
 export { DatePicker } from './Forms/DatePicker'
-export { TimePicker } from './Forms/TimePicker'
 export { default as Label } from './Forms/Label'
 export { default as FormGroup } from './Forms/FormGroup'
 export { default as MarkdownEditor } from './Forms/MarkdownEditor'
@@ -44,8 +43,6 @@ export { default as AudioPlayer } from './Attachments/AudioPlayer'
 // gone: a day cell and the date in its corner, both of which the timesheet's
 // month grid still draws. The entry tile and the hour strip left with the
 // screen that was the only thing clicking them.
-export { default as CalendarDayNumber } from './Calendar/CalendarDayNumber'
-export { default as CalendarDayCell } from './Calendar/CalendarDayCell'
 export { default as TitleInput } from './Forms/TitleInput'
 
 // ===== BUTTON COMPONENTS =====
@@ -64,25 +61,17 @@ export { default as TypeBadge } from './DataDisplay/TypeBadge'
 export { default as Pill } from './DataDisplay/Pill'
 export { default as Counter } from './DataDisplay/Counter'
 export { default as KpiCard } from './DataDisplay/KpiCard'
-export { default as RefreshStamp } from './DataDisplay/RefreshStamp'
-export { default as DataTable } from './DataDisplay/DataTable'
 
 // ===== CHARTS =====
 // The analytics vocabulary, in one place. Before this, "how much of each" was
 // written five times across four files and no two agreed on the bar height, the
 // track colour or what a full bar meant.
-export { default as BarList } from './Charts/BarList'
-export { default as ColumnChart } from './Charts/ColumnChart'
-export { default as Meter } from './Charts/Meter'
 export { default as Sparkline } from './Charts/Sparkline'
 export { default as MarkdownViewer, setTaskChecked } from './DataDisplay/MarkdownViewer'
 export { default as TaskCounters } from './TaskManagement/TaskCounters'
 export { default as TaskIdentity } from './TaskManagement/TaskIdentity'
-export { default as TaskListCard } from './TaskManagement/TaskListCard'
 export { default as TaskListView } from './TaskManagement/TaskListView'
 export { default as AttachmentRow } from './TaskManagement/AttachmentRow'
-export { default as TimeLogRow } from './TaskManagement/TimeLogRow'
-export { default as TimeTrackingControl } from './TaskManagement/TimeTrackingControl'
 export { default as IssueLinkRow } from './TaskManagement/IssueLinkRow'
 export { default as DescriptionPlaceholder } from './TaskManagement/DescriptionPlaceholder'
 export { default as BulkActionBar } from './TaskManagement/BulkActionBar'
@@ -102,7 +91,6 @@ export { default as Alert } from './Feedback/Alert'
 export { default as LoadingSpinner } from './Feedback/LoadingSpinner'
 export { default as Skeleton } from './Feedback/Skeleton'
 export { default as EmptyState } from './Feedback/EmptyState'
-export { default as SignalList } from './Feedback/SignalList'
 
 // ===== LAYOUT COMPONENTS =====
 export { default as Card } from './Layout/Card'
@@ -110,7 +98,6 @@ export { default as TaskAttributesPanel, getTaskAttributeChrome, AttributeTrigge
 export { default as SidebarLayout } from './Layout/SidebarLayout'
 export { default as DetailLayout } from './Layout/DetailLayout'
 export { default as DetailSection } from './Layout/DetailSection'
-export { default as ChartCard } from './Layout/ChartCard'
 export { default as PageHeader } from './Layout/PageHeader'
 export { default as UserMenu } from './Layout/UserMenu'
 export { default as NotificationBell } from './Layout/NotificationBell'
@@ -122,7 +109,6 @@ export { default as AttachmentViewer } from './AttachmentViewer'
 export { ConfirmProvider, useConfirm } from './ConfirmProvider'
 export { default as Tabs } from './Tabs'
 export { default as ContextMenu } from './ContextMenu'
-export { default as ExportMenu } from './ExportMenu'
 export { default as FilterBar } from './FilterBar'
 export { default as Segmented } from './Segmented'
 export { default as ChannelRail } from './Navigation/ChannelRail'

@@ -58,10 +58,10 @@ test('cycle time uses source dates and exposes contradictory dates', () => {
 
   assert.equal(issueCycleStartMillis(imported), day);
   assert.equal(issueCycleStartMillis(native), 5 * day);
-  // Two valid samples. The mean survives because the exported file has always
-  // carried it, but the readings the screen leads with are the median and the
-  // 85th percentile: a mean cycle time is dragged by the handful of tasks that
-  // sat open for months until it describes nothing anybody worked on.
+  // Two valid samples. The mean is still reported, but the readings that mean
+  // anything are the median and the 85th percentile: a mean cycle time is
+  // dragged by the handful of tasks that sat open for months until it
+  // describes nothing anybody worked on.
   assert.deepEqual(summarizeCycleTimes([imported, native, invalid], completedAt), {
     averageDays: 7,
     medianDays: 2,
@@ -94,24 +94,15 @@ test('group 26 copy and layout contracts stay role-aware and concise', async () 
   assert.match(globals, /@keyframes qt-toast-slide-up/);
 });
 
-test('sprint labels and YouTrack import metadata use the new contracts everywhere', async () => {
-  const [createTask, issueDetail, myTasks, kitStory, importer, velocity, chatSearch] = await Promise.all([
-    read('../src/components/CreateTaskModal.jsx'),
+test('YouTrack import metadata and counted copy use the new contracts everywhere', async () => {
+  const [issueDetail, importer, chatSearch] = await Promise.all([
     read('../src/components/workspace/IssueDetail.jsx'),
-    read('../src/app/(app)/my/page.js'),
-    read('../src/app/ui-kit/sections/task-attributes.jsx'),
     read('../src/lib/server/youtrackImporter.js'),
-    read('../src/components/workspace/VelocityTab.jsx'),
     read('../src/components/ui/Chat/ChatSearchBanner.jsx'),
   ]);
 
-  for (const source of [createTask, issueDetail, myTasks, kitStory]) {
-    assert.doesNotMatch(source, /Без спринта \(Беклог\)|Беклог \(без спринта\)/);
-  }
   assert.match(importer, /importedAt: firstImportedAt/);
   assert.match(importer, /importedAt: currentImportAt/);
-  assert.match(velocity, /Помилка дат завершення/);
-  assert.doesNotMatch(velocity, /\.filter\(v => v !== null && v >= 0\)/);
   assert.doesNotMatch(issueDetail, /length === 1 \? 'запис'/);
   assert.doesNotMatch(chatSearch, /count < 5/);
 });

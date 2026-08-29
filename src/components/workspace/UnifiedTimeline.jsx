@@ -25,7 +25,6 @@ import { COMMENT_WINDOW, useComments } from '@/lib/hooks/useComments';
 import { useIssueTyping } from '@/lib/hooks/useIssueTyping';
 import { useSearch } from '@/lib/hooks/useSearch';
 import { AUDIT_WINDOW, useAuditLog } from '@/lib/hooks/useAuditLog';
-import { useTimeLogs } from '@/lib/hooks/useTimeLogs';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { describeAuditEvent } from '@/lib/utils/issueAuditEvents.mjs';
 import {
@@ -80,15 +79,6 @@ function continuesRun(previous, next) {
     && Math.abs((next._time || 0) - (previous._time || 0)) <= RUN_WINDOW_MS
     && dayKey(previous.createdAt) === dayKey(next.createdAt),
   );
-}
-
-function fmtTime(minutes) {
-  if (!minutes && minutes !== 0) return '—';
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  if (hours === 0) return `${rest}хв`;
-  if (rest === 0) return `${hours}г`;
-  return `${hours}г ${rest}хв`;
 }
 
 function fmtClock(timestamp) {
@@ -323,7 +313,6 @@ export default function UnifiedTimeline({
   // Одним списком обслуговувались обидва питання, тож у чаті задачі можна було
   // тегнути будь-кого з організації — людину, для якої цієї задачі не існує.
   mentionMembers,
-  sprints = [],
   isActive = true,
   onUnreadCountChange,
 }) {
@@ -367,10 +356,9 @@ export default function UnifiedTimeline({
     priorities,
     types,
     labels,
-    sprints,
     members,
     timeZone: organizationTimeZone(org),
-  }), [statuses, priorities, types, labels, sprints, members, org]);
+  }), [statuses, priorities, types, labels, members, org]);
 
   // A task discussed for a year must not cost its whole year to open. The feed
   // arrives as a window of the newest activity — the same rule the chat channel
@@ -386,14 +374,6 @@ export default function UnifiedTimeline({
     hasMore: hasOlderChanges,
   } = useAuditLog(internalViewer ? issueId : null, AUDIT_WINDOW * historyWindow);
   const hasOlderHistory = hasOlderComments || hasOlderChanges;
-  // Time records may contain internal work notes and billing evidence. The
-  // shared incident conversation is client-visible; the support ledger is not.
-  // Keep the subscription dormant until an internal membership is known, so a
-  // client never even attempts the Firestore query that rules also refuse.
-  const { logs: timeLogs, loading: timeLogsLoading } = useTimeLogs(
-    internalViewer ? issueId : null,
-    projectId,
-  );
 
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -581,13 +561,8 @@ export default function UnifiedTimeline({
       _time: entry.createdAt?.toMillis ? entry.createdAt.toMillis() : 0,
       ...entry,
     }));
-    timeLogs.forEach(log => items.push({
-      _type: 'time',
-      _time: log.loggedAt?.toMillis ? log.loggedAt.toMillis() : 0,
-      ...log,
-    }));
     return items.sort((a, b) => a._time - b._time);
-  }, [comments, auditLogs, timeLogs]);
+  }, [comments, auditLogs]);
 
   // Where the optimistic message hands over to the real one. A transaction is
   // not applied to the local cache the way a plain write is, so the snapshot
@@ -638,11 +613,11 @@ export default function UnifiedTimeline({
   // the list has no line — at exactly the moment the list is being placed on it.
   //
   // «Settled» is the second half of the same problem. A task's feed arrives as
-  // three subscriptions that finish in three different renders, and a boundary
+  // two subscriptions that finish in two different renders, and a boundary
   // latched off the first of them names the first unread *comment* in a task
-  // whose oldest unread item is a change. It waits for all three.
+  // whose oldest unread item is a change. It waits for both.
   const feedSettled = (readCursorsLoaded || cursorWaitIsOver)
-    && !commentsLoading && !auditLoading && !timeLogsLoading;
+    && !commentsLoading && !auditLoading;
   const BOUNDARY_NONE = { key: null, count: 0, read: false, dismissed: false };
   const [boundary, setBoundary] = useState({ issueId: null, ...BOUNDARY_NONE });
   if (boundary.issueId !== issueId) {
@@ -1442,9 +1417,9 @@ export default function UnifiedTimeline({
         )}
 
         {timeline.map((item, index) => {
-          const itemTimestamp = item._type === 'time' ? item.loggedAt : item.createdAt;
+          const itemTimestamp = item.createdAt;
           const previousItem = timeline[index - 1];
-          const previousTimestamp = previousItem?._type === 'time' ? previousItem.loggedAt : previousItem?.createdAt;
+          const previousTimestamp = previousItem?.createdAt;
           const separator = index === 0 || dayKey(itemTimestamp) !== dayKey(previousTimestamp)
             ? <DaySeparator timestamp={itemTimestamp} />
             : null;
@@ -1595,18 +1570,6 @@ export default function UnifiedTimeline({
                     )}
                 </div>
               </div>
-              </Fragment>
-            );
-          }
-
-          if (item._type === 'time') {
-            const member = members.find(candidate => (candidate.id || candidate.uid) === item.userId);
-            const text = `Зафіксовано ${fmtTime(item.spentMinutes)}${item.description ? ` · ${item.description}` : ''}`;
-            const actorName = member?.name || item.userName || item.externalActor?.name || org?.name || 'Система';
-            return (
-              <Fragment key={`time-${item.id}`}>
-                {separator}
-                <SystemEventMessage text={text} time={fmtClock(item.loggedAt)} actorName={actorName} actor={member} />
               </Fragment>
             );
           }

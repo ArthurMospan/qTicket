@@ -10,14 +10,14 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 338,
-    "elements": 3935,
+    "files": 284,
+    "elements": 2901,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 37
+    "runtimeNameVerification": 35
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:3506",
+      "location": "src/app/(app)/settings/page.js:3503",
       "attributes": [
         "title",
         "aria-label"
@@ -147,13 +147,6 @@
       ]
     },
     {
-      "element": "Button",
-      "location": "src/components/ui/ExportMenu.jsx:85",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
       "element": "IconAction",
       "location": "src/components/ui/Forms/MarkdownEditor.jsx:49",
       "attributes": [
@@ -235,18 +228,10 @@
     },
     {
       "element": "Button",
-      "location": "src/components/ui/TaskManagement/TaskListView.jsx:238",
+      "location": "src/components/ui/TaskManagement/TaskListView.jsx:234",
       "attributes": [
         "title",
         "aria-label"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/TaskManagement/TimeTrackingControl.jsx:41",
-      "attributes": [
-        "aria-label",
-        "title"
       ]
     },
     {
@@ -265,14 +250,14 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1492",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1467",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1512",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1487",
       "attributes": [
         "label"
       ]

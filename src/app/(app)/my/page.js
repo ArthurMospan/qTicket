@@ -415,7 +415,6 @@ export default function IncidentQueuePage() {
               members={members}
               projects={projects}
               projectId="my"
-              sprints={[]}
               showProjectName
               groupBy="category"
               compareIssueCards={compareTaskCards}
@@ -439,7 +438,6 @@ export default function IncidentQueuePage() {
             issueLinks={issueLinks}
             members={members}
             labels={labels}
-            sprints={[]}
             projects={projects}
             showProjectName
             groupBy="category"
@@ -497,7 +495,6 @@ export default function IncidentQueuePage() {
         projects={projects}
         stages={[]}
         teamMembers={supportMembers}
-        sprints={[]}
       />
 
       {showSettingsModal && (
@@ -548,7 +545,6 @@ export default function IncidentQueuePage() {
           issueLinks={issueLinks}
           members={members}
           labels={labels}
-          sprints={[]}
           busy={Boolean(pendingStatusMove.busy)}
           onSelect={selectPendingStatus}
           onClose={() => setPendingStatusMove(null)}

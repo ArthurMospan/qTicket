@@ -27,19 +27,14 @@ test('ranked priority uses a solid dot and no priority uses a dashed ring', () =
   assert.doesNotMatch(icon, /outerColor|innerColor/);
 });
 
-test('analytics keeps explicit, missing, and stale priorities in the unranked bucket', async () => {
+// Explicit, missing, and stale all mean the same thing to a reader: nobody
+// ranked this. `priorityPresentation` is the one place that decides it, so an
+// id pointing at a priority somebody deleted resolves to the unranked bucket
+// rather than to nothing at all.
+test('explicit, missing, and stale priorities all read as the unranked bucket', () => {
   assert.equal(priorityPresentation(NO_PRIORITY_ID, DEFAULT_SYSTEM_PRIORITIES).id, NO_PRIORITY_ID);
   assert.equal(priorityPresentation(undefined, DEFAULT_SYSTEM_PRIORITIES).id, NO_PRIORITY_ID);
   assert.equal(priorityPresentation('deleted-custom-priority', DEFAULT_SYSTEM_PRIORITIES).id, NO_PRIORITY_ID);
-
-  const [workspaceAnalytics, projectAnalytics] = await Promise.all([
-    readFile(new URL('../src/app/(app)/analytics/page.js', import.meta.url), 'utf8'),
-    readFile(new URL('../src/components/workspace/AnalyticsTab.jsx', import.meta.url), 'utf8'),
-  ]);
-  for (const source of [workspaceAnalytics, projectAnalytics]) {
-    assert.match(source, /priorityPresentation\(i\.priority, priorities\)\.id/);
-  }
-  assert.match(projectAnalytics, /selectablePriorities\(priorities\)/);
 });
 
 // Nothing said about priority means no priority.
@@ -60,7 +55,6 @@ test('no path that creates a task invents a priority for it', async () => {
     'src/app/(app)/page.js',
     'src/app/(app)/my/page.js',
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
-    'src/components/AudioTaskPanel.jsx',
     'src/components/workspace/IssueDetail.jsx',
     'src/app/api/issues/route.js',
     'src/app/api/v1/tasks/route.js',

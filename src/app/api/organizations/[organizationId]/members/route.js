@@ -80,13 +80,6 @@ export async function GET(request, context) {
     const profileSnaps = memberships.length
       ? await db.getAll(...memberships.map(item => db.collection('users').doc(item.userId)))
       : [];
-    const canViewBilling = ['owner', 'admin'].includes(authorization.membership.role);
-    const rateSnaps = canViewBilling && memberships.length
-      ? await db.getAll(...memberships.map(item => db.collection('organizations')
-        .doc(organizationId)
-        .collection('memberRates')
-        .doc(item.userId)))
-      : [];
 
     const members = memberships.map((membership, index) => {
       const profile = profileSnaps[index]?.exists ? profileSnaps[index].data() : {};
@@ -102,9 +95,9 @@ export async function GET(request, context) {
           .map(field => [field, serializeValue(profile.profile[field])]));
       }
       // A deleted account leaves an archived seat and no profile at all — that
-      // is the point of deleting it. Without a name every hour they logged
-      // renders as «Невідомий» on the timesheet an invoice is built from, so
-      // the directory says what actually happened instead.
+      // is the point of deleting it. Without a name every incident they touched
+      // renders as «Невідомий», so the directory says what actually happened
+      // instead.
       const accountDeleted = membership.accountDeleted === true;
       if (accountDeleted && !safeProfile.name) safeProfile.name = 'Видалений акаунт';
 
@@ -118,13 +111,6 @@ export async function GET(request, context) {
         deactivatedAt: serializeValue(membership.deactivatedAt) || null,
         joinedAt: serializeValue(membership.joinedAt) || null,
         positionId: membership.positionId || '',
-        ...(canViewBilling ? {
-          hourlyRate: Number(
-            rateSnaps[index]?.exists
-              ? rateSnaps[index].data().hourlyRate
-              : membership.hourlyRate,
-          ) || 0,
-        } : {}),
       };
     });
 

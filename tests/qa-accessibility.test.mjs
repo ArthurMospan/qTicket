@@ -78,13 +78,12 @@ test('dynamic control names are queued for runtime verification instead of accep
 });
 
 test('the known board controls, tab icons, headings and breadcrumbs carry accessible semantics', async () => {
-  const [project, mine, topHeader, breadcrumb, board, analytics] = await Promise.all([
+  const [project, mine, topHeader, breadcrumb, board] = await Promise.all([
     read('src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
     read('src/app/(app)/my/page.js'),
     read('src/components/ui/Layout/TopHeader.jsx'),
     read('src/components/ui/Navigation/Breadcrumb.jsx'),
     read('src/components/workspace/AgileBoard.jsx'),
-    read('src/app/(app)/analytics/page.js'),
   ]);
 
   for (const label of [
@@ -104,21 +103,6 @@ test('the known board controls, tab icons, headings and breadcrumbs carry access
   assert.doesNotMatch(breadcrumb, /<React\.Fragment/);
   assert.doesNotMatch(board, /<h3 className="ui-type-column-title/);
   assert.match(board, /<h2 className="ui-type-column-title/);
-  // The projects table used to end each row with a 24px "Відкрити →" link that
-  // only appeared on hover — a target you had to find before you could hit it.
-  // `DataTable` makes the identifying cell of every row the link instead, so
-  // the target is the row, and it is there whether or not a pointer is.
-  assert.match(analytics, /<DataTable[\s\S]{0,400}rowHref=/);
-  const dataTable = await read('src/components/ui/DataDisplay/DataTable.jsx');
-  // The identifying cell stays a real link — that is what the keyboard tabs to,
-  // what the middle button opens in a tab, and what the context menu can copy.
-  // The row-wide click sits on top of it and must never replace it.
-  assert.match(dataTable, /column === leadColumn && href \?[\s\S]{0,400}<Link href=\{href\}/);
-  assert.match(dataTable, /onClick=\{href \? followRow\(href\) : undefined\}/);
-  // And the shortcut steps aside for anything the reader actually aimed at,
-  // so a control inside a row is still its own target.
-  assert.match(dataTable, /event\.target\.closest\('a, button, input, select, textarea/);
-  assert.doesNotMatch(analytics, /sm:opacity-0 sm:group-hover:opacity-100/);
 });
 
 test('drag announcements use Ukrainian labels and never expose droppable ids', () => {

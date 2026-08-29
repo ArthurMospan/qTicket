@@ -39,9 +39,7 @@ function fmtDate(raw, timeZone) {
  * @param {object[]} props.allIssues Every task in scope, for links that leave the current list.
  * @param {object[]} props.members Workspace members, for the assignee avatar.
  * @param {object[]} props.labels Label definitions, for the chips.
- * @param {object[]} props.sprints Sprint definitions.
  * @param {object[]} props.issueLinks Relations, for the link count.
- * @param {boolean} props.isTimerActive A timer is running on this task.
  * @param {string} props.projectId Current project.
  * @param {string} props.projectName Its name.
  * @param {boolean} props.showProjectName Whether the row names its project — true only on cross-project lists.
@@ -58,12 +56,10 @@ export default function TaskRow({
   issueLinks = [],
   members = [],
   labels = [],
-  sprints = [],
   projectId,
   projectName,
   showProjectName = false,
   showStatusName = false,
-  isTimerActive,
   onClick,
   selected = false,
   selectionActive = false,
@@ -241,12 +237,6 @@ export default function TaskRow({
     </span>
   ) : null;
 
-  const sprintBadge = task.sprintId ? (
-    <span className="inline-flex items-center px-[6px] py-[1.5px] bg-canvas text-muted rounded-[4px] text-[10px] font-medium shrink-0">
-      {sprints.find(s => s.id === task.sprintId)?.name || 'Спринт'}
-    </span>
-  ) : null;
-
   const labelTags = (task.labelIds || []).map(id => {
     const l = labels.find(lbl => lbl.id === id);
     if (!l) return null;
@@ -346,7 +336,7 @@ export default function TaskRow({
       // від білого, тобто майже непомітна, — а `bg-canvas` це #f4f4f5, тобто
       // повноцінний сірий. Рядок сірішав цілком, і кільце, яке й є нашим
       // ховером, губилося в ньому. Кільце робить цю роботу саме.
-      className={`relative group overflow-hidden rounded-[12px] bg-white cursor-pointer select-none border border-line transition-all duration-200 flex items-center justify-between p-[12px] ${selected ? 'ring-2 ring-ink' : 'hover:!ring-4 hover:!ring-line'} ${isTimerActive ? 'ring-2 ring-ink/30' : ''}`}
+      className={`relative group overflow-hidden rounded-[12px] bg-white cursor-pointer select-none border border-line transition-all duration-200 flex items-center justify-between p-[12px] ${selected ? 'ring-2 ring-ink' : 'hover:!ring-4 hover:!ring-line'}`}
     >
       {/* ── One line, from md up ───────────────────────────────────────────── */}
       <div className="hidden items-center justify-between w-full gap-[16px] min-w-0 md:flex">
@@ -369,10 +359,6 @@ export default function TaskRow({
             {renderDue(true)}
             {renderChildProgress(true)}
             {renderChecklist(true)}
-
-            {isTimerActive && (
-              <span className="w-[5px] h-[5px] bg-ink rounded-full animate-pulse shrink-0" />
-            )}
           </div>
 
           {/* Title & Chat Indicator (Bottom Row) */}
@@ -400,7 +386,6 @@ export default function TaskRow({
           <span className="flex min-w-0 items-center gap-[8px] overflow-hidden">
             {statusBadge}
             {blockedBadge}
-            {sprintBadge}
             {labelTags.length > 0 && (
               <span className="flex items-center gap-[4px] overflow-hidden">
                 {labelTags}
@@ -448,9 +433,6 @@ export default function TaskRow({
               parentIssue={parentIssueId ? (parentIssue || { issueKey: '' }) : null}
               className="min-w-0 flex-1"
             />
-            {isTimerActive && (
-              <span className="h-[6px] w-[6px] shrink-0 animate-pulse rounded-full bg-ink" />
-            )}
           </span>
           {countersNode}
           {/* No «Н/В» placeholder here. On a desktop row the empty slot is what
@@ -474,7 +456,6 @@ export default function TaskRow({
           {typeBadge}
           {statusBadge}
           {blockedBadge}
-          {sprintBadge}
           {labelTags}
           {renderDue(false)}
           {renderChildProgress(false)}

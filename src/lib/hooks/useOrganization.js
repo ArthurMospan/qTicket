@@ -206,16 +206,6 @@ export function useOrganization() {
     await store.refresh();
   }, [activeOrgId, store]);
 
-  // Change hourly rate
-  const setMemberRate = useCallback(async (uid, rate) => {
-    if (!activeOrgId) return;
-    await updateOrganizationMember(activeOrgId, uid, {
-      action: 'rate',
-      hourlyRate: Number(rate),
-    });
-    await store.refresh();
-  }, [activeOrgId, store]);
-
   // Change position
   const setMemberPosition = useCallback(async (uid, positionId) => {
     if (!activeOrgId) return;
@@ -253,7 +243,6 @@ export function useOrganization() {
     error,
     inviteMember,
     changeMemberRole,
-    setMemberRate,
     setMemberPosition,
     getMemberRemovalImpact,
     deactivateMember,

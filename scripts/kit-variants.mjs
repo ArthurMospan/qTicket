@@ -143,11 +143,6 @@ const SOURCES = {
   AttributeTrigger: { variant: { literal: ['cell', 'details'] } },
   ColorSwatch: { size: { literal: ['choice', 'theme', 'trigger'] } },
   ListRow: { density: { literal: ['compact', 'roomy'] } },
-  CalendarDayNumber: { state: { literal: ['default', 'outside', 'today'] } },
-  CalendarDayCell: {
-    state: { map: ['Calendar/CalendarDayCell.jsx', 'STATES'] },
-    density: { map: ['Calendar/CalendarDayCell.jsx', 'DENSITIES'] },
-  },
   ResponseChoice: {
     size: { literal: ['md', 'sm', 'tile'] },
     surface: { literal: ['canvas', 'surface'] },
@@ -168,16 +163,6 @@ const SOURCES = {
   MobilePaneBack: { context: { map: ['Navigation/MobilePaneBack.jsx', 'CONTEXTS'] } },
   DetailLayout: { context: { map: ['Layout/DetailLayout.jsx', 'CONTEXTS'] } },
   DetailSection: { density: { map: ['Layout/DetailSection.jsx', 'DENSITIES'] } },
-  // Two kinds of row: a line of figures, and a person with a face and two lines
-  // of text under their name.
-  DataTable: { density: { map: ['DataDisplay/DataTable.jsx', 'DENSITIES'] } },
-  // Progress is `neutral` by default because most progress means nothing beyond
-  // itself; the three severities are the exception, and they say so in words as
-  // well as in hue.
-  Meter: {
-    tone: { map: ['Charts/Meter.jsx', 'TONES'] },
-    layout: { map: ['Charts/Meter.jsx', 'LAYOUTS'] },
-  },
   FilterBar: { context: { map: ['FilterBar.jsx', 'WIDTHS'] } },
   Popover: {
     align: { literal: ['start', 'center', 'end'] },

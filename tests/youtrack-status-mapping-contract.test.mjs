@@ -28,11 +28,3 @@ test('YouTrack discovery, UI and importer preserve manual status mappings', asyn
   assert.match(importer, /statusFilters:\s*normalizedStatusFilters/);
   assert.match(importer, /mappingVersion:\s*4/);
 });
-
-test('YouTrack work items remain imported as time logs and update the issue mirror', async () => {
-  const importer = await read('../src/lib/server/youtrackImporter.js');
-  assert.match(importer, /client\.workItems\(issue\.id\)/);
-  assert.match(importer, /importWorkItems\(\{ job, issueId: saved\.issueId/);
-  assert.match(importer, /FieldValue\.increment\(spentMinutesDelta\)/);
-  assert.match(importer, /spentMinutesMirrorVersion:\s*1/);
-});

@@ -30,10 +30,9 @@ function readPersistentMembers(cacheKey) {
 function writePersistentMembers(cacheKey, members) {
   if (typeof window === 'undefined') return;
   try {
-    const publicMembers = members.map(({ hourlyRate, ...member }) => member);
     window.localStorage.setItem(persistentCacheKey(cacheKey), JSON.stringify({
       createdAt: Date.now(),
-      members: publicMembers,
+      members,
     }));
   } catch {
     // Storage can be unavailable in privacy mode; the in-memory cache still works.
@@ -48,9 +47,9 @@ export async function fetchOrganizationMembers(
   await auth.authStateReady?.();
   const currentUser = auth.currentUser;
   if (!currentUser) throw new Error('Authentication required');
-  // The directory is role-filtered: owner/admin responses include billing
-  // rates, member responses do not. A role change in the same browser must not
-  // be allowed to fall back to a privileged persistent response.
+  // The directory is role-filtered: what a client role may read is narrower
+  // than what support reads. A role change in the same browser must not be
+  // allowed to fall back to a privileged persistent response.
   const cacheKey = `${organizationId}_${currentUser.uid}_${cacheScope || 'default'}`;
   const cached = memberCache.get(cacheKey);
   if (!force && cached && Date.now() - cached.createdAt < CACHE_MS) return cached.promise;

@@ -97,7 +97,7 @@ test('requested navigation and readability regressions stay fixed', async () => 
   // controls inside an invisible scroller.
   assert.doesNotMatch(bulk, /!bg-white hover:!bg-canvas !text-ink/);
   assert.match(bulk, /ui-bulk-actions__trigger/);
-  assert.equal((bulk.match(/ui-bulk-actions__control/g) || []).length, 6);
+  assert.equal((bulk.match(/ui-bulk-actions__control/g) || []).length, 5);
 });
 
 test('help, news and versions are read in place; contracts keep their own address', async () => {
@@ -194,26 +194,6 @@ test('the quiet greys stay light and stay three steps apart', async () => {
   assert.ok(muted > 2, `muted must stay readable, got ${muted}`);
   assert.ok(muted < 4, `muted must stay light, got ${muted}`);
   assert.ok(muted - faint > 0.5, 'faint must stay clearly quieter than muted');
-});
-
-test('a stopped timer keeps its minutes until they are written down', async () => {
-  const [store, detail, sidebar] = await Promise.all([
-    read('src/store/useWorkspaceStore.js'),
-    read('src/components/workspace/IssueDetail.jsx'),
-    read('src/components/WorkspaceSidebar.jsx'),
-  ]);
-  // The server-owned pending state survives reloads, tabs and devices; a
-  // client-local stop intent is namespaced by uid only for offline delivery.
-  assert.match(store, /pendingTimeLog/);
-  assert.match(store, /stopUserTimer/);
-  assert.match(store, /STOP_INTENT_PREFIX = 'qt_timer_stop_intent:'/);
-  assert.match(store, /clearPendingTimeLog/);
-  // The handoff is the store, not a query param that gets stripped on arrival.
-  assert.doesNotMatch(sidebar, /timerTargetHref\(result, \{ minutes/);
-  assert.match(detail, /pendingTimeLog/);
-  assert.match(detail, /closeLogForm/);
-  // Closing the dialog on unsaved timer minutes has to be a decision.
-  assert.match(detail, /Не зберігати відстежений час\?/);
 });
 
 test('a project card offers no action the role cannot perform', async () => {

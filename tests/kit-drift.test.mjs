@@ -146,9 +146,16 @@ test('the variant matrix renders every component that can stand alone', () => {
 // components themselves are still shipped by the incident screens. The number
 // grew because the evidence was deleted, not because a call site moved out of
 // the scan's view, which is the thing this ceiling is watching for.
+// Raised 118 → 131 when invoices, the timesheet and the analytics screens were
+// deleted. Those screens were the only call sites left for a whole shelf of
+// values — the export menu's sizes, the table densities, the meter tones — and
+// the components that declared them went with them where they had no other
+// reader. What stays declared is vocabulary the incident screens still ship.
+// Again the number grew because the evidence was deleted, not because a call
+// site moved out of the scan's view.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 118,
+    committed.totals.declaredUnused <= 131,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   for (const key of ['Input.composition.status-entry', 'Button.composition.status-submit', 'Dialog.size.status']) {

@@ -15,7 +15,6 @@ const CONTEXT = {
   priorities: [{ id: 'high', label: 'Високий' }, { id: 'low', label: 'Низький' }],
   types: [{ id: 'bug', label: 'Баг' }],
   labels: [{ id: 'label-a', name: 'Дизайн' }],
-  sprints: [{ id: 'sprint-7', name: 'Спринт 7' }],
   members: [{ id: 'member-a', name: 'Оля' }, { id: 'member-b', name: 'Дмитро' }],
   timeZone: 'UTC',
 };
@@ -50,14 +49,6 @@ test('values are resolved through the live configuration', () => {
   assert.equal(
     describeAuditEvent({ action: 'changed_type', from: null, to: 'bug' }, CONTEXT),
     'Тип змінено на «Баг»',
-  );
-  assert.equal(
-    describeAuditEvent({ action: 'changed_sprintId', from: null, to: 'sprint-7' }, CONTEXT),
-    'Спринт змінено на «Спринт 7»',
-  );
-  assert.equal(
-    describeAuditEvent({ action: 'changed_estimateMinutes', from: '60', to: '210' }, CONTEXT),
-    'Оцінку змінено: «1 год» → «3 год 30 хв»',
   );
   assert.equal(
     describeAuditEvent({ action: 'changed_priority', from: 'high', to: 'none' }, CONTEXT),
@@ -168,8 +159,8 @@ test('a bulk change reads in the same words a single edit produces', () => {
   );
   // A patch this build cannot read still names the operation that wrote it.
   assert.equal(
-    describeAuditEvent({ action: 'bulk_backlog', from: '', to: '' }, CONTEXT),
-    'Масова дія: повернути в backlog',
+    describeAuditEvent({ action: 'bulk_duplicate', from: '', to: '' }, CONTEXT),
+    'Масова дія: дублювати',
   );
 });
 
@@ -202,11 +193,11 @@ test('the timeline holds no vocabulary of its own', async () => {
 
 test('the fields worth logging live next to the phrases that read them', async () => {
   const hook = await readFile(new URL('../src/lib/hooks/useIssues.js', import.meta.url), 'utf8');
-  // Three fields were logged here while the timeline knew how to say five: a
+  // Three fields were logged here while the timeline knew how to say more: a
   // moved deadline left no trace anywhere in the product.
   assert.doesNotMatch(hook, /const auditFields = /);
   assert.match(hook, /for \(const field of AUDITED_ISSUE_FIELDS\)/);
-  for (const field of ['dueDate', 'sprintId', 'labelIds', 'estimateMinutes', 'description']) {
+  for (const field of ['dueDate', 'labelIds', 'type', 'description']) {
     assert.ok(AUDITED_ISSUE_FIELDS.includes(field), field);
   }
 });

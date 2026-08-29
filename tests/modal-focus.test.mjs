@@ -29,7 +29,7 @@ test('shared dialogs own a browser-history entry and protect dirty drafts', asyn
   assert.match(historyHook, /window\.addEventListener\('popstate'/);
   assert.match(historyHook, /window\.history\.back\(\)/);
   assert.match(historyHook, /window\.confirm\(confirmationRef\.current\)/);
-  assert.match(createTask, /isDirty=\{mode === 'task' && draftTouched\}/);
+  assert.match(createTask, /isDirty=\{draftTouched\}/);
 });
 
 test('Escape closes a floating control, then its form, then the task page', async () => {

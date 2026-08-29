@@ -83,28 +83,6 @@ test('archived tasks leave the working lists but keep their own link', async () 
   // record for what was done, and the cancelled ones for the one screen that
   // lists them. The analytics hook names all three rather than deriving its own.
   assert.match(analytics, /allIssues: record,\s*\n\s*cancelledIssues,/);
-  assert.match(analytics, /allIssues: record,\s*\n\s*cancelledIssues,\s*\n\s*timeLogs: recordTimeLogs,/);
-});
-
-test('an archived task keeps its hours in the timesheet and on the invoice', async () => {
-  const [page, timesheet, workload] = await Promise.all([
-    read('../src/app/(app)/analytics/page.js'),
-    read('../src/components/workspace/TimesheetTab.jsx'),
-    read('../src/components/workspace/WorkloadTab.jsx'),
-  ]);
-  // Money first: an hour recorded against a task somebody later archived is
-  // still an hour that was worked, and dropping it would bill less than was done.
-  assert.match(page, /const billingIssues = allIssues\.filter/);
-  // The timesheet has to be able to name the task an old entry belongs to.
-  assert.match(page, /const projectScopedIssueReferences = useMemo/);
-  assert.match(page, /<TimesheetTab\s+issues=\{projectScopedIssueReferences\}/);
-  assert.match(page, /logIssues=\{projectScopedIssueReferences\}/);
-  // …while new time is still booked only against tasks that are in use.
-  assert.match(timesheet, /const projectIssues = useMemo\(\s*[\s\S]{0,80}withoutArchivedIssues\(issues\)/);
-  // «Остання активність» reads the project-wide list, so a person's last touch
-  // on an archived task still counts as activity.
-  assert.match(workload, /logIssues = scopedIssues,/);
-  assert.match(workload, /referenceIssues: logIssues,/);
 });
 
 test('nothing chases people about a task that was put aside', async () => {

@@ -21,8 +21,8 @@ test('bulk action registry is complete and the API remains bounded', () => {
     'assignees-add', 'assignees-remove', 'assignees-replace', 'assignees-clear',
     'priority', 'priority-clear',
     'labels-add', 'labels-remove', 'labels-clear',
-    'type', 'deadline', 'deadline-clear', 'estimate', 'estimate-clear',
-    'sprint', 'backlog', 'duplicate', 'archive', 'cancel', 'delete',
+    'type', 'deadline', 'deadline-clear',
+    'duplicate', 'archive', 'cancel', 'delete',
   ]);
   // Archiving and cancelling are reversible and permission-wise an edit;
   // deleting starts a retention clock and stays with the roles that may delete.
@@ -39,9 +39,6 @@ test('bulk values reject malformed or unbounded inputs', () => {
   assert.equal(validateBulkActionValue('assignees-add', ['a']), null);
   assert.ok(validateBulkActionValue('assignees-add', []));
   assert.ok(validateBulkActionValue('labels-add', Array.from({ length: 21 }, (_, index) => String(index))));
-  assert.equal(validateBulkActionValue('estimate', 0), null);
-  assert.equal(validateBulkActionValue('estimate', 525600), null);
-  assert.ok(validateBulkActionValue('estimate', -1));
   assert.equal(validateBulkActionValue('deadline', '2026-08-15'), null);
   assert.ok(validateBulkActionValue('deadline', 'not-a-date'));
   assert.ok(validateBulkActionValue('deadline', '2026-02-31'));

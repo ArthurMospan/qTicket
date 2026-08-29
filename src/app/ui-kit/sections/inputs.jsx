@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Forms/Textarea';
-import { Label, Checkbox, ToggleSwitch, DatePicker, TimePicker, ImageUpload, StatusVisibilityPicker, ResponseChoice, ColorSwatch } from '@/components/ui';
+import { Label, Checkbox, ToggleSwitch, DatePicker, ImageUpload, StatusVisibilityPicker, ResponseChoice, ColorSwatch } from '@/components/ui';
 import { DEFAULT_STATUSES } from '@/lib/hooks/useWorkflowConfig';
 import { Search, User, Calendar, Lock, Eye, EyeOff } from 'lucide-react';
 import { PreviewBlock } from '../preview';
@@ -15,7 +15,6 @@ export default function InputsSection() {
   const [chk, setChk] = useState(false);
   const [tgl, setTgl] = useState(true);
   const [dateSingle, setDateSingle] = useState('');
-  const [timeSingle, setTimeSingle] = useState('09:00');
   const [hiddenStatusIds, setHiddenStatusIds] = useState(['done']);
   const [rsvp, setRsvp] = useState('accepted');
   const [swatch, setSwatch] = useState('#10b981');
@@ -122,15 +121,11 @@ export default function InputsSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="Date & Time Pickers" description="Живі DatePicker і TimePicker, які використовуються у задачах, календарі та налаштуваннях." fullWidth>
+      <PreviewBlock title="Date Picker" description="Живий DatePicker, який використовується в інцидентах і налаштуваннях." fullWidth>
         <div className="grid max-w-[532px] gap-3 sm:grid-cols-2">
           <div>
             <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Оберіть дату</label>
             <DatePicker value={dateSingle} onChange={setDateSingle} placeholder="Оберіть день..." />
-          </div>
-          <div>
-            <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Оберіть час</label>
-            <TimePicker value={timeSingle} onChange={setTimeSingle} aria-label="Демонстраційний час" />
           </div>
         </div>
       </PreviewBlock>

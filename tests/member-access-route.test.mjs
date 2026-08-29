@@ -62,20 +62,19 @@ test('qTicket does not expose internal team mutations and keeps personal exit se
   assert.match(settings, /handleLeaveOrganization/);
 });
 
-test('rates are served from protected paths and never persisted in public browser cache', async () => {
-  const [membersRoute, memberService, workflowRoute, workflowService, positions] = await Promise.all([
-    read('../src/app/api/organizations/[organizationId]/members/route.js'),
-    read('../src/lib/services/members.js'),
+// Rates left the product with the invoices. What is left of them is legacy
+// data: a `hourlyRate` still sitting beside a job title in an old workflow
+// document. It is dropped on the way out rather than echoed back to a product
+// that has no such field any more.
+test('a legacy hourly rate is stripped on the way out and is never seeded again', async () => {
+  const [workflowRoute, workflowService, positions] = await Promise.all([
     read('../src/app/api/organizations/[organizationId]/workflow/route.js'),
     read('../src/lib/services/workflow.js'),
     import('../src/lib/utils/workflowPositions.mjs'),
   ]);
 
-  assert.match(membersRoute, /collection\('memberRates'\)/);
-  assert.match(membersRoute, /canViewBilling/);
-  assert.match(memberService, /members\.map\(\(\{ hourlyRate, \.\.\.member \}\) => member\)/);
-  assert.match(workflowRoute, /collection\('private'\)[\s\S]{0,120}doc\('workflowRates'\)/);
-  assert.match(workflowRoute, /canViewBilling[\s\S]{0,180}publicWorkflow\(workflow\)/);
+  assert.match(workflowRoute, /workflow\.positions\.map\(\(\{ hourlyRate, \.\.\.position \}\) => position\)/);
+  assert.match(workflowRoute, /workflow: publicWorkflow\(workflow\)/);
   assert.match(workflowService, /fetchWorkflowViaApi/);
   assert.ok(positions.DEFAULT_WORKFLOW_POSITIONS.every(position => !('hourlyRate' in position)));
 });
@@ -101,7 +100,6 @@ test('every permission in the matrix is read by something', async () => {
   const { PERMISSIONS } = await import('../src/lib/utils/can.js');
   const sources = await Promise.all([
     'src/app/(app)/settings/page.js',
-    'src/app/(app)/analytics/page.js',
     'src/app/(app)/chat/page.js',
     'src/app/(app)/page.js',
     'src/app/(app)/my/page.js',

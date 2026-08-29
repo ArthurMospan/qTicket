@@ -6,10 +6,9 @@ import { ISSUE_BULK_ACTION_BY_ID } from '../bulk/issueBulkActions.mjs';
  * Which field changes are worth a line in a task's history.
  *
  * The list used to be three fields long — назва, пріоритет, виконавці — so the
- * feed in the task chat stayed silent while a deadline moved by a week, a task
- * changed type, or somebody dropped it into another sprint. "Дії пишуться в
- * чаті" was only a third true, and the third it covered was not the third that
- * causes arguments.
+ * feed in the task chat stayed silent while a deadline moved by a week or a
+ * task changed type. "Дії пишуться в чаті" was only a third true, and the third
+ * it covered was not the third that causes arguments.
  *
  * `description` is deliberately recorded as a fact and not as a diff: the whole
  * body of a task in a `from`/`to` pair is a document inside a log entry, and
@@ -21,9 +20,7 @@ export const AUDITED_ISSUE_FIELDS = Object.freeze([
   'assigneeIds',
   'type',
   'dueDate',
-  'estimateMinutes',
   'labelIds',
-  'sprintId',
   'description',
 ]);
 
@@ -37,9 +34,7 @@ const FIELD_LABELS = Object.freeze({
   assigneeIds: 'виконавців',
   type: 'тип',
   dueDate: 'дедлайн',
-  estimateMinutes: 'оцінку',
   labelIds: 'мітки',
-  sprintId: 'спринт',
   parentIssueId: 'основну задачу',
 });
 
@@ -107,15 +102,6 @@ function nameOf(collection, id, fallback) {
   return found?.name || found?.label || fallback;
 }
 
-function formatMinutes(raw) {
-  const minutes = Number(raw);
-  if (!Number.isFinite(minutes) || minutes <= 0) return null;
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  if (hours === 0) return `${rest} хв`;
-  return rest === 0 ? `${hours} год` : `${hours} год ${rest} хв`;
-}
-
 function formatDueDate(raw, timeZone) {
   if (raw === null || raw === undefined || raw === '') return null;
   // Deadlines reach the log as milliseconds (`auditValue` of a Timestamp), as an
@@ -142,7 +128,6 @@ function formatAuditValue(field, value, context) {
     priorities = [],
     types = [],
     labels = [],
-    sprints = [],
     members = [],
     timeZone,
   } = context || {};
@@ -164,9 +149,7 @@ function formatAuditValue(field, value, context) {
     return nameOf(priorities, value, value);
   }
   if (field === 'type') return nameOf(types, value, value);
-  if (field === 'sprintId') return nameOf(sprints, value, 'спринт');
   if (field === 'dueDate') return formatDueDate(value, timeZone) || 'не вказано';
-  if (field === 'estimateMinutes') return formatMinutes(value) || 'не вказано';
   return String(value);
 }
 
@@ -226,14 +209,14 @@ function describeBulkEvent(entry, actionId, context) {
 /**
  * One line of a task's history, in words.
  *
- * The statuses, priorities, types, labels and sprints are read from the live
+ * The statuses, priorities, types and labels are read from the live
  * workflow — never from a table inside this file. A hard-coded map of seven
  * status ids is what made a project that renamed «QA» read «QA» in its own
  * history, and a project that added one read a raw `status-3`.
  *
  * @param {object} entry An `issues/{id}/audit` document.
  * @param {object} context Live workflow and directory: `statuses`, `priorities`,
- *   `types`, `labels`, `sprints`, `members`, `timeZone`.
+ *   `types`, `labels`, `members`, `timeZone`.
  * @returns {string} A sentence for the timeline.
  */
 export function describeAuditEvent(entry, context = {}) {

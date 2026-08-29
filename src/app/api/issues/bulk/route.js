@@ -76,8 +76,6 @@ function duplicateData(issue) {
     assigneeIds: Array.isArray(issue.assigneeIds) ? issue.assigneeIds : [],
     labelIds: Array.isArray(issue.labelIds) ? issue.labelIds : [],
     dueDate: serializedDate(issue.dueDate),
-    estimateMinutes: Number.isFinite(Number(issue.estimateMinutes)) ? Number(issue.estimateMinutes) : null,
-    sprintId: issue.sprintId || null,
   };
 }
 
@@ -142,14 +140,6 @@ function updateForAction({ actionId, value, issue, workflow, timeZone }) {
     }
     case 'deadline-clear':
       return { dueDate: null };
-    case 'estimate':
-      return { estimateMinutes: Number(value) };
-    case 'estimate-clear':
-      return { estimateMinutes: null };
-    case 'sprint':
-      return { sprintId: value };
-    case 'backlog':
-      return { sprintId: null };
     default:
       throw new Error('Дія не підтримує оновлення атрибутів');
   }
@@ -260,15 +250,6 @@ export async function POST(request) {
       valueMemberships = memberIds;
       valueRoles = new Map(memberIds.map((id, index) => [id, memberships[index].data().role || null]));
     }
-    let sprint = null;
-    if (actionId === 'sprint') {
-      const sprintSnap = await db.collection('sprints').doc(body.value).get();
-      sprint = sprintSnap.exists ? { ...sprintSnap.data(), id: sprintSnap.id } : null;
-      if (!sprint || sprint.organizationId !== organizationId || sprint.status === 'completed') {
-        return NextResponse.json({ error: 'Спринт не належить організації або вже завершений' }, { status: 400 });
-      }
-    }
-
     // The project task counters for the whole operation, accumulated across the
     // loop and committed once at the end. Not inside each task's transaction:
     // this route already learned that writing `projects/{id}` per task makes
@@ -345,15 +326,11 @@ export async function POST(request) {
           : body.value;
         const issueRef = db.collection('issues').doc(issue.id);
         const projectRef = db.collection('projects').doc(issue.projectId);
-        const sprintRef = actionId === 'sprint'
-          ? db.collection('sprints').doc(body.value)
-          : null;
         let patch = null;
         let freshIssue = issue;
         await db.runTransaction(async transaction => {
           const freshSnap = await transaction.get(issueRef);
           const freshProjectSnap = await transaction.get(projectRef);
-          const freshSprintSnap = sprintRef ? await transaction.get(sprintRef) : null;
           if (!freshSnap.exists) throw new Error('Завдання більше не існує');
           const fresh = { ...freshSnap.data(), id: freshSnap.id };
           if (fresh.organizationId !== organizationId || fresh.projectId !== issue.projectId) throw new Error('Область задачі змінилася');
@@ -362,11 +339,6 @@ export async function POST(request) {
             : null;
           const freshAccessError = projectAccessError(freshProject, organizationId, authorization);
           if (freshAccessError) throw new Error(freshAccessError);
-          if (freshSprintSnap && (
-            !freshSprintSnap.exists
-            || freshSprintSnap.data().organizationId !== organizationId
-            || freshSprintSnap.data().status === 'completed'
-          )) throw new Error('Спринт не належить організації або вже завершений');
           // The workflow is one document shared by every task in the operation
           // and it is only read to validate an id against it. Reading it inside
           // each transaction meant fifty reads of the same document and fifty
@@ -421,8 +393,8 @@ export async function POST(request) {
           });
         });
         // A deadline is the one attribute a counter depends on: everything else
-        // this branch can write — assignees, labels, priority, type, estimate,
-        // sprint — leaves a task exactly as countable as it was. Accumulated
+        // this branch can write — assignees, labels, priority, type — leaves a
+        // task exactly as countable as it was. Accumulated
         // after the transaction rather than inside it, so a retry cannot count
         // the same move twice.
         if (patch && patch.dueDate !== undefined) {

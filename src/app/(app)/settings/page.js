@@ -827,10 +827,7 @@ export default function SettingsPage() {
     allIssues: archiveScopedIssues,
     cancelledIssues: cancelledIssueList,
     loading: archivedIssuesLoading,
-  } = useWorkspaceAnalytics(archiveProjectIds, {
-    includeLinks: false,
-    includeTimeLogs: false,
-  });
+  } = useWorkspaceAnalytics(archiveProjectIds, { includeLinks: false });
   const archivedIssueList = useMemo(
     () => archivedIssuesOf(archiveScopedIssues),
     [archiveScopedIssues],

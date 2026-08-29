@@ -13,14 +13,14 @@
     "long-text"
   ],
   "totals": {
-    "components": 111,
-    "stateful": 99,
-    "hover": 65,
-    "focus": 64,
-    "disabled": 32,
-    "loading": 7,
-    "error": 6,
-    "long-text": 69
+    "components": 97,
+    "stateful": 87,
+    "hover": 59,
+    "focus": 58,
+    "disabled": 27,
+    "loading": 6,
+    "error": 5,
+    "long-text": 60
   },
   "components": {
     "Alert": {
@@ -51,7 +51,6 @@
       "focus": "global",
       "long-text": "label"
     },
-    "BarList": {},
     "Breadcrumb": {
       "hover": "own",
       "focus": "own"
@@ -62,18 +61,6 @@
     "Button": {
       "disabled": "prop",
       "loading": "prop",
-      "hover": "own",
-      "focus": "global",
-      "long-text": "children"
-    },
-    "CalendarDayCell": {
-      "disabled": "native",
-      "hover": "own",
-      "focus": "global",
-      "long-text": "children"
-    },
-    "CalendarDayNumber": {
-      "disabled": "native",
       "hover": "own",
       "focus": "global",
       "long-text": "children"
@@ -89,9 +76,6 @@
     "ChannelRail": {
       "hover": "own",
       "focus": "global"
-    },
-    "ChartCard": {
-      "long-text": "children, title"
     },
     "ChatAttachmentList": {
       "hover": "own",
@@ -133,7 +117,6 @@
       "focus": "global",
       "long-text": "label"
     },
-    "ColumnChart": {},
     "CommandPalette": {
       "hover": "own",
       "focus": "global"
@@ -149,9 +132,6 @@
       "focus": "global"
     },
     "Counter": {},
-    "DataTable": {
-      "hover": "own"
-    },
     "DatePicker": {
       "disabled": "prop",
       "error": "prop",
@@ -176,10 +156,6 @@
     },
     "EmptyState": {
       "long-text": "children, description, title"
-    },
-    "ExportMenu": {
-      "disabled": "prop",
-      "long-text": "label"
     },
     "FileInput": {
       "disabled": "native",
@@ -291,9 +267,6 @@
       "focus": "global",
       "long-text": "label"
     },
-    "Meter": {
-      "long-text": "label"
-    },
     "MobilePaneBack": {
       "hover": "own",
       "focus": "global",
@@ -339,10 +312,6 @@
       "loading": "prop",
       "long-text": "description"
     },
-    "RefreshStamp": {
-      "loading": "prop",
-      "long-text": "label"
-    },
     "ResponseChoice": {
       "disabled": "prop",
       "hover": "own",
@@ -366,10 +335,6 @@
     },
     "SidebarLayout": {
       "long-text": "children"
-    },
-    "SignalList": {
-      "hover": "own",
-      "focus": "global"
     },
     "Skeleton": {},
     "Sparkline": {},
@@ -406,9 +371,6 @@
     },
     "TaskCounters": {},
     "TaskIdentity": {},
-    "TaskListCard": {
-      "long-text": "title"
-    },
     "TaskListView": {
       "hover": "own"
     },
@@ -426,22 +388,6 @@
       "disabled": "native",
       "focus": "own",
       "long-text": "placeholder"
-    },
-    "TimeLogRow": {
-      "hover": "own",
-      "focus": "own",
-      "long-text": "description"
-    },
-    "TimePicker": {
-      "disabled": "prop",
-      "error": "prop",
-      "focus": "own",
-      "long-text": "value"
-    },
-    "TimeTrackingControl": {
-      "disabled": "prop",
-      "hover": "own",
-      "focus": "global"
     },
     "TitleInput": {
       "disabled": "native",
@@ -503,9 +449,6 @@
       "variant-matrix",
       "states"
     ],
-    "BarList": [
-      "charts"
-    ],
     "BulkActionBar": [
       "task-elements"
     ],
@@ -527,14 +470,6 @@
       "variant-matrix",
       "states"
     ],
-    "CalendarDayCell": [
-      "calendar",
-      "variant-matrix"
-    ],
-    "CalendarDayNumber": [
-      "calendar",
-      "variant-matrix"
-    ],
     "Card": [
       "surfaces",
       "variant-matrix",
@@ -545,9 +480,6 @@
     ],
     "ChannelRail": [
       "inner-nav-layout"
-    ],
-    "ChartCard": [
-      "charts"
     ],
     "ChatAttachmentList": [
       "chat-elements"
@@ -579,9 +511,6 @@
       "inputs",
       "variant-matrix"
     ],
-    "ColumnChart": [
-      "charts"
-    ],
     "CommandPalette": [
       "navigation-overlays"
     ],
@@ -598,9 +527,6 @@
     "Counter": [
       "badges",
       "variant-matrix"
-    ],
-    "DataTable": [
-      "charts"
     ],
     "DatePicker": [
       "inputs",
@@ -625,9 +551,6 @@
       "chat-composer",
       "variant-matrix",
       "states"
-    ],
-    "ExportMenu": [
-      "navigation-overlays"
     ],
     "FileInput": [
       "chat-elements"
@@ -717,10 +640,6 @@
     "MetaTrigger": [
       "navigation-overlays"
     ],
-    "Meter": [
-      "charts",
-      "variant-matrix"
-    ],
     "MobilePaneBack": [
       "inner-nav-layout",
       "variant-matrix"
@@ -749,7 +668,6 @@
     ],
     "Pill": [
       "badges",
-      "charts",
       "chat-elements",
       "detail-layout",
       "variant-matrix",
@@ -771,9 +689,6 @@
     ],
     "ProjectSettingsForm": [
       "dialogs"
-    ],
-    "RefreshStamp": [
-      "charts"
     ],
     "ResponseChoice": [
       "inputs",
@@ -800,9 +715,6 @@
     ],
     "SidebarLayout": [
       "inner-nav-layout"
-    ],
-    "SignalList": [
-      "charts"
     ],
     "Skeleton": [
       "skeletons",
@@ -851,9 +763,6 @@
     "TaskIdentity": [
       "task-crm"
     ],
-    "TaskListCard": [
-      "task-crm"
-    ],
     "TaskListView": [
       "task-crm"
     ],
@@ -869,17 +778,6 @@
       "inputs",
       "dialogs",
       "variant-matrix",
-      "states"
-    ],
-    "TimeLogRow": [
-      "task-elements"
-    ],
-    "TimePicker": [
-      "inputs",
-      "states"
-    ],
-    "TimeTrackingControl": [
-      "task-elements",
       "states"
     ],
     "TitleInput": [
@@ -909,7 +807,6 @@
     "UserAvatar": [
       "badges",
       "avatars",
-      "charts",
       "chat-elements",
       "task-elements",
       "inner-nav-layout",

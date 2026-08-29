@@ -498,25 +498,8 @@ test('high-risk composed previews keep the product markup signatures', () => {
   assert.match(detailCss, /\.scroll-shadow--bottom \{\s*position: sticky;\s*bottom: 0;\s*flex: none;\s*height: var\(--scroll-shadow-depth\);/);
   assert.match(detailLayout, /data-scrolled-below=\{moreBelow \? 'true' : 'false'\}/);
   assert.match(detailLayout, /scroll-shadow--bottom[\s\S]{0,40}<\/div>/, 'the floor closes the reading column, not the grid');
-  // Both records render the same timer. The calendar used to carry a
-  // byte-identical copy of it, down to the 1px nudge that centres the play
-  // triangle, so the two could drift without anything noticing.
-  //
-  // They reach it through LiveTimeTracking, which is the only reader of the
-  // store's one-second tick on either screen: reading `timerElapsed` in a
-  // record's own body re-renders the whole record once a second for as long as
-  // a timer runs.
-  const liveTimeTracking = readFileSync(new URL('../src/components/workspace/LiveTimeTracking.jsx', import.meta.url), 'utf8');
-  assert.match(liveTimeTracking, /<TimeTrackingControl/, 'the timer comes from the kit');
-  for (const [name, source] of Object.entries({ IssueDetail: issueDetail, CalendarEventPage: calendarEvent })) {
-    assert.match(source, /<LiveTimeTracking/, `${name} renders the shared timer`);
-    assert.doesNotMatch(source, /state\.timerElapsed|s\.timerElapsed/, `${name} must not subscribe to the tick itself`);
-  }
-  assert.doesNotMatch(
-    calendarEvent,
-    /place-items-center rounded-\[6px\] leading-none/,
-    'the calendar must not keep its own copy of the timer square',
-  );
+  // The timer that both records used to carry is gone with the rest of the
+  // time ledger, so there is no shared clock left to keep them honest about.
 
   assert.match(issueDetail, /<TaskAttributesPanel[\s\S]{0,120}context="task"/);
   assert.match(calendarEvent, /<TaskAttributesPanel[\s\S]{0,180}context="calendar"/);
@@ -537,7 +520,6 @@ test('high-risk composed previews keep the product markup signatures', () => {
   assert.match(taskAttributes, /compactSelectClass: 'h-\[22px\][^']*rounded-\[10px\]/);
   assert.match(kit, /getTaskAttributeChrome\(\)/);
   assert.match(kit, /<TaskAttributesPanel[\s\S]{0,120}context="task"/);
-  assert.match(kit, /<TaskAttributesPanel[\s\S]{0,120}context="calendar"/);
 
   for (const role of ['member', 'date', 'sort']) {
     assert.match(projects, new RegExp(`filterRole="${role}"`));

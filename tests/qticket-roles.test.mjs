@@ -139,12 +139,12 @@ test('клієнтський інтерфейс створює інцидент 
   assert.equal(INCIDENT_TERMS.client.composerSubmit, 'Створити звернення');
   assert.doesNotMatch(portal, /інцидент/i);
   assert.match(portal, /clientMode/);
-  assert.doesNotMatch(portal, /Пріоритет|Виконавці|Спринт|Дедлайн/);
+  assert.doesNotMatch(portal, /Пріоритет|Виконавці|Дедлайн/);
   assert.match(board, /if \(clientViewer\) router\.replace\('\/'\)/);
   assert.match(board, /const PROJECT_TABS = \[[\s\S]{0,240}Інциденти[\s\S]{0,120}Люди[\s\S]{0,120}Налаштування/);
   assert.match(board, /clientAdminMode/);
   assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
-  assert.doesNotMatch(board, /useSprints|AgileBoard|AnalyticsTab|QtPlusProjectTab/);
+  assert.doesNotMatch(board, /AgileBoard|QtPlusProjectTab/);
   assert.match(board, /entity="incident"/);
   assert.doesNotMatch(board, /clientMode=\{clientViewer\}/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
@@ -153,29 +153,24 @@ test('клієнтський інтерфейс створює інцидент 
   const internalAttributesStart = detail.indexOf(') : (', clientAttributesStart);
   const clientAttributes = detail.slice(clientAttributesStart, internalAttributesStart);
   assert.match(clientAttributes, />Статус</);
-  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Пріоритет/);
+  assert.doesNotMatch(clientAttributes, /Виконавці|Дедлайн|Пріоритет/);
   assert.match(composer, /const submitted = clientMode[\s\S]{0,180}title: form\.title,[\s\S]{0,80}description: form\.description/);
 });
 
 test('клієнтська сесія не підписується на внутрішні модулі QuickTeam', async () => {
-  const [bridge, sprints, detail, timeline] = await Promise.all([
+  const [bridge, detail, timeline] = await Promise.all([
     read('../src/components/WorkspaceNotificationBridge.jsx'),
-    read('../src/lib/hooks/useSprints.js'),
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/components/workspace/UnifiedTimeline.jsx'),
   ]);
   assert.match(bridge, /const internalViewer = Boolean\(orgRole\) && !isClientRole\(orgRole\)/);
   assert.match(bridge, /useUnreadChatCount\(\{ enabled: internalViewer \}\)/);
-  assert.match(bridge, /useUserTimerState\(internalViewer \? userId : null\)/);
-  assert.match(sprints, /export function useSprints\(\{ enabled = true \} = \{\}\)/);
   assert.match(detail, /const internalViewer = Boolean\(orgRole\) && !clientViewer/);
   assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
-  assert.match(detail, /useSprints\(\{ enabled: SHOW_INHERITED_TASK_PLANNING && internalViewer \}\)/);
   assert.match(detail, /SHOW_INHERITED_TASK_PLANNING && internalViewer \? issueId : null/);
   assert.match(timeline, /const internalViewer = can\(orgRole, 'access:internal_notes'\)/);
   assert.match(timeline, /useComments\(issueId, COMMENT_WINDOW \* historyWindow, \{ includeInternal: internalViewer \}\)/);
   assert.match(timeline, /useAuditLog\(internalViewer \? issueId : null/);
-  assert.match(timeline, /useTimeLogs\(\s*internalViewer \? issueId : null,\s*projectId,\s*\)/);
   assert.match(timeline, /Відповідь клієнту/);
   assert.match(timeline, /Внутрішня нотатка/);
 });

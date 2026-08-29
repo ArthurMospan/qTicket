@@ -16,27 +16,6 @@ test('YouTrack issue updates share workflow, hierarchy and deletion invariants',
   assert.match(importer, /issueStatusVersion:\s*FieldValue\.increment\(1\)/);
 });
 
-test('YouTrack work-log import preserves billed evidence and its issue mirror', async () => {
-  const importer = await read('../src/lib/server/youtrackImporter.js');
-  const billedGuard = importer.indexOf('current && isBilledTimeLog(current)');
-  const workLogWrite = importer.indexOf('transaction.set(row.ref, row.fields', billedGuard);
-
-  assert.ok(billedGuard > 0 && billedGuard < workLogWrite);
-  assert.match(importer, /spentMinutesDelta \+=/);
-  assert.match(importer, /Number\.isSafeInteger\(spentMinutes\)/);
-  assert.match(importer, /spentMinutes <= 525_600/);
-  assert.match(importer, /invalidWorkItemCount/);
-  assert.match(
-    importer,
-    /spentMinutes:\s*initializeSpentMinutesMirror[\s\S]*?FieldValue\.increment\(spentMinutesDelta\)/,
-  );
-  assert.match(importer, /spentMinutesMirrorVersion:\s*1/);
-  assert.match(importer, /timeLogMutationVersion:\s*FieldValue\.increment\(1\)/);
-  assert.match(importer, /timeLogImportVersion:\s*FieldValue\.increment\(1\)/);
-  assert.match(importer, /invoiceMutationVersion:\s*FieldValue\.increment\(1\)/);
-  assert.match(importer, /workItemResult\.warnings/);
-});
-
 test('reciprocal YouTrack links can upgrade one pending pair deterministically', async () => {
   const importer = await read('../src/lib/server/youtrackImporter.js');
 
@@ -44,17 +23,6 @@ test('reciprocal YouTrack links can upgrade one pending pair deterministically',
   assert.match(importer, /strongestYouTrackRelationRow\(snapshot\.data\(\), row\)/);
   assert.match(importer, /snapshot\.data\(\)\.status !== 'pending'/);
   assert.match(importer, /transaction\.update\(snapshot\.ref,\s*\{/);
-});
-
-test('issue deletion blocks both billed logs and source-less estimate reservations', async () => {
-  const route = await read('../src/app/api/issues/[issueId]/route.js');
-  const reservationRead = route.indexOf('transaction.get(estimateReservationRef)');
-  const tombstoneWrite = route.indexOf('transaction.create(tombstoneRef');
-
-  assert.ok(reservationRead > 0 && reservationRead < tombstoneWrite);
-  assert.match(route, /invoiceSourcelessReservationId\(/);
-  assert.match(route, /ISSUE_HAS_INVOICE_ESTIMATE/);
-  assert.match(route, /ISSUE_HAS_BILLED_TIME/);
 });
 
 test('issue deletion is reversible until the retention purge', async () => {
@@ -75,81 +43,6 @@ test('issue deletion is reversible until the retention purge', async () => {
   assert.match(detail, /label: 'Скасувати'/);
   assert.match(detail, /duration: 30000/);
   assert.match(detail, /restoreIssue\(issueId, deletion\.organizationId\)/);
-});
-
-test('actual task time cannot race a source-less estimate invoice reservation', async () => {
-  const [postRoute, itemRoute, taskTimeModel] = await Promise.all([
-    read('../src/app/api/issues/[issueId]/time-logs/route.js'),
-    read('../src/app/api/issues/[issueId]/time-logs/[logId]/route.js'),
-    read('../src/lib/utils/taskTimeLog.mjs'),
-  ]);
-  const reservationRef = postRoute.indexOf(
-    "collection('invoiceEstimateReservations').doc(",
-  );
-  const deterministicId = postRoute.indexOf(
-    'invoiceSourcelessReservationId(organizationId, projectId, issueId)',
-  );
-  const transactionStart = postRoute.indexOf(
-    'await db.runTransaction(async transaction =>',
-  );
-  const reservationRead = postRoute.search(/transaction\.get\(\s*estimateReservationRef,/);
-  const logWrite = postRoute.indexOf(
-    'transaction.create(logRef,',
-    transactionStart,
-  );
-
-  assert.ok(reservationRef > 0 && reservationRef < transactionStart);
-  assert.ok(deterministicId > reservationRef && deterministicId < transactionStart);
-  assert.ok(reservationRead > transactionStart && reservationRead < logWrite);
-  assert.match(
-    taskTimeModel,
-    /reservation\.organizationId[\s\S]*?reservation\.projectId[\s\S]*?reservation\.itemId/,
-  );
-  assert.match(postRoute, /TASK_TIME_ESTIMATE_ALREADY_INVOICED/);
-  assert.doesNotMatch(itemRoute, /invoiceEstimateReservations/);
-  assert.doesNotMatch(itemRoute, /TASK_TIME_ESTIMATE_ALREADY_INVOICED/);
-});
-
-test('YouTrack work-log import locks estimate reservations before changed writes', async () => {
-  const importer = await read('../src/lib/server/youtrackImporter.js');
-  const functionStart = importer.indexOf('async function importWorkItems(');
-  const functionEnd = importer.indexOf(
-    '\nasync function enqueueLinks(',
-    functionStart,
-  );
-  const source = importer.slice(functionStart, functionEnd);
-  const deterministicReservation = source.indexOf(
-    'invoiceSourcelessReservationId(job.organizationId, projectId, issueId)',
-  );
-  const transactionStart = source.indexOf(
-    'db.runTransaction(async transaction =>',
-  );
-  const reservationRead = source.indexOf(
-    'transaction.get(estimateReservationRef)',
-    transactionStart,
-  );
-  const changedDetection = source.indexOf(
-    'youTrackImportedWorkLogMatches(current, row.fields)',
-    reservationRead,
-  );
-  const reservationGuard = source.indexOf(
-    'if (estimateReservationSnapshot.exists)',
-    changedDetection,
-  );
-  const workLogWrite = source.indexOf(
-    'transaction.set(row.ref, row.fields',
-    reservationGuard,
-  );
-
-  assert.ok(
-    deterministicReservation > 0 && deterministicReservation < transactionStart,
-  );
-  assert.ok(reservationRead > transactionStart);
-  assert.ok(changedDetection > reservationRead);
-  assert.ok(reservationGuard > changedDetection && reservationGuard < workLogWrite);
-  assert.match(source, /if \(changedLogs === 0\) return skippedIds/);
-  assert.match(source, /YOUTRACK_TIME_ESTIMATE_ALREADY_INVOICED/);
-  assert.match(source, /YOUTRACK_TIME_ESTIMATE_RESERVATION_SCOPE_CONFLICT/);
 });
 
 test('hierarchy migration revalidates exact link inputs and live endpoints on apply', async () => {
@@ -201,15 +94,4 @@ test('status API error details can never replace the HTTP status code', async ()
   assert.match(route, /NextResponse\.json\(\{\s*\.\.\.details,\s*error,/);
   assert.doesNotMatch(route, /\{ status: requestedStatus \}/);
   assert.match(route, /\{ statusId: requestedStatus \}/);
-});
-
-test('issue creation validates the canonical organization-wide sprint model', async () => {
-  const route = await read('../src/app/api/issues/route.js');
-
-  assert.match(
-    route,
-    /sprintSnap\.data\(\)\.organizationId !== organizationId/g,
-  );
-  assert.match(route, /sprintSnap\.data\(\)\.status === 'completed'/g);
-  assert.doesNotMatch(route, /sprintSnap\.data\(\)\.projectId !== projectId/);
 });

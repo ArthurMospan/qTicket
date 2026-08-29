@@ -87,21 +87,6 @@ test('the cancelled state is written by the server, never by the browser', async
   assert.match(route, /if \(Boolean\(current\.cancelledAt\) === cancelled\)/);
 });
 
-test('work already fixed into an invoice cannot be cancelled out of the record', async () => {
-  const route = await read('../src/app/api/issues/[issueId]/cancel/route.js');
-  // The same two guards deletion has. Cancelling billed work would leave the
-  // invoice standing and quietly stop counting the hours behind it, so the two
-  // would disagree with nothing on screen having changed.
-  assert.match(route, /ISSUE_HAS_INVOICE_ESTIMATE/);
-  assert.match(route, /ISSUE_HAS_BILLED_TIME/);
-  assert.match(route, /ownLogs\.filter\(isBilledTimeLog\)/);
-  // Both name the way out, which is the other action.
-  assert.match(route, /Його можна архівувати, але не скасувати/);
-  // Un-cancelling is never blocked by them: taking a task back into the record
-  // cannot make an invoice wrong.
-  assert.match(route, /if \(cancelled\) \{\s*\n\s*if \(estimateReservationSnap\.exists\)/);
-});
-
 test('a cancelled task leaves every set the numbers are built from', async () => {
   const [issues, analytics, myTasks, home, candidates, search] = await Promise.all([
     read('../src/lib/hooks/useIssues.js'),
@@ -120,24 +105,11 @@ test('a cancelled task leaves every set the numbers are built from', async () =>
   assert.match(home, /withoutCancelledIssues\(/);
   assert.match(candidates, /isCancelledIssue\(issue\)/);
   assert.match(search, /!isCancelledIssue\(item\.data\(\)\)/);
-  // Including the record: `allIssues` is what the timesheet and the invoice
-  // read, and cancelled work is not part of what happened either.
+  // Including the record: `allIssues` is what «Мої завдання» and «Архів» read
+  // when they need what happened, and cancelled work is not part of that either.
   assert.match(home, /const allIssues = useMemo\(\(\) => withoutCancelledIssues\(documents\)/);
   assert.match(home, /const issues = useMemo\(\(\) => withoutArchivedIssues\(allIssues\)/);
   assert.match(analytics, /allIssues: record,/);
-});
-
-test('the hours follow the task out, and calendar time stays put', async () => {
-  const analytics = await read('../src/lib/hooks/useWorkspaceAnalytics.js');
-  // Time logs arrive on their own subscription and the timesheet reads them
-  // straight, without joining back to the issue list. Filtering the issues
-  // alone would leave a cancelled task's hours in every total while the task
-  // itself had left every chart above them.
-  assert.match(analytics, /timeLogs\.filter\(log => !log\?\.issueId \|\| !cancelledIssueIds\.has\(log\.issueId\)\)/);
-  assert.match(analytics, /timeLogs: recordTimeLogs/);
-  // A calendar entry has no `issueId` and belongs to nobody's task, so the
-  // filter has to let it through rather than drop everything unmatched.
-  assert.match(analytics, /!log\?\.issueId \|\|/);
 });
 
 test('«Скасувати» does not have to argue with the button that dismisses it', async () => {

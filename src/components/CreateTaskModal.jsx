@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import { uploadFile } from '@/lib/utils/uploadFile';
 import { hasProjectAccess, hasRecordedTeam, isOnProjectTeam, isPrivilegedRole } from '@/lib/utils/projectAccess.mjs';
-import { Check, Play, Tag as TagIcon } from 'lucide-react';
-import { TaskIcon } from '@/lib/design/icons';
+import { Check, Tag as TagIcon } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import MarkdownEditor from '@/components/ui/Forms/MarkdownEditor';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
@@ -22,8 +21,6 @@ import { Input } from '@/components/ui/Input';
 import { DatePicker } from '@/components/ui/Forms/DatePicker';
 import { fromDateInput } from '@/lib/utils/date';
 import { organizationTimeZone } from '@/lib/utils/timeZone.mjs';
-import Tabs from '@/components/ui/Tabs';
-import AudioTaskPanel from '@/components/AudioTaskPanel';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import Alert from '@/components/ui/Feedback/Alert';
@@ -31,11 +28,6 @@ import Checkbox from '@/components/ui/Forms/Checkbox';
 import ToggleSwitch from '@/components/ui/Forms/ToggleSwitch';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
-import {
-  MAX_ISSUE_ESTIMATE_HOURS,
-  clampIssueEstimateHours,
-  issueEstimateHoursError,
-} from '@/lib/utils/issueEstimate.mjs';
 
 
 
@@ -43,7 +35,7 @@ import {
 // asks for: the composer has no project yet, and a category has a different
 // status in every project, so the status can only be resolved once a project is
 // chosen — and again if it is changed.
-export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, teamMembers = [], projects = null, projectContext = null, sprints = [], initialStatus = null, initialCategory = null, initialAssignees = null, initialSprintId = null, entity = 'incident', clientMode = false }) {
+export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, teamMembers = [], projects = null, projectContext = null, initialStatus = null, initialCategory = null, initialAssignees = null, entity = 'incident', clientMode = false }) {
   const router = useRouter();
   const { currentUser, activeOrg, orgRole } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
@@ -55,14 +47,11 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
   // an «інцидент» — a second name for the record, on the one screen where they
   // had already been given the first.
   const terms = incidentTerms(clientMode);
-  const [mode, setMode] = useState('task');
   const [form, setForm] = useState({
     title: '', description: '', status: 'backlog',
     priority: NO_PRIORITY_ID, type: 'task',
     assignees: [], labelIds: [], dueDate: '',
-    estimateHours: '',
     projectId: projects && projects.length > 0 ? projects[0].id : '',
-    sprintId: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -135,10 +124,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
   const assigneesLockedOut = useMemo(() => assigneesJoiningProject.filter(
     member => !memberReachesProject(member),
   ), [assigneesJoiningProject, memberReachesProject]);
-  const availableSprints = useMemo(
-    () => (sprints || []).filter(sprint => sprint.status !== 'completed'),
-    [sprints],
-  );
   const visibleStatuses = useMemo(
     () => statuses.filter(s => !(activeHiddenCols || []).includes(s.id)),
     [statuses, activeHiddenCols],
@@ -180,15 +165,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
       : [currentUser?.id || currentUser?.uid].filter(Boolean),
     labelIds: [],
     dueDate: '',
-    estimateHours: '',
     projectId: projects?.[0]?.id || projectContext?.id || '',
-    // Планування спринтів на телефоні — це не перетягування картки, а «додати
-    // завдання сюди». Спринт, з якого відкрили діалог, уже обраний.
-    sprintId: initialSprintId || '',
   });
 
   const resetDraft = () => {
-    setMode('task');
     setForm(initialForm());
     setError('');
     setFieldErrors({});
@@ -198,7 +178,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
   };
 
   const resetForAnother = () => {
-    setMode('task');
     // Keep the routing/context choices that make a run of similar tasks fast,
     // but clear the content that would accidentally duplicate real work.
     setForm(current => ({
@@ -208,7 +187,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
       priority: current.priority,
       type: current.type,
       assignees: current.assignees,
-      sprintId: current.sprintId,
     }));
     setError('');
     setFieldErrors({});
@@ -230,11 +208,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
   // happen to change identity. `visibleStatuses` is a useMemo over
   // `activeHiddenCols`, which comes off `projectContext` — and the project page
   // builds that as a fresh object literal every render. With those in the
-  // dependency list the reset ran on ordinary re-renders, and `setMode('task')`
-  // pulled the tab back to «Завдання» mid-work: that unmounts AudioTaskPanel,
-  // so a set of AI-generated drafts disappeared with it. The ref makes the
-  // open transition the trigger; the dependencies stay so the reset still reads
-  // current values on the render that opens it.
+  // dependency list the reset ran on ordinary re-renders and wiped a draft
+  // somebody was still typing. The ref makes the open transition the trigger;
+  // the dependencies stay so the reset still reads current values on the
+  // render that opens it.
   const hasOpened = useRef(false);
   useEffect(() => {
     if (!isOpen) {
@@ -247,7 +224,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
       resetDraft();
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, initialAssignees, initialStatus, initialSprintId, categoryStatusId, visibleStatuses, projects]);
+  }, [isOpen, initialAssignees, initialStatus, categoryStatusId, visibleStatuses, projects]);
 
   useEffect(() => {
     if (isOpen && form.status) {
@@ -261,12 +238,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
       }
     }
   }, [categoryStatusId, form.projectId, form.status, isOpen, visibleStatuses]);
-
-  useEffect(() => {
-    if (isOpen && form.sprintId && !availableSprints.some(sprint => sprint.id === form.sprintId)) {
-      queueMicrotask(() => setForm(current => ({ ...current, sprintId: '' })));
-    }
-  }, [availableSprints, form.sprintId, isOpen]);
 
   useEffect(() => {
     if (isOpen && !creatableTypes.some(type => type.id === form.type)) {
@@ -338,8 +309,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
     e.preventDefault();
     const nextErrors = {};
     if (!form.title.trim()) nextErrors.title = incidentComposer ? terms.composerSubjectRequired : 'Вкажіть назву завдання';
-    const estimateError = clientMode || incidentComposer ? '' : issueEstimateHoursError(form.estimateHours);
-    if (estimateError) nextErrors.estimateHours = estimateError;
     if (projects && projects.length > 0 && !form.projectId) {
       nextErrors.projectId = incidentComposer ? 'Оберіть клієнта' : 'Оберіть проєкт';
     }
@@ -378,8 +347,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
             dueDate: form.dueDate
               ? fromDateInput(form.dueDate, { endOfDay: true, timeZone })
               : null,
-            estimateMinutes: form.estimateHours ? Math.round(parseFloat(form.estimateHours) * 60) : 0,
-            sprintId: form.sprintId || null,
             // Only ever true because somebody ticked the box above. The server
             // writes `project.team` on this flag and on nothing else.
             addAssigneesToProjectTeam: addToProjectTeam && assigneesJoiningProject.length > 0,
@@ -416,9 +383,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
       title={incidentComposer ? terms.composerTitle : 'Нове завдання'}
       size="lg"
       bodyPadding="flush"
-      isDirty={mode === 'task' && draftTouched}
+      isDirty={draftTouched}
       closeConfirmation="Закрити форму й втратити незбережені зміни?"
-      footer={mode === 'task' ? (
+      footer={(
         <>
           {!clientMode && (
             <ToggleSwitch
@@ -443,27 +410,8 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
             {loading ? 'Створення...' : incidentComposer ? terms.composerSubmit : 'Створити завдання'}
           </Button>
         </>
-      ) : undefined}
+      )}
     >
-        {!clientMode && !incidentComposer && (
-        <div className="border-b border-line px-5 py-3 sm:px-7">
-          <Tabs
-            tabs={[
-              { id: 'task', label: 'Інцидент', icon: TaskIcon },
-              {
-                id: 'audio',
-                label: 'Аудіо-інцидент (AI)',
-                icon: Play,
-              },
-            ]}
-            activeTab={mode}
-            onTabChange={setMode}
-            composition="pane-switch"
-          />
-        </div>
-        )}
-
-        {mode === 'task' ? (
         <form
           id="create-task-form"
           onSubmit={handleSubmit}
@@ -598,20 +546,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                 }))}
               />
             </div>
-            {!incidentComposer && availableSprints.length > 0 && (
-              <div className="flex flex-col gap-[6px]">
-                <Label>Спринт</Label>
-                <Select
-                  value={form.sprintId}
-                  onChange={val => set('sprintId', val)}
-                  options={[
-                    { value: '', label: 'Без спринта' },
-                    ...availableSprints.map(s => ({ value: s.id, label: s.name }))
-                  ]}
-                  placeholder="Оберіть спринт..."
-                />
-              </div>
-            )}
             <div className="flex flex-col gap-[6px]">
                 <Label>{incidentComposer ? 'Термін вирішення' : 'Дедлайн'}</Label>
               <DatePicker
@@ -620,23 +554,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
                 placeholder={incidentComposer ? 'Без терміну' : 'Без дедлайну'}
               />
             </div>
-            {!incidentComposer && <FormGroup label="Оцінка (год)" error={fieldErrors.estimateHours}>
-              <Input
-                type="number"
-                min="0"
-                max={MAX_ISSUE_ESTIMATE_HOURS}
-                step="0.5"
-                value={form.estimateHours}
-                onChange={event => {
-                  const next = clampIssueEstimateHours(event.target.value);
-                  setForm(current => ({ ...current, estimateHours: next.value }));
-                  setDraftTouched(true);
-                  setFieldErrors(current => ({ ...current, estimateHours: next.error }));
-                }}
-                placeholder="0"
-                error={Boolean(fieldErrors.estimateHours)}
-              />
-            </FormGroup>}
           </div>
           )}
 
@@ -711,17 +628,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, tea
           )}
 
         </form>
-        ) : (
-          <div className="flex-1 overflow-y-auto p-5 sm:p-7">
-            <AudioTaskPanel
-              projects={projects || []}
-              projectContext={projectContext}
-              teamMembers={teamMembers}
-              onSubmit={onSubmit}
-              onFinished={onClose}
-            />
-          </div>
-        )}
     </Dialog>
   );
 }

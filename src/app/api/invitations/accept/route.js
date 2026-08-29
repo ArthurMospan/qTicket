@@ -90,13 +90,6 @@ export async function POST(request) {
         role,
         joinedAt: FieldValue.serverTimestamp(),
       }, { merge: false });
-      batch.set(db.collection('organizations').doc(organizationId)
-        .collection('memberRates').doc(uid), {
-        userId: uid,
-        hourlyRate: 0,
-        updatedBy: uid,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
       batch.update(invitationDoc.ref, {
         status: 'accepted',
         acceptedBy: uid,

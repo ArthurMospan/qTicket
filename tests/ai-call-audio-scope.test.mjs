@@ -12,8 +12,8 @@ import { organizationIdFromPath } from '../src/lib/utils/uploadPaths.mjs';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-// Те, що робить маршрут, відтворене тут із того самого запису URL, який пише
-// AudioTaskPanel. Якби це жило лише в маршруті, перевірити його без мережі
+// Те, що робить маршрут, відтворене тут із того самого запису URL, який він
+// приймає на вході. Якби це жило лише в маршруті, перевірити його без мережі
 // було б нічим.
 function storagePathOf(url, cloud) {
   const prefix = `https://res.cloudinary.com/${cloud}/`;
@@ -48,13 +48,6 @@ test('чужа хмара, коренева тека і сміття не даю
   ]) {
     assert.equal(organizationIdFromPath(storagePathOf(candidate, 'demo')), '');
   }
-});
-
-test('URL, який пише панель, читається саме тим записом, який чекає маршрут', async () => {
-  const panel = await read('src/components/AudioTaskPanel.jsx');
-  // Тека складається тут; якщо вона зміниться, перевірка на вході має змінитись
-  // разом із нею, а не мовчки почати відхиляти всі завантаження.
-  assert.match(panel, /`quickteam\/organizations\/\$\{activeOrgId\}\/ai-calls`/);
 });
 
 test('маршрут звіряє теку з організацією запиту, а не лише хост', async () => {

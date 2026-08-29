@@ -155,7 +155,7 @@ export async function PATCH(request, context) {
     if (action === 'reactivate') {
       return reactivateMember(organizationId, memberId, authorization);
     }
-    if (!['role', 'position', 'rate'].includes(action)) {
+    if (!['role', 'position'].includes(action)) {
       return NextResponse.json({ error: 'Invalid member update' }, { status: 400 });
     }
     // An administrator may promote and demote between member and admin, as in
@@ -177,15 +177,9 @@ export async function PATCH(request, context) {
     if (action === 'position' && (positionId.length > 120 || positionId.includes('/'))) {
       return NextResponse.json({ error: 'Invalid member position' }, { status: 400 });
     }
-    const hourlyRate = Number(body?.hourlyRate);
-    if (action === 'rate' && (!Number.isFinite(hourlyRate) || hourlyRate < 0 || hourlyRate > 1_000_000)) {
-      return NextResponse.json({ error: 'Invalid hourly rate' }, { status: 400 });
-    }
-
     const db = getAdminDb();
     const orgRef = db.collection('organizations').doc(organizationId);
     const membershipRef = db.collection('orgMemberships').doc(`${organizationId}_${memberId}`);
-    const rateRef = orgRef.collection('memberRates').doc(memberId);
     await db.runTransaction(async transaction => {
       const membershipSnap = await transaction.get(membershipRef);
       if (!membershipSnap.exists) {
@@ -208,14 +202,6 @@ export async function PATCH(request, context) {
       const now = FieldValue.serverTimestamp();
       if (action === 'role') transaction.update(membershipRef, { role: body.role, updatedAt: now });
       if (action === 'position') transaction.update(membershipRef, { positionId, updatedAt: now });
-      if (action === 'rate') {
-        transaction.set(rateRef, {
-          userId: memberId,
-          hourlyRate,
-          updatedBy: authorization.user.uid,
-          updatedAt: now,
-        });
-      }
       transaction.update(orgRef, {
         memberDirectoryVersion: FieldValue.increment(1),
       });

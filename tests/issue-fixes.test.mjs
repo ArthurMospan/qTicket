@@ -100,11 +100,10 @@ test('QUI-81 shows newly created board tasks first', async () => {
 });
 
 test('QUI-80 gives every FilterBar selector a semantic icon role', async () => {
-  const [select, project, my, analytics] = await Promise.all([
+  const [select, project, my] = await Promise.all([
     read('../src/components/ui/Select.jsx'),
     read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
     read('../src/app/(app)/my/page.js'),
-    read('../src/app/(app)/analytics/page.js'),
   ]);
 
   for (const role of ['type', 'priority', 'date', 'member', 'project', 'sort']) {
@@ -113,13 +112,11 @@ test('QUI-80 gives every FilterBar selector a semantic icon role', async () => {
   assert.match(project, /filterRole="status"[\s\S]{0,120}value=\{scope\}/);
   assert.match(project, /filterRole="member"[\s\S]{0,120}value=\{assigneeFilter\}/);
   assert.match(project, /filterRole="priority"[\s\S]{0,120}value=\{priorityFilter\}/);
-  assert.doesNotMatch(project, /filterRole="sprint"/);
   assert.match(my, /filterRole="status"[\s\S]{0,100}value=\{filters\.status\}/);
   assert.match(my, /filterRole="member"[\s\S]{0,100}value=\{filters\.assigned\}/);
   assert.match(my, /filterRole="priority"[\s\S]{0,100}value=\{filters\.priority\}/);
   assert.match(my, /filterRole="date"[\s\S]{0,100}value=\{filters\.period\}/);
-  assert.doesNotMatch(my, /filterRole="sprint"/);
-  assert.match(analytics, /filterRole="type"[\s\S]{0,100}value=\{typeFilter\}/);
+  assert.match(my, /filterRole="type"[\s\S]{0,100}value=\{filters\.type\}/);
 });
 
 test('QUI-79 reuses the chat attachment viewer on issue details', async () => {
@@ -131,53 +128,10 @@ test('QUI-79 reuses the chat attachment viewer on issue details', async () => {
   assert.doesNotMatch(source, /bg-black\/85 backdrop-blur-sm/);
 });
 
-test('QUI-78 uses compact billing rows and one selection control', async () => {
-  const billing = await read('../src/components/workspace/BillingTab.jsx');
-
-  assert.match(billing, /data-ui-surface="billing-item"[\s\S]{0,100}data-ui-padding="compact-row"/);
-  assert.match(billing, /composition="billing-selection"/);
-  assert.doesNotMatch(billing, />Позиції:<\/span>/);
-  assert.doesNotMatch(billing, /\(\{checkedCount\} обрано\)/);
-  assert.match(billing, /filterRole="status"[\s\S]{0,100}value=\{filterStatus\}/);
-  assert.match(billing, /statusLabel=\{statusLabelOf\(iss\.columnId \|\| iss\.status\)\}/);
-});
-
-test('QUI-72 never submits a completed or stale sprint from Create Task', async () => {
-  const source = await read('../src/components/CreateTaskModal.jsx');
-
-  assert.match(
-    source,
-    /\(sprints \|\| \[\]\)\.filter\(sprint => sprint\.status !== 'completed'\)/,
-  );
-  assert.match(
-    source,
-    /form\.sprintId && !availableSprints\.some\(sprint => sprint\.id === form\.sprintId\)/,
-  );
-  assert.match(source, /\.\.\.availableSprints\.map\(s => \(\{ value: s\.id, label: s\.name \}\)\)/);
-  assert.doesNotMatch(source, /\.\.\.sprints\.map\(s => \(\{ value: s\.id, label: s\.name \}\)\)/);
-});
-
-test('QUI-71 uses shared date and time controls throughout the calendar event form', async () => {
-  const [dialog, kit, timePicker, datePicker] = await Promise.all([
-    read('../src/components/workspace/calendar/CalendarEventDialog.jsx'),
-    readKitShowcase(),
-    read('../src/components/ui/Forms/TimePicker.jsx'),
-    read('../src/components/ui/Forms/DatePicker.jsx'),
-  ]);
-
-  assert.doesNotMatch(dialog, /<Input type="(?:date|time)"/);
-  // A type with no duration of its own asks for one moment rather than a range,
-  // so the start controls label themselves accordingly; the end pair only
-  // renders for types that have an end.
-  assert.match(dialog, /<DatePicker[\s\S]{0,220}aria-label=\{hasDuration \? 'Дата початку' : 'Дата'\}/);
-  assert.match(dialog, /<DatePicker[\s\S]{0,220}aria-label="Дата завершення"/);
-  assert.match(dialog, /<TimePicker[\s\S]{0,220}aria-label=\{hasDuration \? 'Час початку' : 'Час'\}/);
-  assert.match(dialog, /<TimePicker[\s\S]{0,220}aria-label="Час завершення"/);
-  assert.match(dialog, /value=\{form\.recurrenceUntil\}[\s\S]{0,120}minDate=\{form\.startDate\}/);
-  assert.match(datePicker, /disabled=\{Boolean\(isBeforeMinimum\)\}/);
-  assert.match(timePicker, /data-ui-size=\{size\}/);
-  assert.match(kit, /title="Date & Time Pickers"[\s\S]{0,900}<TimePicker/);
-});
+// QUI-71 pinned the calendar event form to the shared date and time controls.
+// `TimePicker` had no reader left once the time ledger was deleted, so the kit
+// deleted it and the assertion has no subject; the DatePicker half of the same
+// rule is still pinned by the tests above.
 
 // The filter half of this test lived on the planning calendar and went with it.
 // What it was guarding is still worth pinning: the label comes from the shared

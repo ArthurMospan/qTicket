@@ -6,7 +6,6 @@ import {
   analyticsRollupDeltasFor,
   commitAnalyticsRollupDeltas,
 } from '@/lib/server/analyticsRollups';
-import { isBilledTimeLog } from '@/lib/utils/issueDeletion.mjs';
 
 const PURGE_BATCH_SIZE = 25;
 
@@ -30,7 +29,6 @@ async function loadIssueRelationsAndTimeLogs(db, issue) {
       .get(),
   ]);
   return {
-    billedLogs: timeLogs.docs.filter(document => isBilledTimeLog(document.data())),
     timeLogs: timeLogs.docs.map(document => ({ ...document.data(), id: document.id })),
     refs: [
       ...sourceLinks.docs
@@ -61,17 +59,7 @@ async function purgeIssueTombstone(tombstoneDocument, nowMs) {
     return { purged: 0, failed: 1, related: 0 };
   }
 
-  // Accounting evidence is immutable. The DELETE route checks this before the
-  // tombstone is created; this second guard makes the final cascade fail closed
-  // if corrupt or externally-written evidence appears during retention.
   const related = await loadIssueRelationsAndTimeLogs(db, issue);
-  if (related.billedLogs.length > 0) {
-    await tombstoneDocument.ref.set({
-      purgeError: 'ISSUE_HAS_BILLED_TIME',
-      purgeFailedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
-    return { purged: 0, failed: 1, related: 0 };
-  }
 
   const issueRef = db.collection('issues').doc(issue.id);
   const projectRef = db.collection('projects').doc(issue.projectId);

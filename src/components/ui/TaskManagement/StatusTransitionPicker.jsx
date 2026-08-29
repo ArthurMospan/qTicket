@@ -21,7 +21,6 @@ import IssueCard from '@/components/workspace/IssueCard';
  * @param {object[]} props.issueLinks Links used to show whether the task is blocked.
  * @param {object[]} props.members Organization members shown on the task card.
  * @param {object[]} props.labels Organization labels shown on the task card.
- * @param {object[]} props.sprints Organization sprints shown on the task card.
  * @param {(statusId: string) => void} props.onSelect Confirms the exact destination status.
  * @param {() => void} props.onClose Cancels the pending move.
  * @param {boolean} props.busy Whether the status update is being saved.
@@ -36,7 +35,6 @@ export default function StatusTransitionPicker({
   issueLinks = [],
   members = [],
   labels = [],
-  sprints = [],
   onSelect,
   onClose,
   busy = false,
@@ -142,7 +140,6 @@ export default function StatusTransitionPicker({
                           issueLinks={issueLinks}
                           members={members}
                           labels={labels}
-                          sprints={sprints}
                           projectId={issue?.projectId || project?.id}
                           projectName={project?.name}
                           showProjectName

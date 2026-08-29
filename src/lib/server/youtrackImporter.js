@@ -4,11 +4,6 @@ import 'server-only';
 import { createHash, randomUUID } from 'node:crypto';
 import { v2 as cloudinary } from 'cloudinary';
 import { getAdminDb } from '@/lib/server/firebaseAdmin';
-import {
-  organizationRollupTimeZone,
-  writeAnalyticsRollupDeltas,
-} from '@/lib/server/analyticsRollups';
-import { AnalyticsRollupDeltas } from '@/lib/utils/analyticsRollups.mjs';
 import { resolveProjectIssuePrefixInTransaction } from '@/lib/server/issueKeys';
 import { recountProjectIssueCounts } from '@/lib/server/projectIssueCounts';
 import {
@@ -22,7 +17,6 @@ import {
   suggestAvailableIssuePrefix,
 } from '@/lib/utils/issueKeys.mjs';
 import {
-  fieldMinutes,
   fieldPresentation,
   fieldTimestamp,
   filterYouTrackIssuesByStatuses,
@@ -47,12 +41,6 @@ import {
   normalizeStoredIssueLinks,
 } from '@/lib/utils/issueRelations.mjs';
 import { resolveNewIssueType } from '@/lib/utils/issueCreationModel.mjs';
-import { isBilledTimeLog } from '@/lib/utils/issueDeletion.mjs';
-import {
-  isTaskEstimateReservationIdentity,
-  taskTimeLogMirrorTransition,
-} from '@/lib/utils/taskTimeLog.mjs';
-import { invoiceSourcelessReservationId } from '@/lib/server/invoicePayload.mjs';
 import {
   evaluateIssueStatusTransition,
   issueBlockLinkStatusConflict,
@@ -582,7 +570,6 @@ async function upsertIssue({ job, sourceProject, issue, targetProjectId, attachm
   const watcherActors = (issue.watchers?.users || []).map(user => actorFor(user, job));
   const tags = sourceTags(issue);
   const dueDate = fieldTimestamp(youTrackField(issue, 'Due Date'));
-  const estimateMinutes = fieldMinutes(youTrackField(issue, 'Estimation'));
   const sourceCreatedAt = timestamp(issue.created, Timestamp.now());
   const sourceUpdatedAt = timestamp(issue.updated, sourceCreatedAt);
   const currentImportAt = timestamp(job.createdAt, Timestamp.now());
@@ -593,7 +580,6 @@ async function upsertIssue({ job, sourceProject, issue, targetProjectId, attachm
     assigneeIds: assigneeActors.filter(actor => !actor.external).map(actor => actor.id).slice(0, 20),
     watcherIds: watcherActors.filter(actor => !actor.external).map(actor => actor.id).slice(0, 50),
     dueDate: dueDate ? timestamp(dueDate) : null,
-    estimateMinutes,
     attachments,
     reporterId: reporter.id,
     reporterName: reporter.name,
@@ -872,11 +858,7 @@ async function upsertIssue({ job, sourceProject, issue, targetProjectId, attachm
       organizationId: job.organizationId,
       projectId: targetProjectId,
       issueKey,
-      sprintId: null,
       parentIssueId: null,
-      spentMinutes: 0,
-      spentMinutesMirrorVersion: 1,
-      timeLogMutationVersion: 0,
       // One sign for the whole collection: a task nobody has positioned yet
       // sorts above the ones somebody has, newest first. `+next` put an
       // imported task below every card on the board instead, and mixed the two
@@ -985,228 +967,6 @@ async function importComments({ job, issueId, projectId, comments }) {
   return actors;
 }
 
-async function importWorkItems({
-  job,
-  issueId,
-  projectId,
-  sourceKey = '',
-  sourceTitle = '',
-  workItems,
-}) {
-  const normalizedItems = workItems.map(item => ({
-    item,
-    spentMinutes: Math.round(Number(item?.duration?.minutes)),
-  }));
-  const validItems = normalizedItems.filter(({ item, spentMinutes }) => (
-    item?.id
-    && Number.isSafeInteger(spentMinutes)
-    && spentMinutes > 0
-    && spentMinutes <= 525_600
-  ));
-  const invalidWorkItemCount = normalizedItems.length - validItems.length;
-  const invalidWarnings = invalidWorkItemCount > 0
-    ? [
-      `Пропущено ${invalidWorkItemCount} ${plural(invalidWorkItemCount, ['запис', 'записи', 'записів'])} часу YouTrack з некоректною тривалістю або ID`,
-    ]
-    : [];
-  if (!validItems.length) {
-    return { actors: [], warnings: invalidWarnings };
-  }
-  const db = getAdminDb();
-  const rollupTimeZone = await organizationRollupTimeZone(db, job.organizationId);
-  const issueRef = db.collection('issues').doc(issueId);
-  const projectRef = db.collection('projects').doc(projectId);
-  const estimateReservationRef = db.collection('invoiceEstimateReservations').doc(
-    invoiceSourcelessReservationId(job.organizationId, projectId, issueId),
-  );
-  const actors = [];
-  const rows = validItems.map(({ item, spentMinutes }) => {
-    const actor = actorFor(item.author || item.creator, job);
-    actors.push(actor);
-    return {
-      id: String(item.id),
-      ref: db.collection('timeLogs')
-        .doc(`yt_${hashId(job.connectionId, item.id).slice(0, 36)}`),
-      fields: {
-        issueId,
-        projectId,
-        sourceKey: String(sourceKey || '').slice(0, 120),
-        sourceTitle: String(sourceTitle || '').slice(0, 500),
-        userId: actor.id,
-        organizationId: job.organizationId,
-        spentMinutes,
-        description: String(item.text || item.type?.name || '').slice(0, 5_000),
-        loggedAt: timestamp(item.date || item.created, Timestamp.now()),
-        source: 'youtrack',
-        sourceId: String(item.id),
-        externalActor: actor.external ? actor : null,
-      },
-    };
-  });
-  const billedSourceIds = new Set();
-
-  for (let offset = 0; offset < rows.length; offset += 350) {
-    const chunk = rows.slice(offset, offset + 350);
-    const skipped = await db.runTransaction(async transaction => {
-      const [
-        issueSnapshot,
-        projectSnapshot,
-        estimateReservationSnapshot,
-        ...timeLogSnapshots
-      ] = await Promise.all([
-        transaction.get(issueRef),
-        transaction.get(projectRef),
-        transaction.get(estimateReservationRef),
-        ...chunk.map(row => transaction.get(row.ref)),
-      ]);
-      if (
-        !issueSnapshot.exists
-        || issueSnapshot.data().organizationId !== job.organizationId
-        || issueSnapshot.data().projectId !== projectId
-        || issueSnapshot.data().deletionPending === true
-      ) {
-        throw new Error('Задача була змінена або видаляється під час імпорту часу');
-      }
-      if (
-        !projectSnapshot.exists
-        || projectSnapshot.data().organizationId !== job.organizationId
-        || projectSnapshot.data().deletionPending === true
-        || projectSnapshot.data().status === 'archived'
-      ) {
-        throw new Error('Проєкт був змінений або видаляється під час імпорту часу');
-      }
-
-      const issue = issueSnapshot.data();
-      const skippedIds = [];
-      let spentMinutesDelta = 0;
-      const changedRows = [];
-      chunk.forEach((row, index) => {
-        const currentSnapshot = timeLogSnapshots[index];
-        const current = currentSnapshot.exists ? currentSnapshot.data() : null;
-        if (
-          current
-          && (
-            current.organizationId !== job.organizationId
-            || current.projectId !== projectId
-            || current.issueId !== issueId
-          )
-        ) {
-          throw new Error(`Запис часу ${row.id} вже належить іншій задачі`);
-        }
-        if (current && isBilledTimeLog(current)) {
-          skippedIds.push(row.id);
-          return;
-        }
-        if (
-          current
-          && (
-            !Number.isSafeInteger(current.spentMinutes)
-            || current.spentMinutes <= 0
-            || current.spentMinutes > 525_600
-          )
-        ) {
-          throw new Error(
-            `Запис часу ${row.id} потребує звірки перед імпортом`,
-          );
-        }
-        if (youTrackImportedWorkLogMatches(current, row.fields)) return;
-        spentMinutesDelta += row.fields.spentMinutes - (current?.spentMinutes || 0);
-        changedRows.push({ ...row, previous: current });
-      });
-
-      const changedLogs = changedRows.length;
-      if (changedLogs === 0) return skippedIds;
-      if (estimateReservationSnapshot.exists) {
-        const reservation = estimateReservationSnapshot.data();
-        if (!isTaskEstimateReservationIdentity(reservation, {
-          issueId,
-          organizationId: job.organizationId,
-          projectId,
-        })) {
-          const error = new Error(
-            'Резерв оцінки задачі має некоректну область. Потрібна звірка рахунку перед імпортом часу',
-          );
-          error.code = 'YOUTRACK_TIME_ESTIMATE_RESERVATION_SCOPE_CONFLICT';
-          throw error;
-        }
-        const error = new Error(
-          'Оцінку цієї задачі вже включено до рахунку, тому імпортувати новий або змінений фактичний час не можна',
-        );
-        error.code = 'YOUTRACK_TIME_ESTIMATE_ALREADY_INVOICED';
-        throw error;
-      }
-
-      let initializeSpentMinutesMirror = false;
-      if (issue.spentMinutesMirrorVersion !== 1) {
-        const existingLogs = await transaction.get(
-          db.collection('timeLogs')
-            .where('issueId', '==', issueId)
-            .limit(1),
-        );
-        if (!existingLogs.empty) {
-          throw new Error(
-            'Історичні записи часу треба звірити перед імпортом нових',
-          );
-        }
-        initializeSpentMinutesMirror = true;
-      }
-
-      const mirrorTransition = taskTimeLogMirrorTransition({
-        currentSpentMinutes: issue.spentMinutes,
-        spentMinutesDelta,
-        initialize: initializeSpentMinutesMirror,
-      });
-      if (!mirrorTransition) {
-        throw new Error(
-          'Підсумок часу завдання потребує звірки перед імпортом',
-        );
-      }
-      // An import is an edit like any other, so the daily totals move by the
-      // difference: the row as it stood is taken out and the row as imported is
-      // put in. A re-import of the same worklog is not a second contribution —
-      // it does not reach here at all, because an unchanged row is skipped above.
-      const rollupDeltas = new AnalyticsRollupDeltas(rollupTimeZone);
-      const issueCancelled = Boolean(issue.cancelledAt);
-      changedRows.forEach(row => {
-        if (row.previous) {
-          rollupDeltas.add(row.previous, -1, { cancelled: issueCancelled });
-        }
-        rollupDeltas.add(row.fields, 1, { cancelled: issueCancelled });
-        transaction.set(row.ref, row.fields, { merge: true });
-      });
-      writeAnalyticsRollupDeltas({ writer: transaction, db, deltas: rollupDeltas });
-      transaction.update(issueRef, {
-        spentMinutes: initializeSpentMinutesMirror
-          ? mirrorTransition.next
-          : FieldValue.increment(spentMinutesDelta),
-        spentMinutesMirrorVersion: 1,
-        timeLogMutationVersion: FieldValue.increment(1),
-      });
-      transaction.update(projectRef, {
-        timeLogImportVersion: FieldValue.increment(1),
-        invoiceMutationVersion: FieldValue.increment(1),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      return skippedIds;
-    });
-    skipped.forEach(id => billedSourceIds.add(id));
-  }
-
-  return {
-    actors,
-    warnings: [
-      ...invalidWarnings,
-      ...(billedSourceIds.size > 0
-        ? [
-        `Не оновлено ${billedSourceIds.size} виставлених у рахунок записів часу YouTrack: ${
-          [...billedSourceIds].slice(0, 20).join(', ')
-        }`,
-          ]
-        : []),
-    ],
-  };
-}
-
 async function enqueueLinks(jobRef, job, sourceIssue, links) {
   const candidateRows = links.flatMap(link => (link.issues || []).flatMap(target => {
     if (!target?.id || String(target.id) === String(sourceIssue.id)) return [];
@@ -1288,9 +1048,8 @@ async function processIssue(jobRef, job, queueItem) {
   const existingIssue = issueLink.exists
     ? await getAdminDb().collection('issues').doc(issueLink.data().quickTeamId).get()
     : null;
-  const [comments, workItems, links, attachmentResult] = await Promise.all([
+  const [comments, links, attachmentResult] = await Promise.all([
     client.comments(issue.id),
-    client.workItems(issue.id),
     client.links(issue.id),
     importAttachments({
       client,
@@ -1306,21 +1065,14 @@ async function processIssue(jobRef, job, queueItem) {
     targetProjectId,
     attachments: attachmentResult.attachments,
   });
-  const [commentActors, workItemResult] = await Promise.all([
-    importComments({
-      job,
-      issueId: saved.issueId,
-      projectId: targetProjectId,
-      comments,
-    }),
-    importWorkItems({ job, issueId: saved.issueId, projectId: targetProjectId,
-      sourceKey: issue.idReadable || '',
-      sourceTitle: issue.summary || '',
-      workItems,
-    }),
-  ]);
+  const commentActors = await importComments({
+    job,
+    issueId: saved.issueId,
+    projectId: targetProjectId,
+    comments,
+  });
   await Promise.all([
-    saveExternalActors(job, [...saved.actors, ...commentActors, ...workItemResult.actors]),
+    saveExternalActors(job, [...saved.actors, ...commentActors]),
     enqueueLinks(jobRef, job, issue, links),
   ]);
   return {
@@ -1329,7 +1081,6 @@ async function processIssue(jobRef, job, queueItem) {
     warnings: [
       ...attachmentResult.warnings,
       ...(saved.warnings || []),
-      ...workItemResult.warnings,
     ],
   };
 }

@@ -17,9 +17,6 @@ test('a hook that has not subscribed yet reports loading, not emptiness', async 
   const cases = [
     ['../src/lib/hooks/useIssues.js', /issuesLoading \|\| authLoading \|\| orgLoading \|\| projectsLoading \|\| !currentUserId/],
     ['../src/lib/hooks/useCalendarEvents.js', /setLoading\(Boolean\(authLoading \|\| orgLoading\)\);/],
-    // Two subscriptions, two flags: the shared task set and the windowed time
-    // logs move on different clocks, and `loading` is their union.
-    ['../src/lib/hooks/useWorkspaceAnalytics.js', /setTimeLogsLoading\(!activeOrgId && Boolean\(authLoading \|\| orgLoading\)\);/],
     ['../src/lib/hooks/useAllMyTasks.js', /const loading = issuesLoading \|\| Boolean\(authLoading \|\| orgLoading \|\| projectsLoading\);/],
   ];
   for (const [file, pattern] of cases) {
@@ -61,12 +58,6 @@ test('an unloaded membership list is not treated as a denied organization', asyn
     guard.indexOf('if (orgLoading || !orgDirectoryVerified)') < guard.indexOf(denial),
     'the loading guard must come before the denial',
   );
-});
-
-test('the member page waits for the member list before saying "not found"', async () => {
-  const page = await read('../src/app/(app)/analytics/team/[memberId]/page.js');
-  assert.match(page, /loading: membersLoading/);
-  assert.match(page, /if \(!urlReady \|\| loading \|\| calendarLoading \|\| membersLoading\)/);
 });
 
 test('projects from the previous organization are cleared before a new scope subscribes', async () => {

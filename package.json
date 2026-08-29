@@ -39,7 +39,6 @@
     "migrate:issue-keys": "node scripts/migrate-issue-keys.mjs",
     "migrate:api-keys": "node scripts/migrate-api-keys.mjs",
     "cleanup:rate-limits": "node scripts/cleanup-rate-limits.mjs",
-    "reconcile:issue-time": "node --env-file-if-exists=.env.local scripts/reconcile-issue-spent-minutes.mjs",
     "backfill:analytics-rollups": "node --env-file-if-exists=.env.local scripts/backfill-analytics-rollups.mjs",
     "backfill:project-issue-counts": "node --env-file-if-exists=.env.local scripts/backfill-project-issue-counts.mjs",
     "trim:import-metadata": "node --env-file-if-exists=.env.local scripts/trim-issue-import-metadata.mjs"

@@ -37,7 +37,10 @@ test('the accessibility contract holds', () => {
 // real bug in the checker that reported a plausible number instead of failing.
 test('the audit still sees what it is supposed to see', () => {
   assert.ok(committed.totals.files > 150, 'the audit walks the whole workspace and the kit');
-  assert.ok(committed.totals.elements > 3000, 'it reads every JSX element in them');
+  // 3000 → 2800: the analytics, timesheet and invoice screens took a few
+  // hundred elements with them. The floor still catches a checker that stopped
+  // walking, which is what it is for.
+  assert.ok(committed.totals.elements > 2800, 'it reads every JSX element in them');
 
   // Counting any capitalised child as text made every `<button><ChevronRight/>`
   // look named: 12 findings where there were 30.

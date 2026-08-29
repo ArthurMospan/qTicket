@@ -42,28 +42,8 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function ActiveTimerBadge() {
-  const elapsed = useWorkspaceStore(state => state.timerElapsed);
-  const formatElapsed = useWorkspaceStore(state => state.formatElapsed);
-  const label = formatElapsed(elapsed);
 
-  return (
-    <Pill
-      tone="danger"
-      size="sm"
-      shape="badge"
-      weight="medium"
-      title={`Таймер запущено: ${label}`}
-      aria-label={`Таймер запущено: ${label}`}
-    >
-      {label}
-    </Pill>
-  );
-}
-
-
-
-// `showProjectName` is opt-in: cross-project lists (Мої завдання, спринти) need
+// `showProjectName` is opt-in: cross-project lists (Мої інциденти) need
 // the project after the key to tell two identical-looking cards apart, but on a
 // project's own board every card would repeat the project you are already in.
 // `projectName` is still always accepted — the issue key prefix is derived from
@@ -71,7 +51,7 @@ function ActiveTimerBadge() {
 // `showStatusName` is for a column that is not a status: on «Мої завдання» the
 // columns are the five shared categories, so a card in «У роботі» could be in
 // «Код-ревʼю» or in «QA» and the column no longer says which.
-export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], sprints = [], index, projectId, projectName, showProjectName = false, showStatusName = false, isTimerActive, isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
+export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], index, projectId, projectName, showProjectName = false, showStatusName = false, isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
   const router   = useRouter();
   const { currentUser, projects = [], activeOrg } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
@@ -305,10 +285,8 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
             </div>
           )}
 
-          {/* Row 4: Sprint + Type + Labels (Using strict UI Kit Tag atom styling) */}
+          {/* Row 4: Type + Labels (Using strict UI Kit Tag atom styling) */}
           <div className="flex flex-wrap gap-[6px] mb-[12px] items-center">
-            {isTimerActive && <ActiveTimerBadge />}
-
             {typeObj && (
               <TypeBadge
                 label={typeLabel}
@@ -340,13 +318,6 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
               >
                 <Lock size={10} />
                 Заблоковано
-              </Pill>
-            )}
-
-            {/* Sprint: Standard gray badge without emoji */}
-            {issue.sprintId && (
-              <Pill tone="neutral" size="sm" shape="badge" weight="medium">
-                {sprints.find(s => s.id === issue.sprintId)?.name || 'Спринт'}
               </Pill>
             )}
 

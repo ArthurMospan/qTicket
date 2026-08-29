@@ -1,4 +1,4 @@
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
@@ -357,8 +357,7 @@ export async function DELETE(request, context) {
     if (loaded.error) return NextResponse.json({ error: loaded.error }, { status: loaded.status });
     const { db, ref, project } = loaded;
 
-    // Accounting documents are audit evidence, never cascade garbage. The
-    // project lock makes this guard conflict with invoice/calendar mutations
+    // The project lock makes this guard conflict with calendar mutations
     // before the deletion marker closes all later creation paths.
     await db.runTransaction(async transaction => {
       const current = await transaction.get(ref);
@@ -369,59 +368,12 @@ export async function DELETE(request, context) {
         throw new Error('NOT_FOUND');
       }
 
-      const scoped = collectionName => db.collection(collectionName)
-        .where('organizationId', '==', project.organizationId)
-        .where('projectId', '==', projectId)
-        .limit(1);
-      const [
-        invoiceEvidence,
-        timeReservations,
-        estimateReservations,
-        invoiceMarkedLogs,
-        billedAtLogs,
-        calendarEvents,
-      ] = await Promise.all([
-        transaction.get(scoped('invoices')),
-        transaction.get(scoped('invoiceTimeLogReservations')),
-        transaction.get(scoped('invoiceEstimateReservations')),
-        transaction.get(
-          db.collection('timeLogs')
-            .where('organizationId', '==', project.organizationId)
-            .where('projectId', '==', projectId)
-            .where('invoiceId', '>', '')
-            .limit(1),
-        ),
-        transaction.get(
-          db.collection('timeLogs')
-            .where('organizationId', '==', project.organizationId)
-            .where('projectId', '==', projectId)
-            .where(
-              'billedAt',
-              '>',
-              Timestamp.fromMillis(0),
-            )
-            .limit(1),
-        ),
-        transaction.get(
-          db.collection('calendarEvents')
-            .where('organizationId', '==', project.organizationId)
-            .where('projectId', '==', projectId)
-            .limit(1),
-        ),
-      ]);
-      if (
-        !invoiceEvidence.empty
-        || !timeReservations.empty
-        || !estimateReservations.empty
-        || !invoiceMarkedLogs.empty
-        || !billedAtLogs.empty
-      ) {
-        throw projectTransactionError(
-          'PROJECT_HAS_ACCOUNTING_EVIDENCE',
-          409,
-          'Проєкт має рахунки або зафіксований у них час. Архівуйте проєкт; рахунки можна лише анулювати, а облікові докази не видаляються.',
-        );
-      }
+      const calendarEvents = await transaction.get(
+        db.collection('calendarEvents')
+          .where('organizationId', '==', project.organizationId)
+          .where('projectId', '==', projectId)
+          .limit(1),
+      );
       if (!calendarEvents.empty) {
         throw projectTransactionError(
           'PROJECT_HAS_CALENDAR_EVENTS',
@@ -449,33 +401,6 @@ export async function DELETE(request, context) {
       db.collection('timeLogs').where('organizationId', '==', project.organizationId).where('projectId', '==', projectId).get(),
       db.collection('issueLinks').where('organizationId', '==', project.organizationId).get(),
     ]);
-    const unexpectedBilledLog = timeLogs.docs.find(document => {
-      const log = document.data();
-      return (
-        (typeof log.invoiceId === 'string' && log.invoiceId.trim())
-        || log.billedAt
-      );
-    });
-    if (unexpectedBilledLog) {
-      await db.runTransaction(async transaction => {
-        const current = await transaction.get(ref);
-        if (
-          current.exists
-          && current.data().organizationId === project.organizationId
-        ) {
-          transaction.update(ref, {
-            deletionPending: FieldValue.delete(),
-            updatedAt: FieldValue.serverTimestamp(),
-          });
-        }
-      });
-      throw projectTransactionError(
-        'PROJECT_HAS_ACCOUNTING_EVIDENCE',
-        409,
-        'Видалення зупинено: знайдено незмінний запис часу з рахунку',
-        { timeLogId: unexpectedBilledLog.id },
-      );
-    }
     const issueIds = new Set(issues.docs.map(document => document.id));
     const simpleRefs = [
       ...timeLogs.docs.map(document => document.ref),

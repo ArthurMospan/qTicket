@@ -305,7 +305,6 @@ export default function ClientIncidentPortal({
           name: project.name,
           hiddenColumns: project.hiddenColumns || [],
         }}
-        sprints={[]}
         entity="incident"
         clientMode
       />

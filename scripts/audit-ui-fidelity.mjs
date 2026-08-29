@@ -172,7 +172,6 @@ function sortLocations(entries) {
 const STRUCTURES = [
   { id: 'chat', label: 'Чат', file: /(?:\/chat\/|Chat[A-Z]|ChatAttachments|MessageContent|UnifiedTimeline|HoverCard)/ },
   { id: 'calendar', label: 'Календар', file: /calendar/i },
-  { id: 'analytics', label: 'Аналітика', file: /(?:analytics|BillingTab|TimesheetTab|WorkloadTab)/i },
   { id: 'qtplus', label: 'QuickTeam+', file: /qtplus/i },
   { id: 'ai-call', label: 'AI-дзвінок', file: /(?:ai-call|AudioTask)/i },
   { id: 'tasks', label: 'Задачі', file: /(?:IssueDetail|IssueCard|CreateTaskModal|TaskRow|TaskListView|AttachmentViewer|Markdown)/ },

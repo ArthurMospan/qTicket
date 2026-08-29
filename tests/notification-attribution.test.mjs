@@ -130,18 +130,13 @@ test('a document written is not somebody doing something', () => {
 });
 
 test('nothing on the dashboard ranks tasks by when their document was written', async () => {
-  const [home, workload] = await Promise.all([
-    read('../src/app/(app)/page.js'),
-    read('../src/components/workspace/WorkloadTab.jsx'),
-  ]);
+  const home = await read('../src/app/(app)/page.js');
 
-  for (const [name, source] of [['home', home], ['workload', workload]]) {
-    assert.match(source, /issueActivity\(/, name);
-    // A project's own `updatedAt` still sorts the project list — that one is a
-    // project being worked in, which is what the sort says. No task is ranked
-    // by it any more.
-    assert.doesNotMatch(source, /issue\.updatedAt|issue\.createdAt/, name);
-  }
+  assert.match(home, /issueActivity\(/);
+  // A project's own `updatedAt` still sorts the project list — that one is a
+  // project being worked in, which is what the sort says. No task is ranked by
+  // it any more.
+  assert.doesNotMatch(home, /issue\.updatedAt|issue\.createdAt/);
   // The one list of tasks the dashboard still ranks is the activity lines on
   // the featured project card, and the ranking is Firestore's now: the card
   // asks for three documents of one project in activity order rather than

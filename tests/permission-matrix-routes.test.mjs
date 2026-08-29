@@ -76,17 +76,15 @@ test('no route authorises a set of roles the matrix does not describe', async ()
 });
 
 // And the ones where being wrong costs the most, named. A general rule cannot
-// tell `['owner', 'admin']` meaning "may invoice" from `['owner', 'admin']`
-// meaning "may invite"; these four say which is which, so that widening one of
-// them cannot pass by resembling another.
+// tell `['owner', 'admin']` meaning "may change a member's role" from
+// `['owner', 'admin']` meaning "may invite"; these two say which is which, so
+// that widening one of them cannot pass by resembling the other.
 const NAMED = [
   ['organizations/[organizationId]/members/[memberId]/route.js', 'manage:member_roles'],
-  ['invoices/route.js', 'manage:finance'],
-  ['invoices/[invoiceId]/void/route.js', 'manage:finance'],
   ['invitations/route.js', 'invite:client_member'],
 ];
 
-test('roles, money and invitations authorise exactly what the matrix says', async () => {
+test('roles and invitations authorise exactly what the matrix says', async () => {
   const files = new Map((await routeFiles()).map(file => [file.path, file.source]));
   for (const [path, action] of NAMED) {
     const source = files.get(path);

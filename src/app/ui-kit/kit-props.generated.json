@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 111,
-    "props": 821,
-    "documentedProps": 821,
+    "components": 97,
+    "props": 727,
+    "documentedProps": 727,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -272,47 +272,6 @@
         }
       ]
     },
-    "BarList": {
-      "file": "src/components/ui/Charts/BarList.jsx",
-      "summary": "A list of named quantities, as bars.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "emptyText",
-          "default": "'Немає даних'",
-          "type": "string",
-          "values": [],
-          "description": "Shown instead of an empty list."
-        },
-        {
-          "name": "format",
-          "default": "",
-          "type": "(value: number) => string",
-          "values": [],
-          "description": "How to print a value. Defaults to the number itself."
-        },
-        {
-          "name": "items",
-          "default": "[]",
-          "type": "{id: string, label: string, value: number, color?: string, leading?: React.ReactNode, meta?: string}[]",
-          "values": [],
-          "description": "What to draw. `color` is for entities that own one — a status, a type — never for encoding size. `leading` replaces the colour dot where the entity has a glyph of its own, which is also what keeps identity from resting on colour alone."
-        },
-        {
-          "name": "scale",
-          "default": "'max'",
-          "type": "'max'|'total'",
-          "values": [],
-          "description": "What a full bar means: the largest value here, or the sum of them."
-        }
-      ]
-    },
     "Breadcrumb": {
       "file": "src/components/ui/Navigation/Breadcrumb.jsx",
       "summary": "The trail on the left of the workspace header, optionally with the search that expands over it.",
@@ -476,13 +435,6 @@
           "type": "{done: number, total: number}",
           "values": [],
           "description": "How far the running operation has got, when the caller can tell."
-        },
-        {
-          "name": "sprintOptions",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Active or planned sprint destinations."
         },
         {
           "name": "statusOptions",
@@ -658,87 +610,6 @@
           "type": "string",
           "values": [],
           "description": "Legacy alias for `style`, kept for existing call sites."
-        }
-      ]
-    },
-    "CalendarDayCell": {
-      "file": "src/components/ui/Calendar/CalendarDayCell.jsx",
-      "summary": "A day of a month grid, as a pressable tile.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "density",
-          "default": "'roomy'",
-          "type": "'roomy'|'compact'",
-          "values": [
-            "compact",
-            "roomy"
-          ],
-          "description": "How much room the tile takes: the timesheet's summary, or a phone's month picker."
-        },
-        {
-          "name": "onClick",
-          "default": "",
-          "type": "(event) => void",
-          "values": [],
-          "description": "Opens the day, or the week around it."
-        },
-        {
-          "name": "state",
-          "default": "'default'",
-          "type": "'default'|'today'|'weekend'|'outside'|'selected'",
-          "values": [
-            "default",
-            "outside",
-            "selected",
-            "today",
-            "weekend"
-          ],
-          "description": "Which day this is relative to today, the week, the month on screen and the day being read."
-        }
-      ]
-    },
-    "CalendarDayNumber": {
-      "file": "src/components/ui/Calendar/CalendarDayNumber.jsx",
-      "summary": "The date in the corner of a day cell, and the control that opens that day. Without an `onClick` it is a plain mark rather than a button.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "onClick",
-          "default": "",
-          "type": "(event) => void",
-          "values": [],
-          "description": "Opens the day. Omitted where the day is already inside a control."
-        },
-        {
-          "name": "size",
-          "default": "'md'",
-          "type": "'md'|'sm'",
-          "values": [],
-          "description": "The month cell's corner, or the narrow strip a phone shows a week in."
-        },
-        {
-          "name": "state",
-          "default": "'default'",
-          "type": "'today'|'default'|'outside'",
-          "values": [
-            "default",
-            "outside",
-            "today"
-          ],
-          "description": "Which day this is relative to today and to the month on screen."
         }
       ]
     },
@@ -921,54 +792,6 @@
           "type": "(id: string) => void",
           "values": [],
           "description": "Opens one."
-        }
-      ]
-    },
-    "ChartCard": {
-      "file": "src/components/ui/Layout/ChartCard.jsx",
-      "summary": "A titled block of an analytics screen.",
-      "props": [
-        {
-          "name": "action",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "A control belonging to the heading."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "count",
-          "default": "",
-          "type": "number",
-          "values": [],
-          "description": "How many things it is about — drawn as the same pill every count in the product is."
-        },
-        {
-          "name": "icon",
-          "default": "",
-          "type": "React.ComponentType",
-          "values": [],
-          "description": "The block's glyph."
-        },
-        {
-          "name": "meta",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "A quiet clause after the title: a period, a total, a budget. Never a count."
-        },
-        {
-          "name": "title",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "What the block measures."
         }
       ]
     },
@@ -1611,47 +1434,6 @@
         }
       ]
     },
-    "ColumnChart": {
-      "file": "src/components/ui/Charts/ColumnChart.jsx",
-      "summary": "Columns over time, with one or two series.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "data",
-          "default": "[]",
-          "type": "{label: string, values: number[]}[]",
-          "values": [],
-          "description": "One entry per time slot; `values` is one number per series, in series order."
-        },
-        {
-          "name": "format",
-          "default": "",
-          "type": "(value: number) => string",
-          "values": [],
-          "description": "How a value reads in the tooltip."
-        },
-        {
-          "name": "height",
-          "default": "120",
-          "type": "number",
-          "values": [],
-          "description": "Plot height in pixels, excluding the axis band below it."
-        },
-        {
-          "name": "series",
-          "default": "[]",
-          "type": "{label: string, color: string}[]",
-          "values": [],
-          "description": "What each value means. Two at most — the second is drawn as context behind the first."
-        }
-      ]
-    },
     "CommandPalette": {
       "file": "src/components/ui/Navigation/CommandPalette.jsx",
       "summary": "The workspace command palette.",
@@ -1899,64 +1681,6 @@
             "dot"
           ],
           "description": "Whether the badge carries a number or only says \"there is something here\"."
-        }
-      ]
-    },
-    "DataTable": {
-      "file": "src/components/ui/DataDisplay/DataTable.jsx",
-      "summary": "A table of figures with a stacked layout below the breakpoint.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "columns",
-          "default": "[]",
-          "type": "DataTableColumn[]",
-          "values": [],
-          "description": "What the table has."
-        },
-        {
-          "name": "density",
-          "default": "'compact'",
-          "type": "'compact'|'comfortable'",
-          "values": [
-            "comfortable",
-            "compact"
-          ],
-          "description": "Row height. `compact` is a row of figures; `comfortable` is a row carrying a face and two lines of text."
-        },
-        {
-          "name": "emptyText",
-          "default": "'Немає даних'",
-          "type": "string",
-          "values": [],
-          "description": "Shown instead of an empty table."
-        },
-        {
-          "name": "rowHref",
-          "default": "",
-          "type": "(row: object) => string",
-          "values": [],
-          "description": "Makes the whole row a link, which is what a row in analytics almost always wants to be. The identifying cell is a real link; the rest of the row follows it on click."
-        },
-        {
-          "name": "rowKey",
-          "default": "row => row.id",
-          "type": "(row: object) => string",
-          "values": [],
-          "description": "Stable key per row."
-        },
-        {
-          "name": "rows",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "What it shows."
         }
       ]
     },
@@ -2464,61 +2188,6 @@
           "type": "string",
           "values": [],
           "description": "One line saying what is missing."
-        }
-      ]
-    },
-    "ExportMenu": {
-      "file": "src/components/ui/ExportMenu.jsx",
-      "summary": "click, never on render: a timesheet of several thousand rows should not be assembled by a screen nobody is exporting.",
-      "props": [
-        {
-          "name": "build",
-          "default": "",
-          "type": "() => object",
-          "values": [],
-          "description": "Makes the export document. Called on the"
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "disabled",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Greys out the trigger and every format in the menu."
-        },
-        {
-          "name": "disabledReason",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Why, shown on the disabled trigger."
-        },
-        {
-          "name": "formats",
-          "default": "['xlsx', 'csv', 'pdf']",
-          "type": "('xlsx'|'csv'|'pdf')[]",
-          "values": [],
-          "description": "Which of the three to offer. A"
-        },
-        {
-          "name": "label",
-          "default": "'Експорт'",
-          "type": "string",
-          "values": [],
-          "description": "Trigger text."
-        },
-        {
-          "name": "size",
-          "default": "'lg'",
-          "type": "'sm'|'md'|'lg'",
-          "values": [],
-          "description": "Passed straight to the Button."
         }
       ]
     },
@@ -3689,57 +3358,6 @@
         }
       ]
     },
-    "Meter": {
-      "file": "src/components/ui/Charts/Meter.jsx",
-      "summary": "A share of a whole, drawn as one bar.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "height",
-          "default": "8",
-          "type": "number",
-          "values": [],
-          "description": "Bar thickness in pixels."
-        },
-        {
-          "name": "label",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "What is being measured, above the bar."
-        },
-        {
-          "name": "layout",
-          "default": "'stack'",
-          "type": "'stack'|'inline'",
-          "values": [
-            "inline",
-            "stack"
-          ],
-          "description": "Reading above the bar, or beside it. `inline` is for a table cell, where the row is one line."
-        },
-        {
-          "name": "reading",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "The figure, printed opposite the label."
-        },
-        {
-          "name": "value",
-          "default": "0",
-          "type": "number",
-          "values": [],
-          "description": "How much of the limit is used, 0–1. Values above 1 fill the bar and are still reported in the label."
-        }
-      ]
-    },
     "MobilePaneBack": {
       "file": "src/components/ui/Navigation/MobilePaneBack.jsx",
       "summary": "The way back, as an arrow beside the title. `context` decides whether it is the way out of a pane — which only a phone has — or a step inside a screen, which every width has.",
@@ -4668,47 +4286,6 @@
         }
       ]
     },
-    "RefreshStamp": {
-      "file": "src/components/ui/DataDisplay/RefreshStamp.jsx",
-      "summary": "When a reading was taken, and the way to take another. A screen either updates itself or it says when it last looked — and the second is only honest if it is on the screen.",
-      "props": [
-        {
-          "name": "at",
-          "default": "null",
-          "type": "number|null",
-          "values": [],
-          "description": "When the reading was taken, in milliseconds. Nothing is drawn until there is one."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "label",
-          "default": "'Оновлено о'",
-          "type": "string",
-          "values": [],
-          "description": "The whole phrase before the time, preposition included — «Оновлено о», «Дані на». A screen that means something more specific says it in full rather than having a preposition chosen for it."
-        },
-        {
-          "name": "loading",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether a newer reading is on its way; the icon turns while it is."
-        },
-        {
-          "name": "onRefresh",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Take another reading."
-        }
-      ]
-    },
     "ResponseChoice": {
       "file": "src/components/ui/Forms/ResponseChoice.jsx",
       "summary": "The three answers to a calendar invitation, as one group of toggle buttons.",
@@ -5070,40 +4647,6 @@
         }
       ]
     },
-    "SignalList": {
-      "file": "src/components/ui/Feedback/SignalList.jsx",
-      "summary": "The short list of things worth a second look, ordered by how much they matter.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "emptyText",
-          "default": "'Усе гаразд'",
-          "type": "string",
-          "values": [],
-          "description": "The one line a workspace with nothing wrong gets."
-        },
-        {
-          "name": "onSelect",
-          "default": "",
-          "type": "(signal: Signal) => void",
-          "values": [],
-          "description": "Opens a finding in place. `href` wins where a finding has a page of its own."
-        },
-        {
-          "name": "signals",
-          "default": "[]",
-          "type": "Signal[]",
-          "values": [],
-          "description": "What to show. An empty list draws `emptyText` instead."
-        }
-      ]
-    },
     "Skeleton": {
       "file": "src/components/ui/Feedback/Skeleton.jsx",
       "summary": "The kit's loading placeholder. One block, in a named shape. It carries no dimensions of its own: `preset`, `width` and `tone` all resolve in `globals.",
@@ -5310,13 +4853,6 @@
           "type": "object",
           "values": [],
           "description": "Project that owns the task and its statuses."
-        },
-        {
-          "name": "sprints",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Organization sprints shown on the task card."
         },
         {
           "name": "statuses",
@@ -5738,135 +5274,10 @@
         }
       ]
     },
-    "TaskListCard": {
-      "file": "src/components/ui/TaskManagement/TaskListCard.jsx",
-      "summary": "A titled card holding a flat list of tasks — \"Прострочені\", \"Поточний фокус\", \"Нещодавно закриті\".",
-      "props": [
-        {
-          "name": "action",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "Optional control on the right of the caption."
-        },
-        {
-          "name": "allIssues",
-          "default": "",
-          "type": "object[]",
-          "values": [],
-          "description": "Every task in scope, for parents and blockers."
-        },
-        {
-          "name": "back",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "The way out of a drilled-in list; it leads the caption."
-        },
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "count",
-          "default": "",
-          "type": "number",
-          "values": [],
-          "description": "Shown next to the title; defaults to the number of tasks."
-        },
-        {
-          "name": "emptyText",
-          "default": "'Інцидентів немає'",
-          "type": "string",
-          "values": [],
-          "description": "Sentence shown when there is nothing to list."
-        },
-        {
-          "name": "icon",
-          "default": "",
-          "type": "React.ComponentType",
-          "values": [],
-          "description": "Leading glyph on the caption."
-        },
-        {
-          "name": "iconClassName",
-          "default": "'text-muted'",
-          "type": "string",
-          "values": [],
-          "description": "Colour for that glyph, where it carries meaning."
-        },
-        {
-          "name": "issueLinks",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Relations, for the blocked marker."
-        },
-        {
-          "name": "issues",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "The tasks to list."
-        },
-        {
-          "name": "labels",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Label definitions, for the chips."
-        },
-        {
-          "name": "members",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Workspace members, for avatars."
-        },
-        {
-          "name": "projects",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Projects, for naming each row's project."
-        },
-        {
-          "name": "showProjectName",
-          "default": "true",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether each row names its project — true on cross-project lists."
-        },
-        {
-          "name": "sprints",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Sprint definitions."
-        },
-        {
-          "name": "title",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Caption above the list."
-        }
-      ]
-    },
     "TaskListView": {
       "file": "src/components/ui/TaskManagement/TaskListView.jsx",
       "summary": "The list view of a board: tasks grouped by status — or, on a list that spans projects, by the five shared status categories — with hidden groups folded into one «Приховані» group at the end.",
       "props": [
-        {
-          "name": "activeTimerIssueId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The task whose timer is running, if any."
-        },
         {
           "name": "allIssues",
           "default": "issues",
@@ -5992,13 +5403,6 @@
           "type": "boolean",
           "values": [],
           "description": "Whether each row names its project — true only on cross-project lists."
-        },
-        {
-          "name": "sprints",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Sprint definitions, for the sprint column."
         }
       ]
     },
@@ -6033,13 +5437,6 @@
           "type": "object[]",
           "values": [],
           "description": "Its siblings, for resolving the parent key."
-        },
-        {
-          "name": "isTimerActive",
-          "default": "",
-          "type": "boolean",
-          "values": [],
-          "description": "A timer is running on this task."
         },
         {
           "name": "labels",
@@ -6110,13 +5507,6 @@
           "type": "boolean",
           "values": [],
           "description": "Whether the row names its status — true only where the section heading cannot, i.e. a category holding several statuses."
-        },
-        {
-          "name": "sprints",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Sprint definitions."
         }
       ]
     },
@@ -6239,157 +5629,6 @@
             "white"
           ],
           "description": "Which ground it sits on; `white` is for a field placed on the canvas itself."
-        }
-      ]
-    },
-    "TimeLogRow": {
-      "file": "src/components/ui/TaskManagement/TimeLogRow.jsx",
-      "summary": "One entry in a task's time log: who, how long, when, and what they wrote about it.",
-      "props": [
-        {
-          "name": "canEdit",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether the reader owns this entry."
-        },
-        {
-          "name": "dateLabel",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The day, already formatted."
-        },
-        {
-          "name": "description",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "What the entry says; omitted rows simply have none."
-        },
-        {
-          "name": "member",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "Who logged the time."
-        },
-        {
-          "name": "onDelete",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Removes it."
-        },
-        {
-          "name": "onEdit",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Opens it for editing."
-        },
-        {
-          "name": "spentLabel",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Duration, already formatted («2 год 15 хв»)."
-        }
-      ]
-    },
-    "TimePicker": {
-      "file": "src/components/ui/Forms/TimePicker.jsx",
-      "summary": "A time field. The native `type=\"time\"` control with the kit's geometry over it, so the platform keeps the keyboard, the locale and the clock popup.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "disabled",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Unavailable: dimmed and not editable."
-        },
-        {
-          "name": "error",
-          "default": "",
-          "type": "boolean|string",
-          "values": [],
-          "description": "Draws the error border and tints the field."
-        },
-        {
-          "name": "onChange",
-          "default": "",
-          "type": "(value: string) => void",
-          "values": [],
-          "description": "Fires with the new `HH:MM`."
-        },
-        {
-          "name": "size",
-          "default": "'lg'",
-          "type": "'sm'|'md'|'lg'",
-          "values": [],
-          "description": "Control height token."
-        },
-        {
-          "name": "value",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "`HH:MM`."
-        }
-      ]
-    },
-    "TimeTrackingControl": {
-      "file": "src/components/ui/TaskManagement/TimeTrackingControl.jsx",
-      "summary": "The timer half of the task attribute strip: a 22px start/stop square and the running total beside it, which doubles as the button that opens the log.",
-      "props": [
-        {
-          "name": "disabled",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Unavailable: neither half responds."
-        },
-        {
-          "name": "estimateLabel",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The estimate, already formatted, printed after the total."
-        },
-        {
-          "name": "onOpen",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Opens the time log."
-        },
-        {
-          "name": "onToggle",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Starts or stops the timer."
-        },
-        {
-          "name": "running",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether a timer is counting on this task right now."
-        },
-        {
-          "name": "spentLabel",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Total logged, already formatted."
         }
       ]
     },

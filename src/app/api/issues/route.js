@@ -28,7 +28,6 @@ import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages
 import { resolveNewIssueType } from '@/lib/utils/issueCreationModel.mjs';
 import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { issueParentStatusConflict } from '@/lib/utils/issueStatusTransition.mjs';
-import { MAX_ISSUE_ESTIMATE_MINUTES } from '@/lib/utils/issueEstimate.mjs';
 
 function normalizedDate(value) {
   if (value == null || value === '') return null;
@@ -130,21 +129,6 @@ export async function POST(request) {
     if (dueDate === undefined) {
       return NextResponse.json({ error: 'Некоректний дедлайн' }, { status: 400 });
     }
-    const estimateMinutes = data.estimateMinutes == null
-      ? null
-      : Number(data.estimateMinutes);
-    if (
-      estimateMinutes != null
-      && (!Number.isFinite(estimateMinutes)
-        || estimateMinutes < 0
-        || estimateMinutes > MAX_ISSUE_ESTIMATE_MINUTES)
-    ) {
-      return NextResponse.json({
-        error: 'Оцінка завдання виходить за допустимі межі',
-        code: 'INVALID_ESTIMATE',
-      }, { status: 400 });
-    }
-
     // Invalid form submissions do not consume the creation budget. The limit
     // still protects every request that has a valid body and could reach the
     // project/workflow reads below: 60 attempts per user per 60 seconds.
@@ -225,17 +209,6 @@ export async function POST(request) {
         }, { status: 403 });
       }
       if (addAssigneesToProjectTeam) assigneesToAddToTeam = offRoster;
-    }
-
-    if (data.sprintId) {
-      const sprintSnap = await db.collection('sprints').doc(data.sprintId).get();
-      if (
-        !sprintSnap.exists
-        || sprintSnap.data().organizationId !== organizationId
-        || sprintSnap.data().status === 'completed'
-      ) {
-        return NextResponse.json({ error: 'Некоректний або вже завершений спринт' }, { status: 400 });
-      }
     }
 
     const workflowRef = db.collection('organizations').doc(organizationId)
@@ -319,22 +292,6 @@ export async function POST(request) {
         freshWorkflow.labels,
         DEFAULT_LABEL_IDS,
       ));
-      if (data.sprintId) {
-        const sprintSnap = await transaction.get(
-          db.collection('sprints').doc(data.sprintId),
-        );
-        if (
-          !sprintSnap.exists
-          || sprintSnap.data().organizationId !== organizationId
-          || sprintSnap.data().status === 'completed'
-        ) {
-          throw hierarchyTransactionError({
-            code: 'INVALID_SPRINT',
-            status: 400,
-            message: 'Некоректний або вже завершений спринт',
-          });
-        }
-      }
       if (parentIssueId) {
         const parentSnap = await transaction.get(db.collection('issues').doc(parentIssueId));
         const parent = parentSnap.exists
@@ -401,12 +358,7 @@ export async function POST(request) {
           ? data.labelIds.filter(id => freshLabelIds.has(id)).slice(0, 20)
           : [],
         dueDate,
-        sprintId: data.sprintId || null,
         reporterId: authorization.user.uid,
-        estimateMinutes,
-        spentMinutes: 0,
-        spentMinutesMirrorVersion: 1,
-        timeLogMutationVersion: 0,
         parentIssueId,
         // Denormalised for the same reason a mention carries its task's title:
         // the writer knows it, the reader would otherwise have to go looking,

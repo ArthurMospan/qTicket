@@ -118,9 +118,9 @@ export default function BadgesSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="PriorityBadge — Billing task rows"
-        description="Живий бейдж пріоритету з BillingTab. Значення приходить із завдання, тому показані всі можливі пріоритети."
-        filePath="src/components/workspace/BillingTab.jsx"
+        title="PriorityBadge — рядки списку інцидентів"
+        description="Живий бейдж пріоритету зі списку інцидентів. Значення приходить із інциденту, тому показані всі можливі пріоритети."
+        filePath="src/components/ui/TaskManagement/TaskRow.jsx"
       >
         <div className="flex items-center gap-[8px]">
           <PriorityBadge priority="none" priorities={DEFAULT_PRIORITIES} />

@@ -5,7 +5,6 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { useUnreadChatCount } from '@/lib/hooks/useUnreadChatCount';
 import { useOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCounts';
-import { useUserTimerState } from '@/lib/hooks/useUserTimerState';
 import { isConversationOnScreen } from '@/lib/utils/notificationPresence.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { isClientRole } from '@/lib/utils/can';
@@ -48,7 +47,7 @@ export default function WorkspaceNotificationBridge() {
   const userId = currentUser?.id || currentUser?.uid;
   // Wait for the membership before opening internal-only listeners. A client
   // briefly has no role while AppContext resolves, and treating that pending
-  // state as internal caused a forbidden chat/timer subscription on sign-in.
+  // state as internal caused a forbidden chat subscription on sign-in.
   const internalViewer = Boolean(orgRole) && !isClientRole(orgRole);
   const unreadChats = useUnreadChatCount({ enabled: internalViewer });
   const playedEmergencyIds = useRef(new Set());
@@ -87,7 +86,6 @@ export default function WorkspaceNotificationBridge() {
     shouldAnnounce,
   });
   useOrganizationUnreadCounts();
-  useUserTimerState(internalViewer ? userId : null);
   // Одне число, одне джерело.
   //
   // Тут стояло `unreadChatNotifications || unreadChats`: два незалежні

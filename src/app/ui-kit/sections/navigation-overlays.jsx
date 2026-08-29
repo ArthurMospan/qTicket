@@ -2,32 +2,10 @@
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import ContextMenu from '@/components/ui/ContextMenu';
-import { CommandPalette, ExportMenu, KeyboardShortcutsDialog, Popover, Tooltip, MetaTrigger } from '@/components/ui';
+import { CommandPalette, KeyboardShortcutsDialog, Popover, Tooltip, MetaTrigger } from '@/components/ui';
 import { Plus, Edit2, Trash2, Settings, MessageCircle, MoreVertical, Copy, User, Users, Tag as TagIcon, Command, Keyboard } from 'lucide-react';
 import { PreviewBlock } from '../preview';
 import { buildCommands } from '@/lib/utils/commandPalette.mjs';
-
-// Small enough to open and read in a spreadsheet, and shaped exactly like the
-// documents the analytics screens hand this control.
-const KIT_EXPORT_DOCUMENT = {
-  fileName: 'QuickTeam-Приклад',
-  title: 'Приклад експорту',
-  meta: [{ label: 'Період', value: '30 днів' }],
-  blocks: [{
-    id: 'demo',
-    title: 'По проєктах',
-    columns: [
-      { id: 'project', label: 'Проєкт', width: 24, value: row => row.project },
-      { id: 'time', label: 'Час', type: 'duration', value: row => row.minutes },
-      { id: 'hours', label: 'Годин', type: 'hours', value: row => row.minutes },
-    ],
-    rows: [
-      { project: 'Сайт RetroMagaz', minutes: 380 },
-      { project: 'Мобільний застосунок', minutes: 145 },
-    ],
-    total: { project: 'Разом', minutes: 525 },
-  }],
-};
 
 const KIT_MENU_LABELS = [
   { id: 'frontend', label: 'Фронтенд' },
@@ -115,14 +93,6 @@ export default function NavigationOverlaysSection() {
               closeOnSelect={false}
               items={toggleMenuItems}
             />
-          </div>
-          <div className="flex flex-col gap-[8px]">
-            <span className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider">Експорт (ContextMenu + Button)</span>
-            {/* The live component, with a document small enough to read. It is
-                the same control the analytics tabs and the invoice carry, and
-                the only kit component whose menu items do work rather than
-                navigate. */}
-            <ExportMenu size="md" build={() => KIT_EXPORT_DOCUMENT} />
           </div>
           <div className="flex flex-col gap-[8px]">
             <span className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider">Меню людини (align=&quot;start&quot;)</span>
