@@ -19,7 +19,7 @@ import LoadOlderButton from '@/components/ui/Chat/LoadOlderButton';
 import { IconAction, Pill, Popover, useConfirm } from '@/components/ui';
 import EmptyState from '@/components/ui/Feedback/EmptyState';
 import { useAppContext } from '@/lib/context/AppContext';
-import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
+import { can, canWhileRoleLoads } from '@/lib/utils/can';
 import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { COMMENT_WINDOW, useComments } from '@/lib/hooks/useComments';
 import { useIssueTyping } from '@/lib/hooks/useIssueTyping';
@@ -305,8 +305,8 @@ export default function UnifiedTimeline({
   // коментарем має розвʼязати ім'я автора, навіть якщо той давно не в команді
   // проєкту. Але пікер — інше питання. Він не розвʼязує імена, він пропонує
   // покликати людину, і пропонувати він має тих, хто в цьому проєкті справді є.
-  // Одним списком обслуговувались обидва питання, тож у чаті задачі можна було
-  // тегнути будь-кого з організації — людину, для якої цієї задачі не існує.
+  // Одним списком обслуговувались обидва питання, тож у чаті звернення можна
+  // було тегнути будь-кого з організації — людину, для якої цього звернення не існує.
   mentionMembers,
   isActive = true,
   onUnreadCountChange,
@@ -320,9 +320,9 @@ export default function UnifiedTimeline({
   // `firestore.rules` cannot drift apart about what a client role may open.
   const internalViewer = can(orgRole, 'access:audit_log');
   // The conversation is the one surface both sides of the desk read at the same
-  // time, so the record it belongs to has two names in it — «інцидент» for
-  // support, «звернення» for the client whose portal is «Мої звернення».
-  const terms = incidentTerms(isClientRole(orgRole));
+  // time, and the record it belongs to has one name on both — the table below
+  // is where that name is spelled.
+  const terms = incidentTerms();
   // Owners and admins may remove a comment that should not stand; editing one
   // stays with its author, because an edited comment still carries their name.
   const canModerateComments = can(orgRole, 'moderate:content');
@@ -978,7 +978,7 @@ export default function UnifiedTimeline({
 
   // Знято щойно воно з'явилось, а не тоді, коли межа непрочитаного втрапить у
   // видиму частину списку. Це те саме, що робочий чат робить для відкритого
-  // каналу, і завданню бракувало саме цього: запис приходив, дзвоник спалахував
+  // каналу, і зверненню бракувало саме цього: запис приходив, дзвоник спалахував
   // «(1)», а за півсекунди спостерігач кінця стрічки гасив його — і так на
   // кожне повідомлення. Лічильник, який блимає над розмовою, що ти її читаєш, —
   // це не інформація.
@@ -1146,7 +1146,7 @@ export default function UnifiedTimeline({
       }
       // Той самий список, що його пропонує пікер, а не вся організація.
       // Пікер був підказкою, а не дверима: дописане руками «@Імʼя» резолвилось
-      // по повному списку й тегало людину, для якої цієї задачі не існує.
+      // по повному списку й тегало людину, для якої цього звернення не існує.
       // Двері — на сервері (`/api/notifications` відмовляє тим, хто не дістає
       // проєкту); тут просто нічого зайвого не резолвиться.
       const mentionCandidates = mentionMembers || members;
@@ -1165,12 +1165,10 @@ export default function UnifiedTimeline({
       // out and back in — and the id is how the two are recognised as one.
       patchDraft({ serverId: commentId, status: 'sent' });
       const incidentChatLink = `${issuePath(issue, project || projectId)}?view=chat`;
-      // A notification is written once and read by both sides of the desk: the
-      // client who opened the «звернення» and the support person working the
-      // «інцидент». Naming the record here would pick one of them and be wrong
-      // for the other, and the recipient list is not the place to fork the copy
-      // — so the title names the thing they genuinely share, the conversation,
-      // and the link says which one.
+      // A notification is written once and read by both sides of the desk. The
+      // title names what a mention is actually about — the conversation — and
+      // the link says which record it is on; a bell row that spelled the
+      // record out as well said less in more words.
       if (mentionedUserIds.length > 0) {
         try {
           const result = await sendNotification({

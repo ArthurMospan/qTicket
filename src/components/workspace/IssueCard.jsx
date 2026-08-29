@@ -43,12 +43,12 @@ function hexToRgba(hex, alpha) {
 }
 
 
-// `showProjectName` is opt-in: cross-project lists (Мої інциденти) need
+// `showProjectName` is opt-in: cross-project lists (Мої звернення) need
 // the project after the key to tell two identical-looking cards apart, but on a
 // project's own board every card would repeat the project you are already in.
 // `projectName` is still always accepted — the issue key prefix is derived from
 // it below, which has to work whether or not the badge is shown.
-// `showStatusName` is for a column that is not a status: on «Мої завдання» the
+// `showStatusName` is for a column that is not a status: on «Звернення» the
 // columns are the five shared categories, so a card in «У роботі» could be in
 // «Код-ревʼю» or in «QA» and the column no longer says which.
 // `showAssignee` is off for a customer reading their own board: who a request is
@@ -76,7 +76,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
 
   const typeObj = types.find(t => t.id === issue.type) || {
     id: issue.type || 'task',
-    label: issue.type === 'epic' ? 'Епік (legacy)' : 'Інцидент',
+    label: issue.type === 'epic' ? 'Застарілий тип' : 'Звернення',
     color: issue.type === 'epic' ? '#8b5cf6' : '#9a9a9a',
   };
   const typeLabel = typeObj.label;
@@ -251,7 +251,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
                   checked={selected}
                   onChange={() => onSelect(issue.id)}
                   size="sm"
-                  ariaLabel={`Вибрати інцидент ${issue.issueKey || issue.title}`}
+                  ariaLabel={`Вибрати звернення ${issue.issueKey || issue.title}`}
                 />
               </span>
             ) : (
@@ -268,7 +268,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
           {childAll > 0 && (
             <div className="mb-[12px] flex items-center gap-[8px] select-none text-[10px] text-muted font-medium">
               <span className="shrink-0">
-                <strong className="text-ink font-semibold">{childDone}/{childAll}</strong> дочірніх інцидентів
+                <strong className="text-ink font-semibold">{childDone}/{childAll}</strong> дочірніх звернень
               </span>
               <div className="flex items-center gap-[3px] shrink-0">
                 {Array.from({ length: childAll }).map((_, idx) => (
@@ -319,7 +319,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
                 size="sm"
                 shape="badge"
                 weight="medium"
-                title="Заблоковано іншим інцидентом"
+                title="Заблоковано іншим зверненням"
               >
                 <Lock size={10} />
                 Заблоковано
@@ -344,10 +344,10 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
 
           {/* Row 5: Due date (thinner medium weight, lighter text, thinner stroke width)
 
-              Прострочене завдання друкує лише «Прострочено». Дата, яка вже
+              Прострочене звернення друкує лише «Прострочено». Дата, яка вже
               минула, не додає нічого до цього слова — вона лише подвоює рядок
               і забирає ширину в мітках поруч. Точний термін лишається на
-              сторінці завдання, де він є полем, а не присудом. */}
+              сторінці звернення, де він є полем, а не присудом. */}
           {due && (
             <div className={`flex items-center gap-[5px] mb-[12px] text-[11px] font-medium ${
               isOverdue ? 'text-danger' : 'text-muted'
@@ -365,7 +365,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
               in its message count rather than in a hole where the routing was. */}
           <div className={`border-t border-line pt-[10px] flex items-center gap-2 mt-auto ${showAssignee ? 'justify-between' : 'justify-end'}`}>
             {showAssignee && (
-              <div className="flex -space-x-[8px] overflow-visible" aria-label="Учасники інциденту">
+              <div className="flex -space-x-[8px] overflow-visible" aria-label="Учасники звернення">
                 {participants.length > 0 ? (
                   participants.slice(0, 5).map(({ id, member, roles }) => {
                     const roleLabels = roles.map(role => ({

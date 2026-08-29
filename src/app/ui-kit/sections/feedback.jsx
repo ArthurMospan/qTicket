@@ -17,10 +17,10 @@ export default function FeedbackSection() {
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock title="Alerts" component="Alert" description="Компонент сповіщень. Має скруглення L3 (8px) відповідно до токенів." fullWidth>
         <div className="flex flex-col gap-[12px] max-w-[600px]">
-          <Alert variant="success" title="Операція успішна">Проєкт успішно створено та додано до бази даних.</Alert>
+          <Alert variant="success" title="Операція успішна">Клієнта успішно створено та додано до бази даних.</Alert>
           <Alert variant="info" title="Потребує уваги">Будь ласка, перевірте правильність введених даних.</Alert>
-          <Alert variant="warning" title="Попередження">Термін виконання завдання спливає сьогодні.</Alert>
-          <Alert variant="error" title="Не вдалося завантажити проєкти">Спробуйте оновити сторінку.</Alert>
+          <Alert variant="warning" title="Попередження">Термін вирішення звернення спливає сьогодні.</Alert>
+          <Alert variant="error" title="Не вдалося завантажити клієнтів">Спробуйте оновити сторінку.</Alert>
         </div>
       </PreviewBlock>
 
@@ -74,9 +74,9 @@ export default function FeedbackSection() {
           <Surface preset="panel" padding="md" className="w-full">
             <EmptyState
               icon={Folder}
-              title="Ще немає проєктів"
-              description="Створіть перший проєкт, щоб організувати завдання та роботу команди."
-              action="Створити проєкт"
+              title="Ще немає клієнтів"
+              description="Створіть перший клієнтський простір, щоб приймати звернення."
+              action="Створити клієнта"
               onAction={() => {}}
               context="page"
             />
@@ -100,7 +100,7 @@ export default function FeedbackSection() {
           <EmptyState
             icon={ChatIcon}
             title="Ще немає повідомлень"
-            description="Почніть обговорення завдання з командою."
+            description="Почніть обговорення звернення з командою."
             context="flexible"
           />
           <EmptyState

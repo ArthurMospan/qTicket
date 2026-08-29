@@ -28,11 +28,11 @@ export function generateEmailTemplate({
 
   const templates = {
     // `commented` is the one template an external client receives: they are a
-    // participant of the incident they opened, so every support reply can mail
-    // them. It therefore names the record by its key and nothing else — support
-    // reads «інцидент» here and the client reads «звернення», and one HTML body
-    // cannot say both. (It said «до завданьи», which said neither.) The two
-    // below only ever reach an assignee, and qTicket has no external assignees.
+    // participant of the request they opened, so every support reply can mail
+    // them. It names the record by its key and nothing else — the key is what
+    // both sides quote back at each other, and the version that spelled the
+    // noun out spelled it «до завданьи». The two below only ever reach an
+    // assignee, and qTicket has no external assignees.
     commented: `
       <h2>${title}</h2>
       <p><strong>${userName}</strong> написав коментар до <code>${issueKey}</code>:</p>
@@ -43,13 +43,13 @@ export function generateEmailTemplate({
     `,
     assigned: `
       <h2>${title}</h2>
-      <p>Вам призначена завдання <code>${issueKey}</code> в проекті <strong>${projectName}</strong>.</p>
+      <p>Вам призначено звернення <code>${issueKey}</code> для клієнта <strong>${projectName}</strong>.</p>
       <p>${body}</p>
-      <p><a href="${fullLink}" style="display: inline-block; padding: 12px 24px; background: #1f1f1f; color: white; border-radius: 8px; text-decoration: none;">Переглянути завдання</a></p>
+      <p><a href="${fullLink}" style="display: inline-block; padding: 12px 24px; background: #1f1f1f; color: white; border-radius: 8px; text-decoration: none;">Переглянути звернення</a></p>
     `,
     blocked: `
       <h2>${title}</h2>
-      <p>Завдання <code>${issueKey}</code> заблокована іншою завданням.</p>
+      <p>Звернення <code>${issueKey}</code> заблоковане іншим зверненням.</p>
       <p>${body}</p>
       <p><a href="${fullLink}" style="display: inline-block; padding: 12px 24px; background: #dc2626; color: white; border-radius: 8px; text-decoration: none;">Переглянути деталі</a></p>
     `,

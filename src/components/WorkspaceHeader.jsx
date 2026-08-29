@@ -150,17 +150,17 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
       project: null,
       placeholder: isClientRole(orgRole)
         ? 'Пошук за номером або темою звернення...'
-        : 'Пошук інцидентів, клієнтів і команди...',
+        : 'Пошук звернень, клієнтів і команди...',
     };
   }
   if (pathname.startsWith('/overview')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук інцидентів, клієнтів і команди...' };
+    return { mode: 'search', project: null, placeholder: 'Пошук звернень, клієнтів і команди...' };
   }
   if (pathname.startsWith('/clients')) {
     return { mode: 'search', project: null, placeholder: 'Пошук клієнтів...' };
   }
   if (pathname.startsWith('/my')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук інцидентів...' };
+    return { mode: 'search', project: null, placeholder: 'Пошук звернень...' };
   }
   if (pathname.startsWith('/team')) {
     return { mode: 'search', project: null, placeholder: 'Пошук по команді...' };
@@ -195,7 +195,7 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
   // The bell itself is not a staff screen. An external client is a participant
   // of their own incident, so a support reply or a status change puts the same
   // card in front of them — and the card names where it goes.
-  const notificationRecord = incidentTerms(clientViewer)
+  const notificationRecord = incidentTerms()
     .record.toLocaleLowerCase('uk-UA');
   const liveNotifs = useWorkspaceStore(s => s.liveNotifs);
   const dismissLiveNotif = useWorkspaceStore(s => s.dismissLiveNotif);

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 import { can, invitedRoleFor, rolesFor } from '../src/lib/utils/can.js';
 import { isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
-import { INCIDENT_TERMS } from '../src/lib/content/incidentTerms.mjs';
+import { INCIDENT_TERMS_TABLE } from '../src/lib/content/incidentTerms.mjs';
 
 const read = relativePath => readFile(new URL(relativePath, import.meta.url), 'utf8');
 
@@ -110,9 +110,13 @@ test('клієнт і підтримка бачать один екран, і з
   // Only a client opens a request; support receives, works and closes it.
   assert.match(board, /const canOpenIncident = clientViewer && !isReadOnly/);
   assert.match(board, /\{canOpenIncident && \(/);
-  assert.equal(INCIDENT_TERMS.client.composerSubmit, 'Створити звернення');
+  assert.equal(INCIDENT_TERMS_TABLE.composerSubmit, 'Створити звернення');
   assert.match(board, /clientMode/);
-  assert.match(board, /entity="incident"/);
+  // No `entity` prop: the composer had one branch for a «звернення» and one for
+  // a «завдання», and only the first was ever rendered. The record has one name,
+  // so the composer has one wording and no switch in front of it.
+  assert.doesNotMatch(board, /entity=/);
+  assert.doesNotMatch(composer, /incidentComposer/);
   assert.match(board, /clientAdminMode/);
   assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
   assert.doesNotMatch(board, /useSprints|AnalyticsTab|QtPlusProjectTab/);

@@ -25,7 +25,7 @@ import { compareIssues } from '@/lib/utils/optimistic.mjs';
 // in a stacked page, not a scroller of its own, so there is no viewport to
 // window against. It pages instead, the way `TaskListCard` does.
 //
-// Without a limit «Мої завдання» laid out every task a person has ever been
+// Without a limit «Звернення» laid out every task a person has ever been
 // given, in one go, each row scanning the whole set for its parent and its
 // links. The count beside a section heading is always the whole section, so the
 // number never disagrees with what is behind it.
@@ -75,8 +75,8 @@ export default function TaskListView({
   bulkProgress = null,
   canArchive = false,
   selectionScopeKey = '',
-  emptyTitle = 'Інцидентів не знайдено',
-  emptyDescription = 'Змініть фільтри або створіть новий інцидент.',
+  emptyTitle = 'Звернень не знайдено',
+  emptyDescription = 'Змініть фільтри або створіть нове звернення.',
 }) {
   const { statuses, categoryColumns, statusCategoryById, priorities, types } = useWorkflowConfig();
   const [collapsedSections, setCollapsedSections] = useState([]);
@@ -112,7 +112,7 @@ export default function TaskListView({
   }
   // The list and the board are two views of one arrangement, so they sort the
   // same way. Without this the list kept whatever order the query happened to
-  // return — on «Мої завдання» that was due date ascending, which put every
+  // return — on «Звернення» that was due date ascending, which put every
   // freshly created task at the very bottom.
   const sortSection = sectionIssues => [...sectionIssues].sort(compareIssueCards);
   const visibleSections = groups

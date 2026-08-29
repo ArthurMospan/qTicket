@@ -45,7 +45,7 @@ export default function TaskCounters({
   mentions = 0,
   messages = 0,
   unread = false,
-  unreadLabel = 'Є нове в інциденті',
+  unreadLabel = 'Є нове у зверненні',
   size = 'md',
   className = '',
 }) {

@@ -198,7 +198,7 @@
       "childElements": [
         "span"
       ],
-      "ariaLabel": "… : … Завдання …",
+      "ariaLabel": "… : … Звернення …",
       "styled": false,
       "reviewed": "",
       "resembles": "IconAction",
@@ -224,7 +224,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:272",
+      "location": "src/components/WorkspaceSidebar.jsx:270",
       "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
       "text": "",
       "childElements": [
@@ -240,7 +240,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:363",
+      "location": "src/components/WorkspaceSidebar.jsx:361",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -255,7 +255,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:386",
+      "location": "src/components/WorkspaceSidebar.jsx:384",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -270,7 +270,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:452",
+      "location": "src/components/WorkspaceSidebar.jsx:450",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -350,17 +350,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:363",
+      "location": "src/components/WorkspaceSidebar.jsx:361",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:386",
+      "location": "src/components/WorkspaceSidebar.jsx:384",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:452",
+      "location": "src/components/WorkspaceSidebar.jsx:450",
       "tag": "button",
       "context": "branding-action"
     }
@@ -426,7 +426,7 @@
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1635",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1633",
       "tag": "div",
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },

@@ -62,14 +62,14 @@ export async function PATCH(request, context) {
       const name = typeof body.name === 'string' ? body.name.trim() : '';
       const description = typeof body.description === 'string' ? body.description.trim() : '';
       if (!name || name.length > 160 || description.length > 10_000) {
-        return NextResponse.json({ error: 'Некоректна назва або опис проєкту' }, { status: 400 });
+        return NextResponse.json({ error: 'Некоректна назва або опис клієнта' }, { status: 400 });
       }
 
       if (body.team !== undefined && !Array.isArray(body.team)) {
-        return NextResponse.json({ error: 'Некоректний склад команди проєкту' }, { status: 400 });
+        return NextResponse.json({ error: 'Некоректний склад команди клієнта' }, { status: 400 });
       }
       if (body.teamBaseline !== undefined && !Array.isArray(body.teamBaseline)) {
-        return NextResponse.json({ error: 'Некоректний склад команди проєкту' }, { status: 400 });
+        return NextResponse.json({ error: 'Некоректний склад команди клієнта' }, { status: 400 });
       }
       const editsTeam = Array.isArray(body.team);
       const requestedSettingsTeam = editsTeam
@@ -129,14 +129,14 @@ export async function PATCH(request, context) {
           throw projectTransactionError(
             'PROJECT_NOT_FOUND',
             404,
-            'Проєкт не знайдено',
+            'Клієнта не знайдено',
           );
         }
         if (freshProject.data().deletionPending === true) {
           throw projectTransactionError(
             'PROJECT_DELETING',
             409,
-            'Проєкт уже видаляється',
+            'Клієнтський простір уже видаляється',
           );
         }
         const currentProject = freshProject.data();
@@ -243,7 +243,7 @@ export async function PATCH(request, context) {
           throw projectTransactionError(
             'HIDDEN_COLUMN_EXECUTION_CONFLICT',
             409,
-            'Не можна приховати колонку: перенесення задач порушить ієрархію або залежності',
+            'Не можна приховати колонку: перенесення звернень порушить ієрархію або залежності',
             {
               violationCount: violations.length,
               violations: violations.slice(0, 50),
@@ -255,7 +255,7 @@ export async function PATCH(request, context) {
           throw projectTransactionError(
             'HIDDEN_COLUMN_MIGRATION_TOO_LARGE',
             409,
-            'Забагато задач для однієї безпечної зміни колонок',
+            'Забагато звернень для однієї безпечної зміни колонок',
             {
               affectedIssues: issueIdsToMove.size,
               maxTransactionWrites: MAX_PROJECT_SETTINGS_TRANSACTION_WRITES,

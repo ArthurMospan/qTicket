@@ -56,7 +56,7 @@ export function PageHeader({
   // Reproducing that tree inside the sheet was the bug. It is authored as a
   // desktop *row* — `flex items-center justify-between`, with a trailing group
   // pushed out by `ml-auto` — and a row 358px wide does not fold on its own:
-  // «Мої завдання» put its column-visibility button half off the right edge of
+  // «Звернення» put its column-visibility button half off the right edge of
   // the sheet. So the sheet does not reproduce the row, it reads it. Every
   // filter bar comes through stacked, anything the row itself hides on a phone
   // stays hidden, and whatever is left is a control rather than a filter — it

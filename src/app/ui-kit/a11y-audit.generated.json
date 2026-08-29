@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 255,
-    "elements": 2185,
+    "elements": 2184,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -194,14 +194,14 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1422",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1420",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1442",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1440",
       "attributes": [
         "label"
       ]
@@ -215,7 +215,7 @@
     },
     {
       "element": "a",
-      "location": "src/components/WorkspaceSidebar.jsx:499",
+      "location": "src/components/WorkspaceSidebar.jsx:497",
       "attributes": [
         "title"
       ]

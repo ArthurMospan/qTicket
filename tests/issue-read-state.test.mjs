@@ -65,8 +65,8 @@ test('the dot says what kind of activity it is about', () => {
   assert.equal(unreadActivityLabel({ lastActivityType: 'status' }), 'Нове: зміна статусу');
   // Bulk actions and plain edits share one phrase; a card is not the place to
   // enumerate which field of the task moved.
-  assert.equal(unreadActivityLabel({ lastActivityType: 'bulk_priority' }), 'Нове: зміни в задачі');
-  assert.equal(unreadActivityLabel({}), 'Нове: зміни в задачі');
+  assert.equal(unreadActivityLabel({ lastActivityType: 'bulk_priority' }), 'Нове: зміни у зверненні');
+  assert.equal(unreadActivityLabel({}), 'Нове: зміни у зверненні');
 });
 
 test('a task is consumed by being left, never by being rendered', async () => {

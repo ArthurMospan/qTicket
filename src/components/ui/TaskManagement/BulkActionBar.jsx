@@ -90,8 +90,8 @@ export default function BulkActionBar({
 
   const askDeadline = async () => {
     const value = await confirm({
-      title: `Термін вирішення для ${count} інцидентів`,
-      message: 'Оберіть дату вирішення для всіх вибраних інцидентів.',
+      title: `Термін вирішення для ${count} звернень`,
+      message: 'Оберіть дату вирішення для всіх вибраних звернень.',
       confirmText: 'Встановити',
       input: { type: 'date' },
     });
@@ -100,8 +100,8 @@ export default function BulkActionBar({
 
   const askArchive = async () => {
     const accepted = await confirm({
-      title: `Архівувати ${count} інцидентів?`,
-      message: 'Інциденти зникнуть з активної черги, але їхня історія, чат і файли залишаться в «Архіві». Повернути їх можна будь-коли.',
+      title: `Архівувати ${count} звернень?`,
+      message: 'Звернення зникнуть з активної черги, але їхня історія, чат і файли залишаться в «Архіві». Повернути їх можна будь-коли.',
       confirmText: 'Архівувати',
     });
     if (accepted) await apply('archive');
@@ -109,8 +109,8 @@ export default function BulkActionBar({
 
   const askCancel = async () => {
     const accepted = await confirm({
-      title: `Скасувати ${count} інцидентів?`,
-      message: 'Скасовані інциденти зникнуть з активної черги й не рахуватимуться як вирішені. Історія звернень залишиться в «Архіві» → «Скасовані», а повернути їх можна будь-коли.',
+      title: `Скасувати ${count} звернень?`,
+      message: 'Скасовані звернення зникнуть з активної черги й не рахуватимуться як вирішені. Історія звернень залишиться в «Архіві» → «Скасовані», а повернути їх можна будь-коли.',
       confirmText: 'Так, скасувати',
       // See IssueDetail: «Скасувати» is the dismiss label on every dialog, and
       // here it is also the action, so the two buttons would have read the same.
@@ -121,8 +121,8 @@ export default function BulkActionBar({
 
   const askDelete = async () => {
     const accepted = await confirm({
-      title: `Видалити ${count} інцидентів?`,
-      message: 'Інциденти потраплять у «Нещодавно видалене» і через 24 години зникнуть назавжди.',
+      title: `Видалити ${count} звернень?`,
+      message: 'Звернення потраплять у «Нещодавно видалене» і через 24 години зникнуть назавжди.',
       confirmText: 'Видалити',
       danger: true,
     });
@@ -147,7 +147,7 @@ export default function BulkActionBar({
       data-ui-composition="bulk-actions"
       className="ui-bulk-actions"
       role="toolbar"
-      aria-label={`Дії з вибраними інцидентами: ${count}`}
+      aria-label={`Дії з вибраними зверненнями: ${count}`}
     >
       {/* While an action runs the bar said nothing at all: every control simply
           went dead and stayed dead — for minutes on a large selection, with no
@@ -175,7 +175,7 @@ export default function BulkActionBar({
         compact
         size="sm"
         disabled={busy}
-        ariaLabel="Змінити статус вибраних інцидентів"
+        ariaLabel="Змінити статус вибраних звернень"
         buttonClassName={triggerClass}
       />
       <Select
@@ -193,7 +193,7 @@ export default function BulkActionBar({
         compact
         size="sm"
         disabled={busy}
-        ariaLabel="Змінити відповідальних вибраних інцидентів"
+        ariaLabel="Змінити відповідальних вибраних звернень"
         buttonClassName={triggerClass}
       />
       <Select
@@ -208,7 +208,7 @@ export default function BulkActionBar({
         compact
         size="sm"
         disabled={busy}
-        ariaLabel="Змінити пріоритет вибраних інцидентів"
+        ariaLabel="Змінити пріоритет вибраних звернень"
         buttonClassName={triggerClass}
       />
       {labelOptions.length > 0 && (
@@ -227,7 +227,7 @@ export default function BulkActionBar({
           compact
           size="sm"
           disabled={busy}
-          ariaLabel="Змінити мітки вибраних інцидентів"
+          ariaLabel="Змінити мітки вибраних звернень"
           buttonClassName={triggerClass}
         />
       )}
@@ -242,7 +242,7 @@ export default function BulkActionBar({
           compact
           size="sm"
           disabled={busy}
-          ariaLabel="Змінити тип вибраних інцидентів"
+          ariaLabel="Змінити тип вибраних звернень"
           buttonClassName={triggerClass}
         />
       )}

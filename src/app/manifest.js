@@ -9,7 +9,7 @@ export default function manifest() {
   return {
     name: 'qTicket',
     short_name: 'qTicket',
-    description: 'Система інцидентів і клієнтської підтримки',
+    description: 'Система звернень і клієнтської підтримки',
     lang: 'uk',
     start_url: '/',
     scope: '/',
@@ -23,7 +23,7 @@ export default function manifest() {
     ],
     shortcuts: [
       { name: 'Огляд підтримки', url: '/overview' },
-      { name: 'Інциденти', url: '/my' },
+      { name: 'Звернення', url: '/my' },
       { name: 'Клієнти', url: '/clients' },
     ],
   };

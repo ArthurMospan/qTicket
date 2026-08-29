@@ -7,7 +7,7 @@ const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
  *
  * A Firestore `Timestamp` is not a `Date` and has no `getTime`, so every reader
  * that takes a stored field and calls a `Date` method on it directly throws.
- * That is not a hypothetical: «Архів» → «Завдання» handed `archivedAt` straight
+ * That is not a hypothetical: «Архів» → «Звернення» handed `archivedAt` straight
  * to the date formatter and took the whole settings screen down with
  * `getTime is not a function`. One coercion, exported, so a reader never has to
  * know which of the three shapes it was handed.

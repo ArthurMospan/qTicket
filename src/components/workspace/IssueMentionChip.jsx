@@ -202,7 +202,7 @@ export default function IssueMentionChip({ issueKey, title = '', dark = false })
       ref={chipRef}
       type="button"
       onClick={open}
-      title={issue ? `${issueKey}: ${issue.title}` : `Завдання ${issueKey}`}
+      title={issue ? `${issueKey}: ${issue.title}` : `Звернення ${issueKey}`}
       className={mentionChipClass({ dark })}
       data-mention="issue"
     >

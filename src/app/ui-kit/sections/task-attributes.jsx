@@ -34,7 +34,7 @@ export default function TaskAttributesSection() {
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
         title="Task Attributes Panel — Issue Detail"
-        description="Точний primary strip зі сторінки інциденту: ті самі compact/singleRow props, grid, поля та Details popover."
+        description="Точний primary strip зі сторінки звернення: ті самі compact/singleRow props, grid, поля та Details popover."
         filePath="src/components/workspace/IssueDetail.jsx"
         fullWidth
       >
@@ -80,7 +80,7 @@ export default function TaskAttributesSection() {
                   trigger={(
                     <AttributeTrigger
                       className="max-sm:px-0"
-                      aria-label="Деталі завдання"
+                      aria-label="Деталі звернення"
                       title="Пріоритет і тип"
                     >
                       <Settings2 size={14} />

@@ -54,7 +54,7 @@ export async function bulkIssuesViaApi({ organizationId, issueIds, action, value
 /**
  * Tell whoever was just given a task. Being assigned is the same event wherever
  * the task was created from, so both composers say it the same way — the one on
- * «Мої завдання» used to say nothing at all, and a task created there reached
+ * «Звернення» used to say nothing at all, and a task created there reached
  * its assignee only if they happened to look at the board.
  *
  * Best-effort: a task that exists must not appear to have failed because a
@@ -75,7 +75,7 @@ export function notifyIssueAssigned({
   return sendNotification({
     userIds: recipients,
     type: 'assigned',
-    title: `${actorName || 'Колега'} призначив вам нове завдання`,
+    title: `${actorName || 'Колега'} призначив вам нове звернення`,
     body: title || '',
     link: issuePath({ id: issueId, issueKey }, projectId),
     issueId,
@@ -101,7 +101,7 @@ export async function transitionIssueStatusViaApi({
         ...(Array.isArray(orderUpdates) ? { orderUpdates } : {}),
       }),
     },
-    'Не вдалося змінити статус задачі',
+    'Не вдалося змінити статус звернення',
   );
 }
 
@@ -114,7 +114,7 @@ export async function setIssueArchived(issueId, archived) {
   return authenticatedRequest(
     `/api/issues/${encodeURIComponent(issueId)}/archive`,
     { method: 'PATCH', body: JSON.stringify({ archived }) },
-    'Не вдалося змінити стан архіву завдання',
+    'Не вдалося змінити стан архіву звернення',
   );
 }
 
@@ -127,7 +127,7 @@ export async function setIssueCancelled(issueId, cancelled) {
   return authenticatedRequest(
     `/api/issues/${encodeURIComponent(issueId)}/cancel`,
     { method: 'PATCH', body: JSON.stringify({ cancelled }) },
-    'Не вдалося змінити стан скасування завдання',
+    'Не вдалося змінити стан скасування звернення',
   );
 }
 
@@ -136,7 +136,7 @@ export async function fetchDeletedIssues(organizationId) {
   const result = await authenticatedRequest(
     `/api/issues/trash?organizationId=${encodeURIComponent(organizationId)}`,
     { cache: 'no-store' },
-    'Не вдалося прочитати нещодавно видалені завдання',
+    'Не вдалося прочитати нещодавно видалені звернення',
   );
   return result.items || [];
 }
@@ -145,6 +145,6 @@ export async function restoreDeletedIssue(issueId, organizationId) {
   return authenticatedRequest(
     `/api/issues/${encodeURIComponent(issueId)}/restore`,
     { method: 'POST', body: JSON.stringify({ organizationId }) },
-    'Не вдалося відновити завдання',
+    'Не вдалося відновити звернення',
   );
 }

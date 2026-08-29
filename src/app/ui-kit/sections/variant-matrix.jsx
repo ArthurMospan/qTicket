@@ -89,7 +89,7 @@ const VARIANT_BASE = {
   Label: (props) => <Label {...props}>Підпис</Label>,
   Tag: (props) => <Tag {...props}>Тег</Tag>,
   SelectableChip: (props) => <SelectableChip selected {...props}>Чіп</SelectableChip>,
-  MarkdownViewer: (props) => <MarkdownViewer content="Опис завдання" {...props} />,
+  MarkdownViewer: (props) => <MarkdownViewer content="Опис звернення" {...props} />,
   FileThumb: (props) => <FileThumb attachment={{ name: 'кошторис.xlsx' }} {...props} />,
   DetailSection: (props) => (
     <DetailSection icon={Folder} title="Вкладення" count={3} {...props}>
@@ -126,10 +126,10 @@ const VARIANT_BASE = {
 const VARIANT_ELSEWHERE = {
   Dialog: 'Потребує відкритого стану — див. «Dialogs & Modals»',
   FilterBar: 'Живе всередині PageHeader — див. «Filter Bar»',
-  TaskAttributesPanel: 'Потребує задачі — див. «Task Attributes Panel»',
+  TaskAttributesPanel: 'Потребує звернення — див. «Task Attributes Panel»',
   ChatComposerDock: 'Прикріплений до низу екрана — див. «Chat Composer Dock»',
   SidebarLayout: 'Каркас цілого екрана — див. «SidebarLayout — 2 контексти»',
-  DetailLayout: 'Каркас цілої сторінки — див. «Деталі задачі й події»',
+  DetailLayout: 'Каркас цілої сторінки — див. «Деталі звернення»',
 };
 
 // A dark value needs a dark backdrop to be visible at all.

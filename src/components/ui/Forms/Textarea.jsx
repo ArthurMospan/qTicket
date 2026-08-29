@@ -2,7 +2,7 @@
 import React, { forwardRef } from 'react';
 
 // Which ground the field sits on. Canvas is the default because most fields
-// sit on white; a field placed *on* the canvas — the inline «додати завдання»
+// sit on white; a field placed *on* the canvas — the inline «додати звернення»
 // on a board column — disappeared into it, and the caller could not fix that
 // with a class because the component writes its own background as a utility.
 const SURFACES = {

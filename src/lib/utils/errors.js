@@ -33,13 +33,13 @@ export function createResponseError(response, result, fallbackMessage) {
 const API_ERROR_MESSAGES = Object.freeze({
   // The two codes an external client can actually receive — both from
   // POST /api/issues, both rendered verbatim in their composer. qTicket calls
-  // a project a клієнтський простір everywhere a client can read, so these do
-  // too; «проєкт» named a thing the portal never shows them.
+  // a project a клієнтський простір everywhere anybody can read, so these do
+  // too; «проєкт» named a thing no screen of this product shows.
   INVALID_PROJECT_SCOPE: 'Обраний клієнтський простір недоступний у цій організації',
-  INVALID_ESTIMATE: 'Оцінка завдання виходить за допустимі межі',
+  INVALID_ESTIMATE: 'Оцінка звернення виходить за допустимі межі',
   INVALID_SCOPE: 'Оберіть доступні організацію та клієнтський простір',
-  LEGACY_EPIC_TYPE: 'Нові епіки створювати не можна',
-  LEGACY_PARENT_FIELD: 'Оновіть форму й повторіть створення завдання',
+  LEGACY_EPIC_TYPE: 'Цей тип застарілий: нові звернення з ним створювати не можна',
+  LEGACY_PARENT_FIELD: 'Оновіть форму й повторіть створення звернення',
   RATE_LIMITED: 'Забагато спроб. Зачекайте хвилину й повторіть',
 });
 

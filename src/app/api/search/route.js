@@ -217,7 +217,7 @@ export async function GET(request) {
       .filter(entry => entry.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
-      .map(entry => ({ id: entry.project.id, name: entry.project.name || 'Проєкт' }));
+      .map(entry => ({ id: entry.project.id, name: entry.project.name || 'Клієнт' }));
 
     // Membership is organization-wide, and so is the team list every member can
     // already open — so people carry no extra visibility rule of their own.

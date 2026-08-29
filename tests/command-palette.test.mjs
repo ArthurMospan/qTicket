@@ -349,14 +349,14 @@ test('the palette has no headline, and still has a name for a screen reader', as
   assert.match(dialog, /aria-label=\{title \? undefined : ariaLabel\}/);
 });
 
-test('the global search surface speaks about incidents, not inherited tasks', async () => {
+test('the global search surface names the one record the product has', async () => {
   const [modal, header] = await Promise.all([
     read('../src/components/SearchModal.jsx'),
     read('../src/components/WorkspaceHeader.jsx'),
   ]);
 
-  assert.match(modal, /номером, темою або описом інциденту/);
+  assert.match(modal, /номером, темою або описом звернення/);
   assert.doesNotMatch(modal, /описанню завдання/);
-  assert.match(header, /placeholder: 'Пошук інцидентів\.\.\.'/);
+  assert.match(header, /placeholder: 'Пошук звернень\.\.\.'/);
   assert.doesNotMatch(header, /Пошук по спринтах і завданнях|Пошук в аналітиці|Пошук у календарі/);
 });

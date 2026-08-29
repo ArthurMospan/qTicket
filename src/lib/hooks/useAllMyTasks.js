@@ -1,6 +1,6 @@
 'use client';
 
-// src/lib/hooks/useAllMyTasks.js — «Мої завдання», read from the shared task set.
+// src/lib/hooks/useAllMyTasks.js — «Звернення», read from the shared task set.
 //
 // This used to run its own pair of queries per project chunk — the tasks
 // assigned to this person, and their links — plus a third wave of queries for
@@ -10,7 +10,7 @@
 // listener.
 //
 // So there are none here now. `useOrganizationIssues` reads every task of every
-// project this account can open, once, and «Мої завдання» is a filter over it:
+// project this account can open, once, and «Звернення» is a filter over it:
 // the cards are the tasks with this person among the assignees, and the context
 // the cards need — children, blockers, the project's own ordering — is the rest
 // of that same set, which is why the separate child subscription could be
@@ -160,19 +160,19 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
     const reasons = [];
     if (blockers.children.length > 0) {
       reasons.push(
-        `спочатку завершіть підзавдання: ${blockers.children.map(issueLabel).join(', ')}`,
+        `спочатку закрийте дочірні звернення: ${blockers.children.map(issueLabel).join(', ')}`,
       );
     }
     if (blockers.dependencies.length > 0) {
       reasons.push(
-        `завдання ще блокують: ${blockers.dependencies.map(issueLabel).join(', ')}`,
+        `звернення ще блокують: ${blockers.dependencies.map(issueLabel).join(', ')}`,
       );
     }
-    throw new Error(`Не можна завершити завдання — ${reasons.join('; ')}.`);
+    throw new Error(`Не можна завершити звернення — ${reasons.join('; ')}.`);
   }, [allIssues, closedStatusIds, issueLinks]);
 
   /**
-   * A drop on "Мої завдання" always updates a private cross-project order.
+   * A drop on "Звернення" always updates a private cross-project order.
    * Project `order` is only touched when the task really enters another status;
    * a reorder in one category creates no status update or audit event.
    */
@@ -293,7 +293,7 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
   ]);
 
   /**
-   * A drop on the category columns of «Мої завдання». The column names a
+   * A drop on the category columns of «Звернення». The column names a
    * category; the status written is one the task's *own project* uses, so a
    * column of this board can never be missing from a project and a drop can
    * never be refused by a project setting the person dropping the card cannot
@@ -310,9 +310,9 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
     });
     if (!statusId) {
       throw new Error(
-        `У проєкті «${project?.name || current.projectId}» немає доступної колонки `
+        `У клієнта «${project?.name || current.projectId}» немає доступної колонки `
           + `категорії «${statusCategoryLabel(categoryId) || categoryId}». `
-          + 'Увімкніть її в налаштуваннях проєкту або оберіть інший статус',
+          + 'Увімкніть її в налаштуваннях клієнта або оберіть інший статус',
       );
     }
     return moveTask(taskId, statusId, categoryId, position, actorUser);
@@ -325,11 +325,11 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
       && data.columnId !== undefined
       && data.status !== data.columnId
     ) {
-      throw new Error('Статус і колонка задачі мають збігатися');
+      throw new Error('Статус і колонка звернення мають збігатися');
     }
     const hasStatusUpdate = data.status !== undefined || data.columnId !== undefined;
     if (data.completedAt !== undefined && !hasStatusUpdate) {
-      throw new Error('Дата завершення керується статусом задачі');
+      throw new Error('Дата завершення керується статусом звернення');
     }
     const nextStatus = data.columnId ?? data.status;
     const directData = { ...data };

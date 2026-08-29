@@ -57,16 +57,15 @@ function plural(count, [one, few, many]) {
  * той самий факт, сказаний користувачеві двічі.
  *
  * @param {number} count Скільки записів стоїть за цим рядком.
- * @param {object} sample Будь-який із них — потрібен лише для ключа задачі.
+ * @param {object} sample Будь-який із них — потрібен лише для ключа звернення.
  */
 export function notificationCountTitle(count, sample) {
   const what = `${count} ${plural(count, ['нове повідомлення', 'нові повідомлення', 'нових повідомлень'])}`;
   const issueKey = notificationIssueKey(sample);
   if (issueKey) return `${what} в ${issueKey}`;
-  // The fallback names no record: the bell is shared with the external client,
-  // whose word for it is «звернення» and never «завдання». The key above names
-  // it exactly when it can, and «обговорення» is what the messages are in when
-  // it cannot.
+  // The fallback names no record: the key above names it exactly when it can,
+  // and «обговорення» is what the messages are in when it cannot. Repeating the
+  // noun here would say less than the key already does.
   return `${what} в обговоренні`;
 }
 

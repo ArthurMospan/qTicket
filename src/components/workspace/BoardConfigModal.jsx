@@ -120,10 +120,10 @@ export default function BoardConfigModal({
         .map(status => status.label)
         .join(', ');
       const accepted = await confirm({
-        title: 'Приховати етапи інцидентів?',
+        title: 'Приховати етапи звернень?',
         message: affectedCount > 0
-          ? `${affectedCount} інцидентів із прихованих етапів буде перенесено у «Новий». ${hiddenLabels ? `Етапи: ${hiddenLabels}.` : ''}`
-          : `Етапи ${hiddenLabels || 'буде приховано'}. Інциденти з них не залишаться поза робочою чергою.`,
+          ? `${affectedCount} звернень із прихованих етапів буде перенесено у «Новий». ${hiddenLabels ? `Етапи: ${hiddenLabels}.` : ''}`
+          : `Етапи ${hiddenLabels || 'буде приховано'}. Звернення з них не залишаться поза робочою чергою.`,
         confirmText: affectedCount > 0 ? 'Приховати й перенести' : 'Приховати',
       });
       if (!accepted) return;
@@ -148,7 +148,7 @@ export default function BoardConfigModal({
 
       showToast(
         result.movedIssues > 0
-          ? `Налаштування збережено, ${result.movedIssues} інцидентів перенесено у «Новий» ✓`
+          ? `Налаштування збережено, ${result.movedIssues} звернень перенесено у «Новий» ✓`
           : 'Налаштування клієнта збережено ✓',
       );
       onClose();
@@ -183,7 +183,7 @@ export default function BoardConfigModal({
     <section className="mt-2 border-t border-line pt-4">
       <div className="mb-1"><Label>Небезпечна зона</Label></div>
       <p className="mb-3 text-[11px] leading-relaxed text-muted">
-        Архівований клієнт зникає з активного списку, але його інциденти та історія зберігаються.
+        Архівований клієнт зникає з активного списку, але його звернення та історія зберігаються.
         Видалення незворотне.
       </p>
       <div className="flex flex-wrap gap-2">

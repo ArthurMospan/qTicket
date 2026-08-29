@@ -82,7 +82,7 @@ export default function NavigationOverlaysSection() {
             />
           </div>
           <div className="flex flex-col gap-[8px]">
-            <span className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider">Меню-перемикач (мітки задачі)</span>
+            <span className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider">Меню-перемикач (мітки звернення)</span>
             <ContextMenu
               trigger={(
                 <Button style="secondary" size="sm" composition="inline-add-action" icon={Plus}>
@@ -119,7 +119,7 @@ export default function NavigationOverlaysSection() {
       <PreviewBlock
         title="Командна палітра"
         component="CommandPalette"
-        description="⌘K будь-де у воркспейсі: навігація, дії, проєкти та завдання в одному списку. Каталог і ранжування — чисті функції в lib/utils/commandPalette.mjs."
+        description="⌘K будь-де у воркспейсі: навігація, дії, клієнти та звернення в одному списку. Каталог і ранжування — чисті функції в lib/utils/commandPalette.mjs."
         fullWidth
       >
         <div className="flex items-center gap-[16px] flex-wrap">
@@ -138,7 +138,7 @@ export default function NavigationOverlaysSection() {
           projects={KIT_PALETTE_PROJECTS}
           onSelect={() => {}}
           initialQuery="дизайн"
-          initialScope={{ type: 'project', projectId: 'p1', label: 'у проєкті Mobile App Redesign' }}
+          initialScope={{ type: 'project', projectId: 'p1', label: 'у клієнта Mobile App Redesign' }}
           requestKey={1}
         />
         <KeyboardShortcutsDialog isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />

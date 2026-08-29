@@ -35,7 +35,7 @@ export async function POST(request, context) {
   try {
     const { issueId } = await context.params;
     if (!issueId || typeof issueId !== 'string' || issueId.length > 200) {
-      return NextResponse.json({ error: 'Некоректне завдання' }, { status: 400 });
+      return NextResponse.json({ error: 'Некоректне звернення' }, { status: 400 });
     }
 
     // The token is checked before anything is read, and this order is the whole
@@ -80,7 +80,7 @@ export async function POST(request, context) {
   } catch (error) {
     return routeErrorResponse(error, {
       context: 'issue reminders',
-      fallbackMessage: 'Не вдалося оновити нагадування завдання',
+      fallbackMessage: 'Не вдалося оновити нагадування звернення',
     });
   }
 }

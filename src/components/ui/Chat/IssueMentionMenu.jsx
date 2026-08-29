@@ -10,12 +10,9 @@ import { TaskIcon } from '@/lib/design/icons';
  * @param {object[]} props.projects Visible projects, used only for their names.
  * @param {(issue: object) => void} props.onSelect Inserts the selected key.
  * @param {boolean} props.loading Whether the server search is in flight.
- * @param {string} props.heading What the sheet is offering to mention. Supplied
- *   by the caller, because the same composer sits in front of two audiences:
- *   internal support mentions an «інцидент», the external client whose portal
- *   is «Мої звернення» mentions a «звернення», and the kit cannot know which of
- *   them is reading. The default is the support wording, which is what the
- *   catalogue previews.
+ * @param {string} props.heading What the sheet is offering to mention. Kept as
+ *   a prop so a composer in another context can say what it is searching, but
+ *   the record has one name for everybody, and the default is it.
  * @param {string} props.className Placement in the composer.
  */
 export default function IssueMentionMenu({
@@ -23,7 +20,7 @@ export default function IssueMentionMenu({
   projects = [],
   onSelect,
   loading = false,
-  heading = 'Згадати інцидент',
+  heading = 'Згадати звернення',
   className = '',
 }) {
   if (!loading && issues.length === 0) return null;

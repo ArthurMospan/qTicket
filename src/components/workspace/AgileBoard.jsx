@@ -180,7 +180,7 @@ export default function AgileBoard({
   const dndAnnouncements = useMemo(() => createUkrainianDndAnnouncements({
     itemLabel: draggableId => {
       const issue = boardIssues.find(candidate => candidate.id === draggableId);
-      return issue?.issueKey || issue?.title || 'Інцидент';
+      return issue?.issueKey || issue?.title || 'Звернення';
     },
     listLabel: droppableId => {
       const columnId = String(droppableId || '').split('::').at(-1);
@@ -254,7 +254,7 @@ export default function AgileBoard({
     }
 
     // The column the user was looking at, not an index into rows they could not
-    // see. Filters, swimlanes and the cross-project columns of «Мої завдання»
+    // see. Filters, swimlanes and the cross-project columns of «Звернення»
     // all mean the visible list is a subset of what `order` numbers, so the
     // caller resolves this against its own scope. It used to be resolved here,
     // against a list sorted by a rule of its own, and a card that was dropped

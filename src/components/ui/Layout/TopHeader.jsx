@@ -95,7 +95,7 @@ export default function TopHeader({
           searchLocalResultCount={searchLocalResultCount}
           searchOutsideResultCount={searchOutsideResultCount}
           searchOutsideLoading={searchOutsideLoading}
-          searchPlaceholder={`Пошук інцидентів клієнта "${projectName}"...`}
+          searchPlaceholder={`Пошук звернень клієнта "${projectName}"...`}
         />
       );
     }

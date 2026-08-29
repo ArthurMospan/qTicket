@@ -163,7 +163,7 @@ export default function SupportOverviewPage() {
   return (
     <div className="qt-nav-scroll flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent">
       <div className="workspace-page-layout min-h-full pb-[120px]">
-        {/* No «Створити інцидент» here. Only a client opens a request — support
+        {/* No «Створити звернення» here. Only a client opens a request — support
             receives it, works it and closes it — so the front door of the
             support side has nothing to create. */}
         <PageHeader title="Огляд підтримки" />
@@ -189,7 +189,7 @@ export default function SupportOverviewPage() {
               <KpiCard
                 icon={Inbox}
                 value={metrics.open}
-                label="Відкриті інциденти"
+                label="Відкриті звернення"
                 sub={`у ${activeProjects.length} клієнтських просторах`}
               />
               <KpiCard
@@ -228,7 +228,7 @@ export default function SupportOverviewPage() {
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h2 className="ui-type-section-title text-ink">Нещодавно оновлені</h2>
-                    <p className="mt-1 text-[12px] text-muted">Останні зміни в інцидентах усіх доступних клієнтів.</p>
+                    <p className="mt-1 text-[12px] text-muted">Останні зміни у зверненнях усіх доступних клієнтів.</p>
                   </div>
                   <Button onClick={() => router.push('/my')} style="secondary" size="md" icon={ArrowRight}>
                     Вся черга
@@ -238,7 +238,7 @@ export default function SupportOverviewPage() {
                 {recentIssues.length === 0 ? (
                   <EmptyState
                     icon={Inbox}
-                    title="Інцидентів ще немає"
+                    title="Звернень ще немає"
                     description="Запросіть клієнта до підготовленого для нього простору — звернення відкриває він."
                     density="compact"
                     surface="card"
@@ -270,7 +270,7 @@ export default function SupportOverviewPage() {
                               done={category === 'done'}
                             />
                             <p className="mt-1 truncate text-[13px] font-bold text-ink">
-                              {issue.title || 'Інцидент без назви'}
+                              {issue.title || 'Звернення без назви'}
                             </p>
                             <p className="mt-1 text-[11px] text-faint">
                               Оновлено {formatUpdatedAt(issue.updatedAt || issue.createdAt)}
@@ -297,7 +297,7 @@ export default function SupportOverviewPage() {
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h2 className="ui-type-section-title text-ink">Клієнти</h2>
-                    <p className="mt-1 text-[12px] text-muted">Відкриті інциденти за просторами.</p>
+                    <p className="mt-1 text-[12px] text-muted">Відкриті звернення за просторами.</p>
                   </div>
                   <Button onClick={() => router.push('/clients')} style="secondary" size="md" icon={ArrowRight}>
                     Усі

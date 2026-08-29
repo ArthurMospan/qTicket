@@ -26,7 +26,7 @@ export default function SurfacesSection() {
                 Level 2: White Card (rounded-[12px])
               </span>
               <p className="text-[13px] text-[#1f1f1f] font-semibold mt-[12px]">Біла плаваюча картка</p>
-              <p className="text-[12px] text-[#9a9a9a] mt-[4px]">Без рамки та без тіней. Чиста біла поверхня для розміщення окремих завдань, деталей або списків.</p>
+              <p className="text-[12px] text-[#9a9a9a] mt-[4px]">Без рамки та без тіней. Чиста біла поверхня для розміщення окремих звернень, деталей або списків.</p>
             </Surface>
 
             <Surface preset="card" padding="md" className="flex flex-col">

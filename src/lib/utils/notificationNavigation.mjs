@@ -61,11 +61,11 @@ export function notificationDestination(notification) {
 // place.
 //
 // Two of these named the destination «завдання», and the bell is not a staff
-// screen: an external client is a participant of their own incident, so a
+// screen: an external client is a participant of their own request, so a
 // support reply or a status change puts the same card in front of them. The
 // conversation labels say what the destination is rather than what the record
 // is called, and the three that genuinely name the record take the name from
-// the caller — «інцидент» for support, «звернення» for the client.
+// the caller, which reads it out of `incidentTerms`.
 const OPEN_LABELS = {
   commented: 'Відкрити обговорення',
   mentioned: 'Відкрити обговорення',
@@ -79,14 +79,15 @@ const RECORD_DESTINATIONS = new Set(['assigned', 'status_changed', 'deadline']);
 
 /**
  * @param {object} notification The notification being named.
- * @param {string} options.record What this reader calls the record — accusative,
- *   which for both «інцидент» and «звернення» is the nominative. Defaults to the
- *   support wording; the client portal's reader passes its own.
+ * @param {string} options.record The product's word for the record, accusative
+ *   — which for «звернення» is the nominative. Callers pass `terms.record`
+ *   lowercased; the default is that same word, so a caller that forgets cannot
+ *   put a different one on the card.
  * @returns {string} Where the card goes, in words — its accessible name, and the
  *   label of the row action where one is still drawn. «Перейти» for anything
  *   without a place of its own.
  */
-export function notificationOpenLabel(notification, { record = 'інцидент' } = {}) {
+export function notificationOpenLabel(notification, { record = 'звернення' } = {}) {
   const type = typeof notification?.type === 'string' ? notification.type : '';
   if (RECORD_DESTINATIONS.has(type)) return `Відкрити ${record}`;
   return OPEN_LABELS[type] || 'Перейти';

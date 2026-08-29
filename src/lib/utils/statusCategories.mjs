@@ -8,7 +8,7 @@
 // by something that exists everywhere.
 //
 // Before this file the app had one global list of names and no categories, so
-// «Мої завдання» built its columns from raw names, project boards could hide any
+// «Звернення» built its columns from raw names, project boards could hide any
 // of those names, and dropping a card into a column the card's own project had
 // switched off was rejected by the server with a message the user could do
 // nothing about. Categories remove the collision instead of guarding it: a task

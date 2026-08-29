@@ -66,7 +66,7 @@ export async function GET(request) {
   } catch (error) {
     return routeErrorResponse(error, {
       context: 'issue-trash',
-      fallbackMessage: 'Не вдалося прочитати нещодавно видалені завдання',
+      fallbackMessage: 'Не вдалося прочитати нещодавно видалені звернення',
     });
   }
 }

@@ -35,11 +35,11 @@ export function routeTitle(pathname, projects = [], { clientPortal = false } = {
   const projectId = path.split('/').filter(Boolean)[0] || '';
   const project = (projects || []).find(item => item?.id === projectId);
   if (project?.name) return project.name;
-  // The one such route a client can open is their own incident, and until the
-  // spaces load there is no name for it — «Проєкт» is a word from the product
-  // they did not buy, so their tab says where they are instead.
+  // The one such route a client can open is their own request, and until the
+  // spaces load there is no name for it. A client's tab says where they are;
+  // support's says whose space it is standing in.
   if (clientPortal) return 'Мої звернення';
-  return projectId ? 'Проєкт' : BRAND;
+  return projectId ? 'Клієнт' : BRAND;
 }
 
 // The breadcrumb trail is already the answer to "where am I", and detail screens

@@ -17,7 +17,9 @@ test('a project page produces the one removable palette scope', () => {
   assert.deepEqual(scope, {
     type: 'project',
     projectId: 'p1',
-    label: 'у проєкті Мобільний застосунок',
+    // The scope chip names the client whose space is being searched. «у проєкті»
+    // described somebody's portfolio; this space belongs to one customer.
+    label: 'у клієнта Мобільний застосунок',
   });
   assert.deepEqual(searchScopeParams(scope), { projectId: 'p1' });
   assert.equal(createProjectSearchScope(null), null);

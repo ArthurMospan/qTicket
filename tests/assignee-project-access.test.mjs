@@ -124,11 +124,14 @@ test('the composer scopes assignees to the project selected inside it', async ()
   assert.match(modal, /assigneesJoiningProject/);
   assert.doesNotMatch(modal, /буде додано разом зі створенням завдання/);
   assert.match(modal, /const \[addToProjectTeam, setAddToProjectTeam\] = useState\(false\);/);
-  assert.match(modal, /Додати до проєкту/);
+  // The consent the person reads is about the client they are filing under, not
+  // about a «проєкт» — the collection keeps that name, the sentence does not.
+  assert.match(modal, /Додати до команди підтримки клієнта/);
+  assert.doesNotMatch(modal, /Додати до проєкту/);
   // Beside the project, not at the bottom of the form: the block used to sit
   // under the assignee chips, which is past the fold of a form somebody is
   // still filling in.
-  const projectField = modal.indexOf("label={incidentComposer ? 'Клієнт' : 'Проєкт'}");
+  const projectField = modal.indexOf('<FormGroup label="Клієнт" required');
   const consent = modal.indexOf('assigneesJoiningProject.length > 0 && (');
   const description = modal.indexOf('<MarkdownEditor');
   assert.ok(projectField > 0 && consent > projectField && consent < description,

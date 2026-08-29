@@ -30,7 +30,7 @@ export default function BadgesSection() {
           <Pill tone="warning" size="md">Очікує</Pill>
           <Pill tone="danger" size="md">Прострочено</Pill>
           <Pill tone="info" size="sm" shape="badge">1г 25хв</Pill>
-          <Pill tone="surface" size="wide-sm" appearance="soft-outline">Проєкт</Pill>
+          <Pill tone="surface" size="wide-sm" appearance="soft-outline">Клієнт</Pill>
           {/* Обидва лічильники стоять поруч зі стеком облич і мають бути
               рівно такого ж розміру, як обличчя: avatar-counter — для 24px
               (sm), avatar-counter-xs — для 16px (xs). Це четверта аватарка, а
@@ -57,7 +57,7 @@ export default function BadgesSection() {
         <div className="flex flex-col gap-[18px] w-full">
           <div>
             <h4 className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[8px]">Іконка стану — IssueCard</h4>
-            <Pill tone="danger" size="sm" shape="badge" weight="medium" title="Заблоковано іншою задачею">
+            <Pill tone="danger" size="sm" shape="badge" weight="medium" title="Заблоковано іншим зверненням">
               <Lock size={10} />
               Заблоковано
             </Pill>
@@ -118,8 +118,8 @@ export default function BadgesSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="PriorityBadge — рядки списку інцидентів"
-        description="Живий бейдж пріоритету зі списку інцидентів. Значення приходить із інциденту, тому показані всі можливі пріоритети."
+        title="PriorityBadge — рядки списку звернень"
+        description="Живий бейдж пріоритету зі списку звернень. Значення приходить зі звернення, тому показані всі можливі пріоритети."
         filePath="src/components/ui/TaskManagement/TaskRow.jsx"
       >
         <div className="flex items-center gap-[8px]">
@@ -133,7 +133,7 @@ export default function BadgesSection() {
 
       <PreviewBlock
         title="Tag — issue labels"
-        description="Два фактичні розміри мітки: компактний у IssueCard та стандартний у IssueDetail. Колір завжди приходить із конфігурації мітки бренду/проєкту."
+        description="Два фактичні розміри мітки: компактний у IssueCard та стандартний у IssueDetail. Колір завжди приходить із конфігурації мітки організації."
         filePath="src/components/workspace/IssueCard.jsx"
       >
         <div className="flex items-center gap-[12px]">
@@ -170,7 +170,7 @@ export default function BadgesSection() {
 
       <PreviewBlock
         title="StatusPill — статус із бази"
-        description="Спільний компактний статус із черги інцидентів і клієнтського порталу. Геометрія однакова, а label і колір приходять із workflow організації, тому це дані, а не токен."
+        description="Спільний компактний статус із черги звернень і клієнтського порталу. Геометрія однакова, а label і колір приходять із workflow організації, тому це дані, а не токен."
         filePath="src/app/(app)/overview/page.js"
       >
         <div className="flex flex-wrap items-center gap-[8px]">

@@ -57,8 +57,8 @@ export function isIssueUnread(issue, lastSeenAt, currentUserId) {
 const ACTIVITY_LABELS = {
   comment: 'Нове: повідомлення',
   status: 'Нове: зміна статусу',
-  created: 'Нове завдання',
-  restored: 'Нове: завдання відновлено',
+  created: 'Нове звернення',
+  restored: 'Нове: звернення відновлено',
 };
 
 /**
@@ -72,7 +72,7 @@ export function unreadActivityLabel(issue) {
   // Bulk actions arrive as `bulk_<actionId>`; every one of them is a field of
   // the task being set from a selection, and none of them is worth its own
   // phrase on a card.
-  return 'Нове: зміни в задачі';
+  return 'Нове: зміни у зверненні';
 }
 
 /**

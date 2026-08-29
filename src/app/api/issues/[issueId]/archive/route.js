@@ -30,7 +30,7 @@ export async function PATCH(request, context) {
     const body = await readJsonBody(request);
     if (typeof body?.archived !== 'boolean') {
       return NextResponse.json({
-        error: 'Потрібно вказати, архівувати завдання чи повернути',
+        error: 'Потрібно вказати, архівувати звернення чи повернути',
         code: 'INVALID_ARCHIVE_STATE',
       }, { status: 400 });
     }
@@ -40,7 +40,7 @@ export async function PATCH(request, context) {
     const issueRef = db.collection('issues').doc(issueId);
     const issueSnap = await issueRef.get();
     if (!issueSnap.exists) {
-      return NextResponse.json({ error: 'Завдання не знайдено', code: 'ISSUE_NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ error: 'Звернення не знайдено', code: 'ISSUE_NOT_FOUND' }, { status: 404 });
     }
     const issue = issueSnap.data();
 
@@ -67,17 +67,17 @@ export async function PATCH(request, context) {
         transaction.get(projectRef),
       ]);
       if (!currentSnap.exists) {
-        throw archiveError('ISSUE_NOT_FOUND', 404, 'Завдання не знайдено');
+        throw archiveError('ISSUE_NOT_FOUND', 404, 'Звернення не знайдено');
       }
       const current = currentSnap.data();
       if (
         current.organizationId !== issue.organizationId
         || current.projectId !== issue.projectId
       ) {
-        throw archiveError('ISSUE_SCOPE_CHANGED', 409, 'Область завдання змінилася. Оновіть сторінку');
+        throw archiveError('ISSUE_SCOPE_CHANGED', 409, 'Область звернення змінилася. Оновіть сторінку');
       }
       if (current.deletionPending === true) {
-        throw archiveError('ISSUE_DELETING', 409, 'Завдання вже видаляється');
+        throw archiveError('ISSUE_DELETING', 409, 'Звернення вже видаляється');
       }
       const accessError = projectWriteError(
         projectSnap.exists ? { ...projectSnap.data(), id: projectSnap.id } : null,
@@ -88,7 +88,7 @@ export async function PATCH(request, context) {
       if (accessError) {
         throw archiveError(
           'PROJECT_FORBIDDEN',
-          accessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
+          accessError === 'Ви не входите до команди цього клієнта' ? 403 : 409,
           accessError,
         );
       }
@@ -147,7 +147,7 @@ export async function PATCH(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue archive',
-      fallbackMessage: 'Не вдалося змінити стан архіву завдання',
+      fallbackMessage: 'Не вдалося змінити стан архіву звернення',
     });
   }
 }

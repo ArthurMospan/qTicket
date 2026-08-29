@@ -85,7 +85,7 @@ test('help, releases and legal pages are public, searchable and mobile-safe', as
   await page.setViewportSize({ width: 390, height: 844 });
   const routes = [
     ['/help', 'Відповіді про реальну роботу сервісу'],
-    ['/help/kanban-and-bulk-actions', 'Як змінити багато інцидентів одразу'],
+    ['/help/kanban-and-bulk-actions', 'Як змінити багато звернень одразу'],
     ['/news', 'Новини продукту'],
     ['/terms', 'Умови користування qTicket'],
     ['/privacy', 'Політика конфіденційності qTicket'],
@@ -148,7 +148,7 @@ test('bulk toolbar remains usable at phone width and opens its confirm flow', as
 
   // The catalogue now shows the toolbar twice — idle, and mid-operation with
   // every control disabled. This flow is about the idle one.
-  const toolbar = page.getByRole('toolbar', { name: 'Дії з вибраними інцидентами: 4' });
+  const toolbar = page.getByRole('toolbar', { name: 'Дії з вибраними зверненнями: 4' });
   await expect(toolbar).toBeVisible();
   expect(await toolbar.evaluate(element => element.scrollWidth >= element.clientWidth)).toBe(true);
   // On a phone the less-frequent actions are intentionally reachable by
@@ -162,7 +162,7 @@ test('bulk toolbar remains usable at phone width and opens its confirm flow', as
   const deadlineAction = page.getByRole('menuitem', { name: 'Встановити термін вирішення' });
   await expect(deadlineAction).toBeVisible();
   await deadlineAction.click();
-  await expect(page.getByRole('dialog', { name: /Термін вирішення для 4 інцидентів/ })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: /Термін вирішення для 4 звернень/ })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expectHealthyPage(page, errors);

@@ -131,8 +131,6 @@ export default function WorkspaceSidebar() {
     { href: '/my',         icon: TaskIcon,        label: 'Звернення' },
     { href: '/clients',    icon: Folder,          label: 'Клієнти' },
     { href: '/team',       icon: Users,           label: 'Команда' },
-    // «Дзвінок → задачі» свідомо НЕ в сайдбарі: це не окремий екран, а вкладка
-    // всередині створення задачі (CreateTaskModal → AudioTaskPanel).
     { href: '/settings',   icon: Settings,      label: 'Налаштування' },
   ];
   // A client has exactly one space, and it is a real address — the same

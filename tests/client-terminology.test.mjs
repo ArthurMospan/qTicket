@@ -1,22 +1,24 @@
 // A client must never be shown a «завдання».
 //
-// qTicket keeps its inherited task engine — `issues`, `CreateTaskModal`,
-// `TaskRow` — and that is deliberate. What is not allowed to leak is the
-// vocabulary: an external `client_admin`/`client_member` opened an account to
-// send their supplier a problem, and «завдання», «спринт», «виконавець» or
-// «проєкт» on their screen describes a product they did not buy.
+// `tests/product-terminology.test.mjs` holds the whole of `src/` to the one
+// name the record has. This file is the stricter half: an external
+// `client_admin`/`client_member` opened an account to send their supplier a
+// problem, so «виконавець» and «трекер» describe a product they did not buy
+// even though support may still say them among themselves.
 //
-// A one-time sweep of the screens is worth one release. These assertions are
-// worth every release after it: they read the client-facing copy the product
-// actually ships and fail on the first task-manager word that comes back.
+// The two tests overlap on purpose. The product-wide one reads every string in
+// the source; this one drives the actual functions a client's screens call, so
+// a word that appears only when a catalogue is filtered by role, a palette is
+// built for `client_admin` or a tab title falls back still has to answer for
+// itself.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 import {
-  INCIDENT_TERMS,
-  TASK_MANAGER_WORDS,
+  CLIENT_FORBIDDEN_WORDS,
+  INCIDENT_TERMS_TABLE,
   incidentTerms,
 } from '../src/lib/content/incidentTerms.mjs';
 import { HELP_ARTICLES, helpArticlesForRole } from '../src/lib/content/helpArticles.mjs';
@@ -29,7 +31,7 @@ const lower = value => String(value || '').toLocaleLowerCase('uk-UA');
 
 function taskManagerWordsIn(text) {
   const haystack = lower(text);
-  return TASK_MANAGER_WORDS.filter(word => haystack.includes(word));
+  return CLIENT_FORBIDDEN_WORDS.filter(word => haystack.includes(word));
 }
 
 function assertClean(text, what) {
@@ -37,21 +39,16 @@ function assertClean(text, what) {
   assert.deepEqual(found, [], `${what} still says ${found.join(', ')}`);
 }
 
-test('the client half of the vocabulary carries none of the task manager', () => {
-  for (const [key, value] of Object.entries(INCIDENT_TERMS.client)) {
-    assertClean(value, `INCIDENT_TERMS.client.${key}`);
+test('the vocabulary the product speaks carries none of the task manager', () => {
+  for (const [key, value] of Object.entries(INCIDENT_TERMS_TABLE)) {
+    assertClean(value, `INCIDENT_TERMS_TABLE.${key}`);
   }
-  // The staff half is deliberately not asserted clean — «інцидент» is support's
-  // word and «Опис інциденту» is a correct staff string. What must hold is that
-  // the two speak about the same things, because a shared screen picks one of
-  // them by role and a key missing on one side is a silent fall-through.
-  assert.deepEqual(
-    Object.keys(INCIDENT_TERMS.client).toSorted(),
-    Object.keys(INCIDENT_TERMS.staff).toSorted(),
-  );
-  assert.equal(incidentTerms(true), INCIDENT_TERMS.client);
-  assert.equal(incidentTerms(false), INCIDENT_TERMS.staff);
-  assert.equal(incidentTerms(), INCIDENT_TERMS.staff);
+  // There is one table and no way to ask for another. The file used to export a
+  // `staff` half and a `client` half, and asserting only the client half clean
+  // is precisely how «Опис інциденту» stayed correct on a screen both of them
+  // open.
+  assert.equal(incidentTerms(), INCIDENT_TERMS_TABLE);
+  assert.equal(incidentTerms.length, 0);
 });
 
 test('the screen a client lands on is the screen support opens', async () => {
@@ -66,9 +63,13 @@ test('the screen a client lands on is the screen support opens', async () => {
   );
   assert.match(board, /INCIDENT_TERMS_TABLE\.composerSubmit/);
   assert.match(board, /INCIDENT_TERMS_TABLE\.created/);
-  // The composer is the client's action, and it is the client's form.
+  // The composer is the client's action, and it is the client's form — but not
+  // its own vocabulary: the `entity` prop that used to pick between a
+  // «звернення» and a «завдання» is gone, and only one wording was ever
+  // rendered anyway.
   assert.match(board, /canOpenIncident = clientViewer/);
   assert.match(board, /clientMode/);
+  assert.doesNotMatch(board, /entity=/);
 });
 
 test('the Ctrl+K palette a client opens offers nothing from a task manager', () => {
@@ -103,7 +104,7 @@ test('a client tab never reads as somebody else’s project', () => {
 });
 
 test('the notification centre names the record in the reader’s own word', () => {
-  const record = INCIDENT_TERMS.client.record.toLocaleLowerCase('uk-UA');
+  const record = INCIDENT_TERMS_TABLE.record.toLocaleLowerCase('uk-UA');
   for (const type of ['commented', 'mentioned', 'status_changed', 'assigned', 'deadline']) {
     assertClean(
       notificationOpenLabel({ type, issueId: 'i1' }, { record }),
@@ -121,12 +122,11 @@ test('the notification centre names the record in the reader’s own word', () =
 });
 
 test('every published help article is safe to hand a client', () => {
-  // The catalogue is filtered by role now (`helpArticlesForRole`), and the
-  // articles a client reaches are asserted below in their own right. This still
-  // reads the whole catalogue: the support team's word for the record is the
-  // client's word for it, so a task-manager word is wrong in a staff article
-  // too — and an article moved down to `client_member` must not be able to
-  // carry one in with it.
+  // The catalogue is filtered by role (`helpArticlesForRole`), and the articles
+  // a client reaches are asserted below in their own right. This still reads the
+  // whole catalogue: the support team's word for the record is the client's word
+  // for it, so a task-manager word is wrong in a staff article too — and an
+  // article moved down to `client_member` must not be able to carry one in.
   for (const article of HELP_ARTICLES) {
     assertClean(JSON.stringify(article), `help article ${article.id}`);
   }

@@ -135,9 +135,8 @@ export const HeaderSearch = forwardRef(({
             }`}
           >
             {/* The extended search is the command palette, and it answers with
-                tasks, projects, people and events — plus actions and places to
-                go. «у задачах і проєктах» named two of six, so the row promised
-                less than it does. */}
+                records, clients and people — plus actions and places to go. The
+                row used to name two of those, so it promised less than it does. */}
             <span className="min-w-0 truncate">Шукати «{escalation.term}» у всьому робочому просторі</span>
             <span className="ml-2 shrink-0 text-[10px] text-faint max-md:hidden">{paletteKeys}</span>
           </button>

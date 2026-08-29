@@ -18,7 +18,7 @@ export function resolveNewIssueType(requestedType, configuredTypeIds = []) {
       error: {
         code: 'LEGACY_EPIC_TYPE',
         status: 400,
-        message: 'Епік є лише legacy-типом і недоступний для нових завдань',
+        message: 'Цей тип застарілий і недоступний для нових звернень',
       },
     };
   }
@@ -29,7 +29,7 @@ export function resolveNewIssueType(requestedType, configuredTypeIds = []) {
       error: {
         code: 'NO_CREATABLE_ISSUE_TYPE',
         status: 409,
-        message: 'У процесі немає активного типу для нових завдань',
+        message: 'У процесі немає активного типу для нових звернень',
       },
     };
   }

@@ -29,13 +29,13 @@ export default function SelectsSection() {
     { value: 'u4', label: 'Дмитро Сірко', user: { id: 'u4', name: 'Дмитро Сірко' } },
   ];
 
-  // Номер попереду назви — так підпис завдання будує «Зафіксувати час», і саме
+  // Номер попереду назви — так підписує звернення кожен його вибір, і саме
   // тому пошук по «142» знаходить QT-142.
   const issueOpts = [
     { value: 'i1', label: 'QT-142 Перерахувати підсумки табеля' },
-    { value: 'i2', label: 'QT-143 Пошук у селекторі завдань' },
-    { value: 'i3', label: 'QT-158 Шапка спринта на десктопі' },
-    { value: 'i4', label: 'QT-160 Додати існуюче завдання у спринт' },
+    { value: 'i2', label: 'QT-143 Пошук у селекторі звернень' },
+    { value: 'i3', label: 'QT-158 Шапка звернення на десктопі' },
+    { value: 'i4', label: 'QT-160 Кнопка «Додати дочірнє» ховається' },
   ];
 
   return (
@@ -87,16 +87,16 @@ export default function SelectsSection() {
       </PreviewBlock>
 
       {/* ─── Select with Search ─── */}
-      <PreviewBlock title="Select with Search" component="Select" description="Той самий Select із пошуковим рядком над списком: searchable вмикає його, searchPlaceholder підписує. Для вибору з довгого списку, який неможливо переглянути очима — завдання проєкту в «Зафіксувати час». Пошук іде по підпису опції, тому підпис, що починається з номера, знаходиться і за номером, і за назвою. Порожній результат каже «Нічого не знайдено», клавіатура рухається тільки знайденими рядками." fullWidth>
+      <PreviewBlock title="Select with Search" component="Select" description="Той самий Select із пошуковим рядком над списком: searchable вмикає його, searchPlaceholder підписує. Для вибору з довгого списку, який неможливо переглянути очима — звернення клієнтського простору у звʼязках. Пошук іде по підпису опції, тому підпис, що починається з номера, знаходиться і за номером, і за назвою. Порожній результат каже «Нічого не знайдено», клавіатура рухається тільки знайденими рядками." fullWidth>
         <div className="max-w-[300px]">
-          <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Завдання</label>
+          <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Звернення</label>
           <Select
             searchable
             searchPlaceholder="Пошук за назвою або номером"
             options={issueOpts}
             value={v7}
             onChange={setV7}
-            placeholder="Оберіть завдання..."
+            placeholder="Оберіть звернення..."
           />
         </div>
       </PreviewBlock>

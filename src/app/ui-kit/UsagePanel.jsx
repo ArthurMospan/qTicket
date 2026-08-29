@@ -22,9 +22,9 @@ import propsReport from './kit-props.generated.json';
 // A dynamic segment has no real id to link to, so the parent screen plus the
 // next step is offered instead of a dead URL.
 const DYNAMIC_ROUTES = {
-  '/[projectId]': { href: '/', hint: 'відкрий проєкт' },
-  '/[projectId]/issue/[issueId]': { href: '/', hint: 'проєкт → задача' },
-  '/[projectId]/portal': { href: '/', hint: 'проєкт → портал' },
+  '/[projectId]': { href: '/', hint: 'відкрий клієнта' },
+  '/[projectId]/issue/[issueId]': { href: '/', hint: 'клієнт → звернення' },
+  '/[projectId]/portal': { href: '/', hint: 'клієнт → портал' },
   '/analytics/team/[memberId]': { href: '/analytics', hint: 'аналітика → учасник' },
 };
 

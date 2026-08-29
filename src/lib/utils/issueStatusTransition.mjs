@@ -52,7 +52,7 @@ export function normalizeIssueStatusTransitionInput(body, issueId) {
   if (!status) {
     return inputError(
       'INVALID_STATUS',
-      'Потрібен коректний статус завдання',
+      'Потрібен коректний статус звернення',
     );
   }
 
@@ -61,7 +61,7 @@ export function normalizeIssueStatusTransitionInput(body, issueId) {
     if (!validOrder(body.order)) {
       return inputError(
         'INVALID_ISSUE_ORDER',
-        'Позиція завдання має бути скінченним безпечним числом',
+        'Позиція звернення має бути скінченним безпечним числом',
       );
     }
     order = body.order;
@@ -96,7 +96,7 @@ export function normalizeIssueStatusTransitionInput(body, issueId) {
     if (seen.has(entryIssueId)) {
       return inputError(
         'DUPLICATE_ORDER_UPDATE',
-        'Одне завдання не можна двічі вказати в orderUpdates',
+        'Одне звернення не можна двічі вказати в orderUpdates',
         { issueId: entryIssueId },
       );
     }
@@ -106,7 +106,7 @@ export function normalizeIssueStatusTransitionInput(body, issueId) {
       if (order !== undefined && order !== entry.order) {
         return inputError(
           'CONFLICTING_ISSUE_ORDER',
-          'Позиція переміщеного завдання відрізняється в order та orderUpdates',
+          'Позиція переміщеного звернення відрізняється в order та orderUpdates',
         );
       }
       order = entry.order;
@@ -303,7 +303,7 @@ export function issueParentStatusConflict({
   ) {
     return transitionError(
       'COMPLETED_PARENT_REQUIRES_COMPLETED_CHILD',
-      'Неможливо додати незавершене підзавдання до завершеного основного завдання',
+      'Неможливо додати незавершене дочірнє звернення до завершеного основного',
       {
         parentIssueId: cleanId(parentIssue.id) || null,
       },
@@ -332,7 +332,7 @@ export function issueBlockLinkStatusConflict({
   ) {
     return transitionError(
       'COMPLETED_TARGET_REQUIRES_COMPLETED_BLOCKER',
-      'Неможливо додати активний блокер до вже завершеного завдання',
+      'Неможливо додати активний блокер до вже завершеного звернення',
       {
         sourceIssueId: cleanId(sourceIssue.id) || null,
         targetIssueId: cleanId(targetIssue.id) || null,
@@ -415,7 +415,7 @@ export function evaluateIssueStatusTransition({
   if (openChildren.length > 0 || openBlockers.length > 0) {
     const reasons = [];
     if (openChildren.length > 0) {
-      reasons.push(`незавершені підзавдання: ${openChildren.length}`);
+      reasons.push(`незавершені дочірні звернення: ${openChildren.length}`);
     }
     if (openBlockers.length > 0) {
       reasons.push(`активні блокери: ${openBlockers.length}`);
@@ -427,7 +427,7 @@ export function evaluateIssueStatusTransition({
       leavingTerminal,
       error: transitionError(
         'ISSUE_COMPLETION_BLOCKED',
-        `Неможливо завершити завдання — ${reasons.join('; ')}`,
+        `Неможливо завершити звернення — ${reasons.join('; ')}`,
         {
           openChildIssueIds: openChildren.map(child => child.id),
           openBlockerIssueIds: openBlockers.map(blocker => blocker.id),
@@ -438,9 +438,9 @@ export function evaluateIssueStatusTransition({
 
   if (completedParent || completedBlockedTargets.length > 0) {
     const reasons = [];
-    if (completedParent) reasons.push('основне завдання вже завершене');
+    if (completedParent) reasons.push('основне звернення вже завершене');
     if (completedBlockedTargets.length > 0) {
-      reasons.push(`завершені заблоковані завдання: ${completedBlockedTargets.length}`);
+      reasons.push(`завершені заблоковані звернення: ${completedBlockedTargets.length}`);
     }
     return {
       fromStatusId,
@@ -449,7 +449,7 @@ export function evaluateIssueStatusTransition({
       leavingTerminal,
       error: transitionError(
         'ISSUE_REOPEN_BLOCKED',
-        `Неможливо повторно відкрити завдання — ${reasons.join('; ')}`,
+        `Неможливо повторно відкрити звернення — ${reasons.join('; ')}`,
         {
           completedParentIssueId: completedParent?.id || null,
           completedBlockedTargetIssueIds: completedBlockedTargets.map(target => target.id),

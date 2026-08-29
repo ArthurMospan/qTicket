@@ -113,8 +113,8 @@ export async function POST(request) {
       if (!issue || issue.organizationId !== organizationId || (projectId && issue.projectId !== projectId)) {
         return NextResponse.json({ error: 'Issue does not belong to notification scope' }, { status: 400 });
       }
-      // Сповіщення про задачу — це сповіщення про проєкт, у якому вона лежить,
-      // навіть коли викликач назвав лише задачу.
+      // Сповіщення про звернення — це сповіщення про клієнтський простір, у
+      // якому воно лежить, навіть коли викликач назвав лише звернення.
       if (!project && issue.projectId) {
         const projectSnap = await db.collection('projects').doc(issue.projectId).get();
         if (projectSnap.exists) project = { ...projectSnap.data(), id: projectSnap.id };
@@ -143,7 +143,7 @@ export async function POST(request) {
     //
     // Пікер згадок пропонує лише склад проєкту, але це підказка, а не двері:
     // достатньо дописати «@Імʼя» руками — і повідомлення йде будь-кому з
-    // організації. Людина отримувала сповіщення про задачу, тиснула на нього й
+    // організації. Людина отримувала сповіщення про звернення, тиснула на нього й
     // упиралась у проєкт, до якого не має доступу. Просити доступ теж нема в
     // кого: запрошувати можуть і власник, і адміністратори, тож «надіслати
     // запит» довелося б комусь одному з кількох рівноправних.

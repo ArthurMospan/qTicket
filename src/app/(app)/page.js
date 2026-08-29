@@ -191,7 +191,7 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
           {/* No «Розархівувати» chip here: this list filters archived projects
               out before it renders a card (see filteredProjects below), so the
               chip could never appear on screen. The one the product actually
-              shows lives in Settings → Архів проєктів and is already a kit
+              shows lives in Settings → «Архів і видалене» and is already a kit
               Button. The menu item below is dead for the same reason; it costs
               one line and keeps the menu correct if the filter ever changes. */}
           {/* A member sees no kebab at all. Every entry in it is owner/admin
@@ -233,7 +233,7 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
                 воно не коштує жодного читання.
 
                 Праворуч від назви, а не в кутку: назва — це те, за чим шукають
-                проєкт у сітці, і мітка, адресована тобі, має стояти там, де
+                клієнта у сітці, і мітка, адресована тобі, має стояти там, де
                 погляд уже зупинився. */}
             {mentionCount > 0 && !isLarge && (
               <TaskCounters mentions={mentionCount} size="sm" />
@@ -292,26 +292,26 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
 // task is gone from the card, not the vocabulary, and an entry with no verb is
 // how this drifted the first time.
 const ISSUE_ACTIVITY_VERBS = {
-  comment: 'написав у чаті інциденту',
-  created: 'створив інцидент',
-  status: 'змінив статус інциденту',
-  restored: 'відновив інцидент',
-  archived: 'заархівував інцидент',
-  unarchived: 'розархівував інцидент',
-  cancelled: 'скасував інцидент',
-  uncancelled: 'повернув інцидент у роботу',
-  updated: 'оновив інцидент',
+  comment: 'написав у чаті звернення',
+  created: 'створив звернення',
+  status: 'змінив статус звернення',
+  restored: 'відновив звернення',
+  archived: 'заархівував звернення',
+  unarchived: 'розархівував звернення',
+  cancelled: 'скасував звернення',
+  uncancelled: 'повернув звернення у роботу',
+  updated: 'оновив звернення',
 };
 const ISSUE_ACTIVITY_EVENTS = {
-  comment: 'Нове повідомлення в чаті інциденту',
-  created: 'Створено інцидент',
-  status: 'Змінено статус інциденту',
-  restored: 'Відновлено інцидент',
-  archived: 'Заархівовано інцидент',
-  unarchived: 'Розархівовано інцидент',
-  cancelled: 'Скасовано інцидент',
-  uncancelled: 'Інцидент повернуто в роботу',
-  updated: 'Оновлено інцидент',
+  comment: 'Нове повідомлення в чаті звернення',
+  created: 'Створено звернення',
+  status: 'Змінено статус звернення',
+  restored: 'Відновлено звернення',
+  archived: 'Заархівовано звернення',
+  unarchived: 'Розархівовано звернення',
+  cancelled: 'Скасовано звернення',
+  uncancelled: 'Звернення повернуто в роботу',
+  updated: 'Оновлено звернення',
 };
 
 /**
@@ -333,7 +333,7 @@ function activityPhrase(type, hasActor) {
         : `Масова дія «${action.label}»`;
     }
   }
-  return hasActor ? 'оновив інцидент' : 'Оновлено інцидент';
+  return hasActor ? 'оновив звернення' : 'Оновлено звернення';
 }
 
 // How many recent actions the featured card carries.
@@ -398,7 +398,7 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
     }
 
     return {
-      issueKey: issue.issueKey || 'Інцидент',
+      issueKey: issue.issueKey || 'Звернення',
       title: issue.title,
       actor: actorName,
       actorUser: actorUser || (actorName ? { id: actorId || undefined, name: actorName, avatar: actorAvatar } : null),
@@ -469,7 +469,7 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
           key={action.id}
           href={issuePath(action)}
           onClick={(e) => e.stopPropagation()}
-          title="Відкрити інцидент"
+          title="Відкрити звернення"
           className="group/activity no-nav flex items-center gap-[8px] rounded-[10px] bg-canvas px-[10px] py-[7px] text-[12px] text-ink transition-colors hover:bg-line"
         >
           {/* No avatar when nothing recorded who acted — a placeholder face in
@@ -667,8 +667,8 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   // it. See docs/ARCHITECTURE.md → «Вартість читання».
   //
   // Nothing here is a filter over a task set any more, so there is no task set,
-  // and `useOrganizationIssues` is not started by this screen. A board or «Мої
-  // завдання» still opens it — those screens draw the tasks — but the front
+  // and `useOrganizationIssues` is not started by this screen. A board or
+  // «Звернення» still opens it — those screens draw the records — but the front
   // door does not.
 
   // The percentage the sort options order by. Read, not computed: a project
@@ -869,7 +869,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
                 ? 'Не вдалося прочитати частину робочого простору'
                 : projectsError
                   ? 'Не вдалося завантажити клієнтів'
-                  : 'Не вдалося завантажити інциденти'}
+                  : 'Не вдалося завантажити звернення'}
               description={workspaceScopeFailure
                 ? 'Дані організації на місці. Оновіть доступ і спробуйте ще раз.'
                 : 'Перевірте підключення до інтернету та спробуйте ще раз.'}

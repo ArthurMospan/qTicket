@@ -21,10 +21,13 @@ test('every top-level workspace destination names itself in the tab', () => {
   // The planning calendar, the sprint board, the analytics tree and the
   // workspace messenger are deleted, so there is no screen for a title to name.
   // These addresses redirect before anything renders.
-  assert.equal(routeTitle('/calendar'), 'Проєкт');
-  assert.equal(routeTitle('/sprints'), 'Проєкт');
-  assert.equal(routeTitle('/analytics'), 'Проєкт');
-  assert.equal(routeTitle('/chat'), 'Проєкт');
+  // The fallback names whose space the address looks like, and never «Проєкт»:
+  // a support space belongs to a client, and a client's portfolio is not what
+  // this product is.
+  assert.equal(routeTitle('/calendar'), 'Клієнт');
+  assert.equal(routeTitle('/sprints'), 'Клієнт');
+  assert.equal(routeTitle('/analytics'), 'Клієнт');
+  assert.equal(routeTitle('/chat'), 'Клієнт');
 });
 
 test('the external portal names the client experience instead of the staff overview', () => {
@@ -43,8 +46,9 @@ test('a project route is named by the project, not by its id', () => {
   const projects = [{ id: 'p1', name: 'Сайт RetroMagaz' }];
   assert.equal(routeTitle('/p1', projects), 'Сайт RetroMagaz');
   assert.equal(routeTitle('/p1/issue/i9', projects), 'Сайт RetroMagaz');
-  // An id the workspace has not loaded yet still says something truthful.
-  assert.equal(routeTitle('/unknown', projects), 'Проєкт');
+  // An id the workspace has not loaded yet still says something truthful — and
+  // says it in the product's own word for whose space that is.
+  assert.equal(routeTitle('/unknown', projects), 'Клієнт');
 });
 
 test('a detail screen reuses the breadcrumb trail it already renders', () => {
@@ -52,7 +56,7 @@ test('a detail screen reuses the breadcrumb trail it already renders', () => {
     pathname: '/p1/issue/i9',
     organizationName: 'Acme',
     breadcrumbs: [
-      { label: 'Проєкти', href: '/' },
+      { label: 'Клієнти', href: '/' },
       { label: 'Сайт RetroMagaz', href: '/p1' },
       { label: 'QT-12' },
     ],
@@ -65,9 +69,9 @@ test('placeholder crumbs never reach the tab', () => {
   const title = workspaceDocumentTitle({
     pathname: '/p1/issue/i9',
     projects: [{ id: 'p1', name: 'Сайт' }],
-    breadcrumbs: [{ label: 'Проєкти', href: '/' }, { label: '...' }, { label: '...' }],
+    breadcrumbs: [{ label: 'Клієнти', href: '/' }, { label: '...' }, { label: '...' }],
   });
-  assert.equal(title, 'Проєкти · qTicket');
+  assert.equal(title, 'Клієнти · qTicket');
 });
 
 test('the organization name replaces the brand rather than stacking on it', () => {

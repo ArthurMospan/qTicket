@@ -31,7 +31,7 @@ export async function DELETE(request, context) {
     const issueSnap = await issueRef.get();
     if (!issueSnap.exists) {
       return NextResponse.json({
-        error: 'Завдання не знайдено',
+        error: 'Звернення не знайдено',
         code: 'ISSUE_NOT_FOUND',
       }, { status: 404 });
     }
@@ -56,7 +56,7 @@ export async function DELETE(request, context) {
     const childPolicy = new URL(request.url).searchParams.get('childPolicy') || 'block';
     if (!['block', 'promote'].includes(childPolicy)) {
       return NextResponse.json({
-        error: 'Некоректна політика для підзавдань',
+        error: 'Некоректна політика для дочірніх звернень',
         code: 'INVALID_CHILD_POLICY',
       }, { status: 400 });
     }
@@ -80,7 +80,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'ISSUE_NOT_FOUND',
           404,
-          'Завдання не знайдено',
+          'Звернення не знайдено',
         );
       }
       const current = currentSnap.data();
@@ -91,7 +91,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'ISSUE_SCOPE_CHANGED',
           409,
-          'Область завдання змінилася. Оновіть сторінку',
+          'Область звернення змінилася. Оновіть сторінку',
         );
       }
       if (
@@ -101,7 +101,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Проєкт завдання не знайдено',
+          'Клієнтський простір звернення не знайдено',
         );
       }
       const projectAccessError = projectWriteError(
@@ -113,7 +113,7 @@ export async function DELETE(request, context) {
       if (projectAccessError) {
         throw apiTransactionError(
           'PROJECT_FORBIDDEN',
-          projectAccessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
+          projectAccessError === 'Ви не входите до команди цього клієнта' ? 403 : 409,
           projectAccessError,
         );
       }
@@ -121,7 +121,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'ISSUE_ALREADY_DELETED',
           409,
-          'Задачу вже видалено',
+          'Звернення вже видалено',
         );
       }
 
@@ -145,7 +145,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'ISSUE_HAS_CHILDREN',
           409,
-          'Завдання має підзавдання. Підтвердьте їх перенесення на верхній рівень',
+          'Звернення має дочірні. Підтвердьте їх перенесення на верхній рівень',
           { childCount: children.length, allowedChildPolicy: 'promote' },
         );
       }
@@ -153,7 +153,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'TOO_MANY_CHILDREN_TO_PROMOTE',
           409,
-          'Забагато підзавдань для безпечного автоматичного перенесення',
+          'Забагато дочірніх звернень для безпечного автоматичного перенесення',
           {
             childCount: children.length,
             maxTransactionalPromotion: MAX_TRANSACTIONAL_CHILD_PROMOTION,
@@ -218,7 +218,7 @@ export async function DELETE(request, context) {
     }
     return routeErrorResponse(error, {
       context: 'Issue DELETE',
-      fallbackMessage: 'Не вдалося видалити завдання',
+      fallbackMessage: 'Не вдалося видалити звернення',
     });
   }
 }

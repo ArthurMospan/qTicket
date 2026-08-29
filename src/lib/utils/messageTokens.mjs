@@ -3,10 +3,10 @@
 // The renderer used to ask this question with `String.prototype.split` and then
 // decide what each piece was by looking at its first character. `split` with a
 // capturing group hands back the text *between* the matches as well as the
-// matches themselves, so «@ у чаті завдання» — a sentence that merely begins
+// matches themselves, so «@ у чаті звернення» — a sentence that merely begins
 // with an at sign, matching nothing — arrived as one unmatched piece whose
 // first character was `@`, and was drawn as a mention of a person named
-// « у чаті завдання». Every line starting with `@` or `#` became a capsule.
+// « у чаті звернення». Every line starting with `@` or `#` became a capsule.
 //
 // A token is now something that matched, and nothing else can become one.
 

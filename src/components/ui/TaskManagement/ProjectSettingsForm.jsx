@@ -148,10 +148,10 @@ export default function ProjectSettingsForm({
         </FormGroup>
       ) : null}
 
-      <FormGroup label="Етапи інцидентів">
+      <FormGroup label="Етапи звернень">
         <p className="text-[11px] text-muted">
           Оберіть етапи, потрібні цьому клієнту. «Новий» залишається видимим завжди.
-          Інциденти з прихованих етапів будуть перенесені у «Новий» після підтвердження.
+          Звернення з прихованих етапів будуть перенесені у «Новий» після підтвердження.
         </p>
         {loading ? (
           <div className="flex justify-center py-4">

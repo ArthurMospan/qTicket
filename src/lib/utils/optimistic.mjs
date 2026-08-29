@@ -129,7 +129,7 @@ export function prunePatches(items, patches) {
 /**
  * Cards that live in `columnId`, in the order a board renders them.
  * `projectId` narrows the list to one project: `order` numbers a single
- * project's column, so a board that mixes projects — "Мої завдання" — can only
+ * project's column, so a board that mixes projects — "Звернення" — can only
  * position a card among its own project's cards.
  */
 export function columnMembers(issues, columnId, { projectId = null, excludeIssueId = null } = {}) {
@@ -144,7 +144,7 @@ export function columnMembers(issues, columnId, { projectId = null, excludeIssue
 
 /**
  * Where a drop belongs in `column`, given the column the user was actually
- * looking at. A board shows a filtered, and on "Мої завдання" a cross-project,
+ * looking at. A board shows a filtered, and on "Звернення" a cross-project,
  * subset of the cards `order` numbers, so the index the drag library reports is
  * not the index to write.
  *
@@ -207,7 +207,7 @@ export function planMove(issues, issueId, targetColumnId, targetIndex) {
  * status change made outside a board, which belongs at the top of its new
  * column so it cannot be lost — or the visible column that was dropped into.
  *
- * `scopeToProject` is what "Мої завдання" needs: its columns mix projects, and
+ * `scopeToProject` is what "Звернення" needs: its columns mix projects, and
  * an index counted across all of them is meaningless as an `order`, because
  * every project numbers its own column from zero.
  */

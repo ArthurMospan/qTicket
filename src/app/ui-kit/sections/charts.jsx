@@ -18,7 +18,7 @@ export default function ChartsSection() {
         fullWidth
       >
         <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiCard icon={BarChart2} value="18 / 46" label="Робочі задачі" sub="39% виконано" />
+          <KpiCard icon={BarChart2} value="18 / 46" label="Звернення в роботі" sub="39% виконано" />
           <KpiCard
             icon={TrendingDown}
             value={18}

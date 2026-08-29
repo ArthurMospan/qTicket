@@ -21,7 +21,7 @@ async function loadAuthorizedIssue(request, issueId) {
   const issueRef = db.collection('issues').doc(issueId);
   const issueSnap = await issueRef.get();
   if (!issueSnap.exists) {
-    return { error: 'Завдання не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
+    return { error: 'Звернення не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
   }
   const issue = issueSnap.data();
   const authorization = await authorizeOrgRequest(
@@ -41,7 +41,7 @@ async function loadAuthorizedIssue(request, issueId) {
     !projectSnap.exists
     || projectSnap.data().organizationId !== issue.organizationId
   ) {
-    return { error: 'Проєкт завдання не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
+    return { error: 'Клієнтський простір звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
   }
   if (
     authorization.membership?.role === 'member'
@@ -51,7 +51,7 @@ async function loadAuthorizedIssue(request, issueId) {
     )
   ) {
     return {
-      error: 'Ви не входите до команди цього проєкту',
+      error: 'Ви не входите до команди цього клієнта',
       code: 'PROJECT_ACCESS_DENIED',
       status: 403,
     };
@@ -87,7 +87,7 @@ export async function POST(request, context) {
       const currentSnap = await transaction.get(issueRef);
       const projectSnap = await transaction.get(projectRef);
       if (!currentSnap.exists) {
-        throw apiTransactionError('ISSUE_NOT_FOUND', 404, 'Завдання не знайдено');
+        throw apiTransactionError('ISSUE_NOT_FOUND', 404, 'Звернення не знайдено');
       }
       const current = currentSnap.data();
       if (
@@ -97,7 +97,7 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'ISSUE_SCOPE_CHANGED',
           409,
-          'Область завдання змінилася. Оновіть сторінку',
+          'Область звернення змінилася. Оновіть сторінку',
         );
       }
       if (
@@ -107,21 +107,21 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Проєкт завдання не знайдено',
+          'Клієнтський простір звернення не знайдено',
         );
       }
       if (projectSnap.data().deletionPending === true) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Проєкт уже видаляється',
+          'Клієнтський простір уже видаляється',
         );
       }
       if (current.deletionPending === true) {
         throw apiTransactionError(
           'ISSUE_DELETING',
           409,
-          'Неможливо змінити завдання, яке видаляється',
+          'Неможливо змінити звернення, яке видаляється',
         );
       }
 
@@ -137,7 +137,7 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'MALFORMED_LEGACY_SUBTASKS',
           409,
-          'Старий список підзавдань пошкоджено. Потрібен ручний перегляд',
+          'Старий чекліст пошкоджено. Потрібен ручний перегляд',
         );
       }
 

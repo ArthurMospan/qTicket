@@ -345,7 +345,7 @@ export async function PATCH(request, context) {
             throw workflowError(
               'PROJECT_DELETING',
               409,
-              'Один із проєктів уже видаляється',
+              'Один із клієнтських просторів уже видаляється',
               { projectId: projectDocument.id },
             );
           }
@@ -360,7 +360,7 @@ export async function PATCH(request, context) {
           throw workflowError(
             'ISSUE_DELETING',
             409,
-            'Одне із завдань уже видаляють. Дочекайтеся завершення й повторіть зміну workflow',
+            'Одне зі звернень уже видаляють. Дочекайтеся завершення й повторіть зміну workflow',
             { issueId: change.currentIssue.id },
           );
         }
@@ -370,7 +370,7 @@ export async function PATCH(request, context) {
           throw workflowError(
             'PROJECT_DELETING',
             409,
-            'Один із проєктів уже видаляється',
+            'Один із клієнтських просторів уже видаляється',
             { projectId: projectDocument.id },
           );
         }
@@ -391,7 +391,7 @@ export async function PATCH(request, context) {
         throw workflowError(
           'WORKFLOW_MIGRATION_TOO_LARGE',
           409,
-          'Забагато завдань для однієї безпечної транзакції. Виконайте окрему адміністративну міграцію',
+          'Забагато звернень для однієї безпечної транзакції. Виконайте окрему адміністративну міграцію',
           {
             affectedIssues: issueChanges.length,
             affectedProjects: projectChanges.size,

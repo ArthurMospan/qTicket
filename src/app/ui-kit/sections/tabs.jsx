@@ -33,7 +33,7 @@ export default function TabsSection() {
       </PreviewBlock>
 
       <PreviewBlock title="Standard Tabs — 36px" description="Pill wrapper bg-[#f4f4f5], active tab bg-white shadow-sm.">
-        <Tabs tabs={[{ id: 'board', label: 'Дошка' }, { id: 'backlog', label: 'Беклог', count: 3 }, { id: 'sprints', label: 'Спринти' }]} activeTab={a1} onTabChange={setA1} />
+        <Tabs tabs={[{ id: 'board', label: 'Дошка' }, { id: 'list', label: 'Список', count: 3 }, { id: 'archive', label: 'Архів' }]} activeTab={a1} onTabChange={setA1} />
       </PreviewBlock>
 
       <PreviewBlock title="With Icons" description="Tab icon size 14px.">
