@@ -114,7 +114,6 @@ export async function upsertEmailAuthUser(email) {
     baseProfile.avatar = userRecord.photoURL || '';
     baseProfile.role = 'user';
     baseProfile.createdAt = nowIso;
-    baseProfile.lastActive = nowIso;
   }
   await userRef.set(baseProfile, { merge: true });
 

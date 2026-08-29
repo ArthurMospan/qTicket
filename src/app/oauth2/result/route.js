@@ -187,7 +187,6 @@ async function updateOneBUser(userRecord, profile, resolvedEmail, displayName, p
   if (!userSnap.exists) {
     profileData.role = 'user';
     profileData.createdAt = nowIso;
-    profileData.lastActive = nowIso;
   }
   await userRef.set(profileData, { merge: true });
 

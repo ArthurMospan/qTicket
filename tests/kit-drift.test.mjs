@@ -91,12 +91,15 @@ test('the variant matrix renders every component that can stand alone', () => {
 // component into `src/components/ui` takes its call site out of view — and with
 // it, the evidence for every variant that call site was the only user of.
 //
-// `UserStatusDialog` is the live example and the reason this number is pinned.
-// It is the sole user of `Input composition="status-entry"`, `Button
-// composition="status-submit"` and `Dialog size="status"`; promoting it to the
-// kit would move three variants into this list while the product went on
-// rendering them every time somebody set a status. A component whose call site
-// is the only evidence for a declared variant stays where it is.
+// The status dialog was the live example and the reason this number was first
+// pinned: it was the sole user of `Input composition="status-entry"`, `Button
+// composition="status-submit"` and `Dialog size="status"`, so promoting it to
+// the kit would have moved three variants into this list while the product went
+// on rendering them every time somebody set a status. It has since left with
+// the mood status it set — the three variants are declared and uncalled now,
+// which is the same ceiling seen from the other side — but the rule stands for
+// the next such component: one whose call site is the only evidence for a
+// declared variant stays where it is.
 //
 // Raised 96 → 100 when the calendar's day cell arrived. That is a different
 // cause and worth naming, because the number no longer means only one thing:

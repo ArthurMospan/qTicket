@@ -1,5 +1,5 @@
 'use client';
-import { OrganizationMark, PresenceDot, UserAvatar } from '@/components/ui';
+import { OrganizationMark, UserAvatar } from '@/components/ui';
 import { PreviewBlock } from '../preview';
 
 export default function AvatarsSection() {
@@ -42,25 +42,6 @@ export default function AvatarsSection() {
             <OrganizationMark name="OneB" size="sm" appearance="sidebar" />
           </div>
           <OrganizationMark name="OneB" size="picker" appearance="inverse" />
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="PresenceDot"
-        component="PresenceDot"
-        description="Позначка «зараз онлайн» на розі аватара. Розмір іде за розміром аватара, а не обирається на місці — саме так чотири копії цієї крапки й розійшлися на 8, 10, 12 і 20 пікселів."
-        filePath="src/components/ui/DataDisplay/PresenceDot.jsx"
-      >
-        <div className="flex flex-wrap items-end gap-[16px]">
-          {[['xs', 'chat-mention'], ['sm', 'sm'], ['md', 'md'], ['lg', 'lg'], ['hero', 'xl']].map(([token, avatarSize]) => (
-            <div key={token} className="flex flex-col items-center gap-[6px]">
-              <span className="relative inline-flex">
-                <UserAvatar user={demoUser} size={avatarSize} />
-                <PresenceDot size={token} collar="white" />
-              </span>
-              <span className="text-[9px] font-mono text-[#1f1f1f]">{token}</span>
-            </div>
-          ))}
         </div>
       </PreviewBlock>
     </div>

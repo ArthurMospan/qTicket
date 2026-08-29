@@ -929,10 +929,6 @@ export default function SettingsPage() {
   const [customAvatar,  setCustomAvatar]  = useState('');
   const [customAvatarStoragePath, setCustomAvatarStoragePath] = useState('');
   const [customAvatarResourceType, setCustomAvatarResourceType] = useState('image');
-  const [bio,           setBio]           = useState('');
-  const [telegram,      setTelegram]      = useState('');
-  const [phone,         setPhone]         = useState('');
-  const [location,      setLocation]      = useState('');
   const [skillsInput,   setSkillsInput]   = useState('');
 
   // Saved values + whether any profile field is unsaved (for the leave guard).
@@ -940,10 +936,6 @@ export default function SettingsPage() {
   const profileDirty =
     displayName !== (currentUser?.name || '') ||
     customAvatar !== (currentUser?.customAvatar || '') ||
-    bio !== (currentUser?.bio || '') ||
-    telegram !== (currentUser?.telegram || '') ||
-    phone !== (currentUser?.phone || '') ||
-    location !== (currentUser?.location || '') ||
     skillsInput !== savedSkills;
 
   // Discard unsaved profile edits (used when the user chooses to leave without
@@ -954,10 +946,6 @@ export default function SettingsPage() {
     setCustomAvatar(currentUser?.customAvatar || '');
     setCustomAvatarStoragePath(currentUser?.customAvatarStoragePath || '');
     setCustomAvatarResourceType(currentUser?.customAvatarResourceType || 'image');
-    setBio(currentUser?.bio || '');
-    setTelegram(currentUser?.telegram || '');
-    setPhone(currentUser?.phone || '');
-    setLocation(currentUser?.location || '');
     setSkillsInput(Array.isArray(currentUser?.skills) ? currentUser.skills.join(', ') : '');
   }, [currentUser]);
 
@@ -1074,10 +1062,6 @@ export default function SettingsPage() {
         if (currentUser.customAvatar && !customAvatar) setCustomAvatar(currentUser.customAvatar);
         setCustomAvatarStoragePath(currentUser.customAvatarStoragePath || '');
         setCustomAvatarResourceType(currentUser.customAvatarResourceType || 'image');
-        setBio(currentUser.bio || '');
-        setTelegram(currentUser.telegram || '');
-        setPhone(currentUser.phone || '');
-        setLocation(currentUser.location || '');
         setSkillsInput(Array.isArray(currentUser.skills) ? currentUser.skills.join(', ') : '');
         if (currentUser.localization) {
           const loc = {
@@ -2194,31 +2178,6 @@ export default function SettingsPage() {
             <Row label="Email" desc="Використовується для входу та запрошень">
               <span className="text-[13px] text-muted">{currentUser?.email}</span>
             </Row>
-            <Row label="Telegram" desc="Ваш нікнейм без @ (наприклад: username)">
-              <InlineEditField value={telegram} onChange={setTelegram} saved={currentUser?.telegram || ''} onSave={() => saveProfileField('telegram', telegram)} placeholder="username" className="w-[260px]" />
-            </Row>
-            <Row label="Телефон">
-              <InlineEditField value={phone} onChange={setPhone} saved={currentUser?.phone || ''} onSave={() => saveProfileField('phone', phone)} placeholder="+380..." className="w-[260px]" />
-            </Row>
-            <Row label="Локація">
-              <InlineEditField value={location} onChange={setLocation} saved={currentUser?.location || ''} onSave={() => saveProfileField('location', location)} placeholder="Київ, Україна" className="w-[260px]" />
-            </Row>
-            <div className="flex flex-col gap-2 py-[12px] border-t border-canvas mt-2">
-              <Label context="inline">Про себе</Label>
-              <p className="text-[12px] text-muted -mt-1 leading-relaxed">Коротка інформація про вашу роль, досвід чи інтереси</p>
-              <Textarea
-                value={bio}
-                onChange={e => setBio(e.target.value)}
-                placeholder="Розкажіть трохи про себе..."
-                composition="settings-note"
-              />
-              {bio !== (currentUser?.bio || '') && (
-                <div className="flex items-center justify-end gap-2">
-                  <Button onClick={() => setBio(currentUser?.bio || '')} style="secondary" size="sm">Скасувати</Button>
-                  <Button onClick={() => saveProfileField('bio', bio)} style="primary" color="dark" size="sm" icon={Check}>Зберегти</Button>
-                </div>
-              )}
-            </div>
           </Card>
         </Section>
       );

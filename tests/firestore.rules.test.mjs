@@ -764,17 +764,6 @@ test('user profiles are private even between organization members', async () => 
   await assertFails(getDoc(doc(memberDb, 'users', 'owner-a')));
 });
 
-test('presence is organization-scoped and users can only write their own state', async () => {
-  const memberDb = environment.authenticatedContext('member-a').firestore();
-  const outsiderDb = environment.authenticatedContext('outsider').firestore();
-  const ownPresence = doc(memberDb, 'organizations', 'org-a', 'presence', 'member-a');
-  await assertSucceeds(setDoc(ownPresence, { online: true }));
-  await assertSucceeds(getDoc(ownPresence));
-  await assertFails(setDoc(doc(memberDb, 'organizations', 'org-a', 'presence', 'owner-a'), { online: false }));
-  await assertFails(getDoc(doc(outsiderDb, 'organizations', 'org-a', 'presence', 'member-a')));
-  await assertFails(setDoc(doc(memberDb, 'presence', 'member-a'), { online: true }));
-});
-
 test('chat members cannot edit another author message', async () => {
   const memberDb = environment.authenticatedContext('member-a').firestore();
   const ownerDb = environment.authenticatedContext('owner-a').firestore();

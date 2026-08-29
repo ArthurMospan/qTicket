@@ -3,7 +3,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
-import PresenceDot from '@/components/ui/DataDisplay/PresenceDot';
 import Pill from '@/components/ui/DataDisplay/Pill';
 import LoadingSpinner from '@/components/ui/Feedback/LoadingSpinner';
 import EmptyState from '@/components/ui/Feedback/EmptyState';
@@ -11,12 +10,12 @@ import EmptyState from '@/components/ui/Feedback/EmptyState';
 // The team rail: a titled, counted list of people.
 //
 // Same story as ChannelRail — /ui-kit used to hand-copy this and the copy was
-// wrong in five ways at once (8px radius drawn as 10px, the `#ebebeb` selected
-// row drawn as white-with-a-shadow, a 32px avatar drawn at 24px, the muted
-// `#4a4a4a` name drawn as bold ink, and no presence dot at all). The page and
-// the catalogue render this file now, so there is nothing left to drift.
+// wrong in four ways at once (8px radius drawn as 10px, the `#ebebeb` selected
+// row drawn as white-with-a-shadow, a 32px avatar drawn at 24px, and the muted
+// `#4a4a4a` name drawn as bold ink). The page and the catalogue render this
+// file now, so there is nothing left to drift.
 /**
- * The team rail: a titled, counted list of people, with presence.
+ * The team rail: a titled, counted list of people.
  *
  * @param {string} props.title Heading above the list.
  * @param {object[]} props.members The people to list.
@@ -82,7 +81,6 @@ export default function MemberRail({
               >
                 <div className="relative shrink-0">
                   <UserAvatar user={member} size="md" />
-                  {member.online && <PresenceDot size="md" collar="canvas" />}
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className={`text-[13px] font-medium truncate transition-colors flex items-center gap-1 ${
@@ -90,7 +88,6 @@ export default function MemberRail({
                   }`}
                   >
                     {member.name || member.email}
-                    {member.statusEmoji && <span>{member.statusEmoji}</span>}
                   </span>
                   <span className="text-[11px] font-normal text-muted truncate">
                     {member.positionName}
