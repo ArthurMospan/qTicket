@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
-import { MoreVertical, Shield, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
-import { Button, IconAction, Pill, Tabs, ContextMenu, EmptyState, Tooltip } from '@/components/ui';
+import { Button, IconAction, Pill, Tabs, EmptyState, Tooltip } from '@/components/ui';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
