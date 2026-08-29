@@ -5,14 +5,10 @@ import { useAuth }         from '@/lib/hooks/useAuth';
 import { useProjects }     from '@/lib/hooks/useProjects';
 import { acceptPendingInvitation } from '@/lib/hooks/useOrganization';
 import { OrgProvider, useOrg } from '@/lib/context/OrgContext';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { claimActivityHeartbeat } from '@/lib/utils/activity';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
 const AppContext = createContext(null);
 const INVITATION_CHECK_TTL = 5 * 60 * 1000;
-const PRESENCE_HEARTBEAT_MS = 60_000;
 
 // ─── Inner provider (has access to OrgContext) ────────────────────────────
 function AppProviderInner({
@@ -81,28 +77,6 @@ function AppProviderInner({
     })();
     return () => { cancelled = true; };
   }, [invitationEmail, invitationUid]);
-
-  // Update presence
-  useEffect(() => {
-    if (!userId || !activeOrgId) return;
-    const presenceRef = doc(db, 'organizations', activeOrgId, 'presence', userId);
-    const updatePresence = async () => {
-      if (!claimActivityHeartbeat(`presence:${activeOrgId}:${userId}`, PRESENCE_HEARTBEAT_MS)) return;
-      try {
-        await setDoc(presenceRef, {
-          online: true,
-          lastSeen: serverTimestamp(),
-        }, { merge: true });
-      } catch {}
-    };
-    updatePresence();
-    const intervalId = setInterval(updatePresence, PRESENCE_HEARTBEAT_MS);
-    document.addEventListener('visibilitychange', updatePresence);
-    return () => {
-      clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', updatePresence);
-    };
-  }, [activeOrgId, userId]);
 
   const value = {
     authLoading,

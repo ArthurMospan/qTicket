@@ -1,90 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
-import { CakeSlice, Mail, MapPin, Phone, Send, MoreVertical, Shield, X } from 'lucide-react';
-import { ChatIcon, TaskIcon } from '@/lib/design/icons';
-import { Button, IconAction, Pill, PresenceDot, Tabs, ContextMenu, EmptyState, Tooltip } from '@/components/ui';
+import { MoreVertical, Shield, X } from 'lucide-react';
+import { TaskIcon } from '@/lib/design/icons';
+import { Button, IconAction, Pill, Tabs, ContextMenu, EmptyState, Tooltip } from '@/components/ui';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
-import UserStatusDialog from '@/components/UserStatusDialog';
 import { useAppContext } from '@/lib/context/AppContext';
 import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useOrganization } from '@/lib/hooks/useOrganization';
-import { formatLastSeenUk, isPresenceOnline } from '@/lib/utils/presence.mjs';
 import { isOnProjectTeam, isPrivilegedRole } from '@/lib/utils/projectAccess.mjs';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 
-const getRealProfileDetails = (member) => {
-  const skills = member.profile?.skills || member.skills;
-  return {
-    bio:      member.profile?.bio      || member.bio      || null,
-    skills:   Array.isArray(skills) && skills.length ? skills : null,
-    telegram: member.profile?.telegram || member.telegram || null,
-    phone:    member.profile?.phone    || member.phone    || null,
-    location: member.profile?.location || member.location || null,
-    timezone: member.profile?.timezone || member.timezone || member.localization?.timezone || null,
-    birthday: member.profile?.birthday || member.birthday || null,
-  };
-};
-
-// A phone number and an address are things people copy, not things they read
-// out. A click puts the value on the clipboard, and the underline on hover is
-// the affordance the Telegram handle beside them already had — so the three
-// contact values now behave alike, without any of them growing an icon.
-function CopyableContact({ value, label }) {
-  const copy = async () => {
-    const toast = useWorkspaceStore.getState().showToast;
-    try {
-      await navigator.clipboard.writeText(value);
-      toast(`${label} скопійовано`, 'success');
-    } catch {
-      toast('Не вдалося скопіювати', 'error');
-    }
-  };
-  return (
-    <button
-      type="button"
-      data-ui-control="profile-contact-value"
-      onClick={copy}
-      title={`Скопіювати: ${value}`}
-      className="cursor-pointer truncate rounded-[4px] text-left text-[13px] font-medium leading-none text-ink outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ink"
-    >
-      {value}
-    </button>
-  );
-}
-
-// The line over the avatar. On your own profile it is a button and on anybody
-// else's it is a bubble, which is the whole difference between the two — so
-// they are one shape rather than two that drift.
-function StatusBubble({ emoji, text, onClick }) {
-  const Shell = onClick ? 'button' : 'div';
-  return (
-    <Shell
-      {...(onClick ? { type: 'button', onClick, title: 'Змінити статус' } : {})}
-      data-ui-surface="local"
-      className={`absolute top-[-20px] left-[65%] z-20 flex min-w-[50px] max-w-[180px] items-center gap-[6px] rounded-[18px] border border-line bg-white px-[12px] py-[8px] shadow-lg ${
-        onClick ? 'cursor-pointer transition-colors hover:border-line hover:bg-canvas' : ''
-      }`}
-    >
-      <span className="shrink-0 text-[18px]">{emoji || '💭'}</span>
-      {text ? (
-        <span className="truncate text-[13px] font-normal tracking-tight text-ink">{text}</span>
-      ) : onClick ? (
-        <span className="truncate text-[13px] font-normal tracking-tight text-muted">Статус</span>
-      ) : null}
-    </Shell>
-  );
-}
-
+// A support profile answers three questions and no others: who this is, which
+// clients they are on, and what they have open. The task manager this product
+// was copied from also carried a mood bubble, a presence dot, an «Про себе»
+// paragraph and a contact card with a Telegram handle, a phone number and a
+// city — a colleague's social page, none of which helps anybody answer a
+// ticket.
 export default function ProfileView({ user, onClose }) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
   const router = useRouter();
   const openIssueQuickView = useWorkspaceStore(state => state.openIssueQuickView);
   const { currentUser, projects, orgRole } = useAppContext();
@@ -94,7 +30,6 @@ export default function ProfileView({ user, onClose }) {
   const { positions = [], closedStatusIds } = useWorkflowConfig();
   const { members: orgMembers } = useOrganization();
   const [activeTab, setActiveTab] = useState('profile');
-  const [statusOpen, setStatusOpen] = useState(false);
 
   if (!user) return null;
 
@@ -103,19 +38,6 @@ export default function ProfileView({ user, onClose }) {
   const isAdminOrOwner = orgRole === 'admin' || orgRole === 'owner';
   // Live membership record from the role-filtered organization members API.
   const memberRecord = orgMembers.find(m => (m.id || m.uid) === uid);
-
-  const isOnline = user.online === true || isPresenceOnline(user.lastActive, now);
-  const presenceLabel = user.presenceLabel || formatLastSeenUk(user.lastActive, { now, online: isOnline });
-  const details = getRealProfileDetails(user);
-  // The line the person wrote about themselves. `user.status` is the membership
-  // record and says «active» about everybody.
-  //
-  // On your own profile it is read from the signed-in user rather than from the
-  // member list: that one is a server route the page holds a copy of, so a
-  // status you have just set here would not come back for as long as the copy
-  // lasts, and the bubble you had just used would still show the old line.
-  const statusText = (isMe ? currentUser?.status : user.statusText) || null;
-  const statusEmoji = (isMe ? currentUser?.statusEmoji : user.statusEmoji) || null;
 
   const positionName = positions.find(p => p.id === user.positionId)?.label
     || user.title
@@ -180,23 +102,6 @@ export default function ProfileView({ user, onClose }) {
         <div className="flex flex-col items-center text-center px-8">
           <div className="relative mb-2">
             <UserAvatar user={user} size="hero" />
-            {isOnline && <PresenceDot size="hero" collar="white" className="bottom-[6px] right-[6px]" />}
-            {/* `statusText`, not `status`: the second one is the membership —
-                `active` — and this bubble used to read it out as the line the
-                person had written about themselves.
-
-                On your own profile the bubble is the control that sets it. It
-                was readable here and settable only from the pill in the chat
-                header, which is a different screen — so the one place the
-                status is actually looked at could not change it. Somebody
-                else's bubble stays a bubble. */}
-            {(statusText || statusEmoji || isMe) && (
-              <StatusBubble
-                emoji={statusEmoji}
-                text={statusText}
-                onClick={isMe ? () => setStatusOpen(true) : undefined}
-              />
-            )}
           </div>
 
           <div className="flex flex-col gap-1 text-center items-center">
@@ -204,36 +109,21 @@ export default function ProfileView({ user, onClose }) {
             <p className="text-[14px] text-muted font-medium">
               {positionName}
             </p>
-            <p className={`text-[11px] font-medium ${isOnline ? 'text-success' : 'text-faint'}`}>
-              {presenceLabel}
-            </p>
           </div>
 
-          {/* Actions — four 56px circles.
-              Labels went first: four one-word buttons read as a sentence rather
+          {/* Actions — 56px circles.
+              Labels went first: one-word buttons read as a sentence rather
               than a set of actions. Then the icons themselves, which were
               invented here — `CheckSquare` for a task, `CalendarPlus` for an
-              event, `MessageCircle` for chat — while the sidebar, the mobile bar
-              and the palette each showed something else for the same three
-              things. They all read the same three names now.
-              The emergency call moved into the menu: it is the one action here
-              nobody performs by accident, and it was the loudest thing on a
-              colleague's profile. */}
+              event — while the sidebar, the mobile bar and the palette each
+              showed something else for the same things. They all read the same
+              names now. */}
           {!isMe && (
             <div className="flex items-center gap-2 mt-4">
               {/* Each circle carries its name twice: as the accessible label a
                   screen reader reads, and as a tooltip for everyone else. An
-                  icon on its own says nothing, and these four are the whole
-                  action row — there is no text anywhere near them. */}
-              <Tooltip content="Написати повідомлення">
-                <IconAction
-                  label="Написати повідомлення"
-                  icon={ChatIcon}
-                  size="xl"
-                  appearance="contrast"
-                  onClick={() => leaveFor(`/chat?dm=${encodeURIComponent(uid)}`)}
-                />
-              </Tooltip>
+                  icon on its own says nothing, and these are the whole action
+                  row — there is no text anywhere near them. */}
               <Tooltip content="Створити інцидент">
                 <IconAction
                   label="Створити інцидент і призначити учасника"
@@ -270,106 +160,6 @@ export default function ProfileView({ user, onClose }) {
 
         {activeTab === 'profile' && (
           <div className="flex flex-col gap-8">
-            {/* Про себе */}
-            {(details.bio || isMe) && (
-              <div className="flex flex-col gap-3">
-                <h3 className="ui-type-column-title text-muted uppercase tracking-wider">Про себе</h3>
-                {details.bio ? (
-                  <p className="text-[14px] text-ink leading-relaxed">
-                    {details.bio}
-                  </p>
-                ) : (
-                  <p className="text-[14px] text-faint italic">
-                    Додайте опис у налаштуваннях профілю.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Анкета */}
-            <div className="flex flex-col gap-4">
-              <h3 className="ui-type-column-title text-muted uppercase tracking-wider">Контакти</h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                {/* Telegram */}
-                <div className="flex items-center gap-3">
-                  <div className="w-[32px] h-[32px] rounded-full bg-canvas flex items-center justify-center shrink-0">
-                    <Send size={14} className="text-ink" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[11px] font-bold text-muted leading-none mb-1">Telegram</span>
-                    {details.telegram ? (
-                      <a href={`https://t.me/${details.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-[13px] text-ink hover:underline font-medium truncate leading-none">
-                        {details.telegram}
-                      </a>
-                    ) : (
-                      <span className="text-[13px] text-faint leading-none">Не вказано</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Phone */}
-                <div className="flex items-center gap-3">
-                  <div className="w-[32px] h-[32px] rounded-full bg-canvas flex items-center justify-center shrink-0">
-                    <Phone size={14} className="text-ink" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[11px] font-bold text-muted leading-none mb-1">Телефон</span>
-                    {details.phone ? (
-                      <CopyableContact value={details.phone} label="Телефон" />
-                    ) : (
-                      <span className="text-[13px] text-faint leading-none">Не вказано</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="flex items-center gap-3">
-                  <div className="w-[32px] h-[32px] rounded-full bg-canvas flex items-center justify-center shrink-0">
-                    <MapPin size={14} className="text-ink" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[11px] font-bold text-muted leading-none mb-1">Локація</span>
-                    {details.location ? (
-                      <span className="text-[13px] text-ink font-medium leading-none truncate">{details.location}</span>
-                    ) : (
-                      <span className="text-[13px] text-faint leading-none">Не вказано</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="flex items-center gap-3">
-                  <div className="w-[32px] h-[32px] rounded-full bg-canvas flex items-center justify-center shrink-0">
-                    <Mail size={14} className="text-ink" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[11px] font-bold text-muted leading-none mb-1">Email</span>
-                    {user.email ? (
-                      <CopyableContact value={user.email} label="Email" />
-                    ) : (
-                      <span className="text-[13px] text-faint leading-none">Не вказано</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Birthday */}
-                <div className="flex items-center gap-3">
-                  <div className="w-[32px] h-[32px] rounded-full bg-canvas flex items-center justify-center shrink-0">
-                    <CakeSlice size={14} className="text-ink" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[11px] font-bold text-muted leading-none mb-1">День народження</span>
-                    <span className={`text-[13px] font-medium leading-none truncate ${details.birthday ? 'text-ink' : 'text-faint'}`}>
-                      {details.birthday
-                        ? new Date(`${details.birthday}T00:00:00`).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
-                        : 'Не вказано'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Client spaces */}
             <div className="flex flex-col gap-3">
               <h3 className="ui-type-column-title text-muted uppercase tracking-wider">
@@ -455,8 +245,6 @@ export default function ProfileView({ user, onClose }) {
         )}
 
       </div>
-
-      {statusOpen && <UserStatusDialog onClose={() => setStatusOpen(false)} />}
     </div>
   );
 }

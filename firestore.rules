@@ -158,12 +158,6 @@ service cloud.firestore {
       // server-maintained qTicket counters. Browser SDKs never update it.
       allow update: if false;
       allow delete: if false; // Requires a future server-side cascading delete.
-
-      match /presence/{uid} {
-        allow read: if isInternalContributor(orgId);
-        allow create, update: if isOrgMember(orgId) && request.auth.uid == uid;
-        allow delete: if false;
-      }
     }
 
     // ── orgMemberships/{orgId}_{uid} — RBAC source of truth ────────────
@@ -553,11 +547,6 @@ service cloud.firestore {
         request.resource.data.userId == resource.data.userId &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow create: if false;
-    }
-
-    // ── presence/{uid} ───────────────────────────────────────────────────
-    match /presence/{uid} {
-      allow read, write: if false;
     }
 
     // ── organizations/{orgId}/channels/... — chat, scoped via path ──────

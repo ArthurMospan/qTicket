@@ -59,21 +59,11 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="5) Пошук по чатах + Аватарки + Статус (Chat Mode)" description="Спеціальний режим для чатів та каналів." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="5) Пошук по чатах (Chat Mode)" description="Спеціальний режим для чатів та каналів." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="chat"
             showNotifications={false}
-            // No third-party avatar host here: the three placeholder URLs this
-            // used to fetch failed on every load of the page, and the product
-            // deliberately stores no such URL either — a user without a photo
-            // gets initials in their own deterministic colour, which is the
-            // thing worth previewing.
-            onlineUsers={[
-              { id: 'oksana', name: 'Оксана Литвин' },
-              { id: 'ivan', name: 'Іван Петренко' },
-              { id: 'taras', name: 'Тарас Шевчук' },
-            ]}
           />
         </div>
       </PreviewBlock>

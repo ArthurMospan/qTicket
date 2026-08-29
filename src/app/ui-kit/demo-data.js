@@ -17,7 +17,7 @@ export const stamp = (minutesAgo) => {
 
 export const CHAT_DEMO_MEMBERS = [
   { id: 'kit-arthur', name: 'Артур Моспан' },
-  { id: 'kit-olena', name: 'Олена Коваль', statusEmoji: '🎧', statusText: 'У фокусі' },
+  { id: 'kit-olena', name: 'Олена Коваль' },
 ];
 
 export const CHAT_DEMO_MESSAGES = [

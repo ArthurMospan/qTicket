@@ -5,9 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signInWithCustomToken } from 'firebase/auth';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db, createGitHubProvider, googleProvider } from '@/lib/firebase';
-import { claimActivityHeartbeat } from '@/lib/utils/activity';
-
-const ACTIVITY_HEARTBEAT_MS = 60_000;
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -15,8 +12,6 @@ export function useAuth() {
   const sessionUserRef = useRef(null);
   useEffect(() => {
     let cancelled = false;
-    let intervalId;
-    let removeVisibilityListener = () => {};
     let unsubscribeProfile = () => {};
     let unsubscribeAuth = () => {};
     let profileSignature = '';
@@ -26,9 +21,6 @@ export function useAuth() {
     const handleAuthChange = async firebaseUser => {
       const generation = ++authGeneration;
       const isCurrent = () => !cancelled && generation === authGeneration;
-      if (intervalId) clearInterval(intervalId);
-      removeVisibilityListener();
-      removeVisibilityListener = () => {};
       unsubscribeProfile();
       unsubscribeProfile = () => {};
 
@@ -117,11 +109,6 @@ export function useAuth() {
           if (!isCurrent()) return;
           const storedProfile = snap.exists() ? snap.data() : null;
 
-          const syncLastActive = () => {
-            if (!claimActivityHeartbeat(`profile:${firebaseUser.uid}`, ACTIVITY_HEARTBEAT_MS)) return;
-            setDoc(userRef, { lastActive: new Date().toISOString() }, { merge: true }).catch(() => {});
-          };
-
           const resolvedName = firebaseUser.displayName || storedProfile?.name || 'Користувач';
           const resolvedAvatar = storedProfile?.customAvatar || firebaseUser.photoURL || storedProfile?.avatar || fallbackProfile.avatar;
           let reactiveProfile;
@@ -138,7 +125,6 @@ export function useAuth() {
               ...fallbackProfile,
               role: 'user',
               createdAt: new Date().toISOString(),
-              lastActive: new Date().toISOString(),
             };
             await setDoc(userRef, reactiveProfile, { merge: true });
           }
@@ -153,14 +139,11 @@ export function useAuth() {
             avatar: resolvedAvatar,
           });
 
-          const profileWithoutActivity = { ...reactiveProfile };
-          delete profileWithoutActivity.lastActive;
-          profileSignature = JSON.stringify(profileWithoutActivity);
+          profileSignature = JSON.stringify(reactiveProfile);
 
           unsubscribeProfile = onSnapshot(userRef, docSnap => {
             if (!isCurrent() || !docSnap.exists()) return;
             const profile = { ...docSnap.data() };
-            delete profile.lastActive;
             const nextSignature = JSON.stringify(profile);
             if (nextSignature === profileSignature) return;
             profileSignature = nextSignature;
@@ -171,11 +154,6 @@ export function useAuth() {
             // Next.js error overlay.
             console.warn('[useAuth] profile subscription unavailable:', error);
           });
-          syncLastActive();
-          intervalId = setInterval(syncLastActive, ACTIVITY_HEARTBEAT_MS);
-          const handleVisibilityChange = () => syncLastActive();
-          document.addEventListener('visibilitychange', handleVisibilityChange);
-          removeVisibilityListener = () => document.removeEventListener('visibilitychange', handleVisibilityChange);
         } catch (profileError) {
           // A profile permission/read error must not invalidate a valid Firebase session.
           console.warn('[useAuth] profile synchronization unavailable:', profileError);
@@ -205,8 +183,6 @@ export function useAuth() {
       cancelled = true;
       unsubscribeAuth();
       unsubscribeProfile();
-      removeVisibilityListener();
-      if (intervalId) clearInterval(intervalId);
     };
   }, []);
   const signInWithGoogle = async () => {
@@ -237,13 +213,6 @@ export function useAuth() {
     return await signInWithCustomToken(auth, customToken);
   };
   const signOut = async () => {
-    if (user?.id) {
-      await setDoc(doc(db, 'users', user.id), {
-        lastActive: new Date(Date.now() - 300000).toISOString()
-      }, {
-        merge: true
-      }).catch(console.error);
-    }
     sessionUserRef.current = null;
     try {
       window.sessionStorage.removeItem('qt_active_org_id');

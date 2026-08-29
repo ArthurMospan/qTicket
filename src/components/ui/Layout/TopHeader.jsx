@@ -3,22 +3,19 @@ import { Search, ChevronDown, ChevronRight, X, Bell, Hash } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import { HeaderSearch } from '../Forms/HeaderSearch';
 import { Breadcrumb } from '../Navigation/Breadcrumb';
-import Tooltip from '../Navigation/Tooltip';
 import Popover from '../Navigation/Popover';
 import Pill from '../DataDisplay/Pill';
 
 /**
- * The workspace header: breadcrumbs on the left, presence and notifications on
- * the right. It renders `Breadcrumb` and `HeaderSearch`, which is why neither
- * appears anywhere else — the product reaches both only through here.
+ * The workspace header: breadcrumbs on the left, notifications on the right.
+ * It renders `Breadcrumb` and `HeaderSearch`, which is why neither appears
+ * anywhere else — the product reaches both only through here.
  *
  * @param {{label: string, href?: string}[]} props.breadcrumbs The trail for the current screen.
  * @param {string} props.mode Which header this is; screens differ in what the right side carries.
  * @param {string} props.projectName Current client space, where the header names one.
  * @param {object} props.currentUser The signed-in user, for the avatar.
  * @param {() => void} props.onUserClick Opens the user menu.
- * @param {object[]} props.onlineUsers Present members, drawn as a stack of avatars.
- * @param {(user) => void} props.onOnlineUserClick Fires with the member whose avatar was clicked.
  * @param {boolean} props.showNotifications Whether the bell is drawn.
  * @param {number} props.unreadCount Number on the bell.
  * @param {() => void} props.onBellClick Opens notifications.
@@ -57,10 +54,6 @@ export default function TopHeader({
   // Breadcrumbs Props
   breadcrumbs = [],
 
-  // Chat Props
-  onlineUsers = [],
-  onOnlineUserClick = () => {},
-
   // Project team props
 
   // Right Side Props
@@ -77,29 +70,6 @@ export default function TopHeader({
   // Styling
   hideBorder = false,
 }) {
-  const renderOnlineUsers = () => (
-    <div className="flex items-center -space-x-2.5">
-      {onlineUsers.slice(0, 5).map((u, i) => (
-        <Tooltip key={u.id || u.uid || i} content={u.name || u.email || 'Учасник'} position="bottom">
-          <button
-            type="button"
-            onClick={() => onOnlineUserClick(u)}
-            className="relative w-8 h-8 flex items-center justify-center shrink-0 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:rounded-full"
-            aria-label={`Відкрити чат з ${u.name || u.email || 'учасником'}`}
-          >
-            <span className="overflow-hidden rounded-full ring-2 ring-white"><UserAvatar user={u} size="sm" /></span>
-            <span className="absolute -bottom-[1px] -right-[1px] w-2.5 h-2.5 bg-success-solid border-2 border-white rounded-full" />
-          </button>
-        </Tooltip>
-      ))}
-      {onlineUsers.length > 5 && (
-        <div className="w-8 h-8 rounded-full border-2 border-white bg-white flex items-center justify-center z-10 text-[10px] font-bold text-ink-soft shadow-sm">
-          +{onlineUsers.length - 5}
-        </div>
-      )}
-    </div>
-  );
-
   const renderLeft = () => {
     if (mode === 'breadcrumbs') {
       return (
@@ -168,10 +138,6 @@ export default function TopHeader({
       <div className="flex-1 min-w-0 flex items-center">
         {renderLeft()}
       </div>
-
-      {mode === 'chat' && onlineUsers.length > 0 && (
-        <div className="ml-3 mr-2 hidden shrink-0 md:block">{renderOnlineUsers()}</div>
-      )}
 
       {rightContent ? rightContent : (
         <div className="ml-2 flex shrink-0 items-center gap-[6px] z-50 sm:ml-4">

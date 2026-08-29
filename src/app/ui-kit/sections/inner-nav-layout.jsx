@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Surface from '@/components/ui/Surface';
-import { IconAction, SidebarLayout, InnerNavigation, MobilePaneBack, UserAvatar, ChannelRail, MemberRail, ConfirmProvider, ChatComposerCore, StatusPill } from '@/components/ui';
+import { IconAction, SidebarLayout, InnerNavigation, MobilePaneBack, UserAvatar, ChannelRail, MemberRail, ConfirmProvider, ChatComposerCore } from '@/components/ui';
 import ChatComposerDock from '@/components/ui/ChatComposerDock';
 import ChatConversationHeader from '@/components/ui/Chat/ChatConversationHeader';
 import ChatMessageList from '@/components/ui/Chat/ChatMessageList';
@@ -31,9 +31,9 @@ export default function NavMenuSection() {
   const demoUser = { id: 'kit-arthur', name: 'Артур Моспан' };
 
   // No local row helpers here on purpose. This preview used to hand-copy the
-  // two rails, and the copy was wrong in five ways at once: 8px radius drawn as
+  // two rails, and the copy was wrong in four ways at once: 8px radius drawn as
   // 10px, the #ebebeb selected row drawn as white-with-a-shadow, a 32px avatar
-  // drawn at 24px, a muted name drawn as bold ink, and no presence dot at all.
+  // drawn at 24px, and a muted name drawn as bold ink.
   // ChannelRail and MemberRail are the components /chat and /team render, so
   // the catalogue shows the thing itself instead of a drawing of it.
 
@@ -84,8 +84,8 @@ export default function NavMenuSection() {
             sidebar={(
               <MemberRail
                 members={[
-                  { id: 'arthur', name: 'Артур Моспан', positionName: 'Власник організації', online: true },
-                  { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer', online: true },
+                  { id: 'arthur', name: 'Артур Моспан', positionName: 'Власник організації' },
+                  { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer' },
                   { id: 'petro', name: 'Петро Іванчук', positionName: 'Designer' },
                   { id: 'anna', name: 'Анна Мельник', positionName: 'QA Engineer' },
                 ]}
@@ -98,7 +98,6 @@ export default function NavMenuSection() {
               <div className="flex flex-col items-center gap-2 py-8">
                 <UserAvatar user={demoUser} size="hero" />
                 <h3 className="text-[18px] font-bold text-ink">Артур Моспан</h3>
-                <StatusPill label="Онлайн" tone="success" />
               </div>
               <button type="button" onClick={() => setTeamPane(teamPane === 'sidebar' ? 'content' : 'sidebar')}
                 className="mx-auto rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted">
@@ -138,7 +137,7 @@ export default function NavMenuSection() {
                     id: 'dms',
                     label: 'Особисті',
                     items: [
-                      { id: 'olena', kind: 'dm', name: 'Олена Коваль', user: { name: 'Олена Коваль' }, online: true, unreadCount: 1 },
+                      { id: 'olena', kind: 'dm', name: 'Олена Коваль', user: { name: 'Олена Коваль' }, unreadCount: 1 },
                       { id: 'petro', kind: 'dm', name: 'Петро Іванчук', user: { name: 'Петро Іванчук' } },
                     ],
                   },

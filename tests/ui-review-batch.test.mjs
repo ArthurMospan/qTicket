@@ -26,8 +26,9 @@ test('QUI-129 and QUI-139 keep the project header free of team avatars', async (
     assert.doesNotMatch(source, /projectMembers/, 'the project team avatar strip is gone');
   }
   assert.doesNotMatch(topHeader, /ProjectMembersMenu/);
-  // Chat keeps its online strip: a different list answering a different question.
-  assert.match(topHeader, /renderOnlineUsers/);
+  // Nor a strip of who is online: a ticket system does not report on the
+  // whereabouts of the people answering tickets.
+  assert.doesNotMatch(topHeader, /onlineUsers/);
   // The preview also stopped reaching for a third-party avatar host, which had
   // been failing on every page load.
   assert.doesNotMatch(kit, /pravatar/);
@@ -235,9 +236,10 @@ test('the chat and team rails exist once, and the pages and catalogue all render
   assert.match(memberRail, /rounded-\[8px\][\s\S]{0,80}isSelected \? 'bg-line'/);
   assert.match(memberRail, /<UserAvatar user=\{member\} size="md" \/>/);
   assert.match(memberRail, /text-\[13px\] font-medium truncate/);
-  // The presence mark is one component now: it was drawn four different ways
-  // at four sizes, and on a profile it was a 28px green disc over the face.
-  assert.match(memberRail, /<PresenceDot size="md" collar="canvas" \/>/);
+  // No presence mark on either rail. Whether a colleague is at their desk is
+  // not a fact a ticket system keeps.
+  assert.doesNotMatch(rail, /PresenceDot/);
+  assert.doesNotMatch(memberRail, /PresenceDot/);
 
   for (const [name, source] of [['chat', chat], ['team', team], ['kit', kit]]) {
     assert.doesNotMatch(
@@ -283,12 +285,14 @@ test('a member profile offers qTicket actions only', async () => {
   assert.doesNotMatch(profile, />\s*Написати\s*</);
   assert.doesNotMatch(profile, />\s*Виклик\s*</);
   for (const label of [
-    'Написати повідомлення',
     'Створити інцидент і призначити учасника',
     'Інші дії з учасником',
   ]) {
     assert.match(profile, new RegExp(`label="${label}"`), `${label} must be an icon action`);
   }
+  // Writing to a colleague is not one of them: a profile is a place to look
+  // somebody up, and the product has one conversation — the incident's.
+  assert.doesNotMatch(profile, /Написати повідомлення/);
   assert.doesNotMatch(profile, /Екстрений виклик|Створити подію|\/calendar\?new=1/);
   // Access management stays in the admin-only menu.
   assert.match(profile, /\.\.\.\(isAdminOrOwner \? \[/);
@@ -350,14 +354,14 @@ test('the palette says it is searching rather than that it found nothing', async
   assert.match(palette, /searching \? 'Шукаємо…' : `Нічого не знайдено за «\$\{query\}»`/);
 });
 
-// The two qTicket actions and the optional admin menu share one kit treatment.
+// The qTicket action and the optional admin menu share one kit treatment.
 test('the member profile actions are one declared size and one declared appearance', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
   const button = await read('../src/components/ui/Button.jsx');
   const iconAction = await read('../src/components/ui/IconAction.jsx');
   const globals = await read('../src/app/globals.css');
 
-  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 3);
+  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 2);
   assert.match(button, /'icon-xl': 'w-\[56px\] p-0'/);
   assert.match(iconAction, /xl: 'icon-xl'/);
   assert.match(iconAction, /contrast: '!bg-selected !text-ink/);
@@ -368,7 +372,7 @@ test('the member profile actions are one declared size and one declared appearan
 // no text anywhere near them.
 test('every profile action circle carries a tooltip as well as a label', async () => {
   const profile = await read('../src/components/profile/ProfileView.jsx');
-  for (const content of ['Написати повідомлення', 'Створити інцидент', 'Ще дії']) {
+  for (const content of ['Створити інцидент', 'Ще дії']) {
     assert.match(profile, new RegExp(`<Tooltip content="${content}">`), content);
   }
   // The menu is wrapped, not its trigger: ContextMenu clones the trigger to

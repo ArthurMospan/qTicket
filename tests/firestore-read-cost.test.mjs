@@ -70,7 +70,6 @@ const BOUNDED_WITHOUT_LIMIT = new Map([
   // project, per channel. These grow with the team, not with use.
   ['lib/context/OrgContext.js', 'memberships and organizations of one user'],
   ['lib/hooks/useOrganization.js', 'one organization document and its members'],
-  ['lib/hooks/useOrganizationPresence.js', 'one presence document per member'],
   ['lib/hooks/useProjects.js', 'projects of one organization'],
   ['lib/hooks/useWorkflowConfig.js', 'one settings document'],
   ['lib/hooks/useUnreadChatCount.js', 'channels and read cursors of one organization'],

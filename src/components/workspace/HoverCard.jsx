@@ -8,11 +8,9 @@
 // (`IssueMentionChip`), so there is nothing left to hover for and nothing left
 // here that is not about a person.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
-import { formatLastSeenUk, isPresenceOnline } from '@/lib/utils/presence.mjs';
-import { useAppContext } from '@/lib/context/AppContext';
 import useFittedLabel from '@/lib/hooks/useFittedLabel';
 import { ORGANIZATION_ROLE_LABELS } from '@/lib/utils/orgMembership.mjs';
 
@@ -105,16 +103,10 @@ function findMember(members, value) {
  * @param {boolean} props.dark On a dark bubble — a task chat message of your own.
  */
 export default function HoverCard({ type = 'user', value, members, dark = false }) {
-  const { currentUser } = useAppContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [show, setShow] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
 
   // No lookup: the organization's members are already on the page, which is why
   // this half never needed a request and the task half did.
@@ -136,13 +128,6 @@ export default function HoverCard({ type = 'user', value, members, dark = false 
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const currentUserId = currentUser?.id || currentUser?.uid;
-  const memberId = member?.id || member?.uid;
-  const isOnline = Boolean(member && (
-    memberId === currentUserId
-    || member.online === true
-    || isPresenceOnline(member.lastActive, now)
-  ));
   const subtitle = member?.positionName
     || member?.title
     || ORGANIZATION_ROLE_LABELS[member?.role]
@@ -181,10 +166,6 @@ export default function HoverCard({ type = 'user', value, members, dark = false 
                   <span className="block text-[14px] font-bold leading-tight text-ink">{member.name || member.email}</span>
                   <span className="block text-[11px] text-muted">{subtitle}</span>
                 </span>
-              </span>
-              <span className="mt-1 flex items-center gap-1 text-[11px] text-muted">
-                <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-success-solid' : 'bg-faint'}`} />
-                {formatLastSeenUk(member.lastActive, { now, online: isOnline })}
               </span>
             </span>
           ) : (

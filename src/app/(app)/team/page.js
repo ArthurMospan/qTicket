@@ -3,7 +3,6 @@
 // src/app/workspace/team/page.js
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useAppContext } from '@/lib/context/AppContext';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { isClientRole } from '@/lib/utils/can';
 import { useOrganization } from '@/lib/hooks/useOrganization';
@@ -26,16 +25,12 @@ import {
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import ProfileView from '@/components/profile/ProfileView';
 import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
-import { useOrganizationPresence } from '@/lib/hooks/useOrganizationPresence';
-import { formatLastSeenUk, isPresenceOnline } from '@/lib/utils/presence.mjs';
 
 // ── Invite Modal ─────────────────────────────────────────────────────────────
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function TeamPage() {
-  const { currentUser } = useAppContext();
   const { members, loading, error: membersError } = useOrganization();
   const { positions = [] } = useWorkflowConfig();
-  const presenceByUserId = useOrganizationPresence();
 
   // QUI-104. Search can now answer with a person, and an answer has to land on
   // that person rather than on whoever happens to be first in the list.
@@ -45,57 +40,41 @@ export default function TeamPage() {
   const [selectedUid, setSelectedUid] = useState(null);
   // Mobile single-pane mode: 'list' (учасники) або 'detail' (профіль); md+ показує обидві
   const [mobilePane, setMobilePane] = useState('list');
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
   // Системний «назад» на телефоні повертає до списку команди
   const requestPaneClose = useMobilePaneBack(mobilePane === 'detail', () => setMobilePane('list'));
 
-  const membersWithPresence = useMemo(() => activeMembers(members)
+  const teamMembers = useMemo(() => activeMembers(members)
     .filter(member => !isClientRole(member.role))
-    .map(member => {
-    const memberId = member.id || member.uid;
-    const currentUserId = currentUser?.id || currentUser?.uid;
-    const lastActive = memberId === currentUserId
-      ? now
-      : (presenceByUserId[memberId] || member.lastActive);
-    const online = memberId === currentUserId || isPresenceOnline(lastActive, now);
-    return {
+    .map(member => ({
       ...member,
-      lastActive,
-      online,
-      presenceLabel: formatLastSeenUk(lastActive, { now, online }),
       positionName: positions.find(position => position.id === member.positionId)?.label
         || member.title
         || organizationRoleLabel(member.role),
-    };
-  }), [currentUser, members, now, positions, presenceByUserId]);
+    })), [members, positions]);
 
-  const filteredMembers = useMemo(() => membersWithPresence.filter(m =>
+  const filteredMembers = useMemo(() => teamMembers.filter(m =>
     (m.name || '').toLowerCase().includes(teamSearch.toLowerCase()) ||
     (m.email || '').toLowerCase().includes(teamSearch.toLowerCase())
-  ), [membersWithPresence, teamSearch]);
+  ), [teamMembers, teamSearch]);
   usePublishLocalSearchResults(teamSearch, filteredMembers.length);
 
   useEffect(() => {
     if (loading || !requestedMemberId) return;
-    if (!membersWithPresence.some(member => (member.id || member.uid) === requestedMemberId)) return;
+    if (!teamMembers.some(member => (member.id || member.uid) === requestedMemberId)) return;
     queueMicrotask(() => {
       setSelectedUid(requestedMemberId);
       setMobilePane('detail');
     });
-  }, [loading, membersWithPresence, requestedMemberId]);
+  }, [loading, teamMembers, requestedMemberId]);
 
   // Auto-select first member on initial load
   useEffect(() => {
-    if (!loading && membersWithPresence.length > 0 && !selectedUid) {
+    if (!loading && teamMembers.length > 0 && !selectedUid) {
       queueMicrotask(() => setSelectedUid(filteredMembers[0]?.id || filteredMembers[0]?.uid));
     }
-  }, [loading, membersWithPresence.length, selectedUid, filteredMembers]);
+  }, [loading, teamMembers.length, selectedUid, filteredMembers]);
 
-  const selectedMember = membersWithPresence.find(m => (m.id || m.uid) === selectedUid);
+  const selectedMember = teamMembers.find(m => (m.id || m.uid) === selectedUid);
 
 
   // Одне питання на три екрани: відмова в доступі, вичерпана квота й обрив

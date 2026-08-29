@@ -177,7 +177,7 @@ const STRUCTURES = [
   { id: 'board', label: 'Дошка й проєкт', file: /(?:AgileBoard|BoardConfig|\(app\)\/\[projectId\]|\(app\)\/page\.js)/ },
   { id: 'sprints', label: 'Спринти', file: /sprints/i },
   { id: 'settings', label: 'Налаштування', file: /(?:settings|TeamMemberSettings|InviteLink|InviteMemberDialog|OrgSwitcher)/i },
-  { id: 'shell', label: 'Оболонка', file: /(?:WorkspaceHeader|WorkspaceSidebar|MobileNav|AuthLayout|SearchModal|UserStatusSetter|TopHeader|NotificationCenter|profile\/)/ },
+  { id: 'shell', label: 'Оболонка', file: /(?:WorkspaceHeader|WorkspaceSidebar|MobileNav|AuthLayout|SearchModal|TopHeader|NotificationCenter|profile\/)/ },
 ];
 
 export const STRUCTURE_LABELS = Object.fromEntries(STRUCTURES.map(item => [item.id, item.label]));
