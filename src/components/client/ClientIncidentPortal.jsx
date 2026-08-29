@@ -15,9 +15,11 @@ import {
   Select,
   StatusPill,
   Surface,
+  Tabs,
   TaskIdentity,
 } from '@/components/ui';
-import { ArrowRight, Inbox, Plus, UsersRound } from 'lucide-react';
+import { ArrowRight, Inbox, Kanban, List, Plus, UsersRound } from 'lucide-react';
+import AgileBoard from '@/components/workspace/AgileBoard';
 import CreateTaskModal from '@/components/CreateTaskModal';
 import { useIssues } from '@/lib/hooks/useIssues';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
@@ -58,6 +60,13 @@ export default function ClientIncidentPortal({
   const workspaceSearch = useWorkspaceStore(state => state.workspaceSearch);
   const setWorkspaceSearch = useWorkspaceStore(state => state.setWorkspaceSearch);
   const [showComposer, setShowComposer] = useState(false);
+  // The client sees the same board support sees, and cannot move a card on it.
+  // Where a request has got to is the question they open this screen to answer,
+  // and a list answers it one row at a time; the pipeline answers it at a
+  // glance. Moving a card is a workflow decision, which stays internal — so the
+  // board is the same component in `readOnly`, not a second board written for
+  // customers.
+  const [viewMode, setViewMode] = useState('kanban');
   const [scope, setScope] = useState('open');
   const {
     issues,
@@ -171,6 +180,18 @@ export default function ClientIncidentPortal({
                 >
                   {CLIENT_TERMS.composerSubmit}
                 </Button>
+                {/* Desktop only, exactly as on the support queue: below md the
+                    board has nowhere to go and the list is the only view. */}
+                <div className="max-md:hidden">
+                  <Tabs
+                    tabs={[
+                      { id: 'kanban', icon: Kanban, title: 'Дошка', ariaLabel: 'Дошка' },
+                      { id: 'list', icon: List, title: 'Список', ariaLabel: 'Список' },
+                    ]}
+                    activeTab={viewMode}
+                    onTabChange={setViewMode}
+                  />
+                </div>
               </div>
             )}
             filters={(
@@ -223,6 +244,23 @@ export default function ClientIncidentPortal({
                 context="page"
               />
             </Surface>
+          ) : viewMode === 'kanban' ? (
+            <div className="flex min-h-[500px] flex-1 flex-col">
+              {/* No `members`: a card's assignee is internal routing, and the
+                  client must not learn it from the board when the incident page
+                  deliberately hides it. No `onBulkUpdate` either — selection is
+                  a staff action. */}
+              <AgileBoard
+                issues={visibleIssues}
+                allIssues={visibleIssues}
+                members={[]}
+                projects={[project]}
+                projectId={project.id}
+                project={project}
+                groupBy="category"
+                readOnly
+              />
+            </div>
           ) : (
             <Surface preset="panel" padding="md">
               <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
