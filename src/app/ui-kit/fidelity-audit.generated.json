@@ -8,18 +8,18 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 175,
-    "parsedFiles": 175,
+    "productFiles": 172,
+    "parsedFiles": 172,
     "parseErrors": 0,
-    "nativeControls": 19,
+    "nativeControls": 15,
     "structures": {
       "chat": 2,
       "settings": 1,
-      "shell": 13,
-      "other": 3
+      "shell": 11,
+      "other": 1
     },
-    "styledNativeControls": 10,
-    "reviewedNativeControls": 8,
+    "styledNativeControls": 6,
+    "reviewedNativeControls": 7,
     "manualLabels": 0,
     "manualModalShells": 0,
     "manualPills": 0,
@@ -31,20 +31,20 @@
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 19,
+    "button": 15,
     "input": 0,
     "textarea": 0,
     "select": 0
   },
   "kit": {
     "totals": {
-      "components": 97,
-      "used": 97,
+      "components": 96,
+      "used": 96,
       "unused": 0,
-      "covered": 90,
+      "covered": 89,
       "uncovered": 0,
       "routes": 9,
-      "previews": 127,
+      "previews": 126,
       "internal": 7,
       "unlisted": 0
     },
@@ -158,7 +158,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:382",
+      "location": "src/components/profile/ProfileView.jsx:186",
       "className": "ui-native-control",
       "text": "",
       "childElements": [
@@ -175,67 +175,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:47",
-      "className": "cursor-pointer truncate rounded-[4px] text-left text-[13px] font-medium leading-none text-ink outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ink",
-      "text": "",
-      "childElements": [],
-      "ariaLabel": "Скопіювати: …",
-      "styled": true,
-      "reviewed": "profile-contact-value",
-      "resembles": "",
-      "structure": "shell",
-      "routes": [
-        "/team"
-      ]
-    },
-    {
-      "tag": "button",
-      "location": "src/components/UserStatusDialog.jsx:79",
-      "className": "flex items-center gap-[10px] p-[10px] rounded-[12px] hover:bg-canvas transition-all text-left group",
-      "text": "",
-      "childElements": [
-        "span"
-      ],
-      "ariaLabel": "",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "IconAction",
-      "structure": "other",
-      "routes": [
-        "/team"
-      ]
-    },
-    {
-      "tag": "button",
-      "location": "src/components/UserStatusDialog.jsx:95",
-      "className": "w-[36px] h-[36px] rounded-full flex items-center justify-center text-[18px] transition-all ${…}",
-      "text": "",
-      "childElements": [],
-      "ariaLabel": "",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "",
-      "structure": "other",
-      "routes": [
-        "/team"
-      ]
-    },
-    {
-      "tag": "button",
-      "location": "src/components/UserStatusSetter.jsx:17",
-      "className": "flex items-center gap-1.5 mr-1 bg-canvas px-3 py-1.5 rounded-full cursor-pointer hover:bg-line transition-colors",
-      "text": "",
-      "childElements": [],
-      "ariaLabel": "",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "",
-      "structure": "shell",
-      "routes": []
-    },
-    {
-      "tag": "button",
-      "location": "src/components/workspace/HoverCard.jsx:160",
+      "location": "src/components/workspace/HoverCard.jsx:145",
       "className": "",
       "text": "",
       "childElements": [
@@ -383,19 +323,11 @@
       "count": 3
     },
     {
-      "file": "src/components/profile/ProfileView.jsx",
-      "count": 2
-    },
-    {
-      "file": "src/components/UserStatusDialog.jsx",
-      "count": 2
-    },
-    {
       "file": "src/components/OrgSwitcherScreen.jsx",
       "count": 1
     },
     {
-      "file": "src/components/UserStatusSetter.jsx",
+      "file": "src/components/profile/ProfileView.jsx",
       "count": 1
     },
     {
@@ -424,14 +356,9 @@
       "context": "navigation-sheet-row"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:382",
+      "location": "src/components/profile/ProfileView.jsx:186",
       "tag": "button",
       "context": "profile-project-chip"
-    },
-    {
-      "location": "src/components/profile/ProfileView.jsx:47",
-      "tag": "button",
-      "context": "profile-contact-value"
     },
     {
       "location": "src/components/workspace/UnifiedTimeline.jsx:160",
@@ -525,7 +452,7 @@
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:544",
+      "location": "src/components/WorkspaceHeader.jsx:543",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

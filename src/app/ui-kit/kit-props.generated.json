@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 97,
-    "props": 727,
-    "documentedProps": 727,
+    "components": 96,
+    "props": 721,
+    "documentedProps": 721,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -2085,8 +2085,7 @@
           "values": [
             "lg",
             "md",
-            "sm",
-            "status"
+            "sm"
           ],
           "description": "Width token."
         },
@@ -3115,7 +3114,7 @@
     },
     "MemberRail": {
       "file": "src/components/ui/Navigation/MemberRail.jsx",
-      "summary": "The team rail: a titled, counted list of people, with presence.",
+      "summary": "The team rail: a titled, counted list of people.",
       "props": [
         {
           "name": "action",
@@ -4034,40 +4033,6 @@
           "type": "string",
           "values": [],
           "description": "Placement of the trigger wrapper only."
-        }
-      ]
-    },
-    "PresenceDot": {
-      "file": "src/components/ui/DataDisplay/PresenceDot.jsx",
-      "summary": "\"This person is here right now\", drawn on the corner of their avatar.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "collar",
-          "default": "'canvas'",
-          "type": "'canvas'|'white'",
-          "values": [],
-          "description": "Which surface the avatar sits on."
-        },
-        {
-          "name": "label",
-          "default": "'Зараз онлайн'",
-          "type": "string",
-          "values": [],
-          "description": "Accessible name; the default says what it means."
-        },
-        {
-          "name": "size",
-          "default": "'md'",
-          "type": "'xs'|'sm'|'md'|'lg'|'hero'",
-          "values": [],
-          "description": "Matches the avatar's own size token."
         }
       ]
     },
@@ -5784,7 +5749,7 @@
     },
     "TopHeader": {
       "file": "src/components/ui/Layout/TopHeader.jsx",
-      "summary": "The workspace header: breadcrumbs on the left, presence and notifications on the right.",
+      "summary": "The workspace header: breadcrumbs on the left, notifications on the right.",
       "props": [
         {
           "name": "breadcrumbs",
@@ -5820,20 +5785,6 @@
           "type": "() => void",
           "values": [],
           "description": "Opens notifications."
-        },
-        {
-          "name": "onlineUsers",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Present members, drawn as a stack of avatars."
-        },
-        {
-          "name": "onOnlineUserClick",
-          "default": "() => {}",
-          "type": "(user) => void",
-          "values": [],
-          "description": "Fires with the member whose avatar was clicked."
         },
         {
           "name": "onProjectSearchToggle",

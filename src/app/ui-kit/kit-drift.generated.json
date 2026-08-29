@@ -8,14 +8,14 @@
     "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
   },
   "totals": {
-    "componentsWithVariants": 41,
-    "declaredValues": 351,
+    "componentsWithVariants": 40,
+    "declaredValues": 348,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 187,
+    "usedAndPreviewed": 180,
     "usedWithoutPreview": 0,
-    "declaredUnused": 144
+    "declaredUnused": 152
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -144,6 +144,18 @@
     },
     {
       "component": "Button",
+      "prop": "composition",
+      "value": "status-entry",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
+      "prop": "composition",
+      "value": "status-submit",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Button",
       "prop": "shape",
       "value": "default",
       "namespace": null
@@ -257,6 +269,12 @@
       "namespace": null
     },
     {
+      "component": "Dialog",
+      "prop": "titleContext",
+      "value": "eyebrow",
+      "namespace": null
+    },
+    {
       "component": "EmptyState",
       "prop": "context",
       "value": "centered",
@@ -342,6 +360,18 @@
     },
     {
       "component": "IconAction",
+      "prop": "composition",
+      "value": "status-entry",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
+      "prop": "composition",
+      "value": "status-submit",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "IconAction",
       "prop": "shape",
       "value": "default",
       "namespace": null
@@ -390,6 +420,18 @@
     },
     {
       "component": "Input",
+      "prop": "composition",
+      "value": "status-entry",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Input",
+      "prop": "composition",
+      "value": "status-submit",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "Input",
       "prop": "preset",
       "value": "money",
       "namespace": null
@@ -398,6 +440,12 @@
       "component": "Label",
       "prop": "context",
       "value": "field",
+      "namespace": null
+    },
+    {
+      "component": "Label",
+      "prop": "context",
+      "value": "inline",
       "namespace": null
     },
     {
@@ -827,12 +875,6 @@
       "namespace": null
     },
     {
-      "component": "TaskAttributesPanel",
-      "prop": "context",
-      "value": "calendar",
-      "namespace": null
-    },
-    {
       "component": "TextAction",
       "prop": "tone",
       "value": "ink",
@@ -848,6 +890,12 @@
       "component": "Textarea",
       "prop": "composition",
       "value": "long-form",
+      "namespace": ".ui-textarea[data-ui-composition]"
+    },
+    {
+      "component": "Textarea",
+      "prop": "composition",
+      "value": "settings-note",
       "namespace": ".ui-textarea[data-ui-composition]"
     },
     {
@@ -1247,8 +1295,7 @@
       "size": [
         "lg",
         "md",
-        "sm",
-        "status"
+        "sm"
       ],
       "bodyPadding": [
         "default",
@@ -1429,12 +1476,6 @@
         "timeline-composer"
       ]
     },
-    "TaskAttributesPanel": {
-      "context": [
-        "calendar",
-        "task"
-      ]
-    },
     "SidebarLayout": {
       "context": [
         "chat",
@@ -1514,9 +1555,9 @@
     "Surface.padding.lg": 6,
     "EmptyState.context.page": 4,
     "Button.size.icon-lg": 5,
-    "Button.style.secondary": 42,
+    "Button.style.secondary": 41,
     "Button.size.lg": 17,
-    "Button.style.primary": 28,
+    "Button.style.primary": 27,
     "Select.filterRole.status": 2,
     "Select.variant.ghost": 11,
     "Select.filterRole.member": 3,
@@ -1540,7 +1581,7 @@
     "IconAction.composition.chat-micro-action": 6,
     "Dialog.size.md": 3,
     "SidebarLayout.context.chat": 1,
-    "Button.style.ghost": 44,
+    "Button.style.ghost": 43,
     "Button.size.icon-xs": 11,
     "Button.composition.workspace-guard": 3,
     "Surface.preset.card": 2,
@@ -1550,12 +1591,12 @@
     "MultiSelect.filterRole.project": 1,
     "Select.filterRole.type": 1,
     "Select.filterRole.date": 2,
-    "Button.size.sm": 33,
+    "Button.size.sm": 30,
     "Dialog.titleContext.dialog": 3,
     "Dialog.size.sm": 7,
     "Dialog.presentation.sheet": 1,
-    "Dialog.bodyPadding.spacious": 2,
-    "UserAvatar.size.sm": 6,
+    "Dialog.bodyPadding.spacious": 1,
+    "UserAvatar.size.sm": 5,
     "Pill.tone.warning": 6,
     "Pill.tone.info": 2,
     "Pill.preset.avatar-counter": 2,
@@ -1575,8 +1616,6 @@
     "Pill.weight.medium": 10,
     "Button.size.icon": 12,
     "Card.padding.lg": 9,
-    "Label.context.inline": 1,
-    "Textarea.composition.settings-note": 1,
     "ToggleSwitch.size.sm": 4,
     "Pill.tone.ink-subtle": 5,
     "UserAvatar.size.lg": 2,
@@ -1608,11 +1647,7 @@
     "Counter.size.md": 1,
     "Counter.appearance.inverse-outline": 1,
     "ListRow.density.compact": 1,
-    "Dialog.presentation.dialog": 7,
-    "Dialog.titleContext.eyebrow": 1,
-    "Dialog.size.status": 1,
-    "Input.composition.status-entry": 1,
-    "Button.composition.status-submit": 1,
+    "Dialog.presentation.dialog": 6,
     "ResponseChoice.size.sm": 1,
     "Button.size.icon-sm": 9,
     "Button.shape.compact": 2,
@@ -1636,8 +1671,8 @@
     "IconAction.size.lg": 2,
     "IconAction.appearance.surface-plain": 2,
     "UserAvatar.size.hero": 1,
-    "IconAction.size.xl": 2,
-    "IconAction.appearance.contrast": 2,
+    "IconAction.size.xl": 1,
+    "IconAction.appearance.contrast": 1,
     "Tabs.variant.raised": 1,
     "Pill.appearance.outline": 1,
     "Pill.tone.surface-ink": 1,
@@ -1652,7 +1687,6 @@
     "Tabs.composition.pane-switch": 1,
     "Popover.align.start": 1,
     "Popover.padding.default": 1,
-    "TaskAttributesPanel.context.task": 1,
     "MarkdownViewer.size.lg": 1,
     "Surface.preset.compact-bordered-card": 1,
     "Input.size.md": 1,
@@ -1794,7 +1828,6 @@
     "Dialog.size.lg",
     "Dialog.size.md",
     "Dialog.size.sm",
-    "Dialog.size.status",
     "Dialog.titleContext.dialog",
     "Dialog.titleContext.eyebrow",
     "EmptyState.context.centered",
@@ -2010,7 +2043,6 @@
     "Tabs.variant.underline",
     "Tag.size.default",
     "Tag.size.small",
-    "TaskAttributesPanel.context.task",
     "TextAction.size.lg",
     "TextAction.size.md",
     "TextAction.size.sm",

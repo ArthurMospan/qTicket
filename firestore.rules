@@ -289,8 +289,6 @@ service cloud.firestore {
       }
     }
 
-    }
-
     // ── issues/{issueId} ─────────────────────────────────────────────────
     match /issues/{issueId} {
       allow read: if canAccessIssueData(resource.data);

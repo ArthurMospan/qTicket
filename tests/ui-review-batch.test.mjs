@@ -366,7 +366,9 @@ test('the member profile actions are one declared size and one declared appearan
   const iconAction = await read('../src/components/ui/IconAction.jsx');
   const globals = await read('../src/app/globals.css');
 
-  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 2);
+  // One action, not two: the admin «Керування доступом» menu pointed into a
+  // settings section that can only list now, so it went with the editors.
+  assert.equal((profile.match(/size="xl" appearance="contrast"|appearance="contrast"/g) || []).length, 1);
   assert.match(button, /'icon-xl': 'w-\[56px\] p-0'/);
   assert.match(iconAction, /xl: 'icon-xl'/);
   assert.match(iconAction, /contrast: '!bg-selected !text-ink/);

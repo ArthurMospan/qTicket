@@ -43,7 +43,7 @@ test('the audit still sees what it is supposed to see', () => {
   // floor still catches a checker that stopped walking, which is what it is for;
   // it is lowered deliberately each time screens leave, never to make a red
   // number go away.
-  assert.ok(committed.totals.elements > 2500, 'it reads every JSX element in them');
+  assert.ok(committed.totals.elements > 2350, 'it reads every JSX element in them');
 
   // Counting any capitalised child as text made every `<button><ChevronRight/>`
   // look named: 12 findings where there were 30.

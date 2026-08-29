@@ -13,14 +13,14 @@
     "long-text"
   ],
   "totals": {
-    "components": 97,
-    "stateful": 87,
+    "components": 96,
+    "stateful": 86,
     "hover": 59,
     "focus": 58,
     "disabled": 27,
     "loading": 6,
     "error": 5,
-    "long-text": 60
+    "long-text": 59
   },
   "components": {
     "Alert": {
@@ -303,9 +303,6 @@
       "focus": "global",
       "long-text": "children"
     },
-    "PresenceDot": {
-      "long-text": "label"
-    },
     "PriorityBadge": {},
     "PriorityIcon": {},
     "ProjectSettingsForm": {
@@ -409,7 +406,7 @@
     },
     "TopHeader": {
       "hover": "own",
-      "focus": "own"
+      "focus": "global"
     },
     "TypeBadge": {
       "long-text": "label"
@@ -678,9 +675,6 @@
       "navigation-overlays",
       "variant-matrix"
     ],
-    "PresenceDot": [
-      "avatars"
-    ],
     "PriorityBadge": [
       "badges"
     ],
@@ -725,7 +719,6 @@
     ],
     "StatusPill": [
       "badges",
-      "inner-nav-layout",
       "states"
     ],
     "StatusTransitionPicker": [

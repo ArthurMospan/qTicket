@@ -78,7 +78,6 @@ export default function Dialog({
 
   const sizeClasses = {
     sm: 'sm:w-[440px]',
-    status: 'sm:w-[340px]',
     md: 'sm:w-[560px]',
     lg: 'sm:w-[min(760px,92vw)]',
   };

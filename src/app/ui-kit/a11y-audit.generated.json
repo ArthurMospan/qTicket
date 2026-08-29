@@ -10,14 +10,14 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 271,
-    "elements": 2557,
+    "files": 266,
+    "elements": 2457,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 34
+    "runtimeNameVerification": 32
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:2430",
+      "location": "src/app/(app)/settings/page.js:2389",
       "attributes": [
         "title",
         "aria-label"
@@ -43,14 +43,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:382",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:47",
+      "location": "src/components/profile/ProfileView.jsx:186",
       "attributes": [
         "title"
       ]
@@ -85,7 +78,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/ui/Chat/ChatConversationHeader.jsx:102",
+      "location": "src/components/ui/Chat/ChatConversationHeader.jsx:100",
       "attributes": [
         "label"
       ]
@@ -162,13 +155,6 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/Layout/TopHeader.jsx:84",
-      "attributes": [
-        "aria-label"
-      ]
-    },
-    {
-      "element": "button",
       "location": "src/components/ui/Navigation/Breadcrumb.jsx:98",
       "attributes": [
         "title",
@@ -229,7 +215,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/workspace/HoverCard.jsx:160",
+      "location": "src/components/workspace/HoverCard.jsx:145",
       "attributes": [
         "title"
       ]
@@ -257,7 +243,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:458",
+      "location": "src/components/WorkspaceHeader.jsx:457",
       "attributes": [
         "label"
       ]
