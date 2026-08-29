@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 97,
-    "props": 727,
-    "documentedProps": 727,
+    "components": 91,
+    "props": 654,
+    "documentedProps": 654,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -671,130 +671,6 @@
         }
       ]
     },
-    "ChannelInfoPanel": {
-      "file": "src/components/ui/Chat/ChannelInfoPanel.jsx",
-      "summary": "The panel beside a conversation: its description, its members, and everything ever attached to it, on three tabs.",
-      "props": [
-        {
-          "name": "activeTab",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Which tab is open."
-        },
-        {
-          "name": "channel",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "The conversation."
-        },
-        {
-          "name": "isAdminOrOwner",
-          "default": "",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether the reader may change membership or the description."
-        },
-        {
-          "name": "members",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Its participants."
-        },
-        {
-          "name": "messages",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Its messages, which the attachments tab reads."
-        },
-        {
-          "name": "onAddAllMembers",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Adds everybody in the workspace."
-        },
-        {
-          "name": "onAddMember",
-          "default": "",
-          "type": "(member) => void",
-          "values": [],
-          "description": "Adds one person."
-        },
-        {
-          "name": "onClose",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Closes the panel."
-        },
-        {
-          "name": "onJumpToMessage",
-          "default": "",
-          "type": "(message) => void",
-          "values": [],
-          "description": "Scrolls the conversation to that message."
-        },
-        {
-          "name": "onOpenAttachment",
-          "default": "",
-          "type": "(attachment) => void",
-          "values": [],
-          "description": "Opens an attachment in the viewer."
-        },
-        {
-          "name": "onRemoveMember",
-          "default": "",
-          "type": "(member) => void",
-          "values": [],
-          "description": "Removes one person."
-        },
-        {
-          "name": "onSaveDescription",
-          "default": "",
-          "type": "(text: string) => void",
-          "values": [],
-          "description": "Saves the edited description."
-        },
-        {
-          "name": "onTabChange",
-          "default": "",
-          "type": "(tab: string) => void",
-          "values": [],
-          "description": "Switches tabs."
-        }
-      ]
-    },
-    "ChannelRail": {
-      "file": "src/components/ui/Navigation/ChannelRail.jsx",
-      "summary": "The chat rail: grouped channels and direct messages, with unread counters.",
-      "props": [
-        {
-          "name": "activeId",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Id of the open conversation."
-        },
-        {
-          "name": "groups",
-          "default": "[]",
-          "type": "{id: string, title: string, items: object[]}[]",
-          "values": [],
-          "description": "The sections and their conversations."
-        },
-        {
-          "name": "onSelect",
-          "default": "() => {}",
-          "type": "(id: string) => void",
-          "values": [],
-          "description": "Opens one."
-        }
-      ]
-    },
     "ChatAttachmentList": {
       "file": "src/components/ui/Chat/ChatAttachmentList.jsx",
       "summary": "The files attached to a sent message, as a grid of tiles.",
@@ -838,7 +714,7 @@
     },
     "ChatComposerCore": {
       "file": "src/components/ui/ChatComposerCore.jsx",
-      "summary": "The message input itself, shared by all three chats — workspace, timeline and QuickTeam+.",
+      "summary": "The message input itself: the field, its growth behaviour and its send button.",
       "props": [
         {
           "name": "attachments",
@@ -919,7 +795,7 @@
         },
         {
           "name": "sendAriaLabel",
-          "default": "sendLabel",
+          "default": "'Надіслати'",
           "type": "string",
           "values": [],
           "description": "Accessible name for the icon-only send button."
@@ -930,13 +806,6 @@
           "type": "boolean",
           "values": [],
           "description": "In flight: the send button shows the wait."
-        },
-        {
-          "name": "sendLabel",
-          "default": "'Надіслати'",
-          "type": "string",
-          "values": [],
-          "description": "Visible label on the send button, where it has one."
         },
         {
           "name": "textareaClassName",
@@ -960,28 +829,11 @@
           "description": "Inline style for the textarea, for measured heights."
         },
         {
-          "name": "toolbar",
-          "default": "",
-          "type": "React.ReactNode",
-          "values": [],
-          "description": "Controls under the field."
-        },
-        {
           "name": "value",
           "default": "",
           "type": "string",
           "values": [],
           "description": "Draft text."
-        },
-        {
-          "name": "variant",
-          "default": "'workspace'",
-          "type": "'workspace'|'timeline'",
-          "values": [
-            "timeline",
-            "workspace"
-          ],
-          "description": "Which chat this is; changes the frame, not the behaviour."
         }
       ]
     },
@@ -1018,290 +870,6 @@
           "type": "React.RefObject",
           "values": [],
           "description": "The scroller to pad. Without it only the CSS variable is published."
-        }
-      ]
-    },
-    "ChatConversationHeader": {
-      "file": "src/components/ui/Chat/ChatConversationHeader.jsx",
-      "summary": "The bar above a conversation: who or what it is, what is pinned, the info toggle, and the way back out on a phone.",
-      "props": [
-        {
-          "name": "infoActive",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether the info panel is open — this is the pressed look."
-        },
-        {
-          "name": "infoLabel",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Accessible name of the info toggle."
-        },
-        {
-          "name": "onBack",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Returns to the rail at mobile width."
-        },
-        {
-          "name": "online",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Whether they are present right now."
-        },
-        {
-          "name": "onOpenPinned",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Opens the pinned list."
-        },
-        {
-          "name": "onToggleInfo",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Opens and closes it."
-        },
-        {
-          "name": "pinnedCount",
-          "default": "0",
-          "type": "number",
-          "values": [],
-          "description": "How many messages are pinned; zero hides the control."
-        },
-        {
-          "name": "statusEmoji",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The person's status emoji, for a direct message."
-        },
-        {
-          "name": "statusTitle",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Its text, shown on hover."
-        },
-        {
-          "name": "subtitle",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Line under it — member count, or the person's role."
-        },
-        {
-          "name": "title",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Channel name, or the other person's name."
-        },
-        {
-          "name": "type",
-          "default": "'channel'",
-          "type": "'channel'|'dm'",
-          "values": [],
-          "description": "A channel gets a hash, a direct message gets a face."
-        },
-        {
-          "name": "user",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "The other person, for the avatar."
-        }
-      ]
-    },
-    "ChatMessageList": {
-      "file": "src/components/ui/Chat/ChatMessageList.jsx",
-      "summary": "The scrolling conversation: day separators, avatar grouping, the unread divider, the jump-to-latest button and paging into history.",
-      "props": [
-        {
-          "name": "canModerate",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "The reader may remove someone else's message in this room."
-        },
-        {
-          "name": "contentRef",
-          "default": "",
-          "type": "React.RefObject",
-          "values": [],
-          "description": "The messages themselves, whose height changes as images decode."
-        },
-        {
-          "name": "endRef",
-          "default": "",
-          "type": "React.RefObject",
-          "values": [],
-          "description": "Anchor at the bottom, for scroll-to-latest."
-        },
-        {
-          "name": "hasMore",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "There is older history to page into."
-        },
-        {
-          "name": "loading",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "The first page is still arriving."
-        },
-        {
-          "name": "members",
-          "default": "",
-          "type": "object[]",
-          "values": [],
-          "description": "Participants, for names and avatars."
-        },
-        {
-          "name": "messages",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "The conversation, oldest first."
-        },
-        {
-          "name": "myUid",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The signed-in user, which decides which side a bubble sits on."
-        },
-        {
-          "name": "onDelete",
-          "default": "",
-          "type": "(message) => void",
-          "values": [],
-          "description": "Deletes it."
-        },
-        {
-          "name": "onEdit",
-          "default": "",
-          "type": "(message) => void",
-          "values": [],
-          "description": "Opens a message for editing."
-        },
-        {
-          "name": "onJumpToLatest",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Scrolls to the newest message."
-        },
-        {
-          "name": "onLoadMore",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Fetches that older page."
-        },
-        {
-          "name": "onOpenAttachment",
-          "default": "",
-          "type": "(attachment) => void",
-          "values": [],
-          "description": "Opens an attachment in the viewer."
-        },
-        {
-          "name": "onPin",
-          "default": "",
-          "type": "(message) => void",
-          "values": [],
-          "description": "Pins or unpins it."
-        },
-        {
-          "name": "onReact",
-          "default": "",
-          "type": "(message, emoji) => void",
-          "values": [],
-          "description": "Adds or removes a reaction."
-        },
-        {
-          "name": "onThread",
-          "default": "",
-          "type": "(message) => void",
-          "values": [],
-          "description": "Opens its thread."
-        },
-        {
-          "name": "registerMessageRef",
-          "default": "",
-          "type": "(id: string, node) => void",
-          "values": [],
-          "description": "Records each message's node, for jumping to a search hit."
-        },
-        {
-          "name": "scrollRef",
-          "default": "",
-          "type": "React.RefObject",
-          "values": [],
-          "description": "The scroller, shared with the composer dock."
-        },
-        {
-          "name": "searchTerm",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Current query; matches are highlighted in place."
-        },
-        {
-          "name": "seenReplies",
-          "default": "{}",
-          "type": "Record<string, number>",
-          "values": [],
-          "description": "How many replies of each message this reader has seen."
-        },
-        {
-          "name": "typingUsers",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Who is typing right now."
-        },
-        {
-          "name": "unreadCount",
-          "default": "0",
-          "type": "number",
-          "values": [],
-          "description": "How many unread messages sit below the fold."
-        }
-      ]
-    },
-    "ChatSearchBanner": {
-      "file": "src/components/ui/Chat/ChatSearchBanner.jsx",
-      "summary": "The amber strip above a filtered conversation: how many messages matched, and the way to drop the filter.",
-      "props": [
-        {
-          "name": "count",
-          "default": "0",
-          "type": "number",
-          "values": [],
-          "description": "How many messages matched; the wording declines with it."
-        },
-        {
-          "name": "onClear",
-          "default": "",
-          "type": "() => void",
-          "values": [],
-          "description": "Drops the filter."
-        },
-        {
-          "name": "query",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "What was searched for."
         }
       ]
     },
@@ -3219,110 +2787,6 @@
         }
       ]
     },
-    "MessageBubble": {
-      "file": "src/components/ui/Chat/MessageBubble.jsx",
-      "summary": "One message: the author header when it starts a run, the text, its attachments, its reactions, and the actions that appear on hover.",
-      "props": [
-        {
-          "name": "canModerate",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "The reader is an owner/admin of a group channel and may remove someone else's message. Never true in a direct room."
-        },
-        {
-          "name": "isThread",
-          "default": "false",
-          "type": "boolean",
-          "values": [],
-          "description": "Inside a thread pane: no thread action, tighter layout."
-        },
-        {
-          "name": "members",
-          "default": "",
-          "type": "object[]",
-          "values": [],
-          "description": "Participants, for names and avatars."
-        },
-        {
-          "name": "msg",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "The message."
-        },
-        {
-          "name": "myUid",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "The signed-in user, which decides which side the bubble sits on and what may be edited."
-        },
-        {
-          "name": "onDelete",
-          "default": "",
-          "type": "(msg) => void",
-          "values": [],
-          "description": "Deletes it."
-        },
-        {
-          "name": "onEdit",
-          "default": "",
-          "type": "(msg) => void",
-          "values": [],
-          "description": "Opens it for editing."
-        },
-        {
-          "name": "onOpenAttachment",
-          "default": "",
-          "type": "(attachment) => void",
-          "values": [],
-          "description": "Opens an attachment in the viewer."
-        },
-        {
-          "name": "onPin",
-          "default": "",
-          "type": "(msg) => void",
-          "values": [],
-          "description": "Pins or unpins it."
-        },
-        {
-          "name": "onReact",
-          "default": "",
-          "type": "(msg, emoji) => void",
-          "values": [],
-          "description": "Adds or removes a reaction."
-        },
-        {
-          "name": "onThread",
-          "default": "",
-          "type": "(msg) => void",
-          "values": [],
-          "description": "Opens its thread."
-        },
-        {
-          "name": "prevMsg",
-          "default": "",
-          "type": "object",
-          "values": [],
-          "description": "The one above it; consecutive messages from the same author share one avatar header."
-        },
-        {
-          "name": "searchTerm",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Current query; matches are highlighted in the text."
-        },
-        {
-          "name": "seenReplyCount",
-          "default": "0",
-          "type": "number",
-          "values": [],
-          "description": "How many of this message's replies this reader has already seen."
-        }
-      ]
-    },
     "MetaTrigger": {
       "file": "src/components/ui/DataDisplay/MetaTrigger.jsx",
       "summary": "A label, a face and a name in one row that opens a popover — «Автор: ⬤ Артур». It sits in the metadata strip under a title.",
@@ -4589,7 +4053,7 @@
     },
     "SidebarLayout": {
       "file": "src/components/ui/Layout/SidebarLayout.jsx",
-      "summary": "The rail-plus-content frame that Settings, Team and Chat all sit in.",
+      "summary": "The rail-plus-content frame that Settings and Team both sit in.",
       "props": [
         {
           "name": "className",
@@ -4601,9 +4065,8 @@
         {
           "name": "context",
           "default": "'settings'",
-          "type": "'settings'|'team'|'chat'",
+          "type": "'settings'|'team'",
           "values": [
-            "chat",
             "settings",
             "team"
           ],
@@ -5823,20 +5286,6 @@
           "type": "() => void",
           "values": [],
           "description": "Opens notifications."
-        },
-        {
-          "name": "onlineUsers",
-          "default": "[]",
-          "type": "object[]",
-          "values": [],
-          "description": "Present members, drawn as a stack of avatars."
-        },
-        {
-          "name": "onOnlineUserClick",
-          "default": "() => {}",
-          "type": "(user) => void",
-          "values": [],
-          "description": "Fires with the member whose avatar was clicked."
         },
         {
           "name": "onProjectSearchToggle",

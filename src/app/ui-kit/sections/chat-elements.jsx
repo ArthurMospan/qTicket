@@ -2,8 +2,6 @@
 import { useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Pill, UserAvatar } from '@/components/ui';
-import ChannelInfoPanel from '@/components/ui/Chat/ChannelInfoPanel';
-import ChatSearchBanner from '@/components/ui/Chat/ChatSearchBanner';
 import MentionMenu from '@/components/ui/Chat/MentionMenu';
 import IssueMentionMenu from '@/components/ui/Chat/IssueMentionMenu';
 import UnreadDivider from '@/components/ui/Chat/UnreadDivider';
@@ -15,7 +13,7 @@ import TextAction from '@/components/ui/TextAction';
 import { Trash2, Paperclip, UserPlus } from 'lucide-react';
 import { ChatIcon } from '@/lib/design/icons';
 import { PreviewBlock } from '../preview';
-import { CHAT_DEMO_MESSAGES, KIT_MENTION_MEMBERS } from '../demo-data';
+import { KIT_MENTION_MEMBERS } from '../demo-data';
 
 // An inline data: URI rather than a hosted file, so the image tile draws its
 // real thumbnail without the catalogue depending on anything it has to fetch.
@@ -57,14 +55,13 @@ export default function ChatElementsSection() {
   // The state sits in the section, not in helper components: coverage is
   // measured by finding `<Component` inside the section's own body, so a
   // wrapper function would move the render out of what the scan reads.
-  const [panelTab, setPanelTab] = useState('info');
   const [pickedFiles, setPickedFiles] = useState([]);
   const fileInputRef = useRef(null);
   return (
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
-        title="Чат — власна шкала аватарів"
-        description="Чат побудований навколо 36px аватара в рядку повідомлення. Ці розміри існують тільки для чат-поверхонь і навмисно не зведені до загальної шкали: злиття в найближчі xs/sm/md зсувало кожен рядок на 4px."
+        title="Розмова — власна шкала аватарів"
+        description="Розмова побудована навколо 36px аватара в рядку повідомлення. Ці розміри існують тільки для поверхонь розмови й навмисно не зведені до загальної шкали: злиття в найближчі xs/sm/md зсувало кожен рядок на 4px."
         filePath="src/components/ui/DataDisplay/UserAvatar.jsx"
         component="UserAvatar"
         fullWidth
@@ -82,7 +79,7 @@ export default function ChatElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Чат — розміри іконок у діях"
+        title="Розмова — розміри іконок у діях"
         description="Загальна шкала дає 20px коробці 16px іконку — правильно для щільних тулбарів і завелико для дії над повідомленням, де завжди було 12px. Задається іменованою composition, а не числом на місці виклику."
         filePath="src/components/ui/Button.jsx"
         fullWidth
@@ -91,7 +88,7 @@ export default function ChatElementsSection() {
           {[['chat-micro-action', 12, 'дії над повідомленням: відповісти, редагувати, видалити'],
             ['chat-composer-cancel', 13, 'скасування в композері'],
             ['chat-message-action', 15, 'дії в рядку: гілка, закріпити'],
-            ['chat-panel-action', 16, 'закрити гілку, інфо про канал'],
+            ['chat-panel-action', 16, 'закрити панель'],
             ['chat-composer-action', 17, 'емодзі та вкладення в композері']].map(([token, px, role]) => (
             <div key={token} className="flex items-center gap-[12px]">
               <Button style="ghost" size="icon-sm" composition={token} icon={ChatIcon}>{token}</Button>
@@ -103,7 +100,7 @@ export default function ChatElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Чат — роздільники дат"
+        title="Розмова — роздільники дат"
         description="Пілюля дати між групами повідомлень. Має власну геометрію: під час зведення варіантів її склали в sm/wide-sm, від чого вона стала вужчою, а текст — на піксель більшим. Видно на кожному переході дня."
         filePath="src/app/globals.css"
         component="Pill"
@@ -152,7 +149,7 @@ export default function ChatElementsSection() {
 
       <PreviewBlock
         title="MentionMenu — дві щільності"
-        description="@-меню було написане двічі, по разу на композер, і копії вже розійшлись: у чаті — 16px радіус із тінню й 28px аватари, у таймлайні задачі — 10px рамка й 20px, і лише в другому був курсор із клавіатури."
+        description="@-меню було написане двічі, по разу на композер, і копії вже розійшлись: у месенджері — 16px радіус із тінню й 28px аватари, у стрічці звернення — 10px рамка й 20px, і лише в другому був курсор із клавіатури. Месенджера немає; обидві щільності лишаються оголошеними компонентом."
         filePath="src/components/ui/Chat/MentionMenu.jsx"
         component="MentionMenu"
         fullWidth
@@ -171,7 +168,7 @@ export default function ChatElementsSection() {
 
       <PreviewBlock
         title="Межа непрочитаних повідомлень"
-        description="Стабільно позначає місце, з якого починаються нові повідомлення у чаті завдання. Лічильник збігається з індикатором вкладки чату."
+        description="Стабільно позначає місце, з якого починаються нові повідомлення в розмові звернення."
         filePath="src/components/ui/Chat/UnreadDivider.jsx"
         component="UnreadDivider"
         fullWidth
@@ -183,7 +180,7 @@ export default function ChatElementsSection() {
 
       <PreviewBlock
         title="Межа завантаженої історії"
-        description="Ні канал, ні чат завдання не підписані на всю історію — відкривається найновіша сторінка, а ця кнопка розширює вікно. Один елемент для обох, щоб «давніші повідомлення» і «давніша історія» не розʼїхались."
+        description="Розмова звернення не підписана на всю історію — відкривається найновіша сторінка, а ця кнопка розширює вікно. Звернення, яке обговорювали рік, не має коштувати цілий рік щоразу, коли його відкривають."
         filePath="src/components/ui/Chat/LoadOlderButton.jsx"
         component="LoadOlderButton"
         fullWidth
@@ -214,7 +211,7 @@ export default function ChatElementsSection() {
       </PreviewBlock>
 
       <PreviewBlock
-        title="Вкладення в чаті"
+        title="Вкладення в розмові"
         description="Однакові плитки у трьох місцях: під повідомленням, у вкладці «Матеріали» і як ще ненадісланий чернетковий список у композері. Останній — єдиний, у якого є «прибрати»."
         filePath="src/components/ui/Chat/ChatAttachmentList.jsx"
         component="ChatAttachmentList"
@@ -253,53 +250,6 @@ export default function ChatElementsSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock
-        title="ChatSearchBanner"
-        description="Бурштинова смуга над розмовою під час пошуку. Її «Очистити» — єдина бурштинова текст-кнопка в продукті, тому колір лишається тут, а не стає тоном TextAction, якого більше ніхто не попросить."
-        filePath="src/components/ui/Chat/ChatSearchBanner.jsx"
-        component="ChatSearchBanner"
-        fullWidth
-      >
-        <div className="w-full overflow-hidden rounded-[12px] border border-line">
-          <ChatSearchBanner query="онбординг" count={3} onClear={() => {}} />
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="ChannelInfoPanel"
-        description="Третя панель чату: опис, учасники, закріплені й усі файли каналу. Тринадцять рукописних контролів — третина всієї поверхні чату — жили тут і не показувались ніде, крім справжнього каналу зі справжніми учасниками."
-        filePath="src/components/ui/Chat/ChannelInfoPanel.jsx"
-        component="ChannelInfoPanel"
-        fullWidth
-      >
-        {/* md+ only: нижче панель — `fixed inset-0`, бо на телефоні вона
-            повноекранна, а не рейка збоку. */}
-        <div className="hidden h-[520px] w-full justify-center md:flex">
-          <ChannelInfoPanel
-            channel={{
-              id: 'general',
-              name: 'general',
-              description: 'Загальний канал для всієї команди',
-              members: ['kit-arthur', 'kit-olena'],
-            }}
-            members={KIT_MENTION_MEMBERS}
-            messages={CHAT_DEMO_MESSAGES}
-            activeTab={panelTab}
-            onTabChange={setPanelTab}
-            isAdminOrOwner
-            onOpenAttachment={() => {}}
-            onJumpToMessage={() => {}}
-            onClose={() => {}}
-            onSaveDescription={async () => true}
-            onAddMember={async () => true}
-            onAddAllMembers={async () => true}
-            onRemoveMember={async () => true}
-          />
-        </div>
-        <p className="text-[11px] text-muted md:hidden">
-          На вузькому екрані панель займає весь екран — превʼю показане від 768px.
-        </p>
-      </PreviewBlock>
     </div>
   );
 }

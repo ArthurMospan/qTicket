@@ -111,23 +111,17 @@ export { default as Tabs } from './Tabs'
 export { default as ContextMenu } from './ContextMenu'
 export { default as FilterBar } from './FilterBar'
 export { default as Segmented } from './Segmented'
-export { default as ChannelRail } from './Navigation/ChannelRail'
 export { default as MemberRail } from './Navigation/MemberRail'
 export { default as CommandPalette } from './Navigation/CommandPalette'
 export { default as ConnectionBanner } from './Feedback/ConnectionBanner'
 export { default as KeyboardShortcutsDialog } from './Navigation/KeyboardShortcutsDialog'
 
-// ===== CHAT =====
-// Chat is a structure, not a screen: the message row, the list around it, the
-// header above it and the info panel beside it are all components the catalogue
-// renders, so /ui-kit shows a conversation instead of a grey box where one goes.
-export { default as MessageBubble } from './Chat/MessageBubble'
-export { default as ChatMessageList } from './Chat/ChatMessageList'
+// ===== CONVERSATION =====
+// The parts of the one conversation qTicket has: the incident timeline. The
+// row, its files, the unread rule and the two mention menus are catalogue
+// components, so /ui-kit shows the real pieces instead of a grey box.
 export { default as UnreadDivider } from './Chat/UnreadDivider'
 export { default as LoadOlderButton } from './Chat/LoadOlderButton'
-export { default as ChatConversationHeader } from './Chat/ChatConversationHeader'
-export { default as ChatSearchBanner } from './Chat/ChatSearchBanner'
-export { default as ChannelInfoPanel } from './Chat/ChannelInfoPanel'
 export { default as MentionMenu } from './Chat/MentionMenu'
 export { default as IssueMentionMenu } from './Chat/IssueMentionMenu'
 export { ChatAttachmentList, PendingChatAttachments } from './Chat/ChatAttachmentList'

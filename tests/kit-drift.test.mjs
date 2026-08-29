@@ -147,16 +147,18 @@ test('the variant matrix renders every component that can stand alone', () => {
 // grows because the evidence was deleted, not because a call site moved out of
 // the scan's view, which is the thing this ceiling is watching for.
 //
-// Raised twice in one night, by two deletions that landed together: the
-// third-party integrations, the public API and the migration wizard; and then
-// invoices, the timesheet and the analytics screens. Those were the last call
-// sites for a whole shelf of values — the export menu's sizes, the table
-// densities, the meter tones — and the components that declared them went with
-// them wherever they had no other reader. What stays declared is vocabulary the
-// incident screens still ship.
+// Raised three times in one night, by deletions that landed together: the
+// third-party integrations, the public API and the migration wizard; then
+// invoices, the timesheet and the analytics screens; then the workspace
+// messenger, whose page was the last call site for a shelf of chat compositions
+// the kit still declares in globals.css. Those screens were the last readers of
+// a whole vocabulary — the export menu's sizes, the table densities, the meter
+// tones, the message row's actions — and the components that declared them went
+// with them wherever they had no other reader. What stays declared is
+// vocabulary the incident screens still ship.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 139,
+    committed.totals.declaredUnused <= 152,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   for (const key of ['Input.composition.status-entry', 'Button.composition.status-submit', 'Dialog.size.status']) {
@@ -200,12 +202,15 @@ test('the variant manifest is still derived from the implementation', () => {
   assert.ok(manifest.Button.size.includes('lg'), 'Button sizes should come from its SIZES map');
   assert.ok(manifest.Pill.tone.includes('ink-subtle'), 'Pill tones should come from globals.css');
   assert.ok(manifest.Popover.padding.includes('tight'), 'Popover paddings should come from its PADDINGS map');
-  for (const context of ['settings', 'team', 'chat']) {
+  for (const context of ['settings', 'team']) {
     assert.ok(
       manifest.SidebarLayout.context.includes(context),
       `the ${context} layout should be declared by SidebarLayout.CONTEXTS`,
     );
   }
+  // And the third context is gone with the third screen: the workspace
+  // messenger was the only thing that ever rendered it.
+  assert.ok(!manifest.SidebarLayout.context.includes('chat'));
   for (const context of ['default', 'detail', 'projects', 'stacked']) {
     assert.ok(
       manifest.FilterBar.context.includes(context),
@@ -229,18 +234,18 @@ test('Popover padding is a named scale, not a raw CSS length', () => {
   }
 });
 
-// Settings, Team and Chat are three different layouts — that was never the
-// problem. The problem was that only Settings said so: Chat and Team each
-// hand-wrote the same canvas-rail-beside-white-pane shell, so the same 12px
-// gutter was spelled `gap-3` in one and `gap: '12px'` in the other, and the two
-// screens under the fixed 56px header each remembered the offset separately.
+// Settings and Team are two different layouts — that was never the problem. The
+// problem was that only Settings said so: Team hand-wrote the same
+// canvas-rail-beside-white-pane shell, so the same 12px gutter was spelled
+// `gap-3` in one and `gap: '12px'` in the other, and the screens under the
+// fixed 56px header each remembered the offset separately. There was a third,
+// and it was the workspace messenger's — deleted with it, context and all.
 test('every screen with the two-pane shell declares it instead of retyping it', () => {
   const read = name => readFileSync(new URL(name, import.meta.url), 'utf8');
   const shell = read('../src/components/ui/Layout/SidebarLayout.jsx');
   const screens = {
     settings: read('../src/app/(app)/settings/page.js'),
     team: read('../src/app/(app)/team/page.js'),
-    chat: read('../src/app/(app)/chat/page.js'),
   };
 
   for (const [context, source] of Object.entries(screens)) {
@@ -255,38 +260,28 @@ test('every screen with the two-pane shell declares it instead of retyping it', 
 
   // The shell owns the gutter and the header offset now, so no screen may keep
   // a second copy of either.
-  assert.doesNotMatch(screens.chat, /flex-1 flex overflow-hidden gap-3 p-\[12px\] pt-\[56px\]/);
   assert.doesNotMatch(screens.team, /flex w-full h-full p-\[12px\] pt-\[56px\] gap-\[12px\] bg-white/);
   assert.match(shell, /pt-\[56px\]/, 'the header offset belongs to the shell');
 
-  // The background behind the panes belongs to the context too. Chat used to
-  // paint it on its own page wrapper, so two contexts declared it here and one
-  // did not — the same split the component exists to end.
-  for (const context of ['settings', 'team', 'chat']) {
+  // The background behind the panes belongs to the context too.
+  for (const context of Object.keys(screens)) {
     const block = shell.slice(shell.indexOf(`  ${context}: {`), shell.indexOf('wrapsContent', shell.indexOf(`  ${context}: {`)));
     assert.match(block, /bg-white/, `the ${context} context declares its own background`);
   }
-  assert.doesNotMatch(
-    screens.chat,
-    /flex-1 flex flex-col overflow-hidden bg-white/,
-    'the chat page must not repaint the shell background itself',
-  );
 });
 
-// Three rails, one shell, one inset. Team's rail used `p-4` while chat's and
-// settings' used 32px of vertical padding, so the rail content sat 16px higher
-// on one of the three screens and visibly jumped when you moved between them.
-// Measured in the browser before the fix: settings 32px, chat 35px, team 16px
-// from the top of the rail to its first line of text.
+// Two rails, one shell, one inset. Team's rail used `p-4` while settings' used
+// 32px of vertical padding, so the rail content sat 16px higher on one of the
+// screens and visibly jumped when you moved between them. Measured in the
+// browser before the fix: settings 32px, team 16px from the top of the rail to
+// its first line of text.
 test('every rail in the two-pane shell insets its content the same way', () => {
   const read = name => readFileSync(new URL(name, import.meta.url), 'utf8');
   const shell = read('../src/components/ui/Layout/SidebarLayout.jsx');
-  const channelRail = read('../src/components/ui/Navigation/ChannelRail.jsx');
   const memberRail = read('../src/components/ui/Navigation/MemberRail.jsx');
   const innerNavigation = read('../src/components/ui/Navigation/InnerNavigation.jsx');
 
   assert.match(shell, /export const RAIL_INSET = 'px-\[16px\] py-\[32px\]'/);
-  assert.match(channelRail, /px-\[16px\] py-\[32px\]/, 'the chat rail keeps the shared inset');
   assert.match(innerNavigation, /px-\[16px\] py-\[32px\]/, 'the settings rail keeps the shared inset');
   // QUI-107. MemberRail splits the inset because its header does not scroll
   // with the list, and it opens with a heading and a counter rather than the

@@ -42,19 +42,17 @@ test('a screen ends its own scroller with the footprint the shell stopped reserv
     'src/app/(app)/settings/page.js',
     // `/errors` is not in this list any more and must not come back: it left
     // the workspace shell entirely, so there is no bar over it to clear. The
-    // planning calendar, the sprint board and the whole `/analytics` tree are
-    // gone for a different reason — they are deleted, not merely outside the
-    // shell.
+    // planning calendar, the sprint board, the whole `/analytics` tree and the
+    // workspace messenger are gone for a different reason — they are deleted,
+    // not merely outside the shell.
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
     'src/components/workspace/AgileBoard.jsx',
     'src/components/ui/Navigation/MemberRail.jsx',
-    'src/components/ui/Navigation/ChannelRail.jsx',
     'src/components/profile/ProfileView.jsx',
   ];
   for (const screen of screens) {
     assert.match(await read(`../${screen}`), /qt-nav-scroll/, `${screen} scrolls under the bar`);
   }
-  assert.match(await read('../src/app/(app)/chat/page.js'), /className="qt-nav-dock"/);
 });
 
 test('the last of the page dissolves under the bar instead of stopping at it', async () => {
@@ -192,18 +190,21 @@ test('the active tab is announced, not only tinted', async () => {
   assert.match(nav, /aria-label="Основна навігація"/);
 });
 
-test('qTicket keeps internal chat out of navigation and guards its one subscription', async () => {
+// The bar carries qTicket's destinations, and there is no internal chat among
+// them any more — not hidden from the bar, deleted from the product.
+test('qTicket has no chat destination and no listener left over from one', async () => {
   const nav = await read('../src/components/MobileNav.jsx');
   const bridge = await read('../src/components/WorkspaceNotificationBridge.jsx');
   const title = await read('../src/components/WorkspaceDocumentTitle.jsx');
 
-  // The bridge subscribes; everyone else reads the published number.
-  assert.match(bridge, /useUnreadChatCount\(\{ enabled: internalViewer \}\)/);
-  assert.match(bridge, /setUnreadChatCount\(displayedUnreadChats\)/);
-  assert.doesNotMatch(nav, /useUnreadChatCount/);
-  assert.doesNotMatch(title, /useUnreadChatCount/);
+  for (const source of [nav, bridge, title]) {
+    assert.doesNotMatch(source, /useUnreadChatCount/);
+    assert.doesNotMatch(source, /unreadChatCount/);
+  }
   assert.doesNotMatch(nav, /href: '\/chat'/);
-  assert.doesNotMatch(nav, /s\.unreadChatCount/);
+  // The bridge is still the one publisher of the number the bar and the tab
+  // read back — it is the bell's own count now, not a second one.
+  assert.match(bridge, /useOrganizationUnreadCounts\(\);/);
 });
 
 test('the app installs as an app rather than as a bookmark', async () => {

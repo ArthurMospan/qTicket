@@ -9,26 +9,24 @@
 // Pure and dependency-light: the panel and the sheet draw the same list, and
 // the tests below check the counting, not the markup.
 
-import { notificationConversationId, notificationDestination } from './notificationNavigation.mjs';
+import { notificationDestination } from './notificationNavigation.mjs';
 
 // Types that repeat inside one conversation and say the same thing each time.
 // `assigned`, `status_changed` and the calendar family are deliberately absent:
-// two status changes on one task are two different facts, and collapsing them
-// would hide the newer one behind a number.
-const GROUPABLE_TYPES = new Set(['commented', 'mentioned', 'chat_message']);
+// two status changes on one incident are two different facts, and collapsing
+// them would hide the newer one behind a number.
+const GROUPABLE_TYPES = new Set(['commented', 'mentioned']);
 
 /**
- * Which conversation a record belongs to, or '' if it is not the kind of record
- * that repeats. `mentioned` reaches two different places — a task and the
- * workspace chat — so the key is taken from what the record actually carries.
+ * Which incident a record belongs to, or '' if it is not the kind of record
+ * that repeats. Every conversation the product has is inside an incident, so a
+ * record that names no incident has no conversation to be grouped into.
  */
 export function notificationGroupKey(notification) {
   const type = typeof notification?.type === 'string' ? notification.type : '';
   if (!GROUPABLE_TYPES.has(type)) return '';
   const issueId = typeof notification?.issueId === 'string' ? notification.issueId.trim() : '';
-  if (issueId) return `issue:${issueId}`;
-  const conversationId = notificationConversationId(notification);
-  return conversationId ? `chat:${conversationId}` : '';
+  return issueId ? `issue:${issueId}` : '';
 }
 
 // The task's human key, out of the link the record already carries. Nothing is
@@ -60,17 +58,16 @@ function plural(count, [one, few, many]) {
  *
  * @param {number} count Скільки записів стоїть за цим рядком.
  * @param {object} sample Будь-який із них — потрібен лише для ключа задачі.
- * @param {string} key Ключ розмови з `notificationGroupKey`.
  */
-export function notificationCountTitle(count, sample, key = '') {
+export function notificationCountTitle(count, sample) {
   const what = `${count} ${plural(count, ['нове повідомлення', 'нові повідомлення', 'нових повідомлень'])}`;
   const issueKey = notificationIssueKey(sample);
   if (issueKey) return `${what} в ${issueKey}`;
-  // Neither branch names the record: the bell is shared with the external
-  // client, whose word for it is «звернення» and never «завдання». The key
-  // above names it exactly when it can, and «обговорення» is what the
-  // messages are in when it cannot.
-  return String(key).startsWith('chat:') ? `${what} в розмові` : `${what} в обговоренні`;
+  // The fallback names no record: the bell is shared with the external client,
+  // whose word for it is «звернення» and never «завдання». The key above names
+  // it exactly when it can, and «обговорення» is what the messages are in when
+  // it cannot.
+  return `${what} в обговоренні`;
 }
 
 /**
@@ -80,7 +77,7 @@ export function notificationCountTitle(count, sample, key = '') {
 export function notificationGroupTitle(group) {
   const { items } = group;
   if (items.length < 2) return items[0]?.title || '';
-  return notificationCountTitle(items.length, items[0], group.key);
+  return notificationCountTitle(items.length, items[0]);
 }
 
 /**

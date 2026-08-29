@@ -13,14 +13,14 @@
     "long-text"
   ],
   "totals": {
-    "components": 97,
-    "stateful": 87,
-    "hover": 59,
-    "focus": 58,
+    "components": 91,
+    "stateful": 81,
+    "hover": 53,
+    "focus": 52,
     "disabled": 27,
-    "loading": 6,
+    "loading": 5,
     "error": 5,
-    "long-text": 60
+    "long-text": 59
   },
   "components": {
     "Alert": {
@@ -69,14 +69,6 @@
       "hover": "own",
       "long-text": "children"
     },
-    "ChannelInfoPanel": {
-      "hover": "own",
-      "focus": "own"
-    },
-    "ChannelRail": {
-      "hover": "own",
-      "focus": "global"
-    },
     "ChatAttachmentList": {
       "hover": "own",
       "focus": "global"
@@ -89,20 +81,6 @@
     },
     "ChatComposerDock": {
       "long-text": "children"
-    },
-    "ChatConversationHeader": {
-      "hover": "own",
-      "focus": "global",
-      "long-text": "subtitle, title"
-    },
-    "ChatMessageList": {
-      "loading": "prop",
-      "hover": "own",
-      "focus": "global"
-    },
-    "ChatSearchBanner": {
-      "hover": "own",
-      "focus": "global"
     },
     "Checkbox": {
       "disabled": "prop",
@@ -257,10 +235,6 @@
       "hover": "own",
       "focus": "global"
     },
-    "MessageBubble": {
-      "hover": "own",
-      "focus": "own"
-    },
     "MetaTrigger": {
       "disabled": "native",
       "hover": "css",
@@ -409,7 +383,7 @@
     },
     "TopHeader": {
       "hover": "own",
-      "focus": "own"
+      "focus": "global"
     },
     "TypeBadge": {
       "long-text": "label"
@@ -475,33 +449,15 @@
       "variant-matrix",
       "states"
     ],
-    "ChannelInfoPanel": [
-      "chat-elements"
-    ],
-    "ChannelRail": [
-      "inner-nav-layout"
-    ],
     "ChatAttachmentList": [
       "chat-elements"
     ],
     "ChatComposerCore": [
       "chat-composer",
-      "inner-nav-layout",
-      "variant-matrix",
       "states"
     ],
     "ChatComposerDock": [
-      "chat-composer",
-      "inner-nav-layout"
-    ],
-    "ChatConversationHeader": [
-      "inner-nav-layout"
-    ],
-    "ChatMessageList": [
-      "inner-nav-layout"
-    ],
-    "ChatSearchBanner": [
-      "chat-elements"
+      "chat-composer"
     ],
     "Checkbox": [
       "inputs",
@@ -515,8 +471,7 @@
       "navigation-overlays"
     ],
     "ConfirmProvider": [
-      "dialogs",
-      "inner-nav-layout"
+      "dialogs"
     ],
     "ConnectionBanner": [
       "feedback"
@@ -548,7 +503,6 @@
     ],
     "EmptyState": [
       "feedback",
-      "chat-composer",
       "variant-matrix",
       "states"
     ],
@@ -571,7 +525,6 @@
     ],
     "IconAction": [
       "surfaces",
-      "inner-nav-layout",
       "variant-matrix",
       "states"
     ],
@@ -821,9 +774,6 @@
     ],
     "HeaderSearch": [
       "headers"
-    ],
-    "MessageBubble": [
-      "inner-nav-layout"
     ]
   }
 }

@@ -218,7 +218,7 @@ export function previewSections() {
 
   // A component the catalogue only ever shows through a host has no `<Name` in
   // any story and would look uncovered here. Breadcrumb and HeaderSearch are
-  // rendered by TopHeader on every screen, MessageBubble by ChatMessageList —
+  // rendered by TopHeader on every screen, FileThumb by ChatAttachmentList —
   // the section that shows the host is the section that shows them. Resolved in
   // a loop because a host can itself be an internal component.
   for (let pass = 0; pass < 4; pass += 1) {

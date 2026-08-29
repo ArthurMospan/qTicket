@@ -50,35 +50,10 @@ export function notificationDestination(notification) {
   return '';
 }
 
-/**
- * Which conversation in the workspace chat a notification is about, named the
- * way the chat pane names it: a channel by its id, a direct conversation by the
- * person on the other side of it.
- *
- * Read from the record's own `channelId` where there is one, and from the link
- * it carries where there is not — every record written before that field
- * existed has only the link, and those records are still in people's bells.
- *
- * @param {object} notification The notification record.
- * @returns {string} The channel id, the partner's uid, or '' for anything that is not a chat conversation.
- */
-export function notificationConversationId(notification) {
-  const explicit = typeof notification?.channelId === 'string' ? notification.channelId.trim() : '';
-  if (explicit) return explicit;
-  const link = normalizeNotificationLink(notification?.link);
-  if (!link) return '';
-  try {
-    const { searchParams } = new URL(link, WORKSPACE_ORIGIN);
-    return (searchParams.get('channel') || searchParams.get('dm') || '').trim();
-  } catch {
-    return '';
-  }
-}
-
 // What the card's button says. «Перейти» was the only word it ever said, for
-// five different destinations — a task's chat, the task itself, a conversation,
-// a calendar event, a colleague's profile — so the one thing a button is for,
-// naming where it takes you, was the one thing it did not do.
+// five different destinations — an incident's conversation, the incident
+// itself, a calendar event, a colleague's profile — so the one thing a button
+// is for, naming where it takes you, was the one thing it did not do.
 //
 // This is also where the notification's type now lives on the card. It used to
 // be a capitalised label above the title, repeating in worse words what the
@@ -94,7 +69,6 @@ export function notificationConversationId(notification) {
 const OPEN_LABELS = {
   commented: 'Відкрити обговорення',
   mentioned: 'Відкрити обговорення',
-  chat_message: 'Відкрити розмову',
   calendar_invite: 'Відкрити подію',
   calendar_changed: 'Відкрити подію',
   calendar_reminder: 'Відкрити подію',
@@ -117,9 +91,6 @@ const RECORD_DESTINATIONS = new Set(['assigned', 'status_changed', 'deadline']);
  */
 export function notificationOpenLabel(notification, { record = 'інцидент' } = {}) {
   const type = typeof notification?.type === 'string' ? notification.type : '';
-  // A mention in the workspace chat is a conversation, not an incident — the
-  // same type reaches two different places, and the link is what knows which.
-  if (type === 'mentioned' && !notification?.issueId) return 'Відкрити розмову';
   if (RECORD_DESTINATIONS.has(type)) return `Відкрити ${record}`;
   return OPEN_LABELS[type] || 'Перейти';
 }

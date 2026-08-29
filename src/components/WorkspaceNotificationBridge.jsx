@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAppContext } from '@/lib/context/AppContext';
 import { useNotifications } from '@/lib/hooks/useNotifications';
-import { useUnreadChatCount } from '@/lib/hooks/useUnreadChatCount';
 import { useOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCounts';
 import { isConversationOnScreen } from '@/lib/utils/notificationPresence.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
-import { isClientRole } from '@/lib/utils/can';
 
 // Synthesised locally instead of streamed from assets.mixkit.co. Pulling an
 // alarm sound off a third-party CDN meant the emergency alert silently failed
@@ -43,16 +41,10 @@ function playEmergencyAlarm() {
 }
 
 export default function WorkspaceNotificationBridge() {
-  const { currentUser, activeOrgId, orgRole } = useAppContext();
+  const { currentUser, activeOrgId } = useAppContext();
   const userId = currentUser?.id || currentUser?.uid;
-  // Wait for the membership before opening internal-only listeners. A client
-  // briefly has no role while AppContext resolves, and treating that pending
-  // state as internal caused a forbidden chat subscription on sign-in.
-  const internalViewer = Boolean(orgRole) && !isClientRole(orgRole);
-  const unreadChats = useUnreadChatCount({ enabled: internalViewer });
   const playedEmergencyIds = useRef(new Set());
   const emergencyTimers = useRef(new Map());
-  const setUnreadChatCount = useWorkspaceStore(state => state.setUnreadChatCount);
   const showLiveNotif = useWorkspaceStore(state => state.showLiveNotif);
   const clearLiveNotif = useWorkspaceStore(state => state.clearLiveNotif);
   const holdLiveNotifs = useWorkspaceStore(state => state.holdLiveNotifs);
@@ -85,22 +77,12 @@ export default function WorkspaceNotificationBridge() {
     onNew: showLiveNotif,
     shouldAnnounce,
   });
+  // Одне число, одне джерело: непрочитані сповіщення організації, які цей хук
+  // публікує в стор. Поруч із ним колись стояв другий підрахунок —
+  // курсори прочитаного корпоративного чату — і `||`, що обирав між ними за
+  // ознакою «яке з них не нуль». Чату більше немає, а з ним і питання, яке з
+  // двох чисел показувати.
   useOrganizationUnreadCounts();
-  // Одне число, одне джерело.
-  //
-  // Тут стояло `unreadChatNotifications || unreadChats`: два незалежні
-  // підрахунки того, «скільки непрочитаного в чаті», і `||`, що обирав між ними
-  // за ознакою «яке з них не нуль». Вони рахують різні речі й розходяться
-  // постійно — сповіщення живуть у дзвонику й гаснуть, коли їх прочитали, а
-  // курсор чату гасне, коли прочитали саме повідомлення. Тому число стрибало на
-  // рівному місці: прочитав усі сповіщення в дзвонику — і біля «Чату» раптом
-  // з'явилося число, якого щойно не було, бо перший доданок став нулем і
-  // керування перехопив другий.
-  //
-  // Так це не працює ніде: у Slack, Teams і Linear лічильник біля розмови
-  // рахує непрочитані повідомлення, а дзвоник рахує сповіщення, і одне ніколи
-  // не підмінює інше. Курсори прочитаного — єдине джерело для чату.
-  const displayedUnreadChats = unreadChats;
 
   useEffect(() => {
     clearLiveNotif();
@@ -178,17 +160,6 @@ export default function WorkspaceNotificationBridge() {
   }, []);
 
   useEffect(() => () => clearNotificationCenter(), [clearNotificationCenter, userId]);
-
-  // Published rather than rendered. This component owns the only subscription
-  // to the chat channels and read cursors; the bottom bar and the tab title
-  // read the number back out of the store instead of opening their own pair of
-  // Firestore listeners each. document.title itself belongs to
-  // WorkspaceDocumentTitle, which is the only writer.
-  useEffect(() => {
-    setUnreadChatCount(displayedUnreadChats);
-  }, [displayedUnreadChats, setUnreadChatCount]);
-
-  useEffect(() => () => setUnreadChatCount(0), [setUnreadChatCount]);
 
   return null;
 }

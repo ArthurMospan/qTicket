@@ -137,20 +137,22 @@ test('клієнтська сесія не підписується на вну�
     read('../src/components/workspace/IssueDetail.jsx'),
     read('../src/components/workspace/UnifiedTimeline.jsx'),
   ]);
-  assert.match(bridge, /const internalViewer = Boolean\(orgRole\) && !isClientRole\(orgRole\)/);
-  assert.match(bridge, /useUnreadChatCount\(\{ enabled: internalViewer \}\)/);
   assert.match(detail, /const internalViewer = Boolean\(orgRole\) && !clientViewer/);
   assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
-  assert.match(timeline, /const internalViewer = can\(orgRole, 'access:internal_notes'\)/);
-  assert.match(timeline, /useComments\(issueId, COMMENT_WINDOW \* historyWindow, \{ includeInternal: internalViewer \}\)/);
+  // Розмова інциденту — спільна: клієнт читає все, що там пише підтримка.
+  // Роллю відділена не вона, а журнал змін підтримки поруч із нею.
+  assert.match(timeline, /const internalViewer = can\(orgRole, 'access:audit_log'\)/);
+  assert.match(timeline, /useComments\(issueId, COMMENT_WINDOW \* historyWindow\)/);
   assert.match(timeline, /useAuditLog\(internalViewer \? issueId : null/);
-  assert.match(timeline, /Відповідь клієнту/);
-  assert.match(timeline, /Внутрішня нотатка/);
+  assert.doesNotMatch(timeline, /Внутрішня нотатка/);
+  assert.doesNotMatch(timeline, /internalNotes/);
 
-  // Три підписки, які цей тест колись сторожив за роллю, більше не сторожаться
-  // за роллю — їх немає ні для кого. Спринти, таймер і timeLogs пішли разом з
-  // екранами, що їх читали, тому перевіряється відсутність, а не прапорець:
-  // прапорець можна випадково перевернути, а видалений модуль — ні.
+  // Підписки, які цей тест колись сторожив за роллю, більше не сторожаться за
+  // роллю — їх немає ні для кого. Спринти, таймер, timeLogs і корпоративний
+  // месенджер пішли разом з екранами, що їх читали, тому перевіряється
+  // відсутність, а не прапорець: прапорець можна випадково перевернути, а
+  // видалений модуль — ні.
+  assert.doesNotMatch(bridge, /useUnreadChatCount/);
   assert.doesNotMatch(bridge, /useUserTimerState/);
   assert.doesNotMatch(detail, /useSprints/);
   assert.doesNotMatch(timeline, /useTimeLogs/);

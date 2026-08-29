@@ -26,31 +26,22 @@ export const CONTEXTS = {
     shell: 'flex w-full h-full overflow-hidden bg-white p-[12px] pt-[56px]',
     wrapsContent: false,
   },
-  // The white behind the panes used to be painted by the chat page's own
-  // wrapper, so two of the three contexts declared their background here and
-  // the third declared it at the call site — the exact split this component was
-  // made to end. The wrapper held nothing but the shell and had the same box,
-  // so the paint simply moved here.
-  chat: {
-    shell: 'flex-1 flex overflow-hidden bg-white p-[12px] pt-[56px]',
-    wrapsContent: false,
-  },
 };
 
-// What every rail inside this shell insets its content by. Two of the three
-// rails already agreed on it and the third did not, which is what made the
-// content jump when you moved between Чат and Команда.
+// What every rail inside this shell insets its content by. The rails used to
+// disagree about it, which is what made the content jump when you moved between
+// two screens built on the same frame.
 export const RAIL_INSET = 'px-[16px] py-[32px]';
 
 /**
- * The rail-plus-content frame that Settings, Team and Chat all sit in. The
+ * The rail-plus-content frame that Settings and Team both sit in. The
  * gutter, the rail width and the 56px allowance under the fixed header live in
- * `CONTEXTS` and nowhere else — before this component the three screens each
+ * `CONTEXTS` and nowhere else — before this component each screen
  * remembered those numbers separately, and had already drifted apart.
  *
  * @param {React.ReactNode} props.sidebar The rail.
  * @param {React.ReactNode} props.children The content beside it.
- * @param {'settings'|'team'|'chat'} props.context Which frame: who owns the height, and whether a fixed header sits above.
+ * @param {'settings'|'team'} props.context Which frame: who owns the height, and whether a fixed header sits above.
  * @param {number|string} props.sidebarWidth Rail width, where the context allows it to differ.
  * @param {number|string} props.gap Gutter between rail and content.
  * @param {boolean} props.hasBorder Draws the divider between the two panes.

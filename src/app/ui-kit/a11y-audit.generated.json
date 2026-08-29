@@ -10,14 +10,14 @@
     "runtimeNameVerification": "Dynamic accessible names are listed for browser verification; their mere presence in JSX is not proof of a non-empty runtime name."
   },
   "totals": {
-    "files": 271,
-    "elements": 2593,
+    "files": 261,
+    "elements": 2319,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 34
+    "runtimeNameVerification": 28
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -43,7 +43,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:395",
+      "location": "src/components/profile/ProfileView.jsx:389",
       "attributes": [
         "title"
       ]
@@ -57,70 +57,35 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:118",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:113",
       "attributes": [
         "aria-label"
       ]
     },
     {
       "element": "button",
-      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:145",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:140",
       "attributes": [
         "aria-label"
       ]
     },
     {
       "element": "button",
-      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:172",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:167",
       "attributes": [
         "aria-label"
       ]
     },
     {
       "element": "button",
-      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:48",
-      "attributes": [
-        "aria-label"
-      ]
-    },
-    {
-      "element": "IconAction",
-      "location": "src/components/ui/Chat/ChatConversationHeader.jsx:102",
-      "attributes": [
-        "label"
-      ]
-    },
-    {
-      "element": "Button",
-      "location": "src/components/ui/Chat/MessageBubble.jsx:376",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
-      "element": "Button",
-      "location": "src/components/ui/Chat/MessageBubble.jsx:395",
-      "attributes": [
-        "title"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/ChatComposerCore.jsx:193",
+      "location": "src/components/ui/Chat/ChatAttachmentList.jsx:43",
       "attributes": [
         "aria-label"
       ]
     },
     {
       "element": "button",
-      "location": "src/components/ui/ChatComposerCore.jsx:220",
-      "attributes": [
-        "aria-label"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/ChatComposerCore.jsx:237",
+      "location": "src/components/ui/ChatComposerCore.jsx:152",
       "attributes": [
         "aria-label"
       ]
@@ -156,13 +121,6 @@
     {
       "element": "button",
       "location": "src/components/ui/ImageUpload.jsx:121",
-      "attributes": [
-        "aria-label"
-      ]
-    },
-    {
-      "element": "button",
-      "location": "src/components/ui/Layout/TopHeader.jsx:84",
       "attributes": [
         "aria-label"
       ]
@@ -243,21 +201,21 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1467",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1422",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1487",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1442",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:458",
+      "location": "src/components/WorkspaceHeader.jsx:457",
       "attributes": [
         "label"
       ]

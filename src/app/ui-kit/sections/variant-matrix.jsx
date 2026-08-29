@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Forms/Textarea';
 import { Select, MultiSelect } from '@/components/ui/Select';
 import Surface from '@/components/ui/Surface';
-import { AttributeTrigger, DetailSection, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, ChatComposerCore, MarkdownViewer, SelectableChip, ResponseChoice, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
+import { AttributeTrigger, DetailSection, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, MarkdownViewer, SelectableChip, ResponseChoice, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
 import MentionMenu from '@/components/ui/Chat/MentionMenu';
 import MobilePaneBack from '@/components/ui/Navigation/MobilePaneBack';
 import AvatarButton from '@/components/ui/DataDisplay/AvatarButton';
@@ -102,11 +102,6 @@ const VARIANT_BASE = {
       <span className="text-[11px] text-muted">Вміст</span>
     </Popover>
   ),
-  ChatComposerCore: (props) => (
-    <div className="w-full max-w-[420px]">
-      <ChatComposerCore value="" onChange={() => {}} onSubmit={() => {}} placeholder="Повідомлення" {...props} />
-    </div>
-  ),
   TextAction: (props) => <TextAction {...props}>Дія</TextAction>,
   AvatarButton: (props) => (
     <AvatarButton user={{ id: 'kit', name: 'Артур Моспан' }} label="Переглянути профіль" {...props} />
@@ -133,7 +128,7 @@ const VARIANT_ELSEWHERE = {
   FilterBar: 'Живе всередині PageHeader — див. «Filter Bar»',
   TaskAttributesPanel: 'Потребує задачі — див. «Task Attributes Panel»',
   ChatComposerDock: 'Прикріплений до низу екрана — див. «Chat Composer Dock»',
-  SidebarLayout: 'Каркас цілого екрана — див. «SidebarLayout — 3 контексти»',
+  SidebarLayout: 'Каркас цілого екрана — див. «SidebarLayout — 2 контексти»',
   DetailLayout: 'Каркас цілої сторінки — див. «Деталі задачі й події»',
 };
 

@@ -3,9 +3,9 @@
 //
 // Every authenticated screen used to render the same six letters, because the
 // only title in the app was the one static string in the root layout and the
-// workspace is a client tree that never sets its own. A person with the board,
-// a task, the chat and settings open in four tabs had four tabs reading
-// "QuickTeam" and had to click through them to find one.
+// workspace is a client tree that never sets its own. A person with the queue,
+// an incident, the client list and settings open in four tabs had four tabs
+// reading "QuickTeam" and had to click through them to find one.
 //
 // Pure so the mapping can be asserted without a browser: the component that
 // uses it only writes the result to document.title.
@@ -21,7 +21,6 @@ export const ROUTE_TITLES = [
   // The words the screens themselves use — the tab is not the place to invent
   // a third name for a destination the sidebar and the page already agree on.
   { path: '/my', title: 'Звернення' },
-  { path: '/chat', title: 'Чат' },
   { path: '/team', title: 'Команда' },
   { path: '/settings', title: 'Налаштування' },
 ];

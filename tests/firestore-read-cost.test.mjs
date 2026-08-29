@@ -66,17 +66,14 @@ function listeners() {
 // something other than a limit bounds it — and that something is written down,
 // because «it is small today» is how the last two outages started.
 const BOUNDED_WITHOUT_LIMIT = new Map([
-  // Bounded by the size of the organization: one document per member, per
-  // project, per channel. These grow with the team, not with use.
+  // Bounded by the size of the organization: one document per member and per
+  // project. These grow with the team, not with use.
   ['lib/context/OrgContext.js', 'memberships and organizations of one user'],
   ['lib/hooks/useOrganization.js', 'one organization document and its members'],
   ['lib/hooks/useOrganizationPresence.js', 'one presence document per member'],
   ['lib/hooks/useProjects.js', 'projects of one organization'],
   ['lib/hooks/useWorkflowConfig.js', 'one settings document'],
-  ['lib/hooks/useUnreadChatCount.js', 'channels and read cursors of one organization'],
   ['components/IssueReadStateBridge.jsx', 'one read cursor per task this user opened'],
-  ['app/(app)/chat/page.js', 'presence and channels of one organization'],
-  ['lib/hooks/useWorkspaceChat.js', 'channels of one organization; messages ARE limited'],
   ['lib/hooks/useStagesForProject.js', 'stages of one project'],
 
   // Bounded by the work itself, and reviewed as a deliberate cost: this is the

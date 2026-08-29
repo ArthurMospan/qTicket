@@ -31,7 +31,6 @@
     "migrate:calendar-time-visibility": "node scripts/backfill-calendar-time-log-visibility.mjs",
     "migrate:member-access": "node scripts/migrate-member-access.mjs",
     "migrate:image-assets": "node scripts/migrate-image-assets.mjs",
-    "migrate:chat-attachments": "node scripts/migrate-chat-attachments.mjs",
     "migrate:issue-keys": "node scripts/migrate-issue-keys.mjs",
     "cleanup:rate-limits": "node scripts/cleanup-rate-limits.mjs",
     "backfill:analytics-rollups": "node --env-file-if-exists=.env.local scripts/backfill-analytics-rollups.mjs",

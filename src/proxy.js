@@ -20,12 +20,11 @@ export async function proxy(request) {
     pathname === prefix || pathname.startsWith(`${prefix}/`)
   ));
 
-  // None of these are qTicket product routes. `/analytics`, `/calendar` and
-  // `/sprints` have no page behind them at all any more — the screens and
-  // everything only they reached are deleted — and the redirect is what keeps a
-  // copied bookmark landing in the nearest supported workflow instead of on a
-  // 404. `/chat` still has an inherited page behind it; the redirect is what
-  // keeps it out of reach.
+  // None of these are qTicket product routes, and none of them has a page
+  // behind it any more — the screens and everything only they reached are
+  // deleted, `/chat` and its whole component folder included. The redirect is
+  // what keeps a copied bookmark landing in the nearest supported workflow
+  // instead of on a 404.
   if (legacyRoute) {
     const destinationUrl = new URL(legacyRoute.destination, request.url);
     const organizationId = request.nextUrl.searchParams.get('org');

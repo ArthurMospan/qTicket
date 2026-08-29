@@ -156,7 +156,8 @@ const SOURCES = {
   // PageHeader declares no variants: `alt` was removed with the unreachable
   // portal route that was its only caller, leaving one layout and no choice.
   Tag: { size: { literal: ['small', 'default'] } },
-  ChatComposerCore: { variant: { literal: ['timeline', 'workspace'] } },
+  // ChatComposerCore declares no variants: the workspace messenger's shell went
+  // with the messenger, leaving one composer and no choice.
   ChatComposerDock: { composition: { css: ['.chat-composer-dock', 'data-ui-composition'] } },
   TaskAttributesPanel: { context: { literal: ['calendar', 'task'] } },
   SidebarLayout: { context: { map: ['Layout/SidebarLayout.jsx', 'CONTEXTS'] } },

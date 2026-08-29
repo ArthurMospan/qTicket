@@ -1,97 +1,34 @@
 'use client';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
-import { EmptyState, ChatComposerCore } from '@/components/ui';
+import { ChatComposerCore } from '@/components/ui';
 import ChatComposerDock from '@/components/ui/ChatComposerDock';
-import { Info, Hash, Paperclip, Smile } from 'lucide-react';
-import { ChatIcon } from '@/lib/design/icons';
+import { Paperclip } from 'lucide-react';
 import { PreviewBlock } from '../preview';
 
 export default function ChatComposerSection() {
   const [message, setMessage] = useState('');
-  const canSend = Boolean(message.trim());
 
   return (
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
-        title="Workspace Chat Composer"
-        description="Точна композиція основного workspace-чату: той самий canvas, textarea, toolbar, attachment/emoji controls і send state. ChatComposerDock відповідає лише за overlap. Нижче md композер стає одним рядком — контроли, поле, кругла кнопка надсилання — і поле росте до 120px замість 200. Затверджено як канон; звузь вікно, щоб побачити перемикання."
-        filePath="src/app/(app)/chat/page.js"
-        fullWidth
-      >
-        <div className="h-[420px] w-full">
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-canvas h-full">
-          <div className="relative z-10 flex min-h-[64px] shrink-0 items-center gap-2 border-b border-line/70 bg-canvas/90 px-4 py-3 backdrop-blur-xl">
-            <Hash size={17} className="shrink-0 text-ink" />
-            <div className="min-w-0 flex-1">
-              <h2 className="flex items-center gap-1.5 truncate text-[15px] font-bold text-ink">general</h2>
-              <p className="truncate text-[11px] text-muted">Загальний канал для всієї команди</p>
-            </div>
-            <Info size={16} className="text-muted" />
-          </div>
-
-          <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-4 pb-12 pt-2 scroll-pb-12">
-            <div className="flex h-full flex-1 items-center justify-center">
-              <EmptyState
-                icon={ChatIcon}
-                title="Ще немає повідомлень"
-                description="Почніть розмову! 👋"
-              />
-            </div>
-          </div>
-
-          <ChatComposerDock>
-            <div className="relative px-4 pb-4">
-              <ChatComposerCore
-                variant="workspace"
-                value={message}
-                onChange={event => setMessage(event.target.value)}
-                placeholder="Написати в #general..."
-                toolbar={(
-                  <>
-                    <button
-                      type="button"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink transition-colors"
-                      title="Emoji"
-                    >
-                      <Smile size={17} />
-                    </button>
-                    <button
-                      type="button"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink transition-colors"
-                      title="Прикріпити файл"
-                    >
-                      <Paperclip size={17} />
-                    </button>
-                  </>
-                )}
-                onSubmit={() => setMessage('')}
-                canSubmit={canSend}
-              />
-            </div>
-          </ChatComposerDock>
-        </div>
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="Task Timeline composer"
-        description="Спільне ядро ChatComposerCore у продуктовій оболонці таймлайну з attachment-control. Межу росту поля оболонка оголошує своїм max-height у класі, а не константою в модулі — інакше її не змінила б жодна медіазапит."
+        title="Композер розмови"
+        description="Поле, у якому пишуть відповідь у зверненні — і єдине поле розмови, що лишилось у продукті. Тут стояли два: це й корпоративного месенджера, з власним кільцем, власним ростом поля та підписаною кнопкою «Надіслати». Месенджера видалено, і другої геометрії разом із ним немає. ChatComposerDock відповідає лише за overlap: він міряє себе й віддає стрічці рівно ту нижню подушку, за якою останнє повідомлення не ховається під полем."
         filePath="src/components/workspace/UnifiedTimeline.jsx"
+        component="ChatComposerCore"
         fullWidth
       >
         <div className="grid w-full grid-cols-1 gap-[16px]">
           <div className="flex h-[210px] flex-col overflow-hidden rounded-[16px] bg-canvas">
-            <div className="flex-1 p-4 text-[12px] text-muted">Task timeline</div>
+            <div className="flex-1 p-4 text-[12px] text-muted">Стрічка звернення</div>
             <ChatComposerDock composition="timeline-composer">
               <ChatComposerCore
-                variant="timeline"
-                value=""
-                onChange={() => {}}
-                placeholder="Написати повідомлення..."
+                value={message}
+                onChange={event => setMessage(event.target.value)}
+                placeholder="Написати відповідь клієнту..."
                 leading={<Button className="self-center rounded-full" style="ghost" size="icon-sm" icon={Paperclip} type="button" aria-label="Додати файл" />}
-                onSubmit={() => {}}
-                canSubmit={false}
+                onSubmit={() => setMessage('')}
+                canSubmit={Boolean(message.trim())}
               />
             </ChatComposerDock>
           </div>

@@ -10,8 +10,7 @@ import EmptyState from '@/components/ui/Feedback/EmptyState';
 
 // The team rail: a titled, counted list of people.
 //
-// Same story as ChannelRail — /ui-kit used to hand-copy this and the copy was
-// wrong in five ways at once (8px radius drawn as 10px, the `#ebebeb` selected
+// /ui-kit used to hand-copy this and the copy was wrong in five ways at once (8px radius drawn as 10px, the `#ebebeb` selected
 // row drawn as white-with-a-shadow, a 32px avatar drawn at 24px, the muted
 // `#4a4a4a` name drawn as bold ink, and no presence dot at all). The page and
 // the catalogue render this file now, so there is nothing left to drift.

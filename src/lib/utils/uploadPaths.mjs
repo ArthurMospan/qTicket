@@ -27,17 +27,3 @@ export function isSafeUploadFolder(folder) {
 export function isSafeStoragePath(storagePath) {
   return typeof storagePath === 'string' && SAFE_PUBLIC_ID.test(storagePath);
 }
-
-export function isOrganizationChatStoragePath(path, organizationId = '') {
-  if (!isSafeStoragePath(path)) return false;
-  const pathOrganizationId = organizationIdFromPath(path);
-  if (!pathOrganizationId || (organizationId && pathOrganizationId !== organizationId)) return false;
-  return path.startsWith(`quickteam/organizations/${pathOrganizationId}/chat/`);
-}
-
-export function isOrganizationChatUploadFolder(folder, organizationId = '') {
-  if (!isSafeUploadFolder(folder)) return false;
-  const pathOrganizationId = organizationIdFromPath(folder);
-  if (!pathOrganizationId || (organizationId && pathOrganizationId !== organizationId)) return false;
-  return folder === `quickteam/organizations/${pathOrganizationId}/chat`;
-}

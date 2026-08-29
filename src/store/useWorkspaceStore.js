@@ -52,8 +52,8 @@ const useWorkspaceStore = create((set, get) => ({
   //
   // The panel itself already existed — `IssueModal` over `IssueDetail` — and
   // exactly one screen opened it, while every other place that names an
-  // incident navigated away and made you come back: a mention in chat, the two
-  // lists on a profile. Holding the choice here rather than in each of those
+  // incident navigated away and made you come back: the two lists on a
+  // profile. Holding the choice here rather than in each of those
   // screens is what makes it one panel instead of six copies of the same state.
   //
   // Not in the address, unlike the profile overlay: this opens from an object
@@ -181,10 +181,10 @@ const useWorkspaceStore = create((set, get) => ({
   },
 
   // Which conversation the reader currently has in front of them, published by
-  // whichever pane is showing it: `{ kind: 'issue' | 'dm', id }`. The live
-  // popup reads it and stays down for a message that arrived on the very screen
-  // it would have covered — announcing what somebody is already reading is
-  // noise, and on a task page it landed on top of the chat itself.
+  // whichever pane is showing it: `{ kind: 'issue', id }`. The live popup reads
+  // it and stays down for a message that arrived on the very screen it would
+  // have covered — announcing what somebody is already reading is noise, and on
+  // an incident page it landed on top of the conversation itself.
   //
   // Cleared against the target that registered it, so a pane unmounting after
   // the next one has already registered does not wipe the newer answer.
@@ -231,14 +231,6 @@ const useWorkspaceStore = create((set, get) => ({
     notificationUnreadByOrgError: null,
   }),
 
-  // The same reasoning as the stream above, for the chat badge. Every consumer
-  // that wanted the number — the bottom bar, the tab title — called
-  // useUnreadChatCount() and got its own pair of Firestore listeners on
-  // channels and readState. One publisher, many readers.
-  unreadChatCount: 0,
-  setUnreadChatCount: (count) => set(state =>
-    (state.unreadChatCount === count ? state : { unreadChatCount: count })),
-
   // Per-issue read cursors are published once at the workspace boundary. Card
   // selectors read a single number from this map, so unchanged cards do not
   // subscribe to Firestore or rerender for another issue's cursor.
@@ -255,10 +247,6 @@ const useWorkspaceStore = create((set, get) => ({
   // ── Breadcrumbs (set by each page) ────────────────────────────────
   breadcrumbs: [],   // [{ label, href? }]
   setBreadcrumbs: (crumbs) => set({ breadcrumbs: crumbs }),
-
-  // ── Chat search (synced between header and chat page) ─────────────
-  chatSearch: '',
-  setChatSearch: (q) => set({ chatSearch: q }),
 
   // ── Team search (synced between header and team page) ─────────────
   teamSearch: '',
@@ -289,10 +277,6 @@ const useWorkspaceStore = create((set, get) => ({
     },
   })),
 
-  // ── Chat online users (synced from chat page to header) ───────────
-  chatOnlineUsers: [],
-  setChatOnlineUsers: (users) => set({ chatOnlineUsers: users }),
-
   // ── Localization ──────────────────────────────────────────────────
   localization: null,
   setLocalization: (loc) => set({ localization: loc }),
@@ -316,17 +300,14 @@ const useWorkspaceStore = create((set, get) => ({
       _toastTimer: null,
       liveNotifs: [],
       visibleConversation: null,
-      unreadChatCount: 0,
       issueReadState: {},
       issueReadStateLoaded: false,
       breadcrumbs: [],
-      chatSearch: '',
       teamSearch: '',
       workspaceSearch: '',
       myTaskSearch: '',
       projectSearch: '',
       localSearchFeedback: null,
-      chatOnlineUsers: [],
       sidebarPreview: null,
     });
   },

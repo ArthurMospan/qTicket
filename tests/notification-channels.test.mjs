@@ -7,6 +7,7 @@ import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENTS,
   QTICKET_NOTIFICATION_EVENT_KEYS,
+  REQUESTABLE_NOTIFICATION_TYPES,
   filterRecipients,
   isChannelEnabled,
   resolveNotificationMatrix,
@@ -26,8 +27,6 @@ test('a brand-new account keeps the defaults it had before the matrix', () => {
     mentioned: true,
     statusChanged: false,
     deadline: true,
-    // Chat gained a switch; email never carried chat and still does not.
-    chatMessage: false,
   });
 });
 
@@ -45,22 +44,17 @@ test('a legacy document keeps meaning exactly what it meant', () => {
   const matrix = resolveNotificationMatrix(legacy);
 
   // In-app and Telegram received everything the event flags allowed.
-  // chatMessage had no flag in the legacy shape and no switch anywhere, so it
-  // falls back to what the channel policy was already doing: everything.
   assert.deepEqual(matrix.inapp, {
     assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
-    chatMessage: true,
   });
   assert.deepEqual(matrix.telegram, {
     assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
-    chatMessage: true,
   });
 
   // Email intersected the flags with its hardcoded type list, which is why
   // "Зміна статусу" was on yet no status email ever arrived.
   assert.deepEqual(matrix.email, {
     assigned: true, commented: false, mentioned: false, statusChanged: false, deadline: false,
-    chatMessage: false,
   });
 });
 
@@ -178,19 +172,19 @@ test('channel defaults mirror what the settings page starts from', () => {
   });
 });
 
-test('chat can be silenced on Telegram without disconnecting Telegram', () => {
-  // Before it had a key, chat_message fell through to the channel policy, which
-  // said yes to everything: connecting Telegram meant a push per message in
-  // every channel, and the only remedy was to disconnect.
-  const on = { telegramEnabled: true };
-  assert.equal(shouldDeliver(on, 'telegram', 'chat_message'), true, 'default is unchanged');
-
-  const muted = { telegramEnabled: true, channels: { telegram: { chatMessage: false } } };
-  assert.equal(shouldDeliver(muted, 'telegram', 'chat_message'), false);
-  // And muting chat leaves the rest of the column alone.
-  assert.equal(shouldDeliver(muted, 'telegram', 'mentioned'), true);
-  // The bell keeps its own answer.
-  assert.equal(shouldDeliver(muted, 'inapp', 'chat_message'), true);
+// The workspace messenger's event is gone, and with it the switch it needed.
+// A `chatMessage` preference already stored on an account is a key nothing
+// reads any more — the type cannot be asked for at all.
+test('the deleted workspace-chat event has no switch and no way to be published', () => {
+  assert.ok(!REQUESTABLE_NOTIFICATION_TYPES.includes('chat_message'));
+  assert.ok(!NOTIFICATION_EVENTS.some(event => event.key === 'chatMessage'));
+  assert.ok(!('chatMessage' in EVENT_DEFAULTS));
+  // A stored preference for it changes nothing about the events that remain.
+  const stale = { telegramEnabled: true, channels: { telegram: { chatMessage: false } } };
+  assert.equal(shouldDeliver(stale, 'telegram', 'mentioned'), true);
+  assert.deepEqual(Object.keys(resolveNotificationMatrix(stale).telegram), [
+    'assigned', 'commented', 'mentioned', 'statusChanged', 'deadline',
+  ]);
 });
 
 test('qTicket settings offer every published incident event and no workspace-chat event', async () => {

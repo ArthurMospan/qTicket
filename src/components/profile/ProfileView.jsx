@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 import { CakeSlice, Mail, MapPin, Phone, Send, MoreVertical, Shield, X } from 'lucide-react';
-import { ChatIcon, TaskIcon } from '@/lib/design/icons';
+import { TaskIcon } from '@/lib/design/icons';
 import { Button, IconAction, Pill, PresenceDot, Tabs, ContextMenu, EmptyState, Tooltip } from '@/components/ui';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
@@ -209,13 +209,16 @@ export default function ProfileView({ user, onClose }) {
             </p>
           </div>
 
-          {/* Actions — four 56px circles.
+          {/* Actions — 56px circles.
               Labels went first: four one-word buttons read as a sentence rather
               than a set of actions. Then the icons themselves, which were
               invented here — `CheckSquare` for a task, `CalendarPlus` for an
-              event, `MessageCircle` for chat — while the sidebar, the mobile bar
-              and the palette each showed something else for the same three
-              things. They all read the same three names now.
+              event — while the sidebar, the mobile bar and the palette each
+              showed something else for the same things. They all read the same
+              names now.
+              The direct-message circle went with the workspace messenger it
+              opened: the product has no conversation with a colleague outside
+              an incident to send anybody to.
               The emergency call moved into the menu: it is the one action here
               nobody performs by accident, and it was the loudest thing on a
               colleague's profile. */}
@@ -223,17 +226,8 @@ export default function ProfileView({ user, onClose }) {
             <div className="flex items-center gap-2 mt-4">
               {/* Each circle carries its name twice: as the accessible label a
                   screen reader reads, and as a tooltip for everyone else. An
-                  icon on its own says nothing, and these four are the whole
-                  action row — there is no text anywhere near them. */}
-              <Tooltip content="Написати повідомлення">
-                <IconAction
-                  label="Написати повідомлення"
-                  icon={ChatIcon}
-                  size="xl"
-                  appearance="contrast"
-                  onClick={() => leaveFor(`/chat?dm=${encodeURIComponent(uid)}`)}
-                />
-              </Tooltip>
+                  icon on its own says nothing, and these are the whole action
+                  row — there is no text anywhere near them. */}
               <Tooltip content="Створити інцидент">
                 <IconAction
                   label="Створити інцидент і призначити учасника"

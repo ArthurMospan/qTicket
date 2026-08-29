@@ -180,13 +180,12 @@ export default function WorkspaceLayout({ children }) {
 
   const pathname = usePathname();
   const clientRouteDenied = isClientRole(orgRole) && !isClientPortalRoute(pathname);
-  const isChat = pathname?.startsWith('/chat');
   const isSettings = pathname?.startsWith('/settings');
   const hideHeader = isSettings;
 
-  // A task is the screen you open *into* rather than navigate between: it
-  // carries its own breadcrumb back to the project, it has its own tabs, and on
-  // a phone its chat is a place people sit and type. The tab bar there costs
+  // An incident is the screen you open *into* rather than navigate between: it
+  // carries its own breadcrumb back to the client, it has its own tabs, and on
+  // a phone its conversation is a place people sit and type. The tab bar there costs
   // 78px of a 660px screen for a destination nobody is heading to
   // mid-conversation, so it does without one. Every other screen keeps it.
   //

@@ -3,7 +3,6 @@ import { Search, ChevronDown, ChevronRight, X, Bell, Hash } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import { HeaderSearch } from '../Forms/HeaderSearch';
 import { Breadcrumb } from '../Navigation/Breadcrumb';
-import Tooltip from '../Navigation/Tooltip';
 import Popover from '../Navigation/Popover';
 import Pill from '../DataDisplay/Pill';
 
@@ -17,8 +16,6 @@ import Pill from '../DataDisplay/Pill';
  * @param {string} props.projectName Current client space, where the header names one.
  * @param {object} props.currentUser The signed-in user, for the avatar.
  * @param {() => void} props.onUserClick Opens the user menu.
- * @param {object[]} props.onlineUsers Present members, drawn as a stack of avatars.
- * @param {(user) => void} props.onOnlineUserClick Fires with the member whose avatar was clicked.
  * @param {boolean} props.showNotifications Whether the bell is drawn.
  * @param {number} props.unreadCount Number on the bell.
  * @param {() => void} props.onBellClick Opens notifications.
@@ -36,7 +33,7 @@ import Pill from '../DataDisplay/Pill';
  * @param {boolean} props.hideBorder Drops the bottom divider where the page draws its own.
  */
 export default function TopHeader({
-  mode = 'search', // 'search', 'project', 'breadcrumbs', 'chat'
+  mode = 'search', // 'search', 'project', 'breadcrumbs', 'minimal'
 
   // Search Props
   searchValue = '',
@@ -57,10 +54,6 @@ export default function TopHeader({
   // Breadcrumbs Props
   breadcrumbs = [],
 
-  // Chat Props
-  onlineUsers = [],
-  onOnlineUserClick = () => {},
-
   // Project team props
 
   // Right Side Props
@@ -77,29 +70,6 @@ export default function TopHeader({
   // Styling
   hideBorder = false,
 }) {
-  const renderOnlineUsers = () => (
-    <div className="flex items-center -space-x-2.5">
-      {onlineUsers.slice(0, 5).map((u, i) => (
-        <Tooltip key={u.id || u.uid || i} content={u.name || u.email || 'Учасник'} position="bottom">
-          <button
-            type="button"
-            onClick={() => onOnlineUserClick(u)}
-            className="relative w-8 h-8 flex items-center justify-center shrink-0 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:rounded-full"
-            aria-label={`Відкрити чат з ${u.name || u.email || 'учасником'}`}
-          >
-            <span className="overflow-hidden rounded-full ring-2 ring-white"><UserAvatar user={u} size="sm" /></span>
-            <span className="absolute -bottom-[1px] -right-[1px] w-2.5 h-2.5 bg-success-solid border-2 border-white rounded-full" />
-          </button>
-        </Tooltip>
-      ))}
-      {onlineUsers.length > 5 && (
-        <div className="w-8 h-8 rounded-full border-2 border-white bg-white flex items-center justify-center z-10 text-[10px] font-bold text-ink-soft shadow-sm">
-          +{onlineUsers.length - 5}
-        </div>
-      )}
-    </div>
-  );
-
   const renderLeft = () => {
     if (mode === 'breadcrumbs') {
       return (
@@ -130,24 +100,6 @@ export default function TopHeader({
       );
     }
 
-    if (mode === 'chat') {
-      return (
-        <div className="flex items-center w-full">
-          <HeaderSearch
-            value={searchValue}
-            onChange={onSearchChange}
-            onClear={onSearchClear}
-            onEscalate={onSearchEscalate}
-            localResultCount={searchLocalResultCount}
-            outsideResultCount={searchOutsideResultCount}
-            outsideLoading={searchOutsideLoading}
-            placeholder="Пошук по чатах..."
-            className="w-full max-w-[240px]"
-          />
-        </div>
-      );
-    }
-
     // Default: SEARCH mode
     return (
       <HeaderSearch
@@ -169,10 +121,6 @@ export default function TopHeader({
         {renderLeft()}
       </div>
 
-      {mode === 'chat' && onlineUsers.length > 0 && (
-        <div className="ml-3 mr-2 hidden shrink-0 md:block">{renderOnlineUsers()}</div>
-      )}
-
       {rightContent ? rightContent : (
         <div className="ml-2 flex shrink-0 items-center gap-[6px] z-50 sm:ml-4">
           {showNotifications && (
@@ -190,13 +138,6 @@ export default function TopHeader({
                 </span>
               )}
             </button>
-          )}
-
-          {mode === 'chat' && (
-            <div className="flex items-center gap-1.5 mr-2 bg-canvas px-2 py-1 rounded-full cursor-pointer hover:bg-line transition-colors">
-              <div className="w-2 h-2 rounded-full bg-success-solid"></div>
-              <span className="text-[11px] font-bold text-ink">В мережі</span>
-            </div>
           )}
 
           <button
