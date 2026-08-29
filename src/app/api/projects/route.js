@@ -7,6 +7,7 @@ import {
   organizationCountContext,
 } from '@/lib/server/projectIssueCounts';
 import { PROJECT_ISSUE_COUNTS_FIELD } from '@/lib/utils/projectIssueCounts.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import { DEFAULT_STATUS_IDS, workflowIds } from '@/lib/utils/workflowDefaults.mjs';
 import {
   suggestAvailableIssuePrefix,
@@ -15,7 +16,7 @@ import {
 export async function POST(req) {
   try {
     const body = await readJsonBody(req);
-    const { name, description, visibility, organizationId, team = [], hiddenColumns = [] } = body;
+    const { name, description, organizationId, team = [], hiddenColumns = [] } = body;
 
     const normalizedName = typeof name === 'string' ? name.trim() : '';
     const normalizedDescription = typeof description === 'string' ? description.trim() : '';
@@ -28,7 +29,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const authorization = await authorizeOrgRequest(req, organizationId, ['owner', 'admin']);
+    const authorization = await authorizeOrgRequest(req, organizationId, rolesFor('create:project'));
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }
@@ -86,19 +87,16 @@ export async function POST(req) {
     const payload = {
       name: normalizedName,
       description: normalizedDescription,
-      visibility: visibility === 'shared' ? 'shared' : 'internal',
       organizationId,
       team: [...new Set([userId, ...validTeam])],
       hiddenColumns: requestedHidden,
       status: 'active',
-      stagesCount: 4,
       issueCounter: 0,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
       createdBy: userId,
     };
 
-    const stageNames = ['Брифінг & Аналіз', 'Дизайн & UI/UX', 'Розробка', 'Тестування & Реліз'];
     // The task counters a project starts life with. A project has no tasks yet,
     // so all three are zero — and zero is a total that can be *established*
     // without reading anything, which matters: nothing reads a project's
@@ -127,15 +125,6 @@ export async function POST(req) {
         ...payload,
         issuePrefix,
         [PROJECT_ISSUE_COUNTS_FIELD]: initialProjectIssueCounts(countContext.timeZone),
-      });
-      stageNames.forEach((stageName, index) => {
-        transaction.create(db.collection('stages').doc(), {
-          label: `${String(index + 1).padStart(2, '0')}. ${stageName}`,
-          status: index === 0 ? 'in-progress' : 'todo',
-          projectId: projectRef.id,
-          order: index,
-          createdAt: FieldValue.serverTimestamp(),
-        });
       });
       transaction.update(orgRef, {
         projectMutationVersion: FieldValue.increment(1),

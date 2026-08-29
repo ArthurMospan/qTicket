@@ -12,6 +12,7 @@ import {
   validateIssueParentAssignment,
 } from '@/lib/utils/issueHierarchyModel.mjs';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import { issueParentStatusConflict } from '@/lib/utils/issueStatusTransition.mjs';
 import { resolveClosedStatusIds } from '@/lib/utils/workflowDefaults.mjs';
 
@@ -33,7 +34,7 @@ async function loadAuthorizedIssue(request, issueId) {
   const authorization = await authorizeOrgRequest(
     request,
     issue.organizationId,
-    ['owner', 'admin', 'member'],
+    rolesFor('edit:issue'),
   );
   if (authorization.error) {
     return {

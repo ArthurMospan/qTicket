@@ -1072,15 +1072,7 @@ test('deletion markers freeze nested writes before non-atomic cascades', async (
   const messageRef = doc(memberDb, 'projects', 'project-a', 'messages', 'member-message');
   const commentRef = doc(memberDb, 'issues', 'issue-a', 'comments', 'pending-comment');
   const auditRef = doc(memberDb, 'issues', 'issue-a', 'audit', 'pending-audit');
-  const materialRef = doc(memberDb, 'stages', 'stage-a', 'materials', 'material-a');
 
-  await environment.withSecurityRulesDisabled(async context => {
-    const db = context.firestore();
-    await setDoc(doc(db, 'stages', 'stage-a'), {
-      projectId: 'project-a',
-      title: 'Stage A',
-    });
-  });
   await assertSucceeds(setDoc(messageRef, {
     senderId: 'member-a',
     text: 'Before deletion',
@@ -1092,9 +1084,6 @@ test('deletion markers freeze nested writes before non-atomic cascades', async (
   await assertSucceeds(setDoc(auditRef, {
     userId: 'member-a',
     action: 'before_deletion',
-  }));
-  await assertSucceeds(setDoc(materialRef, {
-    title: 'Before deletion',
   }));
 
   await environment.withSecurityRulesDisabled(async context => {
@@ -1115,20 +1104,6 @@ test('deletion markers freeze nested writes before non-atomic cascades', async (
   }));
   await assertFails(updateDoc(messageRef, { text: 'Too late' }));
   await assertFails(deleteDoc(messageRef));
-  await assertFails(setDoc(doc(
-    memberDb,
-    'stages',
-    'stage-a',
-    'materials',
-    'late-material',
-  ), {
-    title: 'Too late',
-  }));
-  await assertFails(updateDoc(materialRef, { title: 'Too late' }));
-  await assertFails(deleteDoc(materialRef));
-  await assertFails(updateDoc(doc(memberDb, 'stages', 'stage-a'), {
-    title: 'Too late',
-  }));
   await assertFails(setDoc(doc(
     memberDb,
     'issues',
@@ -1337,13 +1312,6 @@ test('project-scoped data follows live team membership while admins retain acces
       userId: 'member-a',
       action: 'created',
     });
-    await setDoc(doc(db, 'stages', 'scoped-stage'), {
-      projectId: 'scoped-project',
-      title: 'Scoped stage',
-    });
-    await setDoc(doc(db, 'stages', 'scoped-stage', 'materials', 'material-a'), {
-      title: 'Scoped material',
-    });
     await setDoc(doc(db, 'issueLinks', 'scoped-link'), {
       schemaVersion: 2,
       organizationId: 'org-a',
@@ -1361,8 +1329,6 @@ test('project-scoped data follows live team membership while admins retain acces
   const issueRef = db => doc(db, 'issues', 'scoped-issue');
   const commentRef = db => doc(db, 'issues', 'scoped-issue', 'comments', 'comment-a');
   const auditRef = db => doc(db, 'issues', 'scoped-issue', 'audit', 'audit-a');
-  const stageRef = db => doc(db, 'stages', 'scoped-stage');
-  const materialRef = db => doc(db, 'stages', 'scoped-stage', 'materials', 'material-a');
   const linkRef = db => doc(db, 'issueLinks', 'scoped-link');
   const messageRef = db => doc(db, 'projects', 'scoped-project', 'messages', 'message-a');
 
@@ -1375,10 +1341,6 @@ test('project-scoped data follows live team membership while admins retain acces
   await assertFails(updateDoc(issueRef(offTeamDb), { title: 'Forbidden' }));
   await assertFails(getDoc(commentRef(offTeamDb)));
   await assertFails(getDoc(auditRef(offTeamDb)));
-  await assertFails(getDoc(stageRef(offTeamDb)));
-  await assertFails(updateDoc(stageRef(offTeamDb), { title: 'Forbidden' }));
-  await assertFails(getDoc(materialRef(offTeamDb)));
-  await assertFails(updateDoc(materialRef(offTeamDb), { title: 'Forbidden' }));
   await assertFails(getDoc(linkRef(offTeamDb)));
   await assertFails(getDoc(messageRef(offTeamDb)));
   await assertFails(setDoc(
@@ -1395,10 +1357,6 @@ test('project-scoped data follows live team membership while admins retain acces
   await assertSucceeds(updateDoc(issueRef(teamDb), { title: 'Team edit' }));
   await assertSucceeds(getDoc(commentRef(teamDb)));
   await assertSucceeds(getDoc(auditRef(teamDb)));
-  await assertSucceeds(getDoc(stageRef(teamDb)));
-  await assertSucceeds(updateDoc(stageRef(teamDb), { title: 'Team stage edit' }));
-  await assertSucceeds(getDoc(materialRef(teamDb)));
-  await assertSucceeds(updateDoc(materialRef(teamDb), { title: 'Team material edit' }));
   await assertSucceeds(getDoc(linkRef(teamDb)));
   await assertSucceeds(getDoc(messageRef(teamDb)));
   await assertSucceeds(getDoc(issueRef(adminDb)));

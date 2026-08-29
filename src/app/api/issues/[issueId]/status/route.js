@@ -12,6 +12,7 @@ import {
 } from '@/lib/server/projectIssueCounts';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import { existingParentIssueId } from '@/lib/utils/issueHierarchyModel.mjs';
 import {
   evaluateIssueStatusTransition,
@@ -92,7 +93,7 @@ export async function PATCH(request, context) {
     const authorization = await authorizeOrgRequest(
       request,
       initialIssue.organizationId,
-      ['owner', 'admin', 'member'],
+      rolesFor('edit:issue'),
     );
     if (authorization.error) {
       return jsonError(

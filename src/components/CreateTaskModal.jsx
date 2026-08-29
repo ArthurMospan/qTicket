@@ -35,7 +35,7 @@ import { issuePath } from '@/lib/utils/issueKeys.mjs';
 // asks for: the composer has no project yet, and a category has a different
 // status in every project, so the status can only be resolved once a project is
 // chosen — and again if it is changed.
-export default function CreateTaskModal({ isOpen, onClose, onSubmit, stages, teamMembers = [], projects = null, projectContext = null, initialStatus = null, initialCategory = null, initialAssignees = null, entity = 'incident', clientMode = false }) {
+export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers = [], projects = null, projectContext = null, initialStatus = null, initialCategory = null, initialAssignees = null, entity = 'incident', clientMode = false }) {
   const router = useRouter();
   const { currentUser, activeOrg, orgRole } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);

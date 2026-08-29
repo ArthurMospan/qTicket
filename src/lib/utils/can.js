@@ -10,6 +10,11 @@
 export const ORGANIZATION_ROLES = ['owner', 'admin', 'member', 'client_admin', 'client_member'];
 export const INVITABLE_ROLES = ['admin', 'member', 'client_admin', 'client_member'];
 export const CLIENT_ROLES = ['client_admin', 'client_member'];
+// The support side of the workspace: the seats QuickTeam provisions and the
+// only ones a QuickTeam launch opens. Not a permission — a permission says what
+// a role may do, and this says which roles are staff at all — so it is a role
+// list rather than an entry in the matrix below.
+export const INTERNAL_ROLES = ORGANIZATION_ROLES.filter(role => !CLIENT_ROLES.includes(role));
 
 export function isClientRole(role) {
   return CLIENT_ROLES.includes(role);

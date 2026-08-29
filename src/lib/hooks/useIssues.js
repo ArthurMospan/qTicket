@@ -432,18 +432,6 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
         }).catch(() => {});
       }
     }
-
-    // Side-effect: if moved to client-approval and has a linked stage, mark it
-    if (newColumnId === 'client-approval' && issue.linkedClientMaterialId) {
-      try {
-        await updateDoc(doc(db, 'stages', issue.linkedClientMaterialId), {
-          clientApprovalPending: true,
-          clientApprovalRequestedAt: serverTimestamp()
-        });
-      } catch (err) {
-        console.warn('[useIssues] could not update stage clientApprovalPending', err);
-      }
-    }
   }, [activeOrgId, includeLinks, issues, issueLinks, linksError, linksReady, projectId, closedStatusIds, statuses, applyPatch, revertPatch]);
   return {
     issues,

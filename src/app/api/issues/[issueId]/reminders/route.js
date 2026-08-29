@@ -7,6 +7,7 @@ import {
 } from '@/lib/server/firebaseAdmin';
 import { routeErrorResponse } from '@/lib/server/apiErrors';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
+import { rolesFor } from '@/lib/utils/can';
 
 // «The deadline moved — rewrite what is queued for this task.»
 //
@@ -68,7 +69,7 @@ export async function POST(request, context) {
     const authorization = await authorizeOrgRequest(
       request,
       issue.organizationId,
-      ['owner', 'admin', 'member'],
+      rolesFor('edit:issue'),
     );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });

@@ -9,9 +9,11 @@ test('workflow mutations are authenticated and transactional', async () => {
     '../src/app/api/organizations/[organizationId]/workflow/route.js',
   );
 
+  // The board's columns are project settings, and the matrix owns that gate:
+  // widening `edit:project_settings` has to widen this route in the same edit.
   assert.match(
     route,
-    /authorizeOrgRequest\([\s\S]{0,180}\['owner', 'admin'\]/,
+    /authorizeOrgRequest\([\s\S]{0,300}rolesFor\('edit:project_settings'\)/,
   );
   assert.match(route, /normalizeWorkflowMutationInput\(body\)/);
   assert.match(route, /await db\.runTransaction\(async transaction =>/);

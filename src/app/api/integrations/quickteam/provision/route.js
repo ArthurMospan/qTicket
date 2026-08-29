@@ -10,8 +10,14 @@ import {
   readSignedQuickTeamRequest,
   resolveQuickTeamStaff,
 } from '@/lib/server/quickteamIntegration';
+import { restoreProjectAccess } from '@/lib/server/orgMembership';
+import {
+  MEMBERSHIP_ARCHIVE,
+  MEMBERSHIP_COLLECTION,
+  membershipId,
+  quickTeamSeatChanges,
+} from '@/lib/utils/orgMembership.mjs';
 
-const INTERNAL_ROLES = new Set(['owner', 'admin', 'member']);
 const MAX_TRANSACTION_WRITES = 450;
 
 export async function POST(request) {
@@ -50,23 +56,40 @@ export async function POST(request) {
         return { status: 'unchanged', revision: currentRevision };
       }
 
-      const activeMemberships = membershipsSnap.docs.map(document => ({
-        ref: document.ref,
-        ...document.data(),
-      }));
-      const removedStaff = activeMemberships.filter(membership => (
-        INTERNAL_ROLES.has(membership.role) && !incomingUserIds.has(membership.userId)
+      // The archived seats of people this snapshot names. Somebody here may be
+      // returning, and their seat is the only surviving record of the client
+      // spaces they worked on — `project.team` was cleared when they left. Read
+      // before any write: a transaction may not read after it has written.
+      const archiveRefs = staff.map(member => db.collection(MEMBERSHIP_ARCHIVE)
+        .doc(membershipId(organizationId, member.qTicketUserId)));
+      const archiveSnaps = archiveRefs.length ? await transaction.getAll(...archiveRefs) : [];
+
+      const membershipRefs = new Map(membershipsSnap.docs.map(
+        document => [document.data().userId, document.ref],
       ));
-      const removedIds = removedStaff.map(member => member.userId);
-      const retainedClientIds = activeMemberships
-        .filter(membership => !INTERNAL_ROLES.has(membership.role))
-        .map(membership => membership.userId);
-      const projectsToClean = removedIds.length
-        ? projectsSnap.docs.filter(document => (
-            (document.data().team || []).some(uid => removedIds.includes(uid))
-          ))
-        : [];
-      const estimatedWrites = 1 + staff.length * 4 + removedStaff.length * 2 + projectsToClean.length;
+      const changes = quickTeamSeatChanges({
+        incomingUserIds: [...incomingUserIds],
+        memberships: membershipsSnap.docs.map(document => document.data()),
+        projects: projectsSnap.docs.map(document => ({
+          id: document.id,
+          team: document.data().team || [],
+        })),
+        // A seat is read back only for the person whose document it is: the
+        // archive is server-only, but a restore that trusts a field over the
+        // document id is a restore that can be pointed at somebody else.
+        archives: archiveSnaps
+          .map((snapshot, index) => (snapshot.exists ? snapshot.data() : null))
+          .filter((archived, index) => (
+            archived
+            && archived.orgId === organizationId
+            && archived.userId === staff[index].qTicketUserId
+          )),
+      });
+      const returningSeats = new Map(changes.returning.map(seat => [seat.userId, seat.seat]));
+      const removedIds = changes.departing.map(seat => seat.userId);
+      const cleanedProjectIds = new Set(changes.projectIds);
+      const projectsToClean = projectsSnap.docs.filter(document => cleanedProjectIds.has(document.id));
+      const estimatedWrites = 1 + staff.length * 4 + changes.departing.length * 2 + projectsToClean.length;
       if (estimatedWrites > MAX_TRANSACTION_WRITES) {
         throw Object.assign(new Error('Provisioning snapshot is too large'), { code: 'SNAPSHOT_TOO_LARGE' });
       }
@@ -77,7 +100,6 @@ export async function POST(request) {
         name: payload.organization.name,
         logo: payload.organization.logo,
         ownerId: owner.qTicketUserId,
-        memberUids: [...new Set([...retainedClientIds, ...incomingUserIds])],
         timezone: payload.organization.timezone,
         onboarded: true,
         portalBranding: {
@@ -98,7 +120,7 @@ export async function POST(request) {
       }, { merge: true });
 
       for (const member of staff) {
-        const membershipId = `${organizationId}_${member.qTicketUserId}`;
+        const seatId = membershipId(organizationId, member.qTicketUserId);
         transaction.set(member.identityRef, {
           provider: 'quickteam',
           sourceUserId: member.sourceUserId,
@@ -114,29 +136,42 @@ export async function POST(request) {
           identitySource: 'quickteam',
           updatedAt: now,
         }, { merge: true });
-        transaction.set(db.collection('orgMemberships').doc(membershipId), {
-          id: membershipId,
+        // Somebody returning is reactivated, not met as a stranger: the seat
+        // keeps the day they joined, their position and who invited them, the
+        // same state reactivateMembership restores from the team screen. The
+        // client spaces on that seat are given back after the transaction.
+        const seat = returningSeats.get(member.qTicketUserId);
+        transaction.set(db.collection(MEMBERSHIP_COLLECTION).doc(seatId), {
+          id: seatId,
           orgId: organizationId,
           userId: member.qTicketUserId,
           role: member.role,
           managedBy: 'quickteam',
-          joinedAt: now,
+          joinedAt: seat?.joinedAt || now,
+          ...(seat
+            ? {
+              positionId: seat.positionId || '',
+              invitedBy: seat.invitedBy || null,
+              reactivatedAt: now,
+            }
+            : {}),
           updatedAt: now,
         }, { merge: true });
-        transaction.delete(db.collection('orgMembershipArchive').doc(membershipId));
+        // The archive is consumed by a restore, never by an arrival.
+        transaction.delete(db.collection(MEMBERSHIP_ARCHIVE).doc(seatId));
       }
 
-      for (const membership of removedStaff) {
-        const membershipId = `${organizationId}_${membership.userId}`;
-        transaction.set(db.collection('orgMembershipArchive').doc(membershipId), {
-          ...membership,
-          id: membershipId,
+      for (const seat of changes.departing) {
+        const archivedId = membershipId(organizationId, seat.userId);
+        transaction.set(db.collection(MEMBERSHIP_ARCHIVE).doc(archivedId), {
+          ...seat,
+          id: archivedId,
           orgId: organizationId,
-          userId: membership.userId,
           managedBy: 'quickteam',
+          reason: 'quickteam-removed',
           deactivatedAt: now,
         });
-        transaction.delete(membership.ref);
+        transaction.delete(membershipRefs.get(seat.userId));
       }
       for (const project of projectsToClean) {
         transaction.update(project.ref, {
@@ -144,8 +179,23 @@ export async function POST(request) {
           updatedAt: now,
         });
       }
-      return { status: 'applied', revision: payload.revision };
+      return {
+        status: 'applied',
+        revision: payload.revision,
+        restored: changes.returning.map(({ userId, projectIds }) => ({ userId, projectIds })),
+      };
     });
+
+    // Outside the transaction, like every other restore path: an organization
+    // may hold more client spaces than one transaction may touch, and a project
+    // an archived seat names may have been deleted since.
+    for (const seat of result.restored || []) {
+      await restoreProjectAccess({
+        organizationId,
+        userId: seat.userId,
+        projectIds: seat.projectIds,
+      });
+    }
 
     return NextResponse.json({
       organizationId,

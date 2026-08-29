@@ -11,9 +11,11 @@
 //      rule, which is why the member query MUST carry `array-contains` — rules
 //      are not filters, so a broad org-wide query would be permission-denied.
 //
-// Project visibility (client portal, orthogonal to team access):
-//   - 'internal' → only visible in qt-workspace (team only)
-//   - 'shared'   → visible in both qt (client portal) and qt-workspace
+// There is no second visibility axis. A project once carried
+// `visibility: 'internal' | 'shared'`, inherited from a task manager whose
+// client portal was a separate product with a list of its own. qTicket has one
+// board that support and the client both open, so the field decided nothing:
+// neither reader of it had a caller, and `team` is the whole access model.
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -106,18 +108,4 @@ export function useProjects(userId, activeOrgId, orgRole) {
     loading: userId === null ? loading : (loading || !scopeMatches),
     error: scopeMatches ? error : null,
   };
-}
-
-// Helper to check if a project should be visible in qt-workspace.
-// Everything the team owns is visible here; undefined visibility is treated as
-// 'internal', so it still shows in the workspace.
-export function isWorkspaceProject(project) {
-  return !project.visibility || project.visibility === 'internal' || project.visibility === 'shared';
-}
-
-// Helper to check if a project should be visible in the client portal (qt).
-// Only an explicit 'shared' visibility exposes a project to the client — an
-// undefined/legacy value is treated as 'internal' (never leaked to the portal).
-export function isClientProject(project) {
-  return project.visibility === 'shared';
 }

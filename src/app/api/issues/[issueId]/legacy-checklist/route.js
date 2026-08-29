@@ -8,6 +8,7 @@ import {
 import { routeErrorResponse } from '@/lib/server/apiErrors';
 import { legacySubtasksToChecklist } from '@/lib/utils/issueHierarchyModel.mjs';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
+import { rolesFor } from '@/lib/utils/can';
 
 function apiTransactionError(code, status, message) {
   const error = new Error(code);
@@ -26,7 +27,7 @@ async function loadAuthorizedIssue(request, issueId) {
   const authorization = await authorizeOrgRequest(
     request,
     issue.organizationId,
-    ['owner', 'admin', 'member'],
+    rolesFor('edit:issue'),
   );
   if (authorization.error) {
     return {

@@ -257,7 +257,6 @@ export default function DialogsSection() {
           isOpen={createTaskOpen}
           onClose={() => setCreateTaskOpen(false)}
           onSubmit={async () => setCreateTaskOpen(false)}
-          stages={[]}
           teamMembers={[]}
           projectContext={{ id: 'ui-kit', name: 'UI Kit' }}
         />

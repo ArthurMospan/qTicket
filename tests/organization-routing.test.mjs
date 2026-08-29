@@ -397,7 +397,7 @@ test('qTicket tenants can only be provisioned by QuickTeam', async () => {
   assert.doesNotMatch(standaloneCreate, /batch\.set|collection\('orgMemberships'\)/);
   assert.match(provision, /readSignedQuickTeamRequest\(request\)/);
   assert.match(provision, /transaction\.set\(organizationRef/);
-  assert.match(provision, /collection\('orgMemberships'\)\.doc\(membershipId\)/);
+  assert.match(provision, /collection\(MEMBERSHIP_COLLECTION\)\.doc\(seatId\)/);
 
   const rules = await read('../firestore.rules');
   const organizations = rules.slice(rules.indexOf('match /organizations/{orgId}'), rules.indexOf('match /orgMemberships/{membershipId}'));

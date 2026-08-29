@@ -8,6 +8,7 @@ import {
   projectIssueCountIncrements,
 } from '@/lib/server/projectIssueCounts';
 import { introducedIssueExecutionViolations } from '@/lib/utils/issueStatusTransition.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import {
   DEFAULT_STATUS_IDS,
   resolveClosedStatusIds,
@@ -28,13 +29,15 @@ function projectTransactionError(code, status, message, details = {}) {
   return error;
 }
 
-async function loadAuthorizedProject(request, projectId) {
+// Editing a client space and deleting one are two permissions, so each verb
+// names its own rather than sharing one list that happens to be identical today.
+async function loadAuthorizedProject(request, projectId, allowedRoles) {
   const db = getAdminDb();
   const ref = db.collection('projects').doc(projectId);
   const snap = await ref.get();
   if (!snap.exists) return { error: 'Project not found', status: 404 };
   const project = snap.data();
-  const authorization = await authorizeOrgRequest(request, project.organizationId, ['owner', 'admin']);
+  const authorization = await authorizeOrgRequest(request, project.organizationId, allowedRoles);
   if (authorization.error) return authorization;
   return { db, ref, project, authorization };
 }
@@ -42,7 +45,7 @@ async function loadAuthorizedProject(request, projectId) {
 export async function PATCH(request, context) {
   try {
     const { projectId } = await context.params;
-    const loaded = await loadAuthorizedProject(request, projectId);
+    const loaded = await loadAuthorizedProject(request, projectId, rolesFor('edit:project_settings'));
     if (loaded.error) return NextResponse.json({ error: loaded.error }, { status: loaded.status });
     const body = await readJsonBody(request);
     const { action } = body;
@@ -353,7 +356,7 @@ export async function PATCH(request, context) {
 export async function DELETE(request, context) {
   try {
     const { projectId } = await context.params;
-    const loaded = await loadAuthorizedProject(request, projectId);
+    const loaded = await loadAuthorizedProject(request, projectId, rolesFor('delete:project'));
     if (loaded.error) return NextResponse.json({ error: loaded.error }, { status: loaded.status });
     const { db, ref, project } = loaded;
 
@@ -392,12 +395,10 @@ export async function DELETE(request, context) {
 
     const [
       issues,
-      stages,
       timeLogs,
       orgLinks,
     ] = await Promise.all([
       db.collection('issues').where('organizationId', '==', project.organizationId).where('projectId', '==', projectId).get(),
-      db.collection('stages').where('projectId', '==', projectId).get(),
       db.collection('timeLogs').where('organizationId', '==', project.organizationId).where('projectId', '==', projectId).get(),
       db.collection('issueLinks').where('organizationId', '==', project.organizationId).get(),
     ]);
@@ -418,7 +419,6 @@ export async function DELETE(request, context) {
     // anything — there is no project left for them to be about.
     await deleteProjectAnalyticsRollups(db, project.organizationId, projectId);
     for (const issue of issues.docs) await db.recursiveDelete(issue.ref);
-    for (const stage of stages.docs) await db.recursiveDelete(stage.ref);
 
     await db.collection('organizations').doc(project.organizationId).update({
       projectMutationVersion: FieldValue.increment(1),

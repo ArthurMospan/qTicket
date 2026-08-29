@@ -11,6 +11,7 @@ import {
   verifyQuickTeamRequest,
 } from '../src/lib/integrations/quickteamContract.mjs';
 import { hasActiveQuickTeamEntitlement } from '../src/lib/utils/quickTeamManaged.mjs';
+import { quickTeamSeatChanges } from '../src/lib/utils/orgMembership.mjs';
 
 const secret = 'test-shared-secret-with-at-least-32-characters';
 
@@ -118,4 +119,76 @@ test('only an active QuickTeam snapshot is a qTicket entitlement', () => {
   assert.equal(hasActiveQuickTeamEntitlement({
     quickTeam: { sourceOrganizationId: 'quickteam-org-1', entitlement: 'active' },
   }), true);
+});
+
+// Кого QuickTeam перестав надсилати, той втрачає місце — і повертається на те
+// саме місце, коли зʼявляється в наступному знімку. README і `firestore.rules`
+// обіцяють це обидва: «Restoring the archived seat returns the same role,
+// position and projects». Provisioning робив протилежне — архівував місце без
+// `projectIds`, вичищав `project.team`, а на поверненні видаляв архів замість
+// того, щоб його спожити. Людина поверталася в організацію, де в неї немає
+// жодного клієнтського простору, і ніхто вже не міг сказати, які були її.
+test('співробітник, знятий у QuickTeam і повернутий, лишається у своїх клієнтських просторах', () => {
+  const memberships = [
+    { userId: 'owner-uid', role: 'owner' },
+    { userId: 'agent-uid', role: 'member', positionId: 'support', joinedAt: 'joined-then', invitedBy: 'owner-uid' },
+    { userId: 'client-uid', role: 'client_admin' },
+  ];
+  const projects = [
+    { id: 'client-a', team: ['owner-uid', 'agent-uid'] },
+    { id: 'client-b', team: ['agent-uid'] },
+    { id: 'client-c', team: ['owner-uid'] },
+  ];
+
+  // Знімок без цієї людини: місце закривається.
+  const removal = quickTeamSeatChanges({
+    incomingUserIds: ['owner-uid'],
+    memberships,
+    projects,
+  });
+  assert.deepEqual(removal.departing.map(seat => seat.userId), ['agent-uid']);
+  const [archived] = removal.departing;
+  // Саме те, що втрачалося: простори записані в місце до того, як `project.team`
+  // їх забуде, разом із роллю й посадою.
+  assert.deepEqual(archived.projectIds, ['client-a', 'client-b']);
+  assert.equal(archived.role, 'member');
+  assert.equal(archived.positionId, 'support');
+  assert.equal(archived.joinedAt, 'joined-then');
+  // Чіпаються тільки ті простори, у яких вона була.
+  assert.deepEqual(removal.projectIds, ['client-a', 'client-b']);
+  // Клієнтські ролі QuickTeam не надсилає і не знімає.
+  assert.equal(removal.departing.some(seat => seat.userId === 'client-uid'), false);
+
+  // Наступний знімок називає її знову: місце споживається, а не видаляється.
+  const restore = quickTeamSeatChanges({
+    incomingUserIds: ['owner-uid', 'agent-uid'],
+    memberships: memberships.filter(membership => membership.userId !== 'agent-uid'),
+    projects: projects.map(project => ({
+      ...project,
+      team: project.team.filter(uid => uid !== 'agent-uid'),
+    })),
+    archives: [{ orgId: 'org', userId: 'agent-uid', ...archived }],
+  });
+  assert.deepEqual(restore.departing, []);
+  assert.deepEqual(restore.returning.map(seat => seat.userId), ['agent-uid']);
+  assert.deepEqual(restore.returning[0].projectIds, ['client-a', 'client-b']);
+  assert.equal(restore.returning[0].seat.positionId, 'support');
+});
+
+test('provisioning повертає місце тим самим шляхом, що й екран команди', async () => {
+  const route = await readFile(
+    new URL('../src/app/api/integrations/quickteam/provision/route.js', import.meta.url),
+    'utf8',
+  );
+
+  // Одне рішення на обидві половини, а не два списки ролей у маршруті.
+  assert.match(route, /quickTeamSeatChanges\(\{/);
+  // Архів пишеться з `projectIds`, бо саме цей рядок і був загублений.
+  assert.match(route, /projectIds/);
+  // Повернення — це відновлення доступу до проєктів, а не видалення архіву.
+  assert.match(route, /restoreProjectAccess\(\{/);
+  assert.match(route, /joinedAt: seat\?\.joinedAt \|\| now/);
+  // І документ організації більше не носить списку, який ніхто не читає, —
+  // а читати його міг кожен клієнт, бо організація йому відкрита.
+  assert.doesNotMatch(route, /memberUids/);
 });

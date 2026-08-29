@@ -8,6 +8,7 @@ import {
 } from '@/lib/server/projectIssueCounts';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
 import { hasProjectAccess } from '@/lib/utils/projectAccess.mjs';
+import { rolesFor } from '@/lib/utils/can';
 import {
   canRestoreIssueTombstone,
   issueTombstoneId,
@@ -28,7 +29,7 @@ export async function POST(request, context) {
       : '';
     // Whoever may delete a task may undo it. Restricting the undo to admins
     // made the trash a one-way door for the person who opened it by mistake.
-    const authorization = await authorizeOrgRequest(request, organizationId, ['owner', 'admin', 'member']);
+    const authorization = await authorizeOrgRequest(request, organizationId, rolesFor('delete:issue'));
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }

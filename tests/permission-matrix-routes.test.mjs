@@ -1,22 +1,24 @@
 // The permission matrix and the routes that are supposed to describe it.
 //
 // `src/lib/utils/can.js` opens by saying what it is for: «A route spelling its
-// own list out is the drift this file exists to prevent.» Three routes call
-// `rolesFor()`. Thirty-seven write `['owner', 'admin']` in the argument list.
+// own list out is the drift this file exists to prevent.» Every route that
+// authorizes a set of roles now names the permission — `rolesFor('edit:issue')`
+// rather than `['owner', 'admin', 'member']` — so widening an entry widens the
+// routes with it, in the one edit, and cannot leave a button that appears while
+// the server still refuses. AGENTS.md states the invariant this holds up: «A
+// change to a Firestore rule or a route's `allowedRoles` updates the matrix in
+// the same change.»
 //
-// That is not, today, a hole — the lists happen to agree with the matrix. It is
-// the kind of thing that becomes a hole quietly: change `create:project` to
-// include members and the button appears while the server still refuses, and
-// nothing in the repository notices, because the two halves never look at each
-// other. AGENTS.md already states the invariant — «A change to a Firestore rule
-// or a route's `allowedRoles` updates the matrix in the same change» — and this
-// is what asks for it.
+// Naming the action is a judgement, and a route labelled with the wrong action
+// gives the right answer today and the wrong one after the next edit — which is
+// why the shape check below survives the rewrite rather than being replaced by
+// it, and why the routes where being wrong costs the most are named one by one.
 //
-// Rewriting all thirty-seven call sites was the other option and is the worse
-// one: choosing which action each route means is a judgement, and a route
-// labelled with the wrong action gives the right answer today and the wrong one
-// after the next edit. A literal that is checked against the matrix is honest.
-// A wrong name is not.
+// One route still writes its list out, and it is listed here as what it is: no
+// permission in the matrix describes editing an organization, because qTicket
+// does not have that action — the route refuses every role with 409, since
+// identity, ownership and staff belong to QuickTeam. Naming another permission
+// there would be labelling a route with an action it does not enforce.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -72,6 +74,30 @@ test('no route authorises a set of roles the matrix does not describe', async ()
     'a route allows a combination of roles no permission in can.js grants. '
     + 'Either the route is wrong, or the matrix has not been updated with it — '
     + 'AGENTS.md requires the second to happen in the same change as the first.',
+  );
+});
+
+// The routes allowed to spell a list out, and why. Anything else must name a
+// permission — that is the whole point of the matrix.
+const LITERAL_LIST_ROUTES = new Set([
+  // No `edit:organization` exists: the route answers 409 QUICKTEAM_MANAGED to
+  // owner and admin alike, so there is no action for it to name.
+  'organizations/[organizationId]/route.js',
+]);
+
+test('a route names the permission it enforces instead of listing roles', async () => {
+  const offenders = [];
+  for (const { path, source } of await routeFiles()) {
+    if (LITERAL_LIST_ROUTES.has(path)) continue;
+    for (const call of source.matchAll(/authorizeOrgRequest\(\s*([^;]*?)\)\s*;/gs)) {
+      if (/\[([^\]]*)\]/.test(call[1])) offenders.push(path);
+    }
+  }
+  assert.deepEqual(
+    [...new Set(offenders)],
+    [],
+    'these routes authorize a hand-written role list. Call rolesFor(action) so '
+    + 'that changing the matrix changes the route in the same edit.',
   );
 });
 
