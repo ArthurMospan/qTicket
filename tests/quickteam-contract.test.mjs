@@ -303,11 +303,15 @@ test('the transfer sends what QuickTeam needs and keeps the request open', async
 
   // Звернення нікуди не зникає: ні статусу, ні архіву, ні скасування.
   assert.doesNotMatch(route, /columnId|archivedAt|cancelledAt/);
-  assert.match(route, /issueRef\.set\(\{ quickTeamTask, updatedAt: now \}, \{ merge: true \}\)/);
+  // І сам документ звернення не чіпається взагалі: посилання в чужий трекер —
+  // це маршрутизація, а її клієнтові не показують. Плюс перенос не піднімає
+  // звернення у списку клієнта як активність, якої він не бачив.
+  assert.match(route, /issueRef\.collection\('internal'\)\.doc\('quickteam'\)\.set\(quickTeamTask/);
+  assert.doesNotMatch(route, /issueRef\.set\(/);
+  assert.match(route, /audit'\)\.doc\('quickteam-transfer'\)/);
   // Лишається слід: поле з посиланням і рядок історії з детермінованим id,
   // щоб друге натискання не написало другий рядок про той самий факт.
   assert.match(route, /quickTeamTask/);
-  assert.match(route, /audit'\)\.doc\(`quickteam-\$\{answer\.taskId\}`\)/);
   assert.match(route, /action: 'quickteam-transferred'/);
 
   // Опис, який читатимуть у QuickTeam, складає qTicket — разом із посиланням

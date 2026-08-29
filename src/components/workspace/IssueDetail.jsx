@@ -46,6 +46,7 @@ import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
 import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
 import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
+import { useQuickTeamTransfer } from '@/lib/hooks/useQuickTeamTransfer';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig';
@@ -312,11 +313,14 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // is: it has been put aside, and the one action it offers is coming back. A
   // cancelled task is read-only on the same terms — editing work that has been
   // called off is how it quietly comes back to life in somebody's list.
-  // The transfer overlay, and the answer it comes back with. The stored field
-  // is the truth on the next read; this is what redraws the menu now.
+  // The transfer overlay, and the answer it comes back with. The stored
+  // document is the truth on the next open; this is what redraws the menu now.
+  // Both are staff-only: the customer reads the incident, and where their
+  // supplier tracks the work is not part of it.
   const [showQuickTeamTransfer, setShowQuickTeamTransfer] = useState(false);
   const [quickTeamTask, setQuickTeamTask] = useState(null);
-  const transferredTask = quickTeamTask || issue?.quickTeamTask || null;
+  const storedQuickTeamTask = useQuickTeamTransfer(internalViewer ? issueId : null);
+  const transferredTask = quickTeamTask || storedQuickTeamTask || null;
   const isIssueArchived = isArchivedIssue(issue);
   const isIssueCancelled = isCancelledIssue(issue);
   const isArchived = project?.status === 'archived' || isIssueArchived || isIssueCancelled;

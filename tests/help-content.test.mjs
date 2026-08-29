@@ -20,6 +20,23 @@ import { ONEB_SUPPORT_CONTACTS, isAllowedSupportHref } from '../src/lib/content/
 const rootUrl = new URL('../', import.meta.url);
 const flattenArticle = article => JSON.stringify(article).toLocaleLowerCase('uk-UA');
 
+// Every sentence of an article, one at a time. The record-name check below reads
+// these rather than the whole article, because one exemption in it has to be
+// judged sentence by sentence: «завдання в QuickTeam» is the other product's
+// word for the other product's record, and the button in qTicket says exactly
+// that. A whole-article check could not tell that sentence from a sentence
+// about a «звернення» that merely happens to share an article with it.
+const articleSentences = article => {
+  const out = [];
+  const walk = value => {
+    if (typeof value === 'string') out.push(value);
+    else if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === 'object') Object.values(value).forEach(walk);
+  };
+  walk(article);
+  return out;
+};
+
 test('help center has one valid article for every required critical area', () => {
   assert.equal(HELP_ARTICLES.length, 13);
   assert.equal(new Set(HELP_ARTICLES.map(article => article.id)).size, HELP_ARTICLES.length);
@@ -77,9 +94,16 @@ test('qTicket help publishes only reachable support workflows', () => {
 // two different things and left them to guess which one they have.
 test('the help centre calls the record what the product calls it', () => {
   for (const article of HELP_ARTICLES) {
-    const text = flattenArticle(article);
-    for (const word of ['інцидент', 'завданн', 'задач', 'виконавц', 'виконавець']) {
-      assert.ok(!text.includes(word), `${article.id} still says "${word}"`);
+    for (const sentence of articleSentences(article)) {
+      // The one exemption, and it is as narrow as the word it requires: a
+      // sentence that names QuickTeam is describing QuickTeam's own records,
+      // where a «завдання» really is a завдання. It is the same exemption the
+      // source terminology test carries, for the same reason.
+      if (sentence.includes('QuickTeam')) continue;
+      const text = sentence.toLocaleLowerCase('uk-UA');
+      for (const word of ['інцидент', 'завданн', 'задач', 'виконавц', 'виконавець']) {
+        assert.ok(!text.includes(word), `${article.id} still says "${word}"`);
+      }
     }
   }
 });

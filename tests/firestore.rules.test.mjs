@@ -444,6 +444,29 @@ test('the change history beside the conversation stays support-side', async () =
   }
 });
 
+// Where the supplier tracks the work is routing, and routing is the thing this
+// product does not show a customer: their board draws no assignee, their
+// history is not readable, and the QuickTeam task an incident was transferred
+// into is a link into somebody else's tracker. It is stored where they cannot
+// read it, and no browser writes it at all.
+test('the QuickTeam task an incident was transferred into is support-side', async () => {
+  const memberDb = environment.authenticatedContext('member-a').firestore();
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'internal', 'quickteam'), {
+      taskId: 'qt-1', issueKey: 'WEB-42', projectId: 'p1', url: 'https://quickteam.example/p1/issue/WEB-42',
+    });
+  });
+  await assertSucceeds(getDoc(doc(memberDb, 'issues', 'issue-a', 'internal', 'quickteam')));
+  // The signed transfer route writes it through the Admin SDK; a staff browser
+  // holding the link on screen still may not write one.
+  await assertFails(setDoc(doc(memberDb, 'issues', 'issue-a', 'internal', 'quickteam'), { taskId: 'forged' }));
+  for (const uid of ['client-admin-a', 'client-member-a']) {
+    const clientDb = environment.authenticatedContext(uid).firestore();
+    await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'internal', 'quickteam')));
+    await assertFails(getDocs(collection(clientDb, 'issues', 'issue-a', 'internal')));
+  }
+});
+
 // ── The incident conversation, in the shape the product actually writes ──────
 //
 // The `setDoc` above is not a shape the product ever sends. `addComment` writes

@@ -395,6 +395,23 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // What support did about this incident somewhere else. Today that is one
+      // document — the QuickTeam task the request was transferred into, with
+      // its key, its project and its URL — and it is here rather than on the
+      // incident because the incident document is read by the customer. Where
+      // a supplier's work is tracked internally is routing, and routing is the
+      // thing this product deliberately does not show a client: their board
+      // draws no assignee, their history is not readable, and a link into
+      // somebody else's tracker is the same fact in a longer form.
+      //
+      // Written by the signed transfer route through the Admin SDK, so no
+      // browser writes it at all.
+      match /internal/{internalDoc} {
+        allow read: if isInternalContributor(issueOrg(issueId)) &&
+          canAccessIssueProject(issueId);
+        allow write: if false;
+      }
+
       // Append-only activity log.
       match /audit/{auditId} {
         // Assignment, priority and other support-side changes are the internal

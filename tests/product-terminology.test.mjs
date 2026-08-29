@@ -68,6 +68,7 @@ const ALLOWED = [
       'src/app/api/issues/[issueId]/quickteam-task/route.js',
       'src/components/workspace/IssueDetail.jsx',
       'src/components/workspace/QuickTeamTransferDialog.jsx',
+      'src/lib/content/helpArticles.mjs',
       'src/lib/utils/issueAuditEvents.mjs',
     ],
     reason:

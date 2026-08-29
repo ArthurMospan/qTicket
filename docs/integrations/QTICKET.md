@@ -216,12 +216,18 @@ inactive, when that person is not in the staff selection, or when their seat is
 gone.
 
 **The request stays a request.** Nothing here closes it, moves it or hides it:
-the client keeps writing in it and support keeps answering. What changes on this
-side is a stored `issue.quickTeamTask` (task id, key, project, url) and one
-audit line, «Створено завдання в QuickTeam», which the client reads like every
-other line in the history. The audit document id is derived from the task id, so
-a repeated press writes the same line about the same fact rather than a second
-one.
+the client keeps writing in it and support keeps answering. The incident
+document is not written at all — a transfer is not activity the customer was
+shown, and it must not push their request to the top of their own list.
+
+What is written is two support-side documents:
+`issues/{id}/internal/quickteam` (task id, key, project, url) and one audit
+line, «Створено завдання в QuickTeam», under the fixed id `quickteam-transfer`
+so a repeated press restates the same fact rather than adding a second line.
+Both are staff-only in `firestore.rules`: where a supplier tracks the work is
+routing, and routing is what this product deliberately does not show a client —
+their board draws no assignee and their history is not readable, and a link into
+somebody else's tracker is the same fact in a longer form.
 
 ## Source of truth
 

@@ -20,8 +20,18 @@ import {
 //
 // Idempotence lives in QuickTeam, where the task does: a second press returns
 // the first task rather than making a second one. This side stores the answer
-// on the request so the button becomes a link, but the guarantee is not the
-// stored field — a field can be missing while the task exists.
+// so the button becomes a link, but the guarantee is not the stored document —
+// a document can be missing while the task exists.
+//
+// Where it is stored is the other half of a decision this product has already
+// made twice. The incident document is read by the customer, and where their
+// supplier tracks the work internally is routing: their board draws no
+// assignee and their history is not readable, so a link into somebody else's
+// tracker does not belong on a record they can read either. It goes in
+// `issues/{id}/internal/quickteam`, which `firestore.rules` opens to internal
+// contributors only — and the incident document is not touched at all, so a
+// transfer does not push the request to the top of the customer's list as
+// activity they were never shown.
 
 function transferError(code, status, message) {
   const error = new Error(code);
@@ -116,10 +126,12 @@ export async function POST(request, context) {
       transferredAt: now,
       transferredBy: authorization.user.uid,
     };
-    await issueRef.set({ quickTeamTask, updatedAt: now }, { merge: true });
+    await issueRef.collection('internal').doc('quickteam').set(quickTeamTask, { merge: true });
     // The history says it happened, and says it once: a repeated press returns
-    // the same task and writes the same line about the same fact.
-    await issueRef.collection('audit').doc(`quickteam-${answer.taskId}`).set({
+    // the same task, and one document id per incident means one line about it.
+    // The history is staff-only (`audit/` in firestore.rules), which is what
+    // makes it the right place to name the other product.
+    await issueRef.collection('audit').doc('quickteam-transfer').set({
       userId: authorization.user.uid,
       userName: authorization.user.name || authorization.user.email || '',
       action: 'quickteam-transferred',
