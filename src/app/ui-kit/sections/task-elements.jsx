@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
-import { AttributeTrigger, UserAvatar, AttachmentRow, AudioPlayer, FileThumb, BulkActionBar, MarkdownEditor, MarkdownViewer, AttachmentViewer, TitleInput, DescriptionPlaceholder, IssueLinkRow, SelectableChip } from '@/components/ui';
+import { ActivityRow, AttributeTrigger, UserAvatar, AttachmentRow, AudioPlayer, FileThumb, BulkActionBar, MarkdownEditor, MarkdownViewer, AttachmentViewer, TitleInput, DescriptionPlaceholder, IssueLinkRow, SelectableChip } from '@/components/ui';
 import { Settings2, Check, Tag as TagIcon, Users } from 'lucide-react';
 import { ATTACHMENT_KINDS, attachmentKindLabel } from '@/lib/utils/attachmentKinds.mjs';
 import { PreviewBlock } from '../preview';
@@ -297,6 +297,44 @@ export default function TaskElementsSection() {
             <TagIcon size={10} className="shrink-0 opacity-70" />
             новий
           </SelectableChip>
+        </div>
+      </PreviewBlock>
+
+      <PreviewBlock
+        title="Рядок стрічки дій"
+        description="Один рядок «що сталося»: хто, що зробив, з яким зверненням і коли. Навмисно не TaskRow: той про запис — його статус, пріоритет, людей — і читається колонкою, порівнюючи їх. Цей про подію, читається згори вниз за часом, а звернення в ньому — додаток речення, а не підмет рядка. Аватар необовʼязковий, і його відсутність змістовна: клієнту не показують, хто саме з підтримки діяв, тож його стрічка складається з речень без підмета, а на місці людини не має бути порожнього кружечка."
+        filePath="src/components/ui/DataDisplay/ActivityRow.jsx"
+        component="ActivityRow"
+        fullWidth
+      >
+        <div className="flex w-full flex-col gap-0.5">
+          <ActivityRow
+            actor={{ name: 'Оксана Іваненко' }}
+            actorName="Оксана Іваненко"
+            text="відповіла у зверненні"
+            detail="Перевірили логи — помилка була в імпорті, вже виправили."
+            issueKey="ACME-42"
+            title="Не працює вивантаження звіту"
+            time="12 черв, 14:20"
+            onClick={() => {}}
+          />
+          <ActivityRow
+            actor={{ name: 'Олег Бондар' }}
+            actorName="Олег Бондар"
+            text="відкрив звернення"
+            issueKey="ACME-51"
+            title="Додати експорт у CSV"
+            time="12 черв, 09:05"
+            onClick={() => {}}
+          />
+          {/* Те, що бачить клієнт: подія без імені й без обличчя. */}
+          <ActivityRow
+            text="Статус звернення змінено"
+            issueKey="ACME-38"
+            title="Повільно вантажиться дашборд"
+            time="11 черв, 18:44"
+            onClick={() => {}}
+          />
         </div>
       </PreviewBlock>
     </div>

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  ActivityRow,
   Alert,
   Button,
   Card,
@@ -38,6 +39,7 @@ import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
+import { issueActivityFeed } from '@/lib/utils/issueActivityFeed.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 
@@ -171,12 +173,20 @@ export default function OverviewPage() {
     () => categorizedIssues.filter(entry => entry.category !== 'done'),
     [categorizedIssues],
   );
-  const recentIssues = useMemo(
-    () => [...(issues || [])]
-      .sort((left, right) => timestampMillis(right.updatedAt || right.createdAt)
-        - timestampMillis(left.updatedAt || left.createdAt))
-      .slice(0, 8),
-    [issues],
+  // «Що сталося», not «до чого торкались».
+  //
+  // This was a list of requests sorted by `updatedAt`, which answers «щось
+  // змінилося» and stops there — and `updatedAt` is written for reasons that
+  // are not activity at all: a drag renumbers every card in a column, hiding a
+  // status migrates requests out of it. The feed reads `lastActivity*`, which
+  // the writers set deliberately, and says what the event was.
+  //
+  // No extra read: every field it needs is on the documents this screen already
+  // streams. See `issueActivityFeed` for what that costs in exchange — one
+  // event per request, the most recent one.
+  const activityFeed = useMemo(
+    () => issueActivityFeed(issues, { supportUserIds, clientViewer, memberById }),
+    [clientViewer, issues, memberById, supportUserIds],
   );
   const projectSummary = useMemo(() => activeProjects
     .map(project => {
@@ -271,8 +281,8 @@ export default function OverviewPage() {
             <Surface preset="panel" padding="md">
               <DetailSection
                 density="panel"
-                title="Останні оновлення"
-                description="Ваші звернення, у яких щось змінилося найпізніше."
+                title="Останні дії"
+                description="Що сталося у ваших зверненнях останнім часом."
                 action={clientSpace ? (
                   <TextAction
                     onClick={() => router.push(`/${encodeURIComponent(clientSpace.id)}`)}
@@ -283,7 +293,7 @@ export default function OverviewPage() {
                   </TextAction>
                 ) : null}
               >
-                {recentIssues.length === 0 ? (
+                {activityFeed.length === 0 ? (
                   <EmptyState
                     icon={Inbox}
                     title="Звернень ще немає"
@@ -296,29 +306,19 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {/* The kit's row, reading the customer's own answer to
-                        «хто цим займається»: `clientAssigneeIds`, their people
-                        on their request. Never `assigneeIds` — which agent has
-                        it is how the desk organises itself — and that is what
-                        `assigneeSource` selects rather than the column being
-                        dropped altogether, which is what used to happen and
-                        left the row looking like nobody's. */}
-                    {recentIssues.map(issue => (
-                      <TaskRow
-                        key={issue.id}
-                        issue={issue}
-                        issues={issues}
-                        members={members}
-                        projectId={issue.projectId}
-                        projectName={projectById.get(issue.projectId)?.name}
-                        // Which project a request belongs to only needs saying
-                        // where the reader has more than one.
-                        showProjectName={activeProjects.length > 1}
-                        showAssignee
-                        assigneeSource="client"
+                  <div className="flex flex-col gap-0.5">
+                    {activityFeed.map(entry => (
+                      <ActivityRow
+                        key={entry.id}
+                        actor={entry.actor}
+                        actorName={entry.actorName}
+                        text={entry.text}
+                        detail={entry.detail}
+                        issueKey={entry.issueKey}
+                        title={entry.title}
+                        time={formatUpdatedAt(entry.at)}
                         onClick={() => {
-                          const href = issuePath(issue, projectById.get(issue.projectId) || issue.projectId);
+                          const href = issuePath(entry.issue, projectById.get(entry.projectId) || entry.projectId);
                           if (href) router.push(href);
                         }}
                       />
@@ -376,15 +376,15 @@ export default function OverviewPage() {
               <Surface preset="panel" padding="md">
                 <DetailSection
                   density="panel"
-                  title="Нещодавно оновлені"
-                  description="Останні зміни у зверненнях усіх доступних клієнтів."
+                  title="Останні дії"
+                  description="Що сталося у зверненнях усіх доступних проєктів."
                   action={(
                     <TextAction onClick={() => router.push('/my')} tone="ink" size="md">
                       Вся черга
                     </TextAction>
                   )}
                 >
-                {recentIssues.length === 0 ? (
+                {activityFeed.length === 0 ? (
                   <EmptyState
                     icon={Inbox}
                     title="Звернень ще немає"
@@ -393,30 +393,26 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  /* The kit's row, not a rebuild of one. This was fourteen lines
-                     of hand-written markup — `ListRow` wrapping `TaskIdentity`, a
-                     title, a date, a priority, a status and an avatar — which is
-                     `TaskRow` with the parts in a slightly different order and a
-                     few of them missing. AGENTS.md forbids exactly that: a local
-                     pattern merely similar to a kit component is how two lists of
-                     the same thing stop looking like the same thing. It already
-                     drew the unread mark differently from every other list in the
-                     product, because `TaskRow` reads a read cursor this did not.
-                     `showProjectName` is what a cross-client list needs and the
-                     row already knows how to say. */
-                  <div className="flex flex-col gap-2">
-                    {recentIssues.map(issue => (
-                      <TaskRow
-                        key={issue.id}
-                        issue={issue}
-                        issues={issues}
-                        members={members}
-                        labels={labels}
-                        projectId={issue.projectId}
-                        projectName={projectById.get(issue.projectId)?.name}
-                        showProjectName
+                  /* «Що сталося», not «до чого торкались». This was `TaskRow`,
+                     sorted by `updatedAt` — a list of records that answered
+                     «щось змінилося» and stopped there, on a screen whose whole
+                     question is «як ідуть справи». `updatedAt` is not even
+                     activity: a drag renumbers every card in the column it
+                     lands in. The feed reads `lastActivity*`, which the writers
+                     set on purpose. */
+                  <div className="flex flex-col gap-0.5">
+                    {activityFeed.map(entry => (
+                      <ActivityRow
+                        key={entry.id}
+                        actor={entry.actor}
+                        actorName={entry.actorName}
+                        text={entry.text}
+                        detail={entry.detail}
+                        issueKey={entry.issueKey}
+                        title={entry.title}
+                        time={formatUpdatedAt(entry.at)}
                         onClick={() => {
-                          const href = issuePath(issue, projectById.get(issue.projectId) || issue.projectId);
+                          const href = issuePath(entry.issue, projectById.get(entry.projectId) || entry.projectId);
                           if (href) router.push(href);
                         }}
                       />

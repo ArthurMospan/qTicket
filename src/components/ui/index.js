@@ -48,6 +48,7 @@ export { default as IconButton } from './Button'
 
 // ===== DATA DISPLAY COMPONENTS =====
 export { default as Tag } from './DataDisplay/Tag'
+export { default as ActivityRow } from './DataDisplay/ActivityRow'
 export { default as UserAvatar } from './DataDisplay/UserAvatar'
 export { default as OrganizationMark } from './DataDisplay/OrganizationMark'
 export { default as PriorityBadge } from './DataDisplay/PriorityBadge'

@@ -5,14 +5,83 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 88,
-    "props": 648,
-    "documentedProps": 648,
+    "components": 89,
+    "props": 657,
+    "documentedProps": 657,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
   "componentsWithoutSummary": [],
   "components": {
+    "ActivityRow": {
+      "file": "src/components/ui/DataDisplay/ActivityRow.jsx",
+      "summary": "One line of an activity feed: who did what, to which request, and when.",
+      "props": [
+        {
+          "name": "actor",
+          "default": "null",
+          "type": "object",
+          "values": [],
+          "description": "Who did it — omitted where the reader may not know."
+        },
+        {
+          "name": "actorName",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Their name, drawn in ink before the verb."
+        },
+        {
+          "name": "className",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Placement in the parent only."
+        },
+        {
+          "name": "detail",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "The message itself, where the event was one. Clamped to one line."
+        },
+        {
+          "name": "issueKey",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Short key of the request, e.g. ACME-12."
+        },
+        {
+          "name": "onClick",
+          "default": "",
+          "type": "() => void",
+          "values": [],
+          "description": "Opens the request."
+        },
+        {
+          "name": "text",
+          "default": "",
+          "type": "string",
+          "values": [],
+          "description": "What they did, or what happened, as a full clause when there is no actor."
+        },
+        {
+          "name": "time",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Already formatted — the row does no date logic."
+        },
+        {
+          "name": "title",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "The request's own title."
+        }
+      ]
+    },
     "Alert": {
       "file": "src/components/ui/Feedback/Alert.jsx",
       "summary": "Inline notice inside a page or a form — a banner that stays until the reader deals with it. Transient feedback is `Toast`, not this.",

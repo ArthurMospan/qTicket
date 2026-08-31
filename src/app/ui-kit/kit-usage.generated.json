@@ -2,13 +2,13 @@
   "generatedBy": "scripts/scan-kit-usage.mjs",
   "scope": "authenticated-workspace",
   "totals": {
-    "components": 88,
-    "used": 88,
+    "components": 89,
+    "used": 89,
     "unused": 0,
-    "covered": 81,
+    "covered": 82,
     "uncovered": 0,
     "routes": 8,
-    "previews": 122,
+    "previews": 123,
     "internal": 7,
     "unlisted": 0
   },
@@ -167,6 +167,7 @@
       "UserAvatar"
     ],
     "/overview": [
+      "ActivityRow",
       "Alert",
       "Button",
       "Card",
@@ -183,7 +184,6 @@
       "Tag",
       "TaskCounters",
       "TaskIdentity",
-      "TaskRow",
       "TextAction",
       "TypeBadge",
       "UserAvatar"
@@ -238,6 +238,18 @@
     ]
   },
   "components": {
+    "ActivityRow": {
+      "file": "src/components/ui/DataDisplay/ActivityRow.jsx",
+      "count": 1,
+      "showcased": true,
+      "usedByKit": [],
+      "routes": [
+        "/overview"
+      ],
+      "usedIn": [
+        "src/app/(app)/overview/page.js"
+      ]
+    },
     "Alert": {
       "file": "src/components/ui/Feedback/Alert.jsx",
       "count": 10,
@@ -1103,6 +1115,7 @@
       "count": 13,
       "showcased": true,
       "usedByKit": [
+        "ActivityRow",
         "DetailSection",
         "IssueLinkRow",
         "MemberRail",
@@ -1450,18 +1463,16 @@
     },
     "TaskRow": {
       "file": "src/components/ui/TaskManagement/TaskRow.jsx",
-      "count": 3,
+      "count": 2,
       "showcased": true,
       "usedByKit": [
         "TaskListView"
       ],
       "routes": [
         "/[projectId]/issue/[issueId]",
-        "/overview",
         "/team"
       ],
       "usedIn": [
-        "src/app/(app)/overview/page.js",
         "src/components/profile/ProfileView.jsx",
         "src/components/workspace/IssueDetail.jsx"
       ]
@@ -1596,6 +1607,7 @@
       "count": 9,
       "showcased": true,
       "usedByKit": [
+        "ActivityRow",
         "AvatarButton",
         "MemberRail",
         "MentionMenu",
@@ -1673,7 +1685,7 @@
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:374",
-            "src/app/(app)/overview/page.js:213",
+            "src/app/(app)/overview/page.js:223",
             "src/app/(app)/page.js:854",
             "src/app/(app)/settings/page.js:2591",
             "src/app/(app)/settings/page.js:2657",
@@ -1701,7 +1713,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:643",
             "src/app/(app)/error.js:51",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:237",
+            "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/components/CreateTaskModal.jsx:409",
@@ -1825,7 +1837,7 @@
             "src/app/(app)/my/page.js:352",
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
-            "src/app/(app)/overview/page.js:237",
+            "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:889",
             "src/app/(app)/settings/page.js:248",
@@ -1868,7 +1880,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:449",
             "src/app/(app)/error.js:51",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:213",
+            "src/app/(app)/overview/page.js:223",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
             "src/app/(app)/settings/page.js:2965",
@@ -1965,8 +1977,8 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:213",
-            "src/app/(app)/overview/page.js:237",
+            "src/app/(app)/overview/page.js:223",
+            "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
@@ -2080,8 +2092,8 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:213",
-            "src/app/(app)/overview/page.js:237",
+            "src/app/(app)/overview/page.js:223",
+            "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
@@ -2186,7 +2198,7 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:237",
+            "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:889",
@@ -2261,7 +2273,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:449",
-            "src/app/(app)/overview/page.js:213",
+            "src/app/(app)/overview/page.js:223",
             "src/app/(app)/page.js:854"
           ]
         },
@@ -2308,8 +2320,8 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:213",
-            "src/app/(app)/overview/page.js:237",
+            "src/app/(app)/overview/page.js:223",
+            "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
@@ -3055,9 +3067,9 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:567",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:635",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:665",
-            "src/app/(app)/overview/page.js:271",
+            "src/app/(app)/overview/page.js:281",
             "src/app/(app)/overview/page.js:376",
-            "src/app/(app)/overview/page.js:429",
+            "src/app/(app)/overview/page.js:425",
             "src/app/(app)/page.js:825",
             "src/app/(app)/page.js:901",
             "src/app/(app)/page.js:908",
@@ -3142,9 +3154,9 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:567",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:635",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:665",
-            "src/app/(app)/overview/page.js:271",
+            "src/app/(app)/overview/page.js:281",
             "src/app/(app)/overview/page.js:376",
-            "src/app/(app)/overview/page.js:429",
+            "src/app/(app)/overview/page.js:425",
             "src/app/(app)/page.js:908",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
@@ -3196,9 +3208,9 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:635",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:665",
             "src/app/(app)/layout.js:131",
-            "src/app/(app)/overview/page.js:271",
+            "src/app/(app)/overview/page.js:281",
             "src/app/(app)/overview/page.js:376",
-            "src/app/(app)/overview/page.js:429",
+            "src/app/(app)/overview/page.js:425",
             "src/app/(app)/page.js:825",
             "src/app/(app)/page.js:908",
             "src/app/(app)/page.js:923",
@@ -3257,7 +3269,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:476",
+            "src/app/(app)/overview/page.js:472",
             "src/app/(app)/settings/page.js:236",
             "src/app/(app)/settings/page.js:2805",
             "src/app/(app)/settings/page.js:2909",
@@ -3352,7 +3364,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:120",
-            "src/app/(app)/overview/page.js:476",
+            "src/app/(app)/overview/page.js:472",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:519",
             "src/components/WorkspaceInfoCenter.jsx:135",
@@ -3435,7 +3447,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:120",
-            "src/app/(app)/overview/page.js:476",
+            "src/app/(app)/overview/page.js:472",
             "src/app/(app)/settings/page.js:624",
             "src/app/(app)/settings/page.js:639",
             "src/components/WorkspaceInfoCenter.jsx:135",
@@ -3492,7 +3504,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:120",
-            "src/app/(app)/overview/page.js:476",
+            "src/app/(app)/overview/page.js:472",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:236",
             "src/app/(app)/settings/page.js:2805",
@@ -3542,7 +3554,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:120",
-            "src/app/(app)/overview/page.js:476",
+            "src/app/(app)/overview/page.js:472",
             "src/app/(app)/settings/page.js:236",
             "src/app/(app)/settings/page.js:2805",
             "src/app/(app)/settings/page.js:2909",
@@ -3599,7 +3611,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:120",
-            "src/app/(app)/overview/page.js:476",
+            "src/app/(app)/overview/page.js:472",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:236",
             "src/app/(app)/settings/page.js:2805",
@@ -3755,9 +3767,9 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:277",
+            "src/app/(app)/overview/page.js:287",
             "src/app/(app)/overview/page.js:382",
-            "src/app/(app)/overview/page.js:435"
+            "src/app/(app)/overview/page.js:431"
           ]
         },
         "danger": {
@@ -3806,9 +3818,9 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:277",
+            "src/app/(app)/overview/page.js:287",
             "src/app/(app)/overview/page.js:382",
-            "src/app/(app)/overview/page.js:435",
+            "src/app/(app)/overview/page.js:431",
             "src/components/InviteLinkSection.jsx:156"
           ]
         },
@@ -4145,7 +4157,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
             "src/app/(app)/my/page.js:397",
-            "src/app/(app)/overview/page.js:232",
+            "src/app/(app)/overview/page.js:242",
             "src/app/(app)/page.js:568",
             "src/app/(app)/page.js:878",
             "src/app/(app)/team/page.js:183",
@@ -4196,9 +4208,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:568",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:90",
-            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:297",
             "src/app/(app)/overview/page.js:388",
-            "src/app/(app)/overview/page.js:441",
+            "src/app/(app)/overview/page.js:437",
             "src/app/(app)/team/page.js:197",
             "src/components/profile/ProfileView.jsx:215",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
@@ -4247,9 +4259,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:568",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:90",
-            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:297",
             "src/app/(app)/overview/page.js:388",
-            "src/app/(app)/overview/page.js:441",
+            "src/app/(app)/overview/page.js:437",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
           ]
         },
@@ -4286,9 +4298,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:568",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:90",
-            "src/app/(app)/overview/page.js:287",
+            "src/app/(app)/overview/page.js:297",
             "src/app/(app)/overview/page.js:388",
-            "src/app/(app)/overview/page.js:441",
+            "src/app/(app)/overview/page.js:437",
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
@@ -4332,7 +4344,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:403",
             "src/app/(app)/loading.js:28",
             "src/app/(app)/my/page.js:391",
-            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:238",
             "src/app/(app)/page.js:815",
             "src/app/(app)/page.js:841",
             "src/app/(app)/page.js:903",
@@ -4476,7 +4488,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:101",
-            "src/app/(app)/overview/page.js:457"
+            "src/app/(app)/overview/page.js:453"
           ]
         },
         "lg": {
@@ -4526,7 +4538,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:101",
-            "src/app/(app)/overview/page.js:457",
+            "src/app/(app)/overview/page.js:453",
             "src/app/(app)/settings/page.js:2132",
             "src/app/(app)/settings/page.js:2162",
             "src/app/(app)/settings/page.js:2206",
@@ -4595,7 +4607,7 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:459",
+            "src/app/(app)/overview/page.js:455",
             "src/components/SupportDialog.jsx:62"
           ]
         },
@@ -4828,9 +4840,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:636",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:666",
-            "src/app/(app)/overview/page.js:272",
+            "src/app/(app)/overview/page.js:282",
             "src/app/(app)/overview/page.js:377",
-            "src/app/(app)/overview/page.js:430"
+            "src/app/(app)/overview/page.js:426"
           ]
         },
         "group": {
@@ -5028,6 +5040,7 @@
     "Перегляд вкладення": "<Button style=\"secondary\" size=\"sm\" onClick={() => setViewerOpen(true)}>Відкрити перегляд</Button>\n{viewerOpen && (\n  <AttachmentViewer\n    attachment={{ name: 'brief.pdf', url: 'data:application/pdf;base64,', type: 'application/pdf' }}\n    onClose={() => setViewerOpen(false)}\n  />\n)}",
     "Звʼязок між зверненнями": "<div className=\"flex flex-col gap-[6px]\">\n  <IssueLinkRow label=\"Блокує\" onRemove={() => {}}>\n    <span className=\"text-[13px] font-semibold text-ink truncate\">\n      <span className=\"text-muted font-medium mr-1 uppercase\">QT-128</span>\n      Перевірити копірайт другого екрана\n    </span>\n  </IssueLinkRow>\n  <IssueLinkRow label=\"Повʼязано\" requiresReview onRemove={() => {}}>\n    <span className=\"text-[13px] font-semibold text-ink truncate\">\n      <span className=\"text-muted font-medium mr-1 uppercase\">QT-77</span>\n      Стара заявка про той самий збій\n    </span>\n  </IssueLinkRow>\n</div>",
     "Чіпи вибору": "<div className=\"flex flex-wrap items-center gap-[8px]\">\n  <SelectableChip shape=\"person\" selected={pickedAssignee} onClick={() => setPickedAssignee(v => !v)}>\n    <span aria-hidden=\"true\"><UserAvatar user={demoUser} size=\"xs\" /></span>\n    <span className=\"max-w-[180px] truncate\">Артур Моспан</span>\n    {pickedAssignee && <Check size={12} className=\"shrink-0\" />}\n  </SelectableChip>\n  <SelectableChip shape=\"person\" selected={false} onClick={() => {}}>\n    <span aria-hidden=\"true\"><UserAvatar user={{ name: 'Олена Коваль' }} size=\"xs\" /></span>\n    <span className=\"max-w-[180px] truncate\">Олена Коваль</span>\n  </SelectableChip>\n  <SelectableChip shape=\"label\" selected={pickedLabel} tone=\"#2563eb\" onClick={() => setPickedLabel(v => !v)}>\n    <TagIcon size={10} className=\"shrink-0 opacity-70\" />\n    дизайн\n  </SelectableChip>\n  <SelectableChip shape=\"label\" selected={false} onClick={() => {}}>\n    <TagIcon size={10} className=\"shrink-0 opacity-70\" />\n    новий\n  </SelectableChip>\n</div>",
+    "Рядок стрічки дій": "<div className=\"flex w-full flex-col gap-0.5\">\n  <ActivityRow\n    actor={{ name: 'Оксана Іваненко' }}\n    actorName=\"Оксана Іваненко\"\n    text=\"відповіла у зверненні\"\n    detail=\"Перевірили логи — помилка була в імпорті, вже виправили.\"\n    issueKey=\"ACME-42\"\n    title=\"Не працює вивантаження звіту\"\n    time=\"12 черв, 14:20\"\n    onClick={() => {}}\n  />\n  <ActivityRow\n    actor={{ name: 'Олег Бондар' }}\n    actorName=\"Олег Бондар\"\n    text=\"відкрив звернення\"\n    issueKey=\"ACME-51\"\n    title=\"Додати експорт у CSV\"\n    time=\"12 черв, 09:05\"\n    onClick={() => {}}\n  />\n  {/* Те, що бачить клієнт: подія без імені й без обличчя. */}\n  <ActivityRow\n    text=\"Статус звернення змінено\"\n    issueKey=\"ACME-38\"\n    title=\"Повільно вантажиться дашборд\"\n    time=\"11 черв, 18:44\"\n    onClick={() => {}}\n  />\n</div>",
     "Standard Dialog": "<Button style=\"primary\" size=\"lg\" onClick={() => setOpen1(true)}>Відкрити форму</Button>\n<Dialog isOpen={open1} onClose={() => setOpen1(false)} title=\"Редагувати клієнта\" size=\"sm\">\n  <div className=\"flex flex-col gap-[16px]\">\n    <div>\n      <label className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block\">Назва *</label>\n      <Input placeholder=\"Назва клієнта...\" />\n    </div>\n    <div>\n      <label className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block\">Опис</label>\n      <Textarea placeholder=\"Короткий опис...\" rows={3} />\n    </div>\n  </div>\n  <div className=\"flex gap-[8px] mt-[24px]\">\n    <Button style=\"secondary\" size=\"lg\" className=\"flex-1\" onClick={() => setOpen1(false)}>Скасувати</Button>\n    <Button style=\"primary\" size=\"lg\" className=\"flex-1\" onClick={() => setOpen1(false)}>Зберегти</Button>\n  </div>\n</Dialog>",
     "Danger / Confirm Dialog": "<ConfirmDialogPreview />",
     "Dialog — решта оголошених значень": "<div className=\"grid w-full gap-[10px] sm:grid-cols-2 lg:grid-cols-3\">\n  {DIALOG_VARIANTS.map(variant => (\n    <div key={variant.id} className=\"flex flex-col gap-[8px] rounded-[12px] border border-line p-[12px]\">\n      <span className=\"font-mono text-[11px] font-bold text-ink\">{variant.label}</span>\n      <p className=\"text-[11px] leading-relaxed text-muted\">{variant.note}</p>\n      <div className=\"mt-auto flex flex-col gap-[6px] pt-[4px]\">\n        <span className=\"text-[10px] leading-relaxed text-faint\">\n          <span className=\"font-semibold text-muted\">Де на сайті:</span> {variant.where}\n          <br />\n          <span className=\"font-semibold text-muted\">Як відкрити:</span> {variant.open}\n        </span>\n        <Button style=\"secondary\" size=\"sm\" onClick={() => setDialogVariant(variant.id)}>\n          Показати\n        </Button>\n      </div>\n    </div>\n  ))}\n</div>\n{DIALOG_VARIANTS.map(variant => (\n  <Dialog\n    key={variant.id}\n    isOpen={dialogVariant === variant.id}\n    onClose={() => setDialogVariant(null)}\n    title={variant.label}\n    {...variant.props}\n  >\n    <div className=\"flex flex-col gap-3\">\n      <p className=\"text-[12px] leading-relaxed text-muted\">{variant.note}</p>\n      <Surface preset=\"inset\" padding=\"md\">\n        <p className=\"text-[11px] text-muted\">\n          Живе тут: <span className=\"font-semibold text-ink\">{variant.where}</span>\n        </p>\n        <p className=\"mt-1 font-mono text-[11px] text-ink\">\n          {Object.entries(variant.props).map(([key, value]) => `${key}=\"${value}\"`).join(' ')}\n        </p>\n      </Surface>\n      <Button style=\"primary\" size=\"md\" onClick={() => setDialogVariant(null)}>Закрити</Button>\n    </div>\n  </Dialog>\n))}",

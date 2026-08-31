@@ -388,20 +388,22 @@ test('«Огляд» — один екран, який знає, хто диви
   assert.match(clientHalf, /value=\{metrics\.waitingOnClient\}/);
   assert.doesNotMatch(clientHalf, /lastCommentAuthorId/);
 
-  // Панель — кітовий `TaskRow` без колонки відповідального, а не зібраний
-  // вручну рядок із `ListRow` + `TaskIdentity`.
-  assert.match(overview, /import TaskRow from '@\/components\/ui\/TaskManagement\/TaskRow';/);
-  assert.match(clientHalf, /<TaskRow/);
-  // Рядок малює відповідальних КЛІЄНТА — його ж людей на його зверненні, —
-  // а не порожню колонку і не виконавця підтримки. Колонки тут не було зовсім,
-  // і звернення через це виглядало нічиїм на єдиному екрані, де читач — одна
-  // з людей, яким воно належить.
-  assert.match(clientHalf, /assigneeSource="client"/);
+  // Панель — стрічка подій, а не список записів. `TaskRow`, відсортований за
+  // `updatedAt`, відповідав «щось змінилося» і на цьому спинявся, а `updatedAt`
+  // взагалі не про дію: перетягування картки перенумеровує всю колонку. Рядки
+  // читають `lastActivity*`, які пишуть навмисно.
+  assert.match(overview, /issueActivityFeed/);
+  assert.match(clientHalf, /<ActivityRow/);
+  assert.doesNotMatch(clientHalf, /<TaskRow/);
+  // Клієнту не називають, хто саме з підтримки діяв: `issueActivityFeed`
+  // віддає такий рядок без імені й без обличчя, і `ActivityRow` не малює
+  // кружечок на місці людини, якої немає.
+  assert.match(overview, /clientViewer, memberById/);
   assert.doesNotMatch(clientHalf, /showAssignee=\{false\}/);
   assert.doesNotMatch(clientHalf, /<ListRow|<TaskIdentity/);
   // Обгортка — `Surface preset="panel"` з `DetailSection density="panel"`.
   assert.match(clientHalf, /<Surface preset="panel"[\s\S]{0,120}<DetailSection\s+density="panel"/);
-  assert.match(clientHalf, /title="Останні оновлення"/);
+  assert.match(clientHalf, /title="Останні дії"/);
   assert.match(clientHalf, /description="[^"]+"/);
 
   // Звернення відкриває тільки клієнт, тож кнопка є в його шапці — і навмисно
@@ -414,7 +416,12 @@ test('«Огляд» — один екран, який знає, хто диви
   // дата, яку читає клієнт, — це обіцяний строк, а qTicket його не обіцяє.
   assert.doesNotMatch(clientHalf, /assigneeIdsOf|UserAvatar|memberById/);
   assert.doesNotMatch(clientHalf, /projectSummary|'\/clients'/);
-  assert.doesNotMatch(clientHalf, /formatUpdatedAt|dueDate|Оновлено /);
+  // Заборонена саме ДАТА ВИРІШЕННЯ: та, яку читає клієнт, — це обіцяний строк,
+  // а qTicket його не обіцяє. `formatUpdatedAt` стояло тут як замінник цього
+  // правила і ним не є: воно форматує час події у стрічці — «12 черв, 14:20»
+  // біля «Нова відповідь у зверненні», — а час того, що вже сталося, клієнт
+  // читає у власній розмові й так.
+  assert.doesNotMatch(clientHalf, /dueDate|Оновлено /);
 
   // Слово підтримки для місця, якого клієнт не обіймає, зникло з екрана, який
   // вони тепер ділять.
