@@ -344,6 +344,35 @@ Completed product slice on 2026-08-29:
   carries the one sentence the deleted section had and this screen did not —
   where a seat comes from.
 
+### The event the desk waits for (2026-08-31)
+
+Creating a request now tells the support staff on that customer's space. Until
+this slice it told nobody: the only notification creation ever sent was
+`assigned`, whose audience is the new task's assignees, and a customer's request
+has none by definition — only a client opens one and support picks it up
+afterwards. `notifyIssueAssigned` was handed an empty array and took its early
+return, so a request filed at midnight waited for somebody to open the queue and
+notice the unread dot on the client in the rail.
+
+- The event is `incident_created`, and it is a **system** type: `/api/notifications`
+  accepts only `REQUESTABLE_NOTIFICATION_TYPES`, so a browser cannot forge one.
+  The create route is the sole author of it.
+- It is emitted **server-side**, in `/api/issues`, because the recipients are the
+  tenant's internal staff and the customer's browser is exactly the place that
+  may not enumerate them.
+- Recipients are the internal roles on `project.team` for that client space,
+  minus the author. The customer's own colleagues are not an audience for their
+  colleague's request. Where the roster names no support staff at all, it falls
+  back to the organization's owners and admins — not as a wider default, but
+  because a request nobody is told about is the defect being fixed.
+- It has no preference switch. Internal staff have no notification settings at
+  all (QuickTeam owns their account), so a per-user switch would be one nobody
+  can reach; as a keyless type it always records in the bell and never emails,
+  which is right while transactional email is off.
+- `unreadInAppCount` filters by no type, so this also raises the qTicket unread
+  badge on QuickTeam's rail — the cross-product counter gets its first event
+  that a person actually waits for.
+
 Product work still required:
 
 - Run the complete tenant/client acceptance flow and correct every permission or

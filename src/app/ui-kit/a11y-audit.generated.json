@@ -208,7 +208,7 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:401",
+      "location": "src/components/WorkspaceHeader.jsx:405",
       "attributes": [
         "label"
       ]

@@ -2,6 +2,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, enforceRateLimit, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
+import { announceIncidentCreated } from '@/lib/server/incidentAnnouncement';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { isValidIssuePrefix } from '@/lib/utils/issueKeys.mjs';
 import { isClientRole, rolesFor } from '@/lib/utils/can';
@@ -440,6 +441,30 @@ export async function POST(request) {
         },
       }).catch(error => console.warn('[issues POST] reminder rows failed:', error.message));
     }
+
+    // The one event this product exists to react to. `notifyIssueAssigned` on
+    // the browser side covers "somebody handed you this", whose audience is the
+    // new task's assignees — and a customer's request has none, because only a
+    // client opens one and support picks it up afterwards. So creation told
+    // nobody anything, and a request filed at midnight waited for somebody to
+    // open the queue and notice an unread dot.
+    //
+    // It is said here rather than by the composer because the recipients are the
+    // tenant's internal staff, and the customer's browser is exactly the place
+    // that may not enumerate them.
+    announceIncidentCreated({
+      organizationId,
+      projectId,
+      projectName: projectData.name || '',
+      projectTeam: Array.isArray(projectData.team) ? projectData.team : [],
+      issueId: issueRef.id,
+      issueKey,
+      title: data.title.trim(),
+      actor: {
+        uid: authorization.user.uid,
+        name: authorization.user.name || authorization.user.email || '',
+      },
+    }).catch(error => console.warn('[issues POST] incident announcement failed:', error.message));
 
     return NextResponse.json({ id: issueRef.id, issueKey }, { status: 201 });
   } catch (error) {

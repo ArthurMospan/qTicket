@@ -16,7 +16,7 @@ import NotificationCard     from '@/components/ui/Layout/NotificationCard';
 import Segmented            from '@/components/ui/Segmented';
 import {
   Bell, Search, Check, CheckCheck, GitPullRequest, Zap,
-  UserCheck, AlertCircle, AtSign, CalendarClock, Settings, Trash2, Mail,
+  UserCheck, AlertCircle, AtSign, CalendarClock, Inbox, Settings, Trash2, Mail,
   ChevronRight, X, Hash, ArrowLeft,
 } from 'lucide-react';
 import { ChatIcon } from '@/lib/design/icons';
@@ -51,6 +51,10 @@ import { RESERVED_SEGMENTS } from '@/lib/utils/clientPortalRoutes.mjs';
 // weight; three controls that cannot save an answer are worse than dead weight.
 const TYPE_CFG = {
   assigned:       { icon: UserCheck,      color: '#6366f1' },
+  // A request arriving is not somebody handing you one. It fell through to the
+  // `assigned` default, so the one event the desk waits for wore the icon of a
+  // different one.
+  incident_created: { icon: Inbox,        color: '#0891b2' },
   commented:      { icon: ChatIcon,       color: '#0891b2' },
   status_changed: { icon: GitPullRequest, color: '#10b981' },
   mentioned:      { icon: AtSign,         color: '#f97316' },
