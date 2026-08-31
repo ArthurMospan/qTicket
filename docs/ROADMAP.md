@@ -149,9 +149,13 @@ Completed product slice on 2026-08-28:
   removed from qTicket settings navigation; the rates and organization-deletion
   panels were deleted outright in the 2026-08-29 slice below.
 - The incident composer and detail view no longer expose audio tasks, sprints,
-  time tracking, estimates, task hierarchy or task links.
+  time tracking, estimates or task hierarchy. Links between requests were hidden
+  by the same change and came back for internal support on 2026-08-31 — see the
+  slice for that date below, which is where the difference between the two is
+  written down.
   Internal support keeps status, responsible staff, priority, type, resolution
-  target, labels, description, attachments and the shared client conversation.
+  target, labels, description, attachments, links to related requests and the
+  shared client conversation.
 - Direct visits to inherited task-manager routes are contained at the request
   boundary: `/analytics` and `/calendar` return to **Огляд**, while `/sprints`
   and `/chat` return to **Звернення**. The active organization is preserved and
@@ -495,6 +499,52 @@ Completed product slice on 2026-08-31 — one roster, one door:
 - The client's command-palette entry «Співробітники» points at `/team`. The
   help articles about invitations and about the roster describe the screen that
   exists, not the settings section that did.
+
+Completed product slice on 2026-08-31:
+
+- **Links between requests are back for internal support; the hierarchy stays
+  gone.** They were one decision because they were one constant:
+  `SHOW_INHERITED_TASK_PLANNING` in `src/components/workspace/IssueDetail.jsx`
+  hid «Основне звернення», «Дочірні звернення» *and* «Звʼязки» together, so a
+  judgement about the inherited planning model silently removed a support
+  feature nobody had judged. The two are now separate and named for what they
+  are: `SHOW_INHERITED_TASK_HIERARCHY` (false, and staying false) and
+  `SHOW_INHERITED_TASK_SHORTCUTS` (false — «Дублювати» and the AI prompt, which
+  were riding along in the same condition and are neither hierarchy nor links).
+  Links have no constant at all: a shipped feature is gated by who is looking.
+- The reasoning, so it is not re-argued: a duplicate is the single most common
+  relation on a support desk, and until now the product could not record one —
+  two agents answering the same outage in two requests had nowhere to say so.
+  A child request is the opposite trade: it means the customer keeps watching
+  the record they opened while the work moves into one they cannot see, which
+  is precisely the seam qTicket exists to remove.
+- Links are internal, twice over. `useIssueLinks` is subscribed only for
+  `internalViewer`, so a client session never fetches a link document; and the
+  «Звʼязки» section, its count and «Додати зв’язок» are all behind
+  `!clientViewer`, with removal behind `canEditIssue`. The server agrees
+  independently: `/api/issues/[issueId]/links` authorizes `rolesFor('edit:issue')`
+  — owner, admin, member — for GET as well as POST and DELETE, and
+  `firestore.rules` already refuses every browser create, update and delete on
+  `issueLinks`. No rules change was needed for this slice.
+- The picker offers four relations and they are the four a support desk uses:
+  «Дублює», «Блокує», «Залежить від» (the same stored `blocks` link read from
+  the other end) and «Пов’язана з». `tests/issue-link-presentation.test.mjs` now
+  holds the seam between what the picker offers and what
+  `canonicalizeRequestedIssueLink` will store, which could drift unnoticed while
+  the section was hidden.
+- The completion guard was live the whole time and is now reachable. An open
+  `blocks` link has always stopped a request from moving to a closed status
+  (`issueCompletionBlockers` → `openBlockerIssues`, enforced in
+  `useIssues.moveIssue` and on the request's own screen), but with the only
+  creating UI hidden, the only blockers that could exist were imported ones.
+  `tests/issue-execution.test.mjs` now also proves the negative half — «Дублює»
+  and «Пов’язана з» never block a close — and that the guard binds the blocked
+  side only. The request screen's own refusal now names the blocking requests
+  instead of counting them, which is what `useIssues.moveIssue` always did.
+- Creating a link stays a single-request action and is deliberately absent from
+  `ISSUE_BULK_ACTIONS`: it is always about the context of two particular
+  requests. The help article «Пріоритет, тип, мітки й відповідальні»
+  (`minimumRole: 'member'`) carries the new «Звʼязки між зверненнями» section.
 
 Product work still required:
 

@@ -154,7 +154,8 @@ test('клієнтська сесія не підписується на вну�
     read('../src/components/workspace/UnifiedTimeline.jsx'),
   ]);
   assert.match(detail, /const internalViewer = Boolean\(orgRole\) && !clientViewer/);
-  assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
+  assert.match(detail, /const SHOW_INHERITED_TASK_HIERARCHY = false/);
+  assert.match(detail, /const SHOW_INHERITED_TASK_SHORTCUTS = false/);
   // Розмова інциденту — спільна: клієнт читає все, що там пише підтримка.
   // Роллю відділена не вона, а журнал змін підтримки поруч із нею.
   assert.match(timeline, /const internalViewer = can\(orgRole, 'access:audit_log'\)/);
@@ -172,6 +173,53 @@ test('клієнтська сесія не підписується на вну�
   assert.doesNotMatch(bridge, /useUserTimerState/);
   assert.doesNotMatch(detail, /useSprints/);
   assert.doesNotMatch(timeline, /useTimeLogs/);
+});
+
+// Один прапорець ховав три різні речі: ієрархію, звʼязки й кнопки, що їх
+// створюють. Ієрархія лишається вимкненою назавжди — розділивши звернення
+// клієнта на дочірні, ми залишаємо клієнта дивитись на один запис, поки робота
+// йде в іншому. Звʼязки — це функція qTicket, і вона повертається, бо дублікат
+// є найчастішим відношенням у підтримці, а позначити його було нічим.
+//
+// Тест сторожить саме розділення: прапорець ієрархії не має права знову
+// зʼявитися на шляху звʼязків, а звʼязки не мають права зʼявитися в клієнта.
+test('звʼязки живуть за роллю, ієрархія — за прапорцем', async () => {
+  const detail = await read('../src/components/workspace/IssueDetail.jsx');
+
+  // Жодного сліду прапорця, який робив дві роботи одночасно.
+  assert.doesNotMatch(detail, /SHOW_INHERITED_TASK_PLANNING/);
+
+  // Підписка на звʼязки залежить лише від того, хто дивиться.
+  assert.match(detail, /useIssueLinks\(internalViewer \? issueId : null\)/);
+
+  // Ієрархія лишається за прапорцем у всіх трьох своїх місцях: хлібна крихта
+  // основного звернення, селект «Основне звернення» і блок дочірніх.
+  assert.match(detail, /\{SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && parentIssueId && \(/);
+  assert.match(detail, /\{SHOW_INHERITED_TASK_HIERARCHY && <div[\s\S]{0,200}Основне звернення/);
+  assert.match(
+    detail,
+    /\{\/\* REAL CHILD ISSUES \*\/\}\s*\{SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && \(childIssues\.length > 0 \|\| showSubInput\) && \(/,
+  );
+  assert.match(detail, /\{SHOW_INHERITED_TASK_HIERARCHY && !parentIssueId && <Button/);
+
+  // Секція «Звʼязки» відкривається роллю, а не прапорцем.
+  const linksStart = detail.indexOf('{/* ISSUE LINKS');
+  assert.ok(linksStart > 0, 'секція звʼязків на місці');
+  const linksSection = detail.slice(linksStart, detail.indexOf('</DetailSection>', linksStart));
+  assert.match(linksSection, /\{!clientViewer && \(currentIssueLinks\.length > 0 \|\| showLinkInput\) && \(/);
+  assert.match(linksSection, /title="Зв’язки" count=\{currentIssueLinks\.length\}/);
+  assert.doesNotMatch(linksSection, /SHOW_INHERITED/);
+  // Ані сама секція, ані лічильник у ній не існують для клієнта: вище стоїть
+  // роль, а нижче — порожній масив, бо підписки для клієнта немає взагалі.
+  assert.match(linksSection, /canRemove=\{!isArchived && canEditIssue\}/);
+
+  // Кнопка створення — теж за роллю, і теж без прапорця.
+  assert.match(detail, /\{!clientViewer && <Button\s+aria-label="Додати зв’язок"/);
+
+  // Дублювання й AI-промпт — окреме рішення під власним іменем, а не безбілетні
+  // пасажири прапорця ієрархії.
+  assert.match(detail, /SHOW_INHERITED_TASK_SHORTCUTS && !isArchived && canEditIssue/);
+  assert.match(detail, /SHOW_INHERITED_TASK_SHORTCUTS && canEditIssue/);
 });
 
 // Внутрішнє місце в qTicket видає лише підписаний provisioning із QuickTeam.
