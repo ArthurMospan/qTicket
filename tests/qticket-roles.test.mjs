@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
 import { can, invitedRoleFor, rolesFor } from '../src/lib/utils/can.js';
-import { isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
+import { RESERVED_SEGMENTS, isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
 import { INCIDENT_TERMS_TABLE } from '../src/lib/content/incidentTerms.mjs';
 
 const read = relativePath => readFile(new URL(relativePath, import.meta.url), 'utf8');
@@ -99,7 +99,13 @@ test('клієнт і підтримка бачать один екран, і з
   // There is no second screen for a client any more. `/` is a door into their
   // own space — the same `[projectId]` route support opens.
   assert.doesNotMatch(root, /ClientIncidentPortal/);
-  assert.match(root, /router\.replace\(`\/\$\{clientProject\.id\}\$\{suffix\}`\)/);
+  // `/` веде клієнта на спільний «Огляд». Виняток один і він змістовний:
+  // `?new=1` відкриває композер, а композер живе у просторі, тож цей перехід
+  // іде прямо туди — інакше запит, який читач уже попросив, просто зникає.
+  assert.match(
+    root,
+    /router\.replace\(searchParams\?\.get\('new'\) === '1' \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
+  );
   assert.doesNotMatch(board, /router\.replace\('\/'\)/);
   // One board, one list, one set of columns; the role decides what is inside.
   assert.match(board, /readOnly=\{clientViewer\}/);
@@ -119,9 +125,28 @@ test('клієнт і підтримка бачать один екран, і з
   assert.match(board, /clientAdminMode/);
   assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
   assert.doesNotMatch(board, /useSprints|AnalyticsTab|QtPlusProjectTab/);
-  // The rail is the same component too, with three destinations for a client.
+  // The rail is the same component too. A client sees «Огляд» · «Мої звернення»
+  // · «Налаштування», and a client administrator one more between them:
+  // «Співробітники», the roster they actually administer.
   assert.match(sidebar, /const topNav = clientViewer/);
   assert.match(sidebar, /label: 'Мої звернення'/);
+  const clientRail = sidebar.slice(
+    sidebar.indexOf('const topNav = clientViewer'),
+    sidebar.indexOf(': internalNav;'),
+  );
+  assert.deepEqual(
+    [...clientRail.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
+    ['Огляд', 'Мої звернення', 'Співробітники', 'Налаштування'],
+  );
+  // And that fourth one is conditional on the role, not on the audience: a
+  // `client_member` administers nobody, and the route boundary refuses them
+  // `/team`, so offering it would be a rail entry that answers with a redirect.
+  assert.match(clientRail, /orgRole === 'client_admin'[\s\S]{0,200}href: '\/team'/);
+  // «Співробітники» вело на `/settings?section=team` — ту саму адресу, яку
+  // рейка налаштувань називає ще раз на екрані, що відкривається. Один
+  // напрямок, названий двічі на одному екрані. Дублікат прибрано з іншого
+  // боку: реєстр тепер окремий екран, і пункт веде саме на нього.
+  assert.doesNotMatch(sidebar, /'\/settings\?section=team'/);
   // The tenant's mark never flips to the vendor's.
   assert.doesNotMatch(sidebar, /rotateY\(180deg\)/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
@@ -129,8 +154,21 @@ test('клієнт і підтримка бачать один екран, і з
   const clientAttributesStart = detail.indexOf('primaryChildren={clientViewer ? (');
   const internalAttributesStart = detail.indexOf(') : (', clientAttributesStart);
   const clientAttributes = detail.slice(clientAttributesStart, internalAttributesStart);
+  // What the customer's strip says, and — the part that matters — that none of
+  // it is a control. Status, type and priority are all three already on the
+  // board card they came from, so the page saying them is the page catching up
+  // with the board, not a disclosure. The rule was «do not name priority»; it is
+  // «do not offer to change any of it», which is the fact the product actually
+  // has to keep true.
   assert.match(clientAttributes, />Статус</);
-  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Пріоритет/);
+  assert.match(clientAttributes, />Тип</);
+  assert.match(clientAttributes, />Пріоритет</);
+  assert.match(clientAttributes, /readOnlyItemClass/);
+  assert.doesNotMatch(clientAttributes, /<Select|<MultiSelect|<DatePicker|onChange=/);
+  // The two the board withholds stay withheld: who inside support is answering,
+  // and the resolution date — a date a customer can read is a promised time, and
+  // qTicket promises none.
+  assert.doesNotMatch(clientAttributes, /Виконавці|Відповідальні|Спринт|Дедлайн|Термін/);
   assert.match(composer, /const submitted = clientMode[\s\S]{0,180}title: form\.title,[\s\S]{0,80}description: form\.description/);
 });
 
@@ -141,7 +179,8 @@ test('клієнтська сесія не підписується на вну�
     read('../src/components/workspace/UnifiedTimeline.jsx'),
   ]);
   assert.match(detail, /const internalViewer = Boolean\(orgRole\) && !clientViewer/);
-  assert.match(detail, /const SHOW_INHERITED_TASK_PLANNING = false/);
+  assert.match(detail, /const SHOW_INHERITED_TASK_HIERARCHY = false/);
+  assert.match(detail, /const SHOW_INHERITED_TASK_SHORTCUTS = false/);
   // Розмова інциденту — спільна: клієнт читає все, що там пише підтримка.
   // Роллю відділена не вона, а журнал змін підтримки поруч із нею.
   assert.match(timeline, /const internalViewer = can\(orgRole, 'access:audit_log'\)/);
@@ -159,6 +198,53 @@ test('клієнтська сесія не підписується на вну�
   assert.doesNotMatch(bridge, /useUserTimerState/);
   assert.doesNotMatch(detail, /useSprints/);
   assert.doesNotMatch(timeline, /useTimeLogs/);
+});
+
+// Один прапорець ховав три різні речі: ієрархію, звʼязки й кнопки, що їх
+// створюють. Ієрархія лишається вимкненою назавжди — розділивши звернення
+// клієнта на дочірні, ми залишаємо клієнта дивитись на один запис, поки робота
+// йде в іншому. Звʼязки — це функція qTicket, і вона повертається, бо дублікат
+// є найчастішим відношенням у підтримці, а позначити його було нічим.
+//
+// Тест сторожить саме розділення: прапорець ієрархії не має права знову
+// зʼявитися на шляху звʼязків, а звʼязки не мають права зʼявитися в клієнта.
+test('звʼязки живуть за роллю, ієрархія — за прапорцем', async () => {
+  const detail = await read('../src/components/workspace/IssueDetail.jsx');
+
+  // Жодного сліду прапорця, який робив дві роботи одночасно.
+  assert.doesNotMatch(detail, /SHOW_INHERITED_TASK_PLANNING/);
+
+  // Підписка на звʼязки залежить лише від того, хто дивиться.
+  assert.match(detail, /useIssueLinks\(internalViewer \? issueId : null\)/);
+
+  // Ієрархія лишається за прапорцем у всіх трьох своїх місцях: хлібна крихта
+  // основного звернення, селект «Основне звернення» і блок дочірніх.
+  assert.match(detail, /\{SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && parentIssueId && \(/);
+  assert.match(detail, /\{SHOW_INHERITED_TASK_HIERARCHY && <div[\s\S]{0,200}Основне звернення/);
+  assert.match(
+    detail,
+    /\{\/\* REAL CHILD ISSUES \*\/\}\s*\{SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && \(childIssues\.length > 0 \|\| showSubInput\) && \(/,
+  );
+  assert.match(detail, /\{SHOW_INHERITED_TASK_HIERARCHY && !parentIssueId && <Button/);
+
+  // Секція «Звʼязки» відкривається роллю, а не прапорцем.
+  const linksStart = detail.indexOf('{/* ISSUE LINKS');
+  assert.ok(linksStart > 0, 'секція звʼязків на місці');
+  const linksSection = detail.slice(linksStart, detail.indexOf('</DetailSection>', linksStart));
+  assert.match(linksSection, /\{!clientViewer && \(currentIssueLinks\.length > 0 \|\| showLinkInput\) && \(/);
+  assert.match(linksSection, /title="Зв’язки" count=\{currentIssueLinks\.length\}/);
+  assert.doesNotMatch(linksSection, /SHOW_INHERITED/);
+  // Ані сама секція, ані лічильник у ній не існують для клієнта: вище стоїть
+  // роль, а нижче — порожній масив, бо підписки для клієнта немає взагалі.
+  assert.match(linksSection, /canRemove=\{!isArchived && canEditIssue\}/);
+
+  // Кнопка створення — теж за роллю, і теж без прапорця.
+  assert.match(detail, /\{!clientViewer && <Button\s+aria-label="Додати зв’язок"/);
+
+  // Дублювання й AI-промпт — окреме рішення під власним іменем, а не безбілетні
+  // пасажири прапорця ієрархії.
+  assert.match(detail, /SHOW_INHERITED_TASK_SHORTCUTS && !isArchived && canEditIssue/);
+  assert.match(detail, /SHOW_INHERITED_TASK_SHORTCUTS && canEditIssue/);
 });
 
 // Внутрішнє місце в qTicket видає лише підписаний provisioning із QuickTeam.
@@ -231,6 +317,63 @@ test('клієнтський глобальний пошук не відкрив
   assert.match(paletteHost, /clientViewer[\s\S]{0,80}\? EMPTY_MATCHES/);
 });
 
+// «Екран, до якого доходять обидві аудиторії, — це один екран, який знає, хто
+// дивиться». Раніше «Огляд» був екраном підтримки: клієнта з нього
+// перекидало, тож перший екран продукту мала лише половина його читачів.
+test('«Огляд» — один екран, який знає, хто дивиться', async () => {
+  const overview = await read('../src/app/(app)/overview/page.js');
+
+  // Ані охоронця, ані порожнього рендера в очікуванні редиректу.
+  assert.doesNotMatch(overview, /if \(orgRole && clientViewer\) router\.replace\('\/'\);/);
+  assert.doesNotMatch(overview, /if \(clientViewer\) return null;/);
+  // Один компонент, дві гілки — не два екрани.
+  assert.match(overview, /\) : clientViewer \? \(/);
+
+  const clientHalf = overview.slice(
+    overview.indexOf(') : clientViewer ? ('),
+    overview.indexOf('\n        ) : (\n', overview.indexOf(') : clientViewer ? (')),
+  );
+  assert.ok(clientHalf.length > 400, 'клієнтська гілка порожня — зріз узято не там');
+
+  // Три плитки, і саме ці три.
+  assert.deepEqual(
+    [...clientHalf.matchAll(/label="([^"]+)"/g)].map(match => match[1]),
+    ['Відкриті', 'Чекають на вас', 'Вирішені'],
+  );
+  // «Чекають на вас» рахує `incidentQueueMetrics`, а не сама сторінка: плитка
+  // клієнта і плитка підтримки — один факт із двох крісел.
+  assert.match(clientHalf, /value=\{metrics\.waitingOnClient\}/);
+  assert.doesNotMatch(clientHalf, /lastCommentAuthorId/);
+
+  // Панель — кітовий `TaskRow` без колонки відповідального, а не зібраний
+  // вручну рядок із `ListRow` + `TaskIdentity`.
+  assert.match(overview, /import TaskRow from '@\/components\/ui\/TaskManagement\/TaskRow';/);
+  assert.match(clientHalf, /<TaskRow/);
+  assert.match(clientHalf, /showAssignee=\{false\}/);
+  assert.doesNotMatch(clientHalf, /<ListRow|<TaskIdentity/);
+  // Обгортка — `Surface preset="panel"` з `DetailSection density="panel"`.
+  assert.match(clientHalf, /<Surface preset="panel"[\s\S]{0,120}<DetailSection\s+density="panel"/);
+  assert.match(clientHalf, /title="Останні оновлення"/);
+  assert.match(clientHalf, /description="[^"]+"/);
+
+  // Звернення відкриває тільки клієнт, тож кнопка є в його шапці — і навмисно
+  // не існує на боці підтримки.
+  assert.match(overview, /actions=\{clientViewer && clientSpace \? \(/);
+  assert.match(overview, /\{INCIDENT_TERMS_TABLE\.composerSubmit\}/);
+  assert.equal(INCIDENT_TERMS_TABLE.composerSubmit, 'Створити звернення');
+
+  // Жодного відповідального, жодної панелі клієнтів, жодної дати вирішення:
+  // дата, яку читає клієнт, — це обіцяний строк, а qTicket його не обіцяє.
+  assert.doesNotMatch(clientHalf, /assigneeIdsOf|UserAvatar|memberById/);
+  assert.doesNotMatch(clientHalf, /projectSummary|'\/clients'/);
+  assert.doesNotMatch(clientHalf, /formatUpdatedAt|dueDate|Оновлено /);
+
+  // Слово підтримки для місця, якого клієнт не обіймає, зникло з екрана, який
+  // вони тепер ділять.
+  assert.doesNotMatch(overview, /виконавц/i);
+  assert.match(overview, /Без відповідального/);
+});
+
 test('qTicket shell не повертає таймер QuickTeam у desktop або mobile навігацію', async () => {
   const [sidebar, mobile] = await Promise.all([
     read('../src/components/WorkspaceSidebar.jsx'),
@@ -259,18 +402,41 @@ test('повернення в QuickTeam бачить лише внутрішня
   assert.match(sidebar, /Повернутися в QuickTeam/);
 });
 
-test('лише client_admin бачить керування співробітниками у налаштуваннях', async () => {
-  const settings = await read('../src/app/(app)/settings/page.js');
+// «Співробітники» в рейці клієнта відкривали «Налаштування», де рейка
+// налаштувань називала ту саму адресу вдруге — «Співробітники клієнта» в
+// окремій групі. Одна адреса, двічі названа на одному екрані. Реєстр тепер
+// один — «/team», — а розділу немає в жодних дверях.
+test('керування співробітниками клієнта живе на «/team», а не в налаштуваннях', async () => {
+  const [settings, team] = await Promise.all([
+    read('../src/app/(app)/settings/page.js'),
+    read('../src/app/(app)/team/page.js'),
+  ]);
 
   assert.match(settings, /const CLIENT_SETTINGS_SECTIONS = new Set\(\[[\s\S]{0,180}'account',[\s\S]{0,20}\]\);/);
   assert.doesNotMatch(
     settings.match(/const CLIENT_SETTINGS_SECTIONS = new Set\(\[[\s\S]*?\]\);/)?.[0] || '',
     /'team'/,
   );
-  assert.match(settings, /const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set\(\[[\s\S]{0,100}'team'/);
-  assert.match(settings, /clientAdmin\s*\? CLIENT_ADMIN_SETTINGS_SECTIONS\s*:\s*CLIENT_SETTINGS_SECTIONS/);
-  assert.match(settings, /clientViewer\s*\?\s*clientSettingsSections\.has\(item\.id\)/);
-  assert.match(settings, /label: 'Співробітники клієнта', group: 'Клієнтський простір'/);
+  // Немає ні другого набору розділів, ні перейменування в рейці, ні тіла.
+  assert.doesNotMatch(settings, /CLIENT_ADMIN_SETTINGS_SECTIONS/);
+  assert.doesNotMatch(settings, /label: 'Співробітники клієнта'/);
+  assert.doesNotMatch(settings, /group: 'Клієнтський простір'/);
+  assert.doesNotMatch(settings, /case 'team':/);
+  assert.doesNotMatch(settings, /id: 'team',/);
+  assert.doesNotMatch(settings, /InviteMemberDialog/);
+  assert.match(settings, /const allowedNav = NAV\.filter\(item => reachableSections\.has\(item\.id\)\);/);
+
+  // Один екран, який знає, хто дивиться: свої співробітники — за складом
+  // простору, а не просто за роллю, і запрошення поруч із ними.
+  assert.match(team, /const clientViewer = isClientRole\(orgRole\);/);
+  assert.match(team, /isClientRole\(member\.role\) && isOnProjectTeam\(clientSpace, member\.id \|\| member\.uid\)/);
+  assert.match(team, /orgRole === 'client_admin'\s*&& can\(orgRole, 'invite:client_member'\)/);
+  assert.match(team, /title="Запросити співробітника"/);
+  // Те саме вікно, що й у клієнтському просторі: пошта на одній вкладці,
+  // посилання з QR — на другій. Роль, яку воно видає, лишається client_member.
+  assert.match(team, /<InviteMemberDialog[\s\S]{0,220}clientMode/);
+  assert.match(team, /projectIds=\{\[clientSpace\.id\]\}/);
+  assert.doesNotMatch(team, /clientAdminMode/);
 });
 
 // Внутрішній працівник — копія акаунта QuickTeam: імʼя, аватар, мову й роль
@@ -283,18 +449,17 @@ test('персональні розділи QuickTeam недосяжні вну�
 
   assert.match(
     settings,
-    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'notifications',\s*'localization',\s*'team',\s*\]\);/,
+    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'notifications',\s*'localization',\s*\]\);/,
   );
-  // «Команда підтримки» не зникла для персоналу, а переїхала: реєстр — це
-  // «Команда». Тому стара адреса веде на екран, який тепер тримає відповідь,
-  // а не на перший-ліпший розділ рейки. І тільки коли роль справді відома:
-  // до відповіді Firestore `myRole` вгадує «member», і здогад відправив би
-  // `client_admin` на штатний екран, з якого його викине layout.
+  // «Команда підтримки» не зникла, а переїхала: реєстр — це «Команда», і для
+  // персоналу, і для співробітників адміністратора клієнта. Тому стара адреса
+  // веде на екран, який тепер тримає відповідь, а не на перший-ліпший розділ
+  // рейки. І тільки коли роль справді відома: до відповіді Firestore `myRole`
+  // вгадує «member», і здогад відправив би `client_member` на екран, з якого
+  // його викине layout.
   assert.match(settings, /const resolvedRole = orgRole \|\| myMemberInfo\?\.role \|\| null;/);
-  assert.match(settings, /const knownStaff = Boolean\(resolvedRole\) && !isClientRole\(resolvedRole\);/);
-  assert.match(settings, /if \(requestedSection === 'team' && knownStaff\) \{\s*router\.replace\('\/team'\);/);
-  // Клієнтський каталог — власний, у qTicket, і свого екрана не має.
-  assert.match(settings, /CLIENT_ADMIN_SETTINGS_SECTIONS = new Set\(\[\s*\.\.\.CLIENT_SETTINGS_SECTIONS,\s*'team',/);
+  assert.match(settings, /const knownTeamReader = Boolean\(resolvedRole\) && resolvedRole !== 'client_member';/);
+  assert.match(settings, /if \(requestedSection === 'team' && knownTeamReader\) \{\s*router\.replace\('\/team'\);/);
   // Одна відповідь на всі три двері в розділ: рейка, адреса й тіло розділу.
   assert.match(settings, /const reachableSections = useMemo\(/);
   assert.match(settings, /!CLIENT_ONLY_SETTINGS_SECTIONS\.has\(item\.id\) && \(!item\.adminOnly \|\| isAdmin\)/);
@@ -331,15 +496,24 @@ test('внутрішня «Безпека» лишає сеанси qTicket і �
 });
 
 test('клієнтська сесія не може відкрити внутрішній workspace прямим URL', async () => {
-  for (const allowed of ['/', '/settings', '/settings/profile', '/client-a/issue/INC-12']) {
+  // `/overview` — спільний екран, який знає, хто дивиться, і саме туди веде
+  // клієнта вхідні двері `/`. Якщо продукт когось кудись відправляє, межа має
+  // це визнавати, інакше сторінка кидає вперед, а layout — назад.
+  for (const allowed of ['/', '/overview', '/settings', '/settings/profile', '/client-a/issue/INC-12']) {
     assert.equal(isClientPortalRoute(allowed), true, `${allowed} має лишатися клієнтським маршрутом`);
   }
-  for (const denied of ['/overview', '/my', '/team', '/clients', '/analytics', '/chat']) {
+  for (const denied of ['/my', '/team', '/clients', '/analytics', '/chat']) {
     assert.equal(isClientPortalRoute(denied), false, `${denied} не має відкриватися клієнту`);
   }
 
+  // Один реєстр на дві аудиторії, і межа — єдине місце, де їх розрізняють:
+  // адміністратор клієнта відкриває «/team» зі своїми співробітниками,
+  // співробітник клієнта не відкриває його взагалі.
+  assert.equal(isClientPortalRoute('/team', ['client-a'], 'client_admin'), true);
+  assert.equal(isClientPortalRoute('/team', ['client-a'], 'client_member'), false);
+
   // Своїм простором клієнт користується, чужим — ні, і форма адреси цього не
-  // вирішує: `/overview` виглядає точно так само. Тому межа звіряє id, а не
+  // вирішує: `/my` виглядає точно так само. Тому межа звіряє id, а не
   // візерунок. Портал веде клієнта саме сюди — поки цього рядка не було,
   // сторінка кидала його в `/{projectId}`, layout кидав назад, і клієнт не міг
   // відкрити qTicket взагалі.
@@ -347,10 +521,13 @@ test('клієнтська сесія не може відкрити внутр�
   assert.equal(isClientPortalRoute('/client-b', ['client-a']), false, 'чужий простір — ні');
   assert.equal(isClientPortalRoute('/client-a'), false, 'без списку просторів нічого не відкривається');
   // Навіть якби простір назвали як екран, екран лишається екраном.
-  assert.equal(isClientPortalRoute('/overview', ['overview']), false, 'зарезервована назва не стає простором');
+  assert.equal(isClientPortalRoute('/my', ['my']), false, 'зарезервована назва не стає простором');
+  // Те саме для `/overview`: він відкривається як екран, а не як чийсь простір,
+  // тому лишається серед зарезервованих назв.
+  assert.ok(RESERVED_SEGMENTS.includes('overview'), '«overview» лишається назвою екрана');
 
   const layout = await read('../src/app/(app)/layout.js');
-  assert.match(layout, /!isClientPortalRoute\(pathname, clientProjectIds\)/);
+  assert.match(layout, /!isClientPortalRoute\(pathname, clientProjectIds, orgRole\)/);
   // Поки простори ще вантажаться, нікого не відкидає: рішення на порожньому
   // списку виганяло б клієнта з власного простору при кожному оновленні.
   assert.match(layout, /&& !projectsLoading/);

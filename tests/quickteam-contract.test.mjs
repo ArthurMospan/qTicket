@@ -13,7 +13,10 @@ import {
   signQuickTeamRequest,
   verifyQuickTeamRequest,
 } from '../src/lib/integrations/quickteamContract.mjs';
-import { hasActiveQuickTeamEntitlement } from '../src/lib/utils/quickTeamManaged.mjs';
+import {
+  hasActiveQuickTeamEntitlement,
+  quickTeamSnapshotOpensOrganization,
+} from '../src/lib/utils/quickTeamManaged.mjs';
 import { quickTeamSeatChanges } from '../src/lib/utils/orgMembership.mjs';
 
 const secret = 'test-shared-secret-with-at-least-32-characters';
@@ -131,6 +134,69 @@ test('only an active QuickTeam snapshot is a qTicket entitlement', () => {
   assert.equal(hasActiveQuickTeamEntitlement({
     quickTeam: { sourceOrganizationId: 'quickteam-org-1', entitlement: 'active' },
   }), true);
+});
+
+// qTicket існує тільки для тих організацій QuickTeam, які його купили. Решта —
+// а їх у власника може бути скільки завгодно — не мають лишати тут ані сліду.
+//
+// `inactive` за контрактом означає «призупинено», і призупинити можна лише те,
+// що вже було: організація зберігається цілою, щоб наступний активний знімок
+// повернув той самий простір підтримки. Але перший знімок, який уже неактивний,
+// описує зовсім інше — організацію QuickTeam, яка ніколи не була клієнтом
+// qTicket. Провіженінг не розрізняв ці два випадки і писав обидва, тож у
+// свічері назавжди зʼявлялася організація, яку неможливо відкрити: рулзи і
+// `authorizeOrgRequest` вимагають `active`, а місце в `orgMemberships` — це
+// рівно те, що малює організацію у списку.
+test('перший неактивний знімок не створює організацію в qTicket', () => {
+  // Ніколи не був клієнтом — нічого не пишемо.
+  assert.equal(quickTeamSnapshotOpensOrganization({
+    organizationExists: false,
+    entitlement: 'inactive',
+  }), false);
+  // Купив — створюємо.
+  assert.equal(quickTeamSnapshotOpensOrganization({
+    organizationExists: false,
+    entitlement: 'active',
+  }), true);
+  // Був клієнтом і призупинився — зберігаємо все, як обіцяє контракт.
+  assert.equal(quickTeamSnapshotOpensOrganization({
+    organizationExists: true,
+    entitlement: 'inactive',
+  }), true);
+  assert.equal(quickTeamSnapshotOpensOrganization({
+    organizationExists: true,
+    entitlement: 'active',
+  }), true);
+  // Відсутній аргумент — це не дозвіл.
+  assert.equal(quickTeamSnapshotOpensOrganization(), false);
+  assert.equal(quickTeamSnapshotOpensOrganization({}), false);
+});
+
+test('провіженінг відмовляє першому неактивному знімку до того, як пише місця', async () => {
+  const route = await readFile(
+    new URL('../src/app/api/integrations/quickteam/provision/route.js', import.meta.url),
+    'utf8',
+  );
+  assert.match(route, /quickTeamSnapshotOpensOrganization\(\{/);
+  assert.match(route, /organizationExists: organizationSnap\.exists/);
+  assert.match(route, /status: 'skipped'/);
+  // Відмова стоїть перед `resolveQuickTeamStaff`, бо той не читає, а створює
+  // акаунти в Firebase Auth і переписує імʼя, пошту й аватар кожного знайденого.
+  // Організація, яка ніколи не купувала qTicket, не має коштувати нікому
+  // облікового запису тут. Далі — перед записом самої організації та місць.
+  const decision = route.indexOf('quickTeamSnapshotOpensOrganization');
+  const staffResolution = route.indexOf('resolveQuickTeamStaff(payload.staff)');
+  const organizationWrite = route.indexOf('transaction.set(organizationRef');
+  const seatWrite = route.indexOf('MEMBERSHIP_COLLECTION).doc(seatId)');
+  assert.ok(decision > 0 && staffResolution > 0 && organizationWrite > 0 && seatWrite > 0);
+  assert.ok(decision < staffResolution, 'ентайтлмент перевіряється перед створенням акаунтів');
+  assert.ok(decision < organizationWrite, 'ентайтлмент перевіряється перед записом організації');
+  assert.ok(decision < seatWrite, 'ентайтлмент перевіряється перед записом місць');
+  // І ще раз у транзакції, проти документа, який вона справді пише.
+  assert.ok(
+    route.indexOf('quickTeamSnapshotOpensOrganization', decision + 1) < organizationWrite,
+    'транзакція перевіряє ентайтлмент повторно',
+  );
 });
 
 // Кого QuickTeam перестав надсилати, той втрачає місце — і повертається на те

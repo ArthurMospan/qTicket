@@ -89,11 +89,53 @@ export function waitingOnUsIssues(categorized, supportUserIds) {
 }
 
 /**
+ * The mirror of `isWaitingOnUs`, read from the customer's side of the same
+ * conversation: we answered last, so the next word is theirs.
+ *
+ * It is deliberately not `!isWaitingOnUs`. A request nobody has written in yet
+ * is waiting on neither side — support has not replied and the customer has
+ * nothing to reply to — and negating the other predicate would have counted
+ * every one of those as the customer's move to make. Three states, two of which
+ * have a tile.
+ *
+ * @param {object} issue The issue document, as the queue already holds it.
+ * @param {Set<string>|string[]} supportUserIds The organization's own people.
+ */
+export function isWaitingOnClient(issue, supportUserIds) {
+  const authorId = issue?.lastCommentAuthorId;
+  if (typeof authorId !== 'string' || authorId.length === 0) return false;
+  // An actor imported with the request is not one of ours, so the answer is
+  // still owed by us — the same reading `isWaitingOnUs` gives it.
+  if (isExternalActorId(authorId)) return false;
+  const support = supportUserIds instanceof Set
+    ? supportUserIds
+    : new Set(supportUserIds || []);
+  // Until we know who «ми» are, nobody can be said to have answered.
+  if (support.size === 0) return false;
+  return support.has(authorId);
+}
+
+/**
+ * The exact set the «Чекають на вас» tile counts on a customer's own overview,
+ * so the number and any list drawn from it cannot come apart. A closed request
+ * is not waiting on anybody, whoever wrote in it last.
+ *
+ * @param {{issue: object, category: string}[]} categorized From `categorizeIssues`.
+ * @param {Set<string>|string[]} supportUserIds The organization's own people.
+ * @returns {object[]}
+ */
+export function waitingOnClientIssues(categorized, supportUserIds) {
+  return (categorized || [])
+    .filter(entry => entry.category !== 'done' && isWaitingOnClient(entry.issue, supportUserIds))
+    .map(entry => entry.issue);
+}
+
+/**
  * The counters every incident queue reports, from one set of rules.
  *
  * @param {{issue: object, category: string}[]} categorized From `categorizeIssues`.
- * @param {{supportUserIds?: Set<string>|string[]}} options Who «ми» are, for «Чекають на нас».
- * @returns {{open: number, new: number, active: number, review: number, resolved: number, unassigned: number, waitingOnUs: number}}
+ * @param {{supportUserIds?: Set<string>|string[]}} options Who «ми» are, for «Чекають на нас» and its mirror.
+ * @returns {{open: number, new: number, active: number, review: number, resolved: number, unassigned: number, waitingOnUs: number, waitingOnClient: number}}
  */
 export function incidentQueueMetrics(categorized, { supportUserIds } = {}) {
   const entries = categorized || [];
@@ -111,5 +153,10 @@ export function incidentQueueMetrics(categorized, { supportUserIds } = {}) {
     // The customer wrote last and we have not answered. The same call the
     // filtered list makes, so the number and the list cannot disagree.
     waitingOnUs: waitingOnUsIssues(entries, supportUserIds).length,
+    // The same fact from the other side of the desk: support answered last, so
+    // the request is standing on the customer. The tile that shows it is on the
+    // customer's own «Огляд», which is why the mirror lives here rather than
+    // being written out again on that screen — one formula, two readers.
+    waitingOnClient: waitingOnClientIssues(entries, supportUserIds).length,
   };
 }

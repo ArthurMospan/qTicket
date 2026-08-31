@@ -1,8 +1,8 @@
 'use client';
 import Button from '@/components/ui/Button';
 import Surface from '@/components/ui/Surface';
-import { IconAction, Card, ListRow } from '@/components/ui';
-import { Edit2, Trash2, Settings, X, Zap, MoreVertical } from 'lucide-react';
+import { IconAction, Card, DetailSection, ListRow } from '@/components/ui';
+import { ArrowRight, Edit2, Trash2, Settings, X, Zap, MoreVertical } from 'lucide-react';
 import { PreviewBlock } from '../preview';
 
 export default function SurfacesSection() {
@@ -111,6 +111,55 @@ export default function SurfacesSection() {
           <IconAction label="Більше" icon={MoreVertical} size="md" appearance="surface" />
           <IconAction label="Закрити" icon={X} size="md" appearance="surface-plain" />
           <IconAction label="Видалити" icon={Trash2} size="sm" appearance="surface-danger" />
+        </div>
+      </PreviewBlock>
+
+      <PreviewBlock
+        title="DetailSection density=panel — шапка панелі"
+        component="DetailSection"
+        description="Заголовок панелі: назва, рядок під нею і єдина дія праворуч. Саме цей блок «Огляд» і клієнтський простір писали руками чотири рази — тепер це третя щільність того самого компонента, поряд із section та group."
+        filePath="src/components/ui/Layout/DetailSection.jsx"
+        fullWidth
+      >
+        <div className="grid w-full gap-4 xl:grid-cols-2">
+          <Surface preset="panel" padding="md">
+            <DetailSection
+              density="panel"
+              title="Нещодавно оновлені"
+              description="Останні зміни у зверненнях усіх доступних клієнтів."
+              action={<Button style="secondary" size="md" icon={ArrowRight}>Вся черга</Button>}
+            >
+              <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                <ListRow density="roomy" className="flex items-center gap-3">
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-ink">Не приходить лист про оплату</span>
+                  <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
+                </ListRow>
+                <ListRow density="roomy" className="flex items-center gap-3">
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-ink">Помилка 500 у звіті за березень</span>
+                  <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
+                </ListRow>
+              </Card>
+            </DetailSection>
+          </Surface>
+
+          {/* Без дії та без опису — та сама щільність, коли панель нічого не
+              пояснює й нічого не пропонує зробити. */}
+          <Surface preset="panel" padding="md">
+            <DetailSection
+              density="panel"
+              title="Команда підтримки"
+              description="Внутрішні працівники, закріплені за цим клієнтським простором."
+            >
+              <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                <ListRow density="roomy" className="flex items-center gap-3">
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-ink">Олена Коваль</span>
+                </ListRow>
+                <ListRow density="roomy" className="flex items-center gap-3">
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-ink">Дмитро Петренко</span>
+                </ListRow>
+              </Card>
+            </DetailSection>
+          </Surface>
         </div>
       </PreviewBlock>
 

@@ -140,8 +140,13 @@ test('a counter on a branded rail takes the rail’s own two colours', async () 
     assert.doesNotMatch(source, /<Counter value=\{otherOrgUnreadCount\}/);
   }
   // And the row it sits in yields the name rather than the chevron: 120px of
-  // name plus the counter plus the chevron is 156px in a 140px column.
-  assert.match(sidebar, /className="flex w-full min-w-0 items-center gap-\[4px\] cursor-pointer transition-colors"/);
-  assert.match(sidebar, /className="min-w-0 truncate transition-all"/);
+  // name plus the counter plus the chevron is 156px in a 140px column, so the
+  // row takes the width it is given and the name is the part that truncates.
+  // The client's portal lockup and the staff rail are one control now, written
+  // once — the staff row used to be a hand-rolled `div role="button"` with its
+  // own classes and its own arithmetic beside the client's real button.
+  const switcherRow = /className="flex h-\[17px\] w-full min-w-0 items-center gap-\[4px\] text-left text-\[12px\] font-medium leading-\[17px\] transition-colors"/g;
+  assert.equal((sidebar.match(switcherRow) || []).length, 1);
+  assert.equal((sidebar.match(/<span className="min-w-0 truncate">/g) || []).length, 1);
   assert.doesNotMatch(sidebar, /data-ui-pill="branding-counter"/);
 });

@@ -75,7 +75,7 @@ const OPEN_LABELS = {
 
 // The three whose destination is the record itself rather than a conversation
 // on it. They are the ones that need the reader's word for it.
-const RECORD_DESTINATIONS = new Set(['assigned', 'status_changed', 'deadline']);
+const RECORD_DESTINATIONS = new Set(['assigned', 'status_changed', 'deadline', 'incident_created']);
 
 /**
  * @param {object} notification The notification being named.

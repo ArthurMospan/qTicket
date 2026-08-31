@@ -19,7 +19,7 @@ import { existingParentIssueId } from '@/lib/utils/issueHierarchyModel.mjs';
 import { openBlockerIssues } from '@/lib/utils/issueExecution.mjs';
 import { isIssueUnread, unreadActivityLabel } from '@/lib/utils/issueReadState.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
-import TaskCounters from '@/components/ui/TaskManagement/TaskCounters';
+import TaskCounters, { hasTaskCounters } from '@/components/ui/TaskManagement/TaskCounters';
 import TaskIdentity from '@/components/ui/TaskManagement/TaskIdentity';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
@@ -153,6 +153,18 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
     // from the last message alone, so being named three times and being named
     // once looked the same, and the second message hid the first.
     const mentionCount = Number(issue.unreadMentions?.[currentUserId]) || 0;
+    // The footer is a rule with things on it, so it exists only when there is
+    // something to put there. A customer's card draws no faces (`showAssignee`
+    // is off — routing is not their business) and a request nobody has replied
+    // to yet has no counters either, so the row rendered as a hairline over ten
+    // pixels of nothing on every new request: the whole client board looked cut
+    // off at the bottom of every card.
+    const showFooter = showAssignee || hasTaskCounters({
+      attachments: attachCount,
+      mentions: mentionCount,
+      messages: msgCount,
+      unread: hasUnreadActivity || hasUnreadChat,
+    });
 
     return (
       <div
@@ -362,7 +374,11 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
           {/* Row 6: Footer with task participants and flat modern indigo chat indicator.
               The counters keep the right edge whether or not the faces are
               drawn — `justify-end` when they are not, so a customer's card ends
-              in its message count rather than in a hole where the routing was. */}
+              in its message count rather than in a hole where the routing was.
+              And when there is neither — no faces and nothing counted — the rule
+              itself goes too, rather than closing the card with a line under
+              nothing. */}
+          {showFooter && (
           <div className={`border-t border-line pt-[10px] flex items-center gap-2 mt-auto ${showAssignee ? 'justify-between' : 'justify-end'}`}>
             {showAssignee && (
               <div className="flex -space-x-[8px] overflow-visible" aria-label="Учасники звернення">
@@ -409,6 +425,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
                 : unreadActivityLabel(issue)}
             />
           </div>
+          )}
 
         </div>
       </div>

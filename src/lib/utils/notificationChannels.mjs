@@ -29,7 +29,19 @@ export const REQUESTABLE_NOTIFICATION_TYPES = [
 ];
 
 
-export const SYSTEM_NOTIFICATION_TYPES = [];
+// Types the product emits and nobody may ask for. `/api/notifications` accepts
+// only the requestable list, so a browser cannot forge one of these: the server
+// route that performs the event is the only thing that can say it happened.
+//
+// `incident_created` is the event a helpdesk exists to react to, and it has no
+// switch on purpose. Internal staff have no notification preferences at all any
+// more — QuickTeam owns their account and the panel was removed with the rest of
+// what it owns — so a per-user switch here would be a preference nobody can
+// reach. Keyless types record in-app and never email, which is what this one
+// wants while transactional email is off.
+export const SYSTEM_NOTIFICATION_TYPES = [
+  'incident_created',
+];
 
 export const NOTIFICATION_TYPES = [
   ...REQUESTABLE_NOTIFICATION_TYPES,

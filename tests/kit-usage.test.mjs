@@ -498,12 +498,29 @@ test('high-risk composed previews keep the product markup signatures', () => {
   // The timer that both records used to carry is gone with the rest of the
   // time ledger, so there is no shared clock left to keep them honest about.
 
-  assert.match(issueDetail, /<TaskAttributesPanel[\s\S]{0,120}context="task"/);
-  // The last column carries «Деталі», which is a target before it is a column:
-  // 32px wide next to a 28px condensed height is a 32×28 hit area, and a thumb
-  // misses it. 44px on a phone, unchanged from `sm` up where the label is back.
-  assert.match(taskAttributes, /task: 'grid w-full grid-cols-\[repeat\(3,minmax\(0,1fr\)\)_44px\]/);
+  // The grid belongs to the agent's controls, and only to them. A customer has
+  // facts, not controls, and handing their three cells a five-column grid is
+  // what left their strip reading as a lone status pill adrift in a grey bar —
+  // a grid reserves its columns whether or not anything arrives to fill them.
+  assert.match(issueDetail, /<TaskAttributesPanel[\s\S]{0,200}context=\{clientViewer \? undefined : 'task'\}/);
+  assert.match(issueDetail, /singleRow=\{!clientViewer\}/);
+  // The customer's cells are read-only chrome: no pointer, no hover tint, no
+  // `flex-1`. The first two promised an edit that never came, and the third is
+  // what stretches a fact to fill a column it does not need.
+  assert.match(issueDetail, /getTaskAttributeChrome\(\{[\s\S]{0,80}readOnly: true,?\s*\}\)/);
+  // Five columns from `sm` up, and five is the number of controls the strip
+  // actually carries: status, type, priority, assignees, due date. It promised
+  // five plus a «Деталі» column while the screen handed it three, because the
+  // shape was inherited from the task manager and the fields behind it were cut
+  // without the columns following.
+  assert.match(taskAttributes, /task: 'grid w-full grid-cols-\[repeat\(2,minmax\(0,1fr\)\)_44px\]/);
+  assert.match(taskAttributes, /sm:grid-cols-\[repeat\(5,minmax\(0,1fr\)\)\]/);
+  // «Деталі» is a target before it is a column: 32px wide next to a 28px
+  // condensed height is a 32×28 hit area, and a thumb misses it. It exists only
+  // below `sm` now — above it there is no overflow left to hold, and a popover
+  // whose job is done opens onto a copy of what is already on screen.
   assert.match(taskAttributes, /detailsButtonClass: `[^`]*max-sm:h-\[44px\]/);
+  assert.match(issueDetail, /className="flex h-full items-center sm:hidden"/);
   // …and the wrapper Popover puts around that trigger has to fill the column,
   // or the button inside is only as wide as its glyph however wide the column
   // is — and having filled it, it has to centre what it stretched around, or

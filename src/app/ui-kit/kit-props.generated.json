@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 89,
-    "props": 645,
-    "documentedProps": 645,
+    "props": 646,
+    "documentedProps": 646,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -1510,12 +1510,20 @@
         {
           "name": "density",
           "default": "'section'",
-          "type": "'section'|'group'",
+          "type": "'panel'|'section'|'group'",
           "values": [
             "group",
+            "panel",
             "section"
           ],
-          "description": "Which of the page's two heading levels this is."
+          "description": "Which heading level this is."
+        },
+        {
+          "name": "description",
+          "default": "",
+          "type": "string",
+          "values": [],
+          "description": "One line saying what the block is for. Only a `panel` needs one: a heading that names a whole subject often has to say which subject, where «Опис» or «Вкладення» never does. Given one, the heading stacks and the action moves to the far right."
         },
         {
           "name": "icon",

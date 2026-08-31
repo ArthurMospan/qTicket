@@ -64,14 +64,32 @@ export default function MobileNav({ keyboardOpen = false }) {
   }, [projects]);
   const visibleTabs = clientViewer
     ? [
+        // The rail's first entry, in the bar's first slot. `/overview` serves
+        // both audiences now, so the phone and the desktop open the same front
+        // screen for a customer.
+        { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
         { href: clientSpaceHref, icon: Folder, label: 'Звернення', exact: clientSpaceHref === '/' },
-        ...(orgRole === 'client_admin'
-          ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
-          : []),
+        // «Співробітники» stood here and pointed at `/settings?section=team` —
+        // the settings rail names that same destination again on the screen it
+        // opens. The client roster lives at `/team` now.
       ]
     : TABS;
+  // «Налаштування», not «Мій профіль»: the desktop rail already dropped the
+  // second name for this screen and the sheet kept it, which left one address
+  // with two labels across the two navigations of one product.
   const visibleMoreNav = clientViewer
-    ? [{ href: '/settings?section=profile', icon: UserRound, label: 'Мій профіль', section: 'profile' }]
+    ? [
+        // The roster is a screen of its own now rather than a section of
+        // «Налаштування», and it belongs to a `client_admin` alone — the route
+        // boundary refuses `/team` to a `client_member`, and a navigation must
+        // not offer an address that answers with a redirect. It lives in the
+        // sheet rather than the bar because the bar holds the two places a
+        // customer is actually in all day.
+        ...(orgRole === 'client_admin'
+          ? [{ href: '/team', icon: Users, label: 'Співробітники' }]
+          : []),
+        { href: '/settings?section=profile', icon: UserRound, label: 'Налаштування', section: 'profile' },
+      ]
     : MORE_NAV;
   const [moreOpen, setMoreOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);

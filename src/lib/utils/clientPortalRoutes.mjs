@@ -8,7 +8,7 @@
 // the client actually holds — the layout passes the spaces their own
 // `useProjects` stream returned, which is already scoped by `project.team` and
 // by the rules behind it. An id that is not theirs fails here exactly as
-// `/team` does.
+// `/overview` does.
 //
 // This is also why the boundary is not merely cosmetic bookkeeping: for one
 // commit the portal redirected a client from `/` into `/{projectId}` while this
@@ -31,10 +31,27 @@ export const RESERVED_SEGMENTS = Object.freeze([
   'help', 'news', 'offer', 'privacy', 'terms', 'privacy-policy', 'api',
 ]);
 
-export function isClientPortalRoute(pathname = '', clientProjectIds = []) {
+export function isClientPortalRoute(pathname = '', clientProjectIds = [], role = null) {
   const path = String(pathname || '').trim();
   if (path === '/') return true;
+  // «Огляд» is one screen that knows who is looking, so it is the client's
+  // front screen as much as support's — and the front door at `/` sends them
+  // here. If the product sends somebody somewhere, this list has to say so:
+  // the paragraph above is the record of what happens when it does not.
+  //
+  // Admitted by exact name only. `/overview` stays a RESERVED_SEGMENT, so a
+  // client space that happens to be called `overview` is still refused as a
+  // space — the address opens the screen, never somebody's queue.
+  if (path === '/overview' || path === '/overview/') return true;
   if (path === '/settings' || path.startsWith('/settings/')) return true;
+  // The roster is one screen that knows who is looking, so the boundary in
+  // front of it is where the two audiences are told apart. A `client_admin`
+  // administers their own employees on «/team» — qTicket's own directory, and
+  // the only client-side roster there is; a `client_member` has nobody to
+  // administer and is sent back to the portal like any other internal address.
+  // The answer lives here rather than in a guard inside the screen, because two
+  // opinions about who may open an address is exactly how the two drift apart.
+  if (path === '/team' || path === '/team/') return role === 'client_admin';
   // A request opens from the portal and the page still enforces its exact scope.
   if (/^\/[^/]+\/issue\/[^/]+\/?$/.test(path)) return true;
 

@@ -59,6 +59,67 @@ test('dangling links do not make completion permanently impossible', () => {
   }], ['done']), []);
 });
 
+// Тільки «Блокує» бере участь у закритті. «Дублює» і «Повʼязана з» — це
+// довідка для людини, а не ворота: заборонити закрити звернення, бо воно
+// дублює інше, означало б тримати відкритими обидва дублікати одразу. Поки
+// секцію звʼязків було приховано, створити такий звʼязок з екрана було
+// неможливо, тож перевіряти це стало обовʼязково саме тепер.
+test('only a blocking relation stands in the way of closing a request', () => {
+  const links = [
+    {
+      id: 'duplicate',
+      relationType: 'duplicates',
+      sourceIssueId: 'target',
+      targetIssueId: 'blocker',
+    },
+    {
+      id: 'related',
+      relationType: 'relates-to',
+      sourceIssueId: 'blocker',
+      targetIssueId: 'target',
+    },
+  ];
+
+  assert.deepEqual(openBlockerIssues('target', issues, links, ['done']), []);
+  assert.equal(
+    issueCompletionBlockers({
+      issueId: 'target',
+      issues,
+      issueLinks: links,
+      closedStatusIds: ['done'],
+    }).canComplete,
+    true,
+  );
+
+  // А те саме звернення, дописане ще й як блокер, закрити вже не дає.
+  assert.deepEqual(
+    openBlockerIssues('target', issues, [...links, {
+      id: 'blocking',
+      relationType: 'blocks',
+      sourceIssueId: 'blocker',
+      targetIssueId: 'target',
+    }], ['done']).map(issue => issue.id),
+    ['blocker'],
+  );
+});
+
+// Напрямок «Блокує» не симетричний, і саме на цьому кінці про нього згадують:
+// підтримка вибирає «Блокує» на зверненні, яке заважає, а перевірка стоїть на
+// тому, якому заважають.
+test('a blocking link stops only the blocked side from closing', () => {
+  const links = [{
+    id: 'canonical',
+    relationType: 'blocks',
+    sourceIssueId: 'blocker',
+    targetIssueId: 'target',
+  }];
+  assert.deepEqual(openBlockerIssues('blocker', issues, links, ['done']), []);
+  assert.deepEqual(
+    openBlockerIssues('target', issues, links, ['done']).map(issue => issue.id),
+    ['blocker'],
+  );
+});
+
 test('completion reports children and dependencies independently', () => {
   const result = issueCompletionBlockers({
     issueId: 'parent',

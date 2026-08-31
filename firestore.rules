@@ -68,6 +68,13 @@ service cloud.firestore {
       return isOrgMember(orgId) && orgRole(orgId) in ['owner', 'admin', 'member'];
     }
 
+    // The other side of the desk. A client role never touches the workflow, but
+    // the request has one thing on it that is genuinely theirs to maintain —
+    // who, among their own people, is answering for it.
+    function isClientContributor(orgId) {
+      return isOrgMember(orgId) && orgRole(orgId) in ['client_admin', 'client_member'];
+    }
+
     function isOrgOwner(orgId) {
       return isOrgMember(orgId) && orgRole(orgId) == 'owner';
     }
@@ -120,6 +127,29 @@ service cloud.firestore {
       let projectPath = /databases/$(database)/documents/projects/$(projectId);
       return exists(projectPath) &&
         canAccessProject(projectId, get(projectPath).data.organizationId);
+    }
+
+    // A client naming which of their own people answers for a request. Ordered
+    // cheapest-and-most-selective first so a write that is not this one costs
+    // almost nothing: the key test is false for every other write on the
+    // incident, and the role read settles all of support before anything reaches
+    // `diff()`, which is the expensive part.
+    //
+    // The roster is the bound on who may be named. What it cannot do is tell a
+    // client apart from an agent, so a determined client could list a support
+    // uid and see that name under their own heading — cosmetic, and confined to
+    // a project that person is already on. Separating the two here means a
+    // membership `get` per entry, and rules allow ten.
+    function clientMaintainsOwnAssignees(data) {
+      return 'clientAssigneeIds' in request.resource.data &&
+        request.resource.data.clientAssigneeIds is list &&
+        request.resource.data.clientAssigneeIds.size() <= 10 &&
+        isClientContributor(data.organizationId) &&
+        request.resource.data.diff(data).affectedKeys()
+          .hasOnly(['clientAssigneeIds', 'updatedAt']) &&
+        request.resource.data.clientAssigneeIds.hasOnly(
+          get(/databases/$(database)/documents/projects/$(data.projectId)).data.team
+        );
     }
 
     function canAccessIssueData(data) {
@@ -330,8 +360,38 @@ service cloud.firestore {
       // stamp to the comment beside it (the comment's id is not knowable here),
       // so a participant can in principle stamp without writing; the blast
       // radius is the cosmetic strip they can already fill by actually replying.
+      //
+      // The customer's own side of the request rides on the same prefix, as a
+      // second narrow shape rather than a third `allow`. `assigneeIds` is
+      // support's routing and stays invisible to a client; `clientAssigneeIds`
+      // is the mirror that belongs to them — which of their own people is
+      // answering. Support reads it, and may correct it through the internal
+      // clause above, which does not refuse this key.
+      //
+      // Why it lives here and not in an `allow` of its own, and why it is the
+      // second branch rather than the first: a request has a budget of a
+      // thousand expressions across every clause that matches it, and this file
+      // already spends most of it. As a third `allow` it repeated the whole
+      // scope walk and pushed denied writes over the limit — and an exhausted
+      // budget reads exactly like a denial, so the suite stayed green on
+      // coincidence: every write it exhausted on was one the rules meant to
+      // refuse anyway.
+      //
+      // Folding it in shares the prefix; putting the conversation shape first
+      // decides «Надіслати» — the one write the client portal exists for — at
+      // full budget, before anything of this can be spent. Denied writes can
+      // still exhaust on the way out, which is a denial arriving as a denial.
+      // The next thing added to this file should reduce what is here, not add
+      // to it; `tests/firestore.rules.test.mjs` sends the real reply transaction
+      // against an incident that already carries this field, so a regression
+      // that starves it fails there rather than in a customer's portal.
+      //
+      // `canAccessIssueData` has already established that a client role reaching
+      // this incident is on the space's roster, so the only thing left to check
+      // is that everybody they named is on it too — from a `get` this evaluation
+      // has already made and cached.
       allow update: if issueAcceptsNestedWrites(issueId) &&
-        canAccessIssueData(resource.data) &&
+        canAccessIssueData(resource.data) && (
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly([
             'commentCount',
@@ -347,7 +407,8 @@ service cloud.firestore {
             'lastCommentMentionIds',
             'lastCommentReadBy',
             'unreadMentions'
-          ]);
+          ]) ||
+        clientMaintainsOwnAssignees(resource.data));
       allow delete: if false; // Server route enforces hierarchy and cascades.
 
       // One conversation, read by everyone who can reach the incident. There is
@@ -424,6 +485,24 @@ service cloud.firestore {
           isInternalContributor(issueOrg(issueId)) &&
           request.resource.data.userId == request.auth.uid;
         allow update, delete: if false;
+      }
+
+      // What happened to the request, for the person who filed it.
+      //
+      // `audit/` above is the support-side work record and stays that way. This
+      // is the one fact from it a customer is entitled to — their request moved,
+      // and when — carried in a collection of its own because rules cannot
+      // require a `where` clause: «read the audit, but only the status rows» is
+      // not a condition that can be written here. What a client may read is
+      // therefore decided by what the server puts in, not by a query they are
+      // trusted to send.
+      //
+      // Written only by the status route and the create route, both server-side,
+      // and never from a browser: an append here would be a customer editing the
+      // history of their own request.
+      match /statusHistory/{entryId} {
+        allow read: if canAccessIssueProject(issueId);
+        allow write: if false;
       }
     }
 

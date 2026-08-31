@@ -55,6 +55,44 @@ test('a screen ends its own scroller with the footprint the shell stopped reserv
   }
 });
 
+// The bar and the rail are two navigations of one product, so they answer the
+// same questions the same way: where the front screen is, and how many names a
+// destination gets.
+test('the bar offers a client the same destinations the rail does', async () => {
+  const nav = await read('../src/components/MobileNav.jsx');
+  const sidebar = await read('../src/components/WorkspaceSidebar.jsx');
+
+  const clientTabs = nav.slice(nav.indexOf('const visibleTabs = clientViewer'), nav.indexOf(': TABS;'));
+  assert.deepEqual(
+    [...clientTabs.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
+    ['Огляд', 'Звернення'],
+  );
+  // `/overview` serves both audiences, so both navigations lead there and the
+  // phone no longer opens on a list where the desktop opens on a summary.
+  assert.match(clientTabs, /href: '\/overview'/);
+  assert.match(sidebar, /href: '\/overview', icon: LayoutDashboard, label: 'Огляд'/);
+
+  // «Співробітники» pointed at `/settings?section=team`, which the settings rail
+  // named again on the screen it opened: one destination, two names, one screen.
+  // The duplicate is gone from the other end — the roster is a screen now — so
+  // what both navigations must agree on is that the entry leads there, and only
+  // for the role the route boundary admits.
+  for (const source of [nav, sidebar]) {
+    assert.doesNotMatch(source, /'\/settings\?section=team'/,
+      'the roster is no longer a section of «Налаштування»');
+    assert.match(source, /label: 'Співробітники'/);
+    assert.match(source, /orgRole === 'client_admin'[\s\S]{0,160}href: '\/team'/,
+      'the roster entry is offered to a client administrator only');
+  }
+  // On the phone it lives in the sheet rather than the bar: the bar holds the
+  // two places a customer is in all day, and the third destination is not one
+  // of them.
+  assert.doesNotMatch(clientTabs, /label: 'Співробітники'/);
+  // And `/settings` carries one name across both, not «Мій профіль» here and
+  // «Налаштування» there.
+  assert.doesNotMatch(nav, /label: 'Мій профіль'/);
+});
+
 test('the last of the page dissolves under the bar instead of stopping at it', async () => {
   const css = await read('../src/app/globals.css');
   const nav = await read('../src/components/MobileNav.jsx');

@@ -1223,3 +1223,162 @@ test('anyone in the conversation may say they are typing, and write nothing else
   await assertFails(setDoc(typingRef(offTeamDb), { typing: ['client-other'], typingAt: {} }));
 });
 
+
+// ── The customer's own side of a request ─────────────────────────────────────
+//
+// `assigneeIds` is support's routing and a client never sees it. `clientAssigneeIds`
+// is the mirror that belongs to them, so it is the one field on the incident a
+// client role may write — and the rule has to be narrow in every direction at
+// once: this key only, this space's roster only, and nothing riding along.
+
+test('a client names who on their own side answers for their request', async () => {
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertSucceeds(updateDoc(doc(clientDb, 'issues', 'issue-a'), {
+    clientAssigneeIds: ['client-member-a', 'client-admin-a'],
+    updatedAt: serverTimestamp(),
+  }));
+});
+
+test('support may correct the customer’s side, and the customer may not touch support’s', async () => {
+  const memberDb = environment.authenticatedContext('member-a').firestore();
+  await assertSucceeds(updateDoc(doc(memberDb, 'issues', 'issue-a'), {
+    clientAssigneeIds: ['client-admin-a'],
+  }));
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a'), {
+    assigneeIds: ['member-a'],
+  }));
+});
+
+// The whole point of `hasOnly`. A client editing their own field must not be
+// able to carry a workflow change in beside it — the same defence the
+// conversation clause makes, made again for a second narrow write.
+test('nothing rides along with the customer’s field', async () => {
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  for (const smuggled of [
+    { status: 'done' },
+    { columnId: 'done' },
+    { priority: 'urgent' },
+    { assigneeIds: ['member-a'] },
+    { labelIds: ['bug'] },
+    { dueDate: Timestamp.fromMillis(Date.now()) },
+    { archivedAt: serverTimestamp() },
+    { cancelledAt: serverTimestamp() },
+    { watcherIds: ['client-member-a'] },
+    { organizationId: 'org-b' },
+  ]) {
+    await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a'), {
+      clientAssigneeIds: ['client-member-a'],
+      ...smuggled,
+    }));
+  }
+});
+
+// A uid that is not on this client space has no business on its requests. The
+// roster is what rules can check in one read; it is the same bound the server
+// applies at creation.
+test('a client cannot name somebody who is not on their space', async () => {
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a'), {
+    clientAssigneeIds: ['client-other'],
+  }));
+  await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a'), {
+    clientAssigneeIds: ['client-member-a', 'stranger'],
+  }));
+});
+
+test('a client of another space cannot write this one’s field at all', async () => {
+  const otherDb = environment.authenticatedContext('client-other').firestore();
+  await assertFails(updateDoc(doc(otherDb, 'issues', 'issue-a'), {
+    clientAssigneeIds: ['client-other'],
+  }));
+});
+
+test('the customer’s field is bounded in size', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await updateDoc(doc(context.firestore(), 'projects', 'project-a'), {
+      team: arrayUnion(...Array.from({ length: 12 }, (_, index) => `bulk-${index}`)),
+    });
+  });
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a'), {
+    clientAssigneeIds: Array.from({ length: 11 }, (_, index) => `bulk-${index}`),
+  }));
+});
+
+// The guard on the budget, not on the shape.
+//
+// `clientAssigneeIds` shares one `allow update` with the conversation metadata,
+// because a third clause repeated the scope walk and pushed denied writes past
+// the thousand-expression limit rules allow per request. The shape tests above
+// would all still pass if that limit ever starved the branch that matters, so
+// this one sends the real reply transaction against an incident that already
+// carries the field — the state a real portal is in once anybody has used it.
+test('a reply still goes through on an incident that carries the customer’s own field', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await updateDoc(doc(context.firestore(), 'issues', 'issue-a'), {
+      clientAssigneeIds: ['client-admin-a', 'client-member-a'],
+    });
+  });
+  for (const uid of ['client-admin-a', 'client-member-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertSucceeds(sendClientReply(db, uid, `${uid}-reply-beside-assignees`));
+  }
+});
+
+// ── What happened to the request, for the person who filed it ────────────────
+//
+// `audit/` is the support-side work record and stays refused to a client role.
+// The one fact from it a customer is entitled to — their request moved, and
+// when — lives in a collection of its own, because rules cannot require a
+// `where` clause: «the audit, but only the status rows» is not a condition that
+// can be written here. So what a client may read is decided by what the server
+// puts in, and never by a query they are trusted to send.
+test('a customer reads what happened to their request, and still not the work record', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'issues', 'issue-a', 'statusHistory', 'moved-1'), {
+      action: 'moved', from: 'todo', to: 'in-progress', createdAt: serverTimestamp(),
+    });
+    await setDoc(doc(db, 'issues', 'issue-a', 'audit', 'assigned-1'), {
+      userId: 'member-a', action: 'changed_assigneeIds', from: [], to: ['member-a'],
+    });
+  });
+
+  for (const uid of ['client-admin-a', 'client-member-a', 'member-a', 'owner-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertSucceeds(getDoc(doc(db, 'issues', 'issue-a', 'statusHistory', 'moved-1')));
+  }
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'assigned-1')));
+});
+
+// An append here would be a customer editing the history of their own request,
+// and an agent doing it would be a work record with two authors. Only the status
+// route and the create route write it, both server-side.
+test('nobody writes the customer’s history from a browser', async () => {
+  for (const uid of ['client-admin-a', 'member-a', 'owner-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertFails(setDoc(doc(db, 'issues', 'issue-a', 'statusHistory', `forged-${uid}`), {
+      action: 'moved', from: 'todo', to: 'done', createdAt: serverTimestamp(),
+    }));
+  }
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'statusHistory', 'moved-2'), {
+      action: 'moved', from: 'todo', to: 'done', createdAt: serverTimestamp(),
+    });
+  });
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
+  await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a', 'statusHistory', 'moved-2'), { to: 'todo' }));
+  await assertFails(deleteDoc(doc(clientDb, 'issues', 'issue-a', 'statusHistory', 'moved-2')));
+});
+
+test('a stranger reads no history of a space they are not on', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'statusHistory', 'moved-3'), {
+      action: 'moved', from: 'todo', to: 'done', createdAt: serverTimestamp(),
+    });
+  });
+  const outsiderDb = environment.authenticatedContext('client-other').firestore();
+  await assertFails(getDoc(doc(outsiderDb, 'issues', 'issue-a', 'statusHistory', 'moved-3')));
+});

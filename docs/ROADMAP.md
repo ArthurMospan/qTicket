@@ -5,7 +5,7 @@ This file contains current owner guardrails and confirmed open work. Completed i
 ## Product guardrails
 
 - qTicket is a shared multi-tenant SaaS add-on activated for an existing QuickTeam organization. It has no standalone registration or organization creation. QuickTeam provisions the tenant, branding and selected support staff; qTicket then owns client spaces, invitations and incidents. qTicket and QuickTeam remain separate products and data stores.
-- Organization roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. The first three belong to the tenant's support team. Client roles are restricted to their assigned project: they can see and create incidents and reply in an incident, while workflow, assignment, priority, and settings remain internal-only. A client admin may invite only client members into that same project.
+- Organization roles are `owner`, `admin`, `member`, `client_admin`, and `client_member`. The first three belong to the tenant's support team. Client roles are restricted to their assigned project: they can see and create incidents and reply in an incident, while workflow, assignment, priority, and settings remain internal to **change**. Reading is a separate question and was conflated with changing until 2026-08-31: a client's board card had always drawn the status, the type badge and the priority mark, while the request's own page showed the status alone — so the page withheld from a customer what the card beside it had already told them. A client now reads status, type and priority on both surfaces and can set none of them. Two facts stay withheld on both, deliberately: which member of support is answering, because routing is how the desk organises itself; and the resolution date, because a date a customer can read is a promised resolution time, and qTicket promises none. A client admin may invite only client members into that same project.
 - Staff identity and incident-to-task transfer integrate with QuickTeam through explicit server-side contracts. External clients authenticate in qTicket's own Firebase project; project-scoped invitations are bound to the verified email returned by the sign-in provider. Do not couple the products' primary Firebase sessions or data models.
 - QuickTeam is the authority for the internal organization, branding,
   entitlement and enabled support staff. qTicket must refuse direct changes to
@@ -149,9 +149,13 @@ Completed product slice on 2026-08-28:
   removed from qTicket settings navigation; the rates and organization-deletion
   panels were deleted outright in the 2026-08-29 slice below.
 - The incident composer and detail view no longer expose audio tasks, sprints,
-  time tracking, estimates, task hierarchy or task links.
+  time tracking, estimates or task hierarchy. Links between requests were hidden
+  by the same change and came back for internal support on 2026-08-31 — see the
+  slice for that date below, which is where the difference between the two is
+  written down.
   Internal support keeps status, responsible staff, priority, type, resolution
-  target, labels, description, attachments and the shared client conversation.
+  target, labels, description, attachments, links to related requests and the
+  shared client conversation.
 - Direct visits to inherited task-manager routes are contained at the request
   boundary: `/analytics` and `/calendar` return to **Огляд**, while `/sprints`
   and `/chat` return to **Звернення**. The active organization is preserved and
@@ -336,6 +340,8 @@ Completed product slice on 2026-08-29:
   section is `client_admin`-only now («Співробітники клієнта», qTicket's own
   directory, which has no screen of its own), and `?section=team` asked by
   staff redirects to `/team` — that roster moved, it was not taken away.
+  (Superseded on 2026-08-31, see below: the client half moved to `/team` as
+  well, and the section exists for no role now.)
 - **Команда** absorbed what only the settings copy had. It lists people whose
   seat QuickTeam switched off, sorted last, dimmed, «Без доступу» in place of
   a position they no longer hold, and the profile they open says the same. Only
@@ -343,6 +349,254 @@ Completed product slice on 2026-08-29:
   work cannot be handed to somebody who can no longer sign in. The rail also
   carries the one sentence the deleted section had and this screen did not —
   where a seat comes from.
+
+### Workspaces the product refuses to open (2026-08-31)
+
+A seat in `orgMemberships` is what draws an organization in the switcher, and
+nothing ever took one back out. Provisioning stopped creating seats for QuickTeam
+tenants that never bought qTicket — but that covered only the seats provisioning
+itself had made. A dry run of `migrate:noncustomer-orgs` against `qticket-qt`
+removed **nothing** and reported two organizations under `manualReview` with the
+reason `legacy-standalone`: they predate the QuickTeam contract, carry no
+`quickTeam.sourceOrganizationId` at all, and were therefore never in that
+migration's scope. Their owners kept being offered a door that opens onto
+«організація не підключена через QuickTeam», because access requires both a
+source organization and an active entitlement.
+
+`buildOrganizationList` now drops an organization whose document proves the
+product cannot open it, and the active-organization snapshot listener applies the
+same rule before appending. Nothing is deleted and no seat is touched — the
+organization simply stops being offered as somewhere to go. The one case it must
+never catch is a `pending` entry: a document that did not come back is a short
+read, and dropping a workspace on that evidence is the failure `buildOrganizationList`
+was written to prevent in the first place. Both halves have a test.
+
+The two legacy organizations stay in the database, with their content, for a
+human to decide about. They are not a migration's business.
+
+### A customer's thread that says nothing happened (2026-08-31)
+
+`audit/` is the support-side work record — who reassigned it, who moved it, when
+— and `firestore.rules` refuses it to a client role. That is right, and it left
+the customer's own thread empty: a request went Новий → Прийнято → У роботі →
+Вирішено and their timeline showed no trace of it unless somebody had also typed
+a message, while the status pill above it changed silently.
+
+Firestore rules cannot require a `where` clause, so «let a client read the audit,
+but only the status rows» is not a condition that can be written. The fact they
+are entitled to therefore lives in `issues/{id}/statusHistory`, written by the
+status route and the create route — both server-side, both the only writers, and
+the rule refuses every browser write. Status changes have exactly one write path
+already: the bulk action delegates to the same route, so the history has no
+holes.
+
+- No actor is stored. Which agent moved a request is the routing withheld from a
+  customer everywhere else, and a field that is not written cannot leak if the
+  rule around it is ever loosened.
+- Entries are written in the audit's own shape (`action`, `from`, `to`), so
+  `describeAuditEvent` reads both feeds out in the same words. Two vocabularies
+  for one fact is how the two sides of a desk begin describing different
+  products.
+- `UnifiedTimeline` subscribes to exactly one of the two feeds by role, and the
+  unread boundary now waits on whichever one this reader is actually on —
+  latching on `auditLoading` would settle instantly for a customer, who has no
+  audit subscription at all.
+
+### The customer's own side of a request (2026-08-31)
+
+`assigneeIds` is support's routing and a client never sees it. `clientAssigneeIds`
+is the mirror that belongs to them: which of their own people answers for this
+request. Support reads it — «who do we talk to over there» is the most useful
+thing about a queue of somebody else's problems — and may correct it. It defaults
+to whoever filed the request, because a field that starts empty is a field most
+people leave empty and «нобody» is the one answer this question never has.
+
+- One label for both readers, **«Відповідальні клієнта»**. Two labels for one
+  field is how a two-name product starts, and the agent's screen shows this
+  beside «Відповідальні», so the label has to say whose.
+- One placement for both readers: a `group` section in the request's body, not a
+  cell on the attribute strip. The agent's strip is already five controls wide,
+  and this is read far more often than it is changed.
+- The server bounds it to the client space's roster at creation;
+  `firestore.rules` bounds the later edit to the same roster and to this key
+  alone. What the roster cannot do is tell a client from an agent, so a client
+  could name a support uid and see that person under their own heading —
+  cosmetic, confined to a project that person is already on, and separating the
+  two in rules would mean a membership `get` per entry against a limit of ten.
+
+**A budget, and a warning for whoever edits `firestore.rules` next.** A request
+carries a thousand expressions across every clause that matches it, and this
+file already spends most of that. Adding this as a third `allow update` on
+`issues` repeated the whole scope walk and pushed denied writes past the limit —
+and an exhausted budget arrives looking exactly like a denial. The emulator suite
+stayed green throughout, because every write it exhausted on was one the rules
+meant to refuse: green by coincidence. It is folded into the conversation clause
+now, second branch, so «Надіслати» is decided at full budget before any of it can
+be spent. **The next change here should reduce what is in this file rather than
+add to it.**
+
+### «Огляд» for the customer too (2026-08-31)
+
+The product's front screen was something only half its users had. `/overview`
+redirected a client away on sight, `/` sent them into their space instead, and
+their rail opened with «Мої звернення» — so a customer arrived at a list and
+never at a summary. The obvious second answer, a customer dashboard of its own,
+is the one this guardrail forbids: **a screen both audiences reach is one screen
+that knows who is looking**. Two screens counting the same records is how «У
+роботі» came to mean two different numbers once already.
+
+- The screen guard and the redirect are gone. `/overview` renders one component
+  that branches on the role: support keeps its five tiles, the recently-updated
+  list across every client and the client panel; a customer gets three tiles —
+  **«Відкриті»**, **«Чекають на вас»**, **«Вирішені»** — and «Останні оновлення»
+  of their own requests, drawn with the kit's `TaskRow` and `showAssignee={false}`.
+- **«Чекають на вас»** is the mirror of support's **«Чекають на нас»** and is
+  computed in `incidentQueueMetrics.mjs` beside it, not written out again on the
+  page: `isWaitingOnClient` / `waitingOnClient`. It is deliberately not
+  `!waitingOnUs` — a request nobody has written in yet waits on neither side,
+  and negating the other predicate would have handed every new request to the
+  customer as their move to make.
+- **«Створити звернення»** is a primary in the `PageHeader`, and only on the
+  customer's half. Only a client opens a request, so the control exists for the
+  one reader who may use it and deliberately does not exist for support. It
+  leads to `/{spaceId}?new=1`, because the composer lives in the space.
+- Three things the customer's half never draws: **who is assigned** (routing is
+  how the desk organises itself), the **clients panel** (there is one client and
+  it is them), and any **resolution date** — a date a customer can read is a
+  promised resolution time, which the owner rejected outright.
+- The client rail is **«Огляд» · «Мої звернення» · «Налаштування»**, and `/`
+  lands a client on `/overview`. The one address that still overrides it is
+  `?new=1` from Ctrl+K: the composer is in the space, so that hop goes straight
+  there rather than dropping the request the reader already made.
+- **«Співробітники»** is off the client rail and off `MobileNav`. It pointed at
+  `/settings?section=team`, and the settings rail names that same destination
+  again on the screen it opens — one address named twice on one screen. The
+  roster moves to `/team`.
+- `isClientPortalRoute` admits `/overview` **by exact name**. If the product
+  sends somebody somewhere, that list has to say so — the alternative is the
+  loop this file already records: the page redirects forward, the layout bounces
+  back, and the client cannot open qTicket at all. `overview` stays a
+  `RESERVED_SEGMENT`, so a space that happens to carry that id is still refused
+  as a space.
+- The screen came off the `STAFF_ONLY` exemption in `tests/client-terminology.test.mjs`,
+  and support's own word for the seat went with it: the tile and the rows say
+  **«Без відповідального»**. A word kept one branch away from the person it is
+  hidden from is a word this product has already leaked twice by moving the branch.
+
+Still open: the command palette offers a client no «Огляд» entry, and
+`WorkspaceHeader` still puts support's search placeholder — «Пошук звернень,
+клієнтів і команди…» — over the customer's half of the screen.
+
+### The event the desk waits for (2026-08-31)
+
+Creating a request now tells the support staff on that customer's space. Until
+this slice it told nobody: the only notification creation ever sent was
+`assigned`, whose audience is the new task's assignees, and a customer's request
+has none by definition — only a client opens one and support picks it up
+afterwards. `notifyIssueAssigned` was handed an empty array and took its early
+return, so a request filed at midnight waited for somebody to open the queue and
+notice the unread dot on the client in the rail.
+
+- The event is `incident_created`, and it is a **system** type: `/api/notifications`
+  accepts only `REQUESTABLE_NOTIFICATION_TYPES`, so a browser cannot forge one.
+  The create route is the sole author of it.
+- It is emitted **server-side**, in `/api/issues`, because the recipients are the
+  tenant's internal staff and the customer's browser is exactly the place that
+  may not enumerate them.
+- Recipients are the internal roles on `project.team` for that client space,
+  minus the author. The customer's own colleagues are not an audience for their
+  colleague's request. Where the roster names no support staff at all, it falls
+  back to the organization's owners and admins — not as a wider default, but
+  because a request nobody is told about is the defect being fixed.
+- It has no preference switch. Internal staff have no notification settings at
+  all (QuickTeam owns their account), so a per-user switch would be one nobody
+  can reach; as a keyless type it always records in the bell and never emails,
+  which is right while transactional email is off.
+- `unreadInAppCount` filters by no type, so this also raises the qTicket unread
+  badge on QuickTeam's rail — the cross-product counter gets its first event
+  that a person actually waits for.
+
+Completed product slice on 2026-08-31 — one roster, one door:
+
+- **`/team` is the roster for both audiences, and the settings `team` section
+  is gone at every door.** A `client_admin` saw «Співробітники» in the rail,
+  which opened «Налаштування», where the settings rail named the same address
+  again as «Співробітники клієнта» under a group of its own — one address,
+  named twice, on one screen. The section is deleted outright: out of `NAV`,
+  out of `CLIENT_ONLY_SETTINGS_SECTIONS`, out of the reachable-section set and
+  out of `renderSection`, so the rail, the `?section=team` address and the
+  rendered body all answer the same way. `?section=team` now redirects to
+  `/team` for a client administrator exactly as it already did for staff; a
+  `client_member` — the one role with no roster — falls through to the first
+  section of their own rail.
+- **The screen knows who is looking, rather than being two screens.** Staff see
+  exactly what `/team` showed before, deactivated seats included. A
+  `client_admin` sees the client members of their one space — scoped by
+  `project.team`, not merely by role — under the heading «Співробітники», with
+  «Запросити співробітника» beside it. That control opens the same
+  `InviteMemberDialog` the client space uses, so the email invitation and the
+  invitation **link** with its QR code are one dialog and not a second control
+  somewhere else on the page. The role it may issue stays `client_member`, and
+  stays fixed by the dialog, the invitation route and `firestore.rules` — this
+  slice widened nothing.
+- **The client boundary is what tells the two client roles apart.**
+  `isClientPortalRoute` now takes the role, and `/team` answers `true` only for
+  `client_admin`; the authenticated layout passes `orgRole` into it. A
+  `client_member` who pastes `/team` is returned to their portal by the same
+  boundary that returns them from `/overview`, and the navigation graph walks
+  every role through the real predicate to prove it. Putting the answer in the
+  boundary rather than in a guard inside the screen is deliberate: two opinions
+  about who may open an address is how the front door and the boundary once
+  handed a client back and forth for ever.
+- The client's command-palette entry «Співробітники» points at `/team`. The
+  help articles about invitations and about the roster describe the screen that
+  exists, not the settings section that did.
+
+Completed product slice on 2026-08-31:
+
+- **Links between requests are back for internal support; the hierarchy stays
+  gone.** They were one decision because they were one constant:
+  `SHOW_INHERITED_TASK_PLANNING` in `src/components/workspace/IssueDetail.jsx`
+  hid «Основне звернення», «Дочірні звернення» *and* «Звʼязки» together, so a
+  judgement about the inherited planning model silently removed a support
+  feature nobody had judged. The two are now separate and named for what they
+  are: `SHOW_INHERITED_TASK_HIERARCHY` (false, and staying false) and
+  `SHOW_INHERITED_TASK_SHORTCUTS` (false — «Дублювати» and the AI prompt, which
+  were riding along in the same condition and are neither hierarchy nor links).
+  Links have no constant at all: a shipped feature is gated by who is looking.
+- The reasoning, so it is not re-argued: a duplicate is the single most common
+  relation on a support desk, and until now the product could not record one —
+  two agents answering the same outage in two requests had nowhere to say so.
+  A child request is the opposite trade: it means the customer keeps watching
+  the record they opened while the work moves into one they cannot see, which
+  is precisely the seam qTicket exists to remove.
+- Links are internal, twice over. `useIssueLinks` is subscribed only for
+  `internalViewer`, so a client session never fetches a link document; and the
+  «Звʼязки» section, its count and «Додати зв’язок» are all behind
+  `!clientViewer`, with removal behind `canEditIssue`. The server agrees
+  independently: `/api/issues/[issueId]/links` authorizes `rolesFor('edit:issue')`
+  — owner, admin, member — for GET as well as POST and DELETE, and
+  `firestore.rules` already refuses every browser create, update and delete on
+  `issueLinks`. No rules change was needed for this slice.
+- The picker offers four relations and they are the four a support desk uses:
+  «Дублює», «Блокує», «Залежить від» (the same stored `blocks` link read from
+  the other end) and «Пов’язана з». `tests/issue-link-presentation.test.mjs` now
+  holds the seam between what the picker offers and what
+  `canonicalizeRequestedIssueLink` will store, which could drift unnoticed while
+  the section was hidden.
+- The completion guard was live the whole time and is now reachable. An open
+  `blocks` link has always stopped a request from moving to a closed status
+  (`issueCompletionBlockers` → `openBlockerIssues`, enforced in
+  `useIssues.moveIssue` and on the request's own screen), but with the only
+  creating UI hidden, the only blockers that could exist were imported ones.
+  `tests/issue-execution.test.mjs` now also proves the negative half — «Дублює»
+  and «Пов’язана з» never block a close — and that the guard binds the blocked
+  side only. The request screen's own refusal now names the blocking requests
+  instead of counting them, which is what `useIssues.moveIssue` always did.
+- Creating a link stays a single-request action and is deliberately absent from
+  `ISSUE_BULK_ACTIONS`: it is always about the context of two particular
+  requests. The help article «Пріоритет, тип, мітки й відповідальні»
+  (`minimumRole: 'member'`) carries the new «Звʼязки між зверненнями» section.
 
 Product work still required:
 

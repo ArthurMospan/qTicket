@@ -26,6 +26,78 @@ import {
   resolveOrganizationPortalBrand,
 } from '@/lib/utils/organizationBranding.mjs';
 
+/**
+ * The two lines beside the mark, and there is one of them.
+ *
+ * The big line names the space you are in; the small line says what that space
+ * is. A client's corner has always read that way — the provider's name over
+ * «Портал підтримки» — and the staff rail read the other way round, in two
+ * arrangements: «qTicket» big over the tenant's name small when the tenant had
+ * no branding, the two swapped when it did. Three shapes for one corner, and in
+ * one of them the organization somebody actually works in was the small print
+ * above their vendor's name.
+ *
+ * The column is 36px and the words sit on the logo's axis rather than on the
+ * text box's: for rows of ink 14 and 12, `nameRow = 18 + (14 − 12) / 2` gives
+ * 19 + 17. Whoever changes a font size here re-measures — the split is derived
+ * in `tests/sidebar-brand-lockup.test.mjs`.
+ *
+ * `canSwitch` is the whole of the switcher's presence. One organization is not
+ * a choice, and a control that opens a picker of one is an invitation to find
+ * out there was nothing to pick.
+ */
+function SidebarBrandLockup({
+  href,
+  name,
+  label,
+  switchLabel,
+  canSwitch,
+  unreadElsewhere,
+  onSwitch,
+  theme,
+}) {
+  return (
+    <>
+      <Link href={href} className="hover:opacity-80 transition-opacity">
+        <h1
+          data-ui-type="branding-title"
+          className="h-[19px] truncate text-[16px] font-bold leading-[19px] tracking-tight"
+          style={{ color: theme.text }}
+        >
+          {name}
+        </h1>
+      </Link>
+      {canSwitch ? (
+        <button
+          type="button"
+          onClick={onSwitch}
+          aria-label={switchLabel}
+          // The row takes the width it is given and the name is the part that
+          // yields: `w-fit` plus a 120px name, a counter and a chevron adds up
+          // to 156px in a column that is 140px wide, so the row simply hung
+          // over the collapse button the moment a second organization had
+          // anything unread.
+          className="flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors"
+          style={{ color: theme.muted }}
+        >
+          <span className="min-w-0 truncate">{label}</span>
+          {unreadElsewhere > 0 && (
+            <Counter variant="dot" size="sm" appearance="sidebar" />
+          )}
+          <ChevronsUpDown size={12} className="shrink-0" aria-hidden />
+        </button>
+      ) : (
+        <span
+          className="h-[17px] truncate text-[12px] font-medium leading-[17px]"
+          style={{ color: theme.muted }}
+        >
+          {label}
+        </span>
+      )}
+    </>
+  );
+}
+
 export default function WorkspaceSidebar() {
   const pathname  = usePathname();
   const router    = useRouter();
@@ -143,16 +215,30 @@ export default function WorkspaceSidebar() {
   }, [projects]);
   const topNav = clientViewer
     ? [
+        // The same first entry the internal rail has, leading to the same
+        // address. `/overview` knows who is looking, so a customer's front
+        // screen is the product's front screen and not a second one built for
+        // them — see src/app/(app)/overview/page.js.
+        { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
         { href: clientSpaceHref, icon: Folder, label: 'Мої звернення', exact: clientSpaceHref === '/' },
+        // «Співробітники» used to point at `/settings?section=team` — an address
+        // the settings rail named a second time on the screen it opened, so one
+        // destination was named twice on one screen. The duplicate is gone from
+        // the other end: the roster is a screen of its own now, and this entry
+        // leads to it. It stays `client_admin`-only, because the route boundary
+        // refuses `/team` to a `client_member` and a rail must not offer an
+        // address that answers with a redirect.
         ...(orgRole === 'client_admin'
-          ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
+          ? [{ href: '/team', icon: Users, label: 'Співробітники' }]
           : []),
+        //
         // The same destination the internal rail ends with, under the same
         // name. «Мій профіль» was a third word for one screen.
         { href: '/settings', icon: Settings, label: 'Налаштування', section: 'profile' },
       ]
     : internalNav;
-  const homeHref = clientViewer ? clientSpaceHref : '/overview';
+  // One front door for both roles now that `/overview` serves both.
+  const homeHref = '/overview';
   // Staff arrive through a signed QuickTeam launch, which replaces the entry it
   // came from — so the browser's own «back» is not a way back. The rail carries
   // the return instead. Only for an internal seat of a QuickTeam-provisioned
@@ -251,101 +337,25 @@ export default function WorkspaceSidebar() {
                 )}
                 {brandingReady && (
                   <div className="flex flex-col min-w-0 ml-[12px]">
-                    {clientViewer ? (
-                      <>
-                        {/* A client is in the support provider's portal, not in
-                            qTicket. The provider is therefore the primary
-                            identity and the product name does not appear in
-                            this lockup at all. */}
-                        <Link href={homeHref} className="hover:opacity-80 transition-opacity">
-                          <h1
-                            data-ui-type="branding-title"
-                            className="h-[19px] truncate text-[16px] font-bold leading-[19px] tracking-tight"
-                            style={{ color: theme.text }}
-                          >
-                            {portalBrand.name}
-                          </h1>
-                        </Link>
-                        {(allOrgs || []).length > 1 ? (
-                          <button
-                            type="button"
-                            onClick={() => setShowOrgSwitcher(true)}
-                            aria-label="Змінити портал підтримки"
-                            className="flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors"
-                            style={{ color: theme.muted }}
-                          >
-                            <span className="min-w-0 truncate">Портал підтримки</span>
-                            {otherOrgUnreadCount > 0 && (
-                              <Counter variant="dot" size="sm" appearance="sidebar" />
-                            )}
-                            <ChevronsUpDown size={12} className="shrink-0" aria-hidden />
-                          </button>
-                        ) : (
-                          <span
-                            className="h-[17px] truncate text-[12px] font-medium leading-[17px]"
-                            style={{ color: theme.muted }}
-                          >
-                            Портал підтримки
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                    {/* The lockup is 36px tall in both states, so nothing shifts
-                        when branding arrives — but the two lines do not split it
-                        evenly, because the big line moves from top to bottom and
-                        the ink follows it. Centring the *box* on the logo left
-                        the words 1.5px high.
-
-                        Solving inkCentre = 18 for a fixed 36px column gives
-                        `titleRow = 18 + (titleInk − orgInk) / 2`. Measured ink
-                        heights are 14/12 unbranded and 10/17 branded, so the
-                        split is 19+17 and 15+21; both land the words on the
-                        logo's axis. Whoever changes a font size here re-measures:
-                        `tests/sidebar-brand-lockup.test.mjs` recomputes it. */}
-                    <Link href={homeHref} className="hover:opacity-80 transition-opacity">
-                       <h1
-                         data-ui-type="branding-title"
-                         className="tracking-tight truncate transition-all"
-                         style={{
-                           color: isBranded ? (theme.mutedHeader || theme.muted) : theme.text,
-                           fontSize: isBranded ? 12 : 16,
-                           height: isBranded ? 15 : 19,
-                           lineHeight: isBranded ? '15px' : '19px',
-                           fontWeight: isBranded ? 500 : 700,
-                         }}
-                       >qTicket</h1>
-                    </Link>
-                    <div
-                      onClick={() => setShowOrgSwitcher(true)}
-                      role="button"
-                      tabIndex={0}
-                      aria-label="Змінити організацію"
-                      onKeyDown={event => {
-                        if (event.key !== 'Enter' && event.key !== ' ') return;
-                        event.preventDefault();
-                        setShowOrgSwitcher(true);
-                      }}
-                      // `w-fit` plus a 120px name, a counter and a chevron adds
-                      // up to 156px in a column that is 140px wide, so the row
-                      // simply hung over the collapse button the moment a
-                      // second organization had anything unread. The row is the
-                      // width it is given now, and the name is the part that
-                      // yields — which is what `truncate` was there for.
-                      className="flex w-full min-w-0 items-center gap-[4px] cursor-pointer transition-colors"
-                      style={{ color: isBranded ? theme.text : theme.muted, height: isBranded ? 21 : 17 }}
-                    >
-                      <span
-                        className="min-w-0 truncate transition-all"
-                        style={{ fontSize: isBranded ? 16 : 12, lineHeight: isBranded ? '21px' : '17px', fontWeight: isBranded ? 700 : 500 }}
-                      >{activeOrg?.name || 'Company name'}</span>
-                      {otherOrgUnreadCount > 0 && (
-                        <Counter variant="dot" size="sm" appearance="sidebar" />
-                      )}
-                      <ChevronsUpDown size={12} className="shrink-0" style={{ color: theme.muted }} />
-                    </div>
-                      </>
-                    )}
+                    {/* A client is in the support provider's portal, not in
+                        qTicket, so the provider is the primary identity and the
+                        product name does not appear in their corner at all. A
+                        member of staff is in their own organization, inside
+                        qTicket. Two readers, two pairs of words, one lockup. */}
+                    <SidebarBrandLockup
+                      href={homeHref}
+                      name={clientViewer
+                        ? portalBrand.name
+                        : (activeOrg?.name || 'Company name')}
+                      label={clientViewer ? 'Портал підтримки' : 'qTicket'}
+                      switchLabel={clientViewer
+                        ? 'Змінити портал підтримки'
+                        : 'Змінити організацію'}
+                      canSwitch={(allOrgs || []).length > 1}
+                      unreadElsewhere={otherOrgUnreadCount}
+                      onSwitch={() => setShowOrgSwitcher(true)}
+                      theme={theme}
+                    />
                   </div>
                 )}
               </div>

@@ -146,18 +146,22 @@ function nextHop(path, session) {
   // The boundary. While the spaces are still arriving it denies nothing: the
   // list is empty then, and deciding on an empty list threw a client off their
   // own space on every refresh.
-  if (client && !session.projectsLoading && !isClientPortalRoute(path, session.spaces)) return '/';
+  if (client && !session.projectsLoading && !isClientPortalRoute(path, session.spaces, session.role)) return '/';
 
   if (path === '/') {
     if (!session.role) return null;
     if (!client) return '/overview';
-    const space = session.spaces[0];
-    return space ? `/${space}` : null;
+    // The same address, for the same reason: `/overview` is one screen that
+    // knows who is looking. A client with no space at all has nothing to be
+    // shown there and stops on `/`, which says who prepares one.
+    return session.spaces[0] ? '/overview' : null;
   }
 
-  // The screen-level guards, which the boundary above already shadows. They are
+  // The screen-level guard, which the boundary above already shadows. It is
   // modelled anyway: two guards that disagree are only visible when both are.
-  if (client && (path === '/overview' || path === '/my')) return '/';
+  // `/overview` used to carry the same guard and no longer does — it serves
+  // both audiences, and the boundary admits it for both.
+  if (client && path === '/my') return '/';
 
   return null;
 }
@@ -181,7 +185,7 @@ function walk(startPath, session, limit = 8) {
 function admits(session, path) {
   if (!isAppPath(path)) return true;
   if (!isClientRole(session.role)) return true;
-  return isClientPortalRoute(path, session.spaces);
+  return isClientPortalRoute(path, session.spaces, session.role);
 }
 
 const SESSIONS = ORGANIZATION_ROLES.map(role => ({
@@ -244,21 +248,28 @@ test('every role reaches a resting place from every address, and never a loop', 
 // The bug itself, named. A client's front door and the boundary in front of it
 // have to agree about one address, and when they did not, every path a client
 // could take ran between the two of them for ever.
-test('a client opens the product: / is a door into their own space, and the door admits it', () => {
+test('a client opens the product: / is a door onto «Огляд», and the door admits it', () => {
   const client = { role: 'client_admin', spaces: [SPACE], projectsLoading: false };
 
-  assert.equal(nextHop('/', client), `/${SPACE}`, 'the front door sends a client into their space');
-  assert.equal(isClientPortalRoute(`/${SPACE}`, [SPACE]), true, 'and the boundary lets them in');
-  assert.equal(nextHop(`/${SPACE}`, client), null, 'so the space is where they stop');
+  assert.equal(nextHop('/', client), '/overview', 'the front door sends a client to the shared overview');
+  assert.equal(isClientPortalRoute('/overview', [SPACE]), true, 'and the boundary lets them in');
+  assert.equal(nextHop('/overview', client), null, 'so the overview is where they stop');
 
   const { trail, cycle } = walk('/', client);
   assert.equal(cycle, false);
-  assert.deepEqual(trail, ['/', `/${SPACE}`]);
+  assert.deepEqual(trail, ['/', '/overview']);
+
+  // Their own space is still a resting place — it is the rail's second entry
+  // and every row of «Останні оновлення» leads into it.
+  assert.equal(isClientPortalRoute(`/${SPACE}`, [SPACE]), true);
+  assert.equal(nextHop(`/${SPACE}`, client), null);
 
   // Somebody else's space is refused at the same boundary, by id and not by the
-  // shape of the address: `/overview` and `/{projectId}` look identical.
+  // shape of the address: `/overview` and `/{projectId}` look identical, which
+  // is why `/overview` is admitted by exact name and never as a space id.
   assert.equal(isClientPortalRoute(`/${OTHER_SPACE}`, [SPACE]), false);
-  assert.equal(walk(`/${OTHER_SPACE}`, client).terminal, `/${SPACE}`);
+  assert.equal(walk(`/${OTHER_SPACE}`, client).terminal, '/overview');
+  assert.equal(isClientPortalRoute('/overview', []), true, '«Огляд» is a screen, not one of their spaces');
 });
 
 // The half of the loop that a boundary deciding too early would have restored.
@@ -279,8 +290,12 @@ test('a screen guard and the boundary in front of it never disagree', () => {
   // The boundary must refuse the same address for the same role — a screen that
   // sends somebody away from a page the boundary would have admitted, or one
   // that admits somebody the boundary refuses, is the two of them arguing.
+  //
+  // `/overview` is deliberately not on this list any more: it stopped being a
+  // screen that bounces anybody. One screen, two readers — so there is no guard
+  // for the boundary to agree or disagree with, and the assertion that it
+  // admits every role is the one below.
   const SCREEN_GUARDS = [
-    { path: '/overview', bounces: isClientRole, to: '/' },
     { path: '/my', bounces: isClientRole, to: '/' },
   ];
 
@@ -294,6 +309,16 @@ test('a screen guard and the boundary in front of it never disagree', () => {
         `${guard.path} ${bounced ? 'bounces' : 'admits'} ${session.role} while the boundary says the opposite`,
       );
     }
+  }
+
+  // The screen with no guard at all. Every role reaches it and rests there,
+  // which is what «one screen that knows who is looking» has to mean at the
+  // level of the address: a role that is redirected off a screen does not share
+  // it, whatever the component renders inside.
+  for (const session of SESSIONS) {
+    assert.equal(admits(session, '/overview'), true, `${session.role} is refused «Огляд»`);
+    assert.equal(nextHop('/overview', session), null, `${session.role} is sent away from «Огляд»`);
+    assert.equal(walk('/', session).terminal, '/overview', `${session.role} does not land on «Огляд»`);
   }
 });
 
@@ -364,14 +389,58 @@ test('a client is never offered an address the client boundary refuses', () => {
       if (!command.href) continue;
       const path = samplePathOf(command.href);
       const { terminal } = walk(path, session);
-      assert.equal(isClientPortalRoute(terminal, [SPACE]), true,
+      assert.equal(isClientPortalRoute(terminal, [SPACE], role), true,
         `«${command.label}» takes a ${role} to ${terminal}, which is not part of the portal`);
     }
     // And the internal screens are not quietly in the client's catalogue.
+    // Two exceptions now, one from each side of the desk.
+    //
+    // `/team` is the roster for both audiences, so what a `client_admin` opens
+    // there is their own employees; a `client_member` administers nobody, so for
+    // them it stays an internal screen like the others.
+    //
+    // `/overview` is off the list entirely — it is the client's own front screen
+    // now. The palette does not offer it to them yet, and that is a gap to fill
+    // rather than a boundary to hold: asserting it stays absent would freeze the
+    // gap into an invariant.
     const hrefs = commands.map(command => command.href).filter(Boolean);
-    for (const internal of ['/overview', '/my', '/clients', '/team']) {
+    const internalScreens = role === 'client_admin'
+      ? ['/my', '/clients']
+      : ['/my', '/clients', '/team'];
+    for (const internal of internalScreens) {
       assert.equal(hrefs.includes(internal), false, `${role} is offered ${internal}`);
     }
+    assert.equal(hrefs.includes('/team'), role === 'client_admin',
+      `${role} is ${hrefs.includes('/team') ? 'offered' : 'refused'} the roster against what the boundary says`);
+  }
+});
+
+// The duplicate door, closed. «Співробітники» in a client's rail used to open
+// «Налаштування», where the settings rail named the same address a second time
+// as «Співробітники клієнта». One roster screen now answers both audiences —
+// which makes the boundary in front of it the only place that may say which
+// client role opens it, and this is the walk that proves it does.
+test('the roster admits a client administrator and returns a client employee to their portal', () => {
+  const admin = { role: 'client_admin', spaces: [SPACE], projectsLoading: false };
+  const employee = { role: 'client_member', spaces: [SPACE], projectsLoading: false };
+
+  assert.equal(isClientPortalRoute('/team', [SPACE], 'client_admin'), true);
+  assert.equal(isClientPortalRoute('/team', [SPACE], 'client_member'), false);
+  // Asked without a role — every internal caller — the roster is a staff screen.
+  assert.equal(isClientPortalRoute('/team', [SPACE]), false);
+
+  assert.equal(nextHop('/team', admin), null, 'a client administrator stops on the roster');
+  // `/` is the client's front door and it now opens «Огляд», not their space —
+  // the two slices that landed together moved where a returned client arrives,
+  // not whether they are returned. The claim is the walk terminating somewhere
+  // they can actually open, which it does.
+  assert.deepEqual(walk('/team', employee).trail, ['/team', '/', '/overview'],
+    'a client employee is returned to their own portal, the way every other internal address returns them');
+  assert.equal(walk('/team', employee).cycle, false);
+
+  // And staff are untouched by any of it.
+  for (const session of SESSIONS.filter(entry => !isClientRole(entry.role))) {
+    assert.equal(walk('/team', session).terminal, '/team');
   }
 });
 
@@ -505,9 +574,16 @@ test('a client space can never be reached under the name of a screen', () => {
       `«${segment}» is a screen on disk but not a reserved segment: a client space named `
       + `«${segment}» would answer to its address`);
     // And the reservation holds even if a space were somehow given that id. The
-    // exception is `/settings`, which is a portal address in its own right —
-    // there the answer is «yes, open it», and what it opens is the screen.
-    if (segment === 'settings') continue;
+    // exceptions are `/settings` and `/overview`, which are portal addresses in
+    // their own right — there the answer is «yes, open it», and what it opens is
+    // the screen. That is exactly the claim: the address resolves by name before
+    // any space id is consulted, so a space called «overview» still cannot be
+    // opened at `/overview`, and the screen still is.
+    if (segment === 'settings' || segment === 'overview') continue;
+    // Asked as a space — no role, the way every id is checked — a screen's name
+    // is never a space. `/team` answers `true` for a `client_admin`, and that is
+    // the screen answering, not the id: the reservation above is what stops a
+    // space from ever being called that.
     assert.equal(isClientPortalRoute(`/${segment}`, [segment]), false,
       `a space with the id «${segment}» must not be reachable under a screen's name`);
   }

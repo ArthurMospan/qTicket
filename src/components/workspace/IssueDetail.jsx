@@ -44,7 +44,7 @@ import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCance
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
-import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
+import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, PriorityIcon, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, TypeBadge, useConfirm } from '@/components/ui';
 import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
 import { useQuickTeamTransfer } from '@/lib/hooks/useQuickTeamTransfer';
 import Button from '@/components/ui/Button';
@@ -56,11 +56,11 @@ import {
   AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff, ExternalLink,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
-  Maximize2, User, Users, CircleDot, Ban, Undo2,
+  Maximize2, User, Users, UsersRound, CircleDot, Ban, Undo2,
 } from 'lucide-react';
 import { ParentTaskIcon, TaskIcon } from '@/lib/design/icons';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
-import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
+import { NO_PRIORITY_ID, priorityPresentation, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, deleteDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { uploadFile } from '@/lib/utils/uploadFile';
@@ -90,11 +90,31 @@ import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 
 const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || '';
 
-// qTicket keeps the inherited task records and migration readers, but its
-// incident screen is a support workspace, not a second project-management
-// screen. These readers stay dormant until their old data paths are removed in
-// a reviewed migration.
-const SHOW_INHERITED_TASK_PLANNING = false;
+// Two inherited task-manager surfaces stay dormant, and they are two constants
+// because they are two decisions. One constant used to hold both of them *and*
+// the links between requests, which is how a supported qTicket feature came to
+// be switched off by a decision that was never about it: nobody flipping
+// «hierarchy stays gone» to `false` meant to say «and no support agent may ever
+// mark a duplicate».
+//
+// The hierarchy — «Основне звернення», «Дочірні звернення», and the parent
+// picker and «Додати дочірнє звернення» that create them. It does not come
+// back: splitting a customer's request into child records means the customer
+// watches one record while the work happens in another.
+const SHOW_INHERITED_TASK_HIERARCHY = false;
+
+// Duplicating a record and copying an AI prompt about it. Neither is hierarchy
+// and neither is a link — they arrived with the inherited task screen and no
+// support workflow has asked for them — so they wait under their own name
+// instead of borrowing somebody else's.
+const SHOW_INHERITED_TASK_SHORTCUTS = false;
+
+// Links between requests («Звʼязки») are deliberately absent from the two lists
+// above. They are a qTicket feature and they ship: a duplicate is the single
+// most common relation on a support desk, and until now the product had no way
+// to record one. So their gate is who is looking rather than a constant —
+// `internalViewer` fetches them, `!clientViewer` draws them, `canEditIssue`
+// changes them — and a customer sees no section, no count and no control.
 
 // The same wording Settings uses when you walk away from an unsaved field.
 const UNSAVED_EDIT_PROMPT = {
@@ -359,7 +379,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     refresh: refreshLinks,
     addLink,
     removeLink,
-  } = useIssueLinks(SHOW_INHERITED_TASK_PLANNING && internalViewer ? issueId : null);
+  } = useIssueLinks(internalViewer ? issueId : null);
 
   const {
     types: rawTypes, priorities: rawPriorities, statuses: STATUSES, labels: availableLabels = [], closedStatusIds
@@ -457,6 +477,19 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // render on everything they did; they are simply not people you can hand new
   // work to, here or in any other picker.
   const supportDirectory = activeMembers(members).filter(member => !isClientRole(member.role));
+  // The customer's own people on this space. `assigneeIds` is support's routing
+  // and a client never sees it; this is the mirror that belongs to them —
+  // whichever of their colleagues is answering for this request. Support reads
+  // it because "who do we talk to over there" is the most useful thing about a
+  // queue of somebody else's problems, and may correct it; the customer owns it.
+  const clientDirectory = activeMembers(members).filter(member => (
+    isClientRole(member.role) && isOnProjectTeam(project, member.id || member.uid)
+  ));
+  const clientAssigneeIds = Array.isArray(issue.clientAssigneeIds) ? issue.clientAssigneeIds : [];
+  const clientAssignees = clientAssigneeIds
+    .map(uid => members.find(member => (member.id || member.uid) === uid))
+    .filter(Boolean);
+  const canEditClientAssignees = !isArchived && (clientViewer || canEditIssue);
   const assignableMembers = assignableIds.size === 0
     // A project with no team recorded at all is legacy data, not a project
     // nobody may be assigned to.
@@ -733,6 +766,14 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     compactSelectClass,
     detailsButtonClass,
   } = getTaskAttributeChrome({ condensed: isHeaderScrolled });
+  // The customer's half of the same strip. Their cells carry facts, not
+  // controls, so they take the width of their own words instead of stretching
+  // to fill a grid column, and they stop claiming to be clickable.
+  const { attributeItemClass: readOnlyItemClass } = getTaskAttributeChrome({
+    condensed: isHeaderScrolled,
+    readOnly: true,
+  });
+  const priorityCfg = priorityPresentation(issue.priority, PRIORITIES);
 
   const assignees     = (issue.assigneeIds || []).map(uid => members.find(m => (m.id || m.uid) === uid)).filter(Boolean);
   const reporterMatchByEmail = issue.reporterName ? members.find(m => m.email && m.email.toLowerCase() === issue.reporterName.toLowerCase()) : null;
@@ -773,12 +814,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // reading there is always the description or its placeholder; while writing
   // the padded half of the panel is drawn only when something is actually in it,
   // so an empty task edits as the editor alone with no grey strip under it.
-  const hasSecondaryBlocks = issueLabels.length > 0 || (
-    SHOW_INHERITED_TASK_PLANNING && (
-      childIssues.length > 0 || showSubInput
-      || currentIssueLinks.length > 0 || showLinkInput
-    )
-  );
+  const hasSecondaryBlocks = issueLabels.length > 0
+    || (SHOW_INHERITED_TASK_HIERARCHY && (childIssues.length > 0 || showSubInput))
+    || (!clientViewer && (currentIssueLinks.length > 0 || showLinkInput));
   const hasPanelBody = !isEditing || visibleAttachments.length > 0 || hasSecondaryBlocks;
 
   const actor          = { userId: currentUser?.id || currentUser?.uid, userName: currentUser?.name };
@@ -837,7 +875,17 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         closedStatusIds,
       });
       if (blockers.dependencies.length > 0) {
-        showToast(`Звернення ще блокують: ${blockers.dependencies.length}`, 'error');
+        // Named, not counted. `useIssues.moveIssue` has always said which
+        // requests are in the way; this screen said «2» and left the agent to
+        // find them. That was survivable while nothing could create a blocking
+        // link — the only ones left were imported — and stops being survivable
+        // the moment «Блокує» is back in the picker.
+        const names = blockers.dependencies
+          .slice(0, 2)
+          .map(blocker => blocker.issueKey || blocker.title)
+          .filter(Boolean)
+          .join(', ');
+        showToast(`Звернення ще блокують: ${names || blockers.dependencies.length}`, 'error');
         return;
       }
     }
@@ -1130,10 +1178,10 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             dropdownClassName="w-[210px]"
             items={[
               { label: 'Копіювати посилання', icon: Copy, onClick: copyIssueLink },
-              ...(SHOW_INHERITED_TASK_PLANNING && !isArchived && canEditIssue
+              ...(SHOW_INHERITED_TASK_SHORTCUTS && !isArchived && canEditIssue
                 ? [{ label: 'Дублювати', icon: CopyPlus, onClick: handleDuplicate }]
                 : []),
-              ...(SHOW_INHERITED_TASK_PLANNING && canEditIssue
+              ...(SHOW_INHERITED_TASK_SHORTCUTS && canEditIssue
                 ? [{ label: 'Скопіювати AI-промпт', icon: Sparkles, onClick: copyAiPrompt }]
                 : []),
               // Only offered when there is somebody else's activity to un-see.
@@ -1251,7 +1299,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         header={(
              <div className="flex w-full flex-col gap-[10px] pb-[12px] pt-[12px] sm:flex-row sm:items-start sm:justify-between sm:gap-[16px]">
                <div className="flex flex-col gap-[4px] flex-1 min-w-0">
-            {SHOW_INHERITED_TASK_PLANNING && !clientViewer && parentIssueId && (
+            {SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && parentIssueId && (
               <div className="mb-1 flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted">
                 {/* The same arrow the board card and the list row draw for this
                     relation. This line used to be `Layers`, so the one fact
@@ -1477,9 +1525,15 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             </div>
         )}
         attributes={(
+            /* The five-column grid belongs to the five controls an agent works
+               with; it lines them up so the same field sits in the same place on
+               every request. A customer has three facts and no controls, so they
+               get the wrapping row instead — a fixed grid would only reserve
+               columns nothing arrives to fill, which is the whole reason their
+               strip read as one status pill adrift in a grey bar. */
             <TaskAttributesPanel
-              singleRow
-              context="task"
+              singleRow={!clientViewer}
+              context={clientViewer ? undefined : 'task'}
               compact
               condensed={isHeaderScrolled}
               cardClassName="transition-[background-color,padding] duration-200"
@@ -1489,19 +1543,84 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 WebkitBackdropFilter: isHeaderScrolled ? 'blur(4px)' : undefined,
               }}
               primaryChildren={clientViewer ? (
-                <div className={attributeItemClass}>
-                  <span className={attributeLabelClass}>Статус</span>
-                  <StatusPill
-                    label={statusCfg?.label || 'Новий'}
-                    color={statusCfg?.color}
-                  />
-                </div>
+                /* What the customer is told about their own request. Three
+                   facts, all of them already visible to them elsewhere — the
+                   status pill on their board, the type badge and the priority
+                   mark on the very same card — so this is the page catching up
+                   with the board rather than any new disclosure. What stays off
+                   it is what the board also withholds: who inside support is
+                   answering, and the resolution date, which is a promised time
+                   the moment a customer can read it. */
+                <>
+                  <div className={readOnlyItemClass}>
+                    <span className={attributeLabelClass}>Статус</span>
+                    <StatusPill
+                      label={statusCfg?.label || 'Новий'}
+                      color={statusCfg?.color}
+                    />
+                  </div>
+
+                  <div className={readOnlyItemClass}>
+                    <span className={attributeLabelClass}>Тип</span>
+                    <TypeBadge
+                      label={typeCfg.label}
+                      color={typeCfg.color}
+                      icon={typeCfg.icon}
+                    />
+                  </div>
+
+                  <div className={readOnlyItemClass}>
+                    <span className={attributeLabelClass}>Пріоритет</span>
+                    <span className="flex items-center gap-1.5 text-[13px] font-medium leading-[22px] text-ink">
+                      <PriorityIcon priority={priorityCfg} size="sm" />
+                      {priorityCfg.label}
+                    </span>
+                  </div>
+                </>
               ) : (
                 <>
                   {/* Status */}
                   <div className={attributeItemClass} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
                     <span className={attributeLabelClass}>Статус</span>
                     <Select compact disabled={isArchived} value={issue.columnId || issue.status || visibleStatuses[0]?.id} onChange={val => handleStatusChange(val)} options={visibleStatuses.map(s => ({ value: s.id, label: s.label, dotColor: s.color }))} buttonClassName={compactSelectClass} />
+                  </div>
+
+                  {/* Type and priority. They used to live behind «Деталі», a
+                      popover built when this strip had seven inherited fields
+                      and room for three. It has five now, and these are the two
+                      an agent reads on every request — what kind of problem this
+                      is, and how urgent somebody judged it. A control you open a
+                      panel to reach is a control you check less often than you
+                      should. Below `sm` they fold back into «Деталі», which is
+                      the only place the overflow is still real. */}
+                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Тип</span>
+                    <Select
+                      compact
+                      disabled={isArchived}
+                      value={draft.type || issue.type || ''}
+                      onChange={val => {
+                        update({ type: val });
+                        if (isEditing) setDraft(current => ({ ...current, type: val }));
+                      }}
+                      options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
+                      buttonClassName={compactSelectClass}
+                    />
+                  </div>
+
+                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Пріоритет</span>
+                    <Select
+                      compact
+                      disabled={isArchived}
+                      value={draft.priority || issue.priority || ''}
+                      onChange={val => {
+                        update({ priority: val });
+                        if (isEditing) setDraft(current => ({ ...current, priority: val }));
+                      }}
+                      options={prioritySelectOptions(PRIORITIES)}
+                      buttonClassName={compactSelectClass}
+                    />
                   </div>
 
                   {/* Assignees — the task model has always been multi-assignee;
@@ -1544,11 +1663,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* Less frequently changed fields */}
+                  {/* The overflow, and only where there is one. Above `sm` all
+                      five attributes are on the strip and this button would open
+                      onto a copy of what the reader is already looking at. */}
                   <Popover
                     position="bottom"
                     hideCloseIcon
-                    className="flex h-full items-center"
+                    className="flex h-full items-center sm:hidden"
                     // Without this the wrapper Popover puts around a trigger is
                     // a bare block in a flex row, so it shrinks to the glyph:
                     // «Деталі» was a 14px-wide hit area inside a 44px column,
@@ -1574,7 +1695,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     )}
                   >
                       <div className="flex w-[248px] max-w-full flex-col gap-4">
-                        <div className="flex flex-col gap-1.5 sm:hidden">
+                        <div className="flex flex-col gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
                           <DatePicker
                             compact
@@ -1616,7 +1737,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
                           />
                         </div>
-                        {SHOW_INHERITED_TASK_PLANNING && <div className="flex flex-col gap-1.5">
+                        {SHOW_INHERITED_TASK_HIERARCHY && <div className="flex flex-col gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Основне звернення</span>
                           <Select
                             disabled={isArchived || childIssues.length > 0 || parentSaving}
@@ -1713,6 +1834,48 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     </DescriptionPlaceholder>
                   )}
 
+                {/* Who is answering on the customer's side. One placement for
+                    both readers rather than a cell on one strip and a section on
+                    the other: the agent's strip is already five controls wide,
+                    and this is a fact people read far more often than they
+                    change. Drawn whenever it has names, or whenever whoever is
+                    looking may add some. */}
+                {(clientAssignees.length > 0 || canEditClientAssignees) && (
+                  <DetailSection
+                    density="group"
+                    icon={UsersRound}
+                    title="Відповідальні клієнта"
+                    count={clientAssignees.length}
+                    className="pt-1"
+                  >
+                    {canEditClientAssignees ? (
+                      <MultiSelect
+                        showSelectedAvatars
+                        ariaLabel="Відповідальні з боку клієнта"
+                        value={clientAssigneeIds}
+                        onChange={ids => update({ clientAssigneeIds: ids })}
+                        options={clientDirectory.map(member => ({
+                          value: member.id || member.uid,
+                          label: member.name || member.displayName || member.email || 'Учасник',
+                          user: member,
+                        }))}
+                        placeholder="Нікого не призначено"
+                        searchPlaceholder="Знайти співробітника…"
+                        dropdownClassName="w-[260px]"
+                      />
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {clientAssignees.map(member => (
+                          <span key={member.id || member.uid} className="flex items-center gap-1.5 text-[13px] font-medium text-ink">
+                            <UserAvatar user={member} size="xs" />
+                            {member.name || member.displayName || member.email || 'Учасник'}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </DetailSection>
+                )}
+
                 {!clientViewer && issueLabels.length > 0 && (
                   <DetailSection density="group" icon={TagIcon} title="Мітки" count={issueLabels.length} className="pt-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -1729,7 +1892,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 )}
 
               {/* REAL CHILD ISSUES */}
-              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (childIssues.length > 0 || showSubInput) && (
+              {SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && (childIssues.length > 0 || showSubInput) && (
                 <DetailSection
                   density="group"
                   icon={TaskIcon}
@@ -1807,8 +1970,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 </DetailSection>
               )}
 
-              {/* ISSUE LINKS */}
-              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
+              {/* ISSUE LINKS — internal support only, by role rather than by a
+                  feature constant. A customer's copy of this screen has no
+                  section here, no «Звʼязки» count and no way to make or break
+                  one: `useIssueLinks` above is never even subscribed for them,
+                  so `currentIssueLinks` is empty and this whole branch is
+                  unreachable twice over. */}
+              {!clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
               <DetailSection density="group" icon={Link2} title="Зв’язки" count={currentIssueLinks.length} className="pt-2">
               <div className="flex flex-col gap-[6px]">
                 {currentIssueLinks.map(({ link, perspective }) => {
@@ -1885,7 +2053,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           if (!linkTargetId || linkSaving) return;
                           try {
                             setLinkSaving(true);
-                            await addLink(issueId, linkTargetId, linkRelation, currentUser?.uid || currentUser?.id);
+                            await addLink(issueId, linkTargetId, linkRelation);
                             showToast('Звʼязок додано');
                             setShowLinkInput(false);
                             setLinkTargetId('');
@@ -1937,7 +2105,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         };
                       })}
                     />
-                    {SHOW_INHERITED_TASK_PLANNING && !parentIssueId && <Button
+                    {SHOW_INHERITED_TASK_HIERARCHY && !parentIssueId && <Button
                       aria-label="Додати дочірнє звернення"
                       style="secondary"
                       size="sm"
@@ -1947,7 +2115,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     >
                       <span className="sm:hidden">Дочірнє</span><span className="hidden sm:inline">Додати дочірнє звернення</span>
                     </Button>}
-                    {SHOW_INHERITED_TASK_PLANNING && <Button
+                    {/* `canEditIssue` above already answers «not a client», and
+                        this says it a second time in the words the section
+                        header uses. A control that creates internal data is
+                        hidden by the role, never by the permission alone. */}
+                    {!clientViewer && <Button
                       aria-label="Додати зв’язок"
                       style="secondary"
                       size="sm"

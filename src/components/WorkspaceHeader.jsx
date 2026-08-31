@@ -16,7 +16,7 @@ import NotificationCard     from '@/components/ui/Layout/NotificationCard';
 import Segmented            from '@/components/ui/Segmented';
 import {
   Bell, Search, Check, CheckCheck, GitPullRequest, Zap,
-  UserCheck, AlertCircle, AtSign, CalendarClock, Settings, Trash2, Mail,
+  UserCheck, AlertCircle, AtSign, CalendarClock, Inbox, Settings, Trash2, Mail,
   ChevronRight, X, Hash, ArrowLeft,
 } from 'lucide-react';
 import { ChatIcon } from '@/lib/design/icons';
@@ -51,6 +51,10 @@ import { RESERVED_SEGMENTS } from '@/lib/utils/clientPortalRoutes.mjs';
 // weight; three controls that cannot save an answer are worse than dead weight.
 const TYPE_CFG = {
   assigned:       { icon: UserCheck,      color: '#6366f1' },
+  // A request arriving is not somebody handing you one. It fell through to the
+  // `assigned` default, so the one event the desk waits for wore the icon of a
+  // different one.
+  incident_created: { icon: Inbox,        color: '#0891b2' },
   commented:      { icon: ChatIcon,       color: '#0891b2' },
   status_changed: { icon: GitPullRequest, color: '#10b981' },
   mentioned:      { icon: AtSign,         color: '#f97316' },
@@ -135,8 +139,18 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
         : 'Пошук звернень, клієнтів і команди...',
     };
   }
+  // «Огляд» serves both audiences now, so its placeholder has to as well. It
+  // said «клієнтів і команди» to everybody, which on a customer's own front
+  // screen offers to search two things they do not have — the same branch `/`
+  // has carried all along, applied where the customer now actually lands.
   if (pathname.startsWith('/overview')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук звернень, клієнтів і команди...' };
+    return {
+      mode: 'search',
+      project: null,
+      placeholder: isClientRole(orgRole)
+        ? 'Пошук за номером або темою звернення...'
+        : 'Пошук звернень, клієнтів і команди...',
+    };
   }
   if (pathname.startsWith('/clients')) {
     return { mode: 'search', project: null, placeholder: 'Пошук клієнтів...' };

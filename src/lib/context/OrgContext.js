@@ -11,6 +11,7 @@ import { auth, db } from '@/lib/firebase';
 import { authenticatedRequest } from '@/lib/services/authenticatedRequest';
 import { claimActivityHeartbeat } from '@/lib/utils/activity';
 import { reportLoadError } from '@/lib/utils/errors';
+import { hasActiveQuickTeamEntitlement } from '@/lib/utils/quickTeamManaged.mjs';
 import {
   buildOrganizationList,
   createMembershipSnapshotGate,
@@ -433,7 +434,11 @@ export function OrgProvider({ user, children }) {
           if (exists) {
             return prev.map(o => o.id === snap.id ? data : o);
           }
-          return [...prev, data];
+          // The same rule the list is built by, applied to the one entry that
+          // does not come from it. Appending unconditionally would let a live
+          // snapshot put back a workspace the switcher had just stopped
+          // offering — a filter is only worth as much as its narrowest way in.
+          return hasActiveQuickTeamEntitlement(data) ? [...prev, data] : prev;
         });
       }
     }, (err) => {

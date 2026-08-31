@@ -11,13 +11,13 @@
   },
   "totals": {
     "files": 257,
-    "elements": 2151,
+    "elements": 2169,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 27
+    "runtimeNameVerification": 28
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:2394",
+      "location": "src/app/(app)/settings/page.js:2303",
       "attributes": [
         "title",
         "aria-label"
@@ -35,7 +35,7 @@
     },
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:639",
+      "location": "src/app/(app)/settings/page.js:633",
       "attributes": [
         "aria-label",
         "title"
@@ -194,30 +194,37 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1420",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1443",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1440",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1463",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:401",
+      "location": "src/components/WorkspaceHeader.jsx:415",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "a",
-      "location": "src/components/WorkspaceSidebar.jsx:497",
+      "location": "src/components/WorkspaceSidebar.jsx:507",
       "attributes": [
         "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:71",
+      "attributes": [
+        "aria-label"
       ]
     }
   ]

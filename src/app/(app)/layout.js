@@ -189,7 +189,7 @@ export default function WorkspaceLayout({ children }) {
   );
   const clientRouteDenied = isClientRole(orgRole)
     && !projectsLoading
-    && !isClientPortalRoute(pathname, clientProjectIds);
+    && !isClientPortalRoute(pathname, clientProjectIds, orgRole);
   const isSettings = pathname?.startsWith('/settings');
   const hideHeader = isSettings;
 

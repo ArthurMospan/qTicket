@@ -11,6 +11,7 @@ import {
   resolveQuickTeamStaff,
 } from '@/lib/server/quickteamIntegration';
 import { restoreProjectAccess } from '@/lib/server/orgMembership';
+import { quickTeamSnapshotOpensOrganization } from '@/lib/utils/quickTeamManaged.mjs';
 import {
   MEMBERSHIP_ARCHIVE,
   MEMBERSHIP_COLLECTION,
@@ -36,11 +37,30 @@ export async function POST(request) {
 
     const payload = normalized.data;
     const organizationId = quickTeamOrganizationId(payload.sourceOrganizationId);
+    const db = getAdminDb();
+    const organizationRef = db.collection('organizations').doc(organizationId);
+
+    // Refused before the staff are resolved, because resolving them is not a
+    // read: it creates Firebase Auth accounts and rewrites the name, email and
+    // avatar of every account it finds. An organization that never bought the
+    // add-on must not cost anybody an identity here. The transaction below asks
+    // the same question again of the document it is about to write — that one is
+    // the authority, and this one is only ever allowed to refuse.
+    const existingOrganization = await organizationRef.get();
+    if (!quickTeamSnapshotOpensOrganization({
+      organizationExists: existingOrganization.exists,
+      entitlement: payload.entitlement,
+    })) {
+      return NextResponse.json({
+        organizationId,
+        status: 'skipped',
+        revision: Number(existingOrganization.data()?.quickTeam?.revision || 0),
+      }, { headers: { 'Cache-Control': 'private, no-store' } });
+    }
+
     const staff = await resolveQuickTeamStaff(payload.staff);
     const incomingUserIds = new Set(staff.map(member => member.qTicketUserId));
     const owner = staff.find(member => member.role === 'owner');
-    const db = getAdminDb();
-    const organizationRef = db.collection('organizations').doc(organizationId);
 
     const result = await db.runTransaction(async transaction => {
       const organizationSnap = await transaction.get(organizationRef);
@@ -54,6 +74,15 @@ export async function POST(request) {
       const currentRevision = Number(currentOrganization?.quickTeam?.revision || 0);
       if (currentRevision >= payload.revision) {
         return { status: 'unchanged', revision: currentRevision };
+      }
+      // An organization QuickTeam never sold qTicket to is not a workspace that
+      // happens to be switched off. It has no place here at all, and the seats
+      // this loop is about to write are what would give it one for good.
+      if (!quickTeamSnapshotOpensOrganization({
+        organizationExists: organizationSnap.exists,
+        entitlement: payload.entitlement,
+      })) {
+        return { status: 'skipped', revision: currentRevision };
       }
 
       // The archived seats of people this snapshot names. Somebody here may be

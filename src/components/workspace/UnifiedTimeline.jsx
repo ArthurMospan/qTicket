@@ -24,7 +24,7 @@ import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { COMMENT_WINDOW, useComments } from '@/lib/hooks/useComments';
 import { useIssueTyping } from '@/lib/hooks/useIssueTyping';
 import { useSearch } from '@/lib/hooks/useSearch';
-import { AUDIT_WINDOW, useAuditLog } from '@/lib/hooks/useAuditLog';
+import { AUDIT_WINDOW, useAuditLog, useStatusHistory } from '@/lib/hooks/useAuditLog';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { describeAuditEvent } from '@/lib/utils/issueAuditEvents.mjs';
 import {
@@ -364,11 +364,29 @@ export default function UnifiedTimeline({
     comments, loading: commentsLoading, hasMore: hasOlderComments,
     addComment, updateComment, deleteComment, markCommentsRead,
   } = useComments(issueId, COMMENT_WINDOW * historyWindow);
+  // Two feeds, one per side of the desk, and exactly one of them is subscribed
+  // to. `audit` is the support-side work record and the rules refuse it to a
+  // client role, which used to leave a customer's thread with nothing in it at
+  // all: their request went Новий → Прийнято → У роботі → Вирішено and the page
+  // showed no trace of it unless somebody had also typed a message, while the
+  // status pill above changed silently. `statusHistory` is the one fact from
+  // that record they are entitled to, written server-side.
   const {
-    entries: auditLogs,
+    entries: auditEntries,
     loading: auditLoading,
-    hasMore: hasOlderChanges,
+    hasMore: hasOlderAudit,
   } = useAuditLog(internalViewer ? issueId : null, AUDIT_WINDOW * historyWindow);
+  const {
+    entries: statusEntries,
+    loading: statusHistoryLoading,
+    hasMore: hasOlderStatusHistory,
+  } = useStatusHistory(internalViewer ? null : issueId, AUDIT_WINDOW * historyWindow);
+  // Written in the audit's own shape, so everything downstream — the merge, the
+  // unread boundary, `describeAuditEvent` — treats them as one kind of thing and
+  // reads them out in one vocabulary.
+  const auditLogs = internalViewer ? auditEntries : statusEntries;
+  const historyLoading = internalViewer ? auditLoading : statusHistoryLoading;
+  const hasOlderChanges = internalViewer ? hasOlderAudit : hasOlderStatusHistory;
   const hasOlderHistory = hasOlderComments || hasOlderChanges;
 
   const [input, setInput] = useState('');
@@ -602,8 +620,13 @@ export default function UnifiedTimeline({
   // two subscriptions that finish in two different renders, and a boundary
   // latched off the first of them names the first unread *comment* in a task
   // whose oldest unread item is a change. It waits for both.
+  // Whichever of the two history feeds this reader is actually on. Latching on
+  // `auditLoading` would settle instantly for a customer — they have no audit
+  // subscription at all — and name their first unread item from a feed whose
+  // other half had not arrived yet, which is precisely what the paragraph above
+  // exists to prevent.
   const feedSettled = (readCursorsLoaded || cursorWaitIsOver)
-    && !commentsLoading && !auditLoading;
+    && !commentsLoading && !historyLoading;
   const BOUNDARY_NONE = { key: null, count: 0, read: false, dismissed: false };
   const [boundary, setBoundary] = useState({ issueId: null, ...BOUNDARY_NONE });
   if (boundary.issueId !== issueId) {

@@ -2,6 +2,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, enforceRateLimit, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
+import { announceIncidentCreated } from '@/lib/server/incidentAnnouncement';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { isValidIssuePrefix } from '@/lib/utils/issueKeys.mjs';
 import { isClientRole, rolesFor } from '@/lib/utils/can';
@@ -90,6 +91,12 @@ export async function POST(request) {
       ? {
           title: submittedData.title,
           description: submittedData.description,
+          // The one routing decision that is genuinely the customer's: which of
+          // their own people answers for this. It is not `assigneeIds` and never
+          // becomes one — support's queue stays support's — so it passes the
+          // projection as its own key rather than widening what a client may
+          // say about the workflow.
+          clientAssigneeIds: submittedData.clientAssigneeIds,
         }
       : submittedData;
     if (!projectId || typeof data.title !== 'string' || !data.title.trim() || data.title.trim().length > 240) {
@@ -161,6 +168,24 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Ви не входите до команди цього клієнтського простору' }, { status: 403 });
     }
     const assigneeIds = Array.isArray(data.assigneeIds) ? [...new Set(data.assigneeIds)].slice(0, 20) : [];
+    // The customer's own answerable people. Bounded to the client space's
+    // roster here for the same reason `firestore.rules` bounds the later edit to
+    // it: the picker only offers colleagues, and a hand-written request must not
+    // be able to name somebody who is not on this space at all. A client who
+    // says nothing answers for it themselves — that is the useful default and
+    // the one the composer starts from.
+    const rosterUids = Array.isArray(projectData.team) ? projectData.team : [];
+    const requestedClientAssignees = Array.isArray(data.clientAssigneeIds)
+      ? [...new Set(data.clientAssigneeIds)].filter(uid => typeof uid === 'string' && uid)
+      : [];
+    const offRoster = requestedClientAssignees.filter(uid => !rosterUids.includes(uid));
+    if (offRoster.length) {
+      return NextResponse.json({
+        error: 'Відповідальний не входить до цього клієнтського простору',
+        code: 'CLIENT_ASSIGNEE_OUTSIDE_PROJECT',
+      }, { status: 400 });
+    }
+    const clientAssigneeIds = requestedClientAssignees.slice(0, 10);
     // Adding somebody to a project is a thing the caller asks for, never a side
     // effect of assigning them work. The first version of this rule did it
     // silently, in the same write, on the strength of a 10px line in the
@@ -354,6 +379,7 @@ export async function POST(request) {
         priority: freshPriorityIds.has(data.priority) ? data.priority : NO_PRIORITY_ID,
         type: freshTypeSelection.type,
         assigneeIds,
+        clientAssigneeIds,
         labelIds: Array.isArray(data.labelIds)
           ? data.labelIds.filter(id => freshLabelIds.has(id)).slice(0, 20)
           : [],
@@ -398,6 +424,15 @@ export async function POST(request) {
           ? { issueHierarchyVersion: FieldValue.increment(1) }
           : {}),
       });
+      // The first line of the customer's own history, so their thread opens with
+      // the request existing rather than with nothing at all. See the status
+      // route for why this is a subcollection of its own and carries no actor.
+      transaction.create(issueRef.collection('statusHistory').doc(), {
+        action: 'created',
+        from: null,
+        to: status,
+        createdAt: now,
+      });
       transaction.create(issueRef.collection('audit').doc(), {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',
@@ -440,6 +475,30 @@ export async function POST(request) {
         },
       }).catch(error => console.warn('[issues POST] reminder rows failed:', error.message));
     }
+
+    // The one event this product exists to react to. `notifyIssueAssigned` on
+    // the browser side covers "somebody handed you this", whose audience is the
+    // new task's assignees — and a customer's request has none, because only a
+    // client opens one and support picks it up afterwards. So creation told
+    // nobody anything, and a request filed at midnight waited for somebody to
+    // open the queue and notice an unread dot.
+    //
+    // It is said here rather than by the composer because the recipients are the
+    // tenant's internal staff, and the customer's browser is exactly the place
+    // that may not enumerate them.
+    announceIncidentCreated({
+      organizationId,
+      projectId,
+      projectName: projectData.name || '',
+      projectTeam: Array.isArray(projectData.team) ? projectData.team : [],
+      issueId: issueRef.id,
+      issueKey,
+      title: data.title.trim(),
+      actor: {
+        uid: authorization.user.uid,
+        name: authorization.user.name || authorization.user.email || '',
+      },
+    }).catch(error => console.warn('[issues POST] incident announcement failed:', error.message));
 
     return NextResponse.json({ id: issueRef.id, issueKey }, { status: 201 });
   } catch (error) {
