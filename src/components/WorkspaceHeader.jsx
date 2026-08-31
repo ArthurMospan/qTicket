@@ -737,6 +737,8 @@ export default function WorkspaceHeader() {
         searchOutsideResultCount={outsideResultCount}
         searchOutsideLoading={searchLoading}
         projectName={project?.name}
+        // The trail starts at «Клієнти» only for somebody who can open it.
+        showParentCrumb={!isClientRole(orgRole)}
         projectSearchActive={projectSearch}
         onProjectSearchToggle={() => setProjectSearch(true)}
         breadcrumbs={breadcrumbs}

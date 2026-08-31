@@ -51,12 +51,19 @@ function hexToRgba(hex, alpha) {
 // `showStatusName` is for a column that is not a status: on «Звернення» the
 // columns are the five shared categories, so a card in «У роботі» could be in
 // «Код-ревʼю» or in «QA» and the column no longer says which.
-// `showAssignee` is off for a customer reading their own board: who a request is
-// routed to is how support organises itself, not a fact about the request. It
-// was already fed an empty `members`, so no name or face leaked — but the slot
-// stayed, printing «Без учасників», which tells a customer a routing decision
-// exists and is empty. The row has to be absent, not empty.
-export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], index, projectId, projectName, showProjectName = false, showStatusName = false, showAssignee = true, isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
+// `showAssignee` is whether the card has a faces row at all; `assigneeSource` is
+// whose faces go in it. They were one thing, and being one thing is what made a
+// customer's board draw nobody.
+//
+// The reasoning that produced `showAssignee={false}` was right and incomplete:
+// who a request is *routed to* is how support organises itself, so the customer
+// is not shown `assigneeIds`, and an empty slot printing «Без учасників» is
+// worse than no slot, because it announces that a routing decision exists. What
+// it missed is that the customer has an answer of their own to the same
+// question — `clientAssigneeIds`, «Відповідальні клієнта», which is their people
+// on their request and has been on the record since 2026-08-31. So the row comes
+// back for them, reading the other field. See `issueDisplayParticipants`.
+export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], index, projectId, projectName, showProjectName = false, showStatusName = false, showAssignee = true, assigneeSource = 'support', isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
   const router   = useRouter();
   const { currentUser, projects = [], activeOrg } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
@@ -91,7 +98,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
       : hexToRgba(priorityConfig.color, 0.15),
   };
 
-  const participantRoles = issueDisplayParticipants(issue);
+  const participantRoles = issueDisplayParticipants(issue, { source: assigneeSource });
   const participants = participantRoles
     .map(participant => {
       const member = members.find(candidate => (candidate.id || candidate.uid) === participant.id);
@@ -386,6 +393,7 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
                   participants.slice(0, 5).map(({ id, member, roles }) => {
                     const roleLabels = roles.map(role => ({
                       assignee: 'відповідальний',
+                      'client-assignee': 'відповідальний клієнта',
                       author: 'автор',
                       subscriber: 'підписник',
                     })[role]);

@@ -286,18 +286,23 @@ export default function OverviewPage() {
                   />
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {/* The kit's row, with the assignee column absent rather
-                        than empty. `showAssignee={false}` is what drops it —
-                        see `TaskRow`: an empty column still tells the customer
-                        that a routing decision exists. */}
+                    {/* The kit's row, reading the customer's own answer to
+                        «хто цим займається»: `clientAssigneeIds`, their people
+                        on their request. Never `assigneeIds` — which agent has
+                        it is how the desk organises itself — and that is what
+                        `assigneeSource` selects rather than the column being
+                        dropped altogether, which is what used to happen and
+                        left the row looking like nobody's. */}
                     {recentIssues.map(issue => (
                       <TaskRow
                         key={issue.id}
                         issue={issue}
                         issues={issues}
+                        members={members}
                         projectId={issue.projectId}
                         projectName={projectById.get(issue.projectId)?.name}
-                        showAssignee={false}
+                        showAssignee
+                        assigneeSource="client"
                         onClick={() => {
                           const href = issuePath(issue, projectById.get(issue.projectId) || issue.projectId);
                           if (href) router.push(href);

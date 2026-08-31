@@ -44,6 +44,7 @@ export default function AgileBoard({
   projects = [],
   showProjectName = false,
   showAssignee = true,
+  assigneeSource = 'support',
   onMoveIssue,
   onBulkUpdate,
   swimlane = 'none',
@@ -626,6 +627,7 @@ export default function AgileBoard({
                               : project?.name}
                             showProjectName={showProjectName}
                             showAssignee={showAssignee}
+                            assigneeSource={assigneeSource}
                             issueLinks={issueLinks}
                             isArchived={isArchived || readOnly}
                             selected={activeSelectedIssueIds.has(issue.id)}

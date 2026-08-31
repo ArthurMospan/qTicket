@@ -50,7 +50,29 @@ export function issueParticipants(issue, {
   )];
 }
 
-export function issueDisplayParticipants(issue) {
+/**
+ * The faces a card or a row draws, and whose faces they are.
+ *
+ * There are two answers to «хто цим займається» on one request, and they belong
+ * to the two sides of the desk. `assigneeIds` is support's routing — which agent
+ * has it — and a customer never sees it. `clientAssigneeIds` is the customer's
+ * own: which of *their* people this request is on. Support reads both; a
+ * customer reads only the second, and it is theirs to read, not a leak.
+ *
+ * Until this argument existed a customer's board drew no faces at all, because
+ * the only set on offer was the one they may not have. That was right about the
+ * routing and wrong about the card: it left the request looking like nobody's,
+ * on the one screen where the reader is one of the people it belongs to.
+ *
+ * `watcherIds` is deliberately absent from the client answer. Watching is a
+ * support-side subscription — «Стежити» is not offered to a customer at all —
+ * so every id in it is an agent, and drawing them under a customer's heading
+ * would hand over exactly the routing the other branch withholds.
+ *
+ * @param {object} issue The request.
+ * @param {'support'|'client'} options.source Whose answer to «хто цим займається» to draw.
+ */
+export function issueDisplayParticipants(issue, { source = 'support' } = {}) {
   const participants = new Map();
   const addRole = (userId, role) => {
     if (typeof userId !== 'string' || userId.length === 0) return;
@@ -58,6 +80,13 @@ export function issueDisplayParticipants(issue) {
     if (!current.roles.includes(role)) current.roles.push(role);
     participants.set(userId, current);
   };
+
+  if (source === 'client') {
+    const clientAssigneeIds = Array.isArray(issue?.clientAssigneeIds) ? issue.clientAssigneeIds : [];
+    clientAssigneeIds.forEach(userId => addRole(userId, 'client-assignee'));
+    addRole(issue?.reporterId || issue?.createdBy, 'author');
+    return [...participants.values()];
+  }
 
   const assigneeIds = Array.isArray(issue?.assigneeIds)
     ? issue.assigneeIds

@@ -43,6 +43,7 @@ import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
+import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { assigneeIdsOf, categorizeIssues } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
@@ -59,12 +60,29 @@ const PROJECT_TABS = [
   { id: 'people', label: 'Учасники' },
 ];
 
+// The period filter's cutoff, resolved outside the component.
+//
+// «Створені за 7 днів» is a window measured from now, so it has to read the
+// clock — and a clock read during render is an impurity React's own lint rule
+// refuses, because two renders of the same state would disagree. «Звернення»
+// already had this shape for the same reason: its `filterTasks` is a module
+// function and reads the clock there. One helper, both screens' behaviour.
+function periodCutoff(period) {
+  const days = period === '7days' ? 7 : period === '30days' ? 30 : 0;
+  return days ? Date.now() - days * 24 * 60 * 60 * 1000 : 0;
+}
+
 const SCOPE_OPTIONS = [
   { value: 'open', label: 'Відкриті' },
   { value: 'all', label: 'Усі звернення' },
   { value: 'resolved', label: 'Вирішені' },
 ];
 
+// `onOpen` is optional, and its absence is a decision rather than an oversight.
+// A customer may now read this screen, and the support half of it is a list of
+// names — not doors: a support profile carries the projects that person is on,
+// which is every other customer of this desk. So the client's own colleagues
+// open, and the agents answering them do not.
 function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
   if (members.length === 0) {
     return (
@@ -82,12 +100,12 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
     <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
       {members.map(member => {
         const memberId = member.id || member.uid;
+        const Row = onOpen ? ListRow : 'div';
         return (
-          <ListRow
+          <Row
             key={memberId}
-            density="roomy"
-            onClick={() => onOpen(memberId)}
-            className="flex items-center gap-3"
+            {...(onOpen ? { density: 'roomy', onClick: () => onOpen(memberId) } : {})}
+            className={onOpen ? 'flex items-center gap-3' : 'flex items-center gap-3 px-4 py-4 sm:px-5'}
           >
             <UserAvatar user={member} size="md" />
             <div className="min-w-0 flex-1">
@@ -101,7 +119,7 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
             <Pill tone="neutral" size="sm" shape="badge">
               {organizationRoleLabel(member.role)}
             </Pill>
-          </ListRow>
+          </Row>
         );
       })}
     </Card>
@@ -140,6 +158,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const {
     statuses,
     priorities,
+    types,
     loading: workflowLoading,
     error: workflowError,
   } = useWorkflowConfig();
@@ -148,6 +167,8 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const [scope, setScope] = useState('open');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all');
   // The board is the first thing both audiences see. «Де воно зараз» is the
   // question this screen exists to answer, and a pipeline answers it at a
   // glance where a list answers it one row at a time.
@@ -212,6 +233,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   );
   const visibleIssues = useMemo(() => {
     const query = workspaceSearch.trim().toLocaleLowerCase('uk-UA');
+    const cutoff = periodCutoff(periodFilter);
     return categorizedIssues
       .filter(({ issue, category }) => {
         if (scope === 'open' && category === 'done') return false;
@@ -225,6 +247,13 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
           if (assigneeFilter !== 'all' && assigneeFilter !== 'unassigned' && !assignees.includes(assigneeFilter)) return false;
         }
         if (priorityFilter !== 'all' && (issue.priority || NO_PRIORITY_ID) !== priorityFilter) return false;
+        // Type and period are offered to both readers. A client already reads
+        // the type on the card and on the request itself, so filtering by it
+        // tells them nothing the screen was not showing — unlike the assignee
+        // above, which is the one filter whose very existence is a fact about
+        // how the desk is organised.
+        if (typeFilter !== 'all' && issue.type !== typeFilter) return false;
+        if (cutoff && timestampMillis(issue.createdAt) < cutoff) return false;
         if (!query) return true;
         return [issue.issueKey, issue.title, issue.description]
           .some(value => String(value || '').toLocaleLowerCase('uk-UA').includes(query));
@@ -234,7 +263,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         timestampMillis(right.updatedAt || right.createdAt)
         - timestampMillis(left.updatedAt || left.createdAt)
       ));
-  }, [assigneeFilter, categorizedIssues, clientViewer, priorityFilter, scope, workspaceSearch]);
+  }, [assigneeFilter, categorizedIssues, clientViewer, periodFilter, priorityFilter, scope, typeFilter, workspaceSearch]);
   usePublishLocalSearchResults(workspaceSearch, visibleIssues.length);
 
   const actor = useMemo(() => ({
@@ -325,6 +354,18 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     || workflowLoading;
   const loadError = projectsError || issuesError || membersError || workflowError;
   const failure = loadError ? workspaceDataFailureCopy(loadError, isQuotaRefused()) : null;
+  // Why this board looked nothing like the one on «Звернення», which is the
+  // same component with the same cards. That screen gives kanban the viewport:
+  // the page stops scrolling and the columns scroll inside themselves, which is
+  // what makes a pipeline readable. Here the board was dropped into an ordinary
+  // scrolling page with `min-h-[500px]`, so the columns ended wherever the
+  // tallest one ended, the whole page scrolled instead of the columns, and the
+  // header slid away with it. Same branch as `/my` now, and only for the case
+  // it is about: a list scrolls, an empty state scrolls, a failure scrolls.
+  const boardFillsScreen = activeTab === 'incidents'
+    && viewMode === 'kanban'
+    && !loadError
+    && visibleIssues.length > 0;
   const canManageProject = can(orgRole, 'edit:project_settings');
   const canInviteClient = can(orgRole, 'manage:team');
   const isArchived = project?.status === 'archived';
@@ -334,10 +375,15 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   // stops being able to say who asked for what. The composer is therefore the
   // one action on this screen that belongs to the client and not to staff.
   const canOpenIncident = clientViewer && !isReadOnly;
-  // A client's space has one thing in it: their requests. Its team and its
-  // settings are the tenant's administration of a customer, not the customer's
-  // own screen — same component, fewer tabs.
-  const tabs = (clientViewer ? PROJECT_TABS.filter(tab => tab.id === 'incidents') : PROJECT_TABS)
+  // Both tabs, both readers. «Учасники» was staff-only on the reasoning that a
+  // customer's space is administered *about* them rather than *by* them — true
+  // of the gear in the header, and not true of the roster: the people on this
+  // space are their own colleagues and the agents answering them, and a
+  // customer asking «хто цим займається з нашого боку» had nowhere to look.
+  // What stays withheld is one step finer and unchanged: which agent holds a
+  // particular request. A desk that will not say who works here is not
+  // protecting its routing, it is hiding.
+  const tabs = PROJECT_TABS
     .map(tab => ({
       ...tab,
       count: tab.id === 'incidents' ? visibleIssues.length : projectMembers.length,
@@ -370,8 +416,10 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
 
   return (
     <>
-      <div className="qt-nav-scroll flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent">
-        <div className="workspace-page-layout min-h-full pb-[120px]">
+      <div className={`flex-1 h-full bg-transparent ${boardFillsScreen
+        ? 'overflow-hidden'
+        : 'qt-nav-scroll overflow-y-auto overflow-x-hidden custom-scrollbar'}`}>
+        <div className={`workspace-page-layout ${boardFillsScreen ? 'h-full pb-0' : 'min-h-full pb-[120px]'}`}>
           <PageHeader
             title={project.name}
             tabs={tabs}
@@ -401,23 +449,10 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     {INCIDENT_TERMS_TABLE.composerSubmit}
                   </Button>
                 )}
-                {/* Desktop only: below md the board has nowhere to go and the
-                    list is the only view. Same control for both readers. */}
-                {activeTab === 'incidents' && (
-                  <div className="max-md:hidden">
-                    <Tabs
-                      tabs={[
-                        { id: 'kanban', icon: Kanban, title: 'Дошка', ariaLabel: 'Дошка' },
-                        { id: 'list', icon: List, title: 'Список', ariaLabel: 'Список' },
-                      ]}
-                      activeTab={viewMode}
-                      onTabChange={setViewMode}
-                    />
-                  </div>
-                )}
               </div>
             )}
             filters={activeTab === 'incidents' ? (
+              <div className="flex w-full items-center justify-between">
               <FilterBar>
                 <Select
                   filterRole="status"
@@ -452,7 +487,48 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     ...prioritySelectOptions(priorities),
                   ]}
                 />
+                <Select
+                  filterRole="type"
+                  ariaLabel="Фільтр за типом"
+                  variant="ghost"
+                  value={typeFilter}
+                  onChange={setTypeFilter}
+                  options={[
+                    { value: 'all', label: 'Усі типи' },
+                    ...(types || []).map(taskTypeSelectOption),
+                  ]}
+                />
+                <Select
+                  filterRole="date"
+                  ariaLabel="Фільтр за періодом створення"
+                  variant="ghost"
+                  value={periodFilter}
+                  onChange={setPeriodFilter}
+                  options={[
+                    { value: 'all', label: 'За весь час' },
+                    { value: '7days', label: 'Створені за 7 днів' },
+                    { value: '30days', label: 'Створені за 30 днів' },
+                  ]}
+                />
               </FilterBar>
+
+              {/* Opposite the filters, which is where «Звернення» puts it and
+                  where this screen did not: it sat up in the header beside
+                  «Створити звернення», so one product had its board/list
+                  switcher in two different places depending on which board you
+                  were looking at. Desktop only — below md there is no list, and
+                  the board is the view built for a narrow screen. */}
+              <div className="ml-auto flex items-center gap-2 max-md:hidden">
+                <Tabs
+                  tabs={[
+                    { id: 'kanban', icon: Kanban, title: 'Дошка', ariaLabel: 'Дошка' },
+                    { id: 'list', icon: List, title: 'Список', ariaLabel: 'Список' },
+                  ]}
+                  activeTab={viewMode}
+                  onTabChange={setViewMode}
+                />
+              </div>
+              </div>
             ) : null}
           />
 
@@ -464,7 +540,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-[20px]">
+            <div className={`flex flex-col gap-[20px] ${boardFillsScreen ? 'min-h-0 flex-1' : ''}`}>
               {isArchived && (
                 <Alert
                   variant="info"
@@ -511,8 +587,9 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       <AgileBoard
                         issues={visibleIssues}
                         allIssues={issues}
-                        members={clientViewer ? [] : members}
-                        showAssignee={!clientViewer}
+                        members={clientViewer ? clientMembers : members}
+                        showAssignee
+                        assigneeSource={clientViewer ? 'client' : 'support'}
                         projects={[project]}
                         projectId={project.id}
                         project={project}
@@ -521,22 +598,23 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                         onMoveIssue={clientViewer ? undefined : handleMoveIssue}
                         onBulkUpdate={clientViewer ? undefined : handleBulkUpdate}
                         canArchive={!clientViewer && canWhileRoleLoads(orgRole, 'delete:issue')}
-                        selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}`}
+                        selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}|${typeFilter}|${periodFilter}`}
                       />
                     </div>
                   ) : (
                     <TaskListView
                       issues={visibleIssues}
                       allIssues={issues}
-                      members={clientViewer ? [] : members}
-                      showAssignee={!clientViewer}
+                      members={clientViewer ? clientMembers : members}
+                      showAssignee
+                      assigneeSource={clientViewer ? 'client' : 'support'}
                       projects={[project]}
                       projectId={project.id}
                       projectName={project.name}
                       onBulkUpdate={clientViewer ? undefined : handleBulkUpdate}
                       bulkProgress={clientViewer ? null : bulkProgress}
                       canArchive={!clientViewer && canWhileRoleLoads(orgRole, 'delete:issue')}
-                      selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}`}
+                      selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}|${typeFilter}|${periodFilter}`}
                       emptyTitle="Звернень не знайдено"
                       emptyDescription="Змініть стан або пріоритет у фільтрах."
                     />
@@ -549,8 +627,10 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                   <Surface preset="panel" padding="md">
                     <DetailSection
                       density="panel"
-                      title="Команда клієнта"
-                      description="Зовнішні користувачі бачать тільки цей простір і його звернення."
+                      title={clientViewer ? 'Ваші співробітники' : 'Команда клієнта'}
+                      description={clientViewer
+                        ? 'Люди з вашого боку, які бачать звернення цього простору.'
+                        : 'Зовнішні користувачі бачать тільки цей простір і його звернення.'}
                       action={canInviteClient ? (
                         <Button
                           onClick={() => setShowClientInvite(true)}
@@ -565,8 +645,10 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     >
                     <MemberList
                       members={clientMembers}
-                      emptyTitle="Клієнта ще не запрошено"
-                      emptyDescription="Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників."
+                      emptyTitle={clientViewer ? 'Тут поки лише ви' : 'Клієнта ще не запрошено'}
+                      emptyDescription={clientViewer
+                        ? 'Запросити колегу можна в розділі «Співробітники».'
+                        : 'Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників.'}
                       onOpen={openClientProfile}
                     />
                     </DetailSection>
@@ -576,13 +658,22 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     <DetailSection
                       density="panel"
                       title="Команда підтримки"
-                      description="Внутрішні працівники, закріплені за цим клієнтським простором."
+                      description={clientViewer
+                        ? 'Хто з боку підтримки веде цей простір.'
+                        : 'Внутрішні працівники, закріплені за цим клієнтським простором.'}
                     >
                     <MemberList
                       members={supportMembers}
                       emptyTitle="Підтримку ще не призначено"
-                      emptyDescription="Додайте внутрішніх працівників у налаштуваннях клієнта."
-                      onOpen={memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
+                      emptyDescription={clientViewer
+                        ? 'Щойно за вашим простором закріплять працівників, вони зʼявляться тут.'
+                        : 'Додайте внутрішніх працівників у налаштуваннях клієнта.'}
+                      // Names, not doors, for a customer: `/team` is the staff
+                      // roster and the profile behind it lists the other
+                      // customers that person works with.
+                      onOpen={clientViewer
+                        ? undefined
+                        : memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
                     />
                     </DetailSection>
                   </Surface>

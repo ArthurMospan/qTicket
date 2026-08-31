@@ -117,7 +117,7 @@ test('клієнт і підтримка бачать один екран, і з
   assert.doesNotMatch(board, /router\.replace\('\/'\)/);
   // One board, one list, one set of columns; the role decides what is inside.
   assert.match(board, /readOnly=\{clientViewer\}/);
-  assert.match(board, /members=\{clientViewer \? \[\] : members\}/);
+  assert.match(board, /members=\{clientViewer \? clientMembers : members\}/);
   assert.match(board, /onBulkUpdate=\{clientViewer \? undefined : handleBulkUpdate\}/);
   assert.match(board, /onMoveIssue=\{clientViewer \? undefined : handleMoveIssue\}/);
   // Only a client opens a request; support receives, works and closes it.
@@ -383,7 +383,12 @@ test('«Огляд» — один екран, який знає, хто диви
   // вручну рядок із `ListRow` + `TaskIdentity`.
   assert.match(overview, /import TaskRow from '@\/components\/ui\/TaskManagement\/TaskRow';/);
   assert.match(clientHalf, /<TaskRow/);
-  assert.match(clientHalf, /showAssignee=\{false\}/);
+  // Рядок малює відповідальних КЛІЄНТА — його ж людей на його зверненні, —
+  // а не порожню колонку і не виконавця підтримки. Колонки тут не було зовсім,
+  // і звернення через це виглядало нічиїм на єдиному екрані, де читач — одна
+  // з людей, яким воно належить.
+  assert.match(clientHalf, /assigneeSource="client"/);
+  assert.doesNotMatch(clientHalf, /showAssignee=\{false\}/);
   assert.doesNotMatch(clientHalf, /<ListRow|<TaskIdentity/);
   // Обгортка — `Surface preset="panel"` з `DetailSection density="panel"`.
   assert.match(clientHalf, /<Surface preset="panel"[\s\S]{0,120}<DetailSection\s+density="panel"/);

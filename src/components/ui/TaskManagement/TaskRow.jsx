@@ -44,7 +44,8 @@ function fmtDate(raw, timeZone) {
  * @param {string} props.projectName Its name.
  * @param {boolean} props.showProjectName Whether the row names its project — true only on cross-project lists.
  * @param {boolean} props.showStatusName Whether the row names its status — true only where the section heading cannot, i.e. a category holding several statuses.
- * @param {boolean} props.showAssignee Whether the row has an assignee column at all. False for a customer reading their own requests: who a request is routed to is how support organises itself, not a fact about the request. Feeding an empty `members` leaked no name, but it left the column printing «Н/В» — which tells the customer a routing decision exists and is empty. The column has to be absent, not empty.
+ * @param {boolean} props.showAssignee Whether the row has an assignee column at all. Dropping it is how a customer's list used to hide support's routing, and the column has to be absent rather than empty — an empty one still prints «Н/В», which tells the customer a routing decision exists. See `assigneeSource` for what a customer is shown instead.
+ * @param {'support'|'client'} props.assigneeSource Which answer to «хто цим займається» the faces are. `support` reads `assigneeIds` — the agent holding the request, never shown to a customer. `client` reads `clientAssigneeIds`, the customer's own people on their own request, which is theirs to read.
  * @param {() => void} props.onClick Opens the task.
  * @param {boolean} props.selected Whether this task is part of the active bulk selection.
  * @param {boolean} props.selectionActive Whether the row is showing its selection control instead of priority.
@@ -62,6 +63,7 @@ export default function TaskRow({
   showProjectName = false,
   showStatusName = false,
   showAssignee = true,
+  assigneeSource = 'support',
   onClick,
   selected = false,
   selectionActive = false,
@@ -102,7 +104,14 @@ export default function TaskRow({
 
   const priorityConfig = priorityPresentation(task.priority, priorities);
 
-  const assignees = (task.assigneeIds || task.assignees || [])
+  // Two answers to «хто цим займається», one per side of the desk. Support
+  // reads its own routing; a customer reads `clientAssigneeIds` — their people
+  // on their request — and never the agent who has it. See
+  // `issueDisplayParticipants` for why watchers are not in the second answer.
+  const assigneeIds = assigneeSource === 'client'
+    ? (task.clientAssigneeIds || [])
+    : (task.assigneeIds || task.assignees || []);
+  const assignees = assigneeIds
     .map(uid => members.find(m => (m.id || m.uid) === uid))
     .filter(Boolean);
 

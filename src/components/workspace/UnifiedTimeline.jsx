@@ -206,9 +206,15 @@ function SystemEventMessage({ text, time, actorName, actor }) {
   return (
     <div className="flex justify-center px-3">
       <div data-ui-surface="system-message" className="ui-surface flex max-w-[92%] items-start gap-2">
-        <span className="mt-[1px] shrink-0">
-          <UserAvatar user={actor || { name: actorName }} size="chat-mention" />
-        </span>
+        {/* No face where there is nobody. A customer's history is written
+            without an actor by design, and `UserAvatar` given a nameless user
+            draws the placeholder for one — a blank circle standing in for a
+            person the entry deliberately does not have. */}
+        {(actor || actorName) && (
+          <span className="mt-[1px] shrink-0">
+            <UserAvatar user={actor || { name: actorName }} size="chat-mention" />
+          </span>
+        )}
         <p className="min-w-0 text-[11px] leading-[18px] text-muted">
           {actorName && <strong className="font-semibold text-ink">{actorName}</strong>}
           {actorName && ' '}
@@ -1550,8 +1556,26 @@ export default function UnifiedTimeline({
           }
 
           if (item._type === 'audit') {
-            const member = members.find(candidate => (candidate.id || candidate.uid) === item.userId);
-            const actorName = item.userName || member?.name || org?.name || 'Система';
+            // `statusHistory` — the feed a customer reads — stores no actor on
+            // purpose: which agent moved a request is the routing withheld from
+            // them everywhere else. So nearly every entry on their side arrives
+            // with no `userId` and no `userName`, and this line fell through to
+            // the organization's own name. A customer's thread therefore opened
+            // with «OneB Створено звернення» — their own request, attributed to
+            // their supplier, at the top of the one screen they came to read.
+            // An entry with no actor now has none, and the sentence stands on
+            // its own, which is what a system line is.
+            //
+            // `created` is the exception and it leaks nothing: the person who
+            // opened the request is the customer, and their name is already on
+            // the request. It is the difference between a thread that starts
+            // with somebody doing something and one that starts with a fact
+            // nobody caused.
+            const actorId = item.action === 'created'
+              ? (item.userId || issue?.reporterId || issue?.createdBy || '')
+              : item.userId;
+            const member = members.find(candidate => (candidate.id || candidate.uid) === actorId);
+            const actorName = item.userName || member?.name || '';
             return (
               <Fragment key={`audit-${item.id}`}>
                 {separator}

@@ -49,7 +49,8 @@ const MORE_ROWS = 25;
  * @param {string} props.projectId Current project.
  * @param {string} props.projectName Its name, for the per-row project chip.
  * @param {boolean} props.showProjectName Whether each row names its project — true only on cross-project lists.
- * @param {boolean} props.showAssignee Whether the rows carry an assignee column at all — false for a customer reading their own requests. See `TaskRow`.
+ * @param {boolean} props.showAssignee Whether the rows carry an assignee column at all. See `TaskRow`.
+ * @param {'support'|'client'} props.assigneeSource Whose answer to «хто цим займається» the rows draw: support's routing, or the customer's own people. See `TaskRow`.
  * @param {(action: string, value: unknown, issues: object[]) => Promise<unknown>} props.onBulkUpdate Applies one bulk action to the selected rows.
  * @param {{done: number, total: number}} props.bulkProgress How far the running bulk action has got, for the toolbar to report.
  * @param {boolean} props.canArchive Whether the current role may archive selected tasks.
@@ -68,6 +69,7 @@ export default function TaskListView({
   projectName,
   showProjectName = false,
   showAssignee = true,
+  assigneeSource = 'support',
   groupBy = 'status',
   compareIssueCards = compareIssues,
   hiddenGroupIds = [],
@@ -264,6 +266,7 @@ export default function TaskListView({
                     showProjectName={showProjectName}
                     showStatusName={section.showStatusName}
                     showAssignee={showAssignee}
+                    assigneeSource={assigneeSource}
                     selected={activeSelectedIssueIds.has(issue.id)}
                     selectionActive={selectionActive}
                     onSelect={onBulkUpdate ? toggleIssueSelection : undefined}

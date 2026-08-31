@@ -241,7 +241,11 @@ export default function WorkspaceSidebar() {
         // screen is the product's front screen and not a second one built for
         // them — see src/app/(app)/overview/page.js.
         { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
-        { href: clientSpaceHref, icon: Folder, label: 'Мої звернення', exact: clientSpaceHref === '/' },
+        // `TaskIcon`, the same mark «Звернення» carries on the support rail.
+        // It was `Folder` — the icon this rail uses for a *client space* — so
+        // the customer's entry drew a container beside the word «звернення»,
+        // and the two halves of the product named one record with two glyphs.
+        { href: clientSpaceHref, icon: TaskIcon, label: 'Мої звернення', exact: clientSpaceHref === '/' },
         // «Співробітники» used to point at `/settings?section=team` — an address
         // the settings rail named a second time on the screen it opened, so one
         // destination was named twice on one screen. The duplicate is gone from

@@ -194,10 +194,17 @@ test('the approved follow-up decisions stay encoded in the product', () => {
   // request, and they open it from their own space.
   assert.doesNotMatch(myTasks, /onRequestAddIssue=/);
   assert.doesNotMatch(project, /<AgileBoard[\s\S]{0,700}showHiddenLane/);
-  // A customer's copy of the board and the list has no assignee slot at all —
-  // absent, not an empty column announcing a routing decision they never see.
-  assert.match(project, /<AgileBoard[\s\S]{0,400}showAssignee=\{!clientViewer\}/);
-  assert.match(project, /<TaskListView[\s\S]{0,300}showAssignee=\{!clientViewer\}/);
+  // A customer's copy of the board and the list draws faces — their own. The
+  // slot used to be absent entirely, on the reasoning that an empty assignee
+  // column announces a routing decision they never see; that was right about
+  // `assigneeIds` and wrong about the card, which then belonged to nobody.
+  // `assigneeSource` is what splits the two: support reads its routing, a
+  // customer reads `clientAssigneeIds` — their people on their request — and
+  // the roster handed in is their own colleagues, never the desk.
+  assert.match(project, /<AgileBoard[\s\S]{0,500}assigneeSource=\{clientViewer \? 'client' : 'support'\}/);
+  assert.match(project, /<TaskListView[\s\S]{0,400}assigneeSource=\{clientViewer \? 'client' : 'support'\}/);
+  assert.match(project, /members=\{clientViewer \? clientMembers : members\}/);
+  assert.doesNotMatch(project, /showAssignee=\{!clientViewer\}/);
 
   assert.match(createTask, /types\.filter\(type => type\.id !== 'epic'\)/);
   assert.match(createTask, /options=\{creatableTypes\.map/);

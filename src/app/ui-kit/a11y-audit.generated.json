@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 256,
-    "elements": 2173,
+    "elements": 2176,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -172,7 +172,7 @@
     },
     {
       "element": "Button",
-      "location": "src/components/ui/TaskManagement/TaskListView.jsx:236",
+      "location": "src/components/ui/TaskManagement/TaskListView.jsx:238",
       "attributes": [
         "title",
         "aria-label"
@@ -194,14 +194,14 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1443",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1449",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1463",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1469",
       "attributes": [
         "label"
       ]
