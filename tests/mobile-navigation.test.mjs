@@ -63,10 +63,20 @@ test('the bar offers a client the same destinations the rail does', async () => 
   const sidebar = await read('../src/components/WorkspaceSidebar.jsx');
 
   const clientTabs = nav.slice(nav.indexOf('const visibleTabs = clientViewer'), nav.indexOf(': TABS;'));
+  // The same names, not merely the same destinations. The bar said «Звернення»
+  // with a `Folder` — the mark this product gives a project — while the rail
+  // two hundred pixels wider said «Мої звернення» with the record's own icon:
+  // one product, one record, two navigations disagreeing about both.
   assert.deepEqual(
     [...clientTabs.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
-    ['Огляд', 'Звернення'],
+    ['Огляд', 'Мої звернення'],
   );
+  assert.match(clientTabs, /icon: TaskIcon, label: 'Мої звернення'/);
+  assert.match(sidebar, /icon: TaskIcon, label: 'Мої звернення'/);
+  // And the entry stands down where it cannot name a destination: a customer
+  // holding two projects gets the list below instead, on both navigations.
+  assert.match(clientTabs, /clientProjects\.length === 1/);
+  assert.match(nav, /\(!clientViewer \|\| clientProjects\.length > 1\)/);
   // `/overview` serves both audiences, so both navigations lead there and the
   // phone no longer opens on a list where the desktop opens on a summary.
   assert.match(clientTabs, /href: '\/overview'/);

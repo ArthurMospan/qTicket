@@ -335,8 +335,13 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
           surface="canvas"
         />
       )}
-      {clientViewer && (
-        <Button
+      {/* For both, because both have the section again.
+          It went client-only on 2026-08-29, when «Сповіщення» was removed from
+          the internal rail — a gear pointing at a screen a support agent no
+          longer had. The section came back on 2026-08-31 and this did not, so
+          an agent has notification preferences and no way to reach them from
+          the one control that is about notifications. */}
+      <Button
           onClick={() => {
             setBellOpen(false);
             navigateAfterOverlayClose(() => router.push('/settings?section=notifications'));
@@ -348,7 +353,7 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
           shape="compact"
           surface="canvas"
         />
-      )}
+      
     </>
   );
 

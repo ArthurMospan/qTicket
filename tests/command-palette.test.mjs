@@ -365,7 +365,7 @@ test('every action the palette offers lands somewhere that answers it', async ()
   // screen with no composer on it.
   assert.match(
     clients,
-    /router\.replace\(searchParams\?\.get\('new'\) === '1' \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
+    /router\.replace\(wantsComposer && clientProject \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
   );
   assert.match(board, /params\.get\('new'\) !== '1'/);
   assert.match(board, /setShowComposer\(true\)/);

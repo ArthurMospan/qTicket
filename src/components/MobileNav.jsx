@@ -58,17 +58,29 @@ export default function MobileNav({ keyboardOpen = false }) {
   // stopped being the current route the moment the redirect landed and could
   // never light up. Two navigations disagreeing about where «Мої звернення»
   // lives is the seam; there is one answer and both read it.
-  const clientSpaceHref = useMemo(() => {
-    const space = (projects || []).find(project => project.status !== 'archived');
-    return space ? `/${space.id}` : '/';
-  }, [projects]);
+  // «The one, if there is one», exactly as the desktop rail answers it. This
+  // said «the first», which is a different answer as soon as a customer holds
+  // two projects — and they can since 2026-09-01. A phone would have picked one
+  // of them silently and offered no way to reach the other.
+  const clientProjects = useMemo(
+    () => (projects || []).filter(project => project.status !== 'archived'),
+    [projects],
+  );
+  const clientSpaceHref = clientProjects.length === 1 ? `/${clientProjects[0].id}` : '/';
   const visibleTabs = clientViewer
     ? [
         // The rail's first entry, in the bar's first slot. `/overview` serves
         // both audiences now, so the phone and the desktop open the same front
         // screen for a customer.
         { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
-        { href: clientSpaceHref, icon: Folder, label: 'Звернення', exact: clientSpaceHref === '/' },
+        // The same name and the same mark the desktop rail uses. The bar said
+        // «Звернення» with a `Folder` — the icon this product gives a project —
+        // while the rail two hundred pixels wider said «Мої звернення» with the
+        // record's own icon. One product, one record, two navigations that
+        // disagreed about both.
+        ...(clientProjects.length === 1
+          ? [{ href: clientSpaceHref, icon: TaskIcon, label: 'Мої звернення', exact: false }]
+          : []),
         // «Співробітники» stood here and pointed at `/settings?section=team` —
         // the settings rail names that same destination again on the screen it
         // opens. The client roster lives at `/team` now.
@@ -322,14 +334,17 @@ export default function MobileNav({ keyboardOpen = false }) {
               })}
             </div>
 
-            {!clientViewer && (
+            {(!clientViewer || clientProjects.length > 1) && (
               <>
             <div className="mx-[16px] border-t border-white/[0.08] my-[10px]" />
 
-            {/* Client workspaces are internal support navigation. */}
+            {/* Support's client list — and, since a customer may hold more than
+                one project, theirs too. Without this a customer with two
+                projects had a bar entry that could not name either and no list
+                anywhere on a phone to reach the second one. */}
             <div className="flex items-center justify-between px-[20px] pb-[8px]">
               <p className="text-[11px] font-bold text-[var(--sb-muted)] uppercase tracking-wider">
-                Проєкти
+                {clientViewer ? 'Мої звернення' : 'Проєкти'}
               </p>
               {can(orgRole, 'create:project') && (
                 <IconAction

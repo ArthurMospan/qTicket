@@ -603,10 +603,16 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const router       = useRouter();
   const [showNewProject, setShowNewProject] = useState(false);
   const clientViewer = isClientRole(orgRole);
-  const clientProject = useMemo(
-    () => (projects || []).find(project => project.status !== 'archived') || null,
+  // «The one, if there is one». `find` — the first — was the whole of this, and
+  // a customer may hold more than one project since 2026-09-01: `?new=1` would
+  // then have opened the composer in whichever project happened to sort first,
+  // and filed somebody's request against the wrong customer space. With several
+  // the hop stops at «Огляд», where the reader picks.
+  const clientProjects = useMemo(
+    () => (projects || []).filter(project => project.status !== 'archived'),
     [projects],
   );
+  const clientProject = clientProjects.length === 1 ? clientProjects[0] : null;
   // Real-time issues state
 
   // Filter states
@@ -659,9 +665,10 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   // overview would have opened a screen with no composer on it and dropped the
   // request the reader had already asked for.
   useEffect(() => {
-    if (!clientViewer || clientsRoute || !clientProject) return;
-    router.replace(searchParams?.get('new') === '1' ? `/${clientProject.id}?new=1` : '/overview');
-  }, [clientProject, clientViewer, clientsRoute, router, searchParams]);
+    if (!clientViewer || clientsRoute || !clientProjects.length) return;
+    const wantsComposer = searchParams?.get('new') === '1';
+    router.replace(wantsComposer && clientProject ? `/${clientProject.id}?new=1` : '/overview');
+  }, [clientProject, clientProjects.length, clientViewer, clientsRoute, router, searchParams]);
 
   // This screen no longer reads tasks at all.
   //
@@ -809,7 +816,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   if (clientViewer && !clientsRoute) {
     // Still on the way in: either the spaces have not arrived yet, or they
     // have and the redirect above is in flight.
-    if (projectsLoading || clientProject) {
+    if (projectsLoading || clientProjects.length) {
       return (
         <div className="flex min-h-[320px] flex-1 items-center justify-center" role="status" aria-busy="true">
           <LoadingSpinner size="md" label="Завантажуємо ваші звернення…" />

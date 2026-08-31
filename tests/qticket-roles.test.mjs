@@ -112,7 +112,7 @@ test('клієнт і підтримка бачать один екран, і з
   // іде прямо туди — інакше запит, який читач уже попросив, просто зникає.
   assert.match(
     root,
-    /router\.replace\(searchParams\?\.get\('new'\) === '1' \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
+    /router\.replace\(wantsComposer && clientProject \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
   );
   assert.doesNotMatch(board, /router\.replace\('\/'\)/);
   // One board, one list, one set of columns; the role decides what is inside.
