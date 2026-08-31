@@ -203,7 +203,7 @@ test('the approved follow-up decisions stay encoded in the product', () => {
   // the roster handed in is their own colleagues, never the desk.
   assert.match(project, /<AgileBoard[\s\S]{0,500}assigneeSource=\{clientViewer \? 'client' : 'support'\}/);
   assert.match(project, /<TaskListView[\s\S]{0,400}assigneeSource=\{clientViewer \? 'client' : 'support'\}/);
-  assert.match(project, /members=\{clientViewer \? clientMembers : members\}/);
+  assert.match(project, /members=\{clientViewer \? projectMembers : members\}/);
   assert.doesNotMatch(project, /showAssignee=\{!clientViewer\}/);
 
   assert.match(createTask, /types\.filter\(type => type\.id !== 'epic'\)/);

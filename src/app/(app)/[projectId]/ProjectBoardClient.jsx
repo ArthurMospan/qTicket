@@ -653,10 +653,19 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                           itself the announcement: it tells the customer a
                           routing decision exists and is empty. Absent, not
                           empty. */}
+                      {/* `projectMembers`, not `clientMembers`. The card looks
+                          every participant id up in this list and drops the
+                          ones it cannot resolve, so handing a customer only
+                          their own colleagues meant the agent's id was added to
+                          the participant list and then silently thrown away
+                          when it came to drawing a face. Everyone on this
+                          project, which is exactly who can be on one of its
+                          requests — and not the organization roster support
+                          gets, because a customer has no business holding it. */}
                       <AgileBoard
                         issues={visibleIssues}
                         allIssues={issues}
-                        members={clientViewer ? clientMembers : members}
+                        members={clientViewer ? projectMembers : members}
                         showAssignee
                         assigneeSource={clientViewer ? 'client' : 'support'}
                         projects={[project]}
@@ -674,7 +683,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     <TaskListView
                       issues={visibleIssues}
                       allIssues={issues}
-                      members={clientViewer ? clientMembers : members}
+                      members={clientViewer ? projectMembers : members}
                       showAssignee
                       assigneeSource={clientViewer ? 'client' : 'support'}
                       projects={[project]}

@@ -117,7 +117,7 @@ test('клієнт і підтримка бачать один екран, і з
   assert.doesNotMatch(board, /router\.replace\('\/'\)/);
   // One board, one list, one set of columns; the role decides what is inside.
   assert.match(board, /readOnly=\{clientViewer\}/);
-  assert.match(board, /members=\{clientViewer \? clientMembers : members\}/);
+  assert.match(board, /members=\{clientViewer \? projectMembers : members\}/);
   assert.match(board, /onBulkUpdate=\{clientViewer \? undefined : handleBulkUpdate\}/);
   assert.match(board, /onMoveIssue=\{clientViewer \? undefined : handleMoveIssue\}/);
   // Only a client opens a request; support receives, works and closes it.

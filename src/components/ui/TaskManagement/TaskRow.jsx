@@ -104,12 +104,22 @@ export default function TaskRow({
 
   const priorityConfig = priorityPresentation(task.priority, priorities);
 
-  // Two answers to «хто цим займається», one per side of the desk. Support
-  // reads its own routing; a customer reads `clientAssigneeIds` — their people
-  // on their request — and never the agent who has it. See
-  // `issueDisplayParticipants` for why watchers are not in the second answer.
+  // Who is on this request, and the customer's answer includes the desk.
+  //
+  // It used to be `clientAssigneeIds` alone, from when the agent's name was
+  // withheld from them — a rule retired on 2026-09-01, because the request's
+  // own strip and every reply in the conversation name that agent anyway. The
+  // card was fixed for it and this row was not, so «Останні дії» went on
+  // showing a customer their own colleagues and no one from support: the same
+  // question answered two ways by two components of one product.
+  //
+  // `watcherIds` stays out of both, as it does in `issueDisplayParticipants`:
+  // watching is an internal subscription, so it answers «хто підписався».
   const assigneeIds = assigneeSource === 'client'
-    ? (task.clientAssigneeIds || [])
+    ? [...new Set([
+      ...(task.assigneeIds || []),
+      ...(task.clientAssigneeIds || []),
+    ])]
     : (task.assigneeIds || task.assignees || []);
   const assignees = assigneeIds
     .map(uid => members.find(m => (m.id || m.uid) === uid))

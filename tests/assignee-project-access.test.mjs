@@ -194,7 +194,7 @@ test('a customer incident row no longer loses the face of someone outside the pr
   // face it already carries out of the organization list — so an assignment
   // keeps its face even after the person leaves this customer roster. The board
   // and the list are handed that list, not the roster.
-  assert.match(workspace, /members=\{clientViewer \? clientMembers : members\}/);
+  assert.match(workspace, /members=\{clientViewer \? projectMembers : members\}/);
   assert.match(workspace, /const supportAssigneeOptions = useMemo\(\(\) => supportMembers/);
   const detail = await read('../src/components/workspace/IssueDetail.jsx');
   assert.match(detail, /const assignableIds = new Set\(\[\.\.\.teamUids, \.\.\.\(issue\?\.assigneeIds \|\| \[\]\)\]\);/);

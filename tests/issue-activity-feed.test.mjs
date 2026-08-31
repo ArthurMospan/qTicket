@@ -94,3 +94,40 @@ test('an event with nobody recorded is still attributed to the desk', () => {
   assert.equal(entry.actor, null, 'the desk is not a person and gets no face');
   assert.equal(entry.text, 'змінила статус звернення');
 });
+
+// The defect this file could not have caught, and the one that got shipped
+// twice: the ids were right and the roster they are resolved against was not.
+//
+// `IssueCard` and `TaskRow` both look every participant id up in the `members`
+// prop and drop what they cannot resolve. So adding support's assignee to the
+// customer's participant list changed nothing at all while the board was still
+// handed `clientMembers` — the id arrived and was silently thrown away when it
+// came to drawing a face. Two components, one question, and the answer depended
+// on a prop nobody was comparing against the list.
+test('a customer’s participants include the desk, and the roster can resolve them', async () => {
+  const { issueDisplayParticipants } = await import('../src/lib/utils/issueParticipants.mjs');
+  const { readFile } = await import('node:fs/promises');
+
+  const request = {
+    assigneeIds: ['agent-1'],
+    clientAssigneeIds: ['customer-2'],
+    reporterId: 'customer-1',
+    watcherIds: ['agent-9'],
+  };
+  const ids = issueDisplayParticipants(request, { source: 'client' }).map(entry => entry.id);
+  assert.ok(ids.includes('agent-1'), 'the agent answering is one of the people on it');
+  assert.ok(ids.includes('customer-2'), 'so is the customer’s own responsible');
+  assert.ok(ids.includes('customer-1'), 'and the author');
+  assert.ok(!ids.includes('agent-9'), 'watching is a subscription, not «хто цим займається»');
+
+  // And the roster handed to the card has to contain all of them. `clientMembers`
+  // is the customer's colleagues alone, so it cannot; `projectMembers` is
+  // everyone on the project, which is exactly who can be on one of its requests.
+  const board = await readFile(new URL('../src/app/(app)/[projectId]/ProjectBoardClient.jsx', import.meta.url), 'utf8');
+  assert.match(board, /members=\{clientViewer \? projectMembers : members\}/);
+  assert.doesNotMatch(board, /members=\{clientViewer \? clientMembers : members\}/);
+
+  // The list row asks the same question and must give the same answer.
+  const row = await readFile(new URL('../src/components/ui/TaskManagement/TaskRow.jsx', import.meta.url), 'utf8');
+  assert.match(row, /\.\.\.\(task\.assigneeIds \|\| \[\]\),\s*\.\.\.\(task\.clientAssigneeIds \|\| \[\]\),/);
+});
