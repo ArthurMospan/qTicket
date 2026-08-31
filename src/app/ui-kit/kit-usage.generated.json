@@ -1479,7 +1479,7 @@
     },
     "TextAction": {
       "file": "src/components/ui/TextAction.jsx",
-      "count": 4,
+      "count": 5,
       "showcased": true,
       "usedByKit": [
         "TaskListView"
@@ -1491,6 +1491,7 @@
         "/team"
       ],
       "usedIn": [
+        "src/app/(app)/error.js",
         "src/app/(app)/overview/page.js",
         "src/components/InviteLinkSection.jsx",
         "src/components/WorkspaceHeader.jsx",
@@ -1711,7 +1712,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:643",
-            "src/app/(app)/error.js:51",
+            "src/app/(app)/error.js:94",
             "src/app/(app)/my/page.js:458",
             "src/app/(app)/overview/page.js:247",
             "src/app/(app)/page.js:562",
@@ -1878,7 +1879,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:449",
-            "src/app/(app)/error.js:51",
+            "src/app/(app)/error.js:94",
             "src/app/(app)/my/page.js:458",
             "src/app/(app)/overview/page.js:223",
             "src/app/(app)/page.js:563",
@@ -1968,7 +1969,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:449",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:643",
-            "src/app/(app)/error.js:51",
+            "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
@@ -2083,7 +2084,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:449",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:643",
-            "src/app/(app)/error.js:51",
+            "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
@@ -2189,7 +2190,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:439",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:643",
-            "src/app/(app)/error.js:51",
+            "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
@@ -2313,7 +2314,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:449",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:643",
-            "src/app/(app)/error.js:51",
+            "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:352",
@@ -3761,6 +3762,17 @@
     },
     "TextAction": {
       "tone": {
+        "muted": {
+          "count": 2,
+          "routes": [
+            "/[projectId]",
+            "/team"
+          ],
+          "files": [
+            "src/app/(app)/error.js:102",
+            "src/components/InviteLinkSection.jsx:169"
+          ]
+        },
         "ink": {
           "count": 3,
           "routes": [
@@ -3782,16 +3794,6 @@
             "src/components/InviteLinkSection.jsx:156"
           ]
         },
-        "muted": {
-          "count": 1,
-          "routes": [
-            "/[projectId]",
-            "/team"
-          ],
-          "files": [
-            "src/components/InviteLinkSection.jsx:169"
-          ]
-        },
         "danger-quiet": {
           "count": 1,
           "routes": [],
@@ -3810,6 +3812,16 @@
         }
       },
       "size": {
+        "lg": {
+          "count": 2,
+          "routes": [
+            "/[projectId]/issue/[issueId]"
+          ],
+          "files": [
+            "src/app/(app)/error.js:102",
+            "src/components/workspace/IssueDetail.jsx:746"
+          ]
+        },
         "md": {
           "count": 4,
           "routes": [
@@ -3833,15 +3845,6 @@
           "files": [
             "src/components/InviteLinkSection.jsx:169",
             "src/components/WorkspaceHeader.jsx:457"
-          ]
-        },
-        "lg": {
-          "count": 1,
-          "routes": [
-            "/[projectId]/issue/[issueId]"
-          ],
-          "files": [
-            "src/components/workspace/IssueDetail.jsx:746"
           ]
         }
       }

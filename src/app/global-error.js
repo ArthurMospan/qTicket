@@ -58,6 +58,17 @@ export default function GlobalError({ error, reset }) {
             >
               Спробувати ще раз
             </button>
+            {/* The one identifier this boundary can offer. It cannot report
+                anything itself — the report route needs an authenticated
+                session, and if the root layout failed there may be no Firebase
+                client at all — so the person is given the digest to quote. A
+                production build strips stacks and leaves exactly this, and it
+                is what the server log can be searched for. */}
+            {error?.digest && (
+              <p style={{ fontSize: 11, color: '#cfcfcf', margin: '20px 0 0', fontFamily: 'ui-monospace, monospace' }}>
+                Код помилки: {error.digest}
+              </p>
+            )}
           </div>
         </div>
       </body>

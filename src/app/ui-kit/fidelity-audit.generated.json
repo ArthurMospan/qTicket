@@ -371,7 +371,7 @@
   "manualSurfaces": [],
   "localSurfaceExceptions": [
     {
-      "location": "src/app/(app)/error.js:37",
+      "location": "src/app/(app)/error.js:80",
       "tag": "div",
       "className": "w-full max-w-[420px] bg-white border border-line rounded-[16px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center"
     },
