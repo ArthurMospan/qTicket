@@ -9,11 +9,11 @@
   },
   "totals": {
     "componentsWithVariants": 38,
-    "declaredValues": 340,
+    "declaredValues": 341,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 162,
+    "usedAndPreviewed": 163,
     "usedWithoutPreview": 0,
     "declaredUnused": 162
   },
@@ -1540,6 +1540,7 @@
     "DetailSection": {
       "density": [
         "group",
+        "panel",
         "section"
       ]
     },
@@ -1590,7 +1591,7 @@
     "ListRow.density.roomy": 4,
     "UserAvatar.size.md": 2,
     "Pill.tone.neutral": 8,
-    "Pill.size.sm": 17,
+    "Pill.size.sm": 18,
     "Pill.shape.badge": 17,
     "LoadingSpinner.size.md": 16,
     "Surface.preset.panel": 13,
@@ -1608,6 +1609,7 @@
     "Button.size.md": 28,
     "Alert.variant.info": 6,
     "Surface.padding.md": 10,
+    "DetailSection.density.panel": 4,
     "Button.composition.workspace-guard": 3,
     "Surface.preset.card": 2,
     "Surface.padding.none": 2,
@@ -1647,7 +1649,7 @@
     "Button.size.icon": 12,
     "Card.padding.lg": 8,
     "ToggleSwitch.size.sm": 4,
-    "Pill.tone.ink-subtle": 4,
+    "Pill.tone.ink-subtle": 5,
     "UserAvatar.size.lg": 2,
     "Button.composition.settings-row-action": 3,
     "Tabs.variant.underline": 1,
@@ -1837,6 +1839,7 @@
     "DetailLayout.context.event",
     "DetailLayout.context.task",
     "DetailSection.density.group",
+    "DetailSection.density.panel",
     "DetailSection.density.section",
     "Dialog.bodyPadding.default",
     "Dialog.bodyPadding.flush",

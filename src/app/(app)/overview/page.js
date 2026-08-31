@@ -6,6 +6,7 @@ import {
   Alert,
   Button,
   Card,
+  DetailSection,
   EmptyState,
   KpiCard,
   ListRow,
@@ -226,16 +227,16 @@ export default function SupportOverviewPage() {
 
             <div className="grid items-start gap-[20px] xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.8fr)]">
               <Surface preset="panel" padding="md">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="ui-type-section-title text-ink">Нещодавно оновлені</h2>
-                    <p className="mt-1 text-[12px] text-muted">Останні зміни у зверненнях усіх доступних клієнтів.</p>
-                  </div>
-                  <Button onClick={() => router.push('/my')} style="secondary" size="md" icon={ArrowRight}>
-                    Вся черга
-                  </Button>
-                </div>
-
+                <DetailSection
+                  density="panel"
+                  title="Нещодавно оновлені"
+                  description="Останні зміни у зверненнях усіх доступних клієнтів."
+                  action={(
+                    <Button onClick={() => router.push('/my')} style="secondary" size="md" icon={ArrowRight}>
+                      Вся черга
+                    </Button>
+                  )}
+                >
                 {recentIssues.length === 0 ? (
                   <EmptyState
                     icon={Inbox}
@@ -292,19 +293,20 @@ export default function SupportOverviewPage() {
                     })}
                   </Card>
                 )}
+                </DetailSection>
               </Surface>
 
               <Surface preset="panel" padding="md">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="ui-type-section-title text-ink">Клієнти</h2>
-                    <p className="mt-1 text-[12px] text-muted">Відкриті звернення за просторами.</p>
-                  </div>
-                  <Button onClick={() => router.push('/clients')} style="secondary" size="md" icon={ArrowRight}>
-                    Усі
-                  </Button>
-                </div>
-
+                <DetailSection
+                  density="panel"
+                  title="Клієнти"
+                  description="Відкриті звернення за просторами."
+                  action={(
+                    <Button onClick={() => router.push('/clients')} style="secondary" size="md" icon={ArrowRight}>
+                      Усі
+                    </Button>
+                  )}
+                >
                 {projectSummary.length === 0 ? (
                   <EmptyState
                     icon={UsersRound}
@@ -344,6 +346,7 @@ export default function SupportOverviewPage() {
                     ))}
                   </Card>
                 )}
+                </DetailSection>
               </Surface>
             </div>
           </div>

@@ -127,7 +127,7 @@
       "long-text": "children"
     },
     "DetailSection": {
-      "long-text": "children, title"
+      "long-text": "children, description, title"
     },
     "Dialog": {
       "long-text": "children, description, title"
@@ -487,6 +487,7 @@
       "detail-layout"
     ],
     "DetailSection": [
+      "surfaces",
       "detail-layout",
       "variant-matrix"
     ],

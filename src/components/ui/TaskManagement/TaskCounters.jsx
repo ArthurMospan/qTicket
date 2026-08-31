@@ -11,6 +11,20 @@ const SIZES = {
 };
 
 /**
+ * Whether this task has any of the three facts to show. A caller that draws a
+ * rule, a border or a footer *around* these counters has to know that before it
+ * commits to the chrome — otherwise the rule is drawn and the row under it comes
+ * back empty, which is what a customer's board card did on every request nobody
+ * had replied to yet: a hairline over ten pixels of nothing.
+ *
+ * Exported rather than re-derived at the call site, so the answer cannot drift
+ * from the early return in the component below.
+ */
+export function hasTaskCounters({ attachments = 0, mentions = 0, messages = 0, unread = false } = {}) {
+  return Boolean(attachments || mentions || messages || unread);
+}
+
+/**
  * What a task carries, counted at the edge of its card or row: files, times you
  * were named, messages — and one dot for "something in here is new".
  *
@@ -50,7 +64,7 @@ export default function TaskCounters({
   className = '',
 }) {
   const scale = SIZES[size] || SIZES.md;
-  if (!attachments && !mentions && !messages && !unread) return null;
+  if (!hasTaskCounters({ attachments, mentions, messages, unread })) return null;
 
   return (
     <div className={`flex items-center ${scale.gap} shrink-0 ${scale.text} font-bold select-none ${className}`}>

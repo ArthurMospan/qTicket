@@ -6,6 +6,7 @@ import {
   Alert,
   Button,
   Card,
+  DetailSection,
   EmptyState,
   FilterBar,
   ListRow,
@@ -545,14 +546,11 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
               {activeTab === 'people' && (
                 <div className="grid items-start gap-[20px] xl:grid-cols-2">
                   <Surface preset="panel" padding="md">
-                    <div className="mb-4 flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="ui-type-section-title text-ink">Команда клієнта</h2>
-                        <p className="mt-1 text-[12px] text-muted">
-                          Зовнішні користувачі бачать тільки цей простір і його звернення.
-                        </p>
-                      </div>
-                      {canInviteClient && (
+                    <DetailSection
+                      density="panel"
+                      title="Команда клієнта"
+                      description="Зовнішні користувачі бачать тільки цей простір і його звернення."
+                      action={canInviteClient ? (
                         <Button
                           onClick={() => setShowClientInvite(true)}
                           icon={UserPlus}
@@ -562,29 +560,30 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                         >
                           Запросити клієнта
                         </Button>
-                      )}
-                    </div>
+                      ) : null}
+                    >
                     <MemberList
                       members={clientMembers}
                       emptyTitle="Клієнта ще не запрошено"
                       emptyDescription="Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників."
                       onOpen={openClientProfile}
                     />
+                    </DetailSection>
                   </Surface>
 
                   <Surface preset="panel" padding="md">
-                    <div className="mb-4">
-                      <h2 className="ui-type-section-title text-ink">Команда підтримки</h2>
-                      <p className="mt-1 text-[12px] text-muted">
-                        Внутрішні працівники, закріплені за цим клієнтським простором.
-                      </p>
-                    </div>
+                    <DetailSection
+                      density="panel"
+                      title="Команда підтримки"
+                      description="Внутрішні працівники, закріплені за цим клієнтським простором."
+                    >
                     <MemberList
                       members={supportMembers}
                       emptyTitle="Підтримку ще не призначено"
                       emptyDescription="Додайте внутрішніх працівників у налаштуваннях клієнта."
                       onOpen={memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
                     />
+                    </DetailSection>
                   </Surface>
                 </div>
               )}
