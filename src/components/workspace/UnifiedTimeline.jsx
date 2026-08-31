@@ -656,6 +656,30 @@ export default function UnifiedTimeline({
     [],
   );
 
+  // Read is read: the line goes.
+  //
+  // `consumeConversation` — which runs when the end of the conversation has been
+  // in front of the reader for half a second, on a phone exactly as on a desk —
+  // used to set `read: true`, and `read: true` did one thing: dropped the line
+  // to 70% opacity. So the marker sat there knowing perfectly well that
+  // everything under it had been seen, and merely looked slightly fainter about
+  // it. Somebody who opened a request, read the two new messages and looked
+  // away was still being told they had something new.
+  //
+  // The fade is kept and given somewhere to go. `read` starts the 300ms
+  // transition, this takes the element out at the end of it, and the list is
+  // pinned to the bottom while that happens — which is the very condition that
+  // triggered the read — so nothing jumps under anybody's eyes.
+  //
+  // Deliberately not a hover: a pointer entering a box is not a person reading
+  // what is in it, and half the readers of this screen have no pointer at all.
+  // The signal is the same one the read receipt already trusts.
+  useEffect(() => {
+    if (!boundary.read || boundary.dismissed) return undefined;
+    const timer = window.setTimeout(dismissBoundary, 320);
+    return () => window.clearTimeout(timer);
+  }, [boundary.read, boundary.dismissed, dismissBoundary]);
+
   // One control, because to a reader there is one question: «take me to what I
   // have not seen». While an unread line exists off screen it points there;
   // otherwise, if the reader has climbed into the history, it points at the end
@@ -684,7 +708,7 @@ export default function UnifiedTimeline({
       ref={unreadMarkerRef}
       className={`transition-opacity duration-300 ${boundary.read ? 'opacity-70' : 'opacity-100'}`}
     >
-      <UnreadDivider label={unreadLabel} onDismiss={dismissBoundary} />
+      <UnreadDivider label={unreadLabel} />
     </div>
   ) : null);
 

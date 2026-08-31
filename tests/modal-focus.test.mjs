@@ -96,3 +96,34 @@ test('every product dialog outside the shared shell opts into the modal-focus co
     assert.match(source, /tabIndex=/);
   }
 });
+
+// Reading the conversation is what takes the unread line down.
+//
+// It used to take it down to 70% opacity and no further: `consumeConversation`
+// set `read: true`, and `read: true` only faded it. So somebody who opened a
+// request, read the two new messages and looked away was still being told they
+// had something new — by a marker that already knew they did not.
+//
+// The trigger is deliberately not a hover. A pointer entering a box is not a
+// person reading what is in it, and half the readers of this screen have no
+// pointer at all; the signal is the one the read receipt already trusts — the
+// end of the conversation in front of the reader for half a second.
+test('the unread line goes when the conversation has been read, not when it is clicked', async () => {
+  const timeline = await read('../src/components/workspace/UnifiedTimeline.jsx');
+  const divider = await read('../src/components/ui/Chat/UnreadDivider.jsx');
+
+  // The same signal that writes the read receipt marks the boundary read…
+  assert.match(timeline, /setBoundary\(current => \(current\.read \? current : \{ \.\.\.current, read: true \}\)\)/);
+  // …and being read is what removes it, once the fade has run.
+  assert.match(timeline, /if \(!boundary\.read \|\| boundary\.dismissed\) return undefined;/);
+  assert.match(timeline, /window\.setTimeout\(dismissBoundary, 320\)/);
+
+  // Not a control: a marker the reader has to dismiss by hand is a marker that
+  // has not understood it was read.
+  assert.doesNotMatch(divider, /onDismiss|<button/);
+  assert.doesNotMatch(timeline, /<UnreadDivider[^/]*onDismiss/);
+
+  // And answering still takes it down immediately, which is the one case where
+  // the reader has said so themselves.
+  assert.match(timeline, /dismissBoundary\(\);/);
+});

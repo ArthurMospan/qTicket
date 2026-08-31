@@ -1781,7 +1781,7 @@
             "src/components/workspace/IssueDetail.jsx:2260",
             "src/components/workspace/IssueDetail.jsx:2288",
             "src/components/workspace/IssueDetail.jsx:2298",
-            "src/components/workspace/UnifiedTimeline.jsx:1644"
+            "src/components/workspace/UnifiedTimeline.jsx:1668"
           ]
         },
         "icon": {
@@ -1803,7 +1803,7 @@
             "src/components/profile/ProfileView.jsx:96",
             "src/components/workspace/IssueDetail.jsx:1296",
             "src/components/workspace/IssueDetail.jsx:1307",
-            "src/components/workspace/UnifiedTimeline.jsx:1758"
+            "src/components/workspace/UnifiedTimeline.jsx:1782"
           ]
         },
         "icon-xs": {
@@ -1912,7 +1912,7 @@
             "src/components/workspace/IssueDetail.jsx:2137",
             "src/components/workspace/IssueDetail.jsx:2227",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1644"
+            "src/components/workspace/UnifiedTimeline.jsx:1668"
           ]
         },
         "(default)": {
@@ -1963,7 +1963,7 @@
             "src/components/workspace/AgileBoard.jsx:555",
             "src/components/workspace/AgileBoard.jsx:589",
             "src/components/workspace/IssueDetail.jsx:1367",
-            "src/components/workspace/UnifiedTimeline.jsx:1758"
+            "src/components/workspace/UnifiedTimeline.jsx:1782"
           ]
         }
       },
@@ -2060,7 +2060,7 @@
             "src/components/workspace/IssueDetail.jsx:2298",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1644"
+            "src/components/workspace/UnifiedTimeline.jsx:1668"
           ]
         },
         "compact": {
@@ -2078,7 +2078,7 @@
           ],
           "files": [
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/workspace/UnifiedTimeline.jsx:1758"
+            "src/components/workspace/UnifiedTimeline.jsx:1782"
           ]
         }
       },
@@ -2176,8 +2176,8 @@
             "src/components/workspace/IssueDetail.jsx:2298",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1644",
-            "src/components/workspace/UnifiedTimeline.jsx:1758"
+            "src/components/workspace/UnifiedTimeline.jsx:1668",
+            "src/components/workspace/UnifiedTimeline.jsx:1782"
           ]
         },
         "canvas": {
@@ -2276,8 +2276,8 @@
             "src/components/workspace/IssueDetail.jsx:2298",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1644",
-            "src/components/workspace/UnifiedTimeline.jsx:1758"
+            "src/components/workspace/UnifiedTimeline.jsx:1668",
+            "src/components/workspace/UnifiedTimeline.jsx:1782"
           ]
         },
         "dark": {
@@ -2396,7 +2396,7 @@
             "src/components/workspace/IssueDetail.jsx:2227",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1644"
+            "src/components/workspace/UnifiedTimeline.jsx:1668"
           ]
         },
         "workspace-guard": {
@@ -2454,7 +2454,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1758"
+            "src/components/workspace/UnifiedTimeline.jsx:1782"
           ]
         }
       }
@@ -2506,10 +2506,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1547",
-            "src/components/workspace/UnifiedTimeline.jsx:1548",
-            "src/components/workspace/UnifiedTimeline.jsx:1549",
-            "src/components/workspace/UnifiedTimeline.jsx:1685",
+            "src/components/workspace/UnifiedTimeline.jsx:1571",
+            "src/components/workspace/UnifiedTimeline.jsx:1572",
+            "src/components/workspace/UnifiedTimeline.jsx:1573",
+            "src/components/workspace/UnifiedTimeline.jsx:1709",
             "src/components/workspace/UnifiedTimeline.jsx:287",
             "src/components/workspace/UnifiedTimeline.jsx:288"
           ]
@@ -2527,9 +2527,9 @@
             "src/app/(app)/page.js:210",
             "src/components/MobileNav.jsx:305",
             "src/components/MobileNav.jsx:335",
-            "src/components/workspace/UnifiedTimeline.jsx:1547",
-            "src/components/workspace/UnifiedTimeline.jsx:1548",
-            "src/components/workspace/UnifiedTimeline.jsx:1685",
+            "src/components/workspace/UnifiedTimeline.jsx:1571",
+            "src/components/workspace/UnifiedTimeline.jsx:1572",
+            "src/components/workspace/UnifiedTimeline.jsx:1709",
             "src/components/workspace/UnifiedTimeline.jsx:287"
           ]
         },
@@ -2586,7 +2586,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1549",
+            "src/components/workspace/UnifiedTimeline.jsx:1573",
             "src/components/workspace/UnifiedTimeline.jsx:288"
           ]
         }
@@ -2624,10 +2624,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1547",
-            "src/components/workspace/UnifiedTimeline.jsx:1548",
-            "src/components/workspace/UnifiedTimeline.jsx:1549",
-            "src/components/workspace/UnifiedTimeline.jsx:1685",
+            "src/components/workspace/UnifiedTimeline.jsx:1571",
+            "src/components/workspace/UnifiedTimeline.jsx:1572",
+            "src/components/workspace/UnifiedTimeline.jsx:1573",
+            "src/components/workspace/UnifiedTimeline.jsx:1709",
             "src/components/workspace/UnifiedTimeline.jsx:287",
             "src/components/workspace/UnifiedTimeline.jsx:288"
           ]
@@ -2666,9 +2666,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1547",
-            "src/components/workspace/UnifiedTimeline.jsx:1548",
-            "src/components/workspace/UnifiedTimeline.jsx:1549",
+            "src/components/workspace/UnifiedTimeline.jsx:1571",
+            "src/components/workspace/UnifiedTimeline.jsx:1572",
+            "src/components/workspace/UnifiedTimeline.jsx:1573",
             "src/components/workspace/UnifiedTimeline.jsx:287",
             "src/components/workspace/UnifiedTimeline.jsx:288"
           ]
@@ -2679,7 +2679,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1685"
+            "src/components/workspace/UnifiedTimeline.jsx:1709"
           ]
         }
       }
@@ -3779,8 +3779,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1449",
-            "src/components/workspace/UnifiedTimeline.jsx:1469"
+            "src/components/workspace/UnifiedTimeline.jsx:1473",
+            "src/components/workspace/UnifiedTimeline.jsx:1493"
           ]
         }
       }
@@ -3921,7 +3921,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1665"
+            "src/components/workspace/UnifiedTimeline.jsx:1689"
           ]
         }
       }
@@ -4264,7 +4264,7 @@
           ],
           "files": [
             "src/app/(app)/layout.js:132",
-            "src/components/workspace/UnifiedTimeline.jsx:1377"
+            "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         },
         "inset": {
@@ -4311,7 +4311,7 @@
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/profile/ProfileView.jsx:215",
-            "src/components/workspace/UnifiedTimeline.jsx:1377"
+            "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         }
       },
@@ -4350,7 +4350,7 @@
             "src/app/(app)/page.js:909",
             "src/app/(app)/team/page.js:197",
             "src/components/profile/ProfileView.jsx:215",
-            "src/components/workspace/UnifiedTimeline.jsx:1377"
+            "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         }
       }
@@ -4795,7 +4795,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1635"
+            "src/components/workspace/UnifiedTimeline.jsx:1659"
           ]
         }
       }
@@ -4943,7 +4943,7 @@
           "files": [
             "src/components/workspace/IssueDetail.jsx:1696",
             "src/components/workspace/IssueDetail.jsx:1873",
-            "src/components/workspace/UnifiedTimeline.jsx:1444"
+            "src/components/workspace/UnifiedTimeline.jsx:1468"
           ]
         }
       },
@@ -4965,7 +4965,7 @@
           "files": [
             "src/components/workspace/IssueDetail.jsx:1696",
             "src/components/workspace/IssueDetail.jsx:1873",
-            "src/components/workspace/UnifiedTimeline.jsx:1444"
+            "src/components/workspace/UnifiedTimeline.jsx:1468"
           ]
         }
       }
