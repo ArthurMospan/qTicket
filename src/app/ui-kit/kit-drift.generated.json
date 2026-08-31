@@ -13,9 +13,9 @@
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 163,
+    "usedAndPreviewed": 164,
     "usedWithoutPreview": 0,
-    "declaredUnused": 162
+    "declaredUnused": 161
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -917,12 +917,6 @@
       "namespace": null
     },
     {
-      "component": "TextAction",
-      "prop": "tone",
-      "value": "ink",
-      "namespace": null
-    },
-    {
       "component": "Textarea",
       "prop": "composition",
       "value": "audio-transcript",
@@ -1598,7 +1592,7 @@
     "Surface.padding.lg": 5,
     "EmptyState.context.page": 4,
     "Button.size.icon-lg": 5,
-    "Button.style.secondary": 42,
+    "Button.style.secondary": 39,
     "Button.size.lg": 17,
     "Button.style.primary": 24,
     "Select.filterRole.status": 3,
@@ -1606,7 +1600,7 @@
     "Select.filterRole.member": 3,
     "Select.filterRole.priority": 2,
     "Alert.variant.error": 8,
-    "Button.size.md": 28,
+    "Button.size.md": 25,
     "Alert.variant.info": 5,
     "Surface.padding.md": 11,
     "DetailSection.density.panel": 5,
@@ -1623,6 +1617,8 @@
     "Dialog.size.sm": 8,
     "Dialog.presentation.sheet": 1,
     "Dialog.bodyPadding.spacious": 1,
+    "TextAction.tone.ink": 3,
+    "TextAction.size.md": 4,
     "Pill.tone.info": 1,
     "Pill.tone.success": 3,
     "Pill.preset.avatar-counter": 2,
@@ -1665,7 +1661,6 @@
     "SelectableChip.shape.label": 1,
     "Surface.padding.sm": 1,
     "TextAction.tone.danger": 1,
-    "TextAction.size.md": 1,
     "Surface.preset.bordered-card": 1,
     "TextAction.tone.muted": 3,
     "TextAction.size.sm": 2,

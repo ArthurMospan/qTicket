@@ -20,7 +20,6 @@ import {
   UserAvatar,
 } from '@/components/ui';
 import {
-  ArrowRight,
   Inbox,
   Kanban,
   List,
@@ -102,7 +101,6 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
             <Pill tone="neutral" size="sm" shape="badge">
               {organizationRoleLabel(member.role)}
             </Pill>
-            <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
           </ListRow>
         );
       })}

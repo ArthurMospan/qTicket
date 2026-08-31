@@ -130,7 +130,6 @@ export default function TeamPage() {
       context="team"
       mobilePane={mobilePane === 'detail' ? 'content' : 'sidebar'}
       sidebar={(
-        <>
           <MemberRail
             title={clientViewer ? 'Співробітники' : 'Команда'}
             members={filteredMembers}
@@ -152,18 +151,6 @@ export default function TeamPage() {
               />
             ) : null}
           />
-          {/* The one thing «Налаштування» → «Команда підтримки» said that this
-              screen did not: where a seat comes from. That section was a second
-              copy of this list and is gone, so the sentence lives here, under
-              the roster it explains, instead of behind a rail entry of its own.
-              A customer reads the other half of the same fact — what the people
-              they add may do, and that they never reach anybody else's space. */}
-          <p className="shrink-0 border-t border-line px-4 py-3 text-[11px] leading-[16px] text-muted">
-            {clientViewer
-              ? 'Співробітники бачать і створюють звернення лише у вашому просторі та відповідають в обговоренні. Робочий процес і налаштування лишаються за підтримкою.'
-              : 'Склад команди синхронізується з QuickTeam: «Налаштування» → «Інтеграції» → «qTicket». Запрошувати внутрішніх працівників усередині qTicket не потрібно.'}
-          </p>
-        </>
       )}
     >
       {/* RIGHT PANEL — mobile: shown only when a member is selected */}

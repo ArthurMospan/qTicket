@@ -54,13 +54,20 @@ test('qTicket does not expose internal team mutations and keeps personal exit se
     read('../src/app/(app)/settings/page.js'),
     read('../src/app/(app)/team/page.js'),
   ]);
-  // Where a seat comes from is said under the roster it explains. It used to be
-  // an Alert inside «Налаштування» → «Команда підтримки»; that section is gone,
-  // and the sentence went with the list it was about rather than staying behind
-  // as a second door into it.
+  // Where a seat comes from belongs to the help centre, not to a paragraph
+  // pinned under the roster. It was an Alert inside «Налаштування» → «Команда
+  // підтримки», then a footnote under this rail, and the owner removed the
+  // footnote — a rail that spends a block of itself explaining that it cannot
+  // be edited is a rail arguing with its reader.
+  //
+  // What this test guards is the fact, not the sentence: settings still has no
+  // second roster to administer, and the explanation is still somewhere a
+  // person can find it. Asserting the exact copy of a hint is how a deleted
+  // hint reads as a regression.
   assert.doesNotMatch(settings, /Команда керується в QuickTeam/);
-  assert.match(team, /Склад команди синхронізується з QuickTeam/);
-  assert.match(team, /Запрошувати внутрішніх працівників усередині qTicket не потрібно/);
+  assert.doesNotMatch(team, /Склад команди синхронізується з QuickTeam/);
+  const help = await read('../src/lib/content/helpArticles.mjs');
+  assert.match(help, /Склад команди приходить із QuickTeam/);
   assert.doesNotMatch(settings, /TeamMemberSettingsDialog/);
   assert.doesNotMatch(settings, /getMemberRemovalImpact/);
 

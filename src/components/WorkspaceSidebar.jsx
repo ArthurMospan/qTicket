@@ -8,7 +8,7 @@ import Image from 'next/image';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui';
 import {
-  ArrowUpRight,
+  Blocks,
   Folder, Users, Settings, ChevronsUpDown,
   Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
@@ -198,11 +198,32 @@ export default function WorkspaceSidebar() {
     return (searchParams.get('section') || 'profile') === section;
   };
 
+  // Staff arrive through a signed QuickTeam launch, which replaces the entry it
+  // came from — so the browser's own «back» is not a way back. The rail carries
+  // the return instead. Only for an internal seat of a QuickTeam-provisioned
+  // organization, and only when the workspace address is configured: a link to
+  // a guessed origin would be worse than no link at all. A client never sees
+  // it — they have no QuickTeam side to return to.
+  const quickTeamUrl = (process.env.NEXT_PUBLIC_QUICKTEAM_URL || '').trim();
+  const showQuickTeamReturn = Boolean(
+    quickTeamUrl && !clientViewer && activeOrg?.quickTeam?.sourceOrganizationId,
+  );
+
   const internalNav = [
     { href: '/overview',   icon: LayoutDashboard, label: 'Огляд' },
     { href: '/my',         icon: TaskIcon,        label: 'Звернення' },
     { href: '/clients',    icon: Folder,          label: 'Клієнти' },
     { href: '/team',       icon: Users,           label: 'Команда' },
+    // A destination, listed where destinations are, rather than a footnote
+    // under the client list. It used to sit at the very bottom of the rail
+    // behind a divider — below every customer's name, which is a strange place
+    // to look for the product you came from — and it was drawn with an
+    // `ArrowUpRight` as its own icon: the row said «leaving» twice and never
+    // said «QuickTeam». It carries a mark now, like every other row, and the
+    // fact that it leaves is carried by the tooltip and by the anchor itself.
+    ...(showQuickTeamReturn
+      ? [{ href: quickTeamUrl, icon: Blocks, label: 'QuickTeam', external: true }]
+      : []),
     { href: '/settings',   icon: Settings,      label: 'Налаштування' },
   ];
   // A client has exactly one space, and it is a real address — the same
@@ -239,16 +260,6 @@ export default function WorkspaceSidebar() {
     : internalNav;
   // One front door for both roles now that `/overview` serves both.
   const homeHref = '/overview';
-  // Staff arrive through a signed QuickTeam launch, which replaces the entry it
-  // came from — so the browser's own «back» is not a way back. The rail carries
-  // the return instead. Only for an internal seat of a QuickTeam-provisioned
-  // organization, and only when the workspace address is configured: a link to
-  // a guessed origin would be worse than no link at all. A client never sees
-  // it — they have no QuickTeam side to return to.
-  const quickTeamUrl = (process.env.NEXT_PUBLIC_QUICKTEAM_URL || '').trim();
-  const showQuickTeamReturn = Boolean(
-    quickTeamUrl && !clientViewer && activeOrg?.quickTeam?.sourceOrganizationId,
-  );
 
   return (
     <aside
@@ -417,10 +428,17 @@ export default function WorkspaceSidebar() {
 
       {/* Main Navigation (y=88 in Figma) */}
       <nav className="pt-[8px] flex flex-col gap-[4px] shrink-0">
-        {topNav.map(({ href, icon: Icon, label, exact, section }) => {
-          const active = isActive(href, exact, section);
+        {topNav.map(({ href, icon: Icon, label, exact, section, external }) => {
+          // A neighbouring product is not a route of this one: it gets a real
+          // anchor rather than a client-side navigation, and it is never the
+          // active row, because you are never on it while you are reading this.
+          const active = external ? false : isActive(href, exact, section);
+          const Row = external ? 'a' : Link;
+          // The rail says «QuickTeam»; the hover says what pressing it does.
+          const rowLabel = external ? 'Повернутися в QuickTeam' : label;
           return (
-            <Link key={href} href={href} title={collapsed ? undefined : label}
+            <Row key={href} href={href} {...(external ? { rel: 'noopener' } : null)}
+              title={collapsed ? undefined : rowLabel}
               className="flex items-center mx-[8px] h-[40px] rounded-[12px] transition-all"
               style={{
                 backgroundColor: active ? 'var(--sb-active)' : 'transparent',
@@ -429,13 +447,13 @@ export default function WorkspaceSidebar() {
               onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = 'var(--sb-hover)'; e.currentTarget.style.color = 'var(--sb-text)'; } }}
               onMouseLeave={e => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--sb-muted)'; } }}
             >
-              <Tooltip content={collapsed ? label : null} position="right" className="w-full h-full flex items-center">
+              <Tooltip content={collapsed ? rowLabel : null} position="right" className="w-full h-full flex items-center">
                 <div className={`flex items-center w-full h-full ${collapsed ? 'justify-center' : 'pl-[12px] gap-[16px] pr-[12px]'}`}>
                   <Icon size={18} className="shrink-0" />
                   {!collapsed && <span className="text-[13px] font-medium">{label}</span>}
                 </div>
               </Tooltip>
-            </Link>
+            </Row>
           );
         })}
       </nav>
@@ -500,26 +518,6 @@ export default function WorkspaceSidebar() {
         </div>
       </div>
         </>
-      )}
-
-      {showQuickTeamReturn && (
-        <div className="shrink-0 pt-[8px]" style={{ borderTop: '1px solid var(--sb-border)' }}>
-          <a
-            href={quickTeamUrl}
-            title={collapsed ? undefined : 'Повернутися в QuickTeam'}
-            className="flex items-center mx-[8px] h-[40px] rounded-[12px] transition-all"
-            style={{ color: 'var(--sb-muted)' }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--sb-hover)'; e.currentTarget.style.color = 'var(--sb-text)'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--sb-muted)'; }}
-          >
-            <Tooltip content={collapsed ? 'Повернутися в QuickTeam' : null} position="right" className="w-full h-full flex items-center">
-              <div className={`flex items-center w-full h-full ${collapsed ? 'justify-center' : 'pl-[12px] gap-[16px] pr-[12px]'}`}>
-                <ArrowUpRight size={18} className="shrink-0" />
-                {!collapsed && <span className="text-[13px] font-medium">QuickTeam</span>}
-              </div>
-            </Tooltip>
-          </a>
-        </div>
       )}
 
       <WorkspaceHelpMenu collapsed={collapsed} />

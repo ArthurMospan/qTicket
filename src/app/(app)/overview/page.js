@@ -16,12 +16,12 @@ import {
   PriorityBadge,
   Surface,
   TaskIdentity,
+  TextAction,
   UserAvatar,
 } from '@/components/ui';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import {
   AlertTriangle,
-  ArrowRight,
   CircleCheck,
   CircleDotDashed,
   Inbox,
@@ -263,14 +263,13 @@ export default function OverviewPage() {
                 title="Останні оновлення"
                 description="Ваші звернення, у яких щось змінилося найпізніше."
                 action={clientSpace ? (
-                  <Button
+                  <TextAction
                     onClick={() => router.push(`/${encodeURIComponent(clientSpace.id)}`)}
-                    style="secondary"
+                    tone="ink"
                     size="md"
-                    icon={ArrowRight}
                   >
                     Усі звернення
-                  </Button>
+                  </TextAction>
                 ) : null}
               >
                 {recentIssues.length === 0 ? (
@@ -361,9 +360,9 @@ export default function OverviewPage() {
                   title="Нещодавно оновлені"
                   description="Останні зміни у зверненнях усіх доступних клієнтів."
                   action={(
-                    <Button onClick={() => router.push('/my')} style="secondary" size="md" icon={ArrowRight}>
+                    <TextAction onClick={() => router.push('/my')} tone="ink" size="md">
                       Вся черга
-                    </Button>
+                    </TextAction>
                   )}
                 >
                 {recentIssues.length === 0 ? (
@@ -414,9 +413,9 @@ export default function OverviewPage() {
                   title="Клієнти"
                   description="Відкриті звернення за просторами."
                   action={(
-                    <Button onClick={() => router.push('/clients')} style="secondary" size="md" icon={ArrowRight}>
+                    <TextAction onClick={() => router.push('/clients')} tone="ink" size="md">
                       Усі
-                    </Button>
+                    </TextAction>
                   )}
                 >
                 {projectSummary.length === 0 ? (
@@ -450,10 +449,14 @@ export default function OverviewPage() {
                             {open} відкритих · {unassigned} без відповідального
                           </p>
                         </div>
+                        {/* No chevron. `ListRow` is a real button and now
+                            hovers visibly, so the arrow was a second way of
+                            saying what the row already says — and at `faint` on
+                            a panel it was the least legible thing on the
+                            screen. */}
                         <Pill tone={open ? 'info' : 'success'} size="sm" shape="badge">
                           {open || 'Усе вирішено'}
                         </Pill>
-                        <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
                       </ListRow>
                     ))}
                   </Card>

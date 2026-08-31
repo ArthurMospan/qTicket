@@ -432,7 +432,28 @@ test('повернення в QuickTeam бачить лише внутрішня
     sidebar,
     /showQuickTeamReturn = Boolean\(\s*quickTeamUrl && !clientViewer && activeOrg\?\.quickTeam\?\.sourceOrganizationId,/,
   );
-  assert.match(sidebar, /\{showQuickTeamReturn && \(/);
+  // It is a destination in the rail, not a footnote under the client list: the
+  // entry is spliced into `internalNav` between «Команда» and «Налаштування»,
+  // under the same gate. Position is the assertion because position was the
+  // defect — a row people look for among the destinations, filed below every
+  // customer's name.
+  assert.match(sidebar, /\.\.\.\(showQuickTeamReturn[\s\S]{0,120}external: true \}\]/);
+  const nav = sidebar.match(/const internalNav = \[([\s\S]*?)\n {2}\];/)?.[1] || '';
+  assert.ok(nav.indexOf("label: 'Команда'") >= 0);
+  assert.ok(nav.indexOf("label: 'Команда'") < nav.indexOf('showQuickTeamReturn'));
+  assert.ok(nav.indexOf('showQuickTeamReturn') < nav.indexOf("label: 'Налаштування'"));
+
+  // A neighbouring product is reached by an anchor, never by a client-side
+  // route, and it is never drawn as the active row.
+  assert.match(sidebar, /const Row = external \? 'a' : Link;/);
+
+  // No diagonal arrow. It was the row's only icon, so the row said «leaving»
+  // twice and never said «QuickTeam» — and it shared its slot with the unread
+  // counter, which is why the indicator sat differently here than anywhere else
+  // in the rail. Asked of the import and of the element, not of the file: an
+  // icon named in a comment explaining why it went is not an icon anybody draws.
+  assert.doesNotMatch(sidebar, /^\s*ArrowUpRight,\s*$/m);
+  assert.doesNotMatch(sidebar, /<ArrowUpRight[\s/>]/);
   assert.match(sidebar, /Повернутися в QuickTeam/);
 });
 

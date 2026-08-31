@@ -9,6 +9,19 @@
 // the kind of difference nobody chooses and nobody can see side by side. One
 // hover now.
 //
+// And that one hover was `bg-canvas`, which is the bug this comment replaces.
+// Every list of these in the product is a white `Card` inside a `Surface
+// preset="panel"` — and a panel *is* `canvas`. So pointing at a row painted it
+// the exact colour of the panel sixteen pixels away: the row did not highlight,
+// it dissolved, and the list grew a hole where the pointer was. `canvas` is the
+// right hover for a row sitting on white and there is no such row here.
+//
+// `line` is the kit's existing next step down — `Button` rests on `canvas` and
+// hovers to `line`, and so does `LoadOlderButton`. It reads against white and
+// against a panel both, which is what a row that does not know its own ground
+// needs. Deliberately not a variant: both call sites are the same case, and a
+// knob nobody sets is a way for the next list to get this wrong again.
+//
 // Layout stays at the call site: one of these is a flex row with a chevron at
 // the end, the other a six-column grid. What the kit owns is that a row in a
 // list is a real button with one density scale and one hover.
@@ -33,7 +46,7 @@ export default function ListRow({ density = 'compact', children, onClick, classN
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left transition-colors hover:bg-canvas ${DENSITIES[density] ?? DENSITIES.compact} ${className}`}
+      className={`w-full text-left transition-colors hover:bg-line ${DENSITIES[density] ?? DENSITIES.compact} ${className}`}
       {...props}
     >
       {children}

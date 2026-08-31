@@ -224,7 +224,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:371",
+      "location": "src/components/WorkspaceSidebar.jsx:382",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -239,7 +239,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:394",
+      "location": "src/components/WorkspaceSidebar.jsx:405",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -254,7 +254,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:460",
+      "location": "src/components/WorkspaceSidebar.jsx:480",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -350,17 +350,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:371",
+      "location": "src/components/WorkspaceSidebar.jsx:382",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:394",
+      "location": "src/components/WorkspaceSidebar.jsx:405",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:460",
+      "location": "src/components/WorkspaceSidebar.jsx:480",
       "tag": "button",
       "context": "branding-action"
     }
