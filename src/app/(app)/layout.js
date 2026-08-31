@@ -132,7 +132,7 @@ function NoOrganizationAccess({ email, onRetry, onSignOut }) {
         <EmptyState
           icon={LockKeyhole}
           title="Доступ до qTicket не надано"
-          description="qTicket не створює окремих організацій. Клієнт входить лише після запрошення до конкретного клієнтського простору, а працівник відкриває qTicket через QuickTeam."
+          description="qTicket не створює окремих організацій. Клієнт входить лише після запрошення до конкретного проєкту, а працівник відкриває qTicket через QuickTeam."
           context="flexible"
         >
           {email && (

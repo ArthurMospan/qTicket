@@ -95,7 +95,7 @@ export default function BoardConfigModal({
   );
   const handleSave = async () => {
     if (!name.trim()) {
-      setNameError('Вкажіть назву клієнта');
+      setNameError('Вкажіть назву проєкту');
       return;
     }
     if (statuses.length > 0 && statusesToHide.length >= statuses.length) {
@@ -149,7 +149,7 @@ export default function BoardConfigModal({
       showToast(
         result.movedIssues > 0
           ? `Налаштування збережено, ${result.movedIssues} звернень перенесено у «Новий» ✓`
-          : 'Налаштування клієнта збережено ✓',
+          : 'Налаштування проєкту збережено ✓',
       );
       onClose();
     } catch (error) {
@@ -162,7 +162,7 @@ export default function BoardConfigModal({
 
   const handleDelete = async () => {
     const accepted = await confirm({
-      title: 'Видалити клієнтський простір?',
+      title: 'Видалити проєкт?',
       message: `Ви видаляєте «${project?.name}». Цю дію неможливо скасувати.`,
       confirmText: 'Видалити',
       danger: true,
@@ -172,7 +172,7 @@ export default function BoardConfigModal({
       await onDelete(project.id);
       onClose();
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося видалити клієнтський простір'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося видалити проєкт'), 'error');
     }
   };
 
@@ -213,7 +213,7 @@ export default function BoardConfigModal({
         ) : null}
         {onDelete ? (
           <Button style="secondary" color="red" size="md" icon={Trash2} onClick={handleDelete}>
-            Видалити простір
+            Видалити проєкт
           </Button>
         ) : null}
       </div>
@@ -225,7 +225,7 @@ export default function BoardConfigModal({
       <Dialog
         isOpen
         onClose={onClose}
-        title="Налаштування клієнта"
+        title="Налаштування проєкту"
         size="sm"
         footer={(
           <>

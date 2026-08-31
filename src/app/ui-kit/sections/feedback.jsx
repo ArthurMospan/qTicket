@@ -20,7 +20,7 @@ export default function FeedbackSection() {
           <Alert variant="success" title="Операція успішна">Клієнта успішно створено та додано до бази даних.</Alert>
           <Alert variant="info" title="Потребує уваги">Будь ласка, перевірте правильність введених даних.</Alert>
           <Alert variant="warning" title="Попередження">Термін вирішення звернення спливає сьогодні.</Alert>
-          <Alert variant="error" title="Не вдалося завантажити клієнтів">Спробуйте оновити сторінку.</Alert>
+          <Alert variant="error" title="Не вдалося завантажити проєкти">Спробуйте оновити сторінку.</Alert>
         </div>
       </PreviewBlock>
 
@@ -74,9 +74,9 @@ export default function FeedbackSection() {
           <Surface preset="panel" padding="md" className="w-full">
             <EmptyState
               icon={Folder}
-              title="Ще немає клієнтів"
-              description="Створіть перший клієнтський простір, щоб приймати звернення."
-              action="Створити клієнта"
+              title="Ще немає проєктів"
+              description="Створіть перший проєкт, щоб приймати звернення."
+              action="Створити проєкт"
               onAction={() => {}}
               context="page"
             />
@@ -105,17 +105,17 @@ export default function FeedbackSection() {
           />
           <EmptyState
             icon={Plug}
-            title="Ще немає клієнтського простору"
-            description="Створіть простір, щоб клієнт міг надіслати перше звернення."
-            action="Створити простір"
+            title="Ще немає проєкту"
+            description="Створіть проєкт, щоб клієнт міг надіслати перше звернення."
+            action="Створити проєкт"
             onAction={() => {}}
             context="inset"
             surface="card"
           />
           <EmptyState
             icon={Plug}
-            title="Оберіть клієнтський простір"
-            description="Виберіть простір, щоб побачити його чергу звернень."
+            title="Оберіть проєкт"
+            description="Виберіть проєкт, щоб побачити його чергу звернень."
             context="inset"
             surface="card"
           >
@@ -127,7 +127,7 @@ export default function FeedbackSection() {
                   { value: 'romashka', label: 'Ромашка' },
                   { value: 'vector', label: 'Вектор' },
                 ]}
-                placeholder="Оберіть клієнтський простір"
+                placeholder="Оберіть проєкт"
                 className="min-w-0 flex-1 text-left"
               />
               <Button style="primary" size="lg" disabled={!clientSpace}>Відкрити</Button>

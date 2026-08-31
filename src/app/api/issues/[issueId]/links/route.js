@@ -80,7 +80,7 @@ async function ensureProjectMutationAccess(loaded) {
     !projectSnap.exists
     || projectSnap.data().organizationId !== issue.organizationId
   ) {
-    return { error: 'Клієнтський простір звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
+    return { error: 'Проєкт звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
   }
   // Owner and admin reach every space; everybody else — a support member and
   // a customer alike — has to be on this one's team.
@@ -92,7 +92,7 @@ async function ensureProjectMutationAccess(loaded) {
     )
   ) {
     return {
-      error: 'Ви не входите до команди цього клієнта',
+      error: 'Ви не входите до команди цього проєкту',
       code: 'PROJECT_ACCESS_DENIED',
       status: 403,
     };
@@ -277,7 +277,7 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'CROSS_PROJECT_LINK',
           400,
-          'Логічні зв’язки можна створювати лише в межах одного клієнтського простору',
+          'Логічні зв’язки можна створювати лише в межах одного проєкту',
         );
       }
       if (sourceSnap.data().deletionPending === true || targetSnap.data().deletionPending === true) {
@@ -294,14 +294,14 @@ export async function POST(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Клієнтський простір звернення не знайдено',
+          'Проєкт звернення не знайдено',
         );
       }
       if (projectSnap.data().deletionPending === true) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Клієнтський простір уже видаляється',
+          'Проєкт уже видаляється',
         );
       }
       const statusConflict = issueBlockLinkStatusConflict({
@@ -463,14 +463,14 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Клієнтський простір звернення не знайдено',
+          'Проєкт звернення не знайдено',
         );
       }
       if (projectSnap.data().deletionPending === true) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Клієнтський простір уже видаляється',
+          'Проєкт уже видаляється',
         );
       }
       const links = db.collection('issueLinks');

@@ -131,7 +131,7 @@ export async function PATCH(request, context) {
       if (projectAccessError) {
         throw apiTransactionError(
           'PROJECT_FORBIDDEN',
-          projectAccessError === 'Ви не входите до команди цього клієнта' ? 403 : 409,
+          projectAccessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
           projectAccessError,
         );
       }
@@ -250,7 +250,7 @@ export async function DELETE(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Клієнтський простір звернення не знайдено',
+          'Проєкт звернення не знайдено',
         );
       }
       const projectAccessError = projectWriteError(
@@ -262,7 +262,7 @@ export async function DELETE(request, context) {
       if (projectAccessError) {
         throw apiTransactionError(
           'PROJECT_FORBIDDEN',
-          projectAccessError === 'Ви не входите до команди цього клієнта' ? 403 : 409,
+          projectAccessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
           projectAccessError,
         );
       }

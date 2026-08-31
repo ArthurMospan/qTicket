@@ -321,7 +321,7 @@ export default function OverviewPage() {
                 icon={Inbox}
                 value={metrics.open}
                 label="Відкриті звернення"
-                sub={`у ${activeProjects.length} клієнтських просторах`}
+                sub={`у ${activeProjects.length} проєктах`}
               />
               <KpiCard
                 icon={AlertTriangle}
@@ -374,7 +374,7 @@ export default function OverviewPage() {
                   <EmptyState
                     icon={Inbox}
                     title="Звернень ще немає"
-                    description="Запросіть клієнта до підготовленого для нього простору — звернення відкриває він."
+                    description="Запросіть клієнта до підготовленого для нього проєкту — звернення відкриває він."
                     density="compact"
                     surface="card"
                   />
@@ -415,8 +415,8 @@ export default function OverviewPage() {
               <Surface preset="panel" padding="md">
                 <DetailSection
                   density="panel"
-                  title="Клієнти"
-                  description="Відкриті звернення за просторами."
+                  title="Проєкти"
+                  description="Відкриті звернення за проєктами."
                   action={(
                     <TextAction onClick={() => router.push('/clients')} tone="ink" size="md">
                       Усі
@@ -426,15 +426,15 @@ export default function OverviewPage() {
                 {projectSummary.length === 0 ? (
                   <EmptyState
                     icon={UsersRound}
-                    title="Клієнтів ще немає"
+                    title="Проєктів ще немає"
                     description={canCreateClient
-                      ? 'Створіть окремий простір для першого клієнта.'
-                      : 'Простір для клієнта створює адміністратор підтримки.'}
+                      ? 'Створіть окремий проєкт для першого клієнта.'
+                      : 'Проєкт для клієнта створює адміністратор підтримки.'}
                     // Only offered to somebody who may actually take it. This
                     // sent every internal role to `/clients?new=1`, and a member
                     // does not hold `create:project` — the address opened the
                     // dialog anyway and the server refused what it submitted.
-                    action={canCreateClient ? 'Додати клієнта' : undefined}
+                    action={canCreateClient ? 'Додати проєкт' : undefined}
                     onAction={canCreateClient ? () => router.push('/clients?new=1') : undefined}
                     density="compact"
                     surface="card"

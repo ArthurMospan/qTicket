@@ -88,10 +88,10 @@ export async function POST(request, context) {
         || project.data().organizationId !== organizationId
         || project.data().deletionPending === true
       ) {
-        throw restoreError('PROJECT_NOT_AVAILABLE', 409, 'Клієнтський простір звернення більше недоступний');
+        throw restoreError('PROJECT_NOT_AVAILABLE', 409, 'Проєкт звернення більше недоступний');
       }
       if (!hasProjectAccess(project.data(), authorization.membership?.role, authorization.user.uid)) {
-        throw restoreError('PROJECT_FORBIDDEN', 403, 'Ви не входите до команди цього клієнта');
+        throw restoreError('PROJECT_FORBIDDEN', 403, 'Ви не входите до команди цього проєкту');
       }
 
       const now = FieldValue.serverTimestamp();

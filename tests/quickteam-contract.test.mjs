@@ -380,7 +380,7 @@ test('the transfer sends what QuickTeam needs and keeps the request open', async
   assert.doesNotMatch(route, /columnId|archivedAt|cancelledAt/);
   // І сам документ звернення не чіпається взагалі: посилання в чужий трекер —
   // це маршрутизація, а її клієнтові не показують. Плюс перенос не піднімає
-  // звернення у списку клієнта як активність, якої він не бачив.
+  // звернення у списку проєкті як активність, якої він не бачив.
   assert.match(route, /issueRef\.collection\('internal'\)\.doc\('quickteam'\)\.set\(quickTeamTask/);
   assert.doesNotMatch(route, /issueRef\.set\(/);
   assert.match(route, /audit'\)\.doc\('quickteam-transfer'\)/);

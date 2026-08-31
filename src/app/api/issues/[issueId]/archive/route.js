@@ -88,7 +88,7 @@ export async function PATCH(request, context) {
       if (accessError) {
         throw archiveError(
           'PROJECT_FORBIDDEN',
-          accessError === 'Ви не входите до команди цього клієнта' ? 403 : 409,
+          accessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
           accessError,
         );
       }

@@ -14,7 +14,7 @@ import Pill from '../DataDisplay/Pill';
  * @param {{label: string, href?: string}[]} props.breadcrumbs The trail for the current screen.
  * @param {string} props.mode Which header this is; screens differ in what the right side carries.
  * @param {string} props.projectName Current client space, where the header names one.
- * @param {boolean} props.showParentCrumb Whether the trail starts at «Клієнти». False for an external client, who cannot open that screen.
+ * @param {boolean} props.showParentCrumb Whether the trail starts at «Проєкти». False for an external client, who cannot open that screen.
  * @param {object} props.currentUser The signed-in user, for the avatar.
  * @param {() => void} props.onUserClick Opens the user menu.
  * @param {boolean} props.showNotifications Whether the bell is drawn.
@@ -48,7 +48,7 @@ export default function TopHeader({
 
   // Client-space Props. The implementation keeps the historical prop name so
   // callers and generated UI Kit reports do not need a second source of truth.
-  projectName = 'Назва клієнта',
+  projectName = 'Назва проєкту',
   showParentCrumb = true,
   projectSearchActive = false,
   onProjectSearchToggle = () => {},
@@ -81,13 +81,13 @@ export default function TopHeader({
 
     if (mode === 'project') {
       // A customer's trail is the space they are in and nothing above it.
-      // «Клієнти ›» was drawn for everybody, and for a customer it named a
+      // «Проєкти ›» was drawn for everybody, and for a customer it named a
       // screen they may not open — the route boundary bounces them off
       // `/clients` — so the one crumb offering a way back led out of the
       // product and into a redirect. `showParentCrumb` is passed by the header,
       // which is the only place that knows who is looking.
       const projectCrumbs = [
-        ...(showParentCrumb ? [{ label: 'Клієнти', href: '/clients' }] : []),
+        ...(showParentCrumb ? [{ label: 'Проєкти', href: '/clients' }] : []),
         { label: projectName, href: null },
       ];
       return (
@@ -103,7 +103,7 @@ export default function TopHeader({
           searchLocalResultCount={searchLocalResultCount}
           searchOutsideResultCount={searchOutsideResultCount}
           searchOutsideLoading={searchOutsideLoading}
-          searchPlaceholder={`Пошук звернень клієнта "${projectName}"...`}
+          searchPlaceholder={`Пошук звернень проєкту "${projectName}"...`}
         />
       );
     }

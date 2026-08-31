@@ -764,7 +764,7 @@ export default function SettingsPage() {
   const [deletedIssues, setDeletedIssues] = useState({ items: [], loading: false });
   const { formatDate, timeFormat: savedTimeFormat } = useLocalization();
   const projectNameById = useCallback(id => (
-    (projects || []).find(project => project.id === id)?.name || 'Клієнтський простір видалено'
+    (projects || []).find(project => project.id === id)?.name || 'Проєкт видалено'
   ), [projects]);
 
   const loadDeletedIssues = useCallback(async () => {
@@ -1530,7 +1530,7 @@ export default function SettingsPage() {
     if (!uid || leavingOrganization) return;
     const typed = await confirmDialog({
       title: `Вийти з «${org?.name || 'організації'}»?`,
-      message: 'Ви втратите доступ до організації та її просторів. Повідомлення, коментарі й історія залишаться за вами. Щоб повернутися, потрібне буде запрошення або відновлення доступу адміністратором.\n\nВведіть ВИЙТИ, щоб підтвердити.',
+      message: 'Ви втратите доступ до організації та її проєктів. Повідомлення, коментарі й історія залишаться за вами. Щоб повернутися, потрібне буде запрошення або відновлення доступу адміністратором.\n\nВведіть ВИЙТИ, щоб підтвердити.',
       confirmText: 'Вийти з організації',
       cancelText: 'Скасувати',
       danger: true,
@@ -1552,9 +1552,9 @@ export default function SettingsPage() {
   const unarchiveProject = async (id) => {
     try {
       await restoreProject(id);
-      showToast('Клієнта повернуто з архіву');
+      showToast('Проєкт повернуто з архіву');
     } catch (err) {
-      showToast(userFacingErrorMessage(err, 'Не вдалося повернути клієнта з архіву'), 'error');
+      showToast(userFacingErrorMessage(err, 'Не вдалося повернути проєкт з архіву'), 'error');
       return false;
     }
     return true;
@@ -1861,7 +1861,7 @@ export default function SettingsPage() {
       accountDeletion.organizationCount > 0
         && `${accountDeletion.organizationCount} ${plural(accountDeletion.organizationCount, ['організації', 'організацій', 'організацій'])}`,
       accountDeletion.projectCount > 0
-        && `${accountDeletion.projectCount} ${plural(accountDeletion.projectCount, ['простору', 'просторів', 'просторів'])}`,
+        && `${accountDeletion.projectCount} ${plural(accountDeletion.projectCount, ['проєкту', 'проєктів', 'проєктів'])}`,
       accountDeletion.assignedIssueCount > 0
         && `${accountDeletion.assignedIssueCount} ${plural(accountDeletion.assignedIssueCount, ['звернення', 'звернень', 'звернень'])}`,
     ].filter(Boolean);
@@ -1932,7 +1932,7 @@ export default function SettingsPage() {
     },
     labels: {
       noun: 'мітки',
-      hint: 'Мітки доступні в усіх клієнтських просторах організації.',
+      hint: 'Мітки доступні в усіх проєктах організації.',
       apply: () => setLabels(DEFAULT_LABELS),
     },
   };
@@ -2729,7 +2729,7 @@ export default function SettingsPage() {
               label="Вийти з організації"
               desc={isOwner
                 ? 'Ви власник. Спершу передайте права власника комусь із команди'
-                : 'Ви втратите доступ до організації та її просторів. Повідомлення, коментарі й історія залишаться за вами, а адміністратор зможе повернути доступ'}
+                : 'Ви втратите доступ до організації та її проєктів. Повідомлення, коментарі й історія залишаться за вами, а адміністратор зможе повернути доступ'}
             >
               <Button
                 onClick={handleLeaveOrganization}
@@ -2782,7 +2782,7 @@ export default function SettingsPage() {
         // a wall of text. The stepper shape also gives «Нещодавно видалене» the
         // width it needs instead of squeezing it into a section header.
         const archiveTabs = [
-          { id: 'projects', label: 'Клієнти', count: archivedProjects.length },
+          { id: 'projects', label: 'Проєкти', count: archivedProjects.length },
           { id: 'issues', label: 'Звернення', count: archivedIssueList.length },
           { id: 'cancelled', label: 'Скасовані', count: cancelledIssueList.length },
           { id: 'deleted', label: 'Нещодавно видалене', count: deletedIssues.items.length },
@@ -2804,8 +2804,8 @@ export default function SettingsPage() {
               {archiveTab === 'projects' && (
                 archivedProjects.length === 0 ? (
                   <ArchiveEmpty
-                    title="Немає архівованих клієнтів"
-                    hint="Тут відображатимуться всі архівовані клієнтські простори"
+                    title="Немає архівованих проєктів"
+                    hint="Тут відображатимуться всі архівовані проєкти"
                   />
                 ) : (
                   <div className="flex flex-col divide-y divide-canvas -my-3">

@@ -136,7 +136,7 @@ export async function PATCH(request, context) {
           throw projectTransactionError(
             'PROJECT_DELETING',
             409,
-            'Клієнтський простір уже видаляється',
+            'Проєкт уже видаляється',
           );
         }
         const currentProject = freshProject.data();

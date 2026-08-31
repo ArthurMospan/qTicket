@@ -72,7 +72,7 @@ export async function POST(request) {
       || projectId.length > 256
     ) {
       return NextResponse.json({
-        error: 'Потрібні коректні організація та клієнтський простір',
+        error: 'Потрібні коректні організація та проєкт',
         code: 'INVALID_SCOPE',
       }, { status: 400 });
     }
@@ -113,7 +113,7 @@ export async function POST(request) {
     if (!projectId || typeof data.title !== 'string' || !data.title.trim() || data.title.trim().length > 240) {
       // Shown verbatim to whoever posted it, and an external client posts here
       // too, so it names the record the way every other screen does.
-      return NextResponse.json({ error: 'Потрібні коректний клієнтський простір і тема' }, { status: 400 });
+      return NextResponse.json({ error: 'Потрібні коректний проєкт і тема' }, { status: 400 });
     }
     if (data.parentEpicId) {
       return NextResponse.json({
@@ -162,7 +162,7 @@ export async function POST(request) {
     const projectSnap = await projectRef.get();
     if (!projectSnap.exists || projectSnap.data().organizationId !== organizationId) {
       return NextResponse.json({
-        error: 'Клієнтський простір не належить цій організації',
+        error: 'Проєкт не належить цій організації',
         code: 'INVALID_PROJECT_SCOPE',
       }, { status: 400 });
     }
@@ -176,7 +176,7 @@ export async function POST(request) {
     const isPrivileged = role === 'owner' || role === 'admin';
     const projectTeam = projectData.team;
     if (!isPrivileged && !(Array.isArray(projectTeam) && projectTeam.includes(authorization.user.uid))) {
-      return NextResponse.json({ error: 'Ви не входите до команди цього клієнтського простору' }, { status: 403 });
+      return NextResponse.json({ error: 'Ви не входите до команди цього проєкту' }, { status: 403 });
     }
     const assigneeIds = Array.isArray(data.assigneeIds) ? [...new Set(data.assigneeIds)].slice(0, 20) : [];
     // The customer's own answerable people. Bounded to the client space's
@@ -192,7 +192,7 @@ export async function POST(request) {
     const offRoster = requestedClientAssignees.filter(uid => !rosterUids.includes(uid));
     if (offRoster.length) {
       return NextResponse.json({
-        error: 'Відповідальний не входить до цього клієнтського простору',
+        error: 'Відповідальний не входить до цього проєкту',
         code: 'CLIENT_ASSIGNEE_OUTSIDE_PROJECT',
       }, { status: 400 });
     }
@@ -230,8 +230,8 @@ export async function POST(request) {
       if (lockedOut.length && (!isPrivileged || !addAssigneesToProjectTeam)) {
         return NextResponse.json({
           error: isPrivileged
-            ? 'Виконавець не входить до складу клієнта. Позначте «Додати до складу», щоб додати його разом зі створенням звернення.'
-            : 'Виконавець не входить до складу клієнта. Попросіть власника або адміністратора додати його.',
+            ? 'Виконавець не входить до складу проєкту. Позначте «Додати до складу», щоб додати його разом зі створенням звернення.'
+            : 'Виконавець не входить до складу проєкту. Попросіть власника або адміністратора додати його.',
           code: 'ASSIGNEE_OUTSIDE_PROJECT',
         }, { status: 403 });
       }
@@ -240,7 +240,7 @@ export async function POST(request) {
       // only because the caller asked for it.
       if (addAssigneesToProjectTeam && !isPrivileged) {
         return NextResponse.json({
-          error: 'Додавати учасників до складу клієнта може лише власник або адміністратор',
+          error: 'Додавати учасників до складу проєкту може лише власник або адміністратор',
           code: 'PROJECT_TEAM_FORBIDDEN',
         }, { status: 403 });
       }
@@ -287,7 +287,7 @@ export async function POST(request) {
         throw hierarchyTransactionError({
           code: 'PROJECT_DELETING',
           status: 409,
-          message: 'Клієнтський простір уже видаляється',
+          message: 'Проєкт уже видаляється',
         });
       }
       const freshWorkflow = freshWorkflowSnap.data() || {};
@@ -521,7 +521,7 @@ export async function POST(request) {
       }, { status: error.hierarchy.status });
     }
     if (error?.message === 'PROJECT_NOT_FOUND') {
-      return NextResponse.json({ error: 'Клієнтський простір не знайдено', code: 'PROJECT_NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ error: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND' }, { status: 404 });
     }
     return routeErrorResponse(error, {
       context: 'Issue POST',

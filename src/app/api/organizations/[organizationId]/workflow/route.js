@@ -345,7 +345,7 @@ export async function PATCH(request, context) {
             throw workflowError(
               'PROJECT_DELETING',
               409,
-              'Один із клієнтських просторів уже видаляється',
+              'Один із проєктів уже видаляється',
               { projectId: projectDocument.id },
             );
           }
@@ -370,7 +370,7 @@ export async function PATCH(request, context) {
           throw workflowError(
             'PROJECT_DELETING',
             409,
-            'Один із клієнтських просторів уже видаляється',
+            'Один із проєктів уже видаляється',
             { projectId: projectDocument.id },
           );
         }

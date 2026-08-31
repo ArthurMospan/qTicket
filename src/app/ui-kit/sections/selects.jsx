@@ -87,7 +87,7 @@ export default function SelectsSection() {
       </PreviewBlock>
 
       {/* ─── Select with Search ─── */}
-      <PreviewBlock title="Select with Search" component="Select" description="Той самий Select із пошуковим рядком над списком: searchable вмикає його, searchPlaceholder підписує. Для вибору з довгого списку, який неможливо переглянути очима — звернення клієнтського простору у звʼязках. Пошук іде по підпису опції, тому підпис, що починається з номера, знаходиться і за номером, і за назвою. Порожній результат каже «Нічого не знайдено», клавіатура рухається тільки знайденими рядками." fullWidth>
+      <PreviewBlock title="Select with Search" component="Select" description="Той самий Select із пошуковим рядком над списком: searchable вмикає його, searchPlaceholder підписує. Для вибору з довгого списку, який неможливо переглянути очима — звернення проєкту у звʼязках. Пошук іде по підпису опції, тому підпис, що починається з номера, знаходиться і за номером, і за назвою. Порожній результат каже «Нічого не знайдено», клавіатура рухається тільки знайденими рядками." fullWidth>
         <div className="max-w-[300px]">
           <label className="text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[6px] block">Звернення</label>
           <Select

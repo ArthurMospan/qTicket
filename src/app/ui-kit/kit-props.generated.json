@@ -3571,7 +3571,7 @@
     },
     "ProjectSettingsForm": {
       "file": "src/components/ui/TaskManagement/ProjectSettingsForm.jsx",
-      "summary": "Shared body for «Новий клієнт» and «Налаштування клієнтського простору».",
+      "summary": "Shared body for «Новий проєкт» and «Налаштування проєкту».",
       "props": [
         {
           "name": "backlogStatusId",
@@ -3617,7 +3617,7 @@
         },
         {
           "name": "inviteEmailsHint",
-          "default": "'Клієнтів запрошують після створення простору…",
+          "default": "'Клієнтів запрошують після створення проєкту …",
           "type": "string",
           "values": [],
           "description": "Sentence under that list; says when the invitations go out."
@@ -3694,7 +3694,7 @@
         },
         {
           "name": "teamHint",
-          "default": "'Власник простору буде доданий до команди під…",
+          "default": "'Власник проєкту буде доданий до команди підт…",
           "type": "string",
           "values": [],
           "description": "Sentence under the team picker."
@@ -5247,7 +5247,7 @@
         },
         {
           "name": "projectName",
-          "default": "'Назва клієнта'",
+          "default": "'Назва проєкту'",
           "type": "string",
           "values": [],
           "description": "Current client space, where the header names one."
@@ -5313,7 +5313,7 @@
           "default": "true",
           "type": "boolean",
           "values": [],
-          "description": "Whether the trail starts at «Клієнти». False for an external client, who cannot open that screen."
+          "description": "Whether the trail starts at «Проєкти». False for an external client, who cannot open that screen."
         },
         {
           "name": "unreadCount",

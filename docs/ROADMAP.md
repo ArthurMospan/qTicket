@@ -19,12 +19,16 @@ This file contains current owner guardrails and confirmed open work. Completed i
   answers «що робити далі», and one screen wearing both answers neither.
   `/overview` is not to be redirected into `/my`, merged with it, or reduced
   to a filter chip on it.
-- **A client space is that client's queue, not a second dashboard.** The page
-  reached from **Клієнти** carries two tabs — **Звернення** and **Учасники** —
-  and no counter tiles above the board: the board's own columns already say
-  where every request stands, and the numbers belong on **Огляд**. The space's
-  configuration is one dialog behind the gear in the header, never a tab of its
-  own beside it.
+- **A project is that client's queue, not a second dashboard.** The page reached
+  from **Проєкти** carries **Звернення** and **Учасники**, and no counter tiles
+  above the board: the board's own columns already say where every request
+  stands, and the numbers belong on **Огляд**. The project's configuration is one
+  dialog behind the gear in the header, never a tab of its own beside it. Both
+  tabs are read by both audiences as of 2026-08-31 — «Учасники» was staff-only on
+  the reasoning that a project is administered *about* a customer rather than
+  *by* them, which is true of the gear and not of a roster whose two halves are
+  the customer's own colleagues and the agents answering them. What stays
+  withheld is one step finer: which agent holds a particular request.
 - **The client and the support team see the same interface.** The difference between them is what the client is *not* shown — internal controls, other customers' queues, organization settings — never a second product built for customers. A screen both audiences reach is one screen that knows who is looking; a screen only clients reach exists only where support genuinely has no equivalent.
 - **The team and the brand are administered in QuickTeam's qTicket integration, not inside qTicket.** Staff seats, roles, identity, organization name, logo and colour arrive in the signed snapshot and are read-only here; a second editor for any of them is a copy that loses. What qTicket's own settings own is the support process and its record: statuses, types, priorities, labels and the archive. A settings section that does not administer one of those does not belong in qTicket.
 - qTicket does not publish a price list, sell or switch subscriptions, or use a
@@ -86,7 +90,8 @@ Completed foundation:
 
 Completed product slice on 2026-08-28:
 
-- Internal primary navigation is now **Огляд**, **Звернення**, **Клієнти**,
+- Internal primary navigation is now **Огляд**, **Звернення**, **Клієнти**
+  (renamed **Проєкти** on 2026-08-31),
   **Команда**, **Налаштування**. Task-planning surfaces are no longer primary
   qTicket navigation, and the legacy project dashboard is reached through
   `/clients` rather than acting as the internal home screen.
@@ -649,7 +654,7 @@ Internal support users:
    activity across all client projects.
 2. **Звернення** — one global queue with list and Kanban views; project/client,
    status, priority, assignee and date filters.
-3. **Клієнти** — client projects, their team, configuration and incident counts.
+3. **Проєкти** — the client projects, their team, configuration and incident counts.
 4. **Команда** — the tenant's internal support team.
 5. **Налаштування** — statuses, types, priorities, labels and the archive. The
    team and the brand are administered in QuickTeam's qTicket integration.

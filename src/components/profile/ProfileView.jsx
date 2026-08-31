@@ -156,7 +156,7 @@ export default function ProfileView({ user, onClose }) {
             {/* Client spaces */}
             <div className="flex flex-col gap-3">
               <h3 className="ui-type-column-title text-muted uppercase tracking-wider">
-                {projectListIsComplete ? 'Клієнтські простори' : 'Спільні клієнти'}
+                {projectListIsComplete ? 'Проєкти' : 'Спільні клієнти'}
               </h3>
               {memberProjects.length === 0 ? (
                 <p className="text-[14px] text-faint italic">

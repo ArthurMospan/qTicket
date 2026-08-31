@@ -29,8 +29,8 @@ export default function ButtonsSection() {
               </tr>
               <tr className="align-middle">
                 <td className="py-4 text-[13px] font-semibold text-[#1f1f1f]">З іконкою</td>
-                <td className="py-4"><Button style="primary" size="lg" icon={Plus}>Новий клієнт</Button></td>
-                <td className="py-4"><Button style="primary" size="md" icon={Plus}>Новий клієнт</Button></td>
+                <td className="py-4"><Button style="primary" size="lg" icon={Plus}>Новий проєкт</Button></td>
+                <td className="py-4"><Button style="primary" size="md" icon={Plus}>Новий проєкт</Button></td>
                 <td className="py-4"><Button style="primary" size="sm" icon={Plus}>Додати</Button></td>
               </tr>
               <tr className="align-middle">

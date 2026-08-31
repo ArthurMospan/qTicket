@@ -71,7 +71,7 @@ export default function InviteMemberDialog({
 
   const copyLoginInstructions = async () => {
     const loginUrl = new URL('/login?mode=client', window.location.origin).toString();
-    const instructions = `Вам підготовлено доступ до порталу підтримки «${portalName}».\n\n1. Відкрийте: ${loginUrl}\n2. Увійдіть через ${GITHUB_LOGIN_ENABLED ? 'Google або GitHub' : 'Google'}.\n3. Використайте акаунт з адресою ${pendingAccessEmail} — вона має точно збігатися з адресою запрошення.\n\nПісля першого входу доступ до клієнтського простору підключиться автоматично.`;
+    const instructions = `Вам підготовлено доступ до порталу підтримки «${portalName}».\n\n1. Відкрийте: ${loginUrl}\n2. Увійдіть через ${GITHUB_LOGIN_ENABLED ? 'Google або GitHub' : 'Google'}.\n3. Використайте акаунт з адресою ${pendingAccessEmail} — вона має точно збігатися з адресою запрошення.\n\nПісля першого входу доступ до проєкту підключиться автоматично.`;
 
     try {
       await navigator.clipboard.writeText(instructions);

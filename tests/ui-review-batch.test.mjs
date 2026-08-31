@@ -45,10 +45,11 @@ test('qTicket headers distinguish global screens from client spaces', async () =
 
   assert.match(workspaceHeader, /pathname\.startsWith\('\/overview'\)/);
   assert.match(workspaceHeader, /pathname\.startsWith\('\/clients'\)/);
-  assert.match(workspaceHeader, /placeholder: 'Пошук клієнтів\.\.\.'/);
-  assert.match(topHeader, /\{ label: 'Клієнти', href: '\/clients' \}/);
-  assert.match(topHeader, /Пошук звернень клієнта/);
-  assert.doesNotMatch(topHeader, /Назва проєкту|label: 'Проєкти'/);
+  assert.match(workspaceHeader, /placeholder: 'Пошук проєктів\.\.\.'/);
+  assert.match(topHeader, /\{ label: 'Проєкти', href: '\/clients' \}/);
+  assert.match(topHeader, /Пошук звернень проєкту/);
+  // The «проєкт» ban that used to be asserted here is gone with the rename —
+  // the container is a проєкт now, and this header is where it is named.
   assert.match(kit, /Client Space Mode/);
   assert.match(kit, /INC-104: Не працює імпорт/);
 });

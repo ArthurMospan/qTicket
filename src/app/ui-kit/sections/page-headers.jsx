@@ -47,7 +47,7 @@ export default function PageHeadersSection() {
                       { value: 'p2', label: 'Mobile Application' }
                     ]}
                     placeholder="Всі клієнти"
-                    searchPlaceholder="Пошук клієнта..."
+                    searchPlaceholder="Пошук проєкту..."
                   />
                   <Select
                     filterRole="type"
@@ -121,7 +121,7 @@ export default function PageHeadersSection() {
         <PreviewBlock title="4) Заголовок + Вкладки + Дії" description="Використовується на сторінках зі списками без розгорнутої фільтрації (наприклад, список клієнтів)." filePath="src/components/ui/Layout/PageHeader.jsx" fullWidth>
           <div className="border border-[#f0f0f0] rounded-[24px] overflow-hidden bg-white p-[24px] w-full">
             <PageHeader
-              title="Клієнти"
+              title="Проєкти"
               tabs={[
                 { id: 'active', label: 'Активні' },
                 { id: 'archived', label: 'Архівні' }
@@ -129,7 +129,7 @@ export default function PageHeadersSection() {
               activeTab={tab2}
               onTabChange={setTab2}
               actions={
-                <Button onClick={() => alert('Створити клієнта')} style="primary" color="dark" size="lg" icon={Plus} collapseAt="sm">Новий клієнт</Button>
+                <Button onClick={() => alert('Створити проєкт')} style="primary" color="dark" size="lg" icon={Plus} collapseAt="sm">Новий проєкт</Button>
               }
             />
           </div>

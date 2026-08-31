@@ -117,7 +117,7 @@ export default function SurfacesSection() {
       <PreviewBlock
         title="DetailSection density=panel — шапка панелі"
         component="DetailSection"
-        description="Заголовок панелі: назва, рядок під нею і єдина дія праворуч. Саме цей блок «Огляд» і клієнтський простір писали руками чотири рази — тепер це третя щільність того самого компонента, поряд із section та group."
+        description="Заголовок панелі: назва, рядок під нею і єдина дія праворуч. Саме цей блок «Огляд» і проєкт писали руками чотири рази — тепер це третя щільність того самого компонента, поряд із section та group."
         filePath="src/components/ui/Layout/DetailSection.jsx"
         fullWidth
       >
@@ -148,7 +148,7 @@ export default function SurfacesSection() {
             <DetailSection
               density="panel"
               title="Команда підтримки"
-              description="Внутрішні працівники, закріплені за цим клієнтським простором."
+              description="Внутрішні працівники, закріплені за цим проєктом."
             >
               <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
                 <ListRow density="roomy" className="flex items-center gap-3">

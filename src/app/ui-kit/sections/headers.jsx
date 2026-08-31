@@ -35,7 +35,7 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація простору клієнта з розсувним пошуком звернень. Склад підтримки видно у вкладці «Учасники», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="3) Хлібні крихти з пошуком (Client Space Mode)" description="Навігація проєкту з розсувним пошуком звернень. Склад підтримки видно у вкладці «Учасники», а хедер лишається місцем для навігації." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="project"
@@ -45,12 +45,12 @@ export default function HeadersSection() {
         </div>
       </PreviewBlock>
 
-      <PreviewBlock title="4) Хлібні крихти детального перегляду (Breadcrumbs Mode)" description="Повний шлях до конкретного звернення в просторі клієнта." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
+      <PreviewBlock title="4) Хлібні крихти детального перегляду (Breadcrumbs Mode)" description="Повний шлях до конкретного звернення в проєкті." filePath="src/components/ui/Layout/TopHeader.jsx" fullWidth>
         <div className="border border-[#f0f0f0] rounded-[16px] overflow-hidden">
           <TopHeader
             mode="breadcrumbs"
             breadcrumbs={[
-              { label: 'Клієнти', href: '/clients' },
+              { label: 'Проєкти', href: '/clients' },
               { label: 'Acme Україна', href: '/client-acme' },
               { label: 'INC-104: Не працює імпорт', href: null },
             ]}

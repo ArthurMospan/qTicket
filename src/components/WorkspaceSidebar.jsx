@@ -212,7 +212,7 @@ export default function WorkspaceSidebar() {
   const internalNav = [
     { href: '/overview',   icon: LayoutDashboard, label: 'Огляд' },
     { href: '/my',         icon: TaskIcon,        label: 'Звернення' },
-    { href: '/clients',    icon: Folder,          label: 'Клієнти' },
+    { href: '/clients',    icon: Folder,          label: 'Проєкти' },
     { href: '/team',       icon: Users,           label: 'Команда' },
     // A destination, listed where destinations are, rather than a footnote
     // under the client list. It used to sit at the very bottom of the rail
@@ -476,13 +476,13 @@ export default function WorkspaceSidebar() {
         {!collapsed && (
           <div className="flex items-center justify-between px-[16px] mb-[16px]">
             <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--sb-muted-header)' }}>
-              КЛІЄНТИ
+              ПРОЄКТИ
             </p>
             {can(orgRole, 'create:project') && (
               <button
                 onClick={() => router.push('/clients?new=1')}
                 data-ui-control="branding-action"
-                className="transition-colors" title="Новий клієнт"
+                className="transition-colors" title="Новий проєкт"
                 style={{ color: 'var(--sb-muted-header)' }}
                 onMouseEnter={e => { e.currentTarget.style.color = 'var(--sb-text)'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = 'var(--sb-muted-header)'; }}

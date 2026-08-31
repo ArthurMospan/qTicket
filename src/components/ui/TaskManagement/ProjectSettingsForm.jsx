@@ -13,7 +13,7 @@ import StatusVisibilityPicker from './StatusVisibilityPicker';
 // exactly the same project fields, so they render the same form — only the title,
 // the footer buttons and the optional danger zone differ.
 /**
- * Shared body for «Новий клієнт» and «Налаштування клієнтського простору». Both dialogs edit
+ * Shared body for «Новий проєкт» and «Налаштування проєкту». Both dialogs edit
  * the same project fields, so they render the same form — only the title, the
  * footer buttons and the optional danger zone differ.
  *
@@ -53,7 +53,7 @@ export default function ProjectSettingsForm({
   teamMemberIds = [],
   onTeamMemberIdsChange,
   ownerId,
-  teamHint = 'Власник простору буде доданий до команди підтримки автоматично.',
+  teamHint = 'Власник проєкту буде доданий до команди підтримки автоматично.',
   teamPlaceholder = 'Оберіть працівників підтримки',
   // Inline invitations, one email per line, sent when the surrounding form is
   // submitted. This is the only way either dialog invites anybody. Project
@@ -64,7 +64,7 @@ export default function ProjectSettingsForm({
   inviteEmails,
   onInviteEmailsChange,
   inviteEmailsError = '',
-  inviteEmailsHint = 'Клієнтів запрошують після створення простору у вкладці «Учасники».',
+  inviteEmailsHint = 'Клієнтів запрошують після створення проєкту у вкладці «Учасники».',
   loading = false,
   dangerZone = null,
 }) {

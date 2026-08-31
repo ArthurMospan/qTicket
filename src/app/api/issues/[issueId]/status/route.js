@@ -183,7 +183,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'PROJECT_NOT_FOUND',
           404,
-          'Клієнтський простір звернення не знайдено',
+          'Проєкт звернення не знайдено',
         );
       }
 
@@ -192,7 +192,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'PROJECT_DELETING',
           409,
-          'Клієнтський простір уже видаляється',
+          'Проєкт уже видаляється',
         );
       }
       if (
@@ -205,7 +205,7 @@ export async function PATCH(request, context) {
         throw apiTransactionError(
           'PROJECT_ACCESS_DENIED',
           403,
-          'Ви не входите до команди цього клієнта',
+          'Ви не входите до команди цього проєкту',
         );
       }
 
@@ -316,7 +316,7 @@ export async function PATCH(request, context) {
           throw apiTransactionError(
             'ORDER_ISSUE_SCOPE_MISMATCH',
             400,
-            'Усі звернення для перестановки мають належати тому самому клієнтському простору',
+            'Усі звернення для перестановки мають належати тому самому проєкту',
             { issueId: update.issueId },
           );
         }

@@ -480,7 +480,7 @@ test('керування співробітниками клієнта живе 
   // Немає ні другого набору розділів, ні перейменування в рейці, ні тіла.
   assert.doesNotMatch(settings, /CLIENT_ADMIN_SETTINGS_SECTIONS/);
   assert.doesNotMatch(settings, /label: 'Співробітники клієнта'/);
-  assert.doesNotMatch(settings, /group: 'Клієнтський простір'/);
+  assert.doesNotMatch(settings, /group: 'Проєкт'/);
   assert.doesNotMatch(settings, /case 'team':/);
   assert.doesNotMatch(settings, /id: 'team',/);
   assert.doesNotMatch(settings, /InviteMemberDialog/);

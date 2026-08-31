@@ -23,10 +23,10 @@ test('every project restore surface shows the actionable API error', async () =>
   ]);
 
   for (const source of [workspace, settings]) {
-    assert.match(source, /userFacingErrorMessage\(.*'Не вдалося повернути клієнта з архіву'/);
+    assert.match(source, /userFacingErrorMessage\(.*'Не вдалося повернути проєкт з архіву'/);
     assert.doesNotMatch(source, /showToast\('Помилка розархівування'/);
   }
-  assert.match(project, /userFacingErrorMessage\(.*'Не вдалося відновити клієнтський простір'/);
+  assert.match(project, /userFacingErrorMessage\(.*'Не вдалося відновити проєкт'/);
   assert.doesNotMatch(project, /showToast\('Помилка розархівування'/);
   assert.match(project, /const handleRestoreProject[\s\S]{0,500}catch \(error\)/);
   assert.match(modal, /await onUnarchive\(project\.id\) !== false/);

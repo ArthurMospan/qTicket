@@ -203,12 +203,12 @@ export default function DialogsSection() {
         filePath="src/components/ui/TaskManagement/ProjectSettingsForm.jsx"
       >
         <Button style="secondary" size="lg" icon={Settings} onClick={() => setProjectSettingsOpen(true)}>
-          Налаштування клієнта
+          Налаштування проєкту
         </Button>
         <Dialog
           isOpen={projectSettingsOpen}
           onClose={() => setProjectSettingsOpen(false)}
-          title="Налаштування клієнта"
+          title="Налаштування проєкту"
           size="sm"
           footer={(
             <>

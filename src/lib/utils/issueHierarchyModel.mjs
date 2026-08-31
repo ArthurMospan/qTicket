@@ -13,7 +13,7 @@ const ERROR_DEFINITIONS = Object.freeze({
   },
   PARENT_SCOPE_MISMATCH: {
     status: 400,
-    message: 'Основне звернення має бути в тому самому клієнтському просторі',
+    message: 'Основне звернення має бути в тому самому проєкті',
   },
   PARENT_IS_CHILD: {
     status: 409,

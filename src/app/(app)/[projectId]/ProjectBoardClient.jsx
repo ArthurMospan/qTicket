@@ -307,11 +307,11 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const handleArchiveProject = useCallback(async id => {
     try {
       await archiveProject(id);
-      showToast('Клієнтський простір архівовано', 'success');
+      showToast('Проєкт архівовано', 'success');
       router.push('/clients');
       return true;
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося архівувати клієнтський простір'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося архівувати проєкт'), 'error');
       return false;
     }
   }, [router, showToast]);
@@ -319,17 +319,17 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const handleRestoreProject = useCallback(async id => {
     try {
       await restoreProject(id);
-      showToast('Клієнтський простір відновлено');
+      showToast('Проєкт відновлено');
       return true;
     } catch (error) {
-      showToast(userFacingErrorMessage(error, 'Не вдалося відновити клієнтський простір'), 'error');
+      showToast(userFacingErrorMessage(error, 'Не вдалося відновити проєкт'), 'error');
       return false;
     }
   }, [showToast]);
 
   const handleDeleteProject = useCallback(async id => {
     await deleteProject(id);
-    showToast('Клієнтський простір видалено');
+    showToast('Проєкт видалено');
     router.push('/clients');
   }, [router, showToast]);
 
@@ -392,7 +392,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   if (loading) {
     return (
       <div role="status" aria-busy="true" className="flex min-h-[420px] flex-1 items-center justify-center">
-        <LoadingSpinner size="md" label="Завантажуємо клієнтський простір…" />
+        <LoadingSpinner size="md" label="Завантажуємо проєкт…" />
       </div>
     );
   }
@@ -403,9 +403,9 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         <Surface preset="panel" padding="lg" className="w-full max-w-[460px]">
           <EmptyState
             icon={Inbox}
-            title="Простір не знайдено"
+            title="Проєкт не знайдено"
             description="Його видалено або у вас більше немає доступу."
-            action={clientViewer ? null : 'До клієнтів'}
+            action={clientViewer ? null : 'До проєктів'}
             onAction={clientViewer ? null : () => router.replace('/clients')}
             context="page"
           />
@@ -433,8 +433,8 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     icon={Settings2}
                     size="icon-lg"
                     style="secondary"
-                    title="Налаштування клієнта"
-                    aria-label="Налаштування клієнта"
+                    title="Налаштування проєкту"
+                    aria-label="Налаштування проєкту"
                   />
                 )}
                 {canOpenIncident && (
@@ -544,7 +544,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
               {isArchived && (
                 <Alert
                   variant="info"
-                  title="Простір в архіві"
+                  title="Проєкт в архіві"
                   description="Історія та листування доступні, але нові звернення тут не створюються."
                 />
               )}
@@ -629,8 +629,8 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       density="panel"
                       title={clientViewer ? 'Ваші співробітники' : 'Команда клієнта'}
                       description={clientViewer
-                        ? 'Люди з вашого боку, які бачать звернення цього простору.'
-                        : 'Зовнішні користувачі бачать тільки цей простір і його звернення.'}
+                        ? 'Люди з вашого боку, які бачать звернення цього проєкту.'
+                        : 'Зовнішні користувачі бачать тільки цей проєкт і його звернення.'}
                       action={canInviteClient ? (
                         <Button
                           onClick={() => setShowClientInvite(true)}
@@ -659,15 +659,15 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       density="panel"
                       title="Команда підтримки"
                       description={clientViewer
-                        ? 'Хто з боку підтримки веде цей простір.'
-                        : 'Внутрішні працівники, закріплені за цим клієнтським простором.'}
+                        ? 'Хто з боку підтримки веде цей проєкт.'
+                        : 'Внутрішні працівники, закріплені за цим проєктом.'}
                     >
                     <MemberList
                       members={supportMembers}
                       emptyTitle="Підтримку ще не призначено"
                       emptyDescription={clientViewer
-                        ? 'Щойно за вашим простором закріплять працівників, вони зʼявляться тут.'
-                        : 'Додайте внутрішніх працівників у налаштуваннях клієнта.'}
+                        ? 'Щойно за вашим проєктом закріплять працівників, вони зʼявляться тут.'
+                        : 'Додайте внутрішніх працівників у налаштуваннях проєкту.'}
                       // Names, not doors, for a customer: `/team` is the staff
                       // roster and the profile behind it lists the other
                       // customers that person works with.

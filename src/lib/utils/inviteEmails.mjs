@@ -1,5 +1,5 @@
 // src/lib/utils/inviteEmails.mjs
-// The inline "invite by email" list, shared by «Новий клієнт» and «Налаштування
+// The inline "invite by email" list, shared by «Новий проєкт» and «Налаштування
 // клієнта». Both dialogs render the same form, so both parse and report the
 // same way — the two used to differ in what they even offered, which is how one
 // of them could invite somebody into the project being edited and the other

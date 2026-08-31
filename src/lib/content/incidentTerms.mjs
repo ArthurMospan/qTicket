@@ -37,20 +37,26 @@ export const RECORD_WRONG_NAMES = Object.freeze([
   'епік',
 ]);
 
-// A client's support space is theirs, not a «проєкт» of somebody's portfolio,
-// and to support it is the client. Both spellings, because the inherited copy
-// used both. Internally the collection is still `projects` and the field is
-// still `projectId` — this list is about what a person reads, not about what
-// the database calls it.
-export const CLIENT_SPACE_WRONG_NAMES = Object.freeze([
-  'проєкт',
-  'проект',
-]);
-
+// The container a customer's requests live in is a **проєкт**, and the owner
+// named it on 2026-08-31 after using the product: «Клієнти» over a list of
+// workspaces read as a list of companies, and the thing being opened is a place
+// to work, not a person. The word this file used to forbid is now the word.
+//
+// The reasoning it replaces is written down rather than deleted, because it was
+// not silly: to a customer «проєкт» can read as somebody's portfolio, and the
+// inherited task manager called every container that, which is how the fork
+// kept leaking its old vocabulary. What settles it is that the two mistakes are
+// not symmetrical — a customer who reads «проєкт» sees a place their requests
+// live, and a support agent who reads «клієнт» over a board sees a person they
+// are being asked to open. Only one of those is a screen nobody can name.
+//
+// A **клієнт** is still a person and a company: «Запросити клієнта», «Команда
+// клієнта», «адміністратор клієнта», and the «клієнтський портал» they sign in
+// to. The container is the проєкт. `projects` and `projectId` never changed.
+//
 // The stems no user-visible string in `src/` may contain, for any reader.
 export const TASK_MANAGER_WORDS = Object.freeze([
   ...RECORD_WRONG_NAMES,
-  ...CLIENT_SPACE_WRONG_NAMES,
 ]);
 
 // Forbidden on top of the above wherever an external client can read. These are

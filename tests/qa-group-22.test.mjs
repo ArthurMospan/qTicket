@@ -23,7 +23,7 @@ test('task composer resets discarded drafts and owns its one inline failure', as
 test('stable API codes map to human task-form messages', () => {
   assert.equal(
     userFacingErrorMessage({ code: 'INVALID_PROJECT_SCOPE', message: 'internal' }, 'fallback'),
-    'Обраний клієнтський простір недоступний у цій організації',
+    'Обраний проєкт недоступний у цій організації',
   );
   assert.equal(userFacingErrorMessage({ message: '  Детальна помилка  ' }, 'fallback'), 'Детальна помилка');
 });

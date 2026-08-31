@@ -36,8 +36,8 @@ export default function FiltersSection() {
         fullWidth
       >
         <PageHeader
-          title="Клієнти"
-          actions={<Button style="primary" color="dark" size="lg" icon={Plus}>Новий клієнт</Button>}
+          title="Проєкти"
+          actions={<Button style="primary" color="dark" size="lg" icon={Plus}>Новий проєкт</Button>}
           filters={(
             <FilterBar context="projects">
               <Select filterRole="member" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant="ghost" />

@@ -310,7 +310,7 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
     });
     if (!statusId) {
       throw new Error(
-        `У клієнта «${project?.name || current.projectId}» немає доступної колонки `
+        `У проєкті «${project?.name || current.projectId}» немає доступної колонки `
           + `категорії «${statusCategoryLabel(categoryId) || categoryId}». `
           + 'Увімкніть її в налаштуваннях клієнта або оберіть інший статус',
       );

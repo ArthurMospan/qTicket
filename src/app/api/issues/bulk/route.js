@@ -307,7 +307,7 @@ export async function POST(request) {
               hiddenStatusIds: project.hiddenColumns || [],
             })
             : body.value.id;
-          if (!requestedStatus) throw new Error(`У клієнта «${project.name || project.id}» немає доступного статусу цієї категорії`);
+          if (!requestedStatus) throw new Error(`У проєкті «${project.name || project.id}» немає доступного статусу цієї категорії`);
           const internal = jsonRequest(new URL(`/api/issues/${encodeURIComponent(issue.id)}/status`, request.url), request, 'PATCH', { status: requestedStatus });
           await responseResult(await transitionIssueStatus(internal, { params: Promise.resolve({ issueId: issue.id }) }));
           return {
@@ -367,7 +367,7 @@ export async function POST(request) {
             ? assigneesOutsideProject(freshProject, valueMemberships, uid => valueRoles.get(uid) ?? null)
             : [];
           if (outsideProject.length) {
-            throw new Error(`У клієнта «${freshProject?.name || issue.projectId}» цей виконавець не входить до складу команди — додайте його на вкладці «Команда»`);
+            throw new Error(`У проєкті «${freshProject?.name || issue.projectId}» цей виконавець не входить до складу команди — додайте його на вкладці «Команда»`);
           }
           const now = FieldValue.serverTimestamp();
           transaction.update(issueRef, {

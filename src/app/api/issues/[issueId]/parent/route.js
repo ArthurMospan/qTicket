@@ -48,7 +48,7 @@ async function loadAuthorizedIssue(request, issueId) {
     !projectSnap.exists
     || projectSnap.data().organizationId !== issue.organizationId
   ) {
-    return { error: 'Клієнтський простір звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
+    return { error: 'Проєкт звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
   }
 
   const role = authorization.membership?.role;
@@ -58,7 +58,7 @@ async function loadAuthorizedIssue(request, issueId) {
     && !(Array.isArray(projectTeam) && projectTeam.includes(authorization.user.uid))
   ) {
     return {
-      error: 'Ви не входите до команди цього клієнта',
+      error: 'Ви не входите до команди цього проєкту',
       code: 'PROJECT_ACCESS_DENIED',
       status: 403,
     };
@@ -139,14 +139,14 @@ export async function PATCH(request, context) {
         throw hierarchyTransactionError({
           code: 'PROJECT_NOT_FOUND',
           status: 404,
-          message: 'Клієнтський простір звернення не знайдено',
+          message: 'Проєкт звернення не знайдено',
         });
       }
       if (projectSnap.data().deletionPending === true) {
         throw hierarchyTransactionError({
           code: 'PROJECT_DELETING',
           status: 409,
-          message: 'Клієнтський простір уже видаляється',
+          message: 'Проєкт уже видаляється',
         });
       }
 

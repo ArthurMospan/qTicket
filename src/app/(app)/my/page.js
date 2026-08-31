@@ -268,8 +268,8 @@ export default function IncidentQueuePage() {
                   value={filters.projects}
                 onChange={(val) => setFilters({ projects: val })}
                 options={projects.map(p => ({ value: p.id, label: p.name }))}
-                placeholder="Усі клієнти"
-                searchPlaceholder="Пошук клієнта..."
+                placeholder="Усі проєкти"
+                searchPlaceholder="Пошук проєкту..."
                 filterRole="project"
               />
               <Select

@@ -131,7 +131,7 @@ test('the composer scopes assignees to the project selected inside it', async ()
   // Beside the project, not at the bottom of the form: the block used to sit
   // under the assignee chips, which is past the fold of a form somebody is
   // still filling in.
-  const projectField = modal.indexOf('<FormGroup label="Клієнт" required');
+  const projectField = modal.indexOf('<FormGroup label="Проєкт" required');
   const consent = modal.indexOf('assigneesJoiningProject.length > 0 && (');
   const description = modal.indexOf('<MarkdownEditor');
   assert.ok(projectField > 0 && consent > projectField && consent < description,

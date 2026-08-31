@@ -648,7 +648,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       breadcrumbs: clientViewer
         ? [{ label: 'Мої звернення', href: backHref }, leaf]
         : [
-          { label: 'Клієнти', href: '/clients' },
+          { label: 'Проєкти', href: '/clients' },
           { label: project?.name || '...', href: `/${projectId}` },
           leaf,
         ]

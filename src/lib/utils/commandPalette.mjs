@@ -13,7 +13,7 @@ export const COMMAND_GROUPS = ['action', 'navigation', 'project', 'issue', 'pers
 export const GROUP_LABELS = {
   action: 'Дії',
   navigation: 'Перейти',
-  project: 'Клієнти',
+  project: 'Проєкти',
   issue: 'Звернення',
   person: 'Люди',
 };
@@ -24,7 +24,7 @@ export const GROUP_LABELS = {
 const INTERNAL_NAVIGATION = [
   { id: 'nav-overview', label: 'Огляд', href: '/overview', icon: 'overview', keywords: 'ohliad overview dashboard support pidtrymka' },
   { id: 'nav-incidents', label: 'Звернення', href: '/my', icon: 'issue', keywords: 'intsydenty incidents requests zvernennya queue cherha' },
-  { id: 'nav-clients', label: 'Клієнти', href: '/clients', icon: 'folder', keywords: 'kliyenty clients customers projects proekty' },
+  { id: 'nav-clients', label: 'Проєкти', href: '/clients', icon: 'folder', keywords: 'kliyenty clients customers projects proekty клієнти проєкти' },
   { id: 'nav-team', label: 'Команда', href: '/team', icon: 'users', keywords: 'komanda team support people ludy' },
   { id: 'nav-settings', label: 'Налаштування', href: '/settings', icon: 'settings', keywords: 'nalashtuvannya settings preferences profile workflow' },
 ];
@@ -56,12 +56,12 @@ const CLIENT_NAVIGATION = [
 const INTERNAL_ACTIONS = [
   {
     id: 'action-new-client',
-    label: 'Новий клієнт',
-    hint: 'Створити клієнтський простір',
+    label: 'Новий проєкт',
+    hint: 'Створити проєкт',
     href: '/clients?new=1',
     icon: 'folder',
     permission: 'create:project',
-    keywords: 'novyi kliyent new client customer project proekt stvoryty create',
+    keywords: 'novyi kliyent new client customer project proekt stvoryty create новий клієнт проєкт створити',
   },
   {
     id: 'action-switch-org',
@@ -113,7 +113,7 @@ export function buildCommands({
     commands.push({
       id: `project-${project.id}`,
       group: 'project',
-      label: project.name || 'Клієнт',
+      label: project.name || 'Проєкт',
       href: `/${project.id}`,
       icon: 'folder',
       keywords: project.issuePrefix || '',
@@ -246,7 +246,7 @@ export function searchCommands({ people = [], projects = [] } = {}) {
     ...projects.slice(0, 6).map(project => ({
       id: `project-${project.id}`,
       group: 'project',
-      label: project.name || 'Клієнт',
+      label: project.name || 'Проєкт',
       href: `/${project.id}`,
       icon: 'folder',
     })),

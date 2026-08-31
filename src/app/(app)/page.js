@@ -108,7 +108,7 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
     ...(canEditProject
       ? [
         !isArchived
-          ? { icon: Archive, label: 'Архівувати клієнта', onClick: () => archive(project.id) }
+          ? { icon: Archive, label: 'Архівувати проєкт', onClick: () => archive(project.id) }
           : { icon: ArchiveRestore, label: 'Розархівувати', onClick: () => unarchive(project.id), color: '#10b981' },
       ]
       : []),
@@ -120,16 +120,16 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
           isDanger: true,
           onClick: async () => {
             if (await confirmDialog({
-              title: 'Видалити клієнтський простір?',
+              title: 'Видалити проєкт?',
               message: `Ви видаляєте «${project.name}». Цю дію неможливо скасувати.`,
               confirmText: 'Видалити',
               danger: true,
             })) {
               try {
                 await deleteProject(project.id);
-                showToast('Клієнтський простір видалено');
+                showToast('Проєкт видалено');
               } catch (error) {
-                showToast(userFacingErrorMessage(error, 'Не вдалося видалити клієнтський простір'), 'error');
+                showToast(userFacingErrorMessage(error, 'Не вдалося видалити проєкт'), 'error');
               }
             }
           },
@@ -163,9 +163,9 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
       >
         {/* Top row: the original project-team identity plus the kebab. */}
         <div className={`flex items-center justify-between ${menuOpen ? 'z-20' : 'z-10'}`}>
-          <div className={`flex ${stackOverlap}`} aria-label={`Учасників клієнтського простору: ${teamCount}`}>
+          <div className={`flex ${stackOverlap}`} aria-label={`Учасників проєкту: ${teamCount}`}>
             {teamCount === 0 && (
-              <div title="До клієнтського простору ще нікого не додано" data-ui-surface="local" style={{ width: stackChip, height: stackChip }} className="rounded-full bg-white flex items-center justify-center border-2 border-canvas">
+              <div title="До проєкту ще нікого не додано" data-ui-surface="local" style={{ width: stackChip, height: stackChip }} className="rounded-full bg-white flex items-center justify-center border-2 border-canvas">
                 <Users size={isLarge ? 13 : 11} className="text-muted" />
               </div>
             )}
@@ -207,7 +207,7 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
                 // small target forgivable — `sm` is the size for dense toolbars,
                 // which this is the opposite of.
                 trigger={
-                  <IconAction label="Дії з клієнтом" icon={MoreVertical} size="md" appearance="quiet" />
+                  <IconAction label="Дії з проєктом" icon={MoreVertical} size="md" appearance="quiet" />
                 }
                 items={projectMenuItems}
               />
@@ -516,7 +516,7 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
     // A disabled primary button gave no reason why, so the form now says what
     // is missing and marks the field instead of silently refusing the click.
     if (!name.trim()) {
-      setNameError('Вкажіть назву клієнта');
+      setNameError('Вкажіть назву проєкту');
       return;
     }
     setSaving(true);
@@ -543,7 +543,7 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
       });
       const result = await response.json();
       if (!response.ok) {
-        setError({ message: result.error || 'Не вдалося створити клієнтський простір' });
+        setError({ message: result.error || 'Не вдалося створити проєкт' });
         setSaving(false);
         return;
       }
@@ -557,10 +557,10 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
   };
 
   return (
-    <Dialog isOpen={true} onClose={onClose} title="Новий клієнт" size="sm" footer={
+    <Dialog isOpen={true} onClose={onClose} title="Новий проєкт" size="sm" footer={
       <>
         <Button onClick={onClose} style="secondary" size="md">Скасувати</Button>
-        <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити клієнта</Button>
+        <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити проєкт</Button>
       </>
     }>
       <div className="flex flex-col gap-[16px]">
@@ -586,7 +586,7 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
             teamMemberIds={team}
             onTeamMemberIdsChange={setTeam}
             teamPlaceholder="Оберіть працівників підтримки"
-            teamHint="Після створення відкрийте клієнта → «Учасники», щоб окремо запросити адміністратора клієнта."
+            teamHint="Після створення відкрийте проєкт → «Учасники», щоб окремо запросити адміністратора клієнта."
           />
       </div>
     </Dialog>
@@ -621,7 +621,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   }, []);
 
   // `?new=1` is the second door into the composer and it has to be the same
-  // door as the button. It was not: «Новий клієнт» asks `create:project`, which
+  // door as the button. It was not: «Новий проєкт» asks `create:project`, which
   // a member does not hold, while the query opened the dialog for anybody who
   // arrived with it — and the empty state on the overview offered exactly that
   // address to every internal role. A member got a form the server was always
@@ -741,7 +741,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const archive = async (id) => {
     try {
       await archiveProject(id);
-      showToast('Клієнта архівовано', 'success', {
+      showToast('Проєкт архівовано', 'success', {
         duration: 5000,
         action: {
           label: 'Скасувати',
@@ -749,7 +749,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
         }
       });
     } catch (err) {
-      showToast(userFacingErrorMessage(err, 'Не вдалося архівувати клієнта'), 'error');
+      showToast(userFacingErrorMessage(err, 'Не вдалося архівувати проєкт'), 'error');
       return false;
     }
     return true;
@@ -758,9 +758,9 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
   const unarchive = async (id) => {
     try {
       await restoreProject(id);
-      showToast('Клієнта повернуто з архіву');
+      showToast('Проєкт повернуто з архіву');
     } catch (err) {
-      showToast(userFacingErrorMessage(err, 'Не вдалося повернути клієнта з архіву'), 'error');
+      showToast(userFacingErrorMessage(err, 'Не вдалося повернути проєкт з архіву'), 'error');
       return false;
     }
     return true;
@@ -825,8 +825,8 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
           <Surface preset="panel" padding="lg">
             <EmptyState
               icon={Inbox}
-              title="Простір підтримки ще не налаштовано"
-              description="Адміністратор має додати вас до підготовленого простору."
+              title="Проєкт підтримки ще не налаштовано"
+              description="Адміністратор має додати вас до підготовленого проєкту."
               context="page"
             />
           </Surface>
@@ -848,7 +848,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
       <div className="workspace-page-layout min-h-full">
 
         <PageHeader
-          title="Клієнти"
+          title="Проєкти"
           actions={
             can(orgRole, 'create:project') && (
               <Button
@@ -858,9 +858,9 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
                 size="lg"
                 icon={Plus}
                 collapseAt="sm"
-                title="Новий клієнт"
+                title="Новий проєкт"
               >
-                Новий клієнт
+                Новий проєкт
               </Button>
             )
           }
@@ -880,7 +880,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
               title={workspaceScopeFailure
                 ? 'Не вдалося прочитати частину робочого простору'
                 : projectsError
-                  ? 'Не вдалося завантажити клієнтів'
+                  ? 'Не вдалося завантажити проєкти'
                   : 'Не вдалося завантажити звернення'}
               description={workspaceScopeFailure
                 ? 'Дані організації на місці. Оновіть доступ і спробуйте ще раз.'
@@ -908,13 +908,13 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
             <Surface preset="panel" padding="md" className="w-full">
               <EmptyState
                 icon={Folder}
-                title={(projects || []).filter(project => project.status !== 'archived').length === 0 ? 'Ще немає клієнтів' : 'Клієнтів не знайдено'}
+                title={(projects || []).filter(project => project.status !== 'archived').length === 0 ? 'Ще немає проєктів' : 'Проєктів не знайдено'}
                 description={(projects || []).filter(project => project.status !== 'archived').length === 0
                   ? can(orgRole, 'create:project')
-                    ? 'Створіть простір першого клієнта, призначте підтримку та запросіть представника клієнта.'
-                    : 'Попросіть адміністратора створити перший клієнтський простір.'
+                    ? 'Створіть перший проєкт, призначте підтримку та запросіть представника клієнта.'
+                    : 'Попросіть адміністратора створити перший проєкт.'
                   : 'Спробуйте змінити параметри фільтрації.'}
-                action={(projects || []).filter(project => project.status !== 'archived').length === 0 && can(orgRole, 'create:project') ? 'Створити клієнта' : null}
+                action={(projects || []).filter(project => project.status !== 'archived').length === 0 && can(orgRole, 'create:project') ? 'Створити проєкт' : null}
                 onAction={(projects || []).filter(project => project.status !== 'archived').length === 0 && can(orgRole, 'create:project') ? () => setShowNewProject(true) : null}
                 context="page"
               />

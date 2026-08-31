@@ -24,13 +24,13 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { copyStrings, walkSources as walk } from './copy-strings.mjs';
 
 import {
-  CLIENT_SPACE_WRONG_NAMES,
   INCIDENT_TERMS_TABLE,
   RECORD_WRONG_NAMES,
   TASK_MANAGER_WORDS,
@@ -120,16 +120,26 @@ test('nothing a person reads calls the record anything but «звернення�
   );
 });
 
-test('a support space is named by whose it is, never «проєкт»', () => {
-  const problems = offences(CLIENT_SPACE_WRONG_NAMES);
-  assert.deepEqual(
-    problems,
-    [],
-    `To a customer «проєкт» is somebody's portfolio; this is their support space. `
-    + `On a staff screen the thing being named is the «клієнт», over one of them `
-    + `it is «клієнтський простір». The collection stays \`projects\` and the field `
-    + `stays \`projectId\` — only the sentence changes.\n\n${problems.join('\n')}`,
-  );
+// The container is a «проєкт» now, and the word is no longer forbidden. What
+// this test guards is the other half of that decision: a проєкт is a place, a
+// клієнт is a person, and the product must not go back to naming the place
+// after the people in it. «Клієнти» over a list of workspaces was the reading
+// the owner tripped on — a list of companies where the thing you open is a
+// board.
+test('the container is named as a place, never as the people in it', () => {
+  const sidebar = readFileSync(join(SRC, 'components', 'WorkspaceSidebar.jsx'), 'utf8');
+  const clients = readFileSync(join(SRC, 'app', '(app)', 'page.js'), 'utf8');
+  const overview = readFileSync(join(SRC, 'app', '(app)', 'overview', 'page.js'), 'utf8');
+
+  assert.match(sidebar, /label: 'Проєкти'/);
+  assert.doesNotMatch(sidebar, /label: 'Клієнти'/);
+  assert.match(sidebar, /ПРОЄКТИ/);
+  assert.match(clients, /title="Проєкти"/);
+  assert.match(overview, /title="Проєкти"/);
+
+  // And the people keep their own word: inviting one, and the team on a
+  // project, are about a клієнт and still say so.
+  assert.match(clients, /клієнт/i);
 });
 
 test('the whitelist is three entries long and all of them say why', () => {
@@ -179,8 +189,6 @@ test('the stems are stems, so a declined form cannot slip past', () => {
     'Епік (legacy)',
     'Додати існуюче завдання у спринт',
     'Беклог',
-    'у проєкті ACME',
-    'клієнтські проекти',
   ];
   for (const phrase of declined) {
     const haystack = phrase.toLocaleLowerCase('uk-UA');

@@ -170,7 +170,7 @@ export default function InviteLandingClient() {
             </h1>
             <p className="mt-3 text-[13px] leading-relaxed" style={muted}>
               {preview.clientSpaceName
-                ? <>Простір підтримки <strong style={ink}>{preview.clientSpaceName}</strong> · {roleLabel}</>
+                ? <>Проєкт <strong style={ink}>{preview.clientSpaceName}</strong> · {roleLabel}</>
                 : roleLabel}
             </p>
 
@@ -182,7 +182,7 @@ export default function InviteLandingClient() {
             ) : (
               <>
                 <p className="mt-8 mb-5 text-[13px] leading-relaxed" style={muted}>
-                  Увійдіть, щоб отримати доступ до звернень цього простору.
+                  Увійдіть, щоб отримати доступ до звернень цього проєкту.
                 </p>
                 <div className="flex w-full flex-col gap-3">
                   <button

@@ -151,7 +151,7 @@ export default function InviteLinkSection({ role, projectId, spaceName = '' }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[11px] leading-5 text-muted">
             Роль зафіксована: <strong className="text-ink">{organizationRoleLabel(link.role)}</strong>.
-            Змінити роль або клієнтський простір після створення неможливо.
+            Змінити роль або проєкт після створення неможливо.
           </p>
           <TextAction tone="danger" size="md" onClick={revoke} disabled={revoking}>
             Відкликати
@@ -165,7 +165,7 @@ export default function InviteLinkSection({ role, projectId, spaceName = '' }) {
           QR-код
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={qrDataUrl} alt="QR-код запрошення до клієнтського простору" className="h-[172px] w-[172px]" />
+        <img src={qrDataUrl} alt="QR-код запрошення до проєкту" className="h-[172px] w-[172px]" />
         <TextAction tone="muted" size="sm" icon={Download} onClick={downloadQr} className="mt-2">
           Завантажити PNG
         </TextAction>

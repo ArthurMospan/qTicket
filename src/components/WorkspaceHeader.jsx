@@ -136,7 +136,7 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
       project: null,
       placeholder: isClientRole(orgRole)
         ? 'Пошук за номером або темою звернення...'
-        : 'Пошук звернень, клієнтів і команди...',
+        : 'Пошук звернень, проєктів і команди...',
     };
   }
   // «Огляд» serves both audiences now, so its placeholder has to as well. It
@@ -149,11 +149,11 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
       project: null,
       placeholder: isClientRole(orgRole)
         ? 'Пошук за номером або темою звернення...'
-        : 'Пошук звернень, клієнтів і команди...',
+        : 'Пошук звернень, проєктів і команди...',
     };
   }
   if (pathname.startsWith('/clients')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук клієнтів...' };
+    return { mode: 'search', project: null, placeholder: 'Пошук проєктів...' };
   }
   if (pathname.startsWith('/my')) {
     return { mode: 'search', project: null, placeholder: 'Пошук звернень...' };

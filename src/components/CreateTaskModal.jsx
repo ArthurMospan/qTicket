@@ -452,7 +452,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
 
           {/* Project Selector (if projects passed) */}
           {projects && projects.length > 0 && (
-            <FormGroup label="Клієнт" required error={fieldErrors.projectId}>
+            <FormGroup label="Проєкт" required error={fieldErrors.projectId}>
               <Select
                 value={form.projectId}
                 onChange={val => set('projectId', val)}

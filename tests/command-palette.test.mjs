@@ -66,6 +66,10 @@ test('archived projects are not destinations', () => {
 test('a query finds the thing you were aiming at, not merely something matching', () => {
   const commands = buildCommands({ projects, allowedPermissions: ['create:project'] });
 
+  // The container is a «проєкт» now, and both words find it. A rename that
+  // makes a control unfindable by the name it had yesterday is a rename that
+  // costs its users the one screen they open when they cannot see a button.
+  assert.equal(rankCommands(commands, 'новий проєкт')[0].id, 'action-new-client');
   assert.equal(rankCommands(commands, 'новий клієнт')[0].id, 'action-new-client');
   assert.equal(rankCommands(commands, 'retro')[0].id, 'project-p1');
   // The client's own palette still reaches the one composer the product has.

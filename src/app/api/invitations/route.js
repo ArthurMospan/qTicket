@@ -176,10 +176,10 @@ export async function POST(request) {
     return NextResponse.json({ type: 'invitation_sent', emailSent }, { status: 201 });
   } catch (error) {
     if (error.message === 'INVALID_PROJECT_SCOPE') {
-      return NextResponse.json({ error: 'Клієнтський простір недоступний для цієї організації' }, { status: 400 });
+      return NextResponse.json({ error: 'Проєкт недоступний для цієї організації' }, { status: 400 });
     }
     if (error.message === 'CLIENT_PROJECT_REQUIRED') {
-      return NextResponse.json({ error: 'Оберіть один доступний клієнтський простір' }, { status: 400 });
+      return NextResponse.json({ error: 'Оберіть один доступний проєкт' }, { status: 400 });
     }
     return routeErrorResponse(error, { context: 'Invitation POST', fallbackMessage: 'Internal Server Error' });
   }

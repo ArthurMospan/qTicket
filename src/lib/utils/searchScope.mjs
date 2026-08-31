@@ -7,7 +7,7 @@ export function createProjectSearchScope(project) {
   return {
     type: 'project',
     projectId: String(project.id),
-    label: `у клієнта ${project.name || 'Без назви'}`,
+    label: `у проєкті ${project.name || 'Без назви'}`,
   };
 }
 
@@ -16,7 +16,7 @@ export function normalizeSearchScope(scope) {
   return {
     type: 'project',
     projectId: String(scope.projectId),
-    label: String(scope.label || 'у клієнта').trim() || 'у клієнта',
+    label: String(scope.label || 'у проєкті').trim() || 'у проєкті',
   };
 }
 

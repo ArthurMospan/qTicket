@@ -17,7 +17,7 @@ const BRAND = 'qTicket';
 export const ROUTE_TITLES = [
   { path: '/', exact: true, title: 'Огляд' },
   { path: '/overview', title: 'Огляд' },
-  { path: '/clients', title: 'Клієнти' },
+  { path: '/clients', title: 'Проєкти' },
   // The words the screens themselves use — the tab is not the place to invent
   // a third name for a destination the sidebar and the page already agree on.
   { path: '/my', title: 'Звернення' },
@@ -39,7 +39,7 @@ export function routeTitle(pathname, projects = [], { clientPortal = false } = {
   // spaces load there is no name for it. A client's tab says where they are;
   // support's says whose space it is standing in.
   if (clientPortal) return 'Мої звернення';
-  return projectId ? 'Клієнт' : BRAND;
+  return projectId ? 'Проєкт' : BRAND;
 }
 
 // The breadcrumb trail is already the answer to "where am I", and detail screens

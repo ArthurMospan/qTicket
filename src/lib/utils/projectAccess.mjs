@@ -40,9 +40,9 @@ export function hasProjectAccess(project, role, uid) {
  * and must not be reported as a permission problem.
  */
 export function projectWriteError(project, organizationId, role, uid) {
-  if (!project || project.organizationId !== organizationId) return 'Клієнтський простір звернення не знайдено';
-  if (project.deletionPending === true) return 'Клієнтський простір уже видаляється';
-  if (!hasProjectAccess(project, role, uid)) return 'Ви не входите до команди цього клієнта';
+  if (!project || project.organizationId !== organizationId) return 'Проєкт звернення не знайдено';
+  if (project.deletionPending === true) return 'Проєкт уже видаляється';
+  if (!hasProjectAccess(project, role, uid)) return 'Ви не входите до команди цього проєкту';
   return '';
 }
 

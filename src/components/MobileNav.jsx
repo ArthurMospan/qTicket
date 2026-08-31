@@ -33,7 +33,7 @@ const NAV_OPACITY = 0.88;
 const TABS = [
   { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
   { href: '/my',       icon: TaskIcon,        label: 'Звернення' },
-  { href: '/clients',  icon: Folder,          label: 'Клієнти' },
+  { href: '/clients',  icon: Folder,          label: 'Проєкти' },
 ];
 
 const MORE_NAV = [
@@ -329,11 +329,11 @@ export default function MobileNav({ keyboardOpen = false }) {
             {/* Client workspaces are internal support navigation. */}
             <div className="flex items-center justify-between px-[20px] pb-[8px]">
               <p className="text-[11px] font-bold text-[var(--sb-muted)] uppercase tracking-wider">
-                Клієнти
+                Проєкти
               </p>
               {can(orgRole, 'create:project') && (
                 <IconAction
-                  label="Новий клієнт"
+                  label="Новий проєкт"
                   icon={Plus}
                   size="sm"
                   appearance="quiet"

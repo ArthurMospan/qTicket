@@ -24,7 +24,7 @@ export default function manifest() {
     shortcuts: [
       { name: 'Огляд підтримки', url: '/overview' },
       { name: 'Звернення', url: '/my' },
-      { name: 'Клієнти', url: '/clients' },
+      { name: 'Проєкти', url: '/clients' },
     ],
   };
 }

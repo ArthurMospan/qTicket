@@ -113,7 +113,7 @@ export async function POST(request) {
       if (!issue || issue.organizationId !== organizationId || (projectId && issue.projectId !== projectId)) {
         return NextResponse.json({ error: 'Issue does not belong to notification scope' }, { status: 400 });
       }
-      // Сповіщення про звернення — це сповіщення про клієнтський простір, у
+      // Сповіщення про звернення — це сповіщення про проєкт, у
       // якому воно лежить, навіть коли викликач назвав лише звернення.
       if (!project && issue.projectId) {
         const projectSnap = await db.collection('projects').doc(issue.projectId).get();
