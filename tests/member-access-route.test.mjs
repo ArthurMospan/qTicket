@@ -50,8 +50,17 @@ test('legacy member roles stay protected while QuickTeam-managed seats are immut
 });
 
 test('qTicket does not expose internal team mutations and keeps personal exit separate', async () => {
-  const settings = await read('../src/app/(app)/settings/page.js');
-  assert.match(settings, /Команда керується в QuickTeam/);
+  const [settings, team] = await Promise.all([
+    read('../src/app/(app)/settings/page.js'),
+    read('../src/app/(app)/team/page.js'),
+  ]);
+  // Where a seat comes from is said under the roster it explains. It used to be
+  // an Alert inside «Налаштування» → «Команда підтримки»; that section is gone,
+  // and the sentence went with the list it was about rather than staying behind
+  // as a second door into it.
+  assert.doesNotMatch(settings, /Команда керується в QuickTeam/);
+  assert.match(team, /Склад команди синхронізується з QuickTeam/);
+  assert.match(team, /Запрошувати внутрішніх працівників усередині qTicket не потрібно/);
   assert.doesNotMatch(settings, /TeamMemberSettingsDialog/);
   assert.doesNotMatch(settings, /getMemberRemovalImpact/);
 

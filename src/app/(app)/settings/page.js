@@ -13,7 +13,6 @@ import { fetchWorkflowViaApi, updateWorkflowViaApi } from '@/lib/services/workfl
 import { authenticatedRequest } from '@/lib/services/authenticatedRequest';
 import { deleteAccount, fetchAccountDeletionImpact } from '@/lib/services/account';
 import { plural } from '@/lib/utils/plural.mjs';
-import { isActiveMember, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { can, isClientRole } from '@/lib/utils/can';
 import { archivedIssuesOf } from '@/lib/utils/issueArchive.mjs';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
@@ -32,7 +31,7 @@ import { auth, createGitHubProvider, db, googleProvider } from '@/lib/firebase';
 import { linkWithPopup, unlink } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import {
-  User, Bell, Users, GitBranch,
+  User, Bell, GitBranch,
   Shapes, Check, Plus, Trash2, Edit2, X, Save,
   Building, LogOut, RefreshCw, Mail,
   ExternalLink, AlertTriangle,
@@ -41,8 +40,7 @@ import {
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Surface, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
-import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
+import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
 import ImageUpload from '@/components/ui/ImageUpload';
 import {
   CHANNEL_DEFAULTS,
@@ -54,7 +52,6 @@ import {
   organizationPortalBackground,
   resolveOrganizationPortalBrand,
 } from '@/lib/utils/organizationBranding.mjs';
-import InviteMemberDialog from '@/components/InviteMemberDialog';
 import {
   DEFAULT_STATUSES,
   DEFAULT_TYPES,
@@ -117,11 +114,6 @@ const CLIENT_SETTINGS_SECTIONS = new Set([
   'account',
 ]);
 
-const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set([
-  ...CLIENT_SETTINGS_SECTIONS,
-  'team',
-]);
-
 // A staff seat is a copy of a QuickTeam account: QuickTeam owns the person's
 // name, avatar, language and role, and re-sends all of it on the next sync. A
 // personal profile editor and a locale editor inside qTicket are therefore a
@@ -133,14 +125,17 @@ const CLIENT_ADMIN_SETTINGS_SECTIONS = new Set([
 // «Команда підтримки» went the same way, for the same reason twice over: the
 // staff roster is QuickTeam's, and qTicket already draws it on «Команда», which
 // answers what a support screen is for — which clients a person is on and what
-// they have open. Two doors into one read-only list is one door too many; the
-// section stays for `client_admin`, whose «Співробітники клієнта» is qTicket's
-// own directory and has no screen of its own.
+// they have open. Two doors into one read-only list is one door too many.
+//
+// «Співробітники клієнта» — the `client_admin` half of that same section —
+// followed it on 2026-08-31, and for the same reason a third time: the rail
+// entry a client saw already said «Співробітники», and the section it opened
+// said it again under a group of its own. The roster is «Команда» for both
+// audiences now; there is no `team` section left for any role to reach.
 const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([
   'profile',
   'notifications',
   'localization',
-  'team',
 ]);
 
 const NAV = [
@@ -161,7 +156,6 @@ const NAV = [
   // one describes, and a rail entry is a promise that there is something to do
   // behind it. `?section=billing` still resolves; see MERGED_SECTIONS.
   { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
-  { id: 'team',          label: 'Команда підтримки', icon: Users,         group: 'Організація' },
   { id: 'statuses',      label: 'Статуси звернень', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
   { id: 'types',         label: 'Типи звернень',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
   { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
@@ -675,7 +669,6 @@ export default function SettingsPage() {
   const {
     org,
     members,
-    inviteMember,
     deactivateMember,
   } = useOrganization();
 
@@ -687,19 +680,6 @@ export default function SettingsPage() {
   const isAdmin = myRole === 'owner' || myRole === 'admin';
   const isOwner = myRole === 'owner';
   const clientViewer = isClientRole(myRole);
-  const clientAdmin = myRole === 'client_admin';
-  const clientSettingsSections = clientAdmin
-    ? CLIENT_ADMIN_SETTINGS_SECTIONS
-    : CLIENT_SETTINGS_SECTIONS;
-  const currentUserId = currentUser?.uid || currentUser?.id;
-  const clientProjectIds = useMemo(() => (
-    clientViewer
-      ? (projects || [])
-          .filter(project => project.status !== 'archived' && project.team?.includes(currentUserId))
-          .map(project => project.id)
-          .slice(0, 1)
-      : []
-  ), [clientViewer, currentUserId, projects]);
 
   // Which sections this role may open — one answer for all three doors into a
   // section: the rail, the `?section=` address and the body that renders. A
@@ -707,10 +687,10 @@ export default function SettingsPage() {
   const reachableSections = useMemo(() => new Set(
     NAV
       .filter(item => (clientViewer
-        ? clientSettingsSections.has(item.id)
+        ? CLIENT_SETTINGS_SECTIONS.has(item.id)
         : !CLIENT_ONLY_SETTINGS_SECTIONS.has(item.id) && (!item.adminOnly || isAdmin)))
       .map(item => item.id),
-  ), [clientSettingsSections, clientViewer, isAdmin]);
+  ), [clientViewer, isAdmin]);
   // The first entry of this role's own rail, so «Налаштування» always opens on
   // something this person can actually see — with one exception. Removing the
   // personal group left «Безпека» first for staff, and a support manager who
@@ -835,15 +815,18 @@ export default function SettingsPage() {
       const MERGED_SECTIONS = { 'auth-methods': 'account', billing: 'workspace' };
       const rawSection = currentSearchParams.get('section');
       const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
-      // «Команда підтримки» did not go away for staff, it moved: the roster is
-      // «Команда». A bookmark lands on the screen that now holds the answer
-      // rather than on whatever happens to be first in this rail.
+      // «Команда підтримки» did not go away, it moved: the roster is «Команда»,
+      // for the support team and for a client administrator's own employees
+      // alike. A bookmark lands on the screen that now holds the answer rather
+      // than on whatever happens to be first in this rail.
       // The role is read after the first paint and `myRole` guesses «member»
       // until it arrives, so the raw one is what may be trusted here: guessing
-      // wrong sends a `client_admin` to a staff screen their own layout would
-      // then bounce. Unknown means wait — the effect runs again with the answer.
-      const knownStaff = Boolean(resolvedRole) && !isClientRole(resolvedRole);
-      if (requestedSection === 'team' && knownStaff) {
+      // wrong sends a `client_member` to a screen their own layout would then
+      // bounce. Unknown means wait — the effect runs again with the answer.
+      // A `client_member` is the one role with no roster to be sent to, so the
+      // address falls through to this rail's own first section.
+      const knownTeamReader = Boolean(resolvedRole) && resolvedRole !== 'client_member';
+      if (requestedSection === 'team' && knownTeamReader) {
         router.replace('/team');
         return;
       }
@@ -968,9 +951,6 @@ export default function SettingsPage() {
   const [timeFormat, setTimeFormat] = useState('24h');
   const [timezone, setTimezone] = useState('Europe/Kyiv');
   const [language, setLanguage] = useState('ua');
-
-  // ── Team invite ──
-  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // ─── Auth methods ───
   const [authProviderIds, setAuthProviderIds] = useState([]);
@@ -2269,77 +2249,6 @@ export default function SettingsPage() {
       }
 
 
-
-      // ──────────────────────────────────────────────────────────────
-      // Everyone may see who is on the team; only owners and admins may change
-      // anything about them. Both controls used to render for everyone, and
-      // both lead to a wall: the invitations route requires owner/admin, and
-      // the member dialog disables every field it contains. A control that
-      // cannot do anything is not a disabled control, it is the wrong control.
-      case 'team': {
-        // Deactivated people stay listed, below the active ones: their tasks,
-        // comments and hours are still in the workspace under their name, and a
-        // directory that hides them turns all of that into an unknown id.
-        const directoryMembers = members
-          .filter(member => clientViewer ? isClientRole(member.role) : !isClientRole(member.role))
-          .sort((left, right) => (
-            Number(!isActiveMember(left)) - Number(!isActiveMember(right))
-          ));
-        return (
-        <Section
-          title={clientViewer ? 'Співробітники клієнта' : 'Команда підтримки'}
-          desc={clientViewer
-            ? 'Люди, які мають доступ до вашого клієнтського простору та його звернень.'
-            : 'Внутрішні працівники, яким власник надав доступ у QuickTeam.'}
-          rightAction={clientAdmin && clientProjectIds.length === 1 ? (
-          <Button
-            onClick={() => setShowInviteModal(true)}
-            style="primary"
-            size="md"
-            icon={Plus}
-          >Запросити співробітника</Button>
-        ) : null}>
-          {!clientViewer && (
-            <Alert
-              variant="info"
-              title="Команда керується в QuickTeam"
-              description="Щоб додати чи прибрати менеджера або адміністратора, відкрийте QuickTeam → Налаштування → Інтеграції → qTicket і синхронізуйте склад. Окремо запрошувати внутрішніх працівників у qTicket не потрібно."
-              className="mb-4"
-            />
-          )}
-          <Surface preset="card" padding="none" className="overflow-hidden relative z-10">
-            <div className="flex flex-col divide-y divide-line rounded-[16px]">
-              {directoryMembers.map((member, i) => {
-                const isMe = member.id === (currentUser?.uid || currentUser?.id);
-                const positionLabel = positions.find(position => position.id === member.positionId)?.label
-                  || organizationRoleLabel(member.role);
-                const deactivated = !isActiveMember(member);
-                return (
-                  <div key={member.id} className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-canvas transition-colors ${i === 0 ? 'rounded-t-[16px]' : ''} ${i === directoryMembers.length - 1 ? 'rounded-b-[16px]' : ''} ${deactivated ? 'opacity-60' : ''}`}>
-                    <div className="flex min-w-0 items-center gap-3">
-                      <UserAvatar user={member} size="lg" />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-[14px] font-bold text-ink">{member.name || member.email}</p>
-                          {isMe && <Pill shape="badge" size="sm" uppercase>Ти</Pill>}
-                          {deactivated && <Pill shape="badge" size="sm" uppercase>Без доступу</Pill>}
-                        </div>
-                        <p className="truncate text-[12px] text-muted">{member.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Pill size="lg" className="hidden sm:inline-flex">{positionLabel}</Pill>
-                      <Pill tone="ink-subtle" size="lg">{organizationRoleLabel(member.role)}</Pill>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Surface>
-        </Section>
-        );
-      }
-
       // ──────────────────────────────────────────────────────────────
       case 'statuses': {
         const closingStatuses = statuses.filter(s => isClosingCategory(s.category));
@@ -3007,14 +2916,7 @@ export default function SettingsPage() {
   //
   // The rail draws exactly what `reachableSections` allows — the same list the
   // address bar and the section body are answered from.
-  const allowedNav = NAV
-    .filter(item => reachableSections.has(item.id))
-    .map(item => {
-    if (clientViewer && item.id === 'team') {
-      return { ...item, label: 'Співробітники клієнта', group: 'Клієнтський простір' };
-    }
-    return item;
-  });
+  const allowedNav = NAV.filter(item => reachableSections.has(item.id));
 
   const handleNavChange = async (id) => {
     const success = await handleSectionChange(id);
@@ -3046,14 +2948,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
-
-      <InviteMemberDialog
-        isOpen={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-        inviteMember={inviteMember}
-        clientMode={clientViewer}
-        projectIds={clientProjectIds}
-      />
     </SidebarLayout>
   );
 }

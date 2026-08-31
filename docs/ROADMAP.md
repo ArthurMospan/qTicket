@@ -336,6 +336,8 @@ Completed product slice on 2026-08-29:
   section is `client_admin`-only now («Співробітники клієнта», qTicket's own
   directory, which has no screen of its own), and `?section=team` asked by
   staff redirects to `/team` — that roster moved, it was not taken away.
+  (Superseded on 2026-08-31, see below: the client half moved to `/team` as
+  well, and the section exists for no role now.)
 - **Команда** absorbed what only the settings copy had. It lists people whose
   seat QuickTeam switched off, sorted last, dimmed, «Без доступу» in place of
   a position they no longer hold, and the profile they open says the same. Only
@@ -343,6 +345,42 @@ Completed product slice on 2026-08-29:
   work cannot be handed to somebody who can no longer sign in. The rail also
   carries the one sentence the deleted section had and this screen did not —
   where a seat comes from.
+
+Completed product slice on 2026-08-31 — one roster, one door:
+
+- **`/team` is the roster for both audiences, and the settings `team` section
+  is gone at every door.** A `client_admin` saw «Співробітники» in the rail,
+  which opened «Налаштування», where the settings rail named the same address
+  again as «Співробітники клієнта» under a group of its own — one address,
+  named twice, on one screen. The section is deleted outright: out of `NAV`,
+  out of `CLIENT_ONLY_SETTINGS_SECTIONS`, out of the reachable-section set and
+  out of `renderSection`, so the rail, the `?section=team` address and the
+  rendered body all answer the same way. `?section=team` now redirects to
+  `/team` for a client administrator exactly as it already did for staff; a
+  `client_member` — the one role with no roster — falls through to the first
+  section of their own rail.
+- **The screen knows who is looking, rather than being two screens.** Staff see
+  exactly what `/team` showed before, deactivated seats included. A
+  `client_admin` sees the client members of their one space — scoped by
+  `project.team`, not merely by role — under the heading «Співробітники», with
+  «Запросити співробітника» beside it. That control opens the same
+  `InviteMemberDialog` the client space uses, so the email invitation and the
+  invitation **link** with its QR code are one dialog and not a second control
+  somewhere else on the page. The role it may issue stays `client_member`, and
+  stays fixed by the dialog, the invitation route and `firestore.rules` — this
+  slice widened nothing.
+- **The client boundary is what tells the two client roles apart.**
+  `isClientPortalRoute` now takes the role, and `/team` answers `true` only for
+  `client_admin`; the authenticated layout passes `orgRole` into it. A
+  `client_member` who pastes `/team` is returned to their portal by the same
+  boundary that returns them from `/overview`, and the navigation graph walks
+  every role through the real predicate to prove it. Putting the answer in the
+  boundary rather than in a guard inside the screen is deliberate: two opinions
+  about who may open an address is how the front door and the boundary once
+  handed a client back and forth for ever.
+- The client's command-palette entry «Співробітники» points at `/team`. The
+  help articles about invitations and about the roster describe the screen that
+  exists, not the settings section that did.
 
 Product work still required:
 

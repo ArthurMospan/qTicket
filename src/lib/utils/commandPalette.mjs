@@ -31,7 +31,10 @@ const INTERNAL_NAVIGATION = [
 
 const CLIENT_NAVIGATION = [
   { id: 'nav-requests', label: 'Мої звернення', href: '/', icon: 'issue', keywords: 'moi zvernennya requests incidents support dopomoha' },
-  { id: 'nav-client-team', label: 'Співробітники', href: '/settings?section=team', icon: 'users', keywords: 'spivrobitnyky employees people team', clientAdminOnly: true },
+  // The same address the support team's «Команда» is. One roster screen, and
+  // the client boundary decides which half of it a `client_admin` sees; the
+  // settings section this used to point at is gone at every door.
+  { id: 'nav-client-team', label: 'Співробітники', href: '/team', icon: 'users', keywords: 'spivrobitnyky employees people team komanda', clientAdminOnly: true },
   { id: 'nav-profile', label: 'Мій профіль', href: '/settings?section=profile', icon: 'user', keywords: 'mii profil profile account settings' },
 ];
 
