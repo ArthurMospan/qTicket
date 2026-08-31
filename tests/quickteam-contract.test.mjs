@@ -36,6 +36,15 @@ test('QuickTeam request signatures cover version, timestamp, nonce and exact bod
     verifyQuickTeamRequest({ secret, timestamp, nonce, signature, body, nowSeconds: timestamp + 301 }),
     { ok: false, code: 'expired' },
   );
+  // A request with no headers at all is not a stale one. `Number('')` is 0 and
+  // 0 is a safe integer, so this used to answer «expired» and send whoever was
+  // debugging an unsigned call to look at clocks.
+  for (const missing of ['', null, undefined]) {
+    assert.deepEqual(
+      verifyQuickTeamRequest({ secret, timestamp: missing, nonce, signature, body, nowSeconds: timestamp }),
+      { ok: false, code: 'timestamp' },
+    );
+  }
 });
 
 test('provisioning accepts one exact owner and only internal qTicket roles', () => {

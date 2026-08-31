@@ -53,6 +53,10 @@ export function verifyQuickTeamRequest({
   body,
   nowSeconds = Math.floor(Date.now() / 1000),
 }) {
+  // A missing header is a missing header: `Number('')` is 0 and 0 is a safe
+  // integer, so an unsigned request used to be reported as «expired» and send
+  // whoever was debugging it to look at clocks.
+  if (!String(timestamp ?? '').trim()) return { ok: false, code: 'timestamp' };
   const numericTimestamp = Number(timestamp);
   if (!Number.isSafeInteger(numericTimestamp)) return { ok: false, code: 'timestamp' };
   if (Math.abs(nowSeconds - numericTimestamp) > QUICKTEAM_SIGNATURE_WINDOW_SECONDS) {

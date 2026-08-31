@@ -41,12 +41,6 @@ function transferError(code, status, message) {
 
 export async function POST(request, context) {
   try {
-    if (!quickTeamTransferConfigured()) {
-      return NextResponse.json({
-        error: 'Перенесення в QuickTeam не налаштоване на сервері',
-        code: 'NOT_CONFIGURED',
-      }, { status: 503 });
-    }
     const { issueId } = await context.params;
     const body = await readJsonBody(request);
     const projectId = String(body?.quickTeamProjectId || '').trim();
@@ -76,7 +70,16 @@ export async function POST(request, context) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }
     if (isClientRole(authorization.membership?.role)) {
-      return NextResponse.json({ error: 'Forbidden', status: 403 }, { status: 403 });
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    // Asked after the session is verified, like the projects proxy beside it:
+    // whether this deployment can reach QuickTeam is not something an anonymous
+    // caller needs told.
+    if (!quickTeamTransferConfigured()) {
+      return NextResponse.json({
+        error: 'Перенесення в QuickTeam не налаштоване на сервері',
+        code: 'NOT_CONFIGURED',
+      }, { status: 503 });
     }
 
     const sourceOrganizationId = authorization.organization?.quickTeam?.sourceOrganizationId || '';
