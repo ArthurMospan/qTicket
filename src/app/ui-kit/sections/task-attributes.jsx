@@ -136,7 +136,7 @@ export default function TaskAttributesSection() {
 
       <PreviewBlock
         title="Task Attributes Panel — очима клієнта"
-        description="Та сама смуга, ті самі клітинки, той самий порядок. Різниця рівно одна: рухати звернення робочим процесом — робота підтримки, тож «Статус» тут читають (readOnly знімає курсор, ховер і flex-1), а решта лишається контролями, бо це зміст звернення. Без двох клітинок, що належать столу підтримки: власних виконавців і обіцяного терміну."
+        description="Та сама смуга, ті самі клітинки, той самий порядок. Дві з них — факти, не контроли: «Статус», бо рухати звернення робочим процесом це робота підтримки, і «Підтримка», бо кого призначити теж вирішує стіл. readOnly дає той самий вигляд без стрілочки — на відміну від disabled, який обіцяє зміну, якої не буде. Немає лише «Терміну вирішення»: дата, яку клієнт прочитав, — це обіцянка."
         filePath="src/components/workspace/IssueDetail.jsx"
         fullWidth
       >
@@ -161,6 +161,11 @@ export default function TaskAttributesSection() {
                   <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />
                 </div>
 
+                <div className={`max-lg:hidden ${readOnlyItemClass}`}>
+                  <span className={attributeLabelClass}>Підтримка</span>
+                  <Select compact readOnly value="1" options={memberOpts} buttonClassName={compactSelectClass} />
+                </div>
+
                 <div className={attributeItemClass}>
                   <span className={attributeLabelClass}>Відповідальні</span>
                   <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />
@@ -169,7 +174,7 @@ export default function TaskAttributesSection() {
                 <Popover
                   position="bottom"
                   hideCloseIcon
-                  className="flex h-full items-center sm:hidden"
+                  className="flex h-full items-center lg:hidden"
                   triggerClassName="flex h-full w-full items-center justify-center"
                   trigger={(
                     <AttributeTrigger
@@ -184,6 +189,10 @@ export default function TaskAttributesSection() {
                 >
                   <div className="flex w-[248px] max-w-full flex-col gap-4">
                     <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Підтримка</span>
+                      <Select readOnly value="1" options={memberOpts} buttonClassName="h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium" />
+                    </div>
+                    <div className="flex flex-col gap-1.5 sm:hidden">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Пріоритет</span>
                       <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName="h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium" />
                     </div>

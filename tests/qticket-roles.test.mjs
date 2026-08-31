@@ -172,6 +172,11 @@ test('клієнт і підтримка бачать один екран, і з
   assert.match(clientAttributes, />Тип</);
   assert.match(clientAttributes, />Пріоритет</);
   assert.match(clientAttributes, />Відповідальні</);
+  // Кого призначили з боку підтримки. Раніше це ховали як внутрішню маршрутизацію
+  // — при тому, що ім'я й обличчя агента клієнт читає в розмові на цьому ж
+  // екрані. Показуємо, але фактом: кого призначити вирішує стіл.
+  assert.match(clientAttributes, />Підтримка</);
+  assert.match(clientAttributes, /<MultiSelect\s+compact\s+readOnly/);
   // Той самий контрол, що й у підтримки, тільки без стрілочки: `readOnly`, а
   // не `disabled` — вимкнений контрол обіцяє зміну, якої не буде.
   assert.match(clientAttributes, /readOnlyItemClass[\s\S]{0,200}<Select\s+compact\s+readOnly/);
@@ -185,9 +190,15 @@ test('клієнт і підтримка бачать один екран, і з
   // Решта — контроли, бо це зміст звернення, а не робочий процес.
   assert.match(clientAttributes, /<Select[\s\S]{0,400}EDITABLE_TYPES/);
   assert.match(clientAttributes, /prioritySelectOptions\(PRIORITIES\)/);
-  // Те, що лишається столу підтримки: хто саме всередині підтримки веде
-  // звернення, і обіцяний термін.
-  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Термін|assigneeIds/);
+  // Те, що лишається столу підтримки цілком: обіцяний термін. Дата, яку клієнт
+  // прочитав, — це обіцянка, а qTicket обіцянок не дає.
+  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Термін/);
+  // І жодного способу перепризначити: клітинка підтримки не має onChange.
+  const clientSupportCell = clientAttributes.slice(
+    clientAttributes.indexOf('>Підтримка<'),
+    clientAttributes.indexOf('>Відповідальні<'),
+  );
+  assert.doesNotMatch(clientSupportCell, /onChange=/);
   assert.match(composer, /const submitted = clientMode[\s\S]{0,400}type: form\.type,[\s\S]{0,80}priority: form\.priority,[\s\S]{0,80}labelIds: form\.labelIds/);
 });
 

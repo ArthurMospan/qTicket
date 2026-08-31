@@ -1648,8 +1648,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:385",
             "src/app/(app)/my/page.js:352",
-            "src/components/workspace/IssueDetail.jsx:1176",
-            "src/components/workspace/IssueDetail.jsx:1179"
+            "src/components/workspace/IssueDetail.jsx:1196",
+            "src/components/workspace/IssueDetail.jsx:1199"
           ]
         },
         "lg": {
@@ -1711,8 +1711,8 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1171",
-            "src/components/workspace/IssueDetail.jsx:1172",
+            "src/components/workspace/IssueDetail.jsx:1191",
+            "src/components/workspace/IssueDetail.jsx:1192",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95"
           ]
@@ -1742,16 +1742,16 @@
             "src/components/InviteMemberDialog.jsx:192",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:1371",
-            "src/components/workspace/IssueDetail.jsx:1395",
-            "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2069",
-            "src/components/workspace/IssueDetail.jsx:2070",
-            "src/components/workspace/IssueDetail.jsx:2159",
-            "src/components/workspace/IssueDetail.jsx:2160",
-            "src/components/workspace/IssueDetail.jsx:2193",
-            "src/components/workspace/IssueDetail.jsx:2221",
-            "src/components/workspace/IssueDetail.jsx:2231",
+            "src/components/workspace/IssueDetail.jsx:1391",
+            "src/components/workspace/IssueDetail.jsx:1415",
+            "src/components/workspace/IssueDetail.jsx:1453",
+            "src/components/workspace/IssueDetail.jsx:2122",
+            "src/components/workspace/IssueDetail.jsx:2123",
+            "src/components/workspace/IssueDetail.jsx:2212",
+            "src/components/workspace/IssueDetail.jsx:2213",
+            "src/components/workspace/IssueDetail.jsx:2246",
+            "src/components/workspace/IssueDetail.jsx:2274",
+            "src/components/workspace/IssueDetail.jsx:2284",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
           ]
         },
@@ -1772,8 +1772,8 @@
             "src/components/MobileNav.jsx:393",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/profile/ProfileView.jsx:96",
-            "src/components/workspace/IssueDetail.jsx:1262",
-            "src/components/workspace/IssueDetail.jsx:1273",
+            "src/components/workspace/IssueDetail.jsx:1282",
+            "src/components/workspace/IssueDetail.jsx:1293",
             "src/components/workspace/UnifiedTimeline.jsx:1734"
           ]
         },
@@ -1792,7 +1792,7 @@
             "src/components/workspace/AgileBoard.jsx:469",
             "src/components/workspace/AgileBoard.jsx:554",
             "src/components/workspace/AgileBoard.jsx:588",
-            "src/components/workspace/IssueDetail.jsx:1333"
+            "src/components/workspace/IssueDetail.jsx:1353"
           ]
         },
         "icon-sm": {
@@ -1842,16 +1842,16 @@
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
-            "src/components/workspace/IssueDetail.jsx:1171",
-            "src/components/workspace/IssueDetail.jsx:1176",
-            "src/components/workspace/IssueDetail.jsx:1179",
-            "src/components/workspace/IssueDetail.jsx:1262",
-            "src/components/workspace/IssueDetail.jsx:1273",
-            "src/components/workspace/IssueDetail.jsx:2069",
-            "src/components/workspace/IssueDetail.jsx:2159",
-            "src/components/workspace/IssueDetail.jsx:2193",
-            "src/components/workspace/IssueDetail.jsx:2221",
-            "src/components/workspace/IssueDetail.jsx:2231",
+            "src/components/workspace/IssueDetail.jsx:1191",
+            "src/components/workspace/IssueDetail.jsx:1196",
+            "src/components/workspace/IssueDetail.jsx:1199",
+            "src/components/workspace/IssueDetail.jsx:1282",
+            "src/components/workspace/IssueDetail.jsx:1293",
+            "src/components/workspace/IssueDetail.jsx:2122",
+            "src/components/workspace/IssueDetail.jsx:2212",
+            "src/components/workspace/IssueDetail.jsx:2246",
+            "src/components/workspace/IssueDetail.jsx:2274",
+            "src/components/workspace/IssueDetail.jsx:2284",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94"
           ]
         },
@@ -1879,12 +1879,12 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:170",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1172",
-            "src/components/workspace/IssueDetail.jsx:1371",
-            "src/components/workspace/IssueDetail.jsx:1395",
-            "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2070",
-            "src/components/workspace/IssueDetail.jsx:2160",
+            "src/components/workspace/IssueDetail.jsx:1192",
+            "src/components/workspace/IssueDetail.jsx:1391",
+            "src/components/workspace/IssueDetail.jsx:1415",
+            "src/components/workspace/IssueDetail.jsx:1453",
+            "src/components/workspace/IssueDetail.jsx:2123",
+            "src/components/workspace/IssueDetail.jsx:2213",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
           ]
@@ -1936,7 +1936,7 @@
             "src/components/workspace/AgileBoard.jsx:469",
             "src/components/workspace/AgileBoard.jsx:554",
             "src/components/workspace/AgileBoard.jsx:588",
-            "src/components/workspace/IssueDetail.jsx:1333",
+            "src/components/workspace/IssueDetail.jsx:1353",
             "src/components/workspace/UnifiedTimeline.jsx:1734"
           ]
         }
@@ -2018,23 +2018,23 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1171",
-            "src/components/workspace/IssueDetail.jsx:1172",
-            "src/components/workspace/IssueDetail.jsx:1176",
-            "src/components/workspace/IssueDetail.jsx:1179",
-            "src/components/workspace/IssueDetail.jsx:1262",
-            "src/components/workspace/IssueDetail.jsx:1273",
-            "src/components/workspace/IssueDetail.jsx:1333",
-            "src/components/workspace/IssueDetail.jsx:1371",
-            "src/components/workspace/IssueDetail.jsx:1395",
-            "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2069",
-            "src/components/workspace/IssueDetail.jsx:2070",
-            "src/components/workspace/IssueDetail.jsx:2159",
-            "src/components/workspace/IssueDetail.jsx:2160",
-            "src/components/workspace/IssueDetail.jsx:2193",
-            "src/components/workspace/IssueDetail.jsx:2221",
-            "src/components/workspace/IssueDetail.jsx:2231",
+            "src/components/workspace/IssueDetail.jsx:1191",
+            "src/components/workspace/IssueDetail.jsx:1192",
+            "src/components/workspace/IssueDetail.jsx:1196",
+            "src/components/workspace/IssueDetail.jsx:1199",
+            "src/components/workspace/IssueDetail.jsx:1282",
+            "src/components/workspace/IssueDetail.jsx:1293",
+            "src/components/workspace/IssueDetail.jsx:1353",
+            "src/components/workspace/IssueDetail.jsx:1391",
+            "src/components/workspace/IssueDetail.jsx:1415",
+            "src/components/workspace/IssueDetail.jsx:1453",
+            "src/components/workspace/IssueDetail.jsx:2122",
+            "src/components/workspace/IssueDetail.jsx:2123",
+            "src/components/workspace/IssueDetail.jsx:2212",
+            "src/components/workspace/IssueDetail.jsx:2213",
+            "src/components/workspace/IssueDetail.jsx:2246",
+            "src/components/workspace/IssueDetail.jsx:2274",
+            "src/components/workspace/IssueDetail.jsx:2284",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
@@ -2137,23 +2137,23 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1171",
-            "src/components/workspace/IssueDetail.jsx:1172",
-            "src/components/workspace/IssueDetail.jsx:1176",
-            "src/components/workspace/IssueDetail.jsx:1179",
-            "src/components/workspace/IssueDetail.jsx:1262",
-            "src/components/workspace/IssueDetail.jsx:1273",
-            "src/components/workspace/IssueDetail.jsx:1333",
-            "src/components/workspace/IssueDetail.jsx:1371",
-            "src/components/workspace/IssueDetail.jsx:1395",
-            "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2069",
-            "src/components/workspace/IssueDetail.jsx:2070",
-            "src/components/workspace/IssueDetail.jsx:2159",
-            "src/components/workspace/IssueDetail.jsx:2160",
-            "src/components/workspace/IssueDetail.jsx:2193",
-            "src/components/workspace/IssueDetail.jsx:2221",
-            "src/components/workspace/IssueDetail.jsx:2231",
+            "src/components/workspace/IssueDetail.jsx:1191",
+            "src/components/workspace/IssueDetail.jsx:1192",
+            "src/components/workspace/IssueDetail.jsx:1196",
+            "src/components/workspace/IssueDetail.jsx:1199",
+            "src/components/workspace/IssueDetail.jsx:1282",
+            "src/components/workspace/IssueDetail.jsx:1293",
+            "src/components/workspace/IssueDetail.jsx:1353",
+            "src/components/workspace/IssueDetail.jsx:1391",
+            "src/components/workspace/IssueDetail.jsx:1415",
+            "src/components/workspace/IssueDetail.jsx:1453",
+            "src/components/workspace/IssueDetail.jsx:2122",
+            "src/components/workspace/IssueDetail.jsx:2123",
+            "src/components/workspace/IssueDetail.jsx:2212",
+            "src/components/workspace/IssueDetail.jsx:2213",
+            "src/components/workspace/IssueDetail.jsx:2246",
+            "src/components/workspace/IssueDetail.jsx:2274",
+            "src/components/workspace/IssueDetail.jsx:2284",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620",
@@ -2240,23 +2240,23 @@
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1171",
-            "src/components/workspace/IssueDetail.jsx:1172",
-            "src/components/workspace/IssueDetail.jsx:1176",
-            "src/components/workspace/IssueDetail.jsx:1179",
-            "src/components/workspace/IssueDetail.jsx:1262",
-            "src/components/workspace/IssueDetail.jsx:1273",
-            "src/components/workspace/IssueDetail.jsx:1333",
-            "src/components/workspace/IssueDetail.jsx:1371",
-            "src/components/workspace/IssueDetail.jsx:1395",
-            "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2069",
-            "src/components/workspace/IssueDetail.jsx:2070",
-            "src/components/workspace/IssueDetail.jsx:2159",
-            "src/components/workspace/IssueDetail.jsx:2160",
-            "src/components/workspace/IssueDetail.jsx:2193",
-            "src/components/workspace/IssueDetail.jsx:2221",
-            "src/components/workspace/IssueDetail.jsx:2231",
+            "src/components/workspace/IssueDetail.jsx:1191",
+            "src/components/workspace/IssueDetail.jsx:1192",
+            "src/components/workspace/IssueDetail.jsx:1196",
+            "src/components/workspace/IssueDetail.jsx:1199",
+            "src/components/workspace/IssueDetail.jsx:1282",
+            "src/components/workspace/IssueDetail.jsx:1293",
+            "src/components/workspace/IssueDetail.jsx:1353",
+            "src/components/workspace/IssueDetail.jsx:1391",
+            "src/components/workspace/IssueDetail.jsx:1415",
+            "src/components/workspace/IssueDetail.jsx:1453",
+            "src/components/workspace/IssueDetail.jsx:2122",
+            "src/components/workspace/IssueDetail.jsx:2123",
+            "src/components/workspace/IssueDetail.jsx:2212",
+            "src/components/workspace/IssueDetail.jsx:2213",
+            "src/components/workspace/IssueDetail.jsx:2246",
+            "src/components/workspace/IssueDetail.jsx:2274",
+            "src/components/workspace/IssueDetail.jsx:2284",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620",
@@ -2366,20 +2366,20 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1171",
-            "src/components/workspace/IssueDetail.jsx:1172",
-            "src/components/workspace/IssueDetail.jsx:1176",
-            "src/components/workspace/IssueDetail.jsx:1179",
-            "src/components/workspace/IssueDetail.jsx:1262",
-            "src/components/workspace/IssueDetail.jsx:1273",
-            "src/components/workspace/IssueDetail.jsx:1333",
-            "src/components/workspace/IssueDetail.jsx:1371",
-            "src/components/workspace/IssueDetail.jsx:1395",
-            "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2069",
-            "src/components/workspace/IssueDetail.jsx:2070",
-            "src/components/workspace/IssueDetail.jsx:2159",
-            "src/components/workspace/IssueDetail.jsx:2160",
+            "src/components/workspace/IssueDetail.jsx:1191",
+            "src/components/workspace/IssueDetail.jsx:1192",
+            "src/components/workspace/IssueDetail.jsx:1196",
+            "src/components/workspace/IssueDetail.jsx:1199",
+            "src/components/workspace/IssueDetail.jsx:1282",
+            "src/components/workspace/IssueDetail.jsx:1293",
+            "src/components/workspace/IssueDetail.jsx:1353",
+            "src/components/workspace/IssueDetail.jsx:1391",
+            "src/components/workspace/IssueDetail.jsx:1415",
+            "src/components/workspace/IssueDetail.jsx:1453",
+            "src/components/workspace/IssueDetail.jsx:2122",
+            "src/components/workspace/IssueDetail.jsx:2123",
+            "src/components/workspace/IssueDetail.jsx:2212",
+            "src/components/workspace/IssueDetail.jsx:2213",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
@@ -2429,9 +2429,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2193",
-            "src/components/workspace/IssueDetail.jsx:2221",
-            "src/components/workspace/IssueDetail.jsx:2231"
+            "src/components/workspace/IssueDetail.jsx:2246",
+            "src/components/workspace/IssueDetail.jsx:2274",
+            "src/components/workspace/IssueDetail.jsx:2284"
           ]
         },
         "chat-composer-action": {
@@ -2709,7 +2709,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2051"
+            "src/components/workspace/IssueDetail.jsx:2104"
           ]
         }
       },
@@ -2728,7 +2728,7 @@
             "src/components/CreateTaskModal.jsx:443",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:2051"
+            "src/components/workspace/IssueDetail.jsx:2104"
           ]
         }
       },
@@ -2747,7 +2747,7 @@
             "src/components/CreateTaskModal.jsx:443",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:2051"
+            "src/components/workspace/IssueDetail.jsx:2104"
           ]
         }
       }
@@ -2790,19 +2790,19 @@
             "src/components/CreateTaskModal.jsx:564",
             "src/components/CreateTaskModal.jsx:573",
             "src/components/CreateTaskModal.jsx:582",
-            "src/components/workspace/IssueDetail.jsx:1572",
-            "src/components/workspace/IssueDetail.jsx:1587",
-            "src/components/workspace/IssueDetail.jsx:1602",
-            "src/components/workspace/IssueDetail.jsx:1662",
-            "src/components/workspace/IssueDetail.jsx:1674",
-            "src/components/workspace/IssueDetail.jsx:1692",
-            "src/components/workspace/IssueDetail.jsx:1705",
-            "src/components/workspace/IssueDetail.jsx:1720",
-            "src/components/workspace/IssueDetail.jsx:1855",
-            "src/components/workspace/IssueDetail.jsx:1867",
-            "src/components/workspace/IssueDetail.jsx:1897",
-            "src/components/workspace/IssueDetail.jsx:2135",
-            "src/components/workspace/IssueDetail.jsx:2143",
+            "src/components/workspace/IssueDetail.jsx:1592",
+            "src/components/workspace/IssueDetail.jsx:1607",
+            "src/components/workspace/IssueDetail.jsx:1622",
+            "src/components/workspace/IssueDetail.jsx:1715",
+            "src/components/workspace/IssueDetail.jsx:1727",
+            "src/components/workspace/IssueDetail.jsx:1745",
+            "src/components/workspace/IssueDetail.jsx:1758",
+            "src/components/workspace/IssueDetail.jsx:1773",
+            "src/components/workspace/IssueDetail.jsx:1908",
+            "src/components/workspace/IssueDetail.jsx:1920",
+            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:2188",
+            "src/components/workspace/IssueDetail.jsx:2196",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2848,19 +2848,19 @@
             "src/components/CreateTaskModal.jsx:564",
             "src/components/CreateTaskModal.jsx:573",
             "src/components/CreateTaskModal.jsx:582",
-            "src/components/workspace/IssueDetail.jsx:1572",
-            "src/components/workspace/IssueDetail.jsx:1587",
-            "src/components/workspace/IssueDetail.jsx:1602",
-            "src/components/workspace/IssueDetail.jsx:1662",
-            "src/components/workspace/IssueDetail.jsx:1674",
-            "src/components/workspace/IssueDetail.jsx:1692",
-            "src/components/workspace/IssueDetail.jsx:1705",
-            "src/components/workspace/IssueDetail.jsx:1720",
-            "src/components/workspace/IssueDetail.jsx:1855",
-            "src/components/workspace/IssueDetail.jsx:1867",
-            "src/components/workspace/IssueDetail.jsx:1897",
-            "src/components/workspace/IssueDetail.jsx:2135",
-            "src/components/workspace/IssueDetail.jsx:2143",
+            "src/components/workspace/IssueDetail.jsx:1592",
+            "src/components/workspace/IssueDetail.jsx:1607",
+            "src/components/workspace/IssueDetail.jsx:1622",
+            "src/components/workspace/IssueDetail.jsx:1715",
+            "src/components/workspace/IssueDetail.jsx:1727",
+            "src/components/workspace/IssueDetail.jsx:1745",
+            "src/components/workspace/IssueDetail.jsx:1758",
+            "src/components/workspace/IssueDetail.jsx:1773",
+            "src/components/workspace/IssueDetail.jsx:1908",
+            "src/components/workspace/IssueDetail.jsx:1920",
+            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:2188",
+            "src/components/workspace/IssueDetail.jsx:2196",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2951,19 +2951,19 @@
             "src/components/CreateTaskModal.jsx:564",
             "src/components/CreateTaskModal.jsx:573",
             "src/components/CreateTaskModal.jsx:582",
-            "src/components/workspace/IssueDetail.jsx:1572",
-            "src/components/workspace/IssueDetail.jsx:1587",
-            "src/components/workspace/IssueDetail.jsx:1602",
-            "src/components/workspace/IssueDetail.jsx:1662",
-            "src/components/workspace/IssueDetail.jsx:1674",
-            "src/components/workspace/IssueDetail.jsx:1692",
-            "src/components/workspace/IssueDetail.jsx:1705",
-            "src/components/workspace/IssueDetail.jsx:1720",
-            "src/components/workspace/IssueDetail.jsx:1855",
-            "src/components/workspace/IssueDetail.jsx:1867",
-            "src/components/workspace/IssueDetail.jsx:1897",
-            "src/components/workspace/IssueDetail.jsx:2135",
-            "src/components/workspace/IssueDetail.jsx:2143",
+            "src/components/workspace/IssueDetail.jsx:1592",
+            "src/components/workspace/IssueDetail.jsx:1607",
+            "src/components/workspace/IssueDetail.jsx:1622",
+            "src/components/workspace/IssueDetail.jsx:1715",
+            "src/components/workspace/IssueDetail.jsx:1727",
+            "src/components/workspace/IssueDetail.jsx:1745",
+            "src/components/workspace/IssueDetail.jsx:1758",
+            "src/components/workspace/IssueDetail.jsx:1773",
+            "src/components/workspace/IssueDetail.jsx:1908",
+            "src/components/workspace/IssueDetail.jsx:1920",
+            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:2188",
+            "src/components/workspace/IssueDetail.jsx:2196",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2972,17 +2972,19 @@
     "MultiSelect": {
       "size": {
         "(default)": {
-          "count": 5,
+          "count": 7,
           "routes": [
             "/[projectId]/issue/[issueId]",
             "/my"
           ],
           "files": [
             "src/app/(app)/my/page.js:266",
-            "src/components/workspace/IssueDetail.jsx:1619",
-            "src/components/workspace/IssueDetail.jsx:1737",
-            "src/components/workspace/IssueDetail.jsx:1761",
-            "src/components/workspace/IssueDetail.jsx:1879"
+            "src/components/workspace/IssueDetail.jsx:1644",
+            "src/components/workspace/IssueDetail.jsx:1661",
+            "src/components/workspace/IssueDetail.jsx:1704",
+            "src/components/workspace/IssueDetail.jsx:1790",
+            "src/components/workspace/IssueDetail.jsx:1814",
+            "src/components/workspace/IssueDetail.jsx:1932"
           ]
         }
       },
@@ -2997,15 +2999,17 @@
           ]
         },
         "(default)": {
-          "count": 4,
+          "count": 6,
           "routes": [
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1619",
-            "src/components/workspace/IssueDetail.jsx:1737",
-            "src/components/workspace/IssueDetail.jsx:1761",
-            "src/components/workspace/IssueDetail.jsx:1879"
+            "src/components/workspace/IssueDetail.jsx:1644",
+            "src/components/workspace/IssueDetail.jsx:1661",
+            "src/components/workspace/IssueDetail.jsx:1704",
+            "src/components/workspace/IssueDetail.jsx:1790",
+            "src/components/workspace/IssueDetail.jsx:1814",
+            "src/components/workspace/IssueDetail.jsx:1932"
           ]
         }
       },
@@ -3020,15 +3024,17 @@
           ]
         },
         "(default)": {
-          "count": 4,
+          "count": 6,
           "routes": [
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1619",
-            "src/components/workspace/IssueDetail.jsx:1737",
-            "src/components/workspace/IssueDetail.jsx:1761",
-            "src/components/workspace/IssueDetail.jsx:1879"
+            "src/components/workspace/IssueDetail.jsx:1644",
+            "src/components/workspace/IssueDetail.jsx:1661",
+            "src/components/workspace/IssueDetail.jsx:1704",
+            "src/components/workspace/IssueDetail.jsx:1790",
+            "src/components/workspace/IssueDetail.jsx:1814",
+            "src/components/workspace/IssueDetail.jsx:1932"
           ]
         }
       }
@@ -3093,7 +3099,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2050"
+            "src/components/workspace/IssueDetail.jsx:2103"
           ]
         }
       },
@@ -3132,7 +3138,7 @@
             "src/app/(app)/page.js:908",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:2050"
+            "src/components/workspace/IssueDetail.jsx:2103"
           ]
         },
         "none": {
@@ -3189,7 +3195,7 @@
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:138",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:2050"
+            "src/components/workspace/IssueDetail.jsx:2103"
           ]
         },
         "chart-panel": {
@@ -3315,7 +3321,7 @@
           ],
           "files": [
             "src/components/workspace/IssueCard.jsx:329",
-            "src/components/workspace/IssueDetail.jsx:1525"
+            "src/components/workspace/IssueDetail.jsx:1545"
           ]
         },
         "surface": {
@@ -3349,7 +3355,7 @@
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:317",
             "src/components/workspace/IssueCard.jsx:329",
-            "src/components/workspace/IssueDetail.jsx:1525"
+            "src/components/workspace/IssueDetail.jsx:1545"
           ]
         },
         "(default)": {
@@ -3467,7 +3473,7 @@
             "src/components/workspace/AgileBoard.jsx:563",
             "src/components/workspace/AgileBoard.jsx:598",
             "src/components/workspace/IssueCard.jsx:406",
-            "src/components/workspace/IssueDetail.jsx:1525",
+            "src/components/workspace/IssueDetail.jsx:1545",
             "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         }
@@ -3510,7 +3516,7 @@
             "src/components/workspace/IssueCard.jsx:317",
             "src/components/workspace/IssueCard.jsx:329",
             "src/components/workspace/IssueCard.jsx:406",
-            "src/components/workspace/IssueDetail.jsx:1525",
+            "src/components/workspace/IssueDetail.jsx:1545",
             "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         },
@@ -3561,7 +3567,7 @@
             "src/components/workspace/AgileBoard.jsx:598",
             "src/components/workspace/IssueCard.jsx:317",
             "src/components/workspace/IssueCard.jsx:329",
-            "src/components/workspace/IssueDetail.jsx:1525",
+            "src/components/workspace/IssueDetail.jsx:1545",
             "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         },
@@ -3615,7 +3621,7 @@
             "src/components/workspace/AgileBoard.jsx:563",
             "src/components/workspace/AgileBoard.jsx:598",
             "src/components/workspace/IssueCard.jsx:406",
-            "src/components/workspace/IssueDetail.jsx:1525"
+            "src/components/workspace/IssueDetail.jsx:1545"
           ]
         },
         "medium": {
@@ -3774,7 +3780,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:726"
+            "src/components/workspace/IssueDetail.jsx:746"
           ]
         }
       },
@@ -3806,7 +3812,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:726"
+            "src/components/workspace/IssueDetail.jsx:746"
           ]
         }
       }
@@ -3842,7 +3848,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1976"
+            "src/components/workspace/IssueDetail.jsx:2029"
           ]
         }
       }
@@ -4142,7 +4148,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:471",
             "src/app/(app)/settings/page.js:2218",
             "src/components/InviteMemberDialog.jsx:185",
-            "src/components/workspace/IssueDetail.jsx:1367",
+            "src/components/workspace/IssueDetail.jsx:1387",
             "src/components/workspace/QuickTeamTransferDialog.jsx:111"
           ]
         },
@@ -4154,8 +4160,8 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:478",
-            "src/components/workspace/IssueDetail.jsx:1391",
-            "src/components/workspace/IssueDetail.jsx:1421"
+            "src/components/workspace/IssueDetail.jsx:1411",
+            "src/components/workspace/IssueDetail.jsx:1441"
           ]
         }
       }
@@ -4524,8 +4530,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1647",
-            "src/components/workspace/IssueDetail.jsx:1821"
+            "src/components/workspace/IssueDetail.jsx:1689",
+            "src/components/workspace/IssueDetail.jsx:1874"
           ]
         }
       }
@@ -4603,7 +4609,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:410",
             "src/app/(app)/my/page.js:361",
             "src/components/InviteMemberDialog.jsx:134",
-            "src/components/workspace/IssueDetail.jsx:1297"
+            "src/components/workspace/IssueDetail.jsx:1317"
           ]
         },
         "underline": {
@@ -4648,7 +4654,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1297"
+            "src/components/workspace/IssueDetail.jsx:1317"
           ]
         }
       }
@@ -4709,7 +4715,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1996"
+            "src/components/workspace/IssueDetail.jsx:2049"
           ]
         }
       }
@@ -4779,7 +4785,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1287"
+            "src/components/workspace/IssueDetail.jsx:1307"
           ]
         }
       }
@@ -4806,10 +4812,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1993",
-            "src/components/workspace/IssueDetail.jsx:2009",
-            "src/components/workspace/IssueDetail.jsx:2093",
-            "src/components/workspace/IssueDetail.jsx:211"
+            "src/components/workspace/IssueDetail.jsx:2046",
+            "src/components/workspace/IssueDetail.jsx:2062",
+            "src/components/workspace/IssueDetail.jsx:211",
+            "src/components/workspace/IssueDetail.jsx:2146"
           ]
         },
         "(default)": {
@@ -4818,7 +4824,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1943"
+            "src/components/workspace/IssueDetail.jsx:1996"
           ]
         }
       }
@@ -4856,7 +4862,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1460"
+            "src/components/workspace/IssueDetail.jsx:1480"
           ]
         },
         "(default)": {
@@ -4865,8 +4871,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1640",
-            "src/components/workspace/IssueDetail.jsx:1806",
+            "src/components/workspace/IssueDetail.jsx:1682",
+            "src/components/workspace/IssueDetail.jsx:1859",
             "src/components/workspace/UnifiedTimeline.jsx:1438"
           ]
         }
@@ -4878,7 +4884,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1460"
+            "src/components/workspace/IssueDetail.jsx:1480"
           ]
         },
         "(default)": {
@@ -4887,8 +4893,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1640",
-            "src/components/workspace/IssueDetail.jsx:1806",
+            "src/components/workspace/IssueDetail.jsx:1682",
+            "src/components/workspace/IssueDetail.jsx:1859",
             "src/components/workspace/UnifiedTimeline.jsx:1438"
           ]
         }
@@ -4945,7 +4951,7 @@
     "DetailSection density=panel — шапка панелі": "<div className=\"grid w-full gap-4 xl:grid-cols-2\">\n  <Surface preset=\"panel\" padding=\"md\">\n    <DetailSection\n      density=\"panel\"\n      title=\"Нещодавно оновлені\"\n      description=\"Останні зміни у зверненнях усіх доступних клієнтів.\"\n      action={<Button style=\"secondary\" size=\"md\" icon={ArrowRight}>Вся черга</Button>}\n    >\n      <Card preset=\"borderless\" padding=\"none\" className=\"overflow-hidden divide-y divide-line\">\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Не приходить лист про оплату</span>\n          <ArrowRight size={16} className=\"shrink-0 text-faint\" aria-hidden />\n        </ListRow>\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Помилка 500 у звіті за березень</span>\n          <ArrowRight size={16} className=\"shrink-0 text-faint\" aria-hidden />\n        </ListRow>\n      </Card>\n    </DetailSection>\n  </Surface>\n\n  {/* Без дії та без опису — та сама щільність, коли панель нічого не\n      пояснює й нічого не пропонує зробити. */}\n  <Surface preset=\"panel\" padding=\"md\">\n    <DetailSection\n      density=\"panel\"\n      title=\"Команда підтримки\"\n      description=\"Внутрішні працівники, закріплені за цим клієнтським простором.\"\n    >\n      <Card preset=\"borderless\" padding=\"none\" className=\"overflow-hidden divide-y divide-line\">\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Олена Коваль</span>\n        </ListRow>\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Дмитро Петренко</span>\n        </ListRow>\n      </Card>\n    </DetailSection>\n  </Surface>\n</div>",
     "Tooltip Component": "<div className=\"flex items-center gap-[24px] justify-center w-full py-[40px]\">\n  <Tooltip content=\"Підказка зверху\" position=\"top\">\n    <Button style=\"secondary\">Наведи (Top)</Button>\n  </Tooltip>\n  <Tooltip content=\"Підказка знизу\" position=\"bottom\">\n    <Button style=\"secondary\">Наведи (Bottom)</Button>\n  </Tooltip>\n  <Tooltip content=\"Підказка зліва\" position=\"left\">\n    <Button style=\"secondary\">Наведи (Left)</Button>\n  </Tooltip>\n  <Tooltip content=\"Підказка справа\" position=\"right\">\n    <Button style=\"secondary\">Наведи (Right)</Button>\n  </Tooltip>\n</div>",
     "Task Attributes Panel — Issue Detail": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"task\"\n    compact\n    cardClassName=\"transition-[background-color,padding] duration-200\"\n    primaryChildren={\n      <>\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <Select compact value={statusVal} onChange={setStatusVal} options={statusOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={memberVal} onChange={setMemberVal} options={memberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-lg:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Від клієнта</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-lg:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Термін вирішення</span>\n          <DatePicker\n            compact\n            hideIcon\n            inputClassName={compactInputClass}\n            value={dueDate}\n            onChange={setDueDate}\n            placeholder=\"Без терміну\"\n          />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center lg:hidden\"\n          // Same as the product: without it the wrapper shrinks to the\n          // glyph and «Деталі» becomes a 14px target inside its column —\n          // and without the centring the button it stretched around sits\n          // at the top of it, ten pixels above the row it shares.\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Термін вирішення</span>\n              <DatePicker compact value={dueDate} onChange={setDueDate} placeholder=\"Без терміну\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5 sm:hidden\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5 sm:hidden\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Від клієнта</span>\n              <Select value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
-    "Task Attributes Panel — очима клієнта": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"clientTask\"\n    compact\n    primaryChildren={\n      <>\n        <div className={readOnlyItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <Select compact readOnly value=\"in-progress\" options={statusOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center sm:hidden\"\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
+    "Task Attributes Panel — очима клієнта": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"clientTask\"\n    compact\n    primaryChildren={\n      <>\n        <div className={readOnlyItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <Select compact readOnly value=\"in-progress\" options={statusOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-lg:hidden ${readOnlyItemClass}`}>\n          <span className={attributeLabelClass}>Підтримка</span>\n          <Select compact readOnly value=\"1\" options={memberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center lg:hidden\"\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Підтримка</span>\n              <Select readOnly value=\"1\" options={memberOpts} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5 sm:hidden\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
     "Form Group Layouts": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Назва клієнта\">\n    <Input placeholder=\"Введіть назву...\" />\n  </FormGroup>\n\n  <FormGroup label=\"Електронна пошта\" required>\n    <Input placeholder=\"name@company.com\" />\n  </FormGroup>\n\n  <FormGroup label=\"Пароль\" required error=\"Пароль має містити щонайменше 8 символів\">\n    <Input type=\"password\" placeholder=\"••••••••\" error={true} />\n  </FormGroup>\n</div>",
     "Label з іконкою": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Учасники\" icon={Users}>\n    <Input placeholder=\"Додати учасників\" />\n  </FormGroup>\n\n  <FormGroup label=\"Нагадування\" icon={Bell} required>\n    <Input placeholder=\"За 15 хвилин\" />\n  </FormGroup>\n\n  <div className=\"flex flex-col gap-[6px]\">\n    <Label icon={MapPin}>Місце</Label>\n    <Input placeholder=\"Офіс або кімната\" />\n  </div>\n</div>",
     "Filter Bar — Projects Page": "<PageHeader\n  title=\"Клієнти\"\n  actions={<Button style=\"primary\" color=\"dark\" size=\"lg\" icon={Plus}>Новий клієнт</Button>}\n  filters={(\n    <FilterBar context=\"projects\">\n      <Select filterRole=\"member\" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant=\"ghost\" />\n      <Select filterRole=\"date\" options={dateOptions} value={dateFilter} onChange={setDateFilter} variant=\"ghost\" />\n      <Select filterRole=\"sort\" options={sortOptions} value={sortOption} onChange={setSortOption} variant=\"ghost\" />\n    </FilterBar>\n  )}\n/>",

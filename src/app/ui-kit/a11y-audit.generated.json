@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 256,
-    "elements": 2174,
+    "elements": 2182,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -150,7 +150,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/ui/Select.jsx:558",
+      "location": "src/components/ui/Select.jsx:598",
       "attributes": [
         "aria-label"
       ]

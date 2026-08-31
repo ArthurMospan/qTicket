@@ -33,10 +33,10 @@ const CONTEXT_GRIDS = {
   // and the button, exactly as before.
   task: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(4,minmax(0,1fr))_44px] lg:grid-cols-[repeat(6,minmax(0,1fr))] [&>*]:min-w-0',
   // The customer's copy of it: the same cells in the same order, without the
-  // two that are the desk's own — who inside support is answering, and when it
-  // is promised. Four fit from `sm` up, so «Деталі» is only ever needed on a
-  // phone.
-  clientTask: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(4,minmax(0,1fr))] [&>*]:min-w-0',
+  // one that is the desk's own — the resolution date, which is a promised time
+  // the moment a customer can read it. Five, so the overflow follows the same
+  // rule as the agent's.
+  clientTask: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(4,minmax(0,1fr))_44px] lg:grid-cols-[repeat(5,minmax(0,1fr))] [&>*]:min-w-0',
 };
 
 /**

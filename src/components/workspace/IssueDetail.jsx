@@ -487,6 +487,26 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // render on everything they did; they are simply not people you can hand new
   // work to, here or in any other picker.
   const supportDirectory = activeMembers(members).filter(member => !isClientRole(member.role));
+  // Who the customer is told is answering, named from the directory they are
+  // allowed to read — which is the people on their own space's team.
+  //
+  // Built from the assignees rather than from the directory, because the two
+  // are not the same set: an owner or an admin reaches every space without
+  // being listed on one, so they can hold a request the customer's copy of the
+  // directory does not name. A cell that answered «Ще не призначено» over
+  // somebody's work would be telling them the opposite of the truth, so an
+  // assignee this reader cannot name is still an assignee, under the only word
+  // that is certainly true about them.
+  const supportAssigneeOptions = (issue.assigneeIds || []).map(uid => {
+    const member = supportDirectory.find(candidate => (candidate.id || candidate.uid) === uid);
+    return member
+      ? {
+        value: uid,
+        label: member.name || member.displayName || member.email || 'Спеціаліст підтримки',
+        user: member,
+      }
+      : { value: uid, label: 'Спеціаліст підтримки' };
+  });
   // The customer's own people on this space. `assigneeIds` is support's routing
   // and a client never sees it; this is the mirror that belongs to them —
   // whichever of their colleagues is answering for this request. Support reads
@@ -1612,8 +1632,30 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* Their own people. On this side of the desk there is only
-                      one kind of responsible person, so it is not qualified. */}
+                  {/* Who is answering, on the supplier's side. It used to be
+                      withheld as support's own routing — and the customer reads
+                      the name and the face of the agent who replies to them, in
+                      the conversation on this very screen. Withholding the cell
+                      hid nothing; it only left their strip a column short of
+                      the one it is meant to line up with. Read-only, because
+                      who takes a request is still the desk's decision. */}
+                  <div className={`max-lg:hidden ${readOnlyItemClass}`}>
+                    <span className={attributeLabelClass}>Підтримка</span>
+                    <MultiSelect
+                      compact
+                      readOnly
+                      showSelectedAvatars
+                      ariaLabel="Відповідальні з боку підтримки"
+                      value={issue.assigneeIds || []}
+                      options={supportAssigneeOptions}
+                      placeholder="Ще не призначено"
+                      buttonClassName={compactSelectClass}
+                    />
+                  </div>
+
+                  {/* Their own people. On this side of the desk «відповідальні»
+                      without a qualifier means theirs; support's cell above
+                      says whose it is. */}
                   <div className={attributeItemClass} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
                     <span className={attributeLabelClass}>Відповідальні</span>
                     <MultiSelect
@@ -1635,12 +1677,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* Four cells fit from sm up, so the overflow is a phone's
-                      only — the same rule the agent's strip follows. */}
+                  {/* Five cells, so the overflow follows the agent's rule:
+                      «Деталі» holds what the width cannot. */}
                   <Popover
                     position="bottom"
                     hideCloseIcon
-                    className="flex h-full items-center sm:hidden"
+                    className="flex h-full items-center lg:hidden"
                     triggerClassName="flex h-full w-full items-center justify-center"
                     onOpenChange={setShowDetailsDropdown}
                     trigger={(
@@ -1658,6 +1700,17 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                   >
                     <div className="flex w-[248px] max-w-full flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Підтримка</span>
+                        <MultiSelect
+                          readOnly
+                          showSelectedAvatars
+                          ariaLabel="Відповідальні з боку підтримки"
+                          value={issue.assigneeIds || []}
+                          options={supportAssigneeOptions}
+                          placeholder="Ще не призначено"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5 sm:hidden">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Пріоритет</span>
                         <Select
                           disabled={isArchived || !canEditContent}

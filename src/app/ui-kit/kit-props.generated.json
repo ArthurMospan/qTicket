@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 88,
-    "props": 644,
-    "documentedProps": 644,
+    "props": 645,
+    "documentedProps": 645,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -2975,6 +2975,13 @@
           "type": "string",
           "values": [],
           "description": "Trigger text while nothing is selected."
+        },
+        {
+          "name": "readOnly",
+          "default": "false",
+          "type": "boolean",
+          "values": [],
+          "description": "A fact rather than a control: the same faces, weight and height, without the caret. Not the same as disabled, which says the change is merely unavailable right now."
         },
         {
           "name": "searchPlaceholder",

@@ -515,14 +515,14 @@ test('high-risk composed previews keep the product markup signatures', () => {
   // The customer's four fit from `sm` up.
   assert.match(taskAttributes, /task: 'grid w-full grid-cols-\[repeat\(2,minmax\(0,1fr\)\)_44px\]/);
   assert.match(taskAttributes, /sm:grid-cols-\[repeat\(4,minmax\(0,1fr\)\)_44px\] lg:grid-cols-\[repeat\(6,minmax\(0,1fr\)\)\]/);
-  assert.match(taskAttributes, /clientTask: 'grid w-full grid-cols-\[repeat\(2,minmax\(0,1fr\)\)_44px\][^']*sm:grid-cols-\[repeat\(4,minmax\(0,1fr\)\)\]/);
+  assert.match(taskAttributes, /clientTask: 'grid w-full grid-cols-\[repeat\(2,minmax\(0,1fr\)\)_44px\][^']*sm:grid-cols-\[repeat\(4,minmax\(0,1fr\)\)_44px\] lg:grid-cols-\[repeat\(5,minmax\(0,1fr\)\)\]/);
   // «Деталі» is a target before it is a column: 32px wide next to a 28px
   // condensed height is a 32×28 hit area, and a thumb misses it. Where it
-  // survives depends on what did not fit: below `lg` on the agent's strip,
-  // below `sm` on the customer's.
+  // survives is the same on both strips now: below `lg`, where the last two
+  // cells do not fit.
   assert.match(taskAttributes, /detailsButtonClass: `[^`]*max-sm:h-\[44px\]/);
   assert.match(issueDetail, /className="flex h-full items-center lg:hidden"/);
-  assert.match(issueDetail, /className="flex h-full items-center sm:hidden"/);
+  assert.doesNotMatch(issueDetail, /className="flex h-full items-center sm:hidden"/);
   // …and the wrapper Popover puts around that trigger has to fill the column,
   // or the button inside is only as wide as its glyph however wide the column
   // is — and having filled it, it has to centre what it stretched around, or

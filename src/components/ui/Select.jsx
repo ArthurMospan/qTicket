@@ -445,6 +445,7 @@ export function Select({
  * @param {'sm'|'md'|'lg'} props.size Control height token.
  * @param {'default'|'ghost'|'inline'} props.variant How much chrome the trigger draws.
  * @param {boolean} props.disabled Unavailable: the trigger is dimmed and will not open.
+ * @param {boolean} props.readOnly A fact rather than a control: the same faces, weight and height, without the caret. Not the same as disabled, which says the change is merely unavailable right now.
  * @param {string} props.placeholder Trigger text while nothing is selected.
  * @param {string} props.searchPlaceholder Placeholder inside the search box.
  * @param {string} props.selectAllLabel Label of the select-all row.
@@ -465,6 +466,8 @@ export function MultiSelect({
   value = [], // array of selected values
   onChange,
   options = [], // { value, label, icon?, dotColor? }
+  // See `Select.readOnly`: a value this control shows and somebody else changes.
+  readOnly = false,
   placeholder = 'Оберіть...',
   searchPlaceholder = 'Пошук...',
   className = '',
@@ -553,6 +556,43 @@ export function MultiSelect({
   }
   const defaultButtonClass = `bg-canvas hover:bg-line px-[12px] ${CONTROL_SIZES[size] ?? CONTROL_SIZES.lg}`;
 
+  // The trigger's contents, without the caret. Shared by both shapes so a
+  // selection cannot come to look like two different things.
+  const selectedContent = (
+    <div className={`flex items-center overflow-hidden ${compact ? 'gap-1' : 'gap-[8px]'}`}>
+      {ResolvedTriggerIcon && <ResolvedTriggerIcon size={14} className="text-muted shrink-0" />}
+      {avatarOptions.length > 1 ? (
+        <span aria-hidden="true" className="flex shrink-0 items-center -space-x-1.5">
+          {avatarOptions.slice(0, 3).map(option => (
+            <span key={option.value} className="rounded-full ring-2 ring-white">
+              <UserAvatar user={option.user || { name: option.label, avatar: option.avatar }} size="xs" />
+            </span>
+          ))}
+        </span>
+      ) : (
+        <OptionIdentity option={showSelectedAvatars ? (avatarOptions[0] || singleSelectedOption) : singleSelectedOption} />
+      )}
+      <span className="text-[13px] truncate font-medium text-ink">
+        {triggerText}
+      </span>
+    </div>
+  );
+
+  if (readOnly) {
+    return (
+      <div className={`relative ${filterWidth} ${className}`}>
+        <div
+          data-ui-size={variant === 'ghost' ? 'sm' : size}
+          data-ui-composition={composition}
+          aria-label={ariaLabel}
+          className={`ui-control w-full flex items-center justify-start text-ink ${variant === 'ghost' ? `bg-transparent !rounded-[8px] px-[10px] ${filterWidth ? 'w-full' : 'w-auto'} inline-flex gap-1.5` : (buttonClassName || defaultButtonClass)}`}
+        >
+          {selectedContent}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${filterWidth} ${className}`} ref={containerRef}>
       <button
@@ -574,23 +614,7 @@ export function MultiSelect({
         onClick={() => setIsOpen(!isOpen)}
         className={`ui-control w-full flex items-center justify-between text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-50 disabled:cursor-not-allowed ${variant === 'ghost' ? `bg-transparent hover:bg-line !rounded-[8px] px-[10px] ${filterWidth ? 'w-full' : 'w-auto'} inline-flex gap-1.5` : (buttonClassName || defaultButtonClass)}`}
       >
-        <div className={`flex items-center overflow-hidden ${compact ? 'gap-1' : 'gap-[8px]'}`}>
-          {ResolvedTriggerIcon && <ResolvedTriggerIcon size={14} className="text-muted shrink-0" />}
-          {avatarOptions.length > 1 ? (
-            <span aria-hidden="true" className="flex shrink-0 items-center -space-x-1.5">
-              {avatarOptions.slice(0, 3).map(option => (
-                <span key={option.value} className="rounded-full ring-2 ring-white">
-                  <UserAvatar user={option.user || { name: option.label, avatar: option.avatar }} size="xs" />
-                </span>
-              ))}
-            </span>
-          ) : (
-            <OptionIdentity option={showSelectedAvatars ? (avatarOptions[0] || singleSelectedOption) : singleSelectedOption} />
-          )}
-          <span className="text-[13px] truncate font-medium text-ink">
-            {triggerText}
-          </span>
-        </div>
+        {selectedContent}
         <ChevronDown size={compact ? 12 : 14} className={`text-muted shrink-0 transition-transform ${compact ? 'ml-1' : 'ml-[8px]'} ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
