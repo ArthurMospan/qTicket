@@ -118,7 +118,12 @@ test('an organization role is written in one place, in Ukrainian', async () => {
   // The map is keyed off the membership documents themselves and handed to the
   // provider whole, so a workspace still waiting for its organization document
   // is labelled with the role its membership already states.
-  assert.match(context, /const \{ organizations, roles \} = buildOrganizationList\(memberships, documents, publishedOrgs\);/);
+  // The fourth argument is the whole point: whether the answer came from the
+  // browser SDK, which cannot read an organization without an active
+  // entitlement, or from the Admin SDK directory, which sees every document
+  // there is. Only the second may turn a missing document into "not a
+  // workspace".
+  assert.match(context, /buildOrganizationList\(\s*memberships,\s*documents,\s*publishedOrgs,\s*\{ verified: authoritative \},\s*\)/);
   assert.match(context, /setOrgRoles\(roles\);/);
   assert.match(context, /allOrgs, orgRoles, activeOrgId/);
 

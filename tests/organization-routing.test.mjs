@@ -184,6 +184,43 @@ test('a workspace the product refuses to open is not offered as one', () => {
   assert.deepEqual(roles, { 'org-live': 'owner' });
 });
 
+// The case the first version of this filter missed entirely, and the reason it
+// missed it: the browser cannot read an organization without an active
+// entitlement — the rules refuse it — so the two standalone organizations it was
+// written to remove were exactly the ones whose document never arrived. They
+// stayed `pending`, and `pending` was exempt. The directory route reads through
+// the Admin SDK and sees every document there is, so once it has answered, a
+// membership with nothing behind it is not a workspace.
+test('once the Admin SDK has answered, a membership with no organization is not a workspace', () => {
+  const memberships = [
+    { orgId: 'org-live', role: 'owner' },
+    { orgId: 'org-unreadable', role: 'owner' },
+  ];
+  const documents = [{ id: 'org-live', name: 'OneB', quickTeam: ACTIVE_QUICKTEAM }];
+
+  const verified = buildOrganizationList(memberships, documents, [], { verified: true });
+  assert.deepEqual(verified.organizations.map(entry => entry.id), ['org-live']);
+  assert.deepEqual(verified.roles, { 'org-live': 'owner' });
+
+  // And the same inputs from the cache-backed pass keep it, because there the
+  // missing document really can mean a short read.
+  const provisional = buildOrganizationList(memberships, documents, []);
+  assert.deepEqual(provisional.organizations.map(entry => entry.id), ['org-live', 'org-unreadable']);
+});
+
+// A previously published `pending` entry must not survive the verified pass
+// either — it is the same absent document, remembered.
+test('a remembered pending entry does not outlive the answer that refutes it', () => {
+  const published = [{ id: 'org-unreadable', pending: true }];
+  const { organizations } = buildOrganizationList(
+    [{ orgId: 'org-unreadable', role: 'owner' }],
+    [],
+    published,
+    { verified: true },
+  );
+  assert.deepEqual(organizations, []);
+});
+
 // The one thing this filter must never do. A document that did not come back is
 // a short read — `getDocs` answers from a cache that never held it whenever the
 // SDK believes it is offline — and dropping an entry on that evidence would
@@ -371,7 +408,7 @@ test('a short organizations read is asked again, of the server', async () => {
   ]);
 
   // The list is the memberships', and the documents only decorate it.
-  assert.match(context, /buildOrganizationList\(memberships, documents, publishedOrgs\)/);
+  assert.match(context, /buildOrganizationList\(\s*memberships,\s*documents,\s*publishedOrgs,\s*\{ verified: authoritative \},\s*\)/);
   // Whatever the cache failed to supply is requested from the server, and the
   // request being unreachable does not shorten the list either.
   assert.match(context, /const missing = orgIds\.filter\(orgId => !found\.has\(orgId\)\);/);

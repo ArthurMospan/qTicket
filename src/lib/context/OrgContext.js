@@ -186,7 +186,15 @@ export function OrgProvider({ user, children }) {
         const documents = suppliedOrganizationDocuments
           ?? (orgIds.length > 0 ? await readOrganizationDocuments(orgIds) : []);
 
-        const { organizations, roles } = buildOrganizationList(memberships, documents, publishedOrgs);
+        // `authoritative` is the directory route's answer, and it reads through
+        // the Admin SDK — so on that pass a membership with no organization
+        // behind it is not a workspace rather than a short read.
+        const { organizations, roles } = buildOrganizationList(
+          memberships,
+          documents,
+          publishedOrgs,
+          { verified: authoritative },
+        );
 
         if (!current()) return;
         if (authoritative) {

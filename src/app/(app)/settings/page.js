@@ -132,9 +132,21 @@ const CLIENT_SETTINGS_SECTIONS = new Set([
 // entry a client saw already said «Співробітники», and the section it opened
 // said it again under a group of its own. The roster is «Команда» for both
 // audiences now; there is no `team` section left for any role to reach.
+// «Сповіщення» is deliberately NOT here, and it is the one of the three that
+// never belonged. `users/{uid}/settings/notifications` is qTicket's own
+// document: it decides whether the bell records `assigned`, `commented`,
+// `mentioned`, `statusChanged`, `incident_created` and `deadline`, plus the
+// sound and the pop-up, and QuickTeam holds no copy of any of it. Removing the
+// panel therefore did not stop a second editor from losing to a sync — there was
+// no second editor. It pinned every internal seat to whatever their document
+// already held, with no way for anybody to change it, on a product whose whole
+// job is telling support that something arrived.
+//
+// A name, an avatar and a language are a different case and stay client-only:
+// those really do arrive in QuickTeam's signed snapshot and are re-sent on the
+// next sync, so a qTicket editor for them is a copy that loses.
 const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([
   'profile',
-  'notifications',
   'localization',
 ]);
 

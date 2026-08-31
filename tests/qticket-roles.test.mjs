@@ -447,9 +447,17 @@ test('керування співробітниками клієнта живе 
 test('персональні розділи QuickTeam недосяжні внутрішній ролі — ні в рейці, ні за адресою', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
 
+  // Two, not three. A name, an avatar and a language arrive in QuickTeam's
+  // signed snapshot and are re-sent on the next sync, so a qTicket editor for
+  // them is a copy that loses. Notification preferences are not like that at
+  // all: `users/{uid}/settings/notifications` is qTicket's own document and
+  // QuickTeam holds no copy of it, so removing the panel did not prevent a
+  // second editor losing to a sync — it pinned every internal seat to whatever
+  // their document already held, with nobody able to change it, on a product
+  // whose job is telling support that something arrived.
   assert.match(
     settings,
-    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'notifications',\s*'localization',\s*\]\);/,
+    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'localization',\s*\]\);/,
   );
   // «Команда підтримки» не зникла, а переїхала: реєстр — це «Команда», і для
   // персоналу, і для співробітників адміністратора клієнта. Тому стара адреса

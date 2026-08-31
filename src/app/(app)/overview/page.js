@@ -124,6 +124,7 @@ export default function OverviewPage() {
   const {
     statuses,
     priorities,
+    labels,
     loading: workflowLoading,
     error: workflowError,
   } = useWorkflowConfig();
@@ -375,52 +376,35 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
-                    {recentIssues.map(issue => {
-                      const project = projectById.get(issue.projectId);
-                      const status = statusById.get(issue.columnId || issue.status);
-                      const category = statusCategoryOf(issue.columnId || issue.status, statuses);
-                      const assigneeId = assigneeIdsOf(issue)[0];
-                      const assignee = assigneeId ? memberById.get(assigneeId) : null;
-                      return (
-                        <ListRow
-                          key={issue.id}
-                          density="roomy"
-                          onClick={() => {
-                            const href = issuePath(issue, project || issue.projectId);
-                            if (href) router.push(href);
-                          }}
-                          className="flex items-center gap-3"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <TaskIdentity
-                              issue={issue}
-                              project={project}
-                              projectName={project?.name}
-                              showProjectName
-                              done={category === 'done'}
-                            />
-                            <p className="mt-1 truncate text-[13px] font-bold text-ink">
-                              {issue.title || 'Звернення без назви'}
-                            </p>
-                            <p className="mt-1 text-[11px] text-faint">
-                              Оновлено {formatUpdatedAt(issue.updatedAt || issue.createdAt)}
-                            </p>
-                          </div>
-                          <div className="hidden shrink-0 items-center gap-2 md:flex">
-                            <PriorityBadge priority={issue.priority} priorities={priorities} />
-                            <StatusPill label={status?.label || 'Без статусу'} color={status?.color} />
-                          </div>
-                          {assignee ? (
-                            <UserAvatar user={assignee} size="sm" tooltip />
-                          ) : (
-                            <Pill tone="warning" size="sm" shape="badge">Без відповідального</Pill>
-                          )}
-                          <ArrowRight size={16} className="shrink-0 text-faint" aria-hidden />
-                        </ListRow>
-                      );
-                    })}
-                  </Card>
+                  /* The kit's row, not a rebuild of one. This was fourteen lines
+                     of hand-written markup — `ListRow` wrapping `TaskIdentity`, a
+                     title, a date, a priority, a status and an avatar — which is
+                     `TaskRow` with the parts in a slightly different order and a
+                     few of them missing. AGENTS.md forbids exactly that: a local
+                     pattern merely similar to a kit component is how two lists of
+                     the same thing stop looking like the same thing. It already
+                     drew the unread mark differently from every other list in the
+                     product, because `TaskRow` reads a read cursor this did not.
+                     `showProjectName` is what a cross-client list needs and the
+                     row already knows how to say. */
+                  <div className="flex flex-col gap-2">
+                    {recentIssues.map(issue => (
+                      <TaskRow
+                        key={issue.id}
+                        issue={issue}
+                        issues={issues}
+                        members={members}
+                        labels={labels}
+                        projectId={issue.projectId}
+                        projectName={projectById.get(issue.projectId)?.name}
+                        showProjectName
+                        onClick={() => {
+                          const href = issuePath(issue, projectById.get(issue.projectId) || issue.projectId);
+                          if (href) router.push(href);
+                        }}
+                      />
+                    ))}
+                  </div>
                 )}
                 </DetailSection>
               </Surface>

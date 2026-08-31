@@ -106,10 +106,21 @@ export function parseOrganizationDirectory(payload) {
  * reason: nothing is deleted, and a seat somebody still has stays exactly where
  * it is — it simply stops being offered as somewhere to go.
  *
- * Never applied to a `pending` entry. A document that did not come back is a
- * short read, and dropping an entry on the strength of one would delete a live
- * workspace from the switcher and leave it deleted — which is the very failure
- * the paragraph above exists to prevent.
+ * Which is why `verified` exists. Whether a missing document means "short read"
+ * or "not a workspace" depends entirely on who was asked. The browser SDK cannot
+ * read an organization without an active entitlement — the rules refuse it — so
+ * on a cache-backed pass the organizations this filter most needs to catch are
+ * exactly the ones whose document never arrives, and dropping them there would
+ * be indistinguishable from dropping a live workspace on a short read. The
+ * `/api/organizations` directory answers through the Admin SDK and therefore
+ * sees every document there is: once *it* has answered, a membership with no
+ * organization behind it is not a workspace, and `pending` is no longer an
+ * honest thing to call it.
+ *
+ * The first version of this filter looked at the document alone and quietly did
+ * nothing for the two standalone organizations it was written for — they predate
+ * the QuickTeam contract, the rules refuse to read them, and so they stayed
+ * `pending` and stayed in the switcher.
  *
  * @param {Array<{orgId?: string, role?: string}>} memberships the `orgMemberships` documents' data, in snapshot order
  * @param {Array<{id?: string}>} organizationDocuments whatever the organizations read returned
@@ -119,6 +130,7 @@ export function buildOrganizationList(
   memberships = [],
   organizationDocuments = [],
   knownOrganizations = [],
+  { verified = false } = {},
 ) {
   const byId = new Map();
   for (const organization of knownOrganizations) {
@@ -138,7 +150,13 @@ export function buildOrganizationList(
     seen.add(orgId);
     if (membership.role) roles[orgId] = membership.role;
     const known = byId.get(orgId);
-    if (known && !hasActiveQuickTeamEntitlement(known)) {
+    const openable = known
+      ? hasActiveQuickTeamEntitlement(known)
+      // No document, and the Admin SDK was the one asked. There is nothing to
+      // be short about: this membership names an organization the product will
+      // refuse to open.
+      : !verified;
+    if (!openable) {
       delete roles[orgId];
       continue;
     }

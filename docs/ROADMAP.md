@@ -598,6 +598,31 @@ Completed product slice on 2026-08-31:
   requests. The help article «Пріоритет, тип, мітки й відповідальні»
   (`minimumRole: 'member'`) carries the new «Звʼязки між зверненнями» section.
 
+### Three corrections, 2026-08-31 (late)
+
+- **The staff «Огляд» still built its own rows.** Fourteen lines of `ListRow` +
+  `TaskIdentity` + a title + a date + a priority + a status + an avatar, which is
+  `TaskRow` with the parts reordered and several missing — including the read
+  cursor, so that one list drew its unread mark differently from every other list
+  in the product. It renders `TaskRow` now. The client half already did.
+- **The switcher filter did not catch the organizations it was written for.** The
+  browser cannot read an organization without an active entitlement — the rules
+  refuse it — so the two standalone organizations never had a document, stayed
+  `pending`, and `pending` was exempt. `buildOrganizationList` now takes
+  `{ verified }`: on the Admin-SDK directory pass, a membership with no
+  organization behind it is not a workspace. On the cache-backed pass a missing
+  document still means a short read, which is the failure that exemption exists
+  to prevent.
+- **«Сповіщення» is back for internal staff.** It went out on 2026-08-29 with
+  «Особистий профіль» and «Локалізація», and it never belonged with them: those
+  two arrive in QuickTeam's signed snapshot and are re-sent on the next sync, so
+  a qTicket editor for them is a copy that loses. `users/{uid}/settings/notifications`
+  has no QuickTeam copy at all — it is the only editor for whether the bell
+  records `assigned`, `commented`, `mentioned`, `statusChanged`,
+  `incident_created` and `deadline`, plus the sound and the pop-up. Removing it
+  pinned every internal seat to whatever their document already held, with nobody
+  able to change it, on a product whose job is telling support something arrived.
+
 Product work still required:
 
 - Run the complete tenant/client acceptance flow and correct every permission or
