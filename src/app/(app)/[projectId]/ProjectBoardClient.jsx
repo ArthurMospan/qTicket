@@ -39,6 +39,7 @@ import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
 import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
 import { canWhileRoleLoads, can, isClientRole } from '@/lib/utils/can';
+import { isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
@@ -368,6 +369,13 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     && visibleIssues.length > 0;
   const canManageProject = can(orgRole, 'edit:project_settings');
   const canInviteClient = can(orgRole, 'manage:team');
+  // A client administrator invites a colleague into the project they are
+  // looking at. `/team` carries the same control while they hold exactly one
+  // project; with several, «в який?» is a question that rail has nowhere to
+  // ask, and this screen answers it by being open.
+  const canInviteEmployee = orgRole === 'client_admin'
+    && can(orgRole, 'invite:client_member')
+    && isOnProjectTeam(project, currentUser?.uid || currentUser?.id);
   const isArchived = project?.status === 'archived';
   const isReadOnly = isArchived;
   // Only a client opens a request. Support receives it, works it and closes it —
@@ -631,7 +639,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       description={clientViewer
                         ? 'Люди з вашого боку, які бачать звернення цього проєкту.'
                         : 'Зовнішні користувачі бачать тільки цей проєкт і його звернення.'}
-                      action={canInviteClient ? (
+                      action={(canInviteClient || canInviteEmployee) ? (
                         <Button
                           onClick={() => setShowClientInvite(true)}
                           icon={UserPlus}
@@ -639,7 +647,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                           size="md"
                           collapseAt="sm"
                         >
-                          Запросити клієнта
+                          {canInviteClient ? 'Запросити клієнта' : 'Запросити співробітника'}
                         </Button>
                       ) : null}
                     >
@@ -716,14 +724,18 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         />
       )}
 
-      {!clientViewer && (
+      {/* One dialog, two grants, and which one is decided by who opened it —
+          never by a control inside it. Staff seat a client administrator;
+          that administrator adds their own colleagues. The role is fixed here,
+          again in the invitation route, and a third time in `firestore.rules`. */}
+      {(canInviteClient || canInviteEmployee) && (
         <InviteMemberDialog
           isOpen={showClientInvite}
           onClose={() => setShowClientInvite(false)}
           inviteMember={inviteMember}
           projectIds={[project.id]}
           spaceName={project.name}
-          clientAdminMode
+          {...(canInviteClient ? { clientAdminMode: true } : { clientMode: true })}
         />
       )}
     </>

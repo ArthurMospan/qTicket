@@ -51,14 +51,21 @@ export default function TeamPage() {
 
   const clientViewer = isClientRole(orgRole);
   const currentUserId = currentUser?.uid || currentUser?.id;
-  // A client belongs to exactly one space, and that space is the roster's
-  // scope: the directory a `client_admin` administers is the people on it, not
-  // every client role the member API happened to answer with.
-  const clientSpace = useMemo(() => (clientViewer
-    ? (projects || []).find(project => (
+  // The projects this client is on, and the roster is scoped to all of them.
+  //
+  // It used to be `find(...)` — the first one — which was correct while a client
+  // could only ever be on one. Now that they can be on several, the first one is
+  // simply the wrong answer: an administrator of two projects would have seen
+  // the colleagues of one of them and no way to tell which.
+  const clientSpaces = useMemo(() => (clientViewer
+    ? (projects || []).filter(project => (
       project.status !== 'archived' && isOnProjectTeam(project, currentUserId)
-    )) || null
-    : null), [clientViewer, currentUserId, projects]);
+    ))
+    : []), [clientViewer, currentUserId, projects]);
+  // The invitation stays here only while there is one project to invite into.
+  // With several, «в який?» is a question this rail has nowhere to ask, and the
+  // project's own «Учасники» tab asks it by being open — see ProjectBoardClient.
+  const clientSpace = clientSpaces.length === 1 ? clientSpaces[0] : null;
   const canInviteEmployees = orgRole === 'client_admin'
     && can(orgRole, 'invite:client_member')
     && Boolean(clientSpace);
@@ -85,7 +92,8 @@ export default function TeamPage() {
   // directory is filtered the same way, for the same reason.
   const teamMembers = useMemo(() => (Array.isArray(members) ? members : [])
     .filter(member => (clientViewer
-      ? isClientRole(member.role) && isOnProjectTeam(clientSpace, member.id || member.uid)
+      ? isClientRole(member.role)
+        && clientSpaces.some(space => isOnProjectTeam(space, member.id || member.uid))
       : !isClientRole(member.role)))
     .map(member => ({
       ...member,
@@ -95,7 +103,7 @@ export default function TeamPage() {
         || organizationRoleLabel(member.role),
     }))
     .sort((left, right) => Number(left.inactive) - Number(right.inactive)),
-  [clientSpace, clientViewer, members, positions]);
+  [clientSpaces, clientViewer, members, positions]);
 
   const filteredMembers = useMemo(() => teamMembers.filter(m =>
     (m.name || '').toLowerCase().includes(teamSearch.toLowerCase()) ||
@@ -138,7 +146,7 @@ export default function TeamPage() {
             loading={loading}
             emptyTitle={clientViewer ? 'Ще нікого немає' : 'Нікого не знайдено'}
             emptyDescription={clientViewer
-              ? 'Запросіть співробітника — і він побачить звернення цього проєкту.'
+              ? 'Запросіть співробітника — і він побачить звернення вашого проєкту.'
               : 'Спробуйте змінити пошуковий запит.'}
             action={canInviteEmployees ? (
               <Button

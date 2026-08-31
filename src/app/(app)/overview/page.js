@@ -107,9 +107,18 @@ export default function OverviewPage() {
     () => new Map(activeProjects.map(project => [project.id, project])),
     [activeProjects],
   );
-  // A client holds exactly one space, and every address on their half of this
-  // screen leads into it — the list, the rows, and the composer.
-  const clientSpace = activeProjects[0] || null;
+  // A client may hold more than one project, and most hold exactly one.
+  //
+  // `projects[0]` was the whole of this until 2026-09-01, and it was never a
+  // rule of the data — `project.team` is an array and always was. It was a rule
+  // of the screens, and it cost the case the owner actually has: a supplier
+  // serving two of their customers with one contact working for both.
+  //
+  // So this is «the one, if there is one» rather than «the first». Where the
+  // answer is a single project the screen behaves exactly as it did; where it is
+  // several, the controls that need one address stand down instead of guessing,
+  // and the rail lists the projects the way it lists them for support.
+  const clientSpace = activeProjects.length === 1 ? activeProjects[0] : null;
   const {
     issues,
     loading: issuesLoading,
@@ -236,7 +245,9 @@ export default function OverviewPage() {
                 icon={Inbox}
                 value={metrics.open}
                 label="Відкриті"
-                sub={metrics.open ? 'ще в роботі' : 'усе вирішено'}
+                sub={activeProjects.length > 1
+                  ? `у ${activeProjects.length} проєктах`
+                  : (metrics.open ? 'ще в роботі' : 'усе вирішено')}
               />
               {/* The mirror of support's «Чекають на нас», read from this side
                   of the same conversation: we answered last, so the next word
@@ -301,6 +312,9 @@ export default function OverviewPage() {
                         members={members}
                         projectId={issue.projectId}
                         projectName={projectById.get(issue.projectId)?.name}
+                        // Which project a request belongs to only needs saying
+                        // where the reader has more than one.
+                        showProjectName={activeProjects.length > 1}
                         showAssignee
                         assigneeSource="client"
                         onClick={() => {

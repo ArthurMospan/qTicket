@@ -226,14 +226,19 @@ export default function WorkspaceSidebar() {
       : []),
     { href: '/settings',   icon: Settings,      label: 'Налаштування' },
   ];
-  // A client has exactly one space, and it is a real address — the same
-  // `[projectId]` screen support opens. `/` only redirects into it, so a rail
-  // entry pointing at `/` went inactive the moment the redirect landed. It
-  // points at the space itself as soon as the spaces are known.
-  const clientSpaceHref = useMemo(() => {
-    const space = (projects || []).find(project => project.status !== 'archived');
-    return space ? `/${space.id}` : '/';
-  }, [projects]);
+  // A client's projects, and there may be more than one.
+  //
+  // One is the ordinary case and keeps the rail it had: «Мої звернення»
+  // pointing straight at that project, which is a real address — the same
+  // `[projectId]` screen support opens. Several, and a single entry cannot
+  // name them, so the rail lists them under a heading exactly as it lists a
+  // support seat's projects. Nothing about that group is client-specific; it is
+  // the same block, drawn for a shorter list.
+  const clientProjects = useMemo(
+    () => (projects || []).filter(project => project.status !== 'archived'),
+    [projects],
+  );
+  const clientSpaceHref = clientProjects.length === 1 ? `/${clientProjects[0].id}` : '/';
   const topNav = clientViewer
     ? [
         // The same first entry the internal rail has, leading to the same
@@ -245,7 +250,9 @@ export default function WorkspaceSidebar() {
         // It was `Folder` — the icon this rail uses for a *client space* — so
         // the customer's entry drew a container beside the word «звернення»,
         // and the two halves of the product named one record with two glyphs.
-        { href: clientSpaceHref, icon: TaskIcon, label: 'Мої звернення', exact: clientSpaceHref === '/' },
+        ...(clientProjects.length === 1
+          ? [{ href: clientSpaceHref, icon: TaskIcon, label: 'Мої звернення', exact: false }]
+          : []),
         // «Співробітники» used to point at `/settings?section=team` — an address
         // the settings rail named a second time on the screen it opened, so one
         // destination was named twice on one screen. The duplicate is gone from
@@ -462,10 +469,10 @@ export default function WorkspaceSidebar() {
         })}
       </nav>
 
-      {clientViewer ? (
-        // External users have one portal surface. Listing the underlying
-        // project here exposed an implementation detail and linked straight
-        // back to a route that immediately redirected to «Мої звернення».
+      {clientViewer && clientProjects.length < 2 ? (
+        // One project needs no list: «Мої звернення» in the navigation above
+        // already points at it, and a heading over a single row is a heading
+        // that says nothing.
         <div className="flex-1" />
       ) : (
         <>
@@ -476,7 +483,7 @@ export default function WorkspaceSidebar() {
         {!collapsed && (
           <div className="flex items-center justify-between px-[16px] mb-[16px]">
             <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--sb-muted-header)' }}>
-              ПРОЄКТИ
+              {clientViewer ? 'МОЇ ЗВЕРНЕННЯ' : 'ПРОЄКТИ'}
             </p>
             {can(orgRole, 'create:project') && (
               <button

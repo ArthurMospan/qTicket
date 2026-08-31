@@ -498,7 +498,11 @@ test('керування співробітниками клієнта живе 
   // Один екран, який знає, хто дивиться: свої співробітники — за складом
   // простору, а не просто за роллю, і запрошення поруч із ними.
   assert.match(team, /const clientViewer = isClientRole\(orgRole\);/);
-  assert.match(team, /isClientRole\(member\.role\) && isOnProjectTeam\(clientSpace, member\.id \|\| member\.uid\)/);
+  // Scoped by the projects this person is on, not merely by role — and by all
+  // of them: a client may hold more than one project since 2026-09-01, and
+  // «the first one» would have shown an administrator of two the colleagues of
+  // one with no way to tell which.
+  assert.match(team, /clientSpaces\.some\(space => isOnProjectTeam\(space, member\.id \|\| member\.uid\)\)/);
   assert.match(team, /orgRole === 'client_admin'\s*&& can\(orgRole, 'invite:client_member'\)/);
   assert.match(team, /title="Запросити співробітника"/);
   // Те саме вікно, що й у клієнтському просторі: пошта на одній вкладці,

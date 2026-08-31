@@ -81,3 +81,55 @@ test('client spaces never turn client invitations into internal QuickTeam seats'
   assert.match(clientWorkspace, /<InviteMemberDialog[\s\S]{0,320}clientAdminMode/);
   assert.doesNotMatch(settings, /InviteMemberDialog/);
 });
+
+// One person, several projects. `project.team` is an array and always was, so
+// nothing in the data ever said a client belonged to exactly one — the screens
+// said it, by reading `projects[0]`, and the invitation route said it by
+// answering 409 to anybody who already had a seat. The cost was a real case:
+// a supplier serving two of their customers, one contact working with both, and
+// no way to give that contact the second project except a second email address.
+test('an existing client can be invited into another project, and keeps their role', async () => {
+  const route = await read('../src/app/api/invitations/route.js');
+
+  // The branch exists, and it adds a project rather than a membership.
+  assert.match(route, /type: 'project_added'/);
+  assert.match(route, /team: FieldValue\.arrayUnion\(userId\)/);
+
+  // The role does not move. An invitation is a grant of access to a project;
+  // promoting somebody because a colleague picked the wrong door is not one.
+  assert.match(route, /const currentRole = existingMembership\.data\(\)\.role;/);
+  assert.match(route, /role: currentRole/);
+  assert.doesNotMatch(route, /membershipRef\.update\(\{\s*role/);
+
+  // Only a client role widens this way — an internal seat is QuickTeam's, and
+  // is refused further up with QUICKTEAM_MANAGED before this branch is reached.
+  assert.match(route, /if \(!isClientRole\(currentRole\)/);
+  // Nothing to add is still a conflict, so «invite» never reports success for
+  // a person who was already there.
+  assert.match(route, /alreadyOnAll/);
+  assert.match(route, /'User is already a member'/);
+});
+
+test('the screens a client reads no longer assume they hold exactly one project', async () => {
+  const [overview, sidebar, team] = await Promise.all([
+    read('../src/app/(app)/overview/page.js'),
+    read('../src/components/WorkspaceSidebar.jsx'),
+    read('../src/app/(app)/team/page.js'),
+  ]);
+
+  // «The one, if there is one» rather than «the first»: where a client holds
+  // several, a control that needs a single address stands down instead of
+  // guessing which project the reader meant.
+  assert.match(overview, /activeProjects\.length === 1 \? activeProjects\[0\] : null/);
+  assert.doesNotMatch(overview, /const clientSpace = activeProjects\[0\]/);
+
+  // The rail keeps its single entry for the ordinary case and lists projects
+  // under a heading for the other — the same block support already has.
+  assert.match(sidebar, /clientProjects\.length === 1/);
+  assert.match(sidebar, /clientViewer && clientProjects\.length < 2 \?/);
+  assert.match(sidebar, /clientViewer \? 'МОЇ ЗВЕРНЕННЯ' : 'ПРОЄКТИ'/);
+
+  // The roster spans every project the reader is on, not the first of them.
+  assert.match(team, /const clientSpaces = useMemo/);
+  assert.match(team, /clientSpaces\.length === 1 \? clientSpaces\[0\] : null/);
+});

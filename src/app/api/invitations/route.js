@@ -5,7 +5,7 @@ import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { deliverEmail, invitationEmailHtml } from '@/lib/server/email';
 import { reactivateMembership } from '@/lib/server/orgMembership';
 import { resolveInvitationScope } from '@/lib/server/invitationScope.mjs';
-import { rolesFor } from '@/lib/utils/can';
+import { isClientRole, rolesFor } from '@/lib/utils/can';
 import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 import {
   isQuickTeamManagedOrganization,
@@ -94,8 +94,42 @@ export async function POST(request) {
       const userId = userSnap.docs[0].id;
       const membershipId = `${organizationId}_${userId}`;
       const membershipRef = db.collection('orgMemberships').doc(membershipId);
-      if ((await membershipRef.get()).exists) {
-        return NextResponse.json({ error: 'User is already a member' }, { status: 409 });
+      const existingMembership = await membershipRef.get();
+      if (existingMembership.exists) {
+        // Somebody already here, invited into a project they are not on yet.
+        //
+        // This used to be a flat 409, and it made «one person, one project» a
+        // rule of the product rather than of the data — which it never was:
+        // `project.team` is an array and always has been. What it actually cost
+        // was a real case the owner hit: a supplier serving two of their
+        // customers, one contact working with both, and no way to give that
+        // contact the second project except a second email address.
+        //
+        // Their **role does not move**. An existing `client_member` invited by
+        // an administrator as a `client_admin` stays a member: an invitation is
+        // a grant of access to a project, and quietly promoting somebody
+        // because a colleague picked the wrong door is not one. The internal
+        // seat case never reaches here — a QuickTeam-managed membership is
+        // refused several lines above, and that stays the boundary.
+        const currentRole = existingMembership.data().role;
+        const alreadyOnAll = invitedProjectIds.length > 0 && (await Promise.all(
+          invitedProjectIds.map(async projectId => {
+            const project = await db.collection('projects').doc(projectId).get();
+            return project.exists && (project.data().team || []).includes(userId);
+          }),
+        )).every(Boolean);
+        if (!isClientRole(currentRole) || !invitedProjectIds.length || alreadyOnAll) {
+          return NextResponse.json({ error: 'User is already a member' }, { status: 409 });
+        }
+        const batch = db.batch();
+        invitedProjectIds.forEach(projectId => {
+          batch.update(db.collection('projects').doc(projectId), {
+            team: FieldValue.arrayUnion(userId),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        });
+        await batch.commit();
+        return NextResponse.json({ type: 'project_added', role: currentRole }, { status: 200 });
       }
       // Someone who used to be here comes back to their own seat, not to a
       // blank one: the same position, the same projects, and every task still
