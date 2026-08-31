@@ -407,9 +407,10 @@ test('«Організація і бренд» reports the QuickTeam brand and n
   const settings = await read('../src/app/(app)/settings/page.js');
   const start = settings.indexOf("case 'workspace': {");
   // The section that used to end this slice was «Доступ qTicket», folded into
-  // this one. An anchor that no longer exists makes `indexOf` return -1 and
-  // `slice` hand back the whole file, which is how a test stops testing.
-  const end = settings.indexOf("case 'team': {");
+  // this one; then «Команда підтримки», which moved to «/team» whole. An anchor
+  // that no longer exists makes `indexOf` return -1 and `slice` hand back the
+  // whole file, which is how a test stops testing.
+  const end = settings.indexOf("case 'statuses': {");
   assert.ok(start >= 0 && end > start);
   const section = settings.slice(start, end);
 

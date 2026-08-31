@@ -82,7 +82,10 @@ test('an organization role is written in one place, in Ukrainian', async () => {
 
   for (const path of [
     'src/components/OrgSwitcherScreen.jsx',
-    'src/app/(app)/settings/page.js',
+    // The roster, not the settings screen: «Налаштування» stopped naming a role
+    // at all when its copy of the directory was deleted, and a file asserted to
+    // use a shared label while showing no labels is a claim about nothing.
+    'src/app/(app)/team/page.js',
     'src/components/workspace/HoverCard.jsx',
   ]) {
     const source = await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
