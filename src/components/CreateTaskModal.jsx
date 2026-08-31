@@ -522,32 +522,6 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
               own assignment stays support's and is never shown here. Offered only
               when they have colleagues to choose between: a one-person client
               would be asked to confirm the only possible answer. */}
-          {clientMode && teamMembers.length > 1 && (
-            <div className="flex flex-col gap-[6px] lg:col-span-2">
-              <div className="flex items-center justify-between gap-3">
-                <Label>Відповідальні клієнта</Label>
-                <span className="text-[10px] font-medium text-muted">Можна вибрати кількох</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {teamMembers.map(member => {
-                  const uid = member.uid || member.id;
-                  const selected = form.clientAssignees.includes(uid);
-                  return (
-                    <SelectableChip
-                      key={uid}
-                      shape="person"
-                      selected={selected}
-                      onClick={() => toggleClientAssignee(uid)}
-                    >
-                      <span aria-hidden="true"><UserAvatar user={member} size="xs" /></span>
-                      <span className="max-w-[180px] truncate">{member.name || member.email}</span>
-                      {selected && <Check size={12} className="shrink-0" />}
-                    </SelectableChip>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Metadata controls share one grid, so every field has identical
               geometry and a deterministic reading order.
@@ -633,6 +607,41 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
                     >
                       <span aria-hidden="true"><UserAvatar user={m} size="xs" /></span>
                       <span className="max-w-[180px] truncate">{m.name || m.email}</span>
+                      {selected && <Check size={12} className="shrink-0" />}
+                    </SelectableChip>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Who answers for this on the customer's side, asked last — where
+              QuickTeam's composer asks the same question, and beside support's
+              own picker rather than glued to the description. Every field
+              between the two is hidden for a customer, so sitting where it used
+              to it arrived attached to «Опис» and read as part of it instead of
+              as the form's closing question. Offered only when they have
+              colleagues to choose between: a one-person client would be asked
+              to confirm the only possible answer. */}
+          {clientMode && teamMembers.length > 1 && (
+            <div className="flex flex-col gap-[6px] lg:col-span-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label>Від клієнта</Label>
+                <span className="text-[10px] font-medium text-muted">Можна вибрати кількох</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {teamMembers.map(member => {
+                  const uid = member.uid || member.id;
+                  const selected = form.clientAssignees.includes(uid);
+                  return (
+                    <SelectableChip
+                      key={uid}
+                      shape="person"
+                      selected={selected}
+                      onClick={() => toggleClientAssignee(uid)}
+                    >
+                      <span aria-hidden="true"><UserAvatar user={member} size="xs" /></span>
+                      <span className="max-w-[180px] truncate">{member.name || member.email}</span>
                       {selected && <Check size={12} className="shrink-0" />}
                     </SelectableChip>
                   );

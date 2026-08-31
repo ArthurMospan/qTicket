@@ -171,11 +171,26 @@ test('клієнт і підтримка бачать один екран, і з
   assert.match(clientAttributes, />Статус</);
   assert.match(clientAttributes, />Тип</);
   assert.match(clientAttributes, />Пріоритет</);
-  assert.match(clientAttributes, />Відповідальні</);
+  // Обидві клітинки називають СТОРОНУ, а не читача, і однаково на обох смугах.
+  // «Відповідальні» означало `assigneeIds` у підтримки і `clientAssigneeIds` у
+  // клієнта — одне слово, два різні поля, тож агент і клієнт, кажучи одне й те
+  // саме, говорили про різних людей. Перша спроба це звести поставила обом
+  // «Відповідальні клієнта» — тобто сказала клієнтові «відповідальні клієнта»
+  // про нього самого. Сторона з обох крісел та сама.
+  assert.match(clientAttributes, />Від клієнта</);
+  assert.doesNotMatch(clientAttributes, />Відповідальні</);
   // Кого призначили з боку підтримки. Раніше це ховали як внутрішню маршрутизацію
   // — при тому, що ім'я й обличчя агента клієнт читає в розмові на цьому ж
   // екрані. Показуємо, але фактом: кого призначити вирішує стіл.
   assert.match(clientAttributes, />Підтримка</);
+  // І не ховається на вузькому екрані. Ховалась: смуги мали однакову КІЛЬКІСТЬ
+  // клітинок під `lg` і різний зміст, тож клієнт на вузькому ноутбуці втрачав
+  // відповідь на «хто цим займається», а агент поруч — ні.
+  const clientSupportCellStart = clientAttributes.indexOf('>Підтримка<');
+  assert.doesNotMatch(
+    clientAttributes.slice(Math.max(0, clientSupportCellStart - 400), clientSupportCellStart),
+    /max-lg:hidden \$\{readOnlyItemClass\}/,
+  );
   assert.match(clientAttributes, /<MultiSelect\s+compact\s+readOnly/);
   // Той самий контрол, що й у підтримки, тільки без стрілочки: `readOnly`, а
   // не `disabled` — вимкнений контрол обіцяє зміну, якої не буде.
@@ -196,7 +211,7 @@ test('клієнт і підтримка бачать один екран, і з
   // І жодного способу перепризначити: клітинка підтримки не має onChange.
   const clientSupportCell = clientAttributes.slice(
     clientAttributes.indexOf('>Підтримка<'),
-    clientAttributes.indexOf('>Відповідальні<'),
+    clientAttributes.indexOf('>Від клієнта<'),
   );
   assert.doesNotMatch(clientSupportCell, /onChange=/);
   assert.match(composer, /const submitted = clientMode[\s\S]{0,400}type: form\.type,[\s\S]{0,80}priority: form\.priority,[\s\S]{0,80}labelIds: form\.labelIds/);

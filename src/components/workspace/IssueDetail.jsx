@@ -11,6 +11,7 @@ import { userFacingErrorMessage } from '@/lib/utils/errors';
 import { useWorkflowConfig }   from '@/lib/hooks/useWorkflowConfig';
 import { resolveCategoryStatusId } from '@/lib/utils/statusCategories.mjs';
 import { ISSUE_LINK_OPTIONS, issueLinkPerspective, useIssueLinks } from '@/lib/hooks/useIssueLinks';
+import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import MarkdownEditor from '@/components/ui/Forms/MarkdownEditor';
 import MarkdownViewer, { setTaskChecked } from '@/components/ui/DataDisplay/MarkdownViewer';
 import AttachmentViewer from '@/components/ui/AttachmentViewer';
@@ -1486,9 +1487,18 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     the kebab beside the title drops. An external author has no
                     profile and no chat, so that one stays an explanation. */}
                 {clientViewer ? (
+                  /* The same face and name the agent's copy shows, minus the
+                     menu behind it. A customer has nothing to do with a profile
+                     or a direct chat, so the identity is not a control here —
+                     but it was not a face either, and the author line was the
+                     one place on their own request where a person appeared as
+                     bare text while everybody else on the screen had a picture. */
                   <span className="inline-flex items-center gap-1">
                     <span>Автор:</span>
-                    <span className="font-semibold text-ink">{reporter.name}</span>
+                    <span className="inline-flex items-center gap-[6px]">
+                      <UserAvatar user={reporter} size="xs" />
+                      <span className="font-semibold text-ink">{reporter.name}</span>
+                    </span>
                   </span>
                 ) : isExternalReporter ? (
                   <Popover
@@ -1593,9 +1603,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
 
                    Everything else on it is the customer's own: what kind of
                    problem this is, how urgent they judge it, and which of their
-                   people is answering. What stays off the strip is the desk's
-                   own business — who inside support is on it, and the date it
-                   is promised for. */
+                   people is answering — plus, since 2026-09-01, which agent has
+                   it, read-only. What stays off the strip is the one thing this
+                   product does not promise: the date it is due. */
                 <>
                   {/* The same cell the agent has, without the caret. A pill
                       here was a second way of drawing one fact: their strip
@@ -1653,7 +1663,25 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       hid nothing; it only left their strip a column short of
                       the one it is meant to line up with. Read-only, because
                       who takes a request is still the desk's decision. */}
-                  <div className={`max-lg:hidden ${readOnlyItemClass}`}>
+                  {/* Not `max-lg:hidden`. It was, and that is how a customer on
+                      a laptop narrower than 1024px lost the answer to «хто цим
+                      займається» while the agent looking at the same request
+                      kept theirs — the two strips had the same *number* of
+                      cells below that width and not the same content, which is
+                      the kind of parity that looks fine in the code and fails
+                      on the screen. Below `lg` both readers now keep Статус,
+                      Тип, Пріоритет and Відповідальні; what folds away on each
+                      side is the other column. */}
+                  <div className={readOnlyItemClass}>
+                    {/* Both cells name a side, and neither names the reader.
+                        «Відповідальні» used to mean `assigneeIds` on the agent's
+                        strip and `clientAssigneeIds` on the customer's — one
+                        word, two fields, so the two of them on a call saying
+                        «відповідальні» were talking about different people.
+                        The first attempt at fixing that put ROADMAP's
+                        «Відповідальні клієнта» on both, which told the customer
+                        «the client's responsibles» about themselves. A side is
+                        the same side from either chair. */}
                     <span className={attributeLabelClass}>Підтримка</span>
                     <MultiSelect
                       compact
@@ -1670,8 +1698,8 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                   {/* Their own people. On this side of the desk «відповідальні»
                       without a qualifier means theirs; support's cell above
                       says whose it is. */}
-                  <div className={attributeItemClass} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-                    <span className={attributeLabelClass}>Відповідальні</span>
+                  <div className={`max-lg:hidden ${attributeItemClass}`} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Від клієнта</span>
                     <MultiSelect
                       compact
                       showSelectedAvatars
@@ -1800,7 +1828,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                   {/* Assignees — the task model has always been multi-assignee;
                       the single Select silently hid everyone past the first. */}
                   <div className={attributeItemClass} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-                    <span className={attributeLabelClass}>Відповідальні</span>
+                    <span className={attributeLabelClass}>Підтримка</span>
                     <MultiSelect
                       compact
                       showSelectedAvatars
