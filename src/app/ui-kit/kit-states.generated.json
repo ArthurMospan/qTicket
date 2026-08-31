@@ -628,7 +628,8 @@
       "badges"
     ],
     "PriorityIcon": [
-      "badges"
+      "badges",
+      "task-attributes"
     ],
     "ProjectSettingsForm": [
       "dialogs"
@@ -664,6 +665,7 @@
     ],
     "StatusPill": [
       "badges",
+      "task-attributes",
       "inner-nav-layout",
       "states"
     ],
@@ -738,7 +740,8 @@
       "headers"
     ],
     "TypeBadge": [
-      "badges"
+      "badges",
+      "task-attributes"
     ],
     "UnreadDivider": [
       "chat-elements"

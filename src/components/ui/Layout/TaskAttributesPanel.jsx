@@ -3,16 +3,44 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const CONTEXT_GRIDS = {
-  // The last column is «Деталі». At 32px wide and 28px tall once the header
-  // condensed it was a 32×28 target on a touch screen — under every guideline
-  // there is, and the one control on the strip people reported missing with a
-  // thumb. It is 44px on a phone and unchanged on a mouse.
-  task: 'grid w-full grid-cols-[repeat(3,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(5,minmax(0,1fr))_92px] [&>*]:min-w-0',
+  // A grid reserves its columns whether or not anything arrives to fill them,
+  // so the count here is a promise about what the strip actually carries. This
+  // one used to promise five cells plus a 92px «Деталі» column — a shape
+  // inherited from the task manager, where the sixth field was an estimate and
+  // the seventh a sprint. Those fields are gone; the columns stayed. The screen
+  // handed it three children and the customer's screen handed it one, so the
+  // strip drew a status pill at the far left of a grey bar and four empty
+  // columns after it, and «Деталі» sat stranded in the middle of the row
+  // instead of in the column reserved for it at the end.
+  //
+  // Five columns is now the truth: status, type, priority, assignees, due date.
+  // «Деталі» exists below `sm`, where only the first two fit and the rest have
+  // to live behind something — on a wider screen there is no overflow left for
+  // it to hold, and a popover whose job is done is a control that opens onto a
+  // repeat of what is already on screen.
+  //
+  // The 44px width on a phone is deliberate and stays: at 32×28, which is what
+  // the condensed header left it, «Деталі» was under every touch-target
+  // guideline there is and the one control people reported missing with a thumb.
+  task: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(5,minmax(0,1fr))] [&>*]:min-w-0',
 };
 
-export function getTaskAttributeChrome({ condensed = false } = {}) {
+/**
+ * The strip's shared geometry.
+ *
+ * `readOnly` is for a reader who cannot change any of it — an external customer
+ * looking at their own request. The cell keeps the same rhythm and loses the
+ * three things that promise an edit: the pointer, the hover tint and `flex-1`.
+ * The first two were a lie (the cell answered a click with nothing), and the
+ * third is what stretches a cell to fill a grid column — right for a row of
+ * controls that must line up, wrong for a handful of facts, which should take
+ * the width of the words in them and stop.
+ */
+export function getTaskAttributeChrome({ condensed = false, readOnly = false } = {}) {
   return {
-    attributeItemClass: `flex min-w-0 flex-1 cursor-pointer flex-col rounded-[10px] px-2 transition-[padding,gap,background-color] duration-200 hover:bg-line ${condensed ? 'gap-0 py-1' : 'gap-[4px] py-1.5'}`,
+    attributeItemClass: readOnly
+      ? `flex min-w-0 flex-col rounded-[10px] px-2 transition-[padding,gap] duration-200 ${condensed ? 'gap-0 py-1' : 'gap-[4px] py-1.5'}`
+      : `flex min-w-0 flex-1 cursor-pointer flex-col rounded-[10px] px-2 transition-[padding,gap,background-color] duration-200 hover:bg-line ${condensed ? 'gap-0 py-1' : 'gap-[4px] py-1.5'}`,
     attributeLabelClass: `block h-[14px] overflow-hidden text-[10px] font-bold leading-[14px] uppercase tracking-wider text-muted transition-[height,max-height,opacity] duration-200 ${condensed ? 'h-0 max-h-0 opacity-0' : 'max-h-[14px] opacity-100'}`,
     compactSelectClass: 'h-[22px] w-full justify-start gap-1 rounded-[10px] bg-transparent px-0 text-[13px] font-medium leading-[22px]',
     compactInputClass: 'm-0 h-[22px] w-full cursor-pointer rounded-[10px] bg-transparent p-0 text-[13px] font-medium leading-[22px] text-ink outline-none placeholder:font-medium placeholder:text-faint placeholder:opacity-100',

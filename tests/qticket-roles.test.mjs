@@ -129,8 +129,21 @@ test('клієнт і підтримка бачать один екран, і з
   const clientAttributesStart = detail.indexOf('primaryChildren={clientViewer ? (');
   const internalAttributesStart = detail.indexOf(') : (', clientAttributesStart);
   const clientAttributes = detail.slice(clientAttributesStart, internalAttributesStart);
+  // What the customer's strip says, and — the part that matters — that none of
+  // it is a control. Status, type and priority are all three already on the
+  // board card they came from, so the page saying them is the page catching up
+  // with the board, not a disclosure. The rule was «do not name priority»; it is
+  // «do not offer to change any of it», which is the fact the product actually
+  // has to keep true.
   assert.match(clientAttributes, />Статус</);
-  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Пріоритет/);
+  assert.match(clientAttributes, />Тип</);
+  assert.match(clientAttributes, />Пріоритет</);
+  assert.match(clientAttributes, /readOnlyItemClass/);
+  assert.doesNotMatch(clientAttributes, /<Select|<MultiSelect|<DatePicker|onChange=/);
+  // The two the board withholds stay withheld: who inside support is answering,
+  // and the resolution date — a date a customer can read is a promised time, and
+  // qTicket promises none.
+  assert.doesNotMatch(clientAttributes, /Виконавці|Відповідальні|Спринт|Дедлайн|Термін/);
   assert.match(composer, /const submitted = clientMode[\s\S]{0,180}title: form\.title,[\s\S]{0,80}description: form\.description/);
 });
 

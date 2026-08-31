@@ -44,7 +44,7 @@ import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCance
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
-import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
+import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, PriorityIcon, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, TypeBadge, useConfirm } from '@/components/ui';
 import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
 import { useQuickTeamTransfer } from '@/lib/hooks/useQuickTeamTransfer';
 import Button from '@/components/ui/Button';
@@ -60,7 +60,7 @@ import {
 } from 'lucide-react';
 import { ParentTaskIcon, TaskIcon } from '@/lib/design/icons';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
-import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
+import { NO_PRIORITY_ID, priorityPresentation, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, deleteDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { uploadFile } from '@/lib/utils/uploadFile';
@@ -733,6 +733,14 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     compactSelectClass,
     detailsButtonClass,
   } = getTaskAttributeChrome({ condensed: isHeaderScrolled });
+  // The customer's half of the same strip. Their cells carry facts, not
+  // controls, so they take the width of their own words instead of stretching
+  // to fill a grid column, and they stop claiming to be clickable.
+  const { attributeItemClass: readOnlyItemClass } = getTaskAttributeChrome({
+    condensed: isHeaderScrolled,
+    readOnly: true,
+  });
+  const priorityCfg = priorityPresentation(issue.priority, PRIORITIES);
 
   const assignees     = (issue.assigneeIds || []).map(uid => members.find(m => (m.id || m.uid) === uid)).filter(Boolean);
   const reporterMatchByEmail = issue.reporterName ? members.find(m => m.email && m.email.toLowerCase() === issue.reporterName.toLowerCase()) : null;
@@ -1477,9 +1485,15 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             </div>
         )}
         attributes={(
+            /* The five-column grid belongs to the five controls an agent works
+               with; it lines them up so the same field sits in the same place on
+               every request. A customer has three facts and no controls, so they
+               get the wrapping row instead — a fixed grid would only reserve
+               columns nothing arrives to fill, which is the whole reason their
+               strip read as one status pill adrift in a grey bar. */
             <TaskAttributesPanel
-              singleRow
-              context="task"
+              singleRow={!clientViewer}
+              context={clientViewer ? undefined : 'task'}
               compact
               condensed={isHeaderScrolled}
               cardClassName="transition-[background-color,padding] duration-200"
@@ -1489,19 +1503,84 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 WebkitBackdropFilter: isHeaderScrolled ? 'blur(4px)' : undefined,
               }}
               primaryChildren={clientViewer ? (
-                <div className={attributeItemClass}>
-                  <span className={attributeLabelClass}>Статус</span>
-                  <StatusPill
-                    label={statusCfg?.label || 'Новий'}
-                    color={statusCfg?.color}
-                  />
-                </div>
+                /* What the customer is told about their own request. Three
+                   facts, all of them already visible to them elsewhere — the
+                   status pill on their board, the type badge and the priority
+                   mark on the very same card — so this is the page catching up
+                   with the board rather than any new disclosure. What stays off
+                   it is what the board also withholds: who inside support is
+                   answering, and the resolution date, which is a promised time
+                   the moment a customer can read it. */
+                <>
+                  <div className={readOnlyItemClass}>
+                    <span className={attributeLabelClass}>Статус</span>
+                    <StatusPill
+                      label={statusCfg?.label || 'Новий'}
+                      color={statusCfg?.color}
+                    />
+                  </div>
+
+                  <div className={readOnlyItemClass}>
+                    <span className={attributeLabelClass}>Тип</span>
+                    <TypeBadge
+                      label={typeCfg.label}
+                      color={typeCfg.color}
+                      icon={typeCfg.icon}
+                    />
+                  </div>
+
+                  <div className={readOnlyItemClass}>
+                    <span className={attributeLabelClass}>Пріоритет</span>
+                    <span className="flex items-center gap-1.5 text-[13px] font-medium leading-[22px] text-ink">
+                      <PriorityIcon priority={priorityCfg} size="sm" />
+                      {priorityCfg.label}
+                    </span>
+                  </div>
+                </>
               ) : (
                 <>
                   {/* Status */}
                   <div className={attributeItemClass} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
                     <span className={attributeLabelClass}>Статус</span>
                     <Select compact disabled={isArchived} value={issue.columnId || issue.status || visibleStatuses[0]?.id} onChange={val => handleStatusChange(val)} options={visibleStatuses.map(s => ({ value: s.id, label: s.label, dotColor: s.color }))} buttonClassName={compactSelectClass} />
+                  </div>
+
+                  {/* Type and priority. They used to live behind «Деталі», a
+                      popover built when this strip had seven inherited fields
+                      and room for three. It has five now, and these are the two
+                      an agent reads on every request — what kind of problem this
+                      is, and how urgent somebody judged it. A control you open a
+                      panel to reach is a control you check less often than you
+                      should. Below `sm` they fold back into «Деталі», which is
+                      the only place the overflow is still real. */}
+                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Тип</span>
+                    <Select
+                      compact
+                      disabled={isArchived}
+                      value={draft.type || issue.type || ''}
+                      onChange={val => {
+                        update({ type: val });
+                        if (isEditing) setDraft(current => ({ ...current, type: val }));
+                      }}
+                      options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
+                      buttonClassName={compactSelectClass}
+                    />
+                  </div>
+
+                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Пріоритет</span>
+                    <Select
+                      compact
+                      disabled={isArchived}
+                      value={draft.priority || issue.priority || ''}
+                      onChange={val => {
+                        update({ priority: val });
+                        if (isEditing) setDraft(current => ({ ...current, priority: val }));
+                      }}
+                      options={prioritySelectOptions(PRIORITIES)}
+                      buttonClassName={compactSelectClass}
+                    />
                   </div>
 
                   {/* Assignees — the task model has always been multi-assignee;
@@ -1544,11 +1623,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* Less frequently changed fields */}
+                  {/* The overflow, and only where there is one. Above `sm` all
+                      five attributes are on the strip and this button would open
+                      onto a copy of what the reader is already looking at. */}
                   <Popover
                     position="bottom"
                     hideCloseIcon
-                    className="flex h-full items-center"
+                    className="flex h-full items-center sm:hidden"
                     // Without this the wrapper Popover puts around a trigger is
                     // a bare block in a flex row, so it shrinks to the glyph:
                     // «Деталі» was a 14px-wide hit area inside a 44px column,
@@ -1574,7 +1655,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     )}
                   >
                       <div className="flex w-[248px] max-w-full flex-col gap-4">
-                        <div className="flex flex-col gap-1.5 sm:hidden">
+                        <div className="flex flex-col gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
                           <DatePicker
                             compact
