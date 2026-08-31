@@ -3869,14 +3869,13 @@
     "Counter": {
       "size": {
         "sm": {
-          "count": 5,
+          "count": 4,
           "routes": [],
           "files": [
             "src/components/MobileNav.jsx:218",
             "src/components/MobileNav.jsx:277",
-            "src/components/WorkspaceSidebar.jsx:279",
-            "src/components/WorkspaceSidebar.jsx:343",
-            "src/components/WorkspaceSidebar.jsx:483"
+            "src/components/WorkspaceSidebar.jsx:479",
+            "src/components/WorkspaceSidebar.jsx:85"
           ]
         },
         "md": {
@@ -3889,14 +3888,13 @@
       },
       "variant": {
         "dot": {
-          "count": 5,
+          "count": 4,
           "routes": [],
           "files": [
             "src/components/MobileNav.jsx:218",
             "src/components/MobileNav.jsx:277",
-            "src/components/WorkspaceSidebar.jsx:279",
-            "src/components/WorkspaceSidebar.jsx:343",
-            "src/components/WorkspaceSidebar.jsx:483"
+            "src/components/WorkspaceSidebar.jsx:479",
+            "src/components/WorkspaceSidebar.jsx:85"
           ]
         },
         "(default)": {
@@ -3909,33 +3907,31 @@
       },
       "status": {
         "(default)": {
-          "count": 5,
+          "count": 4,
           "routes": [],
           "files": [
             "src/components/MobileNav.jsx:218",
             "src/components/MobileNav.jsx:277",
             "src/components/OrgSwitcherScreen.jsx:66",
-            "src/components/WorkspaceSidebar.jsx:279",
-            "src/components/WorkspaceSidebar.jsx:343"
+            "src/components/WorkspaceSidebar.jsx:85"
           ]
         },
         "info": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:483"
+            "src/components/WorkspaceSidebar.jsx:479"
           ]
         }
       },
       "appearance": {
         "sidebar": {
-          "count": 4,
+          "count": 3,
           "routes": [],
           "files": [
             "src/components/MobileNav.jsx:218",
             "src/components/MobileNav.jsx:277",
-            "src/components/WorkspaceSidebar.jsx:279",
-            "src/components/WorkspaceSidebar.jsx:343"
+            "src/components/WorkspaceSidebar.jsx:85"
           ]
         },
         "inverse-outline": {
@@ -3949,7 +3945,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:483"
+            "src/components/WorkspaceSidebar.jsx:479"
           ]
         }
       }
@@ -4336,15 +4332,15 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:206"
+            "src/components/WorkspaceSidebar.jsx:278"
           ]
         },
         "caption": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:212",
-            "src/components/WorkspaceSidebar.jsx:215"
+            "src/components/WorkspaceSidebar.jsx:284",
+            "src/components/WorkspaceSidebar.jsx:287"
           ]
         }
       },
@@ -4353,21 +4349,21 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:206"
+            "src/components/WorkspaceSidebar.jsx:278"
           ]
         },
         "wide": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:212"
+            "src/components/WorkspaceSidebar.jsx:284"
           ]
         },
         "half": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:215"
+            "src/components/WorkspaceSidebar.jsx:287"
           ]
         }
       },
@@ -4376,9 +4372,9 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:206",
-            "src/components/WorkspaceSidebar.jsx:212",
-            "src/components/WorkspaceSidebar.jsx:215"
+            "src/components/WorkspaceSidebar.jsx:278",
+            "src/components/WorkspaceSidebar.jsx:284",
+            "src/components/WorkspaceSidebar.jsx:287"
           ]
         }
       }

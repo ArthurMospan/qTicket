@@ -224,23 +224,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:270",
-      "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
-      "text": "",
-      "childElements": [
-        "span",
-        "ChevronsUpDown"
-      ],
-      "ariaLabel": "Змінити портал підтримки",
-      "styled": true,
-      "reviewed": "",
-      "resembles": "IconAction",
-      "structure": "shell",
-      "routes": []
-    },
-    {
-      "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:361",
+      "location": "src/components/WorkspaceSidebar.jsx:357",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -255,7 +239,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:384",
+      "location": "src/components/WorkspaceSidebar.jsx:380",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -270,7 +254,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:450",
+      "location": "src/components/WorkspaceSidebar.jsx:446",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -279,6 +263,22 @@
       "ariaLabel": "Новий клієнт",
       "styled": false,
       "reviewed": "branding-action",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": []
+    },
+    {
+      "tag": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:71",
+      "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
+      "text": "",
+      "childElements": [
+        "span",
+        "ChevronsUpDown"
+      ],
+      "ariaLabel": "",
+      "styled": true,
+      "reviewed": "",
       "resembles": "IconAction",
       "structure": "shell",
       "routes": []
@@ -350,17 +350,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:361",
+      "location": "src/components/WorkspaceSidebar.jsx:357",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:384",
+      "location": "src/components/WorkspaceSidebar.jsx:380",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:450",
+      "location": "src/components/WorkspaceSidebar.jsx:446",
       "tag": "button",
       "context": "branding-action"
     }

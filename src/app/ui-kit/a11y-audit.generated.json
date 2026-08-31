@@ -11,13 +11,13 @@
   },
   "totals": {
     "files": 257,
-    "elements": 2151,
+    "elements": 2146,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
     "fakeButtons": 0,
     "contrastFailures": 0,
-    "runtimeNameVerification": 27
+    "runtimeNameVerification": 28
   },
   "namelessControls": [],
   "imagesWithoutAlt": [],
@@ -215,9 +215,16 @@
     },
     {
       "element": "a",
-      "location": "src/components/WorkspaceSidebar.jsx:497",
+      "location": "src/components/WorkspaceSidebar.jsx:493",
       "attributes": [
         "title"
+      ]
+    },
+    {
+      "element": "button",
+      "location": "src/components/WorkspaceSidebar.jsx:71",
+      "attributes": [
+        "aria-label"
       ]
     }
   ]
