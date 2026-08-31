@@ -1663,8 +1663,8 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:381",
             "src/app/(app)/my/page.js:352",
-            "src/components/workspace/IssueDetail.jsx:1119",
-            "src/components/workspace/IssueDetail.jsx:1122"
+            "src/components/workspace/IssueDetail.jsx:1146",
+            "src/components/workspace/IssueDetail.jsx:1149"
           ]
         },
         "lg": {
@@ -1724,8 +1724,8 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1114",
-            "src/components/workspace/IssueDetail.jsx:1115",
+            "src/components/workspace/IssueDetail.jsx:1141",
+            "src/components/workspace/IssueDetail.jsx:1142",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95"
           ]
@@ -1755,16 +1755,16 @@
             "src/components/InviteMemberDialog.jsx:192",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:1314",
-            "src/components/workspace/IssueDetail.jsx:1338",
-            "src/components/workspace/IssueDetail.jsx:1376",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1794",
-            "src/components/workspace/IssueDetail.jsx:1878",
-            "src/components/workspace/IssueDetail.jsx:1879",
-            "src/components/workspace/IssueDetail.jsx:1912",
-            "src/components/workspace/IssueDetail.jsx:1940",
-            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:1341",
+            "src/components/workspace/IssueDetail.jsx:1365",
+            "src/components/workspace/IssueDetail.jsx:1403",
+            "src/components/workspace/IssueDetail.jsx:1820",
+            "src/components/workspace/IssueDetail.jsx:1821",
+            "src/components/workspace/IssueDetail.jsx:1910",
+            "src/components/workspace/IssueDetail.jsx:1911",
+            "src/components/workspace/IssueDetail.jsx:1944",
+            "src/components/workspace/IssueDetail.jsx:1972",
+            "src/components/workspace/IssueDetail.jsx:1986",
             "src/components/workspace/UnifiedTimeline.jsx:1597"
           ]
         },
@@ -1785,8 +1785,8 @@
             "src/components/MobileNav.jsx:375",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/profile/ProfileView.jsx:96",
-            "src/components/workspace/IssueDetail.jsx:1205",
-            "src/components/workspace/IssueDetail.jsx:1216",
+            "src/components/workspace/IssueDetail.jsx:1232",
+            "src/components/workspace/IssueDetail.jsx:1243",
             "src/components/workspace/UnifiedTimeline.jsx:1711"
           ]
         },
@@ -1811,7 +1811,7 @@
             "src/components/workspace/AgileBoard.jsx:469",
             "src/components/workspace/AgileBoard.jsx:554",
             "src/components/workspace/AgileBoard.jsx:588",
-            "src/components/workspace/IssueDetail.jsx:1276"
+            "src/components/workspace/IssueDetail.jsx:1303"
           ]
         }
       },
@@ -1852,16 +1852,16 @@
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
-            "src/components/workspace/IssueDetail.jsx:1114",
-            "src/components/workspace/IssueDetail.jsx:1119",
-            "src/components/workspace/IssueDetail.jsx:1122",
-            "src/components/workspace/IssueDetail.jsx:1205",
-            "src/components/workspace/IssueDetail.jsx:1216",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1878",
-            "src/components/workspace/IssueDetail.jsx:1912",
-            "src/components/workspace/IssueDetail.jsx:1940",
-            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:1141",
+            "src/components/workspace/IssueDetail.jsx:1146",
+            "src/components/workspace/IssueDetail.jsx:1149",
+            "src/components/workspace/IssueDetail.jsx:1232",
+            "src/components/workspace/IssueDetail.jsx:1243",
+            "src/components/workspace/IssueDetail.jsx:1820",
+            "src/components/workspace/IssueDetail.jsx:1910",
+            "src/components/workspace/IssueDetail.jsx:1944",
+            "src/components/workspace/IssueDetail.jsx:1972",
+            "src/components/workspace/IssueDetail.jsx:1986",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94"
           ]
         },
@@ -1887,12 +1887,12 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:170",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1115",
-            "src/components/workspace/IssueDetail.jsx:1314",
-            "src/components/workspace/IssueDetail.jsx:1338",
-            "src/components/workspace/IssueDetail.jsx:1376",
-            "src/components/workspace/IssueDetail.jsx:1794",
-            "src/components/workspace/IssueDetail.jsx:1879",
+            "src/components/workspace/IssueDetail.jsx:1142",
+            "src/components/workspace/IssueDetail.jsx:1341",
+            "src/components/workspace/IssueDetail.jsx:1365",
+            "src/components/workspace/IssueDetail.jsx:1403",
+            "src/components/workspace/IssueDetail.jsx:1821",
+            "src/components/workspace/IssueDetail.jsx:1911",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1597"
           ]
@@ -1942,7 +1942,7 @@
             "src/components/workspace/AgileBoard.jsx:469",
             "src/components/workspace/AgileBoard.jsx:554",
             "src/components/workspace/AgileBoard.jsx:588",
-            "src/components/workspace/IssueDetail.jsx:1276",
+            "src/components/workspace/IssueDetail.jsx:1303",
             "src/components/workspace/UnifiedTimeline.jsx:1711"
           ]
         }
@@ -2022,23 +2022,23 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1114",
-            "src/components/workspace/IssueDetail.jsx:1115",
-            "src/components/workspace/IssueDetail.jsx:1119",
-            "src/components/workspace/IssueDetail.jsx:1122",
-            "src/components/workspace/IssueDetail.jsx:1205",
-            "src/components/workspace/IssueDetail.jsx:1216",
-            "src/components/workspace/IssueDetail.jsx:1276",
-            "src/components/workspace/IssueDetail.jsx:1314",
-            "src/components/workspace/IssueDetail.jsx:1338",
-            "src/components/workspace/IssueDetail.jsx:1376",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1794",
-            "src/components/workspace/IssueDetail.jsx:1878",
-            "src/components/workspace/IssueDetail.jsx:1879",
-            "src/components/workspace/IssueDetail.jsx:1912",
-            "src/components/workspace/IssueDetail.jsx:1940",
-            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:1141",
+            "src/components/workspace/IssueDetail.jsx:1142",
+            "src/components/workspace/IssueDetail.jsx:1146",
+            "src/components/workspace/IssueDetail.jsx:1149",
+            "src/components/workspace/IssueDetail.jsx:1232",
+            "src/components/workspace/IssueDetail.jsx:1243",
+            "src/components/workspace/IssueDetail.jsx:1303",
+            "src/components/workspace/IssueDetail.jsx:1341",
+            "src/components/workspace/IssueDetail.jsx:1365",
+            "src/components/workspace/IssueDetail.jsx:1403",
+            "src/components/workspace/IssueDetail.jsx:1820",
+            "src/components/workspace/IssueDetail.jsx:1821",
+            "src/components/workspace/IssueDetail.jsx:1910",
+            "src/components/workspace/IssueDetail.jsx:1911",
+            "src/components/workspace/IssueDetail.jsx:1944",
+            "src/components/workspace/IssueDetail.jsx:1972",
+            "src/components/workspace/IssueDetail.jsx:1986",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1597"
@@ -2139,23 +2139,23 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1114",
-            "src/components/workspace/IssueDetail.jsx:1115",
-            "src/components/workspace/IssueDetail.jsx:1119",
-            "src/components/workspace/IssueDetail.jsx:1122",
-            "src/components/workspace/IssueDetail.jsx:1205",
-            "src/components/workspace/IssueDetail.jsx:1216",
-            "src/components/workspace/IssueDetail.jsx:1276",
-            "src/components/workspace/IssueDetail.jsx:1314",
-            "src/components/workspace/IssueDetail.jsx:1338",
-            "src/components/workspace/IssueDetail.jsx:1376",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1794",
-            "src/components/workspace/IssueDetail.jsx:1878",
-            "src/components/workspace/IssueDetail.jsx:1879",
-            "src/components/workspace/IssueDetail.jsx:1912",
-            "src/components/workspace/IssueDetail.jsx:1940",
-            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:1141",
+            "src/components/workspace/IssueDetail.jsx:1142",
+            "src/components/workspace/IssueDetail.jsx:1146",
+            "src/components/workspace/IssueDetail.jsx:1149",
+            "src/components/workspace/IssueDetail.jsx:1232",
+            "src/components/workspace/IssueDetail.jsx:1243",
+            "src/components/workspace/IssueDetail.jsx:1303",
+            "src/components/workspace/IssueDetail.jsx:1341",
+            "src/components/workspace/IssueDetail.jsx:1365",
+            "src/components/workspace/IssueDetail.jsx:1403",
+            "src/components/workspace/IssueDetail.jsx:1820",
+            "src/components/workspace/IssueDetail.jsx:1821",
+            "src/components/workspace/IssueDetail.jsx:1910",
+            "src/components/workspace/IssueDetail.jsx:1911",
+            "src/components/workspace/IssueDetail.jsx:1944",
+            "src/components/workspace/IssueDetail.jsx:1972",
+            "src/components/workspace/IssueDetail.jsx:1986",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1597",
@@ -2241,23 +2241,23 @@
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1114",
-            "src/components/workspace/IssueDetail.jsx:1115",
-            "src/components/workspace/IssueDetail.jsx:1119",
-            "src/components/workspace/IssueDetail.jsx:1122",
-            "src/components/workspace/IssueDetail.jsx:1205",
-            "src/components/workspace/IssueDetail.jsx:1216",
-            "src/components/workspace/IssueDetail.jsx:1276",
-            "src/components/workspace/IssueDetail.jsx:1314",
-            "src/components/workspace/IssueDetail.jsx:1338",
-            "src/components/workspace/IssueDetail.jsx:1376",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1794",
-            "src/components/workspace/IssueDetail.jsx:1878",
-            "src/components/workspace/IssueDetail.jsx:1879",
-            "src/components/workspace/IssueDetail.jsx:1912",
-            "src/components/workspace/IssueDetail.jsx:1940",
-            "src/components/workspace/IssueDetail.jsx:1950",
+            "src/components/workspace/IssueDetail.jsx:1141",
+            "src/components/workspace/IssueDetail.jsx:1142",
+            "src/components/workspace/IssueDetail.jsx:1146",
+            "src/components/workspace/IssueDetail.jsx:1149",
+            "src/components/workspace/IssueDetail.jsx:1232",
+            "src/components/workspace/IssueDetail.jsx:1243",
+            "src/components/workspace/IssueDetail.jsx:1303",
+            "src/components/workspace/IssueDetail.jsx:1341",
+            "src/components/workspace/IssueDetail.jsx:1365",
+            "src/components/workspace/IssueDetail.jsx:1403",
+            "src/components/workspace/IssueDetail.jsx:1820",
+            "src/components/workspace/IssueDetail.jsx:1821",
+            "src/components/workspace/IssueDetail.jsx:1910",
+            "src/components/workspace/IssueDetail.jsx:1911",
+            "src/components/workspace/IssueDetail.jsx:1944",
+            "src/components/workspace/IssueDetail.jsx:1972",
+            "src/components/workspace/IssueDetail.jsx:1986",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1597",
@@ -2363,20 +2363,20 @@
             "src/components/workspace/BoardConfigModal.jsx:215",
             "src/components/workspace/BoardConfigModal.jsx:232",
             "src/components/workspace/BoardConfigModal.jsx:235",
-            "src/components/workspace/IssueDetail.jsx:1114",
-            "src/components/workspace/IssueDetail.jsx:1115",
-            "src/components/workspace/IssueDetail.jsx:1119",
-            "src/components/workspace/IssueDetail.jsx:1122",
-            "src/components/workspace/IssueDetail.jsx:1205",
-            "src/components/workspace/IssueDetail.jsx:1216",
-            "src/components/workspace/IssueDetail.jsx:1276",
-            "src/components/workspace/IssueDetail.jsx:1314",
-            "src/components/workspace/IssueDetail.jsx:1338",
-            "src/components/workspace/IssueDetail.jsx:1376",
-            "src/components/workspace/IssueDetail.jsx:1793",
-            "src/components/workspace/IssueDetail.jsx:1794",
-            "src/components/workspace/IssueDetail.jsx:1878",
-            "src/components/workspace/IssueDetail.jsx:1879",
+            "src/components/workspace/IssueDetail.jsx:1141",
+            "src/components/workspace/IssueDetail.jsx:1142",
+            "src/components/workspace/IssueDetail.jsx:1146",
+            "src/components/workspace/IssueDetail.jsx:1149",
+            "src/components/workspace/IssueDetail.jsx:1232",
+            "src/components/workspace/IssueDetail.jsx:1243",
+            "src/components/workspace/IssueDetail.jsx:1303",
+            "src/components/workspace/IssueDetail.jsx:1341",
+            "src/components/workspace/IssueDetail.jsx:1365",
+            "src/components/workspace/IssueDetail.jsx:1403",
+            "src/components/workspace/IssueDetail.jsx:1820",
+            "src/components/workspace/IssueDetail.jsx:1821",
+            "src/components/workspace/IssueDetail.jsx:1910",
+            "src/components/workspace/IssueDetail.jsx:1911",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1597"
@@ -2426,9 +2426,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1912",
-            "src/components/workspace/IssueDetail.jsx:1940",
-            "src/components/workspace/IssueDetail.jsx:1950"
+            "src/components/workspace/IssueDetail.jsx:1944",
+            "src/components/workspace/IssueDetail.jsx:1972",
+            "src/components/workspace/IssueDetail.jsx:1986"
           ]
         },
         "chat-composer-action": {
@@ -2706,7 +2706,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1775"
+            "src/components/workspace/IssueDetail.jsx:1802"
           ]
         }
       },
@@ -2724,7 +2724,7 @@
             "src/components/CreateTaskModal.jsx:424",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:1775"
+            "src/components/workspace/IssueDetail.jsx:1802"
           ]
         }
       },
@@ -2742,7 +2742,7 @@
             "src/components/CreateTaskModal.jsx:424",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:1775"
+            "src/components/workspace/IssueDetail.jsx:1802"
           ]
         }
       }
@@ -2785,12 +2785,12 @@
             "src/components/CreateTaskModal.jsx:507",
             "src/components/CreateTaskModal.jsx:516",
             "src/components/CreateTaskModal.jsx:524",
-            "src/components/workspace/IssueDetail.jsx:1504",
-            "src/components/workspace/IssueDetail.jsx:1597",
-            "src/components/workspace/IssueDetail.jsx:1609",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:1854",
-            "src/components/workspace/IssueDetail.jsx:1862",
+            "src/components/workspace/IssueDetail.jsx:1531",
+            "src/components/workspace/IssueDetail.jsx:1624",
+            "src/components/workspace/IssueDetail.jsx:1636",
+            "src/components/workspace/IssueDetail.jsx:1648",
+            "src/components/workspace/IssueDetail.jsx:1886",
+            "src/components/workspace/IssueDetail.jsx:1894",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2836,12 +2836,12 @@
             "src/components/CreateTaskModal.jsx:507",
             "src/components/CreateTaskModal.jsx:516",
             "src/components/CreateTaskModal.jsx:524",
-            "src/components/workspace/IssueDetail.jsx:1504",
-            "src/components/workspace/IssueDetail.jsx:1597",
-            "src/components/workspace/IssueDetail.jsx:1609",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:1854",
-            "src/components/workspace/IssueDetail.jsx:1862",
+            "src/components/workspace/IssueDetail.jsx:1531",
+            "src/components/workspace/IssueDetail.jsx:1624",
+            "src/components/workspace/IssueDetail.jsx:1636",
+            "src/components/workspace/IssueDetail.jsx:1648",
+            "src/components/workspace/IssueDetail.jsx:1886",
+            "src/components/workspace/IssueDetail.jsx:1894",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2932,12 +2932,12 @@
             "src/components/CreateTaskModal.jsx:507",
             "src/components/CreateTaskModal.jsx:516",
             "src/components/CreateTaskModal.jsx:524",
-            "src/components/workspace/IssueDetail.jsx:1504",
-            "src/components/workspace/IssueDetail.jsx:1597",
-            "src/components/workspace/IssueDetail.jsx:1609",
-            "src/components/workspace/IssueDetail.jsx:1621",
-            "src/components/workspace/IssueDetail.jsx:1854",
-            "src/components/workspace/IssueDetail.jsx:1862",
+            "src/components/workspace/IssueDetail.jsx:1531",
+            "src/components/workspace/IssueDetail.jsx:1624",
+            "src/components/workspace/IssueDetail.jsx:1636",
+            "src/components/workspace/IssueDetail.jsx:1648",
+            "src/components/workspace/IssueDetail.jsx:1886",
+            "src/components/workspace/IssueDetail.jsx:1894",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2953,7 +2953,7 @@
           ],
           "files": [
             "src/app/(app)/my/page.js:266",
-            "src/components/workspace/IssueDetail.jsx:1511"
+            "src/components/workspace/IssueDetail.jsx:1538"
           ]
         }
       },
@@ -2973,7 +2973,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1511"
+            "src/components/workspace/IssueDetail.jsx:1538"
           ]
         }
       },
@@ -2993,7 +2993,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1511"
+            "src/components/workspace/IssueDetail.jsx:1538"
           ]
         }
       }
@@ -3061,7 +3061,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1774"
+            "src/components/workspace/IssueDetail.jsx:1801"
           ]
         }
       },
@@ -3099,7 +3099,7 @@
             "src/app/(app)/page.js:901",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:1774"
+            "src/components/workspace/IssueDetail.jsx:1801"
           ]
         },
         "none": {
@@ -3160,7 +3160,7 @@
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:138",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:1774"
+            "src/components/workspace/IssueDetail.jsx:1801"
           ]
         },
         "chart-panel": {
@@ -3292,7 +3292,7 @@
           ],
           "files": [
             "src/components/workspace/IssueCard.jsx:317",
-            "src/components/workspace/IssueDetail.jsx:1468"
+            "src/components/workspace/IssueDetail.jsx:1495"
           ]
         },
         "surface": {
@@ -3329,7 +3329,7 @@
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:305",
             "src/components/workspace/IssueCard.jsx:317",
-            "src/components/workspace/IssueDetail.jsx:1468"
+            "src/components/workspace/IssueDetail.jsx:1495"
           ]
         },
         "(default)": {
@@ -3454,7 +3454,7 @@
             "src/components/workspace/AgileBoard.jsx:563",
             "src/components/workspace/AgileBoard.jsx:598",
             "src/components/workspace/IssueCard.jsx:390",
-            "src/components/workspace/IssueDetail.jsx:1468",
+            "src/components/workspace/IssueDetail.jsx:1495",
             "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         }
@@ -3502,7 +3502,7 @@
             "src/components/workspace/IssueCard.jsx:305",
             "src/components/workspace/IssueCard.jsx:317",
             "src/components/workspace/IssueCard.jsx:390",
-            "src/components/workspace/IssueDetail.jsx:1468",
+            "src/components/workspace/IssueDetail.jsx:1495",
             "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         },
@@ -3558,7 +3558,7 @@
             "src/components/workspace/AgileBoard.jsx:598",
             "src/components/workspace/IssueCard.jsx:305",
             "src/components/workspace/IssueCard.jsx:317",
-            "src/components/workspace/IssueDetail.jsx:1468",
+            "src/components/workspace/IssueDetail.jsx:1495",
             "src/components/workspace/UnifiedTimeline.jsx:230"
           ]
         },
@@ -3617,7 +3617,7 @@
             "src/components/workspace/AgileBoard.jsx:563",
             "src/components/workspace/AgileBoard.jsx:598",
             "src/components/workspace/IssueCard.jsx:390",
-            "src/components/workspace/IssueDetail.jsx:1468"
+            "src/components/workspace/IssueDetail.jsx:1495"
           ]
         },
         "medium": {
@@ -3778,7 +3778,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:683"
+            "src/components/workspace/IssueDetail.jsx:703"
           ]
         }
       },
@@ -3810,7 +3810,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:683"
+            "src/components/workspace/IssueDetail.jsx:703"
           ]
         }
       }
@@ -3845,7 +3845,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1700"
+            "src/components/workspace/IssueDetail.jsx:1727"
           ]
         }
       }
@@ -4149,7 +4149,7 @@
             "src/app/(app)/settings/page.js:2226",
             "src/app/(app)/settings/page.js:2303",
             "src/components/InviteMemberDialog.jsx:185",
-            "src/components/workspace/IssueDetail.jsx:1310",
+            "src/components/workspace/IssueDetail.jsx:1337",
             "src/components/workspace/QuickTeamTransferDialog.jsx:111"
           ]
         },
@@ -4161,8 +4161,8 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:459",
-            "src/components/workspace/IssueDetail.jsx:1334",
-            "src/components/workspace/IssueDetail.jsx:1364"
+            "src/components/workspace/IssueDetail.jsx:1361",
+            "src/components/workspace/IssueDetail.jsx:1391"
           ]
         }
       }
@@ -4530,7 +4530,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1563"
+            "src/components/workspace/IssueDetail.jsx:1590"
           ]
         }
       }
@@ -4609,7 +4609,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:406",
             "src/app/(app)/my/page.js:361",
             "src/components/InviteMemberDialog.jsx:134",
-            "src/components/workspace/IssueDetail.jsx:1240"
+            "src/components/workspace/IssueDetail.jsx:1267"
           ]
         },
         "underline": {
@@ -4654,7 +4654,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1240"
+            "src/components/workspace/IssueDetail.jsx:1267"
           ]
         }
       }
@@ -4714,7 +4714,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1720"
+            "src/components/workspace/IssueDetail.jsx:1747"
           ]
         }
       }
@@ -4784,7 +4784,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1230"
+            "src/components/workspace/IssueDetail.jsx:1257"
           ]
         }
       }
@@ -4797,10 +4797,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1717",
-            "src/components/workspace/IssueDetail.jsx:1733",
-            "src/components/workspace/IssueDetail.jsx:1812",
-            "src/components/workspace/IssueDetail.jsx:192"
+            "src/components/workspace/IssueDetail.jsx:1744",
+            "src/components/workspace/IssueDetail.jsx:1760",
+            "src/components/workspace/IssueDetail.jsx:1844",
+            "src/components/workspace/IssueDetail.jsx:212"
           ]
         },
         "(default)": {
@@ -4809,7 +4809,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1667"
+            "src/components/workspace/IssueDetail.jsx:1694"
           ]
         }
       }
@@ -4847,7 +4847,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1403"
+            "src/components/workspace/IssueDetail.jsx:1430"
           ]
         },
         "(default)": {
@@ -4856,7 +4856,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1548",
+            "src/components/workspace/IssueDetail.jsx:1575",
             "src/components/workspace/UnifiedTimeline.jsx:1415"
           ]
         }
@@ -4868,7 +4868,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1403"
+            "src/components/workspace/IssueDetail.jsx:1430"
           ]
         },
         "(default)": {
@@ -4877,7 +4877,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1548",
+            "src/components/workspace/IssueDetail.jsx:1575",
             "src/components/workspace/UnifiedTimeline.jsx:1415"
           ]
         }

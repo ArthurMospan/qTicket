@@ -90,11 +90,31 @@ import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
 
 const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || '';
 
-// qTicket keeps the inherited task records and migration readers, but its
-// incident screen is a support workspace, not a second project-management
-// screen. These readers stay dormant until their old data paths are removed in
-// a reviewed migration.
-const SHOW_INHERITED_TASK_PLANNING = false;
+// Two inherited task-manager surfaces stay dormant, and they are two constants
+// because they are two decisions. One constant used to hold both of them *and*
+// the links between requests, which is how a supported qTicket feature came to
+// be switched off by a decision that was never about it: nobody flipping
+// «hierarchy stays gone» to `false` meant to say «and no support agent may ever
+// mark a duplicate».
+//
+// The hierarchy — «Основне звернення», «Дочірні звернення», and the parent
+// picker and «Додати дочірнє звернення» that create them. It does not come
+// back: splitting a customer's request into child records means the customer
+// watches one record while the work happens in another.
+const SHOW_INHERITED_TASK_HIERARCHY = false;
+
+// Duplicating a record and copying an AI prompt about it. Neither is hierarchy
+// and neither is a link — they arrived with the inherited task screen and no
+// support workflow has asked for them — so they wait under their own name
+// instead of borrowing somebody else's.
+const SHOW_INHERITED_TASK_SHORTCUTS = false;
+
+// Links between requests («Звʼязки») are deliberately absent from the two lists
+// above. They are a qTicket feature and they ship: a duplicate is the single
+// most common relation on a support desk, and until now the product had no way
+// to record one. So their gate is who is looking rather than a constant —
+// `internalViewer` fetches them, `!clientViewer` draws them, `canEditIssue`
+// changes them — and a customer sees no section, no count and no control.
 
 // The same wording Settings uses when you walk away from an unsaved field.
 const UNSAVED_EDIT_PROMPT = {
@@ -359,7 +379,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     refresh: refreshLinks,
     addLink,
     removeLink,
-  } = useIssueLinks(SHOW_INHERITED_TASK_PLANNING && internalViewer ? issueId : null);
+  } = useIssueLinks(internalViewer ? issueId : null);
 
   const {
     types: rawTypes, priorities: rawPriorities, statuses: STATUSES, labels: availableLabels = [], closedStatusIds
@@ -773,12 +793,9 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // reading there is always the description or its placeholder; while writing
   // the padded half of the panel is drawn only when something is actually in it,
   // so an empty task edits as the editor alone with no grey strip under it.
-  const hasSecondaryBlocks = issueLabels.length > 0 || (
-    SHOW_INHERITED_TASK_PLANNING && (
-      childIssues.length > 0 || showSubInput
-      || currentIssueLinks.length > 0 || showLinkInput
-    )
-  );
+  const hasSecondaryBlocks = issueLabels.length > 0
+    || (SHOW_INHERITED_TASK_HIERARCHY && (childIssues.length > 0 || showSubInput))
+    || (!clientViewer && (currentIssueLinks.length > 0 || showLinkInput));
   const hasPanelBody = !isEditing || visibleAttachments.length > 0 || hasSecondaryBlocks;
 
   const actor          = { userId: currentUser?.id || currentUser?.uid, userName: currentUser?.name };
@@ -837,7 +854,17 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         closedStatusIds,
       });
       if (blockers.dependencies.length > 0) {
-        showToast(`Звернення ще блокують: ${blockers.dependencies.length}`, 'error');
+        // Named, not counted. `useIssues.moveIssue` has always said which
+        // requests are in the way; this screen said «2» and left the agent to
+        // find them. That was survivable while nothing could create a blocking
+        // link — the only ones left were imported — and stops being survivable
+        // the moment «Блокує» is back in the picker.
+        const names = blockers.dependencies
+          .slice(0, 2)
+          .map(blocker => blocker.issueKey || blocker.title)
+          .filter(Boolean)
+          .join(', ');
+        showToast(`Звернення ще блокують: ${names || blockers.dependencies.length}`, 'error');
         return;
       }
     }
@@ -1130,10 +1157,10 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             dropdownClassName="w-[210px]"
             items={[
               { label: 'Копіювати посилання', icon: Copy, onClick: copyIssueLink },
-              ...(SHOW_INHERITED_TASK_PLANNING && !isArchived && canEditIssue
+              ...(SHOW_INHERITED_TASK_SHORTCUTS && !isArchived && canEditIssue
                 ? [{ label: 'Дублювати', icon: CopyPlus, onClick: handleDuplicate }]
                 : []),
-              ...(SHOW_INHERITED_TASK_PLANNING && canEditIssue
+              ...(SHOW_INHERITED_TASK_SHORTCUTS && canEditIssue
                 ? [{ label: 'Скопіювати AI-промпт', icon: Sparkles, onClick: copyAiPrompt }]
                 : []),
               // Only offered when there is somebody else's activity to un-see.
@@ -1251,7 +1278,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         header={(
              <div className="flex w-full flex-col gap-[10px] pb-[12px] pt-[12px] sm:flex-row sm:items-start sm:justify-between sm:gap-[16px]">
                <div className="flex flex-col gap-[4px] flex-1 min-w-0">
-            {SHOW_INHERITED_TASK_PLANNING && !clientViewer && parentIssueId && (
+            {SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && parentIssueId && (
               <div className="mb-1 flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted">
                 {/* The same arrow the board card and the list row draw for this
                     relation. This line used to be `Layers`, so the one fact
@@ -1616,7 +1643,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
                           />
                         </div>
-                        {SHOW_INHERITED_TASK_PLANNING && <div className="flex flex-col gap-1.5">
+                        {SHOW_INHERITED_TASK_HIERARCHY && <div className="flex flex-col gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Основне звернення</span>
                           <Select
                             disabled={isArchived || childIssues.length > 0 || parentSaving}
@@ -1729,7 +1756,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 )}
 
               {/* REAL CHILD ISSUES */}
-              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (childIssues.length > 0 || showSubInput) && (
+              {SHOW_INHERITED_TASK_HIERARCHY && !clientViewer && (childIssues.length > 0 || showSubInput) && (
                 <DetailSection
                   density="group"
                   icon={TaskIcon}
@@ -1807,8 +1834,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 </DetailSection>
               )}
 
-              {/* ISSUE LINKS */}
-              {SHOW_INHERITED_TASK_PLANNING && !clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
+              {/* ISSUE LINKS — internal support only, by role rather than by a
+                  feature constant. A customer's copy of this screen has no
+                  section here, no «Звʼязки» count and no way to make or break
+                  one: `useIssueLinks` above is never even subscribed for them,
+                  so `currentIssueLinks` is empty and this whole branch is
+                  unreachable twice over. */}
+              {!clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
               <DetailSection density="group" icon={Link2} title="Зв’язки" count={currentIssueLinks.length} className="pt-2">
               <div className="flex flex-col gap-[6px]">
                 {currentIssueLinks.map(({ link, perspective }) => {
@@ -1885,7 +1917,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           if (!linkTargetId || linkSaving) return;
                           try {
                             setLinkSaving(true);
-                            await addLink(issueId, linkTargetId, linkRelation, currentUser?.uid || currentUser?.id);
+                            await addLink(issueId, linkTargetId, linkRelation);
                             showToast('Звʼязок додано');
                             setShowLinkInput(false);
                             setLinkTargetId('');
@@ -1937,7 +1969,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         };
                       })}
                     />
-                    {SHOW_INHERITED_TASK_PLANNING && !parentIssueId && <Button
+                    {SHOW_INHERITED_TASK_HIERARCHY && !parentIssueId && <Button
                       aria-label="Додати дочірнє звернення"
                       style="secondary"
                       size="sm"
@@ -1947,7 +1979,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     >
                       <span className="sm:hidden">Дочірнє</span><span className="hidden sm:inline">Додати дочірнє звернення</span>
                     </Button>}
-                    {SHOW_INHERITED_TASK_PLANNING && <Button
+                    {/* `canEditIssue` above already answers «not a client», and
+                        this says it a second time in the words the section
+                        header uses. A control that creates internal data is
+                        hidden by the role, never by the permission alone. */}
+                    {!clientViewer && <Button
                       aria-label="Додати зв’язок"
                       style="secondary"
                       size="sm"
