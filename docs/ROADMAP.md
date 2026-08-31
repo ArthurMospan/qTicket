@@ -344,6 +344,30 @@ Completed product slice on 2026-08-29:
   carries the one sentence the deleted section had and this screen did not —
   where a seat comes from.
 
+### Workspaces the product refuses to open (2026-08-31)
+
+A seat in `orgMemberships` is what draws an organization in the switcher, and
+nothing ever took one back out. Provisioning stopped creating seats for QuickTeam
+tenants that never bought qTicket — but that covered only the seats provisioning
+itself had made. A dry run of `migrate:noncustomer-orgs` against `qticket-qt`
+removed **nothing** and reported two organizations under `manualReview` with the
+reason `legacy-standalone`: they predate the QuickTeam contract, carry no
+`quickTeam.sourceOrganizationId` at all, and were therefore never in that
+migration's scope. Their owners kept being offered a door that opens onto
+«організація не підключена через QuickTeam», because access requires both a
+source organization and an active entitlement.
+
+`buildOrganizationList` now drops an organization whose document proves the
+product cannot open it, and the active-organization snapshot listener applies the
+same rule before appending. Nothing is deleted and no seat is touched — the
+organization simply stops being offered as somewhere to go. The one case it must
+never catch is a `pending` entry: a document that did not come back is a short
+read, and dropping a workspace on that evidence is the failure `buildOrganizationList`
+was written to prevent in the first place. Both halves have a test.
+
+The two legacy organizations stay in the database, with their content, for a
+human to decide about. They are not a migration's business.
+
 ### The customer's own side of a request (2026-08-31)
 
 `assigneeIds` is support's routing and a client never sees it. `clientAssigneeIds`

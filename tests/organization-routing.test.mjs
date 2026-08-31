@@ -145,6 +145,59 @@ test('an organization list published late cannot overwrite a newer one', async (
   assert.match(context, /collection\(db, 'orgMemberships'\),\s*\n\s*where\('userId', '==', uid\)/);
 });
 
+// Every organization qTicket can actually open is a QuickTeam tenant with a live
+// entitlement — `firestore.rules` and `authorizeOrgRequest` both require both
+// halves — so a fixture standing for a real workspace has to carry them.
+const ACTIVE_QUICKTEAM = Object.freeze({
+  sourceOrganizationId: 'quickteam-org-1',
+  entitlement: 'active',
+});
+
+// A seat is what draws an organization in the switcher, and nothing ever took
+// one back out. Provisioning stopped creating seats for QuickTeam tenants that
+// never bought qTicket, but that fixed only the seats it made: the standalone
+// organizations from before the QuickTeam contract have no source id at all,
+// were never in scope for it, and their owners kept being offered a door that
+// opens onto «організація не підключена через QuickTeam». Nothing is deleted
+// here — the seat stays exactly where it is. It simply stops being offered.
+test('a workspace the product refuses to open is not offered as one', () => {
+  const memberships = [
+    { orgId: 'org-live', role: 'owner' },
+    { orgId: 'org-standalone', role: 'owner' },
+    { orgId: 'org-suspended', role: 'member' },
+  ];
+
+  const { organizations, roles } = buildOrganizationList(memberships, [
+    { id: 'org-live', name: 'OneB', quickTeam: ACTIVE_QUICKTEAM },
+    // Older than the QuickTeam contract: no source organization at all.
+    { id: 'org-standalone', name: 'Arthur.mospan Team' },
+    {
+      id: 'org-suspended',
+      name: 'Колишній клієнт',
+      quickTeam: { sourceOrganizationId: 'quickteam-org-2', entitlement: 'inactive' },
+    },
+  ]);
+
+  assert.deepEqual(organizations.map(organization => organization.id), ['org-live']);
+  // The role goes with the entry. A switcher that prints «власник» beside a
+  // workspace it is not showing has kept half of a fact.
+  assert.deepEqual(roles, { 'org-live': 'owner' });
+});
+
+// The one thing this filter must never do. A document that did not come back is
+// a short read — `getDocs` answers from a cache that never held it whenever the
+// SDK believes it is offline — and dropping an entry on that evidence would
+// delete a live workspace from the switcher and leave it deleted.
+test('a short read is never mistaken for a workspace nobody may open', () => {
+  const { organizations } = buildOrganizationList(
+    [{ orgId: 'org-one', role: 'owner' }],
+    [],
+  );
+
+  assert.deepEqual(organizations.map(organization => organization.id), ['org-one']);
+  assert.equal(organizations[0].pending, true);
+});
+
 // Ordering was only half of it. The list was assembled out of the organization
 // documents, so however the reads were sequenced, a read that came back short
 // deleted a workspace — and `getDocs` comes back short without failing whenever
@@ -160,7 +213,7 @@ test('a workspace survives an organization document that did not come back', () 
 
   const { organizations, roles } = buildOrganizationList(
     memberships,
-    [{ id: 'org-two', name: 'Друга' }],
+    [{ id: 'org-two', name: 'Друга', quickTeam: ACTIVE_QUICKTEAM }],
   );
 
   assert.deepEqual(organizations.map(organization => organization.id), ['org-one', 'org-two']);
@@ -173,7 +226,7 @@ test('a workspace survives an organization document that did not come back', () 
 
 test('an entry whose document is missing keeps the name it already had', () => {
   const memberships = [{ orgId: 'org-one', role: 'owner' }];
-  const known = [{ id: 'org-one', name: 'OneB', logo: 'https://example.test/logo.png' }];
+  const known = [{ id: 'org-one', name: 'OneB', logo: 'https://example.test/logo.png', quickTeam: ACTIVE_QUICKTEAM }];
 
   const { organizations } = buildOrganizationList(memberships, [], known);
 
@@ -182,7 +235,7 @@ test('an entry whose document is missing keeps the name it already had', () => {
   assert.notEqual(organizations[0].pending, true);
 
   // A document that did come back is the fresher of the two.
-  const refreshed = buildOrganizationList(memberships, [{ id: 'org-one', name: 'OneB Ltd' }], known);
+  const refreshed = buildOrganizationList(memberships, [{ id: 'org-one', name: 'OneB Ltd', quickTeam: ACTIVE_QUICKTEAM }], known);
   assert.equal(refreshed.organizations[0].name, 'OneB Ltd');
 });
 
@@ -194,7 +247,10 @@ test('a membership names its workspace once, whatever the snapshot holds', () =>
       { role: 'member' },
       null,
     ],
-    [{ id: 'org-one', name: 'OneB' }, { id: 'org-ghost', name: 'Не наша' }],
+    [
+      { id: 'org-one', name: 'OneB', quickTeam: ACTIVE_QUICKTEAM },
+      { id: 'org-ghost', name: 'Не наша', quickTeam: ACTIVE_QUICKTEAM },
+    ],
   );
 
   // Deduplicated, and an organization no membership names is not a workspace of

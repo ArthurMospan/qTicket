@@ -1,3 +1,5 @@
+import { hasActiveQuickTeamEntitlement } from './quickTeamManaged.mjs';
+
 // src/lib/utils/organizationList.mjs
 // The workspaces a person belongs to, assembled from their memberships.
 
@@ -90,6 +92,25 @@ export function parseOrganizationDirectory(payload) {
  * is marked `pending`, so the workspace stays reachable and the caller can go
  * back for the document rather than pretend the workspace is gone.
  *
+ * What *is* dropped is an organization the product refuses to open. Access needs
+ * a QuickTeam source organization and an active entitlement — `firestore.rules`
+ * and `authorizeOrgRequest` both require them — so a seat in one of these buys
+ * nothing: every read inside is refused and the screen says the organization is
+ * not connected through QuickTeam. A workspace switcher that offers a door onto
+ * that is not a switcher, it is a list of disappointments.
+ *
+ * Provisioning stopped creating such seats, but that only covered the ones it
+ * made. The older standalone organizations from before the QuickTeam contract
+ * have no source id at all and were never in scope for it, so their owners kept
+ * seeing them. This is the read side of the same rule, and it holds whatever the
+ * reason: nothing is deleted, and a seat somebody still has stays exactly where
+ * it is — it simply stops being offered as somewhere to go.
+ *
+ * Never applied to a `pending` entry. A document that did not come back is a
+ * short read, and dropping an entry on the strength of one would delete a live
+ * workspace from the switcher and leave it deleted — which is the very failure
+ * the paragraph above exists to prevent.
+ *
  * @param {Array<{orgId?: string, role?: string}>} memberships the `orgMemberships` documents' data, in snapshot order
  * @param {Array<{id?: string}>} organizationDocuments whatever the organizations read returned
  * @param {Array<{id?: string}>} knownOrganizations the list published last, so a name survives a short read
@@ -117,6 +138,10 @@ export function buildOrganizationList(
     seen.add(orgId);
     if (membership.role) roles[orgId] = membership.role;
     const known = byId.get(orgId);
+    if (known && !hasActiveQuickTeamEntitlement(known)) {
+      delete roles[orgId];
+      continue;
+    }
     organizations.push(known ? { ...known, id: orgId } : { id: orgId, pending: true });
   }
 
