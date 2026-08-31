@@ -37,15 +37,26 @@ const CONTENT_SECURITY_POLICY = [
   "object-src 'none'",
   "frame-ancestors 'self'",
   "form-action 'self' https://account.oneb.app https://oneb.app",
-  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
+  // `account.oneb.app` serves the profile photo of anyone who signed in through
+  // OneB, and it was missing — so enforcing this policy as written would have
+  // blanked those avatars across the product. Found the way this header is
+  // meant to find things: a real browser on production reported it on
+  // 2026-09-01, which is the whole reason it ships Report-Only first.
+  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://account.oneb.app",
   "media-src 'self' blob: https://res.cloudinary.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // BuggyBag is ours and we embed it ourselves — see the script tag in
+  // src/app/layout.js. Left out of this list, enforcing the policy would kill
+  // the widget people report bugs with, which is a bad thing to discover from
+  // the absence of bug reports.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://buggy-bag.vercel.app",
   "worker-src 'self' blob:",
   "frame-src 'self' https://view.officeapps.live.com",
   [
     "connect-src 'self'",
+    // The same widget, which pings its own portal.
+    'https://buggy-bag.vercel.app',
     'https://*.googleapis.com',
     'https://*.firebaseio.com',
     'wss://*.firebaseio.com',
