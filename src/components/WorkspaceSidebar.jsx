@@ -215,16 +215,24 @@ export default function WorkspaceSidebar() {
   }, [projects]);
   const topNav = clientViewer
     ? [
+        // The same first entry the internal rail has, leading to the same
+        // address. `/overview` knows who is looking, so a customer's front
+        // screen is the product's front screen and not a second one built for
+        // them — see src/app/(app)/overview/page.js.
+        { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
         { href: clientSpaceHref, icon: Folder, label: 'Мої звернення', exact: clientSpaceHref === '/' },
-        ...(orgRole === 'client_admin'
-          ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
-          : []),
+        // «Співробітники» stood here for a `client_admin` and pointed at
+        // `/settings?section=team` — an address the settings rail names again
+        // on the screen it opens, so one destination was named twice on one
+        // screen. The client roster lives at `/team` now.
+        //
         // The same destination the internal rail ends with, under the same
         // name. «Мій профіль» was a third word for one screen.
         { href: '/settings', icon: Settings, label: 'Налаштування', section: 'profile' },
       ]
     : internalNav;
-  const homeHref = clientViewer ? clientSpaceHref : '/overview';
+  // One front door for both roles now that `/overview` serves both.
+  const homeHref = '/overview';
   // Staff arrive through a signed QuickTeam launch, which replaces the entry it
   // came from — so the browser's own «back» is not a way back. The rail carries
   // the return instead. Only for an internal seat of a QuickTeam-provisioned

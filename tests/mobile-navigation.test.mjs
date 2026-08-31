@@ -55,6 +55,35 @@ test('a screen ends its own scroller with the footprint the shell stopped reserv
   }
 });
 
+// The bar and the rail are two navigations of one product, so they answer the
+// same questions the same way: where the front screen is, and how many names a
+// destination gets.
+test('the bar offers a client the same destinations the rail does', async () => {
+  const nav = await read('../src/components/MobileNav.jsx');
+  const sidebar = await read('../src/components/WorkspaceSidebar.jsx');
+
+  const clientTabs = nav.slice(nav.indexOf('const visibleTabs = clientViewer'), nav.indexOf(': TABS;'));
+  assert.deepEqual(
+    [...clientTabs.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
+    ['Огляд', 'Звернення'],
+  );
+  // `/overview` serves both audiences, so both navigations lead there and the
+  // phone no longer opens on a list where the desktop opens on a summary.
+  assert.match(clientTabs, /href: '\/overview'/);
+  assert.match(sidebar, /href: '\/overview', icon: LayoutDashboard, label: 'Огляд'/);
+
+  // «Співробітники» pointed at `/settings?section=team`, which the settings
+  // rail names again on the screen it opens: one destination, two names, one
+  // screen. It is gone from both navigations.
+  for (const source of [nav, sidebar]) {
+    assert.doesNotMatch(source, /label: 'Співробітники'/);
+    assert.doesNotMatch(source, /'\/settings\?section=team'/);
+  }
+  // And `/settings` carries one name across both, not «Мій профіль» here and
+  // «Налаштування» there.
+  assert.doesNotMatch(nav, /label: 'Мій профіль'/);
+});
+
 test('the last of the page dissolves under the bar instead of stopping at it', async () => {
   const css = await read('../src/app/globals.css');
   const nav = await read('../src/components/MobileNav.jsx');

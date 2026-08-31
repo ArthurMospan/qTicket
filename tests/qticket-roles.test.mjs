@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
 import { can, invitedRoleFor, rolesFor } from '../src/lib/utils/can.js';
-import { isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
+import { RESERVED_SEGMENTS, isClientPortalRoute } from '../src/lib/utils/clientPortalRoutes.mjs';
 import { INCIDENT_TERMS_TABLE } from '../src/lib/content/incidentTerms.mjs';
 
 const read = relativePath => readFile(new URL(relativePath, import.meta.url), 'utf8');
@@ -99,7 +99,13 @@ test('клієнт і підтримка бачать один екран, і з
   // There is no second screen for a client any more. `/` is a door into their
   // own space — the same `[projectId]` route support opens.
   assert.doesNotMatch(root, /ClientIncidentPortal/);
-  assert.match(root, /router\.replace\(`\/\$\{clientProject\.id\}\$\{suffix\}`\)/);
+  // `/` веде клієнта на спільний «Огляд». Виняток один і він змістовний:
+  // `?new=1` відкриває композер, а композер живе у просторі, тож цей перехід
+  // іде прямо туди — інакше запит, який читач уже попросив, просто зникає.
+  assert.match(
+    root,
+    /router\.replace\(searchParams\?\.get\('new'\) === '1' \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
+  );
   assert.doesNotMatch(board, /router\.replace\('\/'\)/);
   // One board, one list, one set of columns; the role decides what is inside.
   assert.match(board, /readOnly=\{clientViewer\}/);
@@ -119,9 +125,23 @@ test('клієнт і підтримка бачать один екран, і з
   assert.match(board, /clientAdminMode/);
   assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
   assert.doesNotMatch(board, /useSprints|AnalyticsTab|QtPlusProjectTab/);
-  // The rail is the same component too, with three destinations for a client.
+  // The rail is the same component too, with three destinations for a client:
+  // «Огляд» · «Мої звернення» · «Налаштування», in that order.
   assert.match(sidebar, /const topNav = clientViewer/);
   assert.match(sidebar, /label: 'Мої звернення'/);
+  const clientRail = sidebar.slice(
+    sidebar.indexOf('const topNav = clientViewer'),
+    sidebar.indexOf(': internalNav;'),
+  );
+  assert.deepEqual(
+    [...clientRail.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
+    ['Огляд', 'Мої звернення', 'Налаштування'],
+  );
+  // «Співробітники» вело на `/settings?section=team` — ту саму адресу, яку
+  // рейка налаштувань називає ще раз на екрані, що відкривається. Один
+  // напрямок, названий двічі на одному екрані. Список — на `/team`.
+  assert.doesNotMatch(sidebar, /label: 'Співробітники'/);
+  assert.doesNotMatch(sidebar, /'\/settings\?section=team'/);
   // The tenant's mark never flips to the vendor's.
   assert.doesNotMatch(sidebar, /rotateY\(180deg\)/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
@@ -292,6 +312,63 @@ test('клієнтський глобальний пошук не відкрив
   assert.match(paletteHost, /clientViewer[\s\S]{0,80}\? EMPTY_MATCHES/);
 });
 
+// «Екран, до якого доходять обидві аудиторії, — це один екран, який знає, хто
+// дивиться». Раніше «Огляд» був екраном підтримки: клієнта з нього
+// перекидало, тож перший екран продукту мала лише половина його читачів.
+test('«Огляд» — один екран, який знає, хто дивиться', async () => {
+  const overview = await read('../src/app/(app)/overview/page.js');
+
+  // Ані охоронця, ані порожнього рендера в очікуванні редиректу.
+  assert.doesNotMatch(overview, /if \(orgRole && clientViewer\) router\.replace\('\/'\);/);
+  assert.doesNotMatch(overview, /if \(clientViewer\) return null;/);
+  // Один компонент, дві гілки — не два екрани.
+  assert.match(overview, /\) : clientViewer \? \(/);
+
+  const clientHalf = overview.slice(
+    overview.indexOf(') : clientViewer ? ('),
+    overview.indexOf('\n        ) : (\n', overview.indexOf(') : clientViewer ? (')),
+  );
+  assert.ok(clientHalf.length > 400, 'клієнтська гілка порожня — зріз узято не там');
+
+  // Три плитки, і саме ці три.
+  assert.deepEqual(
+    [...clientHalf.matchAll(/label="([^"]+)"/g)].map(match => match[1]),
+    ['Відкриті', 'Чекають на вас', 'Вирішені'],
+  );
+  // «Чекають на вас» рахує `incidentQueueMetrics`, а не сама сторінка: плитка
+  // клієнта і плитка підтримки — один факт із двох крісел.
+  assert.match(clientHalf, /value=\{metrics\.waitingOnClient\}/);
+  assert.doesNotMatch(clientHalf, /lastCommentAuthorId/);
+
+  // Панель — кітовий `TaskRow` без колонки відповідального, а не зібраний
+  // вручну рядок із `ListRow` + `TaskIdentity`.
+  assert.match(overview, /import TaskRow from '@\/components\/ui\/TaskManagement\/TaskRow';/);
+  assert.match(clientHalf, /<TaskRow/);
+  assert.match(clientHalf, /showAssignee=\{false\}/);
+  assert.doesNotMatch(clientHalf, /<ListRow|<TaskIdentity/);
+  // Обгортка — `Surface preset="panel"` з `DetailSection density="panel"`.
+  assert.match(clientHalf, /<Surface preset="panel"[\s\S]{0,120}<DetailSection\s+density="panel"/);
+  assert.match(clientHalf, /title="Останні оновлення"/);
+  assert.match(clientHalf, /description="[^"]+"/);
+
+  // Звернення відкриває тільки клієнт, тож кнопка є в його шапці — і навмисно
+  // не існує на боці підтримки.
+  assert.match(overview, /actions=\{clientViewer && clientSpace \? \(/);
+  assert.match(overview, /\{INCIDENT_TERMS_TABLE\.composerSubmit\}/);
+  assert.equal(INCIDENT_TERMS_TABLE.composerSubmit, 'Створити звернення');
+
+  // Жодного відповідального, жодної панелі клієнтів, жодної дати вирішення:
+  // дата, яку читає клієнт, — це обіцяний строк, а qTicket його не обіцяє.
+  assert.doesNotMatch(clientHalf, /assigneeIdsOf|UserAvatar|memberById/);
+  assert.doesNotMatch(clientHalf, /projectSummary|'\/clients'/);
+  assert.doesNotMatch(clientHalf, /formatUpdatedAt|dueDate|Оновлено /);
+
+  // Слово підтримки для місця, якого клієнт не обіймає, зникло з екрана, який
+  // вони тепер ділять.
+  assert.doesNotMatch(overview, /виконавц/i);
+  assert.match(overview, /Без відповідального/);
+});
+
 test('qTicket shell не повертає таймер QuickTeam у desktop або mobile навігацію', async () => {
   const [sidebar, mobile] = await Promise.all([
     read('../src/components/WorkspaceSidebar.jsx'),
@@ -414,10 +491,13 @@ test('внутрішня «Безпека» лишає сеанси qTicket і �
 });
 
 test('клієнтська сесія не може відкрити внутрішній workspace прямим URL', async () => {
-  for (const allowed of ['/', '/settings', '/settings/profile', '/client-a/issue/INC-12']) {
+  // `/overview` — спільний екран, який знає, хто дивиться, і саме туди веде
+  // клієнта вхідні двері `/`. Якщо продукт когось кудись відправляє, межа має
+  // це визнавати, інакше сторінка кидає вперед, а layout — назад.
+  for (const allowed of ['/', '/overview', '/settings', '/settings/profile', '/client-a/issue/INC-12']) {
     assert.equal(isClientPortalRoute(allowed), true, `${allowed} має лишатися клієнтським маршрутом`);
   }
-  for (const denied of ['/overview', '/my', '/team', '/clients', '/analytics', '/chat']) {
+  for (const denied of ['/my', '/team', '/clients', '/analytics', '/chat']) {
     assert.equal(isClientPortalRoute(denied), false, `${denied} не має відкриватися клієнту`);
   }
 
@@ -428,7 +508,7 @@ test('клієнтська сесія не може відкрити внутр�
   assert.equal(isClientPortalRoute('/team', ['client-a'], 'client_member'), false);
 
   // Своїм простором клієнт користується, чужим — ні, і форма адреси цього не
-  // вирішує: `/overview` виглядає точно так само. Тому межа звіряє id, а не
+  // вирішує: `/my` виглядає точно так само. Тому межа звіряє id, а не
   // візерунок. Портал веде клієнта саме сюди — поки цього рядка не було,
   // сторінка кидала його в `/{projectId}`, layout кидав назад, і клієнт не міг
   // відкрити qTicket взагалі.
@@ -436,7 +516,10 @@ test('клієнтська сесія не може відкрити внутр�
   assert.equal(isClientPortalRoute('/client-b', ['client-a']), false, 'чужий простір — ні');
   assert.equal(isClientPortalRoute('/client-a'), false, 'без списку просторів нічого не відкривається');
   // Навіть якби простір назвали як екран, екран лишається екраном.
-  assert.equal(isClientPortalRoute('/overview', ['overview']), false, 'зарезервована назва не стає простором');
+  assert.equal(isClientPortalRoute('/my', ['my']), false, 'зарезервована назва не стає простором');
+  // Те саме для `/overview`: він відкривається як екран, а не як чийсь простір,
+  // тому лишається серед зарезервованих назв.
+  assert.ok(RESERVED_SEGMENTS.includes('overview'), '«overview» лишається назвою екрана');
 
   const layout = await read('../src/app/(app)/layout.js');
   assert.match(layout, /!isClientPortalRoute\(pathname, clientProjectIds, orgRole\)/);

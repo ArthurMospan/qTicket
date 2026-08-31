@@ -34,6 +34,15 @@ export const RESERVED_SEGMENTS = Object.freeze([
 export function isClientPortalRoute(pathname = '', clientProjectIds = [], role = null) {
   const path = String(pathname || '').trim();
   if (path === '/') return true;
+  // «Огляд» is one screen that knows who is looking, so it is the client's
+  // front screen as much as support's — and the front door at `/` sends them
+  // here. If the product sends somebody somewhere, this list has to say so:
+  // the paragraph above is the record of what happens when it does not.
+  //
+  // Admitted by exact name only. `/overview` stays a RESERVED_SEGMENT, so a
+  // client space that happens to be called `overview` is still refused as a
+  // space — the address opens the screen, never somebody's queue.
+  if (path === '/overview' || path === '/overview/') return true;
   if (path === '/settings' || path.startsWith('/settings/')) return true;
   // The roster is one screen that knows who is looking, so the boundary in
   // front of it is where the two audiences are told apart. A `client_admin`

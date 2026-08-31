@@ -642,18 +642,25 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     router.replace(searchParams?.get('new') === '1' ? '/clients?new=1' : '/overview');
   }, [clientViewer, clientsRoute, orgRole, router, searchParams]);
 
-  // A client has exactly one space, so `/` is not a screen for them — it is a
-  // door into it. There used to be a second, bespoke screen behind this branch:
-  // its own list, its own board, its own words for the same records. The client
-  // opens the space itself now, the same `[projectId]` route support opens, and
+  // `/` is not a screen for anybody — it is a door, and both roles now walk
+  // through it to the same address. There used to be a second, bespoke screen
+  // behind this branch: its own list, its own board, its own words for the same
+  // records. The client opens the shared `[projectId]` route support opens, and
   // the role decides what is inside it rather than which one is rendered.
   //
-  // The query string travels: `?new=1` from Ctrl+K must still open the composer
-  // once the space has painted.
+  // `/overview` is the same story one level up: it was support's screen and a
+  // client was bounced off it, so the product's front screen was something only
+  // half its users had. It knows who is looking now, so a client lands there
+  // too — the counters they are entitled to, and the button to open a request.
+  //
+  // The query string travels, and it decides the destination: `?new=1` from
+  // Ctrl+K opens the composer, which lives in the space, so that one hop goes
+  // straight to the space and the overview is skipped. Sending it to the
+  // overview would have opened a screen with no composer on it and dropped the
+  // request the reader had already asked for.
   useEffect(() => {
     if (!clientViewer || clientsRoute || !clientProject) return;
-    const suffix = searchParams?.get('new') === '1' ? '?new=1' : '';
-    router.replace(`/${clientProject.id}${suffix}`);
+    router.replace(searchParams?.get('new') === '1' ? `/${clientProject.id}?new=1` : '/overview');
   }, [clientProject, clientViewer, clientsRoute, router, searchParams]);
 
   // This screen no longer reads tasks at all.
@@ -805,7 +812,7 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
     if (projectsLoading || clientProject) {
       return (
         <div className="flex min-h-[320px] flex-1 items-center justify-center" role="status" aria-busy="true">
-          <LoadingSpinner size="md" label="Відкриваємо ваш простір…" />
+          <LoadingSpinner size="md" label="Завантажуємо ваші звернення…" />
         </div>
       );
     }

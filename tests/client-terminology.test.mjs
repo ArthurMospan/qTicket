@@ -194,14 +194,16 @@ const posix = file => relative(ROOT, file).split(sep).join('/');
 // seat a client cannot hold, and it is legal here — but only because a client
 // who pastes the address is sent home before the screen paints, which is the
 // line asserted below. An entry without that line is a claim, not an exemption.
+//
+// `/overview` was on this list and has come off it. It is one screen that knows
+// who is looking now — a client lands there from `/` and reads their own three
+// tiles — so it is the client's file, and the word for support's seat had to go
+// with the exemption. It says «Без відповідального», which is what the picker,
+// the composer and the bulk bar already say.
 const STAFF_ONLY = [
   {
     file: 'src/app/(app)/my/page.js',
     reason: 'The cross-client support queue. A client has one space and no queue across them.',
-  },
-  {
-    file: 'src/app/(app)/overview/page.js',
-    reason: 'The support overview: counters about what the team owes, over every client at once.',
   },
 ];
 
@@ -238,8 +240,8 @@ test('a screen claiming to be support-only sends a client away before it paints'
   // The exemption list is the part of the check that can rot, so it is not
   // taken on trust: a staff screen earns its entry by redirecting, and by
   // rendering nothing at all while the redirect is in flight. Both lines are
-  // the ones `/my` and `/overview` actually carry.
-  assert.equal(STAFF_ONLY.length, 2);
+  // the ones `/my` actually carries.
+  assert.equal(STAFF_ONLY.length, 1);
   for (const entry of STAFF_ONLY) {
     const source = readFileSync(join(ROOT, entry.file), 'utf8');
     assert.ok(entry.reason.length >= 40, `${entry.file} needs a reason, not a note`);

@@ -350,7 +350,14 @@ test('every action the palette offers lands somewhere that answers it', async ()
   // the button asks `create:project`, the address asked nothing, and the empty
   // state on the overview handed that address to every internal role.
   assert.match(clients, /if \(can\(orgRole, 'create:project'\)\) queueMicrotask\(\(\) => setShowNewProject\(true\)\);/);
-  assert.match(clients, /searchParams\?\.get\('new'\) === '1' \? '\?new=1' : ''/);
+  // A client's `/` now leads to the shared «Огляд», and `?new=1` is the one
+  // thing that overrides it: the composer lives in the space, so the request
+  // the reader already made goes straight there rather than being dropped on a
+  // screen with no composer on it.
+  assert.match(
+    clients,
+    /router\.replace\(searchParams\?\.get\('new'\) === '1' \? `\/\$\{clientProject\.id\}\?new=1` : '\/overview'\)/,
+  );
   assert.match(board, /params\.get\('new'\) !== '1'/);
   assert.match(board, /setShowComposer\(true\)/);
 });
