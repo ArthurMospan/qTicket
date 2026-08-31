@@ -4500,7 +4500,7 @@
         {
           "name": "context",
           "default": "",
-          "type": "'task'",
+          "type": "'task'|'clientTask'",
           "values": [],
           "description": "Which grid the strip uses."
         },

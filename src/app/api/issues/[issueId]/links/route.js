@@ -14,6 +14,7 @@ import {
 } from '@/lib/utils/issueRelations.mjs';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
 import { rolesFor } from '@/lib/utils/can';
+import { isPrivilegedRole } from '@/lib/utils/projectAccess.mjs';
 import { issueBlockLinkStatusConflict } from '@/lib/utils/issueStatusTransition.mjs';
 import { resolveClosedStatusIds } from '@/lib/utils/workflowDefaults.mjs';
 
@@ -54,10 +55,14 @@ async function loadIssueAndAuthorization(request, issueId) {
     return { error: 'Звернення не знайдено', code: 'ISSUE_NOT_FOUND', status: 404 };
   }
   const issue = issueSnap.data();
+  // A relation between two звернення is a fact about the requests, not about
+  // how the desk is handling them — «це те саме, що вчора», «це блокує оте».
+  // The customer knows that as often as support does, and both ends stay
+  // inside one client space, which is the scope check below.
   const authorization = await authorizeOrgRequest(
     request,
     issue.organizationId,
-    rolesFor('edit:issue'),
+    rolesFor('edit:issue_content'),
   );
   if (authorization.error) {
     return {
@@ -77,8 +82,10 @@ async function ensureProjectMutationAccess(loaded) {
   ) {
     return { error: 'Клієнтський простір звернення не знайдено', code: 'PROJECT_NOT_FOUND', status: 404 };
   }
+  // Owner and admin reach every space; everybody else — a support member and
+  // a customer alike — has to be on this one's team.
   if (
-    authorization.membership?.role === 'member'
+    !isPrivilegedRole(authorization.membership?.role)
     && !(
       Array.isArray(projectSnap.data().team)
       && projectSnap.data().team.includes(authorization.user.uid)

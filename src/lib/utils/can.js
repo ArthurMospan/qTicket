@@ -73,6 +73,21 @@ export const PERMISSIONS = {
   // /api/issues/bulk; being a member of the organization is not enough.
   'create:issue': ['owner', 'admin', 'member', 'client_admin', 'client_member'],
   'edit:issue': ['owner', 'admin', 'member'],
+  // The record's own content, as opposed to the desk's handling of it.
+  //
+  // A customer files a звернення and then owns what they wrote: the subject,
+  // the description, the attachments, what kind of problem it is, how urgent
+  // they judge it, which labels it carries and what else it relates to. A typo
+  // they cannot correct in their own request is not a safety property.
+  //
+  // What is missing from this entry is the whole of the difference between the
+  // two sides of the desk: status, support's own assignees, the resolution
+  // date, the archive and cancel stamps, hierarchy and deletion stay in
+  // `edit:issue` above, which no client role holds. Content is written through
+  // PATCH /api/issues/[issueId], which accepts these keys and no others —
+  // `firestore.rules` still refuses a client's direct write, so the narrow list
+  // is enforced by a route rather than by what the browser chose to send.
+  'edit:issue_content': ['owner', 'admin', 'member', 'client_admin', 'client_member'],
   'delete:issue': ['owner', 'admin', 'member'],
 
   // The conversation

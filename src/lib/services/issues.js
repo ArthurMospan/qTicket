@@ -17,6 +17,27 @@ export async function createIssueViaApi({ organizationId, projectId, data }) {
   }, 'Не вдалося зберегти. Спробуйте ще раз');
 }
 
+/**
+ * Save the record's own content — subject, description, attachments, type,
+ * priority, labels, the customer's own responsible people.
+ *
+ * Support's edits go straight to Firestore, as they always have. A customer's
+ * cannot: the rules authorize a browser write on an incident only for the
+ * internal side of the desk. Rather than widen a rules file that is already
+ * near its expression budget, the customer's edit is a server call — and the
+ * route accepts these fields and no others, so «what a client may change» is
+ * one list on the server instead of a set of controls the screen happens to
+ * hide.
+ */
+export async function patchIssueContentViaApi(issueId, data) {
+  if (!issueId) throw new Error('Issue is required');
+  return authenticatedIssueRequest(
+    `/api/issues/${encodeURIComponent(issueId)}`,
+    { method: 'PATCH', body: JSON.stringify({ data }) },
+    'Не вдалося зберегти звернення',
+  );
+}
+
 // Fields whose new value changes who gets reminded, and when.
 const REMINDER_FIELDS = ['dueDate', 'assigneeIds'];
 

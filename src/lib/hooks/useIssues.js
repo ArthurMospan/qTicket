@@ -31,6 +31,7 @@ import { useOptimisticPatch } from '@/lib/hooks/useOptimisticPatch';
 import {
   createIssueViaApi,
   notifyIssueAssigned,
+  patchIssueContentViaApi,
   syncIssueRemindersViaApi,
   transitionIssueStatusViaApi,
 } from '@/lib/services/issues';
@@ -47,6 +48,7 @@ import {
 } from '@/lib/utils/issueAuditEvents.mjs';
 import { compareIssues, pickPatchableFields, planDrop } from '@/lib/utils/optimistic.mjs';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
+import { isClientRole } from '@/lib/utils/can';
 
 // Stable references for "this caller wants none of that", so a hook that is
 // not asking for links does not hand a new empty array down on every render.
@@ -83,8 +85,18 @@ async function writeAudit(issueId, {
 // ---------------------------------------------------------------------------
 export function useIssues(projectId, { includeLinks = true, includeSetAside = false } = {}) {
   const {
-    activeOrgId, currentUser, projects, authLoading, orgLoading, projectsLoading,
+    activeOrgId, currentUser, orgRole, projects, authLoading, orgLoading, projectsLoading,
   } = useAppContext();
+  // Which door this hook's writes go through. A customer edits the content of
+  // their own request through the server route — the rules refuse their direct
+  // write, and widening them is the one thing the rules file asks not to be
+  // done to it. Support keeps writing straight to Firestore.
+  // An unknown role goes the same way. The screen offers these controls while
+  // the membership is still arriving — `canWhileRoleLoads` — so a fast click
+  // used to reach Firestore directly and come back as a raw permission error
+  // for the one reader who is refused there. The route authorizes both sides of
+  // the desk, so answering «not yet known» with it is correct for either.
+  const writesThroughContentApi = !orgRole || isClientRole(orgRole);
   const { closedStatusIds, statuses } = useWorkflowConfig();
   // Depend on the uid, not on the `currentUser` object: the profile listener
   // hands back a fresh object whenever anything on the user document changes.
@@ -226,7 +238,9 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
           ...(data.order !== undefined ? { order: data.order } : {}),
         });
       }
-      if (Object.keys(directData).length > 0) {
+      if (Object.keys(directData).length > 0 && writesThroughContentApi) {
+        await patchIssueContentViaApi(issueId, directData);
+      } else if (Object.keys(directData).length > 0) {
         const actorId = userId || currentUserId;
         await updateDoc(doc(db, 'issues', issueId), {
           ...directData,
@@ -247,8 +261,9 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
       // the two stay one act.
       syncIssueRemindersViaApi(issueId, directData);
 
-    // Touch parent project
-    if (Object.keys(directData).length > 0) {
+    // Touch parent project. The content route does this inside its own
+    // transaction, and a client may not write a project document at all.
+    if (Object.keys(directData).length > 0 && !writesThroughContentApi) {
       await updateDoc(doc(db, 'projects', projectId), {
         updatedAt: serverTimestamp()
       }).catch(() => {});
@@ -264,6 +279,9 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
     // to say five, so a moved deadline or a task dropped into another sprint left
     // no trace anywhere in the product.
     for (const field of AUDITED_ISSUE_FIELDS) {
+      // `audit/` is refused to a client role by the rules, deliberately — the
+      // route above wrote these entries with the admin credential instead.
+      if (writesThroughContentApi) break;
       if (directData[field] === undefined || !current) continue;
       const from = auditValue(current[field]);
       const to = auditValue(directData[field]);
@@ -279,7 +297,7 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
         to: factOnly ? null : to,
       });
     }
-  }, [issues, projectId, applyPatch, revertPatch, currentUser, currentUserId]);
+  }, [issues, projectId, applyPatch, revertPatch, currentUser, currentUserId, writesThroughContentApi]);
 
   // -------------------------------------------------------------------------
   // deleteIssue

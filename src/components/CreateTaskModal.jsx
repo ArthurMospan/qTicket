@@ -348,6 +348,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
             title: form.title,
             description: form.description,
             projectId: form.projectId,
+            type: form.type,
+            priority: form.priority,
+            labelIds: form.labelIds,
             clientAssignees: form.clientAssignees,
             createdBy: currentUser?.id || currentUser?.uid,
           }
@@ -547,8 +550,14 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
           )}
 
           {/* Metadata controls share one grid, so every field has identical
-              geometry and a deterministic reading order. */}
-          {!clientMode && (
+              geometry and a deterministic reading order.
+
+              Both composers draw it. What the customer does not get is the two
+              cells that belong to the desk rather than to the request: the
+              status it enters the workflow at, and the date it is promised for.
+              The kind of problem and how urgent it is are theirs — they are the
+              two facts the person filing knows before anybody at the desk
+              does. */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 lg:col-span-2">
             <div className="flex flex-col gap-[6px]">
               <Label>Тип</Label>
@@ -567,28 +576,31 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
                 options={prioritySelectOptions(priorities)}
               />
             </div>
-            <div className="flex flex-col gap-[6px]">
-              <Label>Статус</Label>
-              <Select
-                value={form.status}
-                onChange={val => set('status', val)}
-                options={visibleStatuses.map(s => ({
-                  value: s.id,
-                  label: s.label,
-                  dotColor: s.color,
-                }))}
-              />
-            </div>
-            <div className="flex flex-col gap-[6px]">
+            {!clientMode && (
+              <div className="flex flex-col gap-[6px]">
+                <Label>Статус</Label>
+                <Select
+                  value={form.status}
+                  onChange={val => set('status', val)}
+                  options={visibleStatuses.map(s => ({
+                    value: s.id,
+                    label: s.label,
+                    dotColor: s.color,
+                  }))}
+                />
+              </div>
+            )}
+            {!clientMode && (
+              <div className="flex flex-col gap-[6px]">
                 <Label>Термін вирішення</Label>
-              <DatePicker
-                value={form.dueDate}
-                onChange={value => set('dueDate', value)}
-                placeholder="Без терміну"
-              />
-            </div>
+                <DatePicker
+                  value={form.dueDate}
+                  onChange={value => set('dueDate', value)}
+                  placeholder="Без терміну"
+                />
+              </div>
+            )}
           </div>
-          )}
 
           {/* Assignees */}
           {!clientMode && assignableMembers.length > 0 && (
@@ -629,8 +641,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
             </div>
           )}
 
-          {/* Labels */}
-          {!clientMode && availableLabels.length > 0 && (
+          {/* Labels. A customer marks their own request the same way support
+              does — the taxonomy is the workspace's, and «оплата», «доступи»,
+              «терміново» are as much theirs to apply as anybody's. */}
+          {availableLabels.length > 0 && (
             <div className="flex flex-col gap-[6px] lg:col-span-2">
               <Label>Мітки (Теги)</Label>
               <div className="flex flex-wrap gap-2">

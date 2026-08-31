@@ -83,14 +83,25 @@ export async function POST(request) {
       }, { status: authorization.status });
     }
     const clientAuthor = isClientRole(authorization.membership?.role);
-    // External clients describe an incident; the support workflow classifies
-    // and routes it. This projection is the server boundary behind the simple
-    // client composer: hand-crafted requests cannot pick a status, priority,
-    // assignee, sprint, parent, deadline, labels or estimate during creation.
+    // The projection that decides what a customer may say when they file.
+    //
+    // It used to hold them to a subject, a description and their own responsible
+    // people, on the reasoning that classification is the desk's job. Half of
+    // that is right and half of it was the inherited task manager arguing with
+    // itself: a status is the desk's workflow and stays refused here, along with
+    // support's assignees, the deadline, the parent and the estimate — but what
+    // kind of problem this is, how urgent it is, and which labels it carries are
+    // things the person with the problem knows first. Support reclassifies what
+    // it disagrees with, which is a two-second correction, not a form to design
+    // around; every one of these fields is validated below against the live
+    // workflow, so a value that no longer exists lands as no value at all.
     const data = clientAuthor
       ? {
           title: submittedData.title,
           description: submittedData.description,
+          type: submittedData.type,
+          priority: submittedData.priority,
+          labelIds: submittedData.labelIds,
           // The one routing decision that is genuinely the customer's: which of
           // their own people answers for this. It is not `assigneeIds` and never
           // becomes one — support's queue stays support's — so it passes the

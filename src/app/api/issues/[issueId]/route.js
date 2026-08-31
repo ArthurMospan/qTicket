@@ -2,13 +2,19 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
-import { routeErrorResponse } from '@/lib/server/apiErrors';
+import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
   projectIssueCountDeltasFor,
   projectIssueCountIncrements,
 } from '@/lib/server/projectIssueCounts';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
 import { rolesFor } from '@/lib/utils/can';
+import {
+  AUDITED_ISSUE_FIELDS,
+  FACT_ONLY_AUDITED_FIELDS,
+  auditValue,
+} from '@/lib/utils/issueAuditEvents.mjs';
+import { pickIssueContentFields } from '@/lib/utils/issueContentFields.mjs';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import {
   issueTombstoneId,
@@ -21,6 +27,149 @@ function apiTransactionError(code, status, message, details = {}) {
   const error = new Error(code);
   error.api = { code, status, message, ...details };
   return error;
+}
+
+// PATCH — the record's own content, from either side of the desk.
+//
+// Support writes these fields straight from the browser and always has;
+// `firestore.rules` authorizes that write and there is no reason to move it.
+// A client cannot: `canMutateIssueData` is `isInternalContributor`, and the
+// rules file is close enough to its expression budget that the comment on
+// `issues/{issueId}` asks the next change to remove from it rather than add.
+//
+// So the customer's half of editing arrives here instead. The route is the
+// narrow part: `pickIssueContentFields` drops everything that is not the
+// record's content, so status, support's assignees, the deadline, the counters
+// and every identity field are unreachable through it whatever the browser
+// sends — and the same list is what the screen offers, so the two agree by
+// construction rather than by review.
+export async function PATCH(request, context) {
+  try {
+    const { issueId } = await context.params;
+    const db = getAdminDb();
+    const issueRef = db.collection('issues').doc(issueId);
+    const issueSnap = await issueRef.get();
+    if (!issueSnap.exists) {
+      return NextResponse.json({
+        error: 'Звернення не знайдено',
+        code: 'ISSUE_NOT_FOUND',
+      }, { status: 404 });
+    }
+
+    const issue = issueSnap.data();
+    const authorization = await authorizeOrgRequest(
+      request,
+      issue.organizationId,
+      rolesFor('edit:issue_content'),
+    );
+    if (authorization.error) {
+      return NextResponse.json({
+        error: localizedIssueAuthorizationMessage(authorization.error),
+      }, { status: authorization.status });
+    }
+
+    const body = await readJsonBody(request);
+    const patch = pickIssueContentFields(body?.data ?? body);
+    if (Object.keys(patch).length === 0) {
+      return NextResponse.json({
+        error: 'Немає полів для збереження',
+        code: 'EMPTY_PATCH',
+      }, { status: 400 });
+    }
+    if (patch.title !== undefined && !String(patch.title).trim()) {
+      return NextResponse.json({
+        error: 'Назва звернення не може бути порожньою',
+        code: 'TITLE_REQUIRED',
+      }, { status: 400 });
+    }
+    for (const field of ['attachments', 'labelIds', 'clientAssigneeIds']) {
+      if (patch[field] !== undefined && !Array.isArray(patch[field])) {
+        return NextResponse.json({
+          error: 'Некоректне значення поля',
+          code: 'INVALID_FIELD',
+          field,
+        }, { status: 400 });
+      }
+    }
+    if (issue.archivedAt || issue.cancelledAt) {
+      return NextResponse.json({
+        error: 'Звернення відкладено — поверніть його, щоб редагувати',
+        code: 'ISSUE_SET_ASIDE',
+      }, { status: 409 });
+    }
+
+    const projectRef = db.collection('projects').doc(issue.projectId);
+    const now = Timestamp.now();
+    const actorName = authorization.user.name || authorization.user.email || '';
+
+    await db.runTransaction(async transaction => {
+      const currentSnap = await transaction.get(issueRef);
+      const projectSnap = await transaction.get(projectRef);
+      if (!currentSnap.exists) {
+        throw apiTransactionError('ISSUE_NOT_FOUND', 404, 'Звернення не знайдено');
+      }
+      const current = currentSnap.data();
+      if (
+        current.organizationId !== issue.organizationId
+        || current.projectId !== issue.projectId
+      ) {
+        throw apiTransactionError(
+          'ISSUE_SCOPE_CHANGED',
+          409,
+          'Область звернення змінилася. Оновіть сторінку',
+        );
+      }
+      // Membership of the client space is what authorizes this, for a support
+      // member and for a customer alike — the role check above only said the
+      // role may edit content at all.
+      const projectAccessError = projectWriteError(
+        { ...projectSnap.data(), id: projectSnap.id },
+        current.organizationId,
+        authorization.membership?.role,
+        authorization.user.uid,
+      );
+      if (projectAccessError) {
+        throw apiTransactionError(
+          'PROJECT_FORBIDDEN',
+          projectAccessError === 'Ви не входите до команди цього клієнта' ? 403 : 409,
+          projectAccessError,
+        );
+      }
+
+      transaction.update(issueRef, {
+        ...patch,
+        updatedAt: now,
+        lastActivityType: 'updated',
+        lastActivityAt: now,
+        lastActivityActorId: authorization.user.uid,
+        lastActivityActorName: actorName,
+      });
+      transaction.update(projectRef, { updatedAt: now });
+
+      // The same history the browser writes for a support edit, written here
+      // because a client may not write to `audit/` at all — and the change
+      // still belongs in the record.
+      for (const field of AUDITED_ISSUE_FIELDS) {
+        if (patch[field] === undefined) continue;
+        const from = auditValue(current[field]);
+        const to = auditValue(patch[field]);
+        if (from === to) continue;
+        const factOnly = FACT_ONLY_AUDITED_FIELDS.includes(field);
+        transaction.create(issueRef.collection('audit').doc(), {
+          userId: authorization.user.uid,
+          userName: actorName,
+          action: `changed_${field}`,
+          from: factOnly ? null : from,
+          to: factOnly ? null : to,
+          createdAt: now,
+        });
+      }
+    });
+
+    return NextResponse.json({ ok: true, issueId, fields: Object.keys(patch) });
+  } catch (error) {
+    return routeErrorResponse(error, 'Не вдалося зберегти звернення');
+  }
 }
 
 export async function DELETE(request, context) {

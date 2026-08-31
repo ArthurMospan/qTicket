@@ -42,13 +42,21 @@ test('client_admin не може підвищити роль через тіло
   assert.equal(invitedRoleFor('unknown', 'admin'), 'member');
 });
 
-test('сервер приймає від клієнта лише тему та опис інциденту', async () => {
+test('сервер приймає від клієнта зміст звернення, але не робочий процес', async () => {
   const route = await read('../src/app/api/issues/route.js');
   assert.match(route, /const clientAuthor = isClientRole\(authorization\.membership\?\.role\)/);
-  assert.match(route, /const data = clientAuthor[\s\S]{0,180}title: submittedData\.title,[\s\S]{0,80}description: submittedData\.description/);
+  const projection = route.match(/const data = clientAuthor[\s\S]*?: submittedData;/)?.[0] || '';
+  assert.ok(projection, 'проєкція полів клієнта на місці');
+  // Те, що знає той, хто має проблему: про що вона, якого роду, наскільки
+  // термінова, чим позначена і хто з його боку відповідає.
+  for (const field of ['title', 'description', 'type', 'priority', 'labelIds', 'clientAssigneeIds']) {
+    assert.match(projection, new RegExp(`\\b${field}: submittedData`), field);
+  }
+  // Те, що лишається столу підтримки: статус у робочому процесі, власні
+  // виконавці, обіцяний термін, ієрархія та оцінка.
   assert.doesNotMatch(
-    route.match(/const data = clientAuthor[\s\S]*?: submittedData;/)?.[0] || '',
-    /status: submittedData|priority: submittedData|assigneeIds: submittedData|dueDate: submittedData/,
+    projection,
+    /status: submittedData|columnId: submittedData|assigneeIds: submittedData\b|dueDate: submittedData|parentIssueId: submittedData|estimate/,
   );
 });
 
@@ -150,26 +158,30 @@ test('клієнт і підтримка бачать один екран, і з
   // The tenant's mark never flips to the vendor's.
   assert.doesNotMatch(sidebar, /rotateY\(180deg\)/);
   assert.match(detail, /const canEditIssue = can\(orgRole, 'edit:issue'\)/);
-  assert.match(detail, /internalViewer \? issueId : null/);
+  // Дві різні відповіді на два різні питання: що на цьому екрані належить
+  // столу підтримки, і що належить самому зверненню. Друге тримають обидві
+  // сторони — інакше автор не виправить власну ж описку.
+  assert.match(detail, /const canEditContent = canWhileRoleLoads\(orgRole, 'edit:issue_content'\)/);
   const clientAttributesStart = detail.indexOf('primaryChildren={clientViewer ? (');
   const internalAttributesStart = detail.indexOf(') : (', clientAttributesStart);
   const clientAttributes = detail.slice(clientAttributesStart, internalAttributesStart);
-  // What the customer's strip says, and — the part that matters — that none of
-  // it is a control. Status, type and priority are all three already on the
-  // board card they came from, so the page saying them is the page catching up
-  // with the board, not a disclosure. The rule was «do not name priority»; it is
-  // «do not offer to change any of it», which is the fact the product actually
-  // has to keep true.
+  // Смуга клієнта — та сама смуга: ті самі клітинки, в тому самому порядку.
+  // Різниця рівно одна, і вона змістовна: рухати звернення робочим процесом —
+  // робота підтримки, тож «Статус» тут читають, а не змінюють.
   assert.match(clientAttributes, />Статус</);
   assert.match(clientAttributes, />Тип</);
   assert.match(clientAttributes, />Пріоритет</);
-  assert.match(clientAttributes, /readOnlyItemClass/);
-  assert.doesNotMatch(clientAttributes, /<Select|<MultiSelect|<DatePicker|onChange=/);
-  // The two the board withholds stay withheld: who inside support is answering,
-  // and the resolution date — a date a customer can read is a promised time, and
-  // qTicket promises none.
-  assert.doesNotMatch(clientAttributes, /Виконавці|Відповідальні|Спринт|Дедлайн|Термін/);
-  assert.match(composer, /const submitted = clientMode[\s\S]{0,180}title: form\.title,[\s\S]{0,80}description: form\.description/);
+  assert.match(clientAttributes, />Відповідальні</);
+  assert.match(clientAttributes, /readOnlyItemClass[\s\S]{0,200}<StatusPill/);
+  // Статус — єдина клітинка без контролю: ані селекта статусів, ані обробника.
+  assert.doesNotMatch(clientAttributes, /handleStatusChange|options=\{visibleStatuses/);
+  // Решта — контроли, бо це зміст звернення, а не робочий процес.
+  assert.match(clientAttributes, /<Select[\s\S]{0,400}EDITABLE_TYPES/);
+  assert.match(clientAttributes, /prioritySelectOptions\(PRIORITIES\)/);
+  // Те, що лишається столу підтримки: хто саме всередині підтримки веде
+  // звернення, і обіцяний термін.
+  assert.doesNotMatch(clientAttributes, /Виконавці|Спринт|Дедлайн|Термін|assigneeIds/);
+  assert.match(composer, /const submitted = clientMode[\s\S]{0,400}type: form\.type,[\s\S]{0,80}priority: form\.priority,[\s\S]{0,80}labelIds: form\.labelIds/);
 });
 
 test('клієнтська сесія не підписується на внутрішні модулі QuickTeam', async () => {
@@ -208,14 +220,15 @@ test('клієнтська сесія не підписується на вну�
 //
 // Тест сторожить саме розділення: прапорець ієрархії не має права знову
 // зʼявитися на шляху звʼязків, а звʼязки не мають права зʼявитися в клієнта.
-test('звʼязки живуть за роллю, ієрархія — за прапорцем', async () => {
+test('звʼязки живуть за змістом звернення, ієрархія — за прапорцем', async () => {
   const detail = await read('../src/components/workspace/IssueDetail.jsx');
 
   // Жодного сліду прапорця, який робив дві роботи одночасно.
   assert.doesNotMatch(detail, /SHOW_INHERITED_TASK_PLANNING/);
 
-  // Підписка на звʼязки залежить лише від того, хто дивиться.
-  assert.match(detail, /useIssueLinks\(internalViewer \? issueId : null\)/);
+  // Підписка на звʼязки — одна для обох боків столу: «це те саме, що я писав
+  // учора» знає радше клієнт, ніж підтримка.
+  assert.match(detail, /useIssueLinks\(issueId\)/);
 
   // Ієрархія лишається за прапорцем у всіх трьох своїх місцях: хлібна крихта
   // основного звернення, селект «Основне звернення» і блок дочірніх.
@@ -231,15 +244,18 @@ test('звʼязки живуть за роллю, ієрархія — за п�
   const linksStart = detail.indexOf('{/* ISSUE LINKS');
   assert.ok(linksStart > 0, 'секція звʼязків на місці');
   const linksSection = detail.slice(linksStart, detail.indexOf('</DetailSection>', linksStart));
-  assert.match(linksSection, /\{!clientViewer && \(currentIssueLinks\.length > 0 \|\| showLinkInput\) && \(/);
+  assert.match(linksSection, /\{\(currentIssueLinks\.length > 0 \|\| showLinkInput\) && \(/);
   assert.match(linksSection, /title="Зв’язки" count=\{currentIssueLinks\.length\}/);
   assert.doesNotMatch(linksSection, /SHOW_INHERITED/);
-  // Ані сама секція, ані лічильник у ній не існують для клієнта: вище стоїть
-  // роль, а нижче — порожній масив, бо підписки для клієнта немає взагалі.
-  assert.match(linksSection, /canRemove=\{!isArchived && canEditIssue\}/);
+  // Розривають звʼязок ті самі, хто його ставить — за змістом звернення, а не
+  // за роллю. Обидва кінці однаково лишаються в одному клієнтському просторі:
+  // це перевіряє серверний маршрут.
+  assert.match(linksSection, /canRemove=\{!isArchived && canEditContent\}/);
+  assert.doesNotMatch(linksSection, /clientViewer/);
 
-  // Кнопка створення — теж за роллю, і теж без прапорця.
-  assert.match(detail, /\{!clientViewer && <Button\s+aria-label="Додати зв’язок"/);
+  // Кнопка створення — так само без ролі перед нею.
+  assert.match(detail, /<Button\s+aria-label="Додати зв’язок"/);
+  assert.doesNotMatch(detail, /\{!clientViewer && <Button\s+aria-label="Додати зв’язок"/);
 
   // Дублювання й AI-промпт — окреме рішення під власним іменем, а не безбілетні
   // пасажири прапорця ієрархії.

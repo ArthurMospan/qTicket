@@ -14,7 +14,6 @@ import { ISSUE_LINK_OPTIONS, issueLinkPerspective, useIssueLinks } from '@/lib/h
 import MarkdownEditor from '@/components/ui/Forms/MarkdownEditor';
 import MarkdownViewer, { setTaskChecked } from '@/components/ui/DataDisplay/MarkdownViewer';
 import AttachmentViewer from '@/components/ui/AttachmentViewer';
-import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import Tag from '@/components/ui/DataDisplay/Tag';
 import UnifiedTimeline from '@/components/workspace/UnifiedTimeline';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
@@ -44,7 +43,7 @@ import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCance
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
-import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, PriorityIcon, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, TypeBadge, useConfirm } from '@/components/ui';
+import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
 import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
 import { useQuickTeamTransfer } from '@/lib/hooks/useQuickTeamTransfer';
 import Button from '@/components/ui/Button';
@@ -56,11 +55,11 @@ import {
   AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff, ExternalLink,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
-  Maximize2, User, Users, UsersRound, CircleDot, Ban, Undo2,
+  Maximize2, User, Users, CircleDot, Ban, Undo2,
 } from 'lucide-react';
 import { ParentTaskIcon, TaskIcon } from '@/lib/design/icons';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
-import { NO_PRIORITY_ID, priorityPresentation, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
+import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, deleteDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { uploadFile } from '@/lib/utils/uploadFile';
@@ -260,6 +259,17 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // second name for it.
   const terms = incidentTerms();
   const canEditIssue = can(orgRole, 'edit:issue');
+  // What the request itself says, as opposed to how the desk is handling it:
+  // the subject, the description, the attachments, the type, the priority, the
+  // labels, the links, and who on the customer's side is answering. Both sides
+  // of the desk hold it — a customer who cannot correct a typo in the request
+  // they just filed is not being protected from anything.
+  //
+  // `canEditIssue` above keeps everything that is the desk's own: the status,
+  // support's assignees, the resolution date, the archive and cancel stamps,
+  // hierarchy and deletion. The split is the whole difference between the two
+  // copies of this screen.
+  const canEditContent = canWhileRoleLoads(orgRole, 'edit:issue_content');
   // Where «назад» goes from this screen: the space this request is in, for
   // both sides of the desk. It used to be `/` for a client, from when their
   // portal was a screen of its own and `/{projectId}` was the staff board that
@@ -379,7 +389,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     refresh: refreshLinks,
     addLink,
     removeLink,
-  } = useIssueLinks(internalViewer ? issueId : null);
+  } = useIssueLinks(issueId);
 
   const {
     types: rawTypes, priorities: rawPriorities, statuses: STATUSES, labels: availableLabels = [], closedStatusIds
@@ -489,7 +499,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const clientAssignees = clientAssigneeIds
     .map(uid => members.find(member => (member.id || member.uid) === uid))
     .filter(Boolean);
-  const canEditClientAssignees = !isArchived && (clientViewer || canEditIssue);
+  const canEditClientAssignees = !isArchived && canEditContent;
   const assignableMembers = assignableIds.size === 0
     // A project with no team recorded at all is legacy data, not a project
     // nobody may be assigned to.
@@ -773,7 +783,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     condensed: isHeaderScrolled,
     readOnly: true,
   });
-  const priorityCfg = priorityPresentation(issue.priority, PRIORITIES);
 
   const assignees     = (issue.assigneeIds || []).map(uid => members.find(m => (m.id || m.uid) === uid)).filter(Boolean);
   const reporterMatchByEmail = issue.reporterName ? members.find(m => m.email && m.email.toLowerCase() === issue.reporterName.toLowerCase()) : null;
@@ -816,7 +825,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // so an empty task edits as the editor alone with no grey strip under it.
   const hasSecondaryBlocks = issueLabels.length > 0
     || (SHOW_INHERITED_TASK_HIERARCHY && (childIssues.length > 0 || showSubInput))
-    || (!clientViewer && (currentIssueLinks.length > 0 || showLinkInput));
+    || (currentIssueLinks.length > 0 || showLinkInput);
   const hasPanelBody = !isEditing || visibleAttachments.length > 0 || hasSecondaryBlocks;
 
   const actor          = { userId: currentUser?.id || currentUser?.uid, userName: currentUser?.name };
@@ -1136,7 +1145,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     <AttachmentRows
       attachments={visibleAttachments}
       isEditing={isEditing}
-      isArchived={isArchived || !canEditIssue}
+      isArchived={isArchived || !canEditContent}
       onOpen={setViewerMat}
       onInsert={(attachment, fileType, url) => {
         const markdown = fileType === 'image' ? `![${attachment.name}](${url})` : `[${attachment.name}](${url})`;
@@ -1164,7 +1173,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         </>
       ) : (
         <>
-          {!isArchived && canEditIssue && <Button style="secondary" size="icon-lg" icon={Pencil} onClick={enterEdit} aria-label="Редагувати звернення" title="Редагувати звернення" />}
+          {!isArchived && canEditContent && <Button style="secondary" size="icon-lg" icon={Pencil} onClick={enterEdit} aria-label="Редагувати звернення" title="Редагувати звернення" />}
           <ContextMenu
             trigger={(
               <Button
@@ -1532,8 +1541,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                columns nothing arrives to fill, which is the whole reason their
                strip read as one status pill adrift in a grey bar. */
             <TaskAttributesPanel
-              singleRow={!clientViewer}
-              context={clientViewer ? undefined : 'task'}
+              context={clientViewer ? 'clientTask' : 'task'}
               compact
               condensed={isHeaderScrolled}
               cardClassName="transition-[background-color,padding] duration-200"
@@ -1543,14 +1551,17 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 WebkitBackdropFilter: isHeaderScrolled ? 'blur(4px)' : undefined,
               }}
               primaryChildren={clientViewer ? (
-                /* What the customer is told about their own request. Three
-                   facts, all of them already visible to them elsewhere — the
-                   status pill on their board, the type badge and the priority
-                   mark on the very same card — so this is the page catching up
-                   with the board rather than any new disclosure. What stays off
-                   it is what the board also withholds: who inside support is
-                   answering, and the resolution date, which is a promised time
-                   the moment a customer can read it. */
+                /* The customer's copy of the same strip: the same cells, in the
+                   same order, in the same grid. One of them is a fact rather
+                   than a control, and that is the whole of the difference —
+                   moving a request through support's workflow is support's
+                   work, so «Статус» is read here and set there.
+
+                   Everything else on it is the customer's own: what kind of
+                   problem this is, how urgent they judge it, and which of their
+                   people is answering. What stays off the strip is the desk's
+                   own business — who inside support is on it, and the date it
+                   is promised for. */
                 <>
                   <div className={readOnlyItemClass}>
                     <span className={attributeLabelClass}>Статус</span>
@@ -1560,22 +1571,107 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  <div className={readOnlyItemClass}>
+                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
                     <span className={attributeLabelClass}>Тип</span>
-                    <TypeBadge
-                      label={typeCfg.label}
-                      color={typeCfg.color}
-                      icon={typeCfg.icon}
+                    <Select
+                      compact
+                      disabled={isArchived || !canEditContent}
+                      value={draft.type || issue.type || ''}
+                      onChange={val => {
+                        update({ type: val });
+                        if (isEditing) setDraft(current => ({ ...current, type: val }));
+                      }}
+                      options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
+                      buttonClassName={compactSelectClass}
                     />
                   </div>
 
-                  <div className={readOnlyItemClass}>
+                  <div className={`max-sm:hidden ${attributeItemClass}`} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
                     <span className={attributeLabelClass}>Пріоритет</span>
-                    <span className="flex items-center gap-1.5 text-[13px] font-medium leading-[22px] text-ink">
-                      <PriorityIcon priority={priorityCfg} size="sm" />
-                      {priorityCfg.label}
-                    </span>
+                    <Select
+                      compact
+                      disabled={isArchived || !canEditContent}
+                      value={draft.priority || issue.priority || ''}
+                      onChange={val => {
+                        update({ priority: val });
+                        if (isEditing) setDraft(current => ({ ...current, priority: val }));
+                      }}
+                      options={prioritySelectOptions(PRIORITIES)}
+                      buttonClassName={compactSelectClass}
+                    />
                   </div>
+
+                  {/* Their own people. On this side of the desk there is only
+                      one kind of responsible person, so it is not qualified. */}
+                  <div className={attributeItemClass} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Відповідальні</span>
+                    <MultiSelect
+                      compact
+                      showSelectedAvatars
+                      ariaLabel="Відповідальні з боку клієнта"
+                      disabled={!canEditClientAssignees}
+                      value={clientAssigneeIds}
+                      onChange={ids => update({ clientAssigneeIds: ids })}
+                      options={clientDirectory.map(member => ({
+                        value: member.id || member.uid,
+                        label: member.name || member.displayName || member.email || 'Учасник',
+                        user: member,
+                      }))}
+                      placeholder="Нікого не призначено"
+                      searchPlaceholder="Знайти співробітника…"
+                      buttonClassName={compactSelectClass}
+                      dropdownClassName="w-[260px]"
+                    />
+                  </div>
+
+                  {/* Four cells fit from sm up, so the overflow is a phone's
+                      only — the same rule the agent's strip follows. */}
+                  <Popover
+                    position="bottom"
+                    hideCloseIcon
+                    className="flex h-full items-center sm:hidden"
+                    triggerClassName="flex h-full w-full items-center justify-center"
+                    onOpenChange={setShowDetailsDropdown}
+                    trigger={(
+                      <AttributeTrigger
+                        condensed={isHeaderScrolled}
+                        active={showDetailsDropdown}
+                        className="max-sm:px-0"
+                        aria-expanded={showDetailsDropdown}
+                        aria-label="Деталі звернення"
+                      >
+                        <Settings2 size={14} />
+                        <span className="max-sm:hidden">Деталі</span>
+                      </AttributeTrigger>
+                    )}
+                  >
+                    <div className="flex w-[248px] max-w-full flex-col gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Пріоритет</span>
+                        <Select
+                          disabled={isArchived || !canEditContent}
+                          value={draft.priority || issue.priority || ''}
+                          onChange={val => {
+                            update({ priority: val });
+                            if (isEditing) setDraft(current => ({ ...current, priority: val }));
+                          }}
+                          options={prioritySelectOptions(PRIORITIES)}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Тип</span>
+                        <Select
+                          disabled={isArchived || !canEditContent}
+                          value={draft.type || issue.type || ''}
+                          onChange={val => {
+                            update({ type: val });
+                            if (isEditing) setDraft(current => ({ ...current, type: val }));
+                          }}
+                          options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
+                        />
+                      </div>
+                    </div>
+                  </Popover>
                 </>
               ) : (
                 <>
@@ -1642,8 +1738,36 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
+                  {/* Who is answering on the customer's side. It used to be a
+                      section under the description — an attribute of the
+                      request, parked below the body text, while the strip that
+                      carries every other attribute had a column to spare. It
+                      reads far more often than it changes, which is an argument
+                      for putting it where the reader already looks, not for
+                      putting it last. */}
+                  <div className={`max-lg:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
+                    <span className={attributeLabelClass}>Від клієнта</span>
+                    <MultiSelect
+                      compact
+                      showSelectedAvatars
+                      ariaLabel="Відповідальні з боку клієнта"
+                      disabled={!canEditClientAssignees}
+                      value={clientAssigneeIds}
+                      onChange={ids => update({ clientAssigneeIds: ids })}
+                      options={clientDirectory.map(member => ({
+                        value: member.id || member.uid,
+                        label: member.name || member.displayName || member.email || 'Учасник',
+                        user: member,
+                      }))}
+                      placeholder="Нікого не призначено"
+                      searchPlaceholder="Знайти співробітника…"
+                      buttonClassName={compactSelectClass}
+                      dropdownClassName="w-[260px]"
+                    />
+                  </div>
+
                   {/* Due date */}
-                  <div className={`max-sm:hidden ${attributeItemClass}`}>
+                  <div className={`max-lg:hidden ${attributeItemClass}`}>
                     <span className={attributeLabelClass}>Термін вирішення</span>
                     <DatePicker
                       compact
@@ -1663,13 +1787,15 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* The overflow, and only where there is one. Above `sm` all
-                      five attributes are on the strip and this button would open
-                      onto a copy of what the reader is already looking at. */}
+                  {/* The overflow, and only where there is one. Six cells fit
+                      from `lg` up and this button goes away there; between
+                      `sm` and `lg` it carries the two that did not fit, and
+                      the two that did are hidden inside it rather than shown
+                      twice. */}
                   <Popover
                     position="bottom"
                     hideCloseIcon
-                    className="flex h-full items-center sm:hidden"
+                    className="flex h-full items-center lg:hidden"
                     // Without this the wrapper Popover puts around a trigger is
                     // a bare block in a flex row, so it shrinks to the glyph:
                     // «Деталі» was a 14px-wide hit area inside a 44px column,
@@ -1713,7 +1839,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             placeholder="Без терміну"
                           />
                         </div>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-1.5 sm:hidden">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Пріоритет</span>
                           <Select
                             disabled={isArchived}
@@ -1725,7 +1851,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                             options={prioritySelectOptions(PRIORITIES)}
                           />
                         </div>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-1.5 sm:hidden">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Тип</span>
                           <Select
                             disabled={isArchived}
@@ -1735,6 +1861,24 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                               if (isEditing) setDraft(current => ({ ...current, type: val }));
                             }}
                             options={EDITABLE_TYPES.map(item => ({ value: item.id, label: item.label, icon: item.icon }))}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Від клієнта</span>
+                          <MultiSelect
+                            showSelectedAvatars
+                            ariaLabel="Відповідальні з боку клієнта"
+                            disabled={!canEditClientAssignees}
+                            value={clientAssigneeIds}
+                            onChange={ids => update({ clientAssigneeIds: ids })}
+                            options={clientDirectory.map(member => ({
+                              value: member.id || member.uid,
+                              label: member.name || member.displayName || member.email || 'Учасник',
+                              user: member,
+                            }))}
+                            placeholder="Нікого не призначено"
+                            searchPlaceholder="Знайти співробітника…"
+                            dropdownClassName="w-[260px]"
                           />
                         </div>
                         {SHOW_INHERITED_TASK_HIERARCHY && <div className="flex flex-col gap-1.5">
@@ -1821,7 +1965,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         <MarkdownViewer
                           content={issue.description}
                           size="lg"
-                          onTaskToggle={isArchived || !canEditIssue ? undefined : (taskLine, checked) => update({ description: setTaskChecked(issue.description, taskLine, checked) })}
+                          onTaskToggle={isArchived || !canEditContent ? undefined : (taskLine, checked) => update({ description: setTaskChecked(issue.description, taskLine, checked) })}
                         />
                       )}
                       {visibleAttachments.length > 0 && (
@@ -1829,54 +1973,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       )}
                     </>
                   ) : (
-                    <DescriptionPlaceholder onClick={canEditIssue ? enterEdit : undefined} disabled={!canEditIssue}>
-                      {canEditIssue ? 'Натисни Редагувати щоб додати опис...' : terms.descriptionEmpty}
+                    <DescriptionPlaceholder onClick={canEditContent ? enterEdit : undefined} disabled={!canEditContent}>
+                      {canEditContent ? 'Натисни Редагувати щоб додати опис...' : terms.descriptionEmpty}
                     </DescriptionPlaceholder>
                   )}
 
-                {/* Who is answering on the customer's side. One placement for
-                    both readers rather than a cell on one strip and a section on
-                    the other: the agent's strip is already five controls wide,
-                    and this is a fact people read far more often than they
-                    change. Drawn whenever it has names, or whenever whoever is
-                    looking may add some. */}
-                {(clientAssignees.length > 0 || canEditClientAssignees) && (
-                  <DetailSection
-                    density="group"
-                    icon={UsersRound}
-                    title="Відповідальні клієнта"
-                    count={clientAssignees.length}
-                    className="pt-1"
-                  >
-                    {canEditClientAssignees ? (
-                      <MultiSelect
-                        showSelectedAvatars
-                        ariaLabel="Відповідальні з боку клієнта"
-                        value={clientAssigneeIds}
-                        onChange={ids => update({ clientAssigneeIds: ids })}
-                        options={clientDirectory.map(member => ({
-                          value: member.id || member.uid,
-                          label: member.name || member.displayName || member.email || 'Учасник',
-                          user: member,
-                        }))}
-                        placeholder="Нікого не призначено"
-                        searchPlaceholder="Знайти співробітника…"
-                        dropdownClassName="w-[260px]"
-                      />
-                    ) : (
-                      <div className="flex flex-wrap items-center gap-2">
-                        {clientAssignees.map(member => (
-                          <span key={member.id || member.uid} className="flex items-center gap-1.5 text-[13px] font-medium text-ink">
-                            <UserAvatar user={member} size="xs" />
-                            {member.name || member.displayName || member.email || 'Учасник'}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </DetailSection>
-                )}
-
-                {!clientViewer && issueLabels.length > 0 && (
+                {issueLabels.length > 0 && (
                   <DetailSection density="group" icon={TagIcon} title="Мітки" count={issueLabels.length} className="pt-1">
                     <div className="flex flex-wrap items-center gap-2">
                       {issueLabels.map(label => (
@@ -1884,7 +1986,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           key={label.id}
                           label={label.label || label.name}
                           color={label.color}
-                          onRemove={canEditIssue ? () => update({ labelIds: (issue.labelIds || []).filter(item => item !== label.id) }) : undefined}
+                          onRemove={canEditContent ? () => update({ labelIds: (issue.labelIds || []).filter(item => item !== label.id) }) : undefined}
                         />
                       ))}
                     </div>
@@ -1970,13 +2072,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 </DetailSection>
               )}
 
-              {/* ISSUE LINKS — internal support only, by role rather than by a
-                  feature constant. A customer's copy of this screen has no
-                  section here, no «Звʼязки» count and no way to make or break
-                  one: `useIssueLinks` above is never even subscribed for them,
-                  so `currentIssueLinks` is empty and this whole branch is
-                  unreachable twice over. */}
-              {!clientViewer && (currentIssueLinks.length > 0 || showLinkInput) && (
+              {/* ISSUE LINKS. «Це те саме, що я писав учора» and «оце чекає на
+                  те» are facts about the requests themselves, and the customer
+                  knows them as often as the desk does. Both ends of a link stay
+                  inside one client space — the server route scopes the picker
+                  and the write to it — so this discloses nothing a client
+                  cannot already open. */}
+              {(currentIssueLinks.length > 0 || showLinkInput) && (
               <DetailSection density="group" icon={Link2} title="Зв’язки" count={currentIssueLinks.length} className="pt-2">
               <div className="flex flex-col gap-[6px]">
                 {currentIssueLinks.map(({ link, perspective }) => {
@@ -1993,7 +2095,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                         key={link.id}
                         label={perspective.label}
                         requiresReview={requiresReview}
-                        canRemove={!isArchived && canEditIssue}
+                        canRemove={!isArchived && canEditContent}
                         onRemove={async () => {
                           try {
                             await removeLink(link.id);
@@ -2073,7 +2175,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                   </div>
                   )}
                 </div>
-                {!isArchived && canEditIssue && (
+                {!isArchived && canEditContent && (
                   <div className="relative flex flex-wrap items-center gap-1.5">
                     <ContextMenu
                       trigger={(
@@ -2115,11 +2217,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     >
                       <span className="sm:hidden">Дочірнє</span><span className="hidden sm:inline">Додати дочірнє звернення</span>
                     </Button>}
-                    {/* `canEditIssue` above already answers «not a client», and
-                        this says it a second time in the words the section
-                        header uses. A control that creates internal data is
-                        hidden by the role, never by the permission alone. */}
-                    {!clientViewer && <Button
+                    <Button
                       aria-label="Додати зв’язок"
                       style="secondary"
                       size="sm"
@@ -2131,7 +2229,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       }}
                     >
                       <span className="sm:hidden">Зв’язок</span><span className="hidden sm:inline">Додати зв’язок</span>
-                    </Button>}
+                    </Button>
                   </div>
                 )}
             </DetailSection>

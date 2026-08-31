@@ -22,7 +22,21 @@ const CONTEXT_GRIDS = {
   // The 44px width on a phone is deliberate and stays: at 32×28, which is what
   // the condensed header left it, «Деталі» was under every touch-target
   // guideline there is and the one control people reported missing with a thumb.
-  task: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(5,minmax(0,1fr))] [&>*]:min-w-0',
+  // Six cells for an agent: status, type, priority, support's assignees, the
+  // customer's assignees, the resolution date. The fifth used to be a section
+  // under the description — «хто у клієнта відповідає» is an attribute of the
+  // request, and it read as an afterthought parked below the body text while
+  // the strip above it had a column to spare.
+  //
+  // Six do not fit between `sm` and `lg`, so that range carries the four an
+  // agent touches most and «Деталі» holds the other two. Below `sm` it is two
+  // and the button, exactly as before.
+  task: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(4,minmax(0,1fr))_44px] lg:grid-cols-[repeat(6,minmax(0,1fr))] [&>*]:min-w-0',
+  // The customer's copy of it: the same cells in the same order, without the
+  // two that are the desk's own — who inside support is answering, and when it
+  // is promised. Four fit from `sm` up, so «Деталі» is only ever needed on a
+  // phone.
+  clientTask: 'grid w-full grid-cols-[repeat(2,minmax(0,1fr))_44px] items-center gap-1.5 overflow-visible sm:grid-cols-[repeat(4,minmax(0,1fr))] [&>*]:min-w-0',
 };
 
 /**
@@ -39,7 +53,7 @@ const CONTEXT_GRIDS = {
 export function getTaskAttributeChrome({ condensed = false, readOnly = false } = {}) {
   return {
     attributeItemClass: readOnly
-      ? `flex min-w-0 flex-col rounded-[10px] px-2 transition-[padding,gap] duration-200 ${condensed ? 'gap-0 py-1' : 'gap-[4px] py-1.5'}`
+      ? `flex min-w-0 flex-col items-start rounded-[10px] px-2 transition-[padding,gap] duration-200 ${condensed ? 'gap-0 py-1' : 'gap-[4px] py-1.5'}`
       : `flex min-w-0 flex-1 cursor-pointer flex-col rounded-[10px] px-2 transition-[padding,gap,background-color] duration-200 hover:bg-line ${condensed ? 'gap-0 py-1' : 'gap-[4px] py-1.5'}`,
     attributeLabelClass: `block h-[14px] overflow-hidden text-[10px] font-bold leading-[14px] uppercase tracking-wider text-muted transition-[height,max-height,opacity] duration-200 ${condensed ? 'h-0 max-h-0 opacity-0' : 'max-h-[14px] opacity-100'}`,
     compactSelectClass: 'h-[22px] w-full justify-start gap-1 rounded-[10px] bg-transparent px-0 text-[13px] font-medium leading-[22px]',
@@ -107,7 +121,7 @@ export function AttributeTrigger({
  *
  * @param {React.ReactNode} props.primaryChildren The always-visible attributes.
  * @param {React.ReactNode} props.secondaryChildren The attributes behind "Деталі".
- * @param {'task'} props.context Which grid the strip uses.
+ * @param {'task'|'clientTask'} props.context Which grid the strip uses.
  * @param {boolean} props.condensed Scrolled state: labels collapse and the rows tighten.
  * @param {boolean} props.compact Denser variant for narrow panes.
  * @param {boolean} props.singleRow Keeps everything on one row instead of wrapping.
