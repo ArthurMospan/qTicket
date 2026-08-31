@@ -429,6 +429,58 @@ now, second branch, so «Надіслати» is decided at full budget before a
 be spent. **The next change here should reduce what is in this file rather than
 add to it.**
 
+### «Огляд» for the customer too (2026-08-31)
+
+The product's front screen was something only half its users had. `/overview`
+redirected a client away on sight, `/` sent them into their space instead, and
+their rail opened with «Мої звернення» — so a customer arrived at a list and
+never at a summary. The obvious second answer, a customer dashboard of its own,
+is the one this guardrail forbids: **a screen both audiences reach is one screen
+that knows who is looking**. Two screens counting the same records is how «У
+роботі» came to mean two different numbers once already.
+
+- The screen guard and the redirect are gone. `/overview` renders one component
+  that branches on the role: support keeps its five tiles, the recently-updated
+  list across every client and the client panel; a customer gets three tiles —
+  **«Відкриті»**, **«Чекають на вас»**, **«Вирішені»** — and «Останні оновлення»
+  of their own requests, drawn with the kit's `TaskRow` and `showAssignee={false}`.
+- **«Чекають на вас»** is the mirror of support's **«Чекають на нас»** and is
+  computed in `incidentQueueMetrics.mjs` beside it, not written out again on the
+  page: `isWaitingOnClient` / `waitingOnClient`. It is deliberately not
+  `!waitingOnUs` — a request nobody has written in yet waits on neither side,
+  and negating the other predicate would have handed every new request to the
+  customer as their move to make.
+- **«Створити звернення»** is a primary in the `PageHeader`, and only on the
+  customer's half. Only a client opens a request, so the control exists for the
+  one reader who may use it and deliberately does not exist for support. It
+  leads to `/{spaceId}?new=1`, because the composer lives in the space.
+- Three things the customer's half never draws: **who is assigned** (routing is
+  how the desk organises itself), the **clients panel** (there is one client and
+  it is them), and any **resolution date** — a date a customer can read is a
+  promised resolution time, which the owner rejected outright.
+- The client rail is **«Огляд» · «Мої звернення» · «Налаштування»**, and `/`
+  lands a client on `/overview`. The one address that still overrides it is
+  `?new=1` from Ctrl+K: the composer is in the space, so that hop goes straight
+  there rather than dropping the request the reader already made.
+- **«Співробітники»** is off the client rail and off `MobileNav`. It pointed at
+  `/settings?section=team`, and the settings rail names that same destination
+  again on the screen it opens — one address named twice on one screen. The
+  roster moves to `/team`.
+- `isClientPortalRoute` admits `/overview` **by exact name**. If the product
+  sends somebody somewhere, that list has to say so — the alternative is the
+  loop this file already records: the page redirects forward, the layout bounces
+  back, and the client cannot open qTicket at all. `overview` stays a
+  `RESERVED_SEGMENT`, so a space that happens to carry that id is still refused
+  as a space.
+- The screen came off the `STAFF_ONLY` exemption in `tests/client-terminology.test.mjs`,
+  and support's own word for the seat went with it: the tile and the rows say
+  **«Без відповідального»**. A word kept one branch away from the person it is
+  hidden from is a word this product has already leaked twice by moving the branch.
+
+Still open: the command palette offers a client no «Огляд» entry, and
+`WorkspaceHeader` still puts support's search placeholder — «Пошук звернень,
+клієнтів і команди…» — over the customer's half of the screen.
+
 ### The event the desk waits for (2026-08-31)
 
 Creating a request now tells the support staff on that customer's space. Until

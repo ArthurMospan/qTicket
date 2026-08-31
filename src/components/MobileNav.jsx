@@ -64,14 +64,21 @@ export default function MobileNav({ keyboardOpen = false }) {
   }, [projects]);
   const visibleTabs = clientViewer
     ? [
+        // The rail's first entry, in the bar's first slot. `/overview` serves
+        // both audiences now, so the phone and the desktop open the same front
+        // screen for a customer.
+        { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
         { href: clientSpaceHref, icon: Folder, label: 'Звернення', exact: clientSpaceHref === '/' },
-        ...(orgRole === 'client_admin'
-          ? [{ href: '/settings?section=team', icon: Users, label: 'Співробітники', section: 'team' }]
-          : []),
+        // «Співробітники» stood here and pointed at `/settings?section=team` —
+        // the settings rail names that same destination again on the screen it
+        // opens. The client roster lives at `/team` now.
       ]
     : TABS;
+  // «Налаштування», not «Мій профіль»: the desktop rail already dropped the
+  // second name for this screen and the sheet kept it, which left one address
+  // with two labels across the two navigations of one product.
   const visibleMoreNav = clientViewer
-    ? [{ href: '/settings?section=profile', icon: UserRound, label: 'Мій профіль', section: 'profile' }]
+    ? [{ href: '/settings?section=profile', icon: UserRound, label: 'Налаштування', section: 'profile' }]
     : MORE_NAV;
   const [moreOpen, setMoreOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
