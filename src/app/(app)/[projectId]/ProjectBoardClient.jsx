@@ -7,8 +7,10 @@ import {
   Button,
   Card,
   DetailSection,
+  DistributionBar,
   EmptyState,
   FilterBar,
+  KpiCard,
   ListRow,
   LoadingSpinner,
   PageHeader,
@@ -20,8 +22,11 @@ import {
   UserAvatar,
 } from '@/components/ui';
 import {
+  CircleCheck,
+  CircleDotDashed,
   Inbox,
   Kanban,
+  MessageCircleReply,
   List,
   Plus,
   Settings2,
@@ -44,8 +49,11 @@ import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
+import { plural } from '@/lib/utils/plural.mjs';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
-import { assigneeIdsOf, categorizeIssues } from '@/lib/utils/incidentQueueMetrics.mjs';
+import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
+import { summarizeCycleTimes } from '@/lib/utils/velocityMetrics.mjs';
+import { reliableCompletedAtMillis } from '@/lib/utils/completionDates.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
@@ -59,6 +67,14 @@ import useWorkspaceStore from '@/store/useWorkspaceStore';
 const PROJECT_TABS = [
   { id: 'incidents', label: 'Звернення' },
   { id: 'people', label: 'Учасники' },
+  // A third tab, and it reverses a guardrail: «простір клієнта — це черга, а не
+  // другий дашборд», written on 2026-08-29 when four KPI tiles were sitting on
+  // top of the board saying what the board's own columns already said. That
+  // reasoning holds for tiles *above a queue* and does not reach a tab of its
+  // own — nobody opens «Аналітика» by accident, and the numbers there are about
+  // this one customer, which is the question «Огляд» cannot answer because it
+  // counts every customer at once. The owner asked for it on 2026-08-31.
+  { id: 'analytics', label: 'Аналітика' },
 ];
 
 // The period filter's cutoff, resolved outside the component.
@@ -222,6 +238,15 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     () => projectMembers.filter(member => !isClientRole(member.role)),
     [projectMembers],
   );
+  // Who «ми» are, for «Чекають на нас» — the same roster the assignee filter
+  // is already drawn from, so the question costs no extra read.
+  const supportUserIds = useMemo(
+    () => new Set((members || [])
+      .filter(member => !isClientRole(member.role))
+      .map(member => member.id || member.uid)
+      .filter(Boolean)),
+    [members],
+  );
   const supportAssigneeOptions = useMemo(() => supportMembers.map(member => ({
     value: member.id || member.uid,
     label: member.name || member.displayName || member.email || 'Учасник',
@@ -266,6 +291,38 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
       ));
   }, [assigneeFilter, categorizedIssues, clientViewer, periodFilter, priorityFilter, scope, typeFilter, workspaceSearch]);
   usePublishLocalSearchResults(workspaceSearch, visibleIssues.length);
+
+  // One customer's numbers, derived from the requests this screen already has.
+  //
+  // «Огляд» answers «як ідуть справи» across every customer at once, which is
+  // the wrong shape for «як ідуть справи в цього». Nothing here is a second
+  // read: the same `issues` array feeds the board, the list and this.
+  const analytics = useMemo(() => {
+    const metrics = incidentQueueMetrics(categorizedIssues, { supportUserIds });
+    const cycle = summarizeCycleTimes(issues, reliableCompletedAtMillis);
+    const bucketise = (source, keyOf) => {
+      const counts = new Map();
+      for (const issue of issues) {
+        const key = keyOf(issue);
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+      return source
+        .map(item => ({
+          id: item.id,
+          label: item.label,
+          color: item.color,
+          value: counts.get(item.id) || 0,
+        }))
+        .filter(item => item.value > 0);
+    };
+    return {
+      metrics,
+      cycle,
+      byStatus: bucketise(statuses || [], issue => issue.columnId || issue.status),
+      byType: bucketise(types || [], issue => issue.type),
+      byPriority: bucketise(priorities || [], issue => issue.priority || NO_PRIORITY_ID),
+    };
+  }, [categorizedIssues, issues, priorities, statuses, supportUserIds, types]);
 
   const actor = useMemo(() => ({
     userId: currentUser?.uid || currentUser?.id,
@@ -394,7 +451,11 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   const tabs = PROJECT_TABS
     .map(tab => ({
       ...tab,
-      count: tab.id === 'incidents' ? visibleIssues.length : projectMembers.length,
+      // A count where one means something. «Аналітика» is not a list, and a
+      // number beside it would be a number about nothing.
+      count: tab.id === 'incidents'
+        ? visibleIssues.length
+        : tab.id === 'people' ? projectMembers.length : undefined,
     }));
 
   if (loading) {
@@ -628,6 +689,57 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                     />
                   )}
                 </>
+              )}
+
+              {activeTab === 'analytics' && (
+                <div className="flex flex-col gap-[20px]">
+                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    <KpiCard icon={Inbox} value={analytics.metrics.open} label="Відкриті" sub="ще в роботі" />
+                    <KpiCard icon={CircleCheck} value={analytics.metrics.resolved} label="Вирішені" sub="за весь час" />
+                    {/* The mirror of the overview's pair, read from whichever
+                        side of the desk is looking. A customer is never told
+                        what the desk owes *other* customers, and never told
+                        which agent owes it. */}
+                    <KpiCard
+                      icon={MessageCircleReply}
+                      value={clientViewer ? analytics.metrics.waitingOnClient : analytics.metrics.waitingOnUs}
+                      label={clientViewer ? 'Чекають на вас' : 'Чекають на нас'}
+                      sub={clientViewer ? 'підтримка відповіла останньою' : 'клієнт написав останнім'}
+                    />
+                    {/* Measured, never promised. This is how long requests have
+                        actually taken; it is not a target, and qTicket has no
+                        SLA to compare it against — the owner rejected those
+                        outright, and a median that quietly becomes a promise is
+                        how one grows back. `sampleSize` is on the card because
+                        a median of two requests is not a fact about a desk. */}
+                    <KpiCard
+                      icon={CircleDotDashed}
+                      value={analytics.cycle.medianDays === null ? '—' : `${analytics.cycle.medianDays} д`}
+                      label="Медіанний час до вирішення"
+                      sub={analytics.cycle.sampleSize
+                        ? `за ${analytics.cycle.sampleSize} ${plural(analytics.cycle.sampleSize, ['зверненням', 'зверненнями', 'зверненнями'])}`
+                        : 'ще нема вирішених'}
+                    />
+                  </div>
+
+                  <div className="grid items-start gap-[20px] xl:grid-cols-3">
+                    <Surface preset="panel" padding="md">
+                      <DetailSection density="panel" title="За статусом" description="Де зараз стоять звернення цього проєкту.">
+                        <DistributionBar items={analytics.byStatus} emptyLabel="Звернень ще немає" />
+                      </DetailSection>
+                    </Surface>
+                    <Surface preset="panel" padding="md">
+                      <DetailSection density="panel" title="За типом" description="Про що звертаються найчастіше.">
+                        <DistributionBar items={analytics.byType} emptyLabel="Звернень ще немає" />
+                      </DetailSection>
+                    </Surface>
+                    <Surface preset="panel" padding="md">
+                      <DetailSection density="panel" title="За пріоритетом" description="Наскільки терміновими їх позначили.">
+                        <DistributionBar items={analytics.byPriority} emptyLabel="Звернень ще немає" />
+                      </DetailSection>
+                    </Surface>
+                  </div>
+                </div>
               )}
 
               {activeTab === 'people' && (

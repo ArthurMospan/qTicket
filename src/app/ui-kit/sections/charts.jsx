@@ -1,6 +1,6 @@
 'use client';
 import { AlertTriangle, BarChart2, TrendingDown } from 'lucide-react';
-import { KpiCard, Sparkline } from '@/components/ui';
+import { DistributionBar, KpiCard, Sparkline } from '@/components/ui';
 import { PreviewBlock } from '../preview';
 
 // What is left of the reporting vocabulary after qTicket stopped reporting:
@@ -40,6 +40,25 @@ export default function ChartsSection() {
         <div className="flex items-center gap-4">
           <Sparkline values={[2, 5, 3, 7, 4, 6, 9, 8, 11, 9, 14, 18]} />
           <Sparkline values={[18, 14, 15, 9, 11, 8, 9, 6, 4, 3, 5, 2]} />
+        </div>
+      </PreviewBlock>
+
+  <PreviewBlock
+        title="Розподіл за категоріями"
+        description="Скільки з набору в якому кошику: підпис, пропорційна смуга, число. Навмисно не графік — питання на пʼять-вісім рядків, а вісь, підказка й легенда були б меблями навколо числа, яке рядок і так друкує. Смуга міряється від найбільшого кошика, а не від суми: набір 60/20/20 малює одну повну й дві третини, і це читається, тоді як від суми вийшли б три обрубки на порожній доріжці. Колір тут — дані: свій у статусу, типу й пріоритету, той самий, що на дошці."
+        filePath="src/components/ui/Charts/DistributionBar.jsx"
+        component="DistributionBar"
+        fullWidth
+      >
+        <div className="w-full max-w-[420px]">
+          <DistributionBar
+            items={[
+              { id: 'todo', label: 'Прийнято', value: 12, color: '#0e8f74' },
+              { id: 'in-progress', label: 'У роботі', value: 7, color: '#cf7a22' },
+              { id: 'review', label: 'Очікує відповіді', value: 3 },
+              { id: 'done', label: 'Вирішено', value: 28, color: '#1f1f1f' },
+            ]}
+          />
         </div>
       </PreviewBlock>
 

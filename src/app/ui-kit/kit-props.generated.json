@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 89,
-    "props": 657,
-    "documentedProps": 657,
+    "components": 90,
+    "props": 660,
+    "documentedProps": 660,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -1750,6 +1750,33 @@
             "eyebrow"
           ],
           "description": "Type scale of the headline."
+        }
+      ]
+    },
+    "DistributionBar": {
+      "file": "src/components/ui/Charts/DistributionBar.jsx",
+      "summary": "One measure, split across named buckets, as a list of proportional bars.",
+      "props": [
+        {
+          "name": "className",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Placement in the parent only."
+        },
+        {
+          "name": "emptyLabel",
+          "default": "'Немає даних'",
+          "type": "string",
+          "values": [],
+          "description": "What to say when every bucket is zero."
+        },
+        {
+          "name": "items",
+          "default": "[]",
+          "type": "{id: string, label: string, value: number, color?: string}[]",
+          "values": [],
+          "description": "The buckets, in the order they should read."
         }
       ]
     },

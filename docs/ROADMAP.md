@@ -29,6 +29,15 @@ This file contains current owner guardrails and confirmed open work. Completed i
   *by* them, which is true of the gear and not of a roster whose two halves are
   the customer's own colleagues and the agents answering them. What stays
   withheld is one step finer: which agent holds a particular request.
+  A third tab, **Аналітика**, arrived on 2026-09-01 at the owner's request, and
+  it does not contradict the rule above — it narrows it. No counter tiles stand
+  over the board, and that is what «не другий дашборд» was about: numbers that
+  answer a question the columns beneath them already answer. Numbers about *this
+  one customer* are a question «Огляд» genuinely cannot answer, because it counts
+  every customer at once, and nobody opens a tab named «Аналітика» by accident.
+  What it may show is measured and never promised: how long requests have taken,
+  never how long they will — qTicket has no SLA and the median must not become
+  one. It carries the sample size for the same reason.
 - **The client and the support team see the same interface.** The difference between them is what the client is *not* shown — internal controls, other customers' queues, organization settings — never a second product built for customers. A screen both audiences reach is one screen that knows who is looking; a screen only clients reach exists only where support genuinely has no equivalent.
 - **The team and the brand are administered in QuickTeam's qTicket integration, not inside qTicket.** Staff seats, roles, identity, organization name, logo and colour arrive in the signed snapshot and are read-only here; a second editor for any of them is a copy that loses. What qTicket's own settings own is the support process and its record: statuses, types, priorities, labels and the archive. A settings section that does not administer one of those does not belong in qTicket.
 - qTicket does not publish a price list, sell or switch subscriptions, or use a

@@ -13,7 +13,7 @@
     "long-text"
   ],
   "totals": {
-    "components": 89,
+    "components": 90,
     "stateful": 79,
     "hover": 53,
     "focus": 52,
@@ -137,6 +137,7 @@
     "Dialog": {
       "long-text": "children, description, title"
     },
+    "DistributionBar": {},
     "EmptyState": {
       "long-text": "children, description, title"
     },
@@ -498,6 +499,9 @@
     ],
     "Dialog": [
       "dialogs"
+    ],
+    "DistributionBar": [
+      "charts"
     ],
     "EmptyState": [
       "feedback",
