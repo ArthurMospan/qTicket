@@ -486,6 +486,24 @@ service cloud.firestore {
           request.resource.data.userId == request.auth.uid;
         allow update, delete: if false;
       }
+
+      // What happened to the request, for the person who filed it.
+      //
+      // `audit/` above is the support-side work record and stays that way. This
+      // is the one fact from it a customer is entitled to — their request moved,
+      // and when — carried in a collection of its own because rules cannot
+      // require a `where` clause: «read the audit, but only the status rows» is
+      // not a condition that can be written here. What a client may read is
+      // therefore decided by what the server puts in, not by a query they are
+      // trusted to send.
+      //
+      // Written only by the status route and the create route, both server-side,
+      // and never from a browser: an append here would be a customer editing the
+      // history of their own request.
+      match /statusHistory/{entryId} {
+        allow read: if canAccessIssueProject(issueId);
+        allow write: if false;
+      }
     }
 
     // ── issueLinks/{id} ──────────────────────────────────────────────────

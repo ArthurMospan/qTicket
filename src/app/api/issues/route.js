@@ -424,6 +424,15 @@ export async function POST(request) {
           ? { issueHierarchyVersion: FieldValue.increment(1) }
           : {}),
       });
+      // The first line of the customer's own history, so their thread opens with
+      // the request existing rather than with nothing at all. See the status
+      // route for why this is a subcollection of its own and carries no actor.
+      transaction.create(issueRef.collection('statusHistory').doc(), {
+        action: 'created',
+        from: null,
+        to: status,
+        createdAt: now,
+      });
       transaction.create(issueRef.collection('audit').doc(), {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',

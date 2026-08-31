@@ -194,14 +194,14 @@
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1420",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1443",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "AvatarButton",
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1440",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1463",
       "attributes": [
         "label"
       ]

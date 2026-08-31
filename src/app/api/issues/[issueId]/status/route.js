@@ -446,6 +446,33 @@ export async function PATCH(request, context) {
         ...projectIssueCountIncrements(countDeltas, current.projectId),
         updatedAt: now,
       });
+      // The customer's half of the same fact.
+      //
+      // `audit/` is the support-side work record — who reassigned it, who moved
+      // it, when — and `firestore.rules` refuses it to a client role. That is
+      // right, and it left the customer's own thread with nothing in it: a
+      // request went Новий → Прийнято → У роботі → Вирішено and their timeline
+      // stayed empty unless somebody typed a message, while the status pill
+      // above it changed silently.
+      //
+      // Rules cannot require a `where` clause, so «let them read the audit, but
+      // only the status rows» is not a thing that can be written. A separate
+      // subcollection is, and it is the safer shape anyway: what a client may
+      // read is decided by what is put in here, not by a query they are trusted
+      // to send. Nothing else is ever written to it — no actor in particular,
+      // because which agent moved it is the routing the product withholds from
+      // them everywhere else, and a field that is not stored cannot leak if the
+      // rule around it is ever loosened.
+      //
+      // Shaped exactly like the audit entry beside it so `describeAuditEvent`
+      // reads both out in the same words. Two vocabularies for one fact is how
+      // the two sides of a desk start describing different products.
+      transaction.create(issueRef.collection('statusHistory').doc(), {
+        action: 'moved',
+        from: currentStatus,
+        to: requestedStatus,
+        createdAt: now,
+      });
       transaction.create(issueRef.collection('audit').doc(), {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',

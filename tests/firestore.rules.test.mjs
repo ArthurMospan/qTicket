@@ -1325,3 +1325,60 @@ test('a reply still goes through on an incident that carries the customer’s ow
     await assertSucceeds(sendClientReply(db, uid, `${uid}-reply-beside-assignees`));
   }
 });
+
+// ── What happened to the request, for the person who filed it ────────────────
+//
+// `audit/` is the support-side work record and stays refused to a client role.
+// The one fact from it a customer is entitled to — their request moved, and
+// when — lives in a collection of its own, because rules cannot require a
+// `where` clause: «the audit, but only the status rows» is not a condition that
+// can be written here. So what a client may read is decided by what the server
+// puts in, and never by a query they are trusted to send.
+test('a customer reads what happened to their request, and still not the work record', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'issues', 'issue-a', 'statusHistory', 'moved-1'), {
+      action: 'moved', from: 'todo', to: 'in-progress', createdAt: serverTimestamp(),
+    });
+    await setDoc(doc(db, 'issues', 'issue-a', 'audit', 'assigned-1'), {
+      userId: 'member-a', action: 'changed_assigneeIds', from: [], to: ['member-a'],
+    });
+  });
+
+  for (const uid of ['client-admin-a', 'client-member-a', 'member-a', 'owner-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertSucceeds(getDoc(doc(db, 'issues', 'issue-a', 'statusHistory', 'moved-1')));
+  }
+  const clientDb = environment.authenticatedContext('client-member-a').firestore();
+  await assertFails(getDoc(doc(clientDb, 'issues', 'issue-a', 'audit', 'assigned-1')));
+});
+
+// An append here would be a customer editing the history of their own request,
+// and an agent doing it would be a work record with two authors. Only the status
+// route and the create route write it, both server-side.
+test('nobody writes the customer’s history from a browser', async () => {
+  for (const uid of ['client-admin-a', 'member-a', 'owner-a']) {
+    const db = environment.authenticatedContext(uid).firestore();
+    await assertFails(setDoc(doc(db, 'issues', 'issue-a', 'statusHistory', `forged-${uid}`), {
+      action: 'moved', from: 'todo', to: 'done', createdAt: serverTimestamp(),
+    }));
+  }
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'statusHistory', 'moved-2'), {
+      action: 'moved', from: 'todo', to: 'done', createdAt: serverTimestamp(),
+    });
+  });
+  const clientDb = environment.authenticatedContext('client-admin-a').firestore();
+  await assertFails(updateDoc(doc(clientDb, 'issues', 'issue-a', 'statusHistory', 'moved-2'), { to: 'todo' }));
+  await assertFails(deleteDoc(doc(clientDb, 'issues', 'issue-a', 'statusHistory', 'moved-2')));
+});
+
+test('a stranger reads no history of a space they are not on', async () => {
+  await environment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'issues', 'issue-a', 'statusHistory', 'moved-3'), {
+      action: 'moved', from: 'todo', to: 'done', createdAt: serverTimestamp(),
+    });
+  });
+  const outsiderDb = environment.authenticatedContext('client-other').firestore();
+  await assertFails(getDoc(doc(outsiderDb, 'issues', 'issue-a', 'statusHistory', 'moved-3')));
+});

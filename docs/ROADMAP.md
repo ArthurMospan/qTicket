@@ -368,6 +368,34 @@ was written to prevent in the first place. Both halves have a test.
 The two legacy organizations stay in the database, with their content, for a
 human to decide about. They are not a migration's business.
 
+### A customer's thread that says nothing happened (2026-08-31)
+
+`audit/` is the support-side work record — who reassigned it, who moved it, when
+— and `firestore.rules` refuses it to a client role. That is right, and it left
+the customer's own thread empty: a request went Новий → Прийнято → У роботі →
+Вирішено and their timeline showed no trace of it unless somebody had also typed
+a message, while the status pill above it changed silently.
+
+Firestore rules cannot require a `where` clause, so «let a client read the audit,
+but only the status rows» is not a condition that can be written. The fact they
+are entitled to therefore lives in `issues/{id}/statusHistory`, written by the
+status route and the create route — both server-side, both the only writers, and
+the rule refuses every browser write. Status changes have exactly one write path
+already: the bulk action delegates to the same route, so the history has no
+holes.
+
+- No actor is stored. Which agent moved a request is the routing withheld from a
+  customer everywhere else, and a field that is not written cannot leak if the
+  rule around it is ever loosened.
+- Entries are written in the audit's own shape (`action`, `from`, `to`), so
+  `describeAuditEvent` reads both feeds out in the same words. Two vocabularies
+  for one fact is how the two sides of a desk begin describing different
+  products.
+- `UnifiedTimeline` subscribes to exactly one of the two feeds by role, and the
+  unread boundary now waits on whichever one this reader is actually on —
+  latching on `auditLoading` would settle instantly for a customer, who has no
+  audit subscription at all.
+
 ### The customer's own side of a request (2026-08-31)
 
 `assigneeIds` is support's routing and a client never sees it. `clientAssigneeIds`
