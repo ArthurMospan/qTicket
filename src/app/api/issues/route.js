@@ -91,6 +91,12 @@ export async function POST(request) {
       ? {
           title: submittedData.title,
           description: submittedData.description,
+          // The one routing decision that is genuinely the customer's: which of
+          // their own people answers for this. It is not `assigneeIds` and never
+          // becomes one — support's queue stays support's — so it passes the
+          // projection as its own key rather than widening what a client may
+          // say about the workflow.
+          clientAssigneeIds: submittedData.clientAssigneeIds,
         }
       : submittedData;
     if (!projectId || typeof data.title !== 'string' || !data.title.trim() || data.title.trim().length > 240) {
@@ -162,6 +168,24 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Ви не входите до команди цього клієнтського простору' }, { status: 403 });
     }
     const assigneeIds = Array.isArray(data.assigneeIds) ? [...new Set(data.assigneeIds)].slice(0, 20) : [];
+    // The customer's own answerable people. Bounded to the client space's
+    // roster here for the same reason `firestore.rules` bounds the later edit to
+    // it: the picker only offers colleagues, and a hand-written request must not
+    // be able to name somebody who is not on this space at all. A client who
+    // says nothing answers for it themselves — that is the useful default and
+    // the one the composer starts from.
+    const rosterUids = Array.isArray(projectData.team) ? projectData.team : [];
+    const requestedClientAssignees = Array.isArray(data.clientAssigneeIds)
+      ? [...new Set(data.clientAssigneeIds)].filter(uid => typeof uid === 'string' && uid)
+      : [];
+    const offRoster = requestedClientAssignees.filter(uid => !rosterUids.includes(uid));
+    if (offRoster.length) {
+      return NextResponse.json({
+        error: 'Відповідальний не входить до цього клієнтського простору',
+        code: 'CLIENT_ASSIGNEE_OUTSIDE_PROJECT',
+      }, { status: 400 });
+    }
+    const clientAssigneeIds = requestedClientAssignees.slice(0, 10);
     // Adding somebody to a project is a thing the caller asks for, never a side
     // effect of assigning them work. The first version of this rule did it
     // silently, in the same write, on the strength of a 10px line in the
@@ -355,6 +379,7 @@ export async function POST(request) {
         priority: freshPriorityIds.has(data.priority) ? data.priority : NO_PRIORITY_ID,
         type: freshTypeSelection.type,
         assigneeIds,
+        clientAssigneeIds,
         labelIds: Array.isArray(data.labelIds)
           ? data.labelIds.filter(id => freshLabelIds.has(id)).slice(0, 20)
           : [],

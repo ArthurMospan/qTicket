@@ -48,7 +48,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
   const [form, setForm] = useState({
     title: '', description: '', status: 'backlog',
     priority: NO_PRIORITY_ID, type: 'task',
-    assignees: [], labelIds: [], dueDate: '',
+    assignees: [], clientAssignees: [], labelIds: [], dueDate: '',
     projectId: projects && projects.length > 0 ? projects[0].id : '',
   });
   const [loading, setLoading] = useState(false);
@@ -161,6 +161,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
       : initialAssignees?.length
       ? initialAssignees
       : [currentUser?.id || currentUser?.uid].filter(Boolean),
+    // Whoever is filing it answers for it until they say otherwise. A field that
+    // starts empty is a field most people leave empty, and «нікого» is the one
+    // answer this question never has.
+    clientAssignees: clientMode ? [currentUser?.id || currentUser?.uid].filter(Boolean) : [],
     labelIds: [],
     dueDate: '',
     projectId: projects?.[0]?.id || projectContext?.id || '',
@@ -185,6 +189,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
       priority: current.priority,
       type: current.type,
       assignees: current.assignees,
+      clientAssignees: current.clientAssignees,
     }));
     setError('');
     setFieldErrors({});
@@ -267,6 +272,16 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
     }));
   };
 
+  const toggleClientAssignee = (uid) => {
+    setDraftTouched(true);
+    setForm(current => ({
+      ...current,
+      clientAssignees: current.clientAssignees.includes(uid)
+        ? current.clientAssignees.filter(assignee => assignee !== uid)
+        : [...current.clientAssignees, uid],
+    }));
+  };
+
   const toggleLabel = (labelId) => {
     set('labelIds', form.labelIds.includes(labelId)
       ? form.labelIds.filter(id => id !== labelId)
@@ -333,6 +348,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
             title: form.title,
             description: form.description,
             projectId: form.projectId,
+            clientAssignees: form.clientAssignees,
             createdBy: currentUser?.id || currentUser?.uid,
           }
         : {
@@ -497,6 +513,38 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
               minHeight="120px"
             />
           </div>
+
+          {/* Who answers for this on the customer's side. It is the one routing
+              question a client gets, and it is about their own people — support's
+              own assignment stays support's and is never shown here. Offered only
+              when they have colleagues to choose between: a one-person client
+              would be asked to confirm the only possible answer. */}
+          {clientMode && teamMembers.length > 1 && (
+            <div className="flex flex-col gap-[6px] lg:col-span-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label>Відповідальні клієнта</Label>
+                <span className="text-[10px] font-medium text-muted">Можна вибрати кількох</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {teamMembers.map(member => {
+                  const uid = member.uid || member.id;
+                  const selected = form.clientAssignees.includes(uid);
+                  return (
+                    <SelectableChip
+                      key={uid}
+                      shape="person"
+                      selected={selected}
+                      onClick={() => toggleClientAssignee(uid)}
+                    >
+                      <span aria-hidden="true"><UserAvatar user={member} size="xs" /></span>
+                      <span className="max-w-[180px] truncate">{member.name || member.email}</span>
+                      {selected && <Check size={12} className="shrink-0" />}
+                    </SelectableChip>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Metadata controls share one grid, so every field has identical
               geometry and a deterministic reading order. */}

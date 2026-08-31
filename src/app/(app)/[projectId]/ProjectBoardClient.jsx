@@ -256,6 +256,9 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
       dueDate: formData.dueDate || null,
       estimateMinutes: formData.estimateMinutes || 0,
       addAssigneesToProjectTeam: formData.addAssigneesToProjectTeam === true,
+      // The customer's own answerable people. Never `assigneeIds`: support's
+      // queue is routed by support, and the server keeps the two apart too.
+      clientAssigneeIds: formData.clientAssignees || [],
     }, actor);
     showToast(INCIDENT_TERMS_TABLE.created);
     return { ...created, projectId };
@@ -612,7 +615,9 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
           isOpen={showComposer}
           onClose={() => setShowComposer(false)}
           onSubmit={handleCreateIssue}
-          teamMembers={[]}
+          /* Their colleagues, not the support roster: the only people a client
+             may name are the ones on their own side of this space. */
+          teamMembers={clientMembers}
           projectContext={{
             id: project.id,
             name: project.name,

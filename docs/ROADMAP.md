@@ -344,6 +344,39 @@ Completed product slice on 2026-08-29:
   carries the one sentence the deleted section had and this screen did not —
   where a seat comes from.
 
+### The customer's own side of a request (2026-08-31)
+
+`assigneeIds` is support's routing and a client never sees it. `clientAssigneeIds`
+is the mirror that belongs to them: which of their own people answers for this
+request. Support reads it — «who do we talk to over there» is the most useful
+thing about a queue of somebody else's problems — and may correct it. It defaults
+to whoever filed the request, because a field that starts empty is a field most
+people leave empty and «нобody» is the one answer this question never has.
+
+- One label for both readers, **«Відповідальні клієнта»**. Two labels for one
+  field is how a two-name product starts, and the agent's screen shows this
+  beside «Відповідальні», so the label has to say whose.
+- One placement for both readers: a `group` section in the request's body, not a
+  cell on the attribute strip. The agent's strip is already five controls wide,
+  and this is read far more often than it is changed.
+- The server bounds it to the client space's roster at creation;
+  `firestore.rules` bounds the later edit to the same roster and to this key
+  alone. What the roster cannot do is tell a client from an agent, so a client
+  could name a support uid and see that person under their own heading —
+  cosmetic, confined to a project that person is already on, and separating the
+  two in rules would mean a membership `get` per entry against a limit of ten.
+
+**A budget, and a warning for whoever edits `firestore.rules` next.** A request
+carries a thousand expressions across every clause that matches it, and this
+file already spends most of that. Adding this as a third `allow update` on
+`issues` repeated the whole scope walk and pushed denied writes past the limit —
+and an exhausted budget arrives looking exactly like a denial. The emulator suite
+stayed green throughout, because every write it exhausted on was one the rules
+meant to refuse: green by coincidence. It is folded into the conversation clause
+now, second branch, so «Надіслати» is decided at full budget before any of it can
+be spent. **The next change here should reduce what is in this file rather than
+add to it.**
+
 ### The event the desk waits for (2026-08-31)
 
 Creating a request now tells the support staff on that customer's space. Until

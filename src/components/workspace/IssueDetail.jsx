@@ -56,7 +56,7 @@ import {
   AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff, ExternalLink,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
-  Maximize2, User, Users, CircleDot, Ban, Undo2,
+  Maximize2, User, Users, UsersRound, CircleDot, Ban, Undo2,
 } from 'lucide-react';
 import { ParentTaskIcon, TaskIcon } from '@/lib/design/icons';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
@@ -457,6 +457,19 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // render on everything they did; they are simply not people you can hand new
   // work to, here or in any other picker.
   const supportDirectory = activeMembers(members).filter(member => !isClientRole(member.role));
+  // The customer's own people on this space. `assigneeIds` is support's routing
+  // and a client never sees it; this is the mirror that belongs to them —
+  // whichever of their colleagues is answering for this request. Support reads
+  // it because "who do we talk to over there" is the most useful thing about a
+  // queue of somebody else's problems, and may correct it; the customer owns it.
+  const clientDirectory = activeMembers(members).filter(member => (
+    isClientRole(member.role) && isOnProjectTeam(project, member.id || member.uid)
+  ));
+  const clientAssigneeIds = Array.isArray(issue.clientAssigneeIds) ? issue.clientAssigneeIds : [];
+  const clientAssignees = clientAssigneeIds
+    .map(uid => members.find(member => (member.id || member.uid) === uid))
+    .filter(Boolean);
+  const canEditClientAssignees = !isArchived && (clientViewer || canEditIssue);
   const assignableMembers = assignableIds.size === 0
     // A project with no team recorded at all is legacy data, not a project
     // nobody may be assigned to.
@@ -1793,6 +1806,48 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       {canEditIssue ? 'Натисни Редагувати щоб додати опис...' : terms.descriptionEmpty}
                     </DescriptionPlaceholder>
                   )}
+
+                {/* Who is answering on the customer's side. One placement for
+                    both readers rather than a cell on one strip and a section on
+                    the other: the agent's strip is already five controls wide,
+                    and this is a fact people read far more often than they
+                    change. Drawn whenever it has names, or whenever whoever is
+                    looking may add some. */}
+                {(clientAssignees.length > 0 || canEditClientAssignees) && (
+                  <DetailSection
+                    density="group"
+                    icon={UsersRound}
+                    title="Відповідальні клієнта"
+                    count={clientAssignees.length}
+                    className="pt-1"
+                  >
+                    {canEditClientAssignees ? (
+                      <MultiSelect
+                        showSelectedAvatars
+                        ariaLabel="Відповідальні з боку клієнта"
+                        value={clientAssigneeIds}
+                        onChange={ids => update({ clientAssigneeIds: ids })}
+                        options={clientDirectory.map(member => ({
+                          value: member.id || member.uid,
+                          label: member.name || member.displayName || member.email || 'Учасник',
+                          user: member,
+                        }))}
+                        placeholder="Нікого не призначено"
+                        searchPlaceholder="Знайти співробітника…"
+                        dropdownClassName="w-[260px]"
+                      />
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {clientAssignees.map(member => (
+                          <span key={member.id || member.uid} className="flex items-center gap-1.5 text-[13px] font-medium text-ink">
+                            <UserAvatar user={member} size="xs" />
+                            {member.name || member.displayName || member.email || 'Учасник'}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </DetailSection>
+                )}
 
                 {!clientViewer && issueLabels.length > 0 && (
                   <DetailSection density="group" icon={TagIcon} title="Мітки" count={issueLabels.length} className="pt-1">
