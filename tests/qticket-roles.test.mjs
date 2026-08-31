@@ -125,8 +125,9 @@ test('клієнт і підтримка бачать один екран, і з
   assert.match(board, /clientAdminMode/);
   assert.match(board, /useIssues\(scopedProjectId, \{ includeLinks: false \}\)/);
   assert.doesNotMatch(board, /useSprints|AnalyticsTab|QtPlusProjectTab/);
-  // The rail is the same component too, with three destinations for a client:
-  // «Огляд» · «Мої звернення» · «Налаштування», in that order.
+  // The rail is the same component too. A client sees «Огляд» · «Мої звернення»
+  // · «Налаштування», and a client administrator one more between them:
+  // «Співробітники», the roster they actually administer.
   assert.match(sidebar, /const topNav = clientViewer/);
   assert.match(sidebar, /label: 'Мої звернення'/);
   const clientRail = sidebar.slice(
@@ -135,12 +136,16 @@ test('клієнт і підтримка бачать один екран, і з
   );
   assert.deepEqual(
     [...clientRail.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
-    ['Огляд', 'Мої звернення', 'Налаштування'],
+    ['Огляд', 'Мої звернення', 'Співробітники', 'Налаштування'],
   );
+  // And that fourth one is conditional on the role, not on the audience: a
+  // `client_member` administers nobody, and the route boundary refuses them
+  // `/team`, so offering it would be a rail entry that answers with a redirect.
+  assert.match(clientRail, /orgRole === 'client_admin'[\s\S]{0,200}href: '\/team'/);
   // «Співробітники» вело на `/settings?section=team` — ту саму адресу, яку
   // рейка налаштувань називає ще раз на екрані, що відкривається. Один
-  // напрямок, названий двічі на одному екрані. Список — на `/team`.
-  assert.doesNotMatch(sidebar, /label: 'Співробітники'/);
+  // напрямок, названий двічі на одному екрані. Дублікат прибрано з іншого
+  // боку: реєстр тепер окремий екран, і пункт веде саме на нього.
   assert.doesNotMatch(sidebar, /'\/settings\?section=team'/);
   // The tenant's mark never flips to the vendor's.
   assert.doesNotMatch(sidebar, /rotateY\(180deg\)/);

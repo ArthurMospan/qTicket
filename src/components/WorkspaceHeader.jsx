@@ -139,8 +139,18 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
         : 'Пошук звернень, клієнтів і команди...',
     };
   }
+  // «Огляд» serves both audiences now, so its placeholder has to as well. It
+  // said «клієнтів і команди» to everybody, which on a customer's own front
+  // screen offers to search two things they do not have — the same branch `/`
+  // has carried all along, applied where the customer now actually lands.
   if (pathname.startsWith('/overview')) {
-    return { mode: 'search', project: null, placeholder: 'Пошук звернень, клієнтів і команди...' };
+    return {
+      mode: 'search',
+      project: null,
+      placeholder: isClientRole(orgRole)
+        ? 'Пошук за номером або темою звернення...'
+        : 'Пошук звернень, клієнтів і команди...',
+    };
   }
   if (pathname.startsWith('/clients')) {
     return { mode: 'search', project: null, placeholder: 'Пошук клієнтів...' };

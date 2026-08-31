@@ -72,13 +72,22 @@ test('the bar offers a client the same destinations the rail does', async () => 
   assert.match(clientTabs, /href: '\/overview'/);
   assert.match(sidebar, /href: '\/overview', icon: LayoutDashboard, label: 'Огляд'/);
 
-  // «Співробітники» pointed at `/settings?section=team`, which the settings
-  // rail names again on the screen it opens: one destination, two names, one
-  // screen. It is gone from both navigations.
+  // «Співробітники» pointed at `/settings?section=team`, which the settings rail
+  // named again on the screen it opened: one destination, two names, one screen.
+  // The duplicate is gone from the other end — the roster is a screen now — so
+  // what both navigations must agree on is that the entry leads there, and only
+  // for the role the route boundary admits.
   for (const source of [nav, sidebar]) {
-    assert.doesNotMatch(source, /label: 'Співробітники'/);
-    assert.doesNotMatch(source, /'\/settings\?section=team'/);
+    assert.doesNotMatch(source, /'\/settings\?section=team'/,
+      'the roster is no longer a section of «Налаштування»');
+    assert.match(source, /label: 'Співробітники'/);
+    assert.match(source, /orgRole === 'client_admin'[\s\S]{0,160}href: '\/team'/,
+      'the roster entry is offered to a client administrator only');
   }
+  // On the phone it lives in the sheet rather than the bar: the bar holds the
+  // two places a customer is in all day, and the third destination is not one
+  // of them.
+  assert.doesNotMatch(clientTabs, /label: 'Співробітники'/);
   // And `/settings` carries one name across both, not «Мій профіль» here and
   // «Налаштування» there.
   assert.doesNotMatch(nav, /label: 'Мій профіль'/);

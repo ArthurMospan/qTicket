@@ -78,7 +78,18 @@ export default function MobileNav({ keyboardOpen = false }) {
   // second name for this screen and the sheet kept it, which left one address
   // with two labels across the two navigations of one product.
   const visibleMoreNav = clientViewer
-    ? [{ href: '/settings?section=profile', icon: UserRound, label: 'Налаштування', section: 'profile' }]
+    ? [
+        // The roster is a screen of its own now rather than a section of
+        // «Налаштування», and it belongs to a `client_admin` alone — the route
+        // boundary refuses `/team` to a `client_member`, and a navigation must
+        // not offer an address that answers with a redirect. It lives in the
+        // sheet rather than the bar because the bar holds the two places a
+        // customer is actually in all day.
+        ...(orgRole === 'client_admin'
+          ? [{ href: '/team', icon: Users, label: 'Співробітники' }]
+          : []),
+        { href: '/settings?section=profile', icon: UserRound, label: 'Налаштування', section: 'profile' },
+      ]
     : MORE_NAV;
   const [moreOpen, setMoreOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);

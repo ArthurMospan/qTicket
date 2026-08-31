@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 257,
-    "elements": 2185,
+    "elements": 2169,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:2394",
+      "location": "src/app/(app)/settings/page.js:2303",
       "attributes": [
         "title",
         "aria-label"
@@ -35,7 +35,7 @@
     },
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:639",
+      "location": "src/app/(app)/settings/page.js:633",
       "attributes": [
         "aria-label",
         "title"
@@ -208,14 +208,14 @@
     },
     {
       "element": "IconAction",
-      "location": "src/components/WorkspaceHeader.jsx:405",
+      "location": "src/components/WorkspaceHeader.jsx:415",
       "attributes": [
         "label"
       ]
     },
     {
       "element": "a",
-      "location": "src/components/WorkspaceSidebar.jsx:501",
+      "location": "src/components/WorkspaceSidebar.jsx:507",
       "attributes": [
         "title"
       ]

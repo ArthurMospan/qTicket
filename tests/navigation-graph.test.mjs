@@ -430,8 +430,12 @@ test('the roster admits a client administrator and returns a client employee to 
   assert.equal(isClientPortalRoute('/team', [SPACE]), false);
 
   assert.equal(nextHop('/team', admin), null, 'a client administrator stops on the roster');
-  assert.deepEqual(walk('/team', employee).trail, ['/team', '/', `/${SPACE}`],
-    'a client employee is returned to their own space, the way every other internal address returns them');
+  // `/` is the client's front door and it now opens «Огляд», not their space —
+  // the two slices that landed together moved where a returned client arrives,
+  // not whether they are returned. The claim is the walk terminating somewhere
+  // they can actually open, which it does.
+  assert.deepEqual(walk('/team', employee).trail, ['/team', '/', '/overview'],
+    'a client employee is returned to their own portal, the way every other internal address returns them');
   assert.equal(walk('/team', employee).cycle, false);
 
   // And staff are untouched by any of it.

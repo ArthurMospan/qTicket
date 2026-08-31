@@ -37,8 +37,13 @@ test('the catalogue reflects what this person can actually do', () => {
     assert.equal(admin.some(command => command.id === inherited), false, `${inherited} leaked into qTicket`);
   }
 
+  // «Огляд» leads the client's catalogue because it is their front screen: `/`
+  // sends them there. It was absent while that screen was staff-only, and
+  // leaving it absent afterwards would be the palette describing a product that
+  // no longer exists.
   const clientMember = buildCommands({ projects, role: 'client_member' });
   assert.deepEqual(clientMember.filter(command => command.group === 'navigation').map(command => command.id), [
+    'nav-client-overview',
     'nav-requests',
     'nav-profile',
   ]);

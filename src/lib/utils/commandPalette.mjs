@@ -30,6 +30,11 @@ const INTERNAL_NAVIGATION = [
 ];
 
 const CLIENT_NAVIGATION = [
+  // «Огляд» is the client's front screen now — `/` sends them there — so the
+  // palette offers it the way it offers support theirs. It was absent while the
+  // screen was staff-only, and staying absent afterwards would have been the
+  // palette describing a product that no longer exists.
+  { id: 'nav-client-overview', label: 'Огляд', href: '/overview', icon: 'overview', keywords: 'ohliad overview holovna front dashboard' },
   { id: 'nav-requests', label: 'Мої звернення', href: '/', icon: 'issue', keywords: 'moi zvernennya requests incidents support dopomoha' },
   // The same address the support team's «Команда» is. One roster screen, and
   // the client boundary decides which half of it a `client_admin` sees; the

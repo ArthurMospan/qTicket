@@ -221,10 +221,16 @@ export default function WorkspaceSidebar() {
         // them — see src/app/(app)/overview/page.js.
         { href: '/overview', icon: LayoutDashboard, label: 'Огляд' },
         { href: clientSpaceHref, icon: Folder, label: 'Мої звернення', exact: clientSpaceHref === '/' },
-        // «Співробітники» stood here for a `client_admin` and pointed at
-        // `/settings?section=team` — an address the settings rail names again
-        // on the screen it opens, so one destination was named twice on one
-        // screen. The client roster lives at `/team` now.
+        // «Співробітники» used to point at `/settings?section=team` — an address
+        // the settings rail named a second time on the screen it opened, so one
+        // destination was named twice on one screen. The duplicate is gone from
+        // the other end: the roster is a screen of its own now, and this entry
+        // leads to it. It stays `client_admin`-only, because the route boundary
+        // refuses `/team` to a `client_member` and a rail must not offer an
+        // address that answers with a redirect.
+        ...(orgRole === 'client_admin'
+          ? [{ href: '/team', icon: Users, label: 'Співробітники' }]
+          : []),
         //
         // The same destination the internal rail ends with, under the same
         // name. «Мій профіль» was a third word for one screen.
