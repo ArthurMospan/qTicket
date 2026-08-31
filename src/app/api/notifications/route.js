@@ -6,6 +6,7 @@ import { generateEmailTemplate } from '@/lib/utils/sendEmail';
 import { deliverEmail } from '@/lib/server/email';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
 import { REQUESTABLE_NOTIFICATION_TYPES, shouldDeliver } from '@/lib/utils/notificationChannels.mjs';
+import { deliverTelegramNotification } from '@/lib/server/telegram';
 import { OUTBOX_COLLECTION, nextAttemptDelayMs } from '@/lib/utils/notificationOutbox.mjs';
 import { hasProjectAccess } from '@/lib/utils/projectAccess.mjs';
 
@@ -184,7 +185,14 @@ export async function POST(request) {
     const audienceFor = channel => recipients.filter(item => shouldDeliver(item.prefs, channel, type));
     const inappAudience = audienceFor('inapp');
     const emailAudience = audienceFor('email');
-    const reached = new Set([...inappAudience, ...emailAudience].map(item => item.userId));
+    // A third column, decided by the same per-event switches. It joins `reached`
+    // because that set is what claims the dedupe record: somebody who muted the
+    // bell and kept Telegram must still be claimed, or the sweep re-sends to
+    // them on every pass.
+    const telegramAudience = audienceFor('telegram');
+    const reached = new Set(
+      [...inappAudience, ...emailAudience, ...telegramAudience].map(item => item.userId),
+    );
 
     const notificationData = (delivery, { inapp }) => ({
         userId: delivery.userId, type, title, body, link: scopedLink, issueId, projectId, organizationId,
@@ -243,6 +251,27 @@ export async function POST(request) {
         return result.status === 'rejected' || result.value !== true;
       })
       .map(item => item.userId));
+
+    // Telegram, beside email and on the same claim. Its own delivery function
+    // re-reads the preferences and applies `shouldDeliver` a second time, which
+    // is redundant here and is left alone on purpose: the scheduled dispatcher
+    // calls it too, from a place that has no audience computed.
+    //
+    // Failures are not queued for retry the way email's are. An email that
+    // bounced may be a provider having a bad minute; a Telegram send that failed
+    // is almost always a chat the person deleted or a bot they blocked, and
+    // re-sending into it every few minutes is noise nobody can switch off from
+    // the other side.
+    const telegramTargets = telegramAudience.filter(item => delivered.has(item.userId));
+    if (telegramTargets.length) {
+      await deliverTelegramNotification({
+        userIds: telegramTargets.map(item => item.userId),
+        title,
+        body,
+        link: scopedLink,
+        type,
+      }).catch(error => console.warn('[notifications] telegram delivery failed:', error?.message || error));
+    }
 
     // This path is the low-latency one and stays that way: the message is
     // attempted the moment the event happens. What it did not have was anywhere

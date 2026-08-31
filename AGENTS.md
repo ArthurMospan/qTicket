@@ -28,9 +28,15 @@ work already done is not one of them — that history belongs in Git.
 
 Cross-repository contracts live in `docs/integrations/`. There is one, and one
 is the point: [QTICKET.md](docs/integrations/QTICKET.md), the signed seam to
-QuickTeam. The QuickTeam+, Telegram and YouTrack contracts were deleted with the
-integrations themselves — a ticket system has no import path and no second
-messenger. Add a seventh document only when a subject genuinely has no home
+QuickTeam. The QuickTeam+ and YouTrack contracts were deleted with the
+integrations themselves — a ticket system has no import path. Telegram went out
+with them and came back on 2026-08-31, because that rule was about *import* and
+Telegram is *delivery*: a desk whose whole job is telling somebody that
+something arrived cannot rely on a bell that only rings in an open tab. What
+came back is the notification channel alone, ported from `qt-workspace`. The
+half that files a task from a group chat did not, and must not: only a client
+opens a request, from their own project, so a desk can always say who asked for
+what. Add a seventh document only when a subject genuinely has no home
 above — a new file is a place for the next reader not to look.
 
 ## Framework and commands

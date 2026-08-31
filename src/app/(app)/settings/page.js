@@ -37,7 +37,8 @@ import {
   ExternalLink, AlertTriangle,
   Globe, Tag as TagIcon, GripVertical,
   Archive, ArchiveRestore, Lock,
-  UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
+  UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2,
+  Send
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Tabs, Textarea, ToggleSwitch, UserAvatar, useConfirm } from '@/components/ui';
@@ -192,6 +193,18 @@ const NAV = [
   { id: 'labels',        label: 'Мітки',            icon: TagIcon,       group: 'Процес підтримки', adminOnly: true },
   { id: 'archives',      label: 'Архів і видалене', icon: Archive,       group: 'Інше' },
 ];
+
+// Whether this deployment can actually put a letter in the post.
+//
+// The real answer lives in `emailConfigured()`, which reads `RESEND_API_KEY` /
+// `BREVO_API_KEY` — secrets a browser must never see. So the deployment mirrors
+// the answer into a public flag, and its absence means «no», which is the
+// truthful default for a beta with transactional email switched off.
+//
+// The card is drawn either way. Hiding it until a provider exists is how «а
+// куди мені шле листи?» became a question with no screen to answer it; a
+// disabled switch that says why is an answer.
+const emailDeliveryConfigured = process.env.NEXT_PUBLIC_EMAIL_DELIVERY_ENABLED === 'true';
 
 // ── Primitives ───────────────────────────────────────────────────────
 // Toggle removed - using ToggleSwitch from UI Kit
@@ -960,6 +973,114 @@ export default function SettingsPage() {
       return next;
     });
   };
+
+  // ── Telegram, as a delivery channel and nothing else ────────────────────
+  //
+  // Ported from QuickTeam, including the part that matters most: the switch
+  // *is* the connection. There is no «Підключити» button beside a separate
+  // «Увімкнути» toggle, because a channel that is linked but silent, or enabled
+  // but unlinked, are two states nobody wants and everybody creates by accident.
+  const [telegramBotStatus, setTelegramBotStatus] = useState({ configured: false, connected: false, chatTitle: '' });
+  const [telegramBotLoading, setTelegramBotLoading] = useState(false);
+  // True between opening the bot deep link and the webhook confirming it.
+  const [telegramAwaitingLink, setTelegramAwaitingLink] = useState(false);
+
+  const telegramRequest = useCallback(async (method = 'GET', body = null) => authenticatedRequest(
+    '/api/integrations/telegram',
+    { method, ...(body ? { body: JSON.stringify(body) } : {}) },
+    'Не вдалося виконати запит до Telegram',
+  ), []);
+
+  const refreshTelegram = useCallback(async () => {
+    if (!currentUser) return;
+    setTelegramBotStatus(await telegramRequest());
+  }, [currentUser, telegramRequest]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => refreshTelegram().catch(() => {}), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [refreshTelegram]);
+
+  const connectTelegram = async () => {
+    setTelegramBotLoading(true);
+    try {
+      const result = await telegramRequest('POST', {});
+      window.open(result.link, '_blank', 'noopener,noreferrer');
+      setTelegramAwaitingLink(true);
+      showToast('Натисніть «Старт» у Telegram — далі підключиться саме');
+    } catch (error) {
+      showToast(error.message, 'error');
+    } finally {
+      setTelegramBotLoading(false);
+    }
+  };
+
+  const disconnectTelegram = async () => {
+    setTelegramBotLoading(true);
+    try {
+      await telegramRequest('DELETE');
+      setTelegramBotStatus(previous => ({ ...previous, connected: false, chatTitle: '' }));
+      setNotif(previous => ({ ...previous, telegramEnabled: false }));
+      showToast('Telegram відключено');
+    } catch (error) {
+      showToast(error.message, 'error');
+    } finally {
+      setTelegramBotLoading(false);
+    }
+  };
+
+  const toggleTelegram = async enabled => {
+    if (!enabled) {
+      if (telegramBotStatus.connected) {
+        await disconnectTelegram();
+        return;
+      }
+      setNotif(previous => ({ ...previous, telegramEnabled: false }));
+      return;
+    }
+    if (telegramBotStatus.connected) {
+      setNotif(previous => ({ ...previous, telegramEnabled: true }));
+      return;
+    }
+    await connectTelegram();
+  };
+
+  // Nobody should have to press «Перевірити» after coming back from Telegram —
+  // that is our webhook's plumbing, put in front of the person who used it. The
+  // row polls for the answer, and re-asks whenever the tab regains focus, which
+  // is exactly the moment somebody returns from the bot.
+  useEffect(() => {
+    if (!telegramAwaitingLink) return undefined;
+    const pollMs = 3000;
+    const maxTicks = 60; // three minutes; the connect token itself lasts fifteen
+    let ticks = 0;
+    const check = async () => {
+      try {
+        const status = await telegramRequest();
+        setTelegramBotStatus(status);
+        if (!status.connected) return;
+        setTelegramAwaitingLink(false);
+        setNotif(previous => ({ ...previous, telegramEnabled: true }));
+        showToast('Telegram підключено');
+      } catch {
+        // Transient: the next tick retries, and the token is valid either way.
+      }
+    };
+    const timer = window.setInterval(() => {
+      ticks += 1;
+      if (ticks > maxTicks) {
+        setTelegramAwaitingLink(false);
+        return;
+      }
+      check();
+    }, pollMs);
+    const onFocus = () => check();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [telegramAwaitingLink, telegramRequest, showToast]);
 
   // Last notif/localization value known to match Firestore (JSON) — see the
   // auto-save effects below. null until the first render establishes it.
@@ -2058,16 +2179,13 @@ export default function SettingsPage() {
 
       // ──────────────────────────────────────────────────────────────
       case 'notifications': {
-        // qTicket ships with in-app delivery only. Email stays unavailable
-        // until a verified sender domain exists, and Telegram is not part of
-        // the add-on contract yet. Do not advertise dormant providers as
-        // switches a customer can turn on.
-        // «Сповіщення» belongs to the client roles — an internal seat's
-        // preferences come from QuickTeam — so the rows are the events a client
-        // can actually be the subject of. «Терміни вирішення» is not one of
-        // them: that reminder only ever goes to an assignee, and a client is
-        // never an assignee. A switch for a message that cannot arrive is a
-        // promise the product does not keep.
+        // Three cards, one per channel, because that is the question people
+        // arrive with: «що мені шле Telegram?». The previous version was five
+        // event switches in one list with the channel policy hardcoded in the
+        // senders, and which event reached which channel was written nowhere.
+        //
+        // Ported from QuickTeam rather than designed again — the shape has been
+        // in front of users there for a year, and the owner asked for that one.
         const eventRows = [
           { key: 'assigned',      label: 'Звернення призначено мені', desc: 'Хтось призначив звернення на тебе або створив нове одразу з тобою' },
           // A client is never a «виконавець» — that word describes a seat they
@@ -2075,38 +2193,119 @@ export default function SettingsPage() {
           { key: 'commented',     label: 'Нове повідомлення',        desc: 'Там, де ти автор або учасник розмови' },
           { key: 'mentioned',     label: 'Згадування',               desc: 'Хтось написав @твоє-імʼя в розмові звернення' },
           { key: 'statusChanged', label: 'Зміна статусу',            desc: 'Коли звернення переходить на інший етап' },
-        ].filter(row => QTICKET_NOTIFICATION_EVENT_KEYS.includes(row.key));
+          { key: 'deadline',      label: 'Терміни вирішення',        desc: 'За добу до обіцяного терміну і далі, поки звернення відкрите' },
+        ].filter(row => QTICKET_NOTIFICATION_EVENT_KEYS.includes(row.key)
+          // «Терміни вирішення» only ever reaches an assignee, and a client is
+          // never one. A switch for a message that cannot arrive is a promise
+          // the product does not keep.
+          && !(clientViewer && row.key === 'deadline'));
 
-        // One card, drawn directly. It used to be a factory taking a master
-        // switch and an «канал вимкнено» note, because there were three cards —
-        // the email and Telegram columns went with the providers behind them,
-        // and a factory that builds one thing is a parameter list nobody reads.
-        // Every line is the shared <Row>, so the labels and the switches line up.
+        // Every line is the shared <Row>, so all three cards land on the same
+        // label column and the same right-hand control column.
+        const channelCard = ({ id, icon: ChannelIcon, title, caption, master, available, offNote, showDesc = false, footer = null }) => (
+          <Card preset="borderless" padding="lg">
+            {/* The channel switch is the big one: it governs every row in the
+                card below it. The rows are `sm`, so the difference in size says
+                which is which without a word. */}
+            <CardHeading icon={ChannelIcon} title={title} caption={caption} action={master} />
+
+            {available ? eventRows.map(row => (
+              <Row key={row.key} label={row.label} desc={showDesc ? row.desc : undefined}>
+                <ToggleSwitch
+                  checked={notifMatrix[id][row.key] === true}
+                  onChange={value => setChannelEvent(id, row.key, value)}
+                  size="sm"
+                  ariaLabel={`${row.label} — ${title}`}
+                />
+              </Row>
+            )) : (
+              <p className="py-[14px] text-[12px] leading-relaxed text-faint">{offNote}</p>
+            )}
+
+            {footer}
+          </Card>
+        );
+
         return (
-          <Section title="Сповіщення" desc="Оберіть, про які події qTicket повідомляє всередині застосунку">
-            <Card preset="borderless" padding="lg">
-              <CardHeading icon={Bell} title="На сайті" caption="Дзвіночок у шапці робочого простору" />
+          <Section title="Сповіщення" desc="Кожен канал окремо: оберіть, про що він вас повідомляє">
+            {channelCard({
+              id: 'inapp',
+              icon: Bell,
+              title: 'На сайті',
+              caption: 'Дзвіночок у шапці робочого простору',
+              available: true,
+              showDesc: true,
+              footer: (
+                <div className="mt-1 border-t border-line pt-1">
+                  <Row label="Звук" desc="Короткий сигнал при новому сповіщенні">
+                    <ToggleSwitch checked={notif.sound} onChange={v => setNotif(p => ({ ...p, sound: v }))} size="sm" />
+                  </Row>
+                  <Row label="Спливаючі сповіщення" desc="Картка внизу екрана, коли подія стається в реальному часі">
+                    <ToggleSwitch checked={notif.popup} onChange={v => setNotif(p => ({ ...p, popup: v }))} size="sm" />
+                  </Row>
+                </div>
+              ),
+            })}
 
-              {eventRows.map(row => (
-                <Row key={row.key} label={row.label} desc={row.desc}>
-                  <ToggleSwitch
-                    checked={notifMatrix.inapp[row.key] === true}
-                    onChange={value => setChannelEvent('inapp', row.key, value)}
-                    size="sm"
-                    ariaLabel={`${row.label} — На сайті`}
-                  />
-                </Row>
-              ))}
+            {/* Email is drawn with the switch it will have, and says plainly
+                that it cannot deliver yet. The alternative — hiding the card
+                until a provider exists — is how «а куди мені шле листи?» became
+                a question with no screen to answer it. */}
+            {channelCard({
+              id: 'email',
+              icon: Mail,
+              title: 'Email',
+              caption: emailDeliveryConfigured
+                ? (currentUser?.email || 'Пошта не вказана')
+                : 'Поштового провайдера ще не підключено',
+              available: emailDeliveryConfigured && notif.emailEnabled === true,
+              offNote: emailDeliveryConfigured
+                ? 'Канал вимкнено — увімкніть, щоб обрати, що дублювати на пошту.'
+                : 'Листи вимкнено на рівні середовища: домен для відправки ще не налаштовано. Щойно його підключать, цей канал запрацює з тими перемикачами, які ви тут виберете.',
+              master: (
+                <ToggleSwitch
+                  checked={notif.emailEnabled === true}
+                  onChange={v => setNotif(p => ({ ...p, emailEnabled: v }))}
+                  disabled={!emailDeliveryConfigured}
+                  size="md"
+                  ariaLabel="Сповіщення на пошту"
+                />
+              ),
+            })}
 
-              <div className="mt-1 border-t border-line pt-1">
-                <Row label="Звук" desc="Короткий сигнал при новому сповіщенні">
-                  <ToggleSwitch checked={notif.sound} onChange={v => setNotif(p => ({ ...p, sound: v }))} size="sm" />
-                </Row>
-                <Row label="Спливаючі сповіщення" desc="Картка внизу екрана, коли подія стається в реальному часі">
-                  <ToggleSwitch checked={notif.popup} onChange={v => setNotif(p => ({ ...p, popup: v }))} size="sm" />
-                </Row>
-              </div>
-            </Card>
+            {/* The switch is the connection. Turning it on opens the bot;
+                turning it off unlinks the chat. A channel that is linked but
+                silent, and one that is enabled but unlinked, are two states
+                nobody wants and everybody creates by accident. */}
+            {channelCard({
+              id: 'telegram',
+              icon: Send,
+              title: 'Telegram',
+              caption: telegramBotStatus.connected
+                ? `Підключено: ${telegramBotStatus.chatTitle || 'особистий чат із ботом'}`
+                : telegramAwaitingLink
+                  ? 'Натисніть «Старт» у Telegram — підключиться саме'
+                  : telegramBotStatus.configured
+                    ? 'Не підключено'
+                    : 'Інтеграцію не налаштовано в цьому середовищі',
+              available: telegramBotStatus.connected && notif.telegramEnabled === true,
+              offNote: telegramBotStatus.configured
+                ? 'Увімкніть канал — відкриється бот. Після «Старт» тут зʼявиться список подій.'
+                : 'Інтеграцію не налаштовано в цьому середовищі.',
+              master: (
+                <ToggleSwitch
+                  checked={telegramBotStatus.connected && notif.telegramEnabled === true}
+                  onChange={toggleTelegram}
+                  disabled={
+                    telegramBotLoading
+                    || telegramAwaitingLink
+                    || (!telegramBotStatus.configured && !telegramBotStatus.connected)
+                  }
+                  size="md"
+                  ariaLabel="Сповіщення в Telegram"
+                />
+              ),
+            })}
           </Section>
         );
       }

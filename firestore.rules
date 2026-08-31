@@ -218,6 +218,26 @@ service cloud.firestore {
       match /settings/{settingsDoc} {
         allow read, write: if signedIn() && request.auth.uid == uid;
       }
+
+      // The Telegram link, and it is refused to its own owner.
+      //
+      // `chatId` is a capability, not a fact: anybody holding it plus the bot
+      // token can post into that chat, and a browser that can read it can leak
+      // it to any script the page ever loads. Nothing in the product needs it
+      // client-side — «Налаштування» asks `/api/integrations/telegram`, which
+      // answers `connected` and a title and never the id — so the safest rule
+      // is the true one.
+      match /private/{privateDoc} {
+        allow read, write: if false;
+      }
+    }
+
+    // A connect token attaches a Telegram chat to an account, so it is a bearer
+    // secret with a fifteen-minute life. Stored by hash, minted and spent by the
+    // server alone; a browser that could list these could link its own chat to
+    // somebody else's notifications.
+    match /telegramConnectTokens/{tokenId} {
+      allow read, write: if false;
     }
 
     // ── invitations/{id} ────────────────────────────────────────────────

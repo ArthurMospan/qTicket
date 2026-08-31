@@ -80,9 +80,14 @@ test('qTicket help publishes only reachable support workflows', () => {
   // Not «no article names a deleted feature» — no article may name one at all,
   // in any sentence. Each of these was a whole published topic once.
   const catalogueText = HELP_ARTICLES.map(flattenArticle).join(' ');
+  // `telegram` left this list on 2026-08-31. It is a feature again — the
+  // notification channel, ported back from QuickTeam — so an article that names
+  // it is describing something a person can actually switch on. What is still
+  // absent, and is what the deletion rule was about, is the half of that
+  // integration that files a task from a group chat.
   for (const deletedFeature of [
     'спринт', 'беклог', 'табел', 'рахунок', 'рахунк', 'аналітик', 'таймер',
-    'списан', 'youtrack', 'telegram', 'quickteam+', 'календар', 'день народження',
+    'списан', 'youtrack', 'quickteam+', 'календар', 'день народження',
     'перенесення даних', 'оцінк', 'внутрішня нотатка', 'внутрішні нотатки',
   ]) {
     assert.ok(!catalogueText.includes(deletedFeature), `"${deletedFeature}" is not a qTicket feature any more`);

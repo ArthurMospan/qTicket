@@ -38,8 +38,8 @@ test('a legacy document keeps meaning exactly what it meant', () => {
     statusChanged: true,
     deadline: false,
     emailEnabled: true,
-    // A document written while the Telegram integration existed still carries
-    // this. Nothing reads it now, and it must not resurrect a column.
+    // A document written before the Telegram channel was deleted still carries
+    // this, and now that the channel is back it means what it said again.
     telegramEnabled: true,
   };
   const matrix = resolveNotificationMatrix(legacy);
@@ -48,7 +48,12 @@ test('a legacy document keeps meaning exactly what it meant', () => {
   assert.deepEqual(matrix.inapp, {
     assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
   });
-  assert.equal(matrix.telegram, undefined);
+  // The same per-event flags, read into the Telegram column: a legacy document
+  // has no per-channel matrix, so every channel falls back to the flat flags,
+  // which is exactly «what this account was already asking for».
+  assert.deepEqual(matrix.telegram, {
+    assigned: true, commented: true, mentioned: false, statusChanged: true, deadline: false,
+  });
 
   // Email intersected the flags with its hardcoded type list, which is why
   // "Зміна статусу" was on yet no status email ever arrived.
@@ -162,23 +167,44 @@ test('filterRecipients splits one audience per channel', () => {
 
 test('channel defaults mirror what the settings page starts from', () => {
   assert.deepEqual(CHANNEL_DEFAULTS, {
-    sound: true, popup: true, emailEnabled: false,
+    sound: true, popup: true, emailEnabled: false, telegramEnabled: false,
   });
 });
 
-// Two deletions, one shape of leftover: a preference stored for something the
-// product cannot do any more. Telegram delivered nowhere once the integration
-// went; `chatMessage` lost the event it switched when the workspace messenger
-// went. Neither reads back as a preference somebody set.
-test('there is no Telegram channel, whatever a stored document says', () => {
-  assert.deepEqual(NOTIFICATION_CHANNELS, ['inapp', 'email']);
-  assert.equal(Object.hasOwn(CHANNEL_DEFAULTS, 'telegramEnabled'), false);
+// Telegram is a channel again, and the round trip is the thing worth holding.
+// It was deleted on the rule that «a ticket system has no second messenger»,
+// which is true of *import* — the thing that rule was written about — and not
+// of *delivery*: a desk's whole job is telling somebody that something arrived,
+// and the bell only reaches an open tab. The owner asked for it back on
+// 2026-08-31, and asked for QuickTeam's implementation rather than a new one.
+test('Telegram is a delivery channel, and a stored preference means what it says', () => {
+  assert.deepEqual(NOTIFICATION_CHANNELS, ['inapp', 'email', 'telegram']);
+  assert.equal(CHANNEL_DEFAULTS.telegramEnabled, false);
 
-  const stored = { telegramEnabled: true, channels: { telegram: { assigned: true } } };
-  assert.equal(isChannelEnabled(stored, 'telegram'), false);
-  assert.equal(shouldDeliver(stored, 'telegram', 'assigned'), false);
-  assert.equal(shouldDeliver(stored, 'telegram', 'alert'), false);
-  assert.equal(resolveNotificationMatrix(stored).telegram, undefined);
+  // Off until somebody links a chat: there is nothing to enable before there is
+  // somewhere to send.
+  assert.equal(isChannelEnabled({}, 'telegram'), false);
+  assert.equal(shouldDeliver({}, 'telegram', 'assigned'), false);
+
+  // A preference written before the channel was deleted starts meaning
+  // something again, and that is the correct outcome rather than an accident:
+  // it is what that person chose, and nothing rewrote it in between.
+  const stored = { telegramEnabled: true, channels: { telegram: { assigned: true, commented: false } } };
+  assert.equal(isChannelEnabled(stored, 'telegram'), true);
+  assert.equal(shouldDeliver(stored, 'telegram', 'assigned'), true);
+  assert.equal(shouldDeliver(stored, 'telegram', 'commented'), false);
+
+  // A keyless type has no switch of its own, and Telegram takes them all —
+  // `incident_created` is the event this channel is worth having for, because a
+  // request filed at midnight reaches no open tab.
+  assert.equal(shouldDeliver(stored, 'telegram', 'incident_created'), true);
+  assert.equal(shouldDeliver(stored, 'telegram', 'alert'), true);
+  // And the master switch still gates every one of them.
+  assert.equal(shouldDeliver({ telegramEnabled: false }, 'telegram', 'incident_created'), false);
+
+  assert.deepEqual(Object.keys(resolveNotificationMatrix(stored).telegram), [
+    'assigned', 'commented', 'mentioned', 'statusChanged', 'deadline',
+  ]);
 });
 
 test('the deleted workspace-chat event has no switch and no way to be published', () => {
@@ -193,26 +219,28 @@ test('the deleted workspace-chat event has no switch and no way to be published'
   ]);
 });
 
-// «Сповіщення» belongs to the client roles — an internal seat's preferences
-// arrive from QuickTeam — so the rows are the events a client can be the
-// subject of. «Терміни вирішення» is not one of them: that reminder only ever
-// goes to an assignee, and a client is never an assignee.
+// «Сповіщення» is read by both audiences now, and the row list differs by one.
+// «Терміни вирішення» only ever reaches an assignee, and a client is never one
+// — so the row exists, and the screen filters it out for a customer rather than
+// omitting it from the product. A switch for a message that cannot arrive is a
+// promise the product does not keep; a row a support agent needs is not one to
+// delete because somebody else cannot use it.
 const CLIENT_UNREACHABLE_EVENT_KEYS = ['deadline'];
 
-test('qTicket settings offer every incident event a client can be the subject of', async () => {
+test('qTicket settings offer every incident event, and hide from a client only what cannot reach them', async () => {
   const { readFile } = await import('node:fs/promises');
   const page = await readFile(new URL('../src/app/(app)/settings/page.js', import.meta.url), 'utf8');
   const rows = page.slice(page.indexOf('const eventRows = ['), page.indexOf('].filter(row =>'));
   for (const key of QTICKET_NOTIFICATION_EVENT_KEYS) {
-    if (CLIENT_UNREACHABLE_EVENT_KEYS.includes(key)) {
-      assert.doesNotMatch(rows, new RegExp(`key: '${key}'`), `${key} cannot reach a client`);
-      continue;
-    }
     assert.match(rows, new RegExp(`key: '${key}'`), `${key} has no row in Settings`);
   }
-  // The reminder itself still exists and still reaches an assignee — it is only
-  // the client's switch for it that does not.
-  assert.ok(QTICKET_NOTIFICATION_EVENT_KEYS.includes('deadline'));
-  assert.doesNotMatch(rows, /Терміни вирішення/);
+  // …and the one a client cannot be the subject of is filtered by who is
+  // looking, in the same expression that filters the event list itself.
+  for (const key of CLIENT_UNREACHABLE_EVENT_KEYS) {
+    assert.ok(
+      page.includes(`!(clientViewer && row.key === '${key}')`),
+      `${key} must be hidden from a client rather than deleted`,
+    );
+  }
   assert.doesNotMatch(rows, /key: 'chatMessage'/);
 });

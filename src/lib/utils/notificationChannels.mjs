@@ -9,11 +9,19 @@
 // dropped every type outside a hardcoded list. None of that was visible in
 // Settings, so the page promised choices it did not make.
 //
-// There is no `telegram` channel any more. The integration that carried it was
-// deleted with the other inherited messengers, so the column delivered nowhere
-// while a stored `telegramEnabled` still read as a preference somebody had set.
-
-export const NOTIFICATION_CHANNELS = ['inapp', 'email'];
+// Telegram is back, and the round trip is worth recording. The channel was
+// deleted with the other inherited messengers on the rule that «a ticket system
+// has no second messenger» — which is true of *import*, the thing that rule was
+// written about, and not of *delivery*. A support desk's whole job is telling
+// somebody that something arrived, and the bell only works while a browser tab
+// is open. The owner asked for it back on 2026-08-31 and asked for QuickTeam's
+// implementation rather than a new one, so `src/lib/server/telegram.js` is that
+// file with the task-creating half removed.
+//
+// A stored `telegramEnabled` from before the deletion therefore starts meaning
+// something again. That is the correct outcome and not an accident: it is the
+// preference that person set, and nothing rewrote it in between.
+export const NOTIFICATION_CHANNELS = ['inapp', 'email', 'telegram'];
 
 // Every notification type the product can produce, split by who may ask for it.
 //
@@ -89,6 +97,9 @@ export const CHANNEL_DEFAULTS = {
   sound: true,
   popup: true,
   emailEnabled: false,
+  // Off until somebody links a chat. The switch and the link are one action in
+  // Settings — there is nothing to enable before there is somewhere to send.
+  telegramEnabled: false,
 };
 
 // Types email used to accept, hardcoded in the route. Kept only to reproduce
@@ -128,17 +139,26 @@ export function resolveNotificationMatrix(preferences = {}) {
 export function isChannelEnabled(preferences = {}, channel) {
   if (channel === 'inapp') return true;
   if (channel === 'email') return preferences?.emailEnabled === true;
+  if (channel === 'telegram') return preferences?.telegramEnabled === true;
   return false;
 }
 
-// Types outside NOTIFICATION_EVENTS — alert, emergency and test — have no
-// switch of their own in Settings, so a channel policy decides. In-app
-// records them all, which is what it already did. Email stays narrow on
+// Types outside NOTIFICATION_EVENTS — `incident_created`, alert, emergency and
+// test — have no switch of their own in Settings, so a channel policy decides.
+// In-app records them all, which is what it already did. Email stays narrow on
 // purpose: it used to run off a hardcoded whitelist, and opening it up would
 // mean a mail per reply.
+//
+// Telegram takes them all, and `incident_created` is the reason the channel is
+// worth having: a request filed at midnight is the one event where the bell —
+// which needs an open tab — is not a way of telling anybody. Internal staff have
+// no per-event switches for it because they have no preferences document to put
+// one in; the channel master is the whole of their control, which is the honest
+// shape for a type nobody can turn off individually.
 const KEYLESS_TYPE_POLICY = {
   inapp: () => true,
   email: type => type === 'alert' || type === 'emergency',
+  telegram: () => true,
 };
 
 export function shouldDeliver(preferences = {}, channel, type) {

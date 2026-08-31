@@ -13,9 +13,9 @@
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 165,
+    "usedAndPreviewed": 166,
     "usedWithoutPreview": 0,
-    "declaredUnused": 160
+    "declaredUnused": 159
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -959,12 +959,6 @@
       "namespace": null
     },
     {
-      "component": "ToggleSwitch",
-      "prop": "size",
-      "value": "md",
-      "namespace": null
-    },
-    {
       "component": "UserAvatar",
       "prop": "size",
       "value": "chat-inline",
@@ -1639,6 +1633,7 @@
     "UserAvatar.size.xl": 1,
     "Input.size.md": 3,
     "ToggleSwitch.size.sm": 4,
+    "ToggleSwitch.size.md": 2,
     "Button.composition.settings-row-action": 3,
     "Pill.tone.warning": 3,
     "Tabs.variant.underline": 1,

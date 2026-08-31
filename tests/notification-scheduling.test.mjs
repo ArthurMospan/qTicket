@@ -49,13 +49,58 @@ test('qTicket delivers notifications in the app and nowhere else', async () => {
     settings.indexOf("case 'notifications'"),
     settings.indexOf("case 'localization'"),
   );
-  // One card, written out rather than built by a factory: there is nothing for
-  // a second channel to be, so there is no channel argument either.
-  assert.match(notificationSection, /notifMatrix\.inapp\[row\.key\]/);
-  assert.match(notificationSection, /setChannelEvent\('inapp', row\.key, value\)/);
-  assert.match(notificationSection, /title="На сайті"/);
-  assert.doesNotMatch(notificationSection, /'email'|'telegram'/);
-  assert.doesNotMatch(notificationSection, /channelCard/);
+  // Three cards, one per channel, from one factory — the shape QuickTeam has
+  // shown for a year. A card per channel is the question people arrive with:
+  // «що саме мені шле Telegram?».
+  assert.match(notificationSection, /channelCard\(\{/);
+  assert.match(notificationSection, /notifMatrix\[id\]\[row\.key\]/);
+  assert.match(notificationSection, /setChannelEvent\(id, row\.key, value\)/);
+  assert.match(notificationSection, /title: 'На сайті'/);
+  assert.match(notificationSection, /title: 'Email'/);
+  assert.match(notificationSection, /title: 'Telegram'/);
+
+  // Email is drawn even where it cannot deliver, and says why rather than
+  // vanishing: a hidden card is how «а куди мені шле листи?» became a question
+  // with no screen to answer it. The switch is disabled, not absent.
+  assert.match(notificationSection, /disabled=\{!emailDeliveryConfigured\}/);
+  assert.match(settings, /const emailDeliveryConfigured = process\.env\.NEXT_PUBLIC_EMAIL_DELIVERY_ENABLED === 'true'/);
+
+  // The Telegram switch *is* the connection — no separate «Підключити» button.
+  // Linked-but-silent and enabled-but-unlinked are two states nobody wants and
+  // everybody creates by accident.
+  assert.match(notificationSection, /onChange=\{toggleTelegram\}/);
+  assert.match(settings, /if \(telegramBotStatus\.connected\) \{\s*await disconnectTelegram\(\);/);
+});
+
+test('the Telegram channel delivers and never files a request', async () => {
+  const [server, webhook, route] = await Promise.all([
+    read('../src/lib/server/telegram.js'),
+    read('../src/app/api/integrations/telegram/webhook/route.js'),
+    read('../src/app/api/notifications/route.js'),
+  ]);
+
+  // QuickTeam's bot also takes a task command in a group chat and files an
+  // issue from it. That half is deliberately absent: only a client opens a
+  // request, from their own project, so a desk can always say who asked for
+  // what — and a room in a group chat is not a client.
+  // Asked of the code, not of the file: the comments explain what was left out
+  // and why, and a note about an absent feature is not the feature.
+  assert.doesNotMatch(server, /^export (async )?function createIssueFromTelegram/m);
+  assert.doesNotMatch(server, /collection\('telegramChats'\)/);
+  assert.doesNotMatch(webhook, /^async function connectGroup/m);
+  assert.doesNotMatch(webhook, /collection\('telegramChats'\)/);
+  assert.match(webhook, /message\.chat\?\.type !== 'private'/);
+
+  // The webhook is authenticated by Telegram's own secret header, compared in
+  // constant time, and the connect token is spent inside a transaction so two
+  // updates arriving together cannot both claim it.
+  assert.match(server, /timingSafeEqual/);
+  assert.match(webhook, /x-telegram-bot-api-secret-token/);
+  assert.match(webhook, /runTransaction/);
+
+  // Delivery hangs off the same per-event switches as the bell.
+  assert.match(route, /const telegramAudience = audienceFor\('telegram'\)/);
+  assert.match(route, /deliverTelegramNotification\(/);
 });
 
 test('development avoids persistent multi-tab leases while production keeps offline cache', async () => {

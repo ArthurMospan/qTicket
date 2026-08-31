@@ -1159,6 +1159,33 @@ test('users/{uid}/settings stays reachable by its own owner', async () => {
   await assertSucceeds(getDoc(doc(db, 'users', 'member-a', 'settings', 'prefs')));
 });
 
+// The Telegram link is refused to its own owner, which is the unusual half and
+// the deliberate one. `chatId` is a capability rather than a fact: whoever holds
+// it, plus the bot token, can post into that chat — and a browser that can read
+// it can hand it to any script the page ever loads. Nothing client-side needs
+// it: «Налаштування» asks `/api/integrations/telegram`, which answers whether a
+// chat is connected and what it is called, and never the id.
+test('the Telegram connection is server-only, including for the person it belongs to', async () => {
+  const owner = environment.authenticatedContext('member-a').firestore();
+  await assertFails(getDoc(doc(owner, 'users', 'member-a', 'private', 'telegram')));
+  await assertFails(setDoc(doc(owner, 'users', 'member-a', 'private', 'telegram'), { chatId: '1' }));
+
+  const stranger = environment.authenticatedContext('member-b').firestore();
+  await assertFails(getDoc(doc(stranger, 'users', 'member-a', 'private', 'telegram')));
+});
+
+// A connect token attaches somebody's Telegram chat to an account. A browser
+// that could list these could link its own chat to another person's
+// notifications, so the collection is closed in both directions.
+test('telegram connect tokens are refused to every browser', async () => {
+  const db = environment.authenticatedContext('member-a').firestore();
+  await assertFails(getDoc(doc(db, 'telegramConnectTokens', 'any-hash')));
+  await assertFails(setDoc(doc(db, 'telegramConnectTokens', 'any-hash'), {
+    type: 'user',
+    userId: 'member-a',
+  }));
+});
+
 // An organization settings document other than `workflow` is readable by every
 // member of that organization and writable only by an admin or the owner.
 test('a member reads an org settings document but cannot write it', async () => {

@@ -59,6 +59,24 @@ EMAIL_FROM=
 EMAIL_LOGIN_ENABLED=false
 AUTH_OTP_SECRET=
 
+# What «Налаштування» → «Сповіщення» tells a person about the email channel.
+# The real answer is `emailConfigured()`, which reads the two keys above — and
+# those are secrets a browser must never see, so the deployment mirrors it here.
+# Absent means «no», and the card says so instead of offering a switch that
+# would deliver nowhere.
+NEXT_PUBLIC_EMAIL_DELIVERY_ENABLED=false
+
+# Telegram as a notification channel. All four or none: a bot token with no
+# public HTTPS origin cannot receive a webhook, and a webhook with no secret is
+# an open endpoint — `telegramStatus()` refuses a partial configuration and the
+# settings card says the integration is not set up in this environment.
+# The bot delivers notifications and nothing else: it never files a request,
+# because only a client opens one, from their own project.
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_BOT_USERNAME=
+TELEGRAM_WEBHOOK_SECRET=
+NEXT_PUBLIC_APP_URL=
+
 # Optional OneB login
 NEXT_PUBLIC_ONEB_CLIENT_ID=
 NEXT_PUBLIC_ONEB_REDIRECT_URI=
