@@ -37,6 +37,23 @@ export default defineConfig({
       // Antialiasing noise on text edges is a few dozen pixels; a moved
       // control is thousands. This threshold sits between the two.
       maxDiffPixelRatio: 0.001,
+      // How different two pixels must be before they count as different at
+      // all, and the default made this suite blind to the thing its own
+      // workflow comment promises to catch.
+      //
+      // `threshold` is a YIQ distance normalised against 35215. A 1px `line`
+      // border (#e9e9e9) appearing on a white card moves a pixel by dY=22,
+      // which is 0.5053·22² / 35215 ≈ 0.007 — far under the default 0.2. So
+      // every one of those pixels reads as unchanged, `maxDiffPixelRatio`
+      // never gets a number to weigh, and the comparison reports a perfect
+      // match. Found on 2026-09-01: `KpiCard` gained a visible border, the
+      // live page renders 5473 pixels of it, and `progress.png` came back from
+      // `--update-snapshots` byte-identical.
+      //
+      // 0.05 still ignores genuine rasterisation jitter, which moves a pixel
+      // by a hair rather than by a whole shade, and the ratio above is left
+      // where it was — it is the noise budget, and it was never the problem.
+      threshold: 0.05,
       animations: 'disabled',
       caret: 'hide',
       scale: 'css',
