@@ -633,10 +633,16 @@ Product work still required:
 - Run the complete tenant/client acceptance flow and correct every permission or
   usability problem it exposes.
 - **Команда** and **Налаштування** are both audited (see the 2026-08-29 slices
-  above): the duplicate roster is gone, and what stays is incident workflow,
-  client access and read-only QuickTeam state. In-app notification preferences are no longer part of that
-  retained set for internal roles — the owner removed the panel, and the
-  consequence is recorded above.
+  above): the duplicate roster is gone, and what stays is incident workflow and
+  client access. The audit was corrected twice afterwards, in both directions.
+  «Сповіщення» (2026-08-31) and «Локалізація» (2026-09-01) came back editable —
+  neither has a QuickTeam copy to lose to, so removing them pinned every
+  internal seat to whatever their document already held. «Особистий профіль»
+  came back read-only: those three fields really are re-written on every sync,
+  so it shows them and says where they are changed. And «Організація і бренд»
+  went the other way and is deleted — five read-only rows about somewhere else,
+  behind a rail entry that promised something to do. What it said survives as
+  one row in «Безпека»; `?section=workspace` and `?section=billing` land there.
 - Run the acceptance flow against the two cross-product features that have
   never served a real request: the unread badge on QuickTeam's rail and
   «Створити завдання в QuickTeam». Both are implemented and tested on both

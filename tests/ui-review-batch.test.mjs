@@ -406,33 +406,25 @@ test('every collapse control that folds a group of tasks is the same button', as
 // The theme picker it used to guard is gone: QuickTeam owns the brand and
 // re-sends it on the next provisioning sync, so «Організація і бренд» shows the
 // name, the logo and the rail colour and offers nothing to change them with.
-test('«Організація і бренд» reports the QuickTeam brand and never edits it', async () => {
+// «Організація і бренд» is gone as a section. It was five read-only rows —
+// назва, лого, колір, стан доповнення, джерело — behind a rail entry of its
+// own, and a rail entry is a promise that there is something to do behind it.
+// What is left is the one fact none of the other sections carried: that the
+// brand and the add-on's activation are QuickTeam's, and where to change them.
+test('the brand is QuickTeam’s, said once, where nothing else can be changed either', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
-  const start = settings.indexOf("case 'workspace': {");
-  // The section that used to end this slice was «Доступ qTicket», folded into
-  // this one; then «Команда підтримки», which moved to «/team» whole. An anchor
-  // that no longer exists makes `indexOf` return -1 and `slice` hand back the
-  // whole file, which is how a test stops testing.
-  const end = settings.indexOf("case 'statuses': {");
-  assert.ok(start >= 0 && end > start);
-  const section = settings.slice(start, end);
 
-  // One source of truth for what the tenant's brand is — the same pair the
-  // client rail and the invitation landing page paint themselves from.
-  assert.match(section, /resolveOrganizationPortalBrand\(org\)/);
-  assert.match(section, /organizationPortalBackground\(brand\)/);
-  assert.match(section, /Організація керується в QuickTeam/);
-  // «Доступ qTicket» was a rail entry of its own holding two read-only rows
-  // about this same organization. It is one row here, and the old address
-  // still resolves.
-  assert.match(section, /label="Доступ qTicket"/);
-  assert.match(section, /org\?\.quickTeam\?\.entitlement === 'active'/);
-  assert.match(settings, /MERGED_SECTIONS = \{[^}]*billing: 'workspace'/);
+  assert.doesNotMatch(settings, /case 'workspace': \{/);
+  assert.doesNotMatch(settings, /id: 'workspace'/);
   assert.doesNotMatch(settings, /id: 'billing'/);
-  // Named, shown, and said where it is changed.
-  assert.match(section, /label="Назва організації"/);
-  assert.match(section, /label="Логотип клієнтського порталу"/);
-  assert.match(section, /label="Колір бічної панелі"/);
+  // Both old addresses land in «Безпека», which is where the row now lives.
+  assert.match(settings, /MERGED_SECTIONS = \{[^}]*workspace: 'account'/);
+  assert.match(settings, /MERGED_SECTIONS = \{[^}]*billing: 'account'/);
+
+  assert.match(settings, /label="Організація і бренд"/);
+  assert.match(settings, /org\?\.quickTeam\?\.entitlement === 'active'/);
+  // Only an internal seat: a client has no QuickTeam side to be sent to.
+  assert.match(settings, /\{!clientViewer && \(\s*<Card preset="borderless" padding="lg">\s*<Row\s*label="Організація і бренд"/);
 
   // Nothing on this screen writes the brand, and nothing previews a change to
   // it — a colour wheel, an upload and a live preview all belonged to an editor
@@ -441,5 +433,4 @@ test('«Організація і бренд» reports the QuickTeam brand and n
   assert.doesNotMatch(settings, /setSidebarPreview|clearSidebarPreview/);
   assert.doesNotMatch(settings, /@uiw\/react-color|<Colorful/);
   assert.doesNotMatch(settings, /setOrgCustomBranding|setSidebarColor|setSidebarTheme/);
-  assert.doesNotMatch(section, /<ImageUpload|<ColorSwatch|<ToggleSwitch/);
 });

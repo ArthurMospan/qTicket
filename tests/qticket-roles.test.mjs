@@ -507,18 +507,23 @@ test('керування співробітниками клієнта живе 
 test('персональні розділи QuickTeam недосяжні внутрішній ролі — ні в рейці, ні за адресою', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
 
-  // Two, not three. A name, an avatar and a language arrive in QuickTeam's
-  // signed snapshot and are re-sent on the next sync, so a qTicket editor for
-  // them is a copy that loses. Notification preferences are not like that at
-  // all: `users/{uid}/settings/notifications` is qTicket's own document and
-  // QuickTeam holds no copy of it, so removing the panel did not prevent a
-  // second editor losing to a sync — it pinned every internal seat to whatever
-  // their document already held, with nobody able to change it, on a product
-  // whose job is telling support that something arrived.
-  assert.match(
-    settings,
-    /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\s*'profile',\s*'localization',\s*\]\);/,
-  );
+  // None, now — and the three entries this set once held came out for three
+  // different reasons, which is the point.
+  //
+  // «Сповіщення» left on 2026-08-31: `users/{uid}/settings/notifications` is
+  // qTicket's own document, QuickTeam holds no copy of it, and removing the
+  // panel pinned every internal seat to whatever their document already held
+  // with nobody able to change it. «Локалізація» is the same mistake found a
+  // day later — the provisioning contract carries `name`, `email` and `avatar`
+  // and no time zone at all, so there was never a copy to lose to. And
+  // «Особистий профіль» is the one where the reasoning held and the control did
+  // not: those three fields really are re-written on every sync, so the section
+  // is read-only rather than gone. A locked field answers «яке в мене імʼя»; a
+  // missing screen does not.
+  assert.match(settings, /const CLIENT_ONLY_SETTINGS_SECTIONS = new Set\(\[\]\);/);
+  // Staff read their profile; only a client edits one.
+  assert.match(settings, /case 'profile': return clientViewer \? \(/);
+  assert.match(settings, /Профіль керується в QuickTeam/);
   // «Команда підтримки» не зникла, а переїхала: реєстр — це «Команда», і для
   // персоналу, і для співробітників адміністратора клієнта. Тому стара адреса
   // веде на екран, який тепер тримає відповідь, а не на перший-ліпший розділ

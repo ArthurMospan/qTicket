@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 256,
-    "elements": 2176,
+    "elements": 2174,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:2315",
+      "location": "src/app/(app)/settings/page.js:2306",
       "attributes": [
         "title",
         "aria-label"
@@ -35,7 +35,7 @@
     },
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:645",
+      "location": "src/app/(app)/settings/page.js:663",
       "attributes": [
         "aria-label",
         "title"

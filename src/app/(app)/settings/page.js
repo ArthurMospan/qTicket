@@ -40,7 +40,7 @@ import {
   UserRoundX, ShieldCheck, MonitorSmartphone, Smartphone, Tablet, Monitor, Undo2
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Tabs, Textarea, ToggleSwitch, useConfirm } from '@/components/ui';
+import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Tabs, Textarea, ToggleSwitch, UserAvatar, useConfirm } from '@/components/ui';
 import ImageUpload from '@/components/ui/ImageUpload';
 import {
   CHANNEL_DEFAULTS,
@@ -142,13 +142,26 @@ const CLIENT_SETTINGS_SECTIONS = new Set([
 // already held, with no way for anybody to change it, on a product whose whole
 // job is telling support that something arrived.
 //
-// A name, an avatar and a language are a different case and stay client-only:
-// those really do arrive in QuickTeam's signed snapshot and are re-sent on the
-// next sync, so a qTicket editor for them is a copy that loses.
-const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([
-  'profile',
-  'localization',
-]);
+// Nothing is client-only any more, and the two entries that were tell two
+// different stories.
+//
+// **«Особистий профіль»** really is QuickTeam's: name, email and avatar arrive
+// in the signed provisioning snapshot and are re-written on every sync, so a
+// qTicket editor for them is a copy that loses. Removing the section was the
+// right conclusion from that and the wrong control — an internal seat then had
+// nowhere to *see* their own name, and the product answered «this screen does
+// not exist for you» to a question that has a perfectly good answer. It is back,
+// read-only, saying where the values come from. A locked field is an answer; a
+// missing screen is not.
+//
+// **«Локалізація»** was removed alongside it on the same reasoning, and the
+// reasoning was simply not true of it. The provisioning contract carries `name`,
+// `email` and `avatar` and nothing else — there is no QuickTeam copy of a time
+// zone or a date format to lose to. Every internal seat has therefore been
+// pinned to whatever their document happened to hold, with nobody anywhere able
+// to change it. That is the same defect «Сповіщення» was brought back for on
+// 2026-08-31, one section further down the same rail. It returns editable.
+const CLIENT_ONLY_SETTINGS_SECTIONS = new Set([]);
 
 const NAV = [
   { id: 'profile',       label: 'Особистий профіль',icon: User,          group: 'Особисте' },
@@ -163,11 +176,16 @@ const NAV = [
   // person does about themselves. They used to live inside «Видалення даних»,
   // which is `adminOnly` — so a plain member had no way to reach any of them.
   { id: 'account',       label: 'Безпека',          icon: ShieldCheck,   group: 'Особисте' },
-  // «Доступ qTicket» is not a section of its own any more. It was two read-only
-  // rows — активовано, і ким — about the same synchronized organization this
-  // one describes, and a rail entry is a promise that there is something to do
-  // behind it. `?section=billing` still resolves; see MERGED_SECTIONS.
-  { id: 'workspace',     label: 'Організація і бренд', icon: Building,    group: 'Організація', adminOnly: true },
+  // «Організація і бренд» is gone, and it is the same argument that took
+  // «Доступ qTicket» into it one slice earlier, applied one step further. That
+  // section was five read-only rows — назва, лого, колір, стан доповнення,
+  // джерело — about an organization QuickTeam owns and qTicket may not touch. A
+  // rail entry is a promise that there is something to do behind it, and behind
+  // this one there was nothing but a description of somewhere else. The fact it
+  // carried lives on as one row in «Безпека», next to the other things this
+  // account cannot change here; `?section=workspace` and `?section=billing`
+  // both land there. Whoever needs to edit the brand needs QuickTeam, and the
+  // row says so.
   { id: 'statuses',      label: 'Статуси звернень', icon: GitBranch,     group: 'Процес підтримки', adminOnly: true },
   { id: 'types',         label: 'Типи звернень',    icon: Shapes,        group: 'Процес підтримки', adminOnly: true },
   { id: 'priorities',    label: 'Пріоритети',       icon: AlertTriangle, group: 'Процес підтримки', adminOnly: true },
@@ -824,7 +842,7 @@ export default function SettingsPage() {
       const currentSearchParams = new URLSearchParams(settingsQuery);
       // Sections that were merged into another one. An old link, a bookmark and
       // every OAuth callback still name them.
-      const MERGED_SECTIONS = { 'auth-methods': 'account', billing: 'workspace' };
+      const MERGED_SECTIONS = { 'auth-methods': 'account', billing: 'account', workspace: 'account' };
       const rawSection = currentSearchParams.get('section');
       const requestedSection = MERGED_SECTIONS[rawSection] || rawSection;
       // «Команда підтримки» did not go away, it moved: the roster is «Команда»,
@@ -1978,7 +1996,17 @@ export default function SettingsPage() {
     switch (activeSection) {
 
       // ──────────────────────────────────────────────────────────────
-      case 'profile': return (
+      // Two profiles, one section, and the difference is who owns the values.
+      //
+      // A client's account is qTicket's own, so they edit it here. An internal
+      // seat's name, email and avatar arrive in QuickTeam's signed provisioning
+      // snapshot and are re-written on every sync — editing them here would be
+      // a change the next synchronization silently undoes. The section used to
+      // be removed outright for staff on that reasoning, which answered a fair
+      // question («яке в мене тут імʼя?») with «цього екрана для вас немає».
+      // Locked fields say where the answer comes from; a missing screen says
+      // nothing at all.
+      case 'profile': return clientViewer ? (
         <Section title="Особистий профіль" desc="Ваша інформація відображається у команді підтримки та зверненнях">
           <Card preset="borderless" padding="lg">
             <Row label="Аватар" desc="Квадратне зображення виглядає найкраще — інші обрізаються по центру">
@@ -1999,6 +2027,30 @@ export default function SettingsPage() {
             </Row>
             <Row label="Email" desc="Використовується для входу та запрошень">
               <span className="text-[13px] text-muted">{currentUser?.email}</span>
+            </Row>
+          </Card>
+        </Section>
+      ) : (
+        <Section title="Особистий профіль" desc="Ваші імʼя, фото та пошта приходять із QuickTeam разом із доступом до qTicket">
+          <Alert
+            variant="info"
+            title="Профіль керується в QuickTeam"
+            description="Змініть їх у своєму профілі QuickTeam — qTicket отримає нові значення з наступною синхронізацією. Тут вони показані, але не редагуються: друга копія одного поля завжди програє тій, яку присилають."
+            className="mb-4"
+          />
+          <Card preset="borderless" padding="lg">
+            <Row label="Аватар" desc="Те саме фото, що у вашому профілі QuickTeam">
+              <UserAvatar user={currentUser} size="xl" />
+            </Row>
+            <Row label="Ім'я" desc="Показується у команді підтримки та зверненнях">
+              <div className="w-full sm:w-[260px]">
+                <Input size="md" value={currentUser?.name || ''} readOnly disabled />
+              </div>
+            </Row>
+            <Row label="Email" desc="Використовується для входу та запрошень">
+              <div className="w-full sm:w-[260px]">
+                <Input size="md" value={currentUser?.email || ''} readOnly disabled />
+              </div>
             </Row>
           </Card>
         </Section>
@@ -2199,67 +2251,6 @@ export default function SettingsPage() {
       // the next snapshot overwrites. The section stays because somebody has
       // to be able to see the brand qTicket is wearing; it no longer pretends
       // to own it.
-      case 'workspace': {
-        // The same two functions the client rail and the invitation landing
-        // page paint themselves from — never a second copy of the ternary.
-        const brand = resolveOrganizationPortalBrand(org);
-        const railColor = organizationPortalBackground(brand);
-        const entitlementActive = org?.quickTeam?.entitlement === 'active';
-        const themeLabel = {
-          dark: 'Темна',
-          light: 'Світла',
-          custom: 'Колір організації',
-        }[brand.sidebarTheme] || 'Темна';
-        return (
-          <Section
-            title="Організація і бренд"
-            desc="Назва, оформлення клієнтського порталу та доступ до доповнення синхронізуються з QuickTeam"
-          >
-            <Alert
-              variant="info"
-              title="Організація керується в QuickTeam"
-              description="Назву, логотип, колір бічної панелі та активацію доповнення змінюють у QuickTeam → Налаштування → Інтеграції → qTicket і синхронізують звідти. Тут вони доступні тільки для перегляду, а власних тарифів чи перемикача підписки qTicket не має."
-              className="mb-4"
-            />
-            <Card preset="borderless" padding="lg">
-              <Row label="Назва організації" desc="Її бачить внутрішня команда та клієнти">
-                <p className="text-[13px] font-semibold text-ink">{brand.name}</p>
-              </Row>
-              <Row label="Логотип клієнтського порталу" desc="Надходить із брендингу QuickTeam">
-                {brand.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={brand.logo} alt="Логотип організації" className="h-[44px] w-[44px] rounded-[10px] border border-line object-cover" />
-                ) : (
-                  <Pill tone="neutral" size="md">Не встановлено</Pill>
-                )}
-              </Row>
-              <Row label="Колір бічної панелі" desc="Тло, яким пофарбована рейка клієнта">
-                <div className="flex items-center gap-[10px]">
-                  {/* The colour is data out of the organization document, so it
-                      is an inline style rather than a token. */}
-                  <div
-                    className="h-[28px] w-[28px] rounded-[6px] border border-line"
-                    style={{ backgroundColor: railColor }}
-                  />
-                  <Pill tone="ink-subtle" size="md">{themeLabel}</Pill>
-                </div>
-              </Row>
-              {/* Was «Доступ qTicket», a section of its own with two read-only
-                  rows in it. It is one fact about this same synchronized
-                  organization, so it is one row here. */}
-              <Row label="Доступ qTicket" desc="Стан доповнення для цієї організації QuickTeam">
-                <Pill tone={entitlementActive ? 'success' : 'warning'} size="md">
-                  {entitlementActive ? 'Активовано' : 'Неактивне'}
-                </Pill>
-              </Row>
-              <Row label="Джерело даних" desc="qTicket не створює окремої копії бренду й комерційного стану">
-                <Pill tone="success" size="md">Синхронізовано з QuickTeam</Pill>
-              </Row>
-            </Card>
-          </Section>
-        );
-      }
-
 
       // ──────────────────────────────────────────────────────────────
       case 'statuses': {
@@ -2702,6 +2693,27 @@ export default function SettingsPage() {
               />
             </div>
           </Card>
+          )}
+
+          {/* What is left of «Організація і бренд»: one row, in the section
+              about what this account cannot change from here. The section it
+              replaces was five read-only rows behind a rail entry of its own —
+              a promise that there is something to do, kept by a description of
+              somewhere else. Only for an internal seat: a client has no
+              QuickTeam side and their organization is simply their supplier. */}
+          {!clientViewer && (
+            <Card preset="borderless" padding="lg">
+              <Row
+                label="Організація і бренд"
+                desc="Назву, логотип, колір порталу та активацію qTicket змінюють у QuickTeam → «Налаштування» → «Інтеграції» → «qTicket» і синхронізують звідти"
+              >
+                <Pill tone={org?.quickTeam?.entitlement === 'active' ? 'success' : 'warning'} size="md">
+                  {org?.quickTeam?.entitlement === 'active'
+                    ? 'Синхронізовано з QuickTeam'
+                    : 'Доповнення неактивне'}
+                </Pill>
+              </Row>
+            </Card>
           )}
 
           <Card preset="borderless" padding="lg">
