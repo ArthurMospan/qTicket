@@ -31,6 +31,7 @@
     "migrate:member-access": "node scripts/migrate-member-access.mjs",
     "migrate:image-assets": "node scripts/migrate-image-assets.mjs",
     "migrate:issue-keys": "node scripts/migrate-issue-keys.mjs",
+    "migrate:noncustomer-orgs": "node scripts/migrate-quickteam-noncustomer-orgs.mjs",
     "cleanup:rate-limits": "node scripts/cleanup-rate-limits.mjs",
     "backfill:project-issue-counts": "node --env-file-if-exists=.env.local scripts/backfill-project-issue-counts.mjs"
   },
