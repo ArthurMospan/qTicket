@@ -107,9 +107,19 @@ Rules of the snapshot:
   next server call or Firestore read. It preserves the organization, client
   identities, incidents, discussion and audit history so a newer active
   snapshot can restore the same support space.
+- That preservation is what a *suspension* means, and it presupposes something
+  to suspend. A first snapshot for an organization qTicket has never seen, whose
+  entitlement is already `inactive`, is not a suspension: it describes a
+  QuickTeam organization that is not a qTicket customer. qTicket writes nothing
+  at all for it — no organization, no staff seats, and no Firebase identities —
+  and answers `status: "skipped"`. A seat is what puts an organization in the
+  workspace switcher, and nothing later takes it back out, so an organization
+  that was never a customer would otherwise stay in every one of its staff
+  members' switchers for good, refusing every read they made of it. QuickTeam
+  may therefore send the whole estate; only its customers land here.
 
 The response contains the stable qTicket `organizationId`, applied `revision`
-and `status: applied | unchanged`.
+and `status: applied | unchanged | skipped`.
 
 ## Staff launch and session separation
 
