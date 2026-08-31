@@ -34,23 +34,23 @@ test('a request with nothing recorded is not an entry in a list of what happened
   assert.equal(created.type, 'created');
 });
 
-test('support reads the person; the customer reads the event', () => {
+test('both sides of the desk read the person', () => {
   const forSupport = issueActivityEntry(issue(), { supportUserIds, memberById });
   assert.equal(forSupport.actorName, 'Оксана');
   assert.equal(forSupport.text, 'відповів у зверненні');
   assert.equal(forSupport.detail, 'Перевірили логи');
 
-  // A customer is told the desk acted, never which agent — and «Підтримка» is
-  // no agent. The first version of this withheld the subject altogether, and on
-  // screen that made a customer's own actions bold with a face while the reply
-  // they came to read was a grey line behind a 7px dot: the two most important
-  // rows were the faintest. `fromSupport` is what lets the row draw a mark
-  // instead of a person, so the line keeps its weight without borrowing a face.
+  // The customer reads the same sentence, because they read the same name
+  // everywhere else on their own request: the attribute strip shows a read-only
+  // «Підтримка» cell with the agent in it, and every reply in the shared
+  // conversation is signed and has a face. Anonymising it here said «Підтримка
+  // відповіла» directly above a message signed «Оксана». The owner retired that
+  // rule on 2026-09-01 — see docs/ROADMAP.md.
   const forClient = issueActivityEntry(issue(), { supportUserIds, memberById, clientViewer: true });
-  assert.equal(forClient.actorName, 'Підтримка');
-  assert.equal(forClient.actor, null, 'the desk is not a person and gets no face');
-  assert.equal(forClient.fromSupport, true);
-  assert.equal(forClient.text, 'відповіла у зверненні');
+  assert.equal(forClient.actorName, 'Оксана');
+  assert.equal(forClient.actor?.id, AGENT);
+  assert.equal(forClient.fromSupport, false);
+  assert.equal(forClient.text, 'відповів у зверненні');
 });
 
 test('a customer still reads their own colleagues by name', () => {
@@ -78,4 +78,19 @@ test('the feed is newest first and drops what cannot speak', () => {
     issue({ id: 'd', lastActivityAt: 20 }),
   ], { supportUserIds, memberById }, 2);
   assert.deepEqual(feed.map(entry => entry.id), ['c', 'd']);
+});
+
+// «Підтримка» survives as a fallback rather than as a policy: an event with no
+// actor recorded at all — a server-side status write — still needs a subject,
+// because «something happened» with a dash where the subject goes is not a
+// sentence.
+test('an event with nobody recorded is still attributed to the desk', () => {
+  const entry = issueActivityEntry(
+    { id: 'i9', issueKey: 'ACME-9', lastActivityAt: 5, lastActivityType: 'status' },
+    { supportUserIds, memberById, clientViewer: true },
+  );
+  assert.equal(entry.fromSupport, true);
+  assert.equal(entry.actorName, 'Підтримка');
+  assert.equal(entry.actor, null, 'the desk is not a person and gets no face');
+  assert.equal(entry.text, 'змінила статус звернення');
 });

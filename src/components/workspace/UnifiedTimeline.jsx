@@ -684,7 +684,7 @@ export default function UnifiedTimeline({
       ref={unreadMarkerRef}
       className={`transition-opacity duration-300 ${boundary.read ? 'opacity-70' : 'opacity-100'}`}
     >
-      <UnreadDivider label={unreadLabel} />
+      <UnreadDivider label={unreadLabel} onDismiss={dismissBoundary} />
     </div>
   ) : null);
 

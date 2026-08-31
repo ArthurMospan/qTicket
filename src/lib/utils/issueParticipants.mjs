@@ -82,9 +82,17 @@ export function issueDisplayParticipants(issue, { source = 'support' } = {}) {
   };
 
   if (source === 'client') {
+    // Support's assignees are here too, since 2026-09-01: the customer reads
+    // who is answering on the request's own strip and in every reply, so a card
+    // that hid it was the same surface disagreeing with itself one screen away.
+    const supportIds = Array.isArray(issue?.assigneeIds) ? issue.assigneeIds : [];
+    supportIds.forEach(userId => addRole(userId, 'assignee'));
     const clientAssigneeIds = Array.isArray(issue?.clientAssigneeIds) ? issue.clientAssigneeIds : [];
     clientAssigneeIds.forEach(userId => addRole(userId, 'client-assignee'));
     addRole(issue?.reporterId || issue?.createdBy, 'author');
+    // `watcherIds` still stays out. Watching is an internal subscription the
+    // customer is never offered, so those ids answer «хто підписався», not «хто
+    // цим займається» — a different question, and not one asked here.
     return [...participants.values()];
   }
 

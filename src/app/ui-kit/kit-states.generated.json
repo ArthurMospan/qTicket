@@ -15,8 +15,8 @@
   "totals": {
     "components": 90,
     "stateful": 79,
-    "hover": 53,
-    "focus": 52,
+    "hover": 54,
+    "focus": 53,
     "disabled": 26,
     "loading": 5,
     "error": 5,
@@ -384,6 +384,8 @@
       "long-text": "label"
     },
     "UnreadDivider": {
+      "hover": "own",
+      "focus": "global",
       "long-text": "label"
     },
     "UserAvatar": {},

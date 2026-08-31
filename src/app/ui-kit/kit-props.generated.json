@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 90,
-    "props": 661,
-    "documentedProps": 661,
+    "props": 662,
+    "documentedProps": 662,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -5478,6 +5478,13 @@
           "type": "string",
           "values": [],
           "description": "Human-readable boundary label."
+        },
+        {
+          "name": "onDismiss",
+          "default": "",
+          "type": "() => void",
+          "values": [],
+          "description": "Takes the line down. Without it the pill is not a control."
         }
       ]
     },

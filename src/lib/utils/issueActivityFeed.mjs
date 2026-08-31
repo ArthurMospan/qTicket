@@ -78,18 +78,30 @@ export function issueActivityEntry(issue, {
   const actorId = issue.lastActivityActorId || issue.createdBy || issue.reporterId || '';
   const supportActor = Boolean(actorId) && supportUserIds.has(actorId);
 
-  // A customer is never told which agent did something — that is the routing
-  // withheld from them on every other surface, and a feed is the easiest place
-  // in a product to leak it back. They read the event; the desk reads the
-  // person.
-  const withhold = clientViewer && (supportActor || !actorId);
+  // The customer reads the person too, as of 2026-09-01.
+  //
+  // This branch used to anonymise every support action for them, on a rule that
+  // the product itself never obeyed: the request's own strip has always shown a
+  // read-only «Підтримка» cell with the agent's name, and their name and face
+  // are on every reply in the shared conversation. So the feed said «Підтримка
+  // відповіла» about a message signed «Артур Моспан» directly underneath —
+  // which is the card-versus-request disagreement this file exists downstream
+  // of, in a third place. The owner retired the rule; see docs/ROADMAP.md.
+  //
+  // What is still withheld is unchanged and is not about people: no resolution
+  // date, ever.
+  const withhold = false;
   const member = memberById.get(actorId) || null;
   const actorName = member?.name || issue.lastActivityActorName || '';
 
   // Three subjects, not two. A named person (with their face), the desk (with
   // a mark rather than a face, because it is not a person), or — only where
   // even the desk is not the actor — nobody at all.
-  const desk = withhold && (supportActor || !actorId);
+  // «Підтримка» remains the subject for an event with no actor recorded at all
+  // — a server-side status write, say — because «something happened» with a
+  // dash where the subject goes is not a sentence. It is a fallback now, not a
+  // policy.
+  const desk = !actorName && (supportActor || !actorId);
   return {
     id: issue.id,
     issue,
