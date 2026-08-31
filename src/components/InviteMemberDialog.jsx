@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Check, Copy, Link2, Mail } from 'lucide-react';
 import Dialog from '@/components/ui/Dialog';
+import Pill from '@/components/ui/DataDisplay/Pill';
+import Surface from '@/components/ui/Surface';
 import Tabs from '@/components/ui/Tabs';
 import InviteLinkSection from '@/components/InviteLinkSection';
 import Alert from '@/components/ui/Feedback/Alert';
@@ -12,6 +14,7 @@ import Label from '@/components/ui/Forms/Label';
 import { useAppContext } from '@/lib/context/AppContext';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { isClientRole } from '@/lib/utils/can';
+import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 
 const GITHUB_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GITHUB_LOGIN_ENABLED === 'true';
@@ -131,13 +134,40 @@ export default function InviteMemberDialog({
       bodyPadding="invite"
     >
       <div className="flex flex-col gap-6">
+        {/* What QuickTeam's version puts here is a role picker: two OptionCards
+            deciding what the invitation grants. qTicket has no such choice —
+            the role is fixed by where the dialog was opened from, and the
+            server re-derives it anyway — so the dialog used to begin with a
+            pair of narrow tabs against a lot of white, which is why it read as
+            the poorer relation of the same screen.
+            The answer is not to invent a choice. It is to state the one that
+            has already been made: who is being invited, and into which project.
+            Same weight, same structure, and nothing on it pretends to be a
+            control. */}
+        <Surface preset="inset" padding="md" className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Роль</span>
+            <Pill tone="ink-subtle" size="md">{organizationRoleLabel(invitedRole)}</Pill>
+          </div>
+          {spaceName ? (
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Проєкт</span>
+              <p className="truncate text-[13px] font-semibold text-ink">{spaceName}</p>
+            </div>
+          ) : null}
+        </Surface>
+
+        {/* Full width, both halves equal. Two tabs floated left in a `lg`
+            dialog left the eye no reason to believe they were the whole of the
+            choice. */}
         <Tabs
           tabs={[
             { id: 'email', label: 'Електронна пошта', icon: Mail },
-            { id: 'link', label: 'Посилання', icon: Link2 },
+            { id: 'link', label: 'Посилання та QR', icon: Link2 },
           ]}
           activeTab={tab}
           onTabChange={setTab}
+          className="w-full [&>button]:flex-1"
         />
 
         {tab === 'link' ? (

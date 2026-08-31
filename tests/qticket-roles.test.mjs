@@ -301,7 +301,16 @@ test('qTicket не має самостійного шляху до внутрі�
 
   // Діалог і далі не пропонує внутрішньої ролі й не має QR-половини старого
   // механізму: qTicket видає рівно два запрошення.
-  assert.doesNotMatch(dialog, /Менеджер підтримки|Адміністратор'|Посилання та QR/);
+  // No internal role is on offer here — that seat is QuickTeam's to grant, and
+  // this dialog issues exactly two client roles, both fixed by where it was
+  // opened from. «Посилання та QR» used to be in this pattern as a third way of
+  // saying «this is not QuickTeam's dialog», and it was the wrong marker: the
+  // tab really does show a link and a QR code, so naming it is accuracy rather
+  // than a leak. What must not appear is a role.
+  assert.doesNotMatch(dialog, /Менеджер підтримки|Адміністратор'/);
+  // The choice this dialog does not offer is stated instead of left blank: the
+  // role and the project it grants, as facts rather than controls.
+  assert.match(dialog, /organizationRoleLabel\(invitedRole\)/);
   assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : 'client_admin'/);
 
   // 1. Виписати внутрішню роль неможливо: `isClientRole` — умова, а не

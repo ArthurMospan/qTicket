@@ -13,9 +13,9 @@
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 166,
+    "usedAndPreviewed": 167,
     "usedWithoutPreview": 0,
-    "declaredUnused": 159
+    "declaredUnused": 158
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -889,12 +889,6 @@
     {
       "component": "Surface",
       "prop": "preset",
-      "value": "inset",
-      "namespace": null
-    },
-    {
-      "component": "Surface",
-      "prop": "preset",
       "value": "nested-panel",
       "namespace": null
     },
@@ -1591,7 +1585,7 @@
     "Alert.variant.error": 8,
     "Button.size.md": 25,
     "Alert.variant.info": 5,
-    "Surface.padding.md": 11,
+    "Surface.padding.md": 12,
     "DetailSection.density.panel": 5,
     "Button.composition.workspace-guard": 3,
     "Surface.preset.card": 1,
@@ -1616,7 +1610,7 @@
     "FilterBar.context.projects": 1,
     "Select.filterRole.sort": 1,
     "Surface.composition.chart-panel": 1,
-    "Pill.size.md": 13,
+    "Pill.size.md": 14,
     "Button.style.ghost": 34,
     "MobilePaneBack.context.pane": 1,
     "Input.composition.inline-edit": 1,
@@ -1655,6 +1649,8 @@
     "TextAction.tone.muted": 3,
     "TextAction.size.sm": 2,
     "Dialog.bodyPadding.invite": 1,
+    "Surface.preset.inset": 1,
+    "Pill.tone.ink-subtle": 4,
     "Input.size.lg": 2,
     "Counter.variant.dot": 5,
     "Counter.size.sm": 8,
@@ -1672,7 +1668,6 @@
     "IconAction.appearance.surface": 1,
     "IconAction.appearance.surface-danger": 1,
     "TextAction.tone.danger-quiet": 1,
-    "Pill.tone.ink-subtle": 3,
     "Card.preset.bordered-compact": 1,
     "Card.padding.sm": 1,
     "Button.shape.circle": 2,
