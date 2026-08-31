@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 89,
-    "props": 646,
-    "documentedProps": 646,
+    "components": 88,
+    "props": 644,
+    "documentedProps": 644,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -3867,6 +3867,13 @@
           "description": "Trigger text while nothing is selected."
         },
         {
+          "name": "readOnly",
+          "default": "false",
+          "type": "boolean",
+          "values": [],
+          "description": "A fact rather than a control: the same dot, weight and height, without the caret. Not the same as disabled, which says the change is merely unavailable right now."
+        },
+        {
           "name": "searchable",
           "default": "false",
           "type": "boolean",
@@ -4116,33 +4123,6 @@
           "type": "number",
           "values": [],
           "description": "Drawing width in pixels."
-        }
-      ]
-    },
-    "StatusPill": {
-      "file": "src/components/ui/DataDisplay/StatusPill.jsx",
-      "summary": "A workflow status, drawn as the badge-shaped `Pill` in the status's own colour. It exists so no screen has to remember that pairing.",
-      "props": [
-        {
-          "name": "className",
-          "default": "''",
-          "type": "string",
-          "values": [],
-          "description": "Placement in the parent only."
-        },
-        {
-          "name": "color",
-          "default": "'#9a9a9a'",
-          "type": "string",
-          "values": [],
-          "description": "The status's configured hex colour."
-        },
-        {
-          "name": "label",
-          "default": "",
-          "type": "string",
-          "values": [],
-          "description": "Status name as the workspace spells it."
         }
       ]
     },

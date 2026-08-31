@@ -155,6 +155,7 @@ function useDropdownPosition(isOpen, triggerRef, dropdownRef, gap = 4) {
  * @param {'sm'|'md'|'lg'} props.size Control height token, shared with Button and Input.
  * @param {'default'|'ghost'|'inline'} props.variant How much chrome the trigger draws.
  * @param {boolean} props.disabled Unavailable: the trigger is dimmed and will not open.
+ * @param {boolean} props.readOnly A fact rather than a control: the same dot, weight and height, without the caret. Not the same as disabled, which says the change is merely unavailable right now.
  * @param {string} props.placeholder Trigger text while nothing is selected.
  * @param {boolean} props.compact Denser trigger, for attribute strips.
  * @param {boolean} props.searchable Puts a search box above the list, for a choice too long to scan.
@@ -177,6 +178,15 @@ export function Select({
   buttonClassName,
   dropdownClassName = '',
   disabled = false,
+  // A value that is this control's to show and somebody else's to change.
+  //
+  // Not `disabled`: disabled says «you could change this, but not now» and
+  // draws it at half opacity behind a barred cursor. This says «this is a
+  // fact» — the same dot, the same weight, the same height, in the same place
+  // in the row, without the caret that promises a menu. The customer's status
+  // cell is the case it exists for: their strip is the agent's strip, and the
+  // one cell they do not drive has to line up with the ones they do.
+  readOnly = false,
   variant = 'default',
   triggerIcon: TriggerIcon,
   compact = false,
@@ -289,6 +299,45 @@ export function Select({
     }
   };
 
+  // Everything inside the trigger except the caret. Both shapes render this,
+  // which is the whole point of the read-only variant: one place decides how a
+  // chosen option looks.
+  const selectedContent = (
+    <div className={`flex items-center overflow-hidden ${compact ? 'gap-1' : 'gap-[8px]'}`}>
+      {ResolvedTriggerIcon && <ResolvedTriggerIcon size={14} className="text-muted shrink-0" />}
+      <OptionMark color={selectedOption?.dotColor} />
+      <OptionPriority option={selectedOption} />
+      <OptionIdentity option={selectedOption} />
+      {selectedOption?.icon && (
+        <selectedOption.icon size={14} className="text-muted shrink-0" />
+      )}
+      <span
+        className={`truncate font-medium ${selectedOption?.badgeColor ? 'rounded-[4px] px-[6px] py-[1.5px] text-[10px]' : 'text-[13px] text-ink'}`}
+        style={selectedOption?.badgeColor ? {
+          color: selectedOption.badgeColor,
+          backgroundColor: `${selectedOption.badgeColor}14`,
+        } : undefined}
+      >
+        {selectedOption ? selectedOption.label : placeholder}
+      </span>
+    </div>
+  );
+
+  if (readOnly) {
+    return (
+      <div className={`relative ${filterWidth} ${className}`}>
+        <div
+          data-ui-size={variant === 'ghost' ? 'sm' : size}
+          data-ui-composition={composition}
+          aria-label={ariaLabel}
+          className={`ui-control w-full flex items-center justify-start text-ink ${variant === 'ghost' ? `bg-transparent !rounded-[8px] px-[10px] ${filterWidth ? 'w-full' : 'w-auto'} inline-flex gap-1.5` : (buttonClassName || defaultButtonClass)}`}
+        >
+          {selectedContent}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${filterWidth} ${className}`} ref={containerRef}>
       <button
@@ -306,24 +355,7 @@ export function Select({
         onClick={() => (isOpen ? close({ focusTrigger: false }) : open())}
         className={`ui-control w-full flex items-center justify-between text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-50 disabled:cursor-not-allowed ${variant === 'ghost' ? `bg-transparent hover:bg-line !rounded-[8px] px-[10px] ${filterWidth ? 'w-full' : 'w-auto'} inline-flex gap-1.5` : (buttonClassName || defaultButtonClass)}`}
       >
-        <div className={`flex items-center overflow-hidden ${compact ? 'gap-1' : 'gap-[8px]'}`}>
-          {ResolvedTriggerIcon && <ResolvedTriggerIcon size={14} className="text-muted shrink-0" />}
-          <OptionMark color={selectedOption?.dotColor} />
-          <OptionPriority option={selectedOption} />
-          <OptionIdentity option={selectedOption} />
-          {selectedOption?.icon && (
-            <selectedOption.icon size={14} className="text-muted shrink-0" />
-          )}
-          <span
-            className={`truncate font-medium ${selectedOption?.badgeColor ? 'rounded-[4px] px-[6px] py-[1.5px] text-[10px]' : 'text-[13px] text-ink'}`}
-            style={selectedOption?.badgeColor ? {
-              color: selectedOption.badgeColor,
-              backgroundColor: `${selectedOption.badgeColor}14`,
-            } : undefined}
-          >
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-        </div>
+        {selectedContent}
         <ChevronDown size={compact ? 12 : 14} className={`text-muted shrink-0 transition-transform ${compact ? 'ml-1' : 'ml-[8px]'} ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

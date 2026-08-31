@@ -172,9 +172,16 @@ test('клієнт і підтримка бачать один екран, і з
   assert.match(clientAttributes, />Тип</);
   assert.match(clientAttributes, />Пріоритет</);
   assert.match(clientAttributes, />Відповідальні</);
-  assert.match(clientAttributes, /readOnlyItemClass[\s\S]{0,200}<StatusPill/);
-  // Статус — єдина клітинка без контролю: ані селекта статусів, ані обробника.
-  assert.doesNotMatch(clientAttributes, /handleStatusChange|options=\{visibleStatuses/);
+  // Той самий контрол, що й у підтримки, тільки без стрілочки: `readOnly`, а
+  // не `disabled` — вимкнений контрол обіцяє зміну, якої не буде.
+  assert.match(clientAttributes, /readOnlyItemClass[\s\S]{0,200}<Select\s+compact\s+readOnly/);
+  // І жодного способу той статус змінити.
+  assert.doesNotMatch(clientAttributes, /handleStatusChange/);
+  const clientStatusCell = clientAttributes.slice(
+    clientAttributes.indexOf('readOnlyItemClass'),
+    clientAttributes.indexOf('Тип'),
+  );
+  assert.doesNotMatch(clientStatusCell, /onChange=/);
   // Решта — контроли, бо це зміст звернення, а не робочий процес.
   assert.match(clientAttributes, /<Select[\s\S]{0,400}EDITABLE_TYPES/);
   assert.match(clientAttributes, /prioritySelectOptions\(PRIORITIES\)/);

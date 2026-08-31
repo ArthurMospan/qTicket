@@ -28,7 +28,6 @@ const SHARED_DISPLAY_COMPONENTS = new Set([
   'Counter',
   'Pill',
   'PriorityBadge',
-  'StatusPill',
   'Tag',
   'TypeBadge',
 ]);

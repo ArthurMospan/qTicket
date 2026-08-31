@@ -1,5 +1,5 @@
 'use client';
-import { Pill, PriorityBadge, PriorityIcon, TypeBadge, Tag, Counter, UserAvatar, StatusPill } from '@/components/ui';
+import { Pill, PriorityBadge, PriorityIcon, TypeBadge, Tag, Counter, UserAvatar } from '@/components/ui';
 import { DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig';
 import { NO_PRIORITY } from '@/lib/utils/priorities.mjs';
 import { Lock } from 'lucide-react';
@@ -19,7 +19,7 @@ export default function BadgesSection() {
     <div className="flex flex-col gap-[32px]">
       <PreviewBlock
         title="Pill — semantic metadata family" component="Pill"
-        description="Спільна geometry для neutral metadata, status-like tones і compact badges. Counter, StatusPill та TypeBadge зберігають окрему семантику поверх тієї самої системи."
+        description="Спільна geometry для neutral metadata, status-like tones і compact badges. Counter, PriorityBadge та TypeBadge зберігають окрему семантику поверх тієї самої системи."
         filePath="src/components/ui/DataDisplay/Pill.jsx"
         fullWidth
       >
@@ -30,6 +30,13 @@ export default function BadgesSection() {
           <Pill tone="warning" size="md">Очікує</Pill>
           <Pill tone="danger" size="md">Прострочено</Pill>
           <Pill tone="info" size="sm" shape="badge">1г 25хв</Pill>
+          {/* A tone is a decision; a colour is data. A workflow status arrives
+              with its own hex out of the organization's settings, and the tint
+              behind it has to stay readable whatever that hex turns out to be —
+              #cbd5e1 text on a 9% tint of itself scored about 1.5:1. */}
+          <Pill label="Новий" color="#10b981" size="sm" shape="badge" />
+          <Pill label="У роботі" color="#9a9a9a" size="sm" shape="badge" />
+          <Pill label="Вирішено" color="#1f1f1f" size="sm" shape="badge" />
           <Pill tone="surface" size="wide-sm" appearance="soft-outline">Клієнт</Pill>
           {/* Обидва лічильники стоять поруч зі стеком облич і мають бути
               рівно такого ж розміру, як обличчя: avatar-counter — для 24px
@@ -165,18 +172,6 @@ export default function BadgesSection() {
               <Counter variant="dot" size="sm" status="info" dark />
             </div>
           </div>
-        </div>
-      </PreviewBlock>
-
-      <PreviewBlock
-        title="StatusPill — статус із бази"
-        description="Спільний компактний статус із черги звернень і клієнтського порталу. Геометрія однакова, а label і колір приходять із workflow організації, тому це дані, а не токен."
-        filePath="src/app/(app)/overview/page.js"
-      >
-        <div className="flex flex-wrap items-center gap-[8px]">
-          <StatusPill label="Новий" color="#10b981" />
-          <StatusPill label="У роботі" color="#9a9a9a" />
-          <StatusPill label="Вирішено" color="#1f1f1f" />
         </div>
       </PreviewBlock>
 

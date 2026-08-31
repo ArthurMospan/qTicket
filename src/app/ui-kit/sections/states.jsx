@@ -7,7 +7,7 @@ import Surface from '@/components/ui/Surface';
 import Tabs from '@/components/ui/Tabs';
 import {
   Checkbox, ToggleSwitch, DatePicker, FormGroup, Label, IconAction, Pill, Tag,
-  Alert, EmptyState, Card, Segmented, SelectableChip, TextAction, AvatarButton, StatusPill,
+  Alert, EmptyState, Card, Segmented, SelectableChip, TextAction, AvatarButton,
   KpiCard, StatusVisibilityPicker, MarkdownViewer, ChatComposerCore,
 } from '@/components/ui';
 import kitStates from '../kit-states.generated.json';
@@ -103,9 +103,6 @@ const STATE_BASE = {
   TextAction: ({ long, ...state }) => <TextAction {...state}>{long ? LONG_LABEL : 'Дія'}</TextAction>,
   Pill: ({ long, ...state }) => <Pill {...state}>{long ? LONG_LABEL : 'Мітка'}</Pill>,
   Tag: ({ long, ...state }) => <Tag {...state}>{long ? LONG_LABEL : 'Тег'}</Tag>,
-  StatusPill: ({ long, ...state }) => (
-    <StatusPill label={long ? LONG_LABEL : 'Активний'} color="#10b981" {...state} />
-  ),
   Label: ({ long, ...state }) => <Label {...state}>{long ? LONG_TEXT : 'Підпис'}</Label>,
   FormGroup: ({ long, ...state }) => (
     <FormGroup label={long ? LONG_LABEL : 'Поле'} {...state}>

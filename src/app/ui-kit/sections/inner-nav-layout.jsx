@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Surface from '@/components/ui/Surface';
-import { SidebarLayout, InnerNavigation, MobilePaneBack, UserAvatar, MemberRail, StatusPill } from '@/components/ui';
+import { SidebarLayout, InnerNavigation, MobilePaneBack, UserAvatar, MemberRail, Pill } from '@/components/ui';
 import { Plus, User, Bell, Users, Building } from 'lucide-react';
 import { PreviewBlock } from '../preview';
 
@@ -92,7 +92,7 @@ export default function NavMenuSection() {
               <div className="flex flex-col items-center gap-2 py-8">
                 <UserAvatar user={demoUser} size="hero" />
                 <h3 className="text-[18px] font-bold text-ink">Артур Моспан</h3>
-                <StatusPill label="Онлайн" tone="success" />
+                <Pill tone="success" size="sm" shape="badge">Онлайн</Pill>
               </div>
               <button type="button" onClick={() => setTeamPane(teamPane === 'sidebar' ? 'content' : 'sidebar')}
                 className="mx-auto rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted">

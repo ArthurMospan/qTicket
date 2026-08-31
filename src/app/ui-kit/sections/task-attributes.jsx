@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Select } from '@/components/ui/Select';
-import { AttributeTrigger, DatePicker, Popover, StatusPill, TaskAttributesPanel, getTaskAttributeChrome } from '@/components/ui';
+import { AttributeTrigger, DatePicker, Popover, TaskAttributesPanel, getTaskAttributeChrome } from '@/components/ui';
 import { DEFAULT_STATUSES, DEFAULT_PRIORITIES, DEFAULT_TYPES } from '@/lib/hooks/useWorkflowConfig';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { Settings2 } from 'lucide-react';
@@ -148,7 +148,7 @@ export default function TaskAttributesSection() {
               <>
                 <div className={readOnlyItemClass}>
                   <span className={attributeLabelClass}>Статус</span>
-                  <StatusPill label="У роботі" color={DEFAULT_STATUSES.find(item => item.id === 'in-progress')?.color} />
+                  <Select compact readOnly value="in-progress" options={statusOpts} buttonClassName={compactSelectClass} />
                 </div>
 
                 <div className={`max-sm:hidden ${attributeItemClass}`}>

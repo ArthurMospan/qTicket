@@ -43,7 +43,7 @@ import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCance
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
-import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, StatusPill, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
+import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
 import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
 import { useQuickTeamTransfer } from '@/lib/hooks/useQuickTeamTransfer';
 import Button from '@/components/ui/Button';
@@ -1563,11 +1563,22 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                    own business — who inside support is on it, and the date it
                    is promised for. */
                 <>
+                  {/* The same cell the agent has, without the caret. A pill
+                      here was a second way of drawing one fact: their strip
+                      lined up with the agent's everywhere except the one place
+                      the two are supposed to be read side by side. */}
                   <div className={readOnlyItemClass}>
                     <span className={attributeLabelClass}>Статус</span>
-                    <StatusPill
-                      label={statusCfg?.label || 'Новий'}
-                      color={statusCfg?.color}
+                    <Select
+                      compact
+                      readOnly
+                      value={issue.columnId || issue.status || visibleStatuses[0]?.id}
+                      options={visibleStatuses.map(status => ({
+                        value: status.id,
+                        label: status.label,
+                        dotColor: status.color,
+                      }))}
+                      buttonClassName={compactSelectClass}
                     />
                   </div>
 

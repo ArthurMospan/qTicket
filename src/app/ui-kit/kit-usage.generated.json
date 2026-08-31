@@ -2,13 +2,13 @@
   "generatedBy": "scripts/scan-kit-usage.mjs",
   "scope": "authenticated-workspace",
   "totals": {
-    "components": 89,
-    "used": 89,
+    "components": 88,
+    "used": 88,
     "unused": 0,
-    "covered": 82,
+    "covered": 81,
     "uncovered": 0,
     "routes": 8,
-    "previews": 123,
+    "previews": 122,
     "internal": 7,
     "unlisted": 0
   },
@@ -106,7 +106,6 @@
       "Popover",
       "PriorityIcon",
       "Select",
-      "StatusPill",
       "Surface",
       "Tabs",
       "Tag",
@@ -1110,7 +1109,6 @@
         "IssueLinkRow",
         "MemberRail",
         "PriorityBadge",
-        "StatusPill",
         "TaskRow",
         "TypeBadge"
       ],
@@ -1284,18 +1282,6 @@
       ],
       "routes": [],
       "usedIn": []
-    },
-    "StatusPill": {
-      "file": "src/components/ui/DataDisplay/StatusPill.jsx",
-      "count": 1,
-      "showcased": true,
-      "usedByKit": [],
-      "routes": [
-        "/[projectId]/issue/[issueId]"
-      ],
-      "usedIn": [
-        "src/components/workspace/IssueDetail.jsx"
-      ]
     },
     "StatusTransitionPicker": {
       "file": "src/components/ui/TaskManagement/StatusTransitionPicker.jsx",
@@ -1684,7 +1670,7 @@
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:374",
-            "src/app/(app)/overview/page.js:205",
+            "src/app/(app)/overview/page.js:204",
             "src/app/(app)/page.js:854",
             "src/app/(app)/settings/page.js:2401",
             "src/app/(app)/settings/page.js:2467",
@@ -1712,10 +1698,10 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:557",
             "src/app/(app)/error.js:51",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:229",
-            "src/app/(app)/overview/page.js:267",
-            "src/app/(app)/overview/page.js:365",
-            "src/app/(app)/overview/page.js:418",
+            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:266",
+            "src/app/(app)/overview/page.js:364",
+            "src/app/(app)/overview/page.js:417",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/components/CreateTaskModal.jsx:409",
@@ -1759,13 +1745,13 @@
             "src/components/workspace/IssueDetail.jsx:1371",
             "src/components/workspace/IssueDetail.jsx:1395",
             "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2058",
-            "src/components/workspace/IssueDetail.jsx:2059",
-            "src/components/workspace/IssueDetail.jsx:2148",
-            "src/components/workspace/IssueDetail.jsx:2149",
-            "src/components/workspace/IssueDetail.jsx:2182",
-            "src/components/workspace/IssueDetail.jsx:2210",
-            "src/components/workspace/IssueDetail.jsx:2220",
+            "src/components/workspace/IssueDetail.jsx:2069",
+            "src/components/workspace/IssueDetail.jsx:2070",
+            "src/components/workspace/IssueDetail.jsx:2159",
+            "src/components/workspace/IssueDetail.jsx:2160",
+            "src/components/workspace/IssueDetail.jsx:2193",
+            "src/components/workspace/IssueDetail.jsx:2221",
+            "src/components/workspace/IssueDetail.jsx:2231",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
           ]
         },
@@ -1839,10 +1825,10 @@
             "src/app/(app)/my/page.js:352",
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
-            "src/app/(app)/overview/page.js:229",
-            "src/app/(app)/overview/page.js:267",
-            "src/app/(app)/overview/page.js:365",
-            "src/app/(app)/overview/page.js:418",
+            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:266",
+            "src/app/(app)/overview/page.js:364",
+            "src/app/(app)/overview/page.js:417",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:889",
             "src/app/(app)/settings/page.js:217",
@@ -1861,11 +1847,11 @@
             "src/components/workspace/IssueDetail.jsx:1179",
             "src/components/workspace/IssueDetail.jsx:1262",
             "src/components/workspace/IssueDetail.jsx:1273",
-            "src/components/workspace/IssueDetail.jsx:2058",
-            "src/components/workspace/IssueDetail.jsx:2148",
-            "src/components/workspace/IssueDetail.jsx:2182",
-            "src/components/workspace/IssueDetail.jsx:2210",
-            "src/components/workspace/IssueDetail.jsx:2220",
+            "src/components/workspace/IssueDetail.jsx:2069",
+            "src/components/workspace/IssueDetail.jsx:2159",
+            "src/components/workspace/IssueDetail.jsx:2193",
+            "src/components/workspace/IssueDetail.jsx:2221",
+            "src/components/workspace/IssueDetail.jsx:2231",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94"
           ]
         },
@@ -1885,7 +1871,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:395",
             "src/app/(app)/error.js:51",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:205",
+            "src/app/(app)/overview/page.js:204",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
             "src/app/(app)/settings/page.js:2754",
@@ -1897,8 +1883,8 @@
             "src/components/workspace/IssueDetail.jsx:1371",
             "src/components/workspace/IssueDetail.jsx:1395",
             "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2059",
-            "src/components/workspace/IssueDetail.jsx:2149",
+            "src/components/workspace/IssueDetail.jsx:2070",
+            "src/components/workspace/IssueDetail.jsx:2160",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
           ]
@@ -1982,11 +1968,11 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:205",
-            "src/app/(app)/overview/page.js:229",
-            "src/app/(app)/overview/page.js:267",
-            "src/app/(app)/overview/page.js:365",
-            "src/app/(app)/overview/page.js:418",
+            "src/app/(app)/overview/page.js:204",
+            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:266",
+            "src/app/(app)/overview/page.js:364",
+            "src/app/(app)/overview/page.js:417",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
@@ -2042,13 +2028,13 @@
             "src/components/workspace/IssueDetail.jsx:1371",
             "src/components/workspace/IssueDetail.jsx:1395",
             "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2058",
-            "src/components/workspace/IssueDetail.jsx:2059",
-            "src/components/workspace/IssueDetail.jsx:2148",
-            "src/components/workspace/IssueDetail.jsx:2149",
-            "src/components/workspace/IssueDetail.jsx:2182",
-            "src/components/workspace/IssueDetail.jsx:2210",
-            "src/components/workspace/IssueDetail.jsx:2220",
+            "src/components/workspace/IssueDetail.jsx:2069",
+            "src/components/workspace/IssueDetail.jsx:2070",
+            "src/components/workspace/IssueDetail.jsx:2159",
+            "src/components/workspace/IssueDetail.jsx:2160",
+            "src/components/workspace/IssueDetail.jsx:2193",
+            "src/components/workspace/IssueDetail.jsx:2221",
+            "src/components/workspace/IssueDetail.jsx:2231",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
@@ -2100,11 +2086,11 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:205",
-            "src/app/(app)/overview/page.js:229",
-            "src/app/(app)/overview/page.js:267",
-            "src/app/(app)/overview/page.js:365",
-            "src/app/(app)/overview/page.js:418",
+            "src/app/(app)/overview/page.js:204",
+            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:266",
+            "src/app/(app)/overview/page.js:364",
+            "src/app/(app)/overview/page.js:417",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
@@ -2161,13 +2147,13 @@
             "src/components/workspace/IssueDetail.jsx:1371",
             "src/components/workspace/IssueDetail.jsx:1395",
             "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2058",
-            "src/components/workspace/IssueDetail.jsx:2059",
-            "src/components/workspace/IssueDetail.jsx:2148",
-            "src/components/workspace/IssueDetail.jsx:2149",
-            "src/components/workspace/IssueDetail.jsx:2182",
-            "src/components/workspace/IssueDetail.jsx:2210",
-            "src/components/workspace/IssueDetail.jsx:2220",
+            "src/components/workspace/IssueDetail.jsx:2069",
+            "src/components/workspace/IssueDetail.jsx:2070",
+            "src/components/workspace/IssueDetail.jsx:2159",
+            "src/components/workspace/IssueDetail.jsx:2160",
+            "src/components/workspace/IssueDetail.jsx:2193",
+            "src/components/workspace/IssueDetail.jsx:2221",
+            "src/components/workspace/IssueDetail.jsx:2231",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620",
@@ -2209,10 +2195,10 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:229",
-            "src/app/(app)/overview/page.js:267",
-            "src/app/(app)/overview/page.js:365",
-            "src/app/(app)/overview/page.js:418",
+            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:266",
+            "src/app/(app)/overview/page.js:364",
+            "src/app/(app)/overview/page.js:417",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:889",
@@ -2264,13 +2250,13 @@
             "src/components/workspace/IssueDetail.jsx:1371",
             "src/components/workspace/IssueDetail.jsx:1395",
             "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2058",
-            "src/components/workspace/IssueDetail.jsx:2059",
-            "src/components/workspace/IssueDetail.jsx:2148",
-            "src/components/workspace/IssueDetail.jsx:2149",
-            "src/components/workspace/IssueDetail.jsx:2182",
-            "src/components/workspace/IssueDetail.jsx:2210",
-            "src/components/workspace/IssueDetail.jsx:2220",
+            "src/components/workspace/IssueDetail.jsx:2069",
+            "src/components/workspace/IssueDetail.jsx:2070",
+            "src/components/workspace/IssueDetail.jsx:2159",
+            "src/components/workspace/IssueDetail.jsx:2160",
+            "src/components/workspace/IssueDetail.jsx:2193",
+            "src/components/workspace/IssueDetail.jsx:2221",
+            "src/components/workspace/IssueDetail.jsx:2231",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620",
@@ -2287,7 +2273,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:395",
-            "src/app/(app)/overview/page.js:205",
+            "src/app/(app)/overview/page.js:204",
             "src/app/(app)/page.js:854"
           ]
         },
@@ -2334,11 +2320,11 @@
             "src/app/(app)/my/page.js:374",
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:205",
-            "src/app/(app)/overview/page.js:229",
-            "src/app/(app)/overview/page.js:267",
-            "src/app/(app)/overview/page.js:365",
-            "src/app/(app)/overview/page.js:418",
+            "src/app/(app)/overview/page.js:204",
+            "src/app/(app)/overview/page.js:228",
+            "src/app/(app)/overview/page.js:266",
+            "src/app/(app)/overview/page.js:364",
+            "src/app/(app)/overview/page.js:417",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:854",
@@ -2390,10 +2376,10 @@
             "src/components/workspace/IssueDetail.jsx:1371",
             "src/components/workspace/IssueDetail.jsx:1395",
             "src/components/workspace/IssueDetail.jsx:1433",
-            "src/components/workspace/IssueDetail.jsx:2058",
-            "src/components/workspace/IssueDetail.jsx:2059",
-            "src/components/workspace/IssueDetail.jsx:2148",
-            "src/components/workspace/IssueDetail.jsx:2149",
+            "src/components/workspace/IssueDetail.jsx:2069",
+            "src/components/workspace/IssueDetail.jsx:2070",
+            "src/components/workspace/IssueDetail.jsx:2159",
+            "src/components/workspace/IssueDetail.jsx:2160",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
             "src/components/workspace/UnifiedTimeline.jsx:1620"
@@ -2443,9 +2429,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2182",
-            "src/components/workspace/IssueDetail.jsx:2210",
-            "src/components/workspace/IssueDetail.jsx:2220"
+            "src/components/workspace/IssueDetail.jsx:2193",
+            "src/components/workspace/IssueDetail.jsx:2221",
+            "src/components/workspace/IssueDetail.jsx:2231"
           ]
         },
         "chat-composer-action": {
@@ -2723,7 +2709,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2040"
+            "src/components/workspace/IssueDetail.jsx:2051"
           ]
         }
       },
@@ -2742,7 +2728,7 @@
             "src/components/CreateTaskModal.jsx:443",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:2040"
+            "src/components/workspace/IssueDetail.jsx:2051"
           ]
         }
       },
@@ -2761,7 +2747,7 @@
             "src/components/CreateTaskModal.jsx:443",
             "src/components/InviteMemberDialog.jsx:155",
             "src/components/WorkspaceInfoCenter.jsx:151",
-            "src/components/workspace/IssueDetail.jsx:2040"
+            "src/components/workspace/IssueDetail.jsx:2051"
           ]
         }
       }
@@ -2773,7 +2759,7 @@
     "Select": {
       "size": {
         "(default)": {
-          "count": 34,
+          "count": 35,
           "routes": [
             "/",
             "/[projectId]",
@@ -2804,18 +2790,19 @@
             "src/components/CreateTaskModal.jsx:564",
             "src/components/CreateTaskModal.jsx:573",
             "src/components/CreateTaskModal.jsx:582",
-            "src/components/workspace/IssueDetail.jsx:1576",
-            "src/components/workspace/IssueDetail.jsx:1591",
-            "src/components/workspace/IssueDetail.jsx:1651",
-            "src/components/workspace/IssueDetail.jsx:1663",
-            "src/components/workspace/IssueDetail.jsx:1681",
-            "src/components/workspace/IssueDetail.jsx:1694",
-            "src/components/workspace/IssueDetail.jsx:1709",
-            "src/components/workspace/IssueDetail.jsx:1844",
-            "src/components/workspace/IssueDetail.jsx:1856",
-            "src/components/workspace/IssueDetail.jsx:1886",
-            "src/components/workspace/IssueDetail.jsx:2124",
-            "src/components/workspace/IssueDetail.jsx:2132",
+            "src/components/workspace/IssueDetail.jsx:1572",
+            "src/components/workspace/IssueDetail.jsx:1587",
+            "src/components/workspace/IssueDetail.jsx:1602",
+            "src/components/workspace/IssueDetail.jsx:1662",
+            "src/components/workspace/IssueDetail.jsx:1674",
+            "src/components/workspace/IssueDetail.jsx:1692",
+            "src/components/workspace/IssueDetail.jsx:1705",
+            "src/components/workspace/IssueDetail.jsx:1720",
+            "src/components/workspace/IssueDetail.jsx:1855",
+            "src/components/workspace/IssueDetail.jsx:1867",
+            "src/components/workspace/IssueDetail.jsx:1897",
+            "src/components/workspace/IssueDetail.jsx:2135",
+            "src/components/workspace/IssueDetail.jsx:2143",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2845,7 +2832,7 @@
           ]
         },
         "(default)": {
-          "count": 22,
+          "count": 23,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
@@ -2861,18 +2848,19 @@
             "src/components/CreateTaskModal.jsx:564",
             "src/components/CreateTaskModal.jsx:573",
             "src/components/CreateTaskModal.jsx:582",
-            "src/components/workspace/IssueDetail.jsx:1576",
-            "src/components/workspace/IssueDetail.jsx:1591",
-            "src/components/workspace/IssueDetail.jsx:1651",
-            "src/components/workspace/IssueDetail.jsx:1663",
-            "src/components/workspace/IssueDetail.jsx:1681",
-            "src/components/workspace/IssueDetail.jsx:1694",
-            "src/components/workspace/IssueDetail.jsx:1709",
-            "src/components/workspace/IssueDetail.jsx:1844",
-            "src/components/workspace/IssueDetail.jsx:1856",
-            "src/components/workspace/IssueDetail.jsx:1886",
-            "src/components/workspace/IssueDetail.jsx:2124",
-            "src/components/workspace/IssueDetail.jsx:2132",
+            "src/components/workspace/IssueDetail.jsx:1572",
+            "src/components/workspace/IssueDetail.jsx:1587",
+            "src/components/workspace/IssueDetail.jsx:1602",
+            "src/components/workspace/IssueDetail.jsx:1662",
+            "src/components/workspace/IssueDetail.jsx:1674",
+            "src/components/workspace/IssueDetail.jsx:1692",
+            "src/components/workspace/IssueDetail.jsx:1705",
+            "src/components/workspace/IssueDetail.jsx:1720",
+            "src/components/workspace/IssueDetail.jsx:1855",
+            "src/components/workspace/IssueDetail.jsx:1867",
+            "src/components/workspace/IssueDetail.jsx:1897",
+            "src/components/workspace/IssueDetail.jsx:2135",
+            "src/components/workspace/IssueDetail.jsx:2143",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2947,7 +2935,7 @@
           ]
         },
         "(default)": {
-          "count": 22,
+          "count": 23,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
@@ -2963,18 +2951,19 @@
             "src/components/CreateTaskModal.jsx:564",
             "src/components/CreateTaskModal.jsx:573",
             "src/components/CreateTaskModal.jsx:582",
-            "src/components/workspace/IssueDetail.jsx:1576",
-            "src/components/workspace/IssueDetail.jsx:1591",
-            "src/components/workspace/IssueDetail.jsx:1651",
-            "src/components/workspace/IssueDetail.jsx:1663",
-            "src/components/workspace/IssueDetail.jsx:1681",
-            "src/components/workspace/IssueDetail.jsx:1694",
-            "src/components/workspace/IssueDetail.jsx:1709",
-            "src/components/workspace/IssueDetail.jsx:1844",
-            "src/components/workspace/IssueDetail.jsx:1856",
-            "src/components/workspace/IssueDetail.jsx:1886",
-            "src/components/workspace/IssueDetail.jsx:2124",
-            "src/components/workspace/IssueDetail.jsx:2132",
+            "src/components/workspace/IssueDetail.jsx:1572",
+            "src/components/workspace/IssueDetail.jsx:1587",
+            "src/components/workspace/IssueDetail.jsx:1602",
+            "src/components/workspace/IssueDetail.jsx:1662",
+            "src/components/workspace/IssueDetail.jsx:1674",
+            "src/components/workspace/IssueDetail.jsx:1692",
+            "src/components/workspace/IssueDetail.jsx:1705",
+            "src/components/workspace/IssueDetail.jsx:1720",
+            "src/components/workspace/IssueDetail.jsx:1855",
+            "src/components/workspace/IssueDetail.jsx:1867",
+            "src/components/workspace/IssueDetail.jsx:1897",
+            "src/components/workspace/IssueDetail.jsx:2135",
+            "src/components/workspace/IssueDetail.jsx:2143",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
         }
@@ -2990,10 +2979,10 @@
           ],
           "files": [
             "src/app/(app)/my/page.js:266",
-            "src/components/workspace/IssueDetail.jsx:1608",
-            "src/components/workspace/IssueDetail.jsx:1726",
-            "src/components/workspace/IssueDetail.jsx:1750",
-            "src/components/workspace/IssueDetail.jsx:1868"
+            "src/components/workspace/IssueDetail.jsx:1619",
+            "src/components/workspace/IssueDetail.jsx:1737",
+            "src/components/workspace/IssueDetail.jsx:1761",
+            "src/components/workspace/IssueDetail.jsx:1879"
           ]
         }
       },
@@ -3013,10 +3002,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1608",
-            "src/components/workspace/IssueDetail.jsx:1726",
-            "src/components/workspace/IssueDetail.jsx:1750",
-            "src/components/workspace/IssueDetail.jsx:1868"
+            "src/components/workspace/IssueDetail.jsx:1619",
+            "src/components/workspace/IssueDetail.jsx:1737",
+            "src/components/workspace/IssueDetail.jsx:1761",
+            "src/components/workspace/IssueDetail.jsx:1879"
           ]
         }
       },
@@ -3036,10 +3025,10 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1608",
-            "src/components/workspace/IssueDetail.jsx:1726",
-            "src/components/workspace/IssueDetail.jsx:1750",
-            "src/components/workspace/IssueDetail.jsx:1868"
+            "src/components/workspace/IssueDetail.jsx:1619",
+            "src/components/workspace/IssueDetail.jsx:1737",
+            "src/components/workspace/IssueDetail.jsx:1761",
+            "src/components/workspace/IssueDetail.jsx:1879"
           ]
         }
       }
@@ -3060,9 +3049,9 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:485",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:551",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:577",
-            "src/app/(app)/overview/page.js:261",
-            "src/app/(app)/overview/page.js:359",
-            "src/app/(app)/overview/page.js:412",
+            "src/app/(app)/overview/page.js:260",
+            "src/app/(app)/overview/page.js:358",
+            "src/app/(app)/overview/page.js:411",
             "src/app/(app)/page.js:825",
             "src/app/(app)/page.js:901",
             "src/app/(app)/page.js:908",
@@ -3104,7 +3093,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:2039"
+            "src/components/workspace/IssueDetail.jsx:2050"
           ]
         }
       },
@@ -3137,13 +3126,13 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:485",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:551",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:577",
-            "src/app/(app)/overview/page.js:261",
-            "src/app/(app)/overview/page.js:359",
-            "src/app/(app)/overview/page.js:412",
+            "src/app/(app)/overview/page.js:260",
+            "src/app/(app)/overview/page.js:358",
+            "src/app/(app)/overview/page.js:411",
             "src/app/(app)/page.js:908",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:2039"
+            "src/components/workspace/IssueDetail.jsx:2050"
           ]
         },
         "none": {
@@ -3190,9 +3179,9 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:551",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:577",
             "src/app/(app)/layout.js:131",
-            "src/app/(app)/overview/page.js:261",
-            "src/app/(app)/overview/page.js:359",
-            "src/app/(app)/overview/page.js:412",
+            "src/app/(app)/overview/page.js:260",
+            "src/app/(app)/overview/page.js:358",
+            "src/app/(app)/overview/page.js:411",
             "src/app/(app)/page.js:825",
             "src/app/(app)/page.js:908",
             "src/app/(app)/page.js:923",
@@ -3200,7 +3189,7 @@
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:138",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/workspace/IssueDetail.jsx:2039"
+            "src/components/workspace/IssueDetail.jsx:2050"
           ]
         },
         "chart-panel": {
@@ -3251,7 +3240,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:454",
+            "src/app/(app)/overview/page.js:453",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2251",
             "src/app/(app)/settings/page.js:2615",
@@ -3354,7 +3343,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:102",
-            "src/app/(app)/overview/page.js:454",
+            "src/app/(app)/overview/page.js:453",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:519",
             "src/components/WorkspaceInfoCenter.jsx:135",
@@ -3439,7 +3428,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:102",
-            "src/app/(app)/overview/page.js:454",
+            "src/app/(app)/overview/page.js:453",
             "src/app/(app)/settings/page.js:593",
             "src/app/(app)/settings/page.js:608",
             "src/components/WorkspaceInfoCenter.jsx:135",
@@ -3498,7 +3487,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:102",
-            "src/app/(app)/overview/page.js:454",
+            "src/app/(app)/overview/page.js:453",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2233",
@@ -3550,7 +3539,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:102",
-            "src/app/(app)/overview/page.js:454",
+            "src/app/(app)/overview/page.js:453",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2233",
             "src/app/(app)/settings/page.js:2244",
@@ -3609,7 +3598,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:102",
-            "src/app/(app)/overview/page.js:454",
+            "src/app/(app)/overview/page.js:453",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:205",
             "src/app/(app)/settings/page.js:2233",
@@ -3853,7 +3842,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1965"
+            "src/components/workspace/IssueDetail.jsx:1976"
           ]
         }
       }
@@ -4133,7 +4122,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:463",
             "src/app/(app)/my/page.js:397",
-            "src/app/(app)/overview/page.js:224",
+            "src/app/(app)/overview/page.js:223",
             "src/app/(app)/page.js:568",
             "src/app/(app)/page.js:878",
             "src/app/(app)/team/page.js:188",
@@ -4184,9 +4173,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:486",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:72",
-            "src/app/(app)/overview/page.js:278",
-            "src/app/(app)/overview/page.js:371",
-            "src/app/(app)/overview/page.js:424",
+            "src/app/(app)/overview/page.js:277",
+            "src/app/(app)/overview/page.js:370",
+            "src/app/(app)/overview/page.js:423",
             "src/app/(app)/team/page.js:202",
             "src/components/profile/ProfileView.jsx:215",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
@@ -4235,9 +4224,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:486",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:72",
-            "src/app/(app)/overview/page.js:278",
-            "src/app/(app)/overview/page.js:371",
-            "src/app/(app)/overview/page.js:424",
+            "src/app/(app)/overview/page.js:277",
+            "src/app/(app)/overview/page.js:370",
+            "src/app/(app)/overview/page.js:423",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
           ]
         },
@@ -4274,9 +4263,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:486",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:72",
-            "src/app/(app)/overview/page.js:278",
-            "src/app/(app)/overview/page.js:371",
-            "src/app/(app)/overview/page.js:424",
+            "src/app/(app)/overview/page.js:277",
+            "src/app/(app)/overview/page.js:370",
+            "src/app/(app)/overview/page.js:423",
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
@@ -4320,7 +4309,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:351",
             "src/app/(app)/loading.js:28",
             "src/app/(app)/my/page.js:391",
-            "src/app/(app)/overview/page.js:220",
+            "src/app/(app)/overview/page.js:219",
             "src/app/(app)/page.js:815",
             "src/app/(app)/page.js:841",
             "src/app/(app)/page.js:903",
@@ -4454,7 +4443,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:83",
-            "src/app/(app)/overview/page.js:440"
+            "src/app/(app)/overview/page.js:439"
           ]
         },
         "lg": {
@@ -4503,7 +4492,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:83",
-            "src/app/(app)/overview/page.js:440",
+            "src/app/(app)/overview/page.js:439",
             "src/app/(app)/settings/page.js:1983",
             "src/app/(app)/settings/page.js:2035",
             "src/app/(app)/settings/page.js:2136",
@@ -4535,8 +4524,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1636",
-            "src/components/workspace/IssueDetail.jsx:1810"
+            "src/components/workspace/IssueDetail.jsx:1647",
+            "src/components/workspace/IssueDetail.jsx:1821"
           ]
         }
       }
@@ -4573,7 +4562,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:87",
-            "src/app/(app)/overview/page.js:442",
+            "src/app/(app)/overview/page.js:441",
             "src/components/SupportDialog.jsx:62"
           ]
         },
@@ -4720,7 +4709,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1985"
+            "src/components/workspace/IssueDetail.jsx:1996"
           ]
         }
       }
@@ -4806,9 +4795,9 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:552",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
-            "src/app/(app)/overview/page.js:262",
-            "src/app/(app)/overview/page.js:360",
-            "src/app/(app)/overview/page.js:413"
+            "src/app/(app)/overview/page.js:261",
+            "src/app/(app)/overview/page.js:359",
+            "src/app/(app)/overview/page.js:412"
           ]
         },
         "group": {
@@ -4817,9 +4806,9 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1982",
-            "src/components/workspace/IssueDetail.jsx:1998",
-            "src/components/workspace/IssueDetail.jsx:2082",
+            "src/components/workspace/IssueDetail.jsx:1993",
+            "src/components/workspace/IssueDetail.jsx:2009",
+            "src/components/workspace/IssueDetail.jsx:2093",
             "src/components/workspace/IssueDetail.jsx:211"
           ]
         },
@@ -4829,7 +4818,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1932"
+            "src/components/workspace/IssueDetail.jsx:1943"
           ]
         }
       }
@@ -4876,8 +4865,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1629",
-            "src/components/workspace/IssueDetail.jsx:1795",
+            "src/components/workspace/IssueDetail.jsx:1640",
+            "src/components/workspace/IssueDetail.jsx:1806",
             "src/components/workspace/UnifiedTimeline.jsx:1438"
           ]
         }
@@ -4898,8 +4887,8 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/IssueDetail.jsx:1629",
-            "src/components/workspace/IssueDetail.jsx:1795",
+            "src/components/workspace/IssueDetail.jsx:1640",
+            "src/components/workspace/IssueDetail.jsx:1806",
             "src/components/workspace/UnifiedTimeline.jsx:1438"
           ]
         }
@@ -4938,14 +4927,13 @@
     "Standard Tabs — 36px": "<Tabs tabs={[{ id: 'board', label: 'Дошка' }, { id: 'list', label: 'Список', count: 3 }, { id: 'archive', label: 'Архів' }]} activeTab={a1} onTabChange={setA1} />",
     "With Icons": "<Tabs\n  tabs={[\n    { id: 'kanban', label: 'Kanban', icon: Kanban },\n    { id: 'list', label: 'Список', icon: List },\n    { id: 'table', label: 'Таблиця', icon: TableIcon },\n  ]}\n  activeTab={a3}\n  onTabChange={setA3}\n/>",
     "Segmented Switcher": "<div className=\"rounded-[10px] bg-canvas p-[2px]\">\n  <Segmented\n    value={period}\n    onChange={setPeriod}\n    options={[7, 14, 30, 90].map(days => ({ value: days, label: `${days}д` }))}\n  />\n</div>",
-    "Pill — semantic metadata family": "<div className=\"flex flex-wrap items-center gap-3\">\n  <Pill tone=\"neutral\" size=\"sm\">Metadata</Pill>\n  <Pill tone=\"dark\" size=\"md\">Dark</Pill>\n  <Pill tone=\"success\" size=\"md\">Готово</Pill>\n  <Pill tone=\"warning\" size=\"md\">Очікує</Pill>\n  <Pill tone=\"danger\" size=\"md\">Прострочено</Pill>\n  <Pill tone=\"info\" size=\"sm\" shape=\"badge\">1г 25хв</Pill>\n  <Pill tone=\"surface\" size=\"wide-sm\" appearance=\"soft-outline\">Клієнт</Pill>\n  {/* Обидва лічильники стоять поруч зі стеком облич і мають бути\n      рівно такого ж розміру, як обличчя: avatar-counter — для 24px\n      (sm), avatar-counter-xs — для 16px (xs). Це четверта аватарка, а\n      не бейдж біля аватарок. */}\n  <span className=\"flex items-center -space-x-[6px]\">\n    <UserAvatar user={{ id: 'p1', name: 'Артур Моспан' }} size=\"sm\" stacked />\n    <UserAvatar user={{ id: 'p2', name: 'Іван Петренко' }} size=\"sm\" stacked />\n    <Pill tone=\"neutral\" size=\"md\" preset=\"avatar-counter\">+3</Pill>\n  </span>\n  <span className=\"flex items-center -space-x-[6px]\">\n    <UserAvatar user={{ id: 'p1', name: 'Артур Моспан' }} size=\"xs\" stacked />\n    <UserAvatar user={{ id: 'p2', name: 'Іван Петренко' }} size=\"xs\" stacked />\n    <Pill tone=\"neutral\" size=\"md\" preset=\"avatar-counter-xs\">+3</Pill>\n  </span>\n</div>",
+    "Pill — semantic metadata family": "<div className=\"flex flex-wrap items-center gap-3\">\n  <Pill tone=\"neutral\" size=\"sm\">Metadata</Pill>\n  <Pill tone=\"dark\" size=\"md\">Dark</Pill>\n  <Pill tone=\"success\" size=\"md\">Готово</Pill>\n  <Pill tone=\"warning\" size=\"md\">Очікує</Pill>\n  <Pill tone=\"danger\" size=\"md\">Прострочено</Pill>\n  <Pill tone=\"info\" size=\"sm\" shape=\"badge\">1г 25хв</Pill>\n  {/* A tone is a decision; a colour is data. A workflow status arrives\n      with its own hex out of the organization's settings, and the tint\n      behind it has to stay readable whatever that hex turns out to be —\n      #cbd5e1 text on a 9% tint of itself scored about 1.5:1. */}\n  <Pill label=\"Новий\" color=\"#10b981\" size=\"sm\" shape=\"badge\" />\n  <Pill label=\"У роботі\" color=\"#9a9a9a\" size=\"sm\" shape=\"badge\" />\n  <Pill label=\"Вирішено\" color=\"#1f1f1f\" size=\"sm\" shape=\"badge\" />\n  <Pill tone=\"surface\" size=\"wide-sm\" appearance=\"soft-outline\">Клієнт</Pill>\n  {/* Обидва лічильники стоять поруч зі стеком облич і мають бути\n      рівно такого ж розміру, як обличчя: avatar-counter — для 24px\n      (sm), avatar-counter-xs — для 16px (xs). Це четверта аватарка, а\n      не бейдж біля аватарок. */}\n  <span className=\"flex items-center -space-x-[6px]\">\n    <UserAvatar user={{ id: 'p1', name: 'Артур Моспан' }} size=\"sm\" stacked />\n    <UserAvatar user={{ id: 'p2', name: 'Іван Петренко' }} size=\"sm\" stacked />\n    <Pill tone=\"neutral\" size=\"md\" preset=\"avatar-counter\">+3</Pill>\n  </span>\n  <span className=\"flex items-center -space-x-[6px]\">\n    <UserAvatar user={{ id: 'p1', name: 'Артур Моспан' }} size=\"xs\" stacked />\n    <UserAvatar user={{ id: 'p2', name: 'Іван Петренко' }} size=\"xs\" stacked />\n    <Pill tone=\"neutral\" size=\"md\" preset=\"avatar-counter-xs\">+3</Pill>\n  </span>\n</div>",
     "Композитні Pill — вкладені елементи": "<div className=\"flex flex-col gap-[18px] w-full\">\n  <div>\n    <h4 className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[8px]\">Іконка стану — IssueCard</h4>\n    <Pill tone=\"danger\" size=\"sm\" shape=\"badge\" weight=\"medium\" title=\"Заблоковано іншим зверненням\">\n      <Lock size={10} />\n      Заблоковано\n    </Pill>\n  </div>\n  <div>\n    <h4 className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[8px]\">Текст із забарвленим суфіксом — форма події</h4>\n    <div className=\"flex flex-wrap gap-[6px]\">\n      <Pill tone=\"neutral\" size=\"wide-sm\" weight=\"medium\">\n        Артур Моспан\n        <span className=\"text-emerald-600\">· буде</span>\n      </Pill>\n      <Pill tone=\"neutral\" size=\"wide-sm\" weight=\"medium\">\n        Олена Коваль\n        <span className=\"text-muted\">· очікуємо</span>\n      </Pill>\n    </div>\n  </div>\n  <div>\n    <h4 className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider mb-[8px]\">Аватар + імʼя + стан — сторінка події</h4>\n    <Pill tone=\"surface-ink\" size=\"lg\" weight=\"medium\">\n      <UserAvatar user={{ id: 'kit-arthur', name: 'Артур Моспан' }} size=\"xs\" />\n      <span className=\"font-semibold\">Артур Моспан</span>\n      <span className=\"text-emerald-600\">· буде</span>\n    </Pill>\n  </div>\n</div>",
     "TypeBadge — task type": "<div className=\"flex flex-wrap items-center gap-[8px]\">\n  {[...DEFAULT_TYPES, {\n    id: 'customer-request',\n    label: 'Власний тип',\n    color: '#8b5cf6',\n  }].map(type => (\n    <TypeBadge key={type.id} label={type.label} color={type.color} icon={taskTypeIcon(type)} />\n  ))}\n</div>",
     "PriorityIcon — system and custom priority language": "<div className=\"flex flex-wrap items-center gap-5\">\n  {[NO_PRIORITY, ...[...PREVIEW_PRIORITIES].reverse()].map(priority => (\n    <div key={priority.id} className=\"flex items-center gap-2 text-[12px] font-medium text-ink\">\n      <PriorityIcon priority={priority} priorities={PREVIEW_PRIORITIES} size=\"md\" />\n      <span>{priority.label}</span>\n    </div>\n  ))}\n</div>",
     "PriorityBadge — рядки списку звернень": "<div className=\"flex items-center gap-[8px]\">\n  <PriorityBadge priority=\"none\" priorities={DEFAULT_PRIORITIES} />\n  <PriorityBadge priority=\"low\" priorities={DEFAULT_PRIORITIES} />\n  <PriorityBadge priority=\"medium\" priorities={DEFAULT_PRIORITIES} />\n  <PriorityBadge priority=\"high\" priorities={DEFAULT_PRIORITIES} />\n  <PriorityBadge priority=\"blocker\" priorities={DEFAULT_PRIORITIES} />\n</div>",
     "Tag — issue labels": "<div className=\"flex items-center gap-[12px]\">\n  <Tag label=\"Фронтенд\" color=\"#3b82f6\" size=\"small\" className=\"shrink-0\" />\n  <Tag label=\"Дизайн\" color=\"#db2777\" />\n</div>",
     "Counter — chat and branded navigation": "<div className=\"grid gap-[16px] md:grid-cols-3\">\n  <div>\n    <h4 className=\"mb-[10px] text-[11px] font-bold uppercase tracking-wider text-muted\">Board column · subtle</h4>\n    <Counter value={337} size=\"sm\" appearance=\"subtle\" />\n  </div>\n  <div>\n    <h4 className=\"mb-[10px] text-[11px] font-bold uppercase tracking-wider text-muted\">Chat list · light surface</h4>\n    <Counter value={12} size=\"sm\" status=\"muted\" className=\"shrink-0\" />\n  </div>\n  <div className=\"rounded-[12px] bg-ink p-[16px]\">\n    <h4 className=\"mb-[10px] text-[11px] font-bold uppercase tracking-wider text-white/50\">Sidebar · branded dark surface</h4>\n    <div className=\"flex items-center gap-[12px]\">\n      <Counter value={7} size=\"sm\" status=\"muted\" dark />\n      <Counter value={3} size=\"sm\" status=\"info\" dark />\n      <Counter variant=\"dot\" size=\"sm\" status=\"info\" dark />\n    </div>\n  </div>\n</div>",
-    "StatusPill — статус із бази": "<div className=\"flex flex-wrap items-center gap-[8px]\">\n  <StatusPill label=\"Новий\" color=\"#10b981\" />\n  <StatusPill label=\"У роботі\" color=\"#9a9a9a\" />\n  <StatusPill label=\"Вирішено\" color=\"#1f1f1f\" />\n</div>",
     "UserAvatar sizes": "<div className=\"flex flex-wrap items-end gap-[16px]\">\n  {sizes.map(([token, px]) => (\n    <div key={token} className=\"flex flex-col items-center gap-[6px]\">\n      <UserAvatar user={demoUser} size={token} tooltip />\n      <span className=\"text-[9px] font-mono text-[#1f1f1f]\">{token}</span>\n      <span className=\"text-[9px] font-mono text-[#cfcfcf]\">{px}px</span>\n    </div>\n  ))}\n</div>",
     "UserAvatar states": "<UserAvatar user={{ name: 'Олена Коваль', avatarColor: '#059669' }} size=\"lg\" tooltip />\n<UserAvatar user={null} size=\"lg\" />",
     "OrganizationMark": "<div className=\"flex flex-wrap items-end gap-[16px]\">\n  <OrganizationMark name=\"OneB\" size=\"sm\" appearance=\"surface\" />\n  <OrganizationMark name=\"OneB\" size=\"md\" appearance=\"surface\" />\n  <div className=\"rounded-[16px] bg-surface-dark p-[12px]\">\n    <OrganizationMark name=\"OneB\" size=\"sm\" appearance=\"sidebar\" />\n  </div>\n  <OrganizationMark name=\"OneB\" size=\"picker\" appearance=\"inverse\" />\n</div>",
@@ -4957,7 +4945,7 @@
     "DetailSection density=panel — шапка панелі": "<div className=\"grid w-full gap-4 xl:grid-cols-2\">\n  <Surface preset=\"panel\" padding=\"md\">\n    <DetailSection\n      density=\"panel\"\n      title=\"Нещодавно оновлені\"\n      description=\"Останні зміни у зверненнях усіх доступних клієнтів.\"\n      action={<Button style=\"secondary\" size=\"md\" icon={ArrowRight}>Вся черга</Button>}\n    >\n      <Card preset=\"borderless\" padding=\"none\" className=\"overflow-hidden divide-y divide-line\">\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Не приходить лист про оплату</span>\n          <ArrowRight size={16} className=\"shrink-0 text-faint\" aria-hidden />\n        </ListRow>\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Помилка 500 у звіті за березень</span>\n          <ArrowRight size={16} className=\"shrink-0 text-faint\" aria-hidden />\n        </ListRow>\n      </Card>\n    </DetailSection>\n  </Surface>\n\n  {/* Без дії та без опису — та сама щільність, коли панель нічого не\n      пояснює й нічого не пропонує зробити. */}\n  <Surface preset=\"panel\" padding=\"md\">\n    <DetailSection\n      density=\"panel\"\n      title=\"Команда підтримки\"\n      description=\"Внутрішні працівники, закріплені за цим клієнтським простором.\"\n    >\n      <Card preset=\"borderless\" padding=\"none\" className=\"overflow-hidden divide-y divide-line\">\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Олена Коваль</span>\n        </ListRow>\n        <ListRow density=\"roomy\" className=\"flex items-center gap-3\">\n          <span className=\"min-w-0 flex-1 truncate text-[13px] font-bold text-ink\">Дмитро Петренко</span>\n        </ListRow>\n      </Card>\n    </DetailSection>\n  </Surface>\n</div>",
     "Tooltip Component": "<div className=\"flex items-center gap-[24px] justify-center w-full py-[40px]\">\n  <Tooltip content=\"Підказка зверху\" position=\"top\">\n    <Button style=\"secondary\">Наведи (Top)</Button>\n  </Tooltip>\n  <Tooltip content=\"Підказка знизу\" position=\"bottom\">\n    <Button style=\"secondary\">Наведи (Bottom)</Button>\n  </Tooltip>\n  <Tooltip content=\"Підказка зліва\" position=\"left\">\n    <Button style=\"secondary\">Наведи (Left)</Button>\n  </Tooltip>\n  <Tooltip content=\"Підказка справа\" position=\"right\">\n    <Button style=\"secondary\">Наведи (Right)</Button>\n  </Tooltip>\n</div>",
     "Task Attributes Panel — Issue Detail": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"task\"\n    compact\n    cardClassName=\"transition-[background-color,padding] duration-200\"\n    primaryChildren={\n      <>\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <Select compact value={statusVal} onChange={setStatusVal} options={statusOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={memberVal} onChange={setMemberVal} options={memberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-lg:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Від клієнта</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-lg:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Термін вирішення</span>\n          <DatePicker\n            compact\n            hideIcon\n            inputClassName={compactInputClass}\n            value={dueDate}\n            onChange={setDueDate}\n            placeholder=\"Без терміну\"\n          />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center lg:hidden\"\n          // Same as the product: without it the wrapper shrinks to the\n          // glyph and «Деталі» becomes a 14px target inside its column —\n          // and without the centring the button it stretched around sits\n          // at the top of it, ten pixels above the row it shares.\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Термін вирішення</span>\n              <DatePicker compact value={dueDate} onChange={setDueDate} placeholder=\"Без терміну\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5 sm:hidden\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5 sm:hidden\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Від клієнта</span>\n              <Select value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
-    "Task Attributes Panel — очима клієнта": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"clientTask\"\n    compact\n    primaryChildren={\n      <>\n        <div className={readOnlyItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <StatusPill label=\"У роботі\" color={DEFAULT_STATUSES.find(item => item.id === 'in-progress')?.color} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center sm:hidden\"\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
+    "Task Attributes Panel — очима клієнта": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"clientTask\"\n    compact\n    primaryChildren={\n      <>\n        <div className={readOnlyItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <Select compact readOnly value=\"in-progress\" options={statusOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center sm:hidden\"\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
     "Form Group Layouts": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Назва клієнта\">\n    <Input placeholder=\"Введіть назву...\" />\n  </FormGroup>\n\n  <FormGroup label=\"Електронна пошта\" required>\n    <Input placeholder=\"name@company.com\" />\n  </FormGroup>\n\n  <FormGroup label=\"Пароль\" required error=\"Пароль має містити щонайменше 8 символів\">\n    <Input type=\"password\" placeholder=\"••••••••\" error={true} />\n  </FormGroup>\n</div>",
     "Label з іконкою": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Учасники\" icon={Users}>\n    <Input placeholder=\"Додати учасників\" />\n  </FormGroup>\n\n  <FormGroup label=\"Нагадування\" icon={Bell} required>\n    <Input placeholder=\"За 15 хвилин\" />\n  </FormGroup>\n\n  <div className=\"flex flex-col gap-[6px]\">\n    <Label icon={MapPin}>Місце</Label>\n    <Input placeholder=\"Офіс або кімната\" />\n  </div>\n</div>",
     "Filter Bar — Projects Page": "<PageHeader\n  title=\"Клієнти\"\n  actions={<Button style=\"primary\" color=\"dark\" size=\"lg\" icon={Plus}>Новий клієнт</Button>}\n  filters={(\n    <FilterBar context=\"projects\">\n      <Select filterRole=\"member\" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant=\"ghost\" />\n      <Select filterRole=\"date\" options={dateOptions} value={dateFilter} onChange={setDateFilter} variant=\"ghost\" />\n      <Select filterRole=\"sort\" options={sortOptions} value={sortOption} onChange={setSortOption} variant=\"ghost\" />\n    </FilterBar>\n  )}\n/>",
@@ -5026,7 +5014,7 @@
     "4) Заголовок + Вкладки + Дії": "<div className=\"border border-[#f0f0f0] rounded-[24px] overflow-hidden bg-white p-[24px] w-full\">\n  <PageHeader\n    title=\"Клієнти\"\n    tabs={[\n      { id: 'active', label: 'Активні' },\n      { id: 'archived', label: 'Архівні' }\n    ]}\n    activeTab={tab2}\n    onTabChange={setTab2}\n    actions={\n      <Button onClick={() => alert('Створити клієнта')} style=\"primary\" color=\"dark\" size=\"lg\" icon={Plus} collapseAt=\"sm\">Новий клієнт</Button>\n    }\n  />\n</div>",
     "Workspace Layout Shell (Сайдбар + Мейн Контент)": "<div className=\"h-[550px] rounded-[24px] overflow-hidden flex bg-[#f5f5f5] w-full p-[12px] relative\">\n  {/* Left: Sidebar wrapper with exact layout.js paddings */}\n  <div className=\"shrink-0 h-full flex pr-[6px]\">\n    <div className=\"h-full rounded-[24px] overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex bg-[#1f1f1f]\">\n      <WorkspaceSidebar />\n    </div>\n  </div>\n\n  {/* Right: Main content panel with header and child page area */}\n  <div className=\"flex-1 h-full flex flex-col pl-[6px] overflow-hidden\">\n    <div className=\"flex flex-col flex-1 bg-white rounded-[24px] overflow-hidden relative\">\n      {/* Header inside the container */}\n      <div className=\"border-b border-[#f0f0f0] bg-white z-10 shrink-0\">\n        <WorkspaceHeader />\n      </div>\n\n      {/* Main Content Area */}\n      <div className=\"flex-1 p-[24px] overflow-y-auto bg-white flex flex-col gap-4\">\n        <div className=\"h-full border-2 border-dashed border-[#f0f0f0] rounded-[16px] flex items-center justify-center bg-[#fbfbfb]\">\n          <span className=\"text-[#cfcfcf] font-bold text-[13px]\">Main Work Area (Контентна зона)</span>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>",
     "SidebarLayout context=\"settings\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-white\">\n  <SidebarLayout\n    context=\"settings\"\n    sidebar={<InnerNavigation items={NAV} activeId={active} onChange={setActive} />}\n    hasBorder={false}\n  >\n    <main className=\"flex-1 overflow-y-auto custom-scrollbar bg-canvas relative\">\n      <div className=\"max-w-[760px] mx-auto px-[16px] py-[24px] md:px-[32px] md:py-[48px] min-h-full flex flex-col\">\n        <div className=\"flex-1 pb-[100px]\">\n          <h2 className=\"text-[22px] font-bold text-ink\">Особистий профіль</h2>\n          <p className=\"mt-1 text-[13px] text-muted\">Керуйте особистими даними та налаштуваннями профілю.</p>\n          <Surface preset=\"card\" padding=\"lg\" className=\"mt-6\">\n            <div className=\"h-[180px]\" />\n          </Surface>\n        </div>\n      </div>\n    </main>\n  </SidebarLayout>\n</div>",
-    "SidebarLayout context=\"team\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-white\">\n  <SidebarLayout\n    context=\"team\"\n    mobilePane={teamPane}\n    className=\"!pt-[12px]\"\n    sidebar={(\n      <MemberRail\n        members={[\n          { id: 'arthur', name: 'Артур Моспан', positionName: 'Власник організації', online: true },\n          { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer', online: true },\n          { id: 'petro', name: 'Петро Іванчук', positionName: 'Designer' },\n          { id: 'anna', name: 'Анна Мельник', positionName: 'QA Engineer' },\n          // `inactive` — місце вимкнули в QuickTeam. Людина лишається\n          // у списку, бо її імʼя лишається на зверненнях.\n          { id: 'ihor', name: 'Ігор Левченко', positionName: 'Support Manager', inactive: true },\n        ]}\n        activeId=\"arthur\"\n        action={<Button style=\"ghost\" size=\"icon-xs\" icon={Plus} className=\"hover:!bg-white\" title=\"Запросити\" />}\n      />\n    )}\n  >\n    <Surface preset=\"panel\" padding=\"sm\" className=\"flex flex-1 flex-col overflow-hidden\">\n      <div className=\"flex flex-col items-center gap-2 py-8\">\n        <UserAvatar user={demoUser} size=\"hero\" />\n        <h3 className=\"text-[18px] font-bold text-ink\">Артур Моспан</h3>\n        <StatusPill label=\"Онлайн\" tone=\"success\" />\n      </div>\n      <button type=\"button\" onClick={() => setTeamPane(teamPane === 'sidebar' ? 'content' : 'sidebar')}\n        className=\"mx-auto rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted\">\n        mobilePane: {teamPane} (клац, щоб перемкнути)\n      </button>\n    </Surface>\n  </SidebarLayout>\n</div>",
+    "SidebarLayout context=\"team\"": "<div className=\"h-[420px] w-full overflow-hidden rounded-[24px] border border-line bg-white\">\n  <SidebarLayout\n    context=\"team\"\n    mobilePane={teamPane}\n    className=\"!pt-[12px]\"\n    sidebar={(\n      <MemberRail\n        members={[\n          { id: 'arthur', name: 'Артур Моспан', positionName: 'Власник організації', online: true },\n          { id: 'olena', name: 'Олена Коваль', positionName: 'Frontend Developer', online: true },\n          { id: 'petro', name: 'Петро Іванчук', positionName: 'Designer' },\n          { id: 'anna', name: 'Анна Мельник', positionName: 'QA Engineer' },\n          // `inactive` — місце вимкнули в QuickTeam. Людина лишається\n          // у списку, бо її імʼя лишається на зверненнях.\n          { id: 'ihor', name: 'Ігор Левченко', positionName: 'Support Manager', inactive: true },\n        ]}\n        activeId=\"arthur\"\n        action={<Button style=\"ghost\" size=\"icon-xs\" icon={Plus} className=\"hover:!bg-white\" title=\"Запросити\" />}\n      />\n    )}\n  >\n    <Surface preset=\"panel\" padding=\"sm\" className=\"flex flex-1 flex-col overflow-hidden\">\n      <div className=\"flex flex-col items-center gap-2 py-8\">\n        <UserAvatar user={demoUser} size=\"hero\" />\n        <h3 className=\"text-[18px] font-bold text-ink\">Артур Моспан</h3>\n        <Pill tone=\"success\" size=\"sm\" shape=\"badge\">Онлайн</Pill>\n      </div>\n      <button type=\"button\" onClick={() => setTeamPane(teamPane === 'sidebar' ? 'content' : 'sidebar')}\n        className=\"mx-auto rounded-[8px] bg-canvas px-3 py-1.5 text-[11px] font-bold text-muted\">\n        mobilePane: {teamPane} (клац, щоб перемкнути)\n      </button>\n    </Surface>\n  </SidebarLayout>\n</div>",
     "Шлях назад — стрілка в заголовку": "<div className=\"flex flex-col gap-[12px]\">\n  <div className=\"flex items-center gap-4 rounded-[12px] bg-white p-[16px] [&_button]:!flex\">\n    <span className=\"font-mono text-[10px] font-bold text-faint\">pane</span>\n    <MobilePaneBack label=\"До списку команди\" onClick={() => {}} />\n    <MobilePaneBack label=\"Всі налаштування\" onClick={() => {}} />\n    <MobilePaneBack label=\"До списку звернень\" onClick={() => {}} />\n  </div>\n  <div className=\"flex items-center gap-4 rounded-[12px] bg-white p-[16px]\">\n    <span className=\"font-mono text-[10px] font-bold text-faint\">level</span>\n    <MobilePaneBack context=\"level\" label=\"Усі інтеграції\" onClick={() => {}} />\n    <MobilePaneBack context=\"level\" label=\"Усі джерела\" onClick={() => {}} />\n  </div>\n</div>",
     "DetailLayout context=\"event\"": "<div className=\"h-[320px] overflow-hidden rounded-[12px] border border-line bg-white\">\n  <DetailLayout\n    context=\"event\"\n    standalone={false}\n    header={(\n      <div className=\"pb-[12px] pt-[12px]\">\n        <h1 className=\"ui-type-page-title leading-tight tracking-tight text-ink\">Планерка команди</h1>\n        <p className=\"mt-1 text-[12px] font-medium text-muted\">Організатор: Артур Моспан · створили сьогодні</p>\n      </div>\n    )}\n    attributes={(\n      <div className=\"flex flex-wrap items-center gap-2 rounded-[12px] bg-canvas px-3 py-2\">\n        <Pill tone=\"neutral\" size=\"md\">14:00–15:00</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Мітинг</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Уся команда</Pill>\n      </div>\n    )}\n  >\n    <DetailSection icon={AlignLeft} title=\"Опис\">\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface text-[13px] leading-relaxed text-ink\">\n        Порядок денний, рішення й наступні кроки.\n      </div>\n    </DetailSection>\n    <DetailSection icon={MapPin} title=\"Місце\">\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface text-[13px] text-ink\">\n        Кімната 2\n      </div>\n    </DetailSection>\n    <DetailSection icon={Users} title=\"Учасники\" count={2}>\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface flex flex-wrap gap-2\">\n        <Pill tone=\"surface-ink\" size=\"lg\" weight=\"medium\">\n          <UserAvatar user={demoUser} size=\"xs\" />\n          <span className=\"font-semibold\">Артур Моспан</span>\n        </Pill>\n      </div>\n    </DetailSection>\n  </DetailLayout>\n</div>",
     "DetailLayout context=\"task\"": "<div className=\"h-[320px] overflow-hidden rounded-[12px] border border-line bg-white\">\n  <DetailLayout\n    context=\"task\"\n    standalone={false}\n    header={(\n      <div className=\"pb-[12px] pt-[12px]\">\n        <h1 className=\"ui-type-page-title leading-tight tracking-tight text-ink\">Переробити онбординг</h1>\n        <p className=\"mt-1 text-[12px] font-medium text-muted\">Автор: Артур Моспан · оновили щойно</p>\n      </div>\n    )}\n    attributes={(\n      <div className=\"flex flex-wrap items-center gap-2 rounded-[12px] bg-canvas px-3 py-2\">\n        <Pill tone=\"neutral\" size=\"md\">У роботі</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Артур</Pill>\n        <Pill tone=\"neutral\" size=\"md\">Високий</Pill>\n      </div>\n    )}\n    aside={(\n      <div className=\"flex h-full flex-col items-center justify-center rounded-[16px] bg-canvas text-[11px] font-semibold text-muted\">\n        Чат звернення\n      </div>\n    )}\n  >\n    <DetailSection icon={AlignLeft} title=\"Опис\">\n      <div data-ui-surface=\"panel\" data-ui-padding=\"wide\" className=\"ui-surface flex flex-col gap-4\">\n        <p className=\"text-[13px] leading-relaxed text-ink\">Перший екран лишаємо, другий переробляємо.</p>\n        <DetailSection density=\"group\" icon={Paperclip} title=\"Вкладення\" count={2}>\n          <p className=\"text-[12px] text-muted\">Список файлів</p>\n        </DetailSection>\n        <DetailSection density=\"group\" icon={TaskIcon} title=\"Дочірні звернення\" count={3} meta=\"1/3 · 2 ще в роботі\">\n          <p className=\"text-[12px] text-muted\">Рядки дочірніх звернень</p>\n        </DetailSection>\n        <DetailSection density=\"group\" icon={Link2} title=\"Зв’язки\" count={1}>\n          <p className=\"text-[12px] text-muted\">Рядки зв’язків</p>\n        </DetailSection>\n      </div>\n    </DetailSection>\n  </DetailLayout>\n</div>"

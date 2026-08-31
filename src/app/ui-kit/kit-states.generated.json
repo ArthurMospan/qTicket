@@ -13,14 +13,14 @@
     "long-text"
   ],
   "totals": {
-    "components": 89,
-    "stateful": 79,
+    "components": 88,
+    "stateful": 78,
     "hover": 52,
     "focus": 51,
     "disabled": 26,
     "loading": 5,
     "error": 5,
-    "long-text": 58
+    "long-text": 57
   },
   "components": {
     "Alert": {
@@ -304,9 +304,6 @@
     },
     "Skeleton": {},
     "Sparkline": {},
-    "StatusPill": {
-      "long-text": "label"
-    },
     "StatusTransitionPicker": {
       "hover": "own",
       "focus": "own"
@@ -615,6 +612,7 @@
     "Pill": [
       "badges",
       "chat-elements",
+      "inner-nav-layout",
       "detail-layout",
       "variant-matrix",
       "states"
@@ -661,12 +659,6 @@
     ],
     "Sparkline": [
       "charts"
-    ],
-    "StatusPill": [
-      "badges",
-      "task-attributes",
-      "inner-nav-layout",
-      "states"
     ],
     "StatusTransitionPicker": [
       "task-crm"

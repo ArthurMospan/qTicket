@@ -14,7 +14,6 @@ import {
   PageHeader,
   Pill,
   PriorityBadge,
-  StatusPill,
   Surface,
   TaskIdentity,
   UserAvatar,

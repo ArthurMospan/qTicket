@@ -142,8 +142,10 @@ test('QUI-134 gives the neutral dot the surface opposite, not a brand hue', asyn
 test('QUI-135 keeps every status pill readable against its own tint', async () => {
   const kit = readKitShowcase();
   // `#cbd5e1` text on a 9% tint of itself scored about 1.5:1. The sprint screen
-  // that shipped the unreadable pill is gone; the catalogue still has to show
-  // the readable one.
+  // that shipped the unreadable pill is gone, and so is `StatusPill` — a
+  // wrapper the product stopped reaching once the customer's status cell became
+  // the agent's cell without its caret. The catalogue still has to show the
+  // readable data-coloured pill, drawn now by `Pill` itself.
   assert.doesNotMatch(kit, /label="Завершено" color="#cbd5e1"/);
   assert.match(kit, /label="Вирішено" color="#1f1f1f"/);
 });
