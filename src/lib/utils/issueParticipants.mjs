@@ -94,6 +94,17 @@ export function issueDisplayParticipants(issue, { source = 'support' } = {}) {
       ? issue.assignees
       : [];
   assigneeIds.forEach(userId => addRole(userId, 'assignee'));
+  // The customer's own answerable people, on support's card too.
+  //
+  // They were missing, and it made a board card and the request it stands for
+  // disagree about who is on it: the request's strip shows «Підтримка» and
+  // «Відповідальні клієнта» side by side, while the card drew the first list,
+  // the author and the watchers — so somebody named on the customer's side and
+  // not filing the request appeared on the request and nowhere on the board.
+  // One question, «хто цим займається», must not have two answers depending on
+  // which screen is asking.
+  const clientAssigneeIds = Array.isArray(issue?.clientAssigneeIds) ? issue.clientAssigneeIds : [];
+  clientAssigneeIds.forEach(userId => addRole(userId, 'client-assignee'));
   addRole(issue?.reporterId || issue?.createdBy, 'author');
 
   const watcherIds = Array.isArray(issue?.watcherIds)

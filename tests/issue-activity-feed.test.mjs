@@ -40,12 +40,17 @@ test('support reads the person; the customer reads the event', () => {
   assert.equal(forSupport.text, 'відповів у зверненні');
   assert.equal(forSupport.detail, 'Перевірили логи');
 
-  // Which agent acted is the routing withheld from a customer on every other
-  // surface, and a feed is the easiest place in a product to leak it back.
+  // A customer is told the desk acted, never which agent — and «Підтримка» is
+  // no agent. The first version of this withheld the subject altogether, and on
+  // screen that made a customer's own actions bold with a face while the reply
+  // they came to read was a grey line behind a 7px dot: the two most important
+  // rows were the faintest. `fromSupport` is what lets the row draw a mark
+  // instead of a person, so the line keeps its weight without borrowing a face.
   const forClient = issueActivityEntry(issue(), { supportUserIds, memberById, clientViewer: true });
-  assert.equal(forClient.actorName, '');
-  assert.equal(forClient.actor, null);
-  assert.equal(forClient.text, 'Нова відповідь у зверненні');
+  assert.equal(forClient.actorName, 'Підтримка');
+  assert.equal(forClient.actor, null, 'the desk is not a person and gets no face');
+  assert.equal(forClient.fromSupport, true);
+  assert.equal(forClient.text, 'відповіла у зверненні');
 });
 
 test('a customer still reads their own colleagues by name', () => {
@@ -54,6 +59,8 @@ test('a customer still reads their own colleagues by name', () => {
     { supportUserIds, memberById, clientViewer: true },
   );
   assert.equal(entry.actorName, 'Олег');
+  assert.equal(entry.actor?.id, CUSTOMER, 'their own colleague keeps their face');
+  assert.equal(entry.fromSupport, false);
   assert.equal(entry.text, 'відкрив звернення');
 });
 

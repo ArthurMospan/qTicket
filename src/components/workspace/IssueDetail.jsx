@@ -328,8 +328,8 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // Проєкт, у якому склад ніхто не записував, не може відповісти на питання
   // «хто тут» — і мовчання тут означало б порожній пікер, а не звужений.
   const mentionInvolved = new Set([
-    ...(Array.isArray(issue?.assigneeIds) ? issue.assigneeIds : []),
-    ...(Array.isArray(issue?.watcherIds) ? issue.watcherIds : []),
+    ...(Array.isArray(issue?.assigneeIds) ? issue?.assigneeIds : []),
+    ...(Array.isArray(issue?.watcherIds) ? issue?.watcherIds : []),
     issue?.authorId,
     issue?.createdBy,
   ].filter(Boolean));
@@ -497,7 +497,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // somebody's work would be telling them the opposite of the truth, so an
   // assignee this reader cannot name is still an assignee, under the only word
   // that is certainly true about them.
-  const supportAssigneeOptions = (issue.assigneeIds || []).map(uid => {
+  const supportAssigneeOptions = (issue?.assigneeIds || []).map(uid => {
     const member = supportDirectory.find(candidate => (candidate.id || candidate.uid) === uid);
     return member
       ? {
@@ -515,7 +515,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const clientDirectory = activeMembers(members).filter(member => (
     isClientRole(member.role) && isOnProjectTeam(project, member.id || member.uid)
   ));
-  const clientAssigneeIds = Array.isArray(issue.clientAssigneeIds) ? issue.clientAssigneeIds : [];
+  const clientAssigneeIds = Array.isArray(issue?.clientAssigneeIds) ? issue?.clientAssigneeIds : [];
   const clientAssignees = clientAssigneeIds
     .map(uid => members.find(member => (member.id || member.uid) === uid))
     .filter(Boolean);
@@ -604,19 +604,19 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
       projectName: project?.name || '',
       statusName: (() => {
         const item = STATUSES.find(
-          option => option.id === (issue.status || issue.columnId),
+          option => option.id === (issue?.status || issue?.columnId),
         );
         return item?.label || item?.name || '';
       })(),
       priorityName: (() => {
-        const item = PRIORITIES.find(option => option.id === issue.priority);
+        const item = PRIORITIES.find(option => option.id === issue?.priority);
         return item?.label || item?.name || '';
       })(),
       typeName: (() => {
-        const item = TYPES.find(option => option.id === issue.type);
+        const item = TYPES.find(option => option.id === issue?.type);
         return item?.label || item?.name || '';
       })(),
-      assigneeNames: (issue.assigneeIds || [])
+      assigneeNames: (issue?.assigneeIds || [])
         .map(uid => members.find(member => (member.id || member.uid) === uid))
         .filter(Boolean)
         .map(member => member.name || member.displayName || member.email || ''),
@@ -660,11 +660,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // be edited in place (status, sprint, labels…) writes straight through, so the
   // draft is exactly the six fields `enterEdit` copies.
   const draftIsDirty = Boolean(isEditing && issue && (
-    (draft.title ?? '') !== (issue.title ?? '')
-    || (draft.type || '') !== (issue.type || '')
-    || (draft.priority || '') !== (issue.priority || '')
-    || (draft.description || '') !== (issue.description || '')
-    || (draft.dueDate || '') !== toLocalDateInput(parseDueDate(issue.dueDate, { timeZone }), { timeZone })
+    (draft.title ?? '') !== (issue?.title ?? '')
+    || (draft.type || '') !== (issue?.type || '')
+    || (draft.priority || '') !== (issue?.priority || '')
+    || (draft.description || '') !== (issue?.description || '')
+    || (draft.dueDate || '') !== toLocalDateInput(parseDueDate(issue?.dueDate, { timeZone }), { timeZone })
   ));
 
   // Walking off the page mid-edit used to take the draft with it silently. The
@@ -727,6 +727,20 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     return () => window.removeEventListener('keydown', fn);
   }, [router, backHref, isEditing, showLinkInput, showSubInput, draftIsDirty, confirmDialog]);
 
+  // Everything above this point runs while `issue` is still `undefined`, and
+  // that is not a rare case — it is every first paint. `issues.find(...)` has
+  // nothing to find until the Firestore stream arrives, so on a page load or a
+  // refresh of a request's own URL this component renders once with no request
+  // at all.
+  //
+  // The guard cannot move up to meet that: hooks run between here and there,
+  // and React requires them unconditionally. So the reads above are optional,
+  // every one of them. They were not, and `supportAssigneeOptions` — two
+  // hundred lines before this line — did `(issue.assigneeIds || []).map(...)`,
+  // which threw `TypeError: can't access property "assigneeIds"` on every
+  // refresh and put the whole workspace behind «qTicket не завантажився».
+  // That is the error the owner had been reporting since 2026-08-31; the
+  // console from production named this property exactly.
   if (!issue) {
     return (
       <div className="flex-1 flex items-center justify-center bg-white">

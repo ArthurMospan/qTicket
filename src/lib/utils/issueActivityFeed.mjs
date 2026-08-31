@@ -36,16 +36,26 @@ const PHRASES = {
   updated: 'оновив звернення',
 };
 
-// The same, with nobody to attribute it to. A client's half of the screen sees
-// these for everything support does, and a subjectless sentence is the correct
-// shape for it — «Підтримка змінила статус» would be a person if there were
-// one, and naming the desk as an actor is how routing leaks one word at a time.
-const IMPERSONAL_PHRASES = {
-  created: 'Звернення відкрито',
-  comment: 'Нова відповідь у зверненні',
-  status: 'Статус звернення змінено',
-  restored: 'Звернення відновлено',
-  updated: 'Звернення оновлено',
+// The same events with the desk as the subject, feminine to agree with
+// «Підтримка».
+//
+// The first version of this was subjectless — «Нова відповідь у зверненні
+// KER-4» — on the argument that naming the desk as an actor is how routing
+// leaks one word at a time. Put on screen beside the support account, that
+// argument fell over: a customer's own actions rendered bold with a face while
+// support's rendered grey with a 7px dot, so the two lines they actually came
+// for were the faintest things on the page and read as disabled rows.
+//
+// The rule being protected is «which member of support is answering», and
+// «Підтримка» names no member. It says the desk acted, which the customer can
+// see anyway from the reply sitting in their thread. Withholding the *fact*
+// bought nothing and cost the feed its legibility.
+const SUPPORT_PHRASES = {
+  created: 'відкрила звернення',
+  comment: 'відповіла у зверненні',
+  status: 'змінила статус звернення',
+  restored: 'відновила звернення',
+  updated: 'оновила звернення',
 };
 
 /**
@@ -76,22 +86,29 @@ export function issueActivityEntry(issue, {
   const member = memberById.get(actorId) || null;
   const actorName = member?.name || issue.lastActivityActorName || '';
 
+  // Three subjects, not two. A named person (with their face), the desk (with
+  // a mark rather than a face, because it is not a person), or — only where
+  // even the desk is not the actor — nobody at all.
+  const desk = withhold && (supportActor || !actorId);
   return {
     id: issue.id,
     issue,
     type,
     millis: activity.millis,
     at: activity.at,
-    // `null` means «no face, no name»: the sentence carries the whole event.
+    // `null` means «no face»: either the desk, which gets a mark, or nobody.
     actor: withhold || !actorName ? null : (member || {
       id: actorId,
       name: actorName,
       avatar: issue.lastActivityActorAvatar || '',
     }),
-    actorName: withhold || !actorName ? '' : actorName,
-    text: withhold || !actorName
-      ? IMPERSONAL_PHRASES[type]
-      : PHRASES[type],
+    // `true` where the row is the desk's: `ActivityRow` draws its mark in the
+    // avatar's place, so the line keeps the weight of a named one.
+    fromSupport: desk,
+    actorName: desk ? SUPPORT_ACTOR : (withhold || !actorName ? '' : actorName),
+    text: desk
+      ? SUPPORT_PHRASES[type]
+      : (withhold || !actorName ? SUPPORT_PHRASES[type] : PHRASES[type]),
     // The message itself, where the event was one. Trimmed by the writer
     // already; trimmed again here because a feed row is one line.
     detail: type === 'comment' ? String(issue.lastActivityText || '').trim() : '',

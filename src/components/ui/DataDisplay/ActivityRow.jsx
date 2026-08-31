@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { LifeBuoy } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import Pill from '@/components/ui/DataDisplay/Pill';
 
@@ -24,6 +25,7 @@ import Pill from '@/components/ui/DataDisplay/Pill';
  * One line of an activity feed: who did what, to which request, and when.
  *
  * @param {object} props.actor Who did it — omitted where the reader may not know.
+ * @param {boolean} props.fromSupport The desk did it, and the reader is not told which agent. Draws a mark rather than a face, so the line keeps the weight of a named one.
  * @param {string} props.actorName Their name, drawn in ink before the verb.
  * @param {string} props.text What they did, or what happened, as a full clause when there is no actor.
  * @param {string} props.detail The message itself, where the event was one. Clamped to one line.
@@ -35,6 +37,7 @@ import Pill from '@/components/ui/DataDisplay/Pill';
  */
 export default function ActivityRow({
   actor = null,
+  fromSupport = false,
   actorName = '',
   text,
   detail = '',
@@ -51,14 +54,22 @@ export default function ActivityRow({
       className={`group flex w-full items-start gap-3 rounded-[12px] px-3 py-2.5 text-left transition-colors hover:bg-canvas ${className}`}
     >
       <span className="mt-[1px] flex h-7 w-7 shrink-0 items-center justify-center">
-        {actor
-          ? <UserAvatar user={actor} size="sm" />
-          : (
-            /* No person, no circle. A dot is the smallest mark that says «an
-               event», and it takes the same 28px so every row in the feed keeps
-               one left edge. */
-            <span className="h-[7px] w-[7px] rounded-full bg-line-strong" aria-hidden />
-          )}
+        {actor ? (
+          <UserAvatar user={actor} size="sm" />
+        ) : fromSupport ? (
+          /* The desk, which is not a person and must not borrow a face — but
+             is also not «nobody». Its rows were a 7px dot and muted text, so a
+             customer's own actions came out bold with a photo while the reply
+             they came to read was the faintest line on the screen. A mark of
+             the same size restores the weight without naming an agent. */
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-muted">
+            <LifeBuoy size={14} aria-hidden />
+          </span>
+        ) : (
+          /* Genuinely nobody: a dot, at the same 28px, so the feed keeps one
+             left edge whatever the subject is. */
+          <span className="h-[7px] w-[7px] rounded-full bg-line-strong" aria-hidden />
+        )}
       </span>
 
       <span className="min-w-0 flex-1">

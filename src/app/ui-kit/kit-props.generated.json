@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 90,
-    "props": 660,
-    "documentedProps": 660,
+    "props": 661,
+    "documentedProps": 661,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -44,6 +44,13 @@
           "type": "string",
           "values": [],
           "description": "The message itself, where the event was one. Clamped to one line."
+        },
+        {
+          "name": "fromSupport",
+          "default": "false",
+          "type": "boolean",
+          "values": [],
+          "description": "The desk did it, and the reader is not told which agent. Draws a mark rather than a face, so the line keeps the weight of a named one."
         },
         {
           "name": "issueKey",

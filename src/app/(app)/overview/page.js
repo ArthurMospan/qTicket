@@ -218,7 +218,11 @@ export default function OverviewPage() {
             create, and the same header on the same screen carries the control
             for the one reader who may use it. */}
         <PageHeader
-          title={clientViewer ? 'Огляд' : 'Огляд підтримки'}
+          // «Огляд», for both, because the rail says «Огляд» for both. The
+          // support half used to head itself «Огляд підтримки» — one screen
+          // with two names, on one account only, and the word «підтримки» told
+          // a support agent something they already knew from being signed in.
+          title="Огляд"
           actions={clientViewer && clientSpace ? (
             <Button
               onClick={() => router.push(`/${encodeURIComponent(clientSpace.id)}?new=1`)}
@@ -249,7 +253,15 @@ export default function OverviewPage() {
             </Button>
           </div>
         ) : clientViewer ? (
-          <div className="flex flex-col gap-[20px]">
+          /* The same measure as support's main column, and for the same reason
+             a column has one. Support's half is a `1.6fr` of a two-column grid,
+             so its rows are about a thousand pixels wide; the customer's had no
+             second column and stretched to the whole page, which put the
+             timestamp of an event some twelve hundred pixels from the sentence
+             it belongs to and blew the three tiles out to 440px against
+             support's 290. Same component, same screen, two very different
+             lines — for no reason other than what happened to sit beside it. */
+          <div className="flex flex-col gap-[20px] xl:max-w-[1040px]">
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
               <KpiCard
                 icon={Inbox}
@@ -311,6 +323,7 @@ export default function OverviewPage() {
                       <ActivityRow
                         key={entry.id}
                         actor={entry.actor}
+                        fromSupport={entry.fromSupport}
                         actorName={entry.actorName}
                         text={entry.text}
                         detail={entry.detail}
@@ -405,6 +418,7 @@ export default function OverviewPage() {
                       <ActivityRow
                         key={entry.id}
                         actor={entry.actor}
+                        fromSupport={entry.fromSupport}
                         actorName={entry.actorName}
                         text={entry.text}
                         detail={entry.detail}

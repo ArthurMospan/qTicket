@@ -218,3 +218,39 @@ test('QUI-68 unifies project settings and safely moves hidden statuses to Backlo
   assert.match(myTasks, /localStorage\.setItem\(hiddenCategoriesStorageKey/);
   assert.match(kit, /title="Project Status Visibility"[\s\S]{0,500}<StatusVisibilityPicker/);
 });
+
+// The crash behind «qTicket не завантажився», and the shape that caused it.
+//
+// `IssueDetail` derives `issue` from `issues.find(...)`, which finds nothing
+// until the Firestore stream arrives — so on every page load, and on every
+// refresh of a request's own URL, the component renders once with `issue`
+// undefined. The `if (!issue)` guard cannot move up to meet that, because hooks
+// run between the two points and React requires them unconditionally.
+//
+// So every read above the guard has to be optional, and one of them was not:
+// `supportAssigneeOptions` did `(issue.assigneeIds || []).map(...)` two hundred
+// lines early and threw `TypeError: can't access property "assigneeIds"`,
+// which the error boundary caught and reported as «Дані не вдалося
+// відрендерити» — a sentence about rendering for a request that had simply not
+// arrived yet. Production console, 2026-09-01, named that property exactly.
+test('IssueDetail tolerates a request that has not arrived yet', async () => {
+  const source = await read('../src/components/workspace/IssueDetail.jsx');
+  const lines = source.split('\n');
+  const start = lines.findIndex(line => line.startsWith('  const issue = issues.find('));
+  const guard = lines.findIndex(line => line.trim() === 'if (!issue) {');
+  assert.ok(start > 0 && guard > start, 'the derivation and its guard both still exist');
+
+  const unguarded = [];
+  for (let index = start + 1; index < guard; index += 1) {
+    const line = lines[index];
+    // Comments are prose about the code, not the code.
+    if (/^\s*(\/\/|\*|\/\*)/.test(line)) continue;
+    if (/(?<![\w?.])issue\.[a-zA-Z]/.test(line)) unguarded.push(`${index + 1}: ${line.trim()}`);
+  }
+  assert.deepEqual(
+    unguarded,
+    [],
+    'every `issue.` above the guard must be `issue?.` — this region runs with no request:\n'
+    + unguarded.join('\n'),
+  );
+});

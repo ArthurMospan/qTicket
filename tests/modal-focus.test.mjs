@@ -67,7 +67,13 @@ test('walking off a task mid-edit is confirmed, not silently discarded', async (
   // The draft is dirty only when it differs from the stored task, so merely
   // opening the editor never prompts.
   assert.match(issueDetail, /const draftIsDirty = Boolean\(isEditing && issue && \(/);
-  assert.match(issueDetail, /\(draft\.description \|\| ''\) !== \(issue\.description \|\| ''\)/);
+  // `issue?.` rather than `issue.`: every read above the `if (!issue)` guard has
+  // to tolerate the request being absent, because that is every first paint —
+  // `issues.find(...)` has nothing to find until the stream arrives, and the
+  // guard cannot move up to meet it because hooks run in between. One of those
+  // reads being unguarded is what threw «can't access property "assigneeIds"»
+  // and put the whole workspace behind «qTicket не завантажився» on refresh.
+  assert.match(issueDetail, /\(draft\.description \|\| ''\) !== \(issue\?\.description \|\| ''\)/);
 
   // A reload or a closed tab, and in-app <Link> clicks caught before Next's own
   // handler so the navigation can still be cancelled.
