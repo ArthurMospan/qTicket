@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
-import { X } from 'lucide-react';
+import { Mail, Phone, Send, X } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import { Button, Pill, Tabs, EmptyState } from '@/components/ui';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
@@ -41,9 +41,14 @@ export default function ProfileView({ user, onClose }) {
   // Live membership record from the role-filtered organization members API.
   const memberRecord = orgMembers.find(m => (m.id || m.uid) === uid);
 
+  // Посада і роль — два різні факти, і рядок під іменем показував то один, то
+  // другий. Ланцюжок закінчувався `organizationRoleLabel(...)`, тож у людини з
+  // посадою роль зникала з екрана зовсім, а в людини без посади на її місці
+  // стояла роль — і прочитати, що саме перед тобою, було ніяк. Посада тут
+  // лишається посадою; роль стоїть поруч власною пігулкою.
   const positionName = positions.find(p => p.id === user.positionId)?.label
     || user.title
-    || organizationRoleLabel(memberRecord?.role || user.role);
+    || 'Без посади';
 
   // «Звернення» means a different set on each side of the desk, because being
   // «on» a request does. An agent is put on one — `assigneeIds` — and that is
@@ -124,6 +129,9 @@ export default function ProfileView({ user, onClose }) {
             <p className="text-[14px] text-muted font-medium">
               {positionName}
             </p>
+            {viewedRole && (
+              <Pill tone="ink-subtle" size="md">{organizationRoleLabel(viewedRole)}</Pill>
+            )}
             {/* «Команда» lists people whose seat QuickTeam switched off, because
                 their name is still on the work. The row that leads here says so
                 and so does the profile it opens — a page that reads like every
@@ -131,49 +139,6 @@ export default function ProfileView({ user, onClose }) {
                 request. */}
             {memberRecord && !isActiveMember(memberRecord) && (
               <Pill tone="warning" size="md" shape="badge">Без доступу</Pill>
-            )}
-            {/* The one contact a support desk needs. The «Контакти» block that
-                used to stand here — Telegram, phone, location — was a social
-                card from the task manager and went with the rest of it; an
-                address is not that. It is how a person signed in, how their
-                invitation was matched, and the only way to reach a client
-                outside their own portal. */}
-            {user.email && (
-              <a
-                href={`mailto:${user.email}`}
-                className="text-[13px] text-muted hover:text-ink transition-colors"
-              >
-                {user.email}
-              </a>
-            )}
-            {/* And the two anybody here may add to that address. This is not
-                the контакт-картка that went out with the task manager:
-                nobody's city, nobody's birthday, nobody's mood — a number and a
-                handle, entered in «Особистий профіль» by the person themselves,
-                on both sides of the desk, for the thread that turns out to be
-                the wrong shape for the question. qTicket's own fields: nothing
-                syncs them from QuickTeam and they are blank until somebody
-                types them. Drawn only where they exist, and read by everyone
-                the directory answers to — which for a customer is the people on
-                their own projects and nobody else. */}
-            {(user.phone || user.telegram) && (
-              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-muted">
-                {user.phone && (
-                  <a href={`tel:${user.phone.replace(/[^\d+]/g, '')}`} className="hover:text-ink transition-colors">
-                    {user.phone}
-                  </a>
-                )}
-                {user.telegram && (
-                  <a
-                    href={`https://t.me/${String(user.telegram).replace(/^@/, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-ink transition-colors"
-                  >
-                    @{String(user.telegram).replace(/^@/, '')}
-                  </a>
-                )}
-              </div>
             )}
           </div>
 
@@ -198,6 +163,74 @@ export default function ProfileView({ user, onClose }) {
 
         {activeTab === 'profile' && (
           <div className="flex flex-col gap-8">
+            {/* Контакти — секція, а не підпис під аватаркою.
+                Пошта, телефон і Telegram стояли стовпчиком одразу під іменем,
+                у самій шапці: особисті дані людини як перше, що падає в око,
+                і шапка, висота якої залежить від того, скільки полів вона
+                заповнила. У QuickTeam це окремий блок нижче, і тут тепер так
+                само — та сама сітка з іконкою, підписом і значенням.
+
+                Локації немає навмисно: qTicket не питає, у якому місті людина
+                живе. Адреса — це те, як вона увійшла; решта два — те, чим
+                можна дописати, коли лист не той формат для питання. */}
+            <div className="flex flex-col gap-4">
+              <h3 className="ui-type-column-title text-muted uppercase tracking-wider">Контакти</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-canvas">
+                    <Mail size={14} className="text-ink" />
+                  </div>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="mb-1 text-[11px] font-bold leading-none text-muted">Пошта</span>
+                    {user.email ? (
+                      <a href={`mailto:${user.email}`} className="truncate text-[13px] font-medium leading-none text-ink hover:underline">
+                        {user.email}
+                      </a>
+                    ) : (
+                      <span className="text-[13px] leading-none text-faint">Не вказано</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-canvas">
+                    <Phone size={14} className="text-ink" />
+                  </div>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="mb-1 text-[11px] font-bold leading-none text-muted">Телефон</span>
+                    {user.phone ? (
+                      <a href={`tel:${String(user.phone).replace(/[^\d+]/g, '')}`} className="truncate text-[13px] font-medium leading-none text-ink hover:underline">
+                        {user.phone}
+                      </a>
+                    ) : (
+                      <span className="text-[13px] leading-none text-faint">Не вказано</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-canvas">
+                    <Send size={14} className="text-ink" />
+                  </div>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="mb-1 text-[11px] font-bold leading-none text-muted">Telegram</span>
+                    {user.telegram ? (
+                      <a
+                        href={`https://t.me/${String(user.telegram).replace(/^@/, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="truncate text-[13px] font-medium leading-none text-ink hover:underline"
+                      >
+                        @{String(user.telegram).replace(/^@/, '')}
+                      </a>
+                    ) : (
+                      <span className="text-[13px] leading-none text-faint">Не вказано</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Client spaces */}
             <div className="flex flex-col gap-3">
               <h3 className="ui-type-column-title text-muted uppercase tracking-wider">

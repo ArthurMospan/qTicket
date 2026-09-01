@@ -82,7 +82,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:204",
+      "location": "src/components/AuthLayout.jsx:212",
       "className": "",
       "text": "Підтримка",
       "childElements": [],
@@ -158,7 +158,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:223",
+      "location": "src/components/profile/ProfileView.jsx:256",
       "className": "ui-native-control",
       "text": "",
       "childElements": [
@@ -315,7 +315,7 @@
   "repeatedNativeFingerprints": [],
   "reviewedNativeControls": [
     {
-      "location": "src/components/AuthLayout.jsx:204",
+      "location": "src/components/AuthLayout.jsx:212",
       "tag": "button",
       "context": "auth-footer-support"
     },
@@ -325,7 +325,7 @@
       "context": "navigation-sheet-row"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:223",
+      "location": "src/components/profile/ProfileView.jsx:256",
       "tag": "button",
       "context": "profile-project-chip"
     },

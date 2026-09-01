@@ -1798,7 +1798,7 @@
             "src/app/(app)/settings/page.js:684",
             "src/components/MobileNav.jsx:411",
             "src/components/WorkspaceHelpMenu.jsx:85",
-            "src/components/profile/ProfileView.jsx:112",
+            "src/components/profile/ProfileView.jsx:117",
             "src/components/workspace/IssueDetail.jsx:1311",
             "src/components/workspace/IssueDetail.jsx:1322",
             "src/components/workspace/UnifiedTimeline.jsx:1782"
@@ -1861,7 +1861,7 @@
             "src/app/(app)/team/page.js:193",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/InviteMemberDialog.jsx:222",
-            "src/components/profile/ProfileView.jsx:112",
+            "src/components/profile/ProfileView.jsx:117",
             "src/components/workspace/BoardConfigModal.jsx:191",
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
@@ -2028,7 +2028,7 @@
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:71",
-            "src/components/profile/ProfileView.jsx:112",
+            "src/components/profile/ProfileView.jsx:117",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -2144,7 +2144,7 @@
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:71",
-            "src/components/profile/ProfileView.jsx:112",
+            "src/components/profile/ProfileView.jsx:117",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -2245,7 +2245,7 @@
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:71",
-            "src/components/profile/ProfileView.jsx:112",
+            "src/components/profile/ProfileView.jsx:117",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -2368,7 +2368,7 @@
             "src/components/WorkspaceHeader.jsx:352",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/profile/ProfileView.jsx:112",
+            "src/components/profile/ProfileView.jsx:117",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
             "src/components/workspace/AgileBoard.jsx:555",
@@ -3316,14 +3316,15 @@
           ]
         },
         "ink-subtle": {
-          "count": 2,
+          "count": 3,
           "routes": [
             "/[projectId]",
             "/team"
           ],
           "files": [
             "src/components/InviteMemberDialog.jsx:150",
-            "src/components/WorkspaceHeader.jsx:532"
+            "src/components/WorkspaceHeader.jsx:532",
+            "src/components/profile/ProfileView.jsx:133"
           ]
         },
         "warning": {
@@ -3332,7 +3333,7 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:133"
+            "src/components/profile/ProfileView.jsx:141"
           ]
         },
         "surface-ink": {
@@ -3341,7 +3342,7 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:231"
+            "src/components/profile/ProfileView.jsx:264"
           ]
         },
         "count": {
@@ -3420,7 +3421,7 @@
           ]
         },
         "md": {
-          "count": 11,
+          "count": 12,
           "routes": [
             "/",
             "/[projectId]",
@@ -3437,6 +3438,7 @@
             "src/app/(app)/settings/page.js:3149",
             "src/components/InviteMemberDialog.jsx:150",
             "src/components/profile/ProfileView.jsx:133",
+            "src/components/profile/ProfileView.jsx:141",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3454,7 +3456,7 @@
           "files": [
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
-            "src/components/profile/ProfileView.jsx:231"
+            "src/components/profile/ProfileView.jsx:264"
           ]
         },
         "chat-day": {
@@ -3486,13 +3488,13 @@
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
             "src/components/WorkspaceInfoCenter.jsx:135",
-            "src/components/profile/ProfileView.jsx:133",
+            "src/components/profile/ProfileView.jsx:141",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336"
           ]
         },
         "(default)": {
-          "count": 16,
+          "count": 17,
           "routes": [
             "/",
             "/[projectId]",
@@ -3511,7 +3513,8 @@
             "src/components/InviteMemberDialog.jsx:150",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:532",
-            "src/components/profile/ProfileView.jsx:231",
+            "src/components/profile/ProfileView.jsx:133",
+            "src/components/profile/ProfileView.jsx:264",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3525,7 +3528,7 @@
       },
       "appearance": {
         "(default)": {
-          "count": 23,
+          "count": 24,
           "routes": [
             "/",
             "/[projectId]",
@@ -3550,6 +3553,7 @@
             "src/components/WorkspaceHeader.jsx:532",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/profile/ProfileView.jsx:133",
+            "src/components/profile/ProfileView.jsx:141",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3568,13 +3572,13 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:231"
+            "src/components/profile/ProfileView.jsx:264"
           ]
         }
       },
       "preset": {
         "(default)": {
-          "count": 22,
+          "count": 23,
           "routes": [
             "/",
             "/[projectId]",
@@ -3598,7 +3602,8 @@
             "src/components/WorkspaceHeader.jsx:532",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/profile/ProfileView.jsx:133",
-            "src/components/profile/ProfileView.jsx:231",
+            "src/components/profile/ProfileView.jsx:141",
+            "src/components/profile/ProfileView.jsx:264",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3630,7 +3635,7 @@
       },
       "weight": {
         "(default)": {
-          "count": 16,
+          "count": 17,
           "routes": [
             "/",
             "/[projectId]",
@@ -3651,6 +3656,7 @@
             "src/components/InviteMemberDialog.jsx:150",
             "src/components/WorkspaceHeader.jsx:532",
             "src/components/profile/ProfileView.jsx:133",
+            "src/components/profile/ProfileView.jsx:141",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3677,7 +3683,7 @@
             "src/app/(app)/settings/page.js:640",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceInfoCenter.jsx:135",
-            "src/components/profile/ProfileView.jsx:231",
+            "src/components/profile/ProfileView.jsx:264",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336",
             "src/components/workspace/UnifiedTimeline.jsx:236"
@@ -3738,7 +3744,7 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:119"
+            "src/components/profile/ProfileView.jsx:124"
           ]
         },
         "lg": {
@@ -4245,7 +4251,7 @@
             "src/app/(app)/overview/page.js:409",
             "src/app/(app)/overview/page.js:459",
             "src/app/(app)/team/page.js:202",
-            "src/components/profile/ProfileView.jsx:256",
+            "src/components/profile/ProfileView.jsx:289",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
           ]
         },
@@ -4316,7 +4322,7 @@
             "src/app/(app)/team/page.js:202",
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
-            "src/components/profile/ProfileView.jsx:256",
+            "src/components/profile/ProfileView.jsx:289",
             "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         }
@@ -4356,7 +4362,7 @@
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:923",
             "src/app/(app)/team/page.js:202",
-            "src/components/profile/ProfileView.jsx:256",
+            "src/components/profile/ProfileView.jsx:289",
             "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         }
@@ -4707,7 +4713,7 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:192"
+            "src/components/profile/ProfileView.jsx:157"
           ]
         }
       },
@@ -4725,7 +4731,7 @@
             "src/app/(app)/my/page.js:389",
             "src/app/(app)/settings/page.js:3050",
             "src/components/InviteMemberDialog.jsx:163",
-            "src/components/profile/ProfileView.jsx:192"
+            "src/components/profile/ProfileView.jsx:157"
           ]
         },
         "pane-switch": {

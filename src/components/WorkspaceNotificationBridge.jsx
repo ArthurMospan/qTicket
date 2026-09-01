@@ -41,7 +41,9 @@ function playEmergencyAlarm() {
 }
 
 export default function WorkspaceNotificationBridge() {
-  const { currentUser, activeOrgId } = useAppContext();
+  // Той самий шлюз і з тієї самої причини, що в `IssueReadStateBridge`: цей
+  // міст теж стоїть вище за гвард маршруту.
+  const { currentUser, subscribableOrgId: activeOrgId } = useAppContext();
   const userId = currentUser?.id || currentUser?.uid;
   const playedEmergencyIds = useRef(new Set());
   const emergencyTimers = useRef(new Map());

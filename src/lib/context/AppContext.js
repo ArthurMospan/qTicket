@@ -25,7 +25,31 @@ function AppProviderInner({
   const userId = authLoading ? undefined : (user?.id || user?.uid || null);
   const invitationUid = user?.id || user?.uid;
   const invitationEmail = user?.email;
-  const { projects, loading: projectsLoading, error: projectsError } = useProjects(userId, activeOrgId, orgRole);
+  // Жодна підписка не йде в організацію, про яку ще не відомо, чи вона взагалі
+  // робочий простір цього акаунта.
+  //
+  // Це причина «Немає доступу до цих даних», яку правили чотири рази й щоразу
+  // не там. Довідник організацій приходить двічі: спершу з кешу браузера,
+  // потім із `/api/organizations` через Admin SDK. На кешовому проході запис,
+  // документа якого браузер прочитати не може, лишається `pending` і лишається
+  // обраним — `buildOrganizationList` робить це навмисно, щоб короткий читок не
+  // видалив живий простір із перемикача. Але поки він обраний, кожен слухач,
+  // прив'язаний до `activeOrgId`, б'ється в `firestore.rules`, де все —
+  // організація, проєкти, налаштування, стан прочитаного — стоїть за
+  // `organizationEntitlementActive(orgId)`, і жодне з цього не читається.
+  //
+  // `WorkspaceOrganizationRouteGuard` уже тримає екрани саме через це:
+  // `if (orgLoading || !orgDirectoryVerified) return <LoadingScreen/>`. Але він
+  // тримає лише те, що всередині нього, а підписки живуть вище — тут і в двох
+  // мостах у layout. Тобто гвард закриває вікно для очей і лишає його
+  // відчиненим для мережі.
+  //
+  // Попередні виправлення вчили екрани мовчати про відмову (`isUnresolvedAccessError`).
+  // Це лікувало реакцію: відмови й далі генерувалися, просто їх ковтали — і
+  // кожен новий слухач мусив вивчити той самий трюк, інакше картка поверталась.
+  // Один шлюз замість N: підписуємось лише туди, де вже відомо, що можна.
+  const subscribableOrgId = orgDirectoryVerified ? activeOrgId : '';
+  const { projects, loading: projectsLoading, error: projectsError } = useProjects(userId, subscribableOrgId, orgRole);
   const resetOrganizationScope = useWorkspaceStore(state => state.resetOrganizationScope);
   const previousOrganizationId = useRef(undefined);
 
@@ -93,6 +117,13 @@ function AppProviderInner({
     projects,
     // Org-related
     activeOrgId,
+    // Та сама організація, але тільки після того, як довідник підтвердив, що
+    // вона взагалі робочий простір цього акаунта. Усе, що відкриває слухача на
+    // Firestore, бере цю, а не `activeOrgId`: підписка на непідтверджену
+    // організацію — це гарантована відмова в правах, а не гонка, якій можна не
+    // пощастити. `activeOrgId` лишається для того, що не читає даних:
+    // перемикача, гварда маршруту, ключа ремонтування.
+    subscribableOrgId,
     activeOrg,
     orgRole,
     noOrg,
@@ -158,6 +189,7 @@ export const useAppContext = () => {
       orgRole: null,
       noOrg: false,
       orgDirectoryVerified: false,
+      subscribableOrgId: '',
       allOrgs: [],
       orgRoles: {},
       switchOrg: () => {},

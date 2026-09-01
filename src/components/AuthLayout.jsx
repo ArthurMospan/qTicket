@@ -200,7 +200,15 @@ export default function AuthLayout({
               not a reason to offer ours. What stays is the help centre, which
               publishes only what the least privileged reader may open, and the
               three documents, which are the ones being agreed to here. */}
-          {!brand && !portalMode && (
+          {/* І не на перемиканні організації.
+              `onClose` є лише тоді, коли ця оболонка відкрита поверх робочого
+              простору як екран вибору організації. Там людина вже увійшла й
+              обирає, куди зайти: підтримка продукту в цей момент недоречна — а
+              крім того, діалог відкривався під самим екраном вибору, який
+              лежить на `z-[200]` і перекриває його, тож кнопка ще й нічого не
+              показувала. Обидві біди мають одну причину: підвал екрана входу
+              малювався там, де входу немає. */}
+          {!brand && !portalMode && !onClose && (
             <button
               type="button"
               data-ui-control="auth-footer-support"

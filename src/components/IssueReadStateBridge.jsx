@@ -11,7 +11,13 @@ import useWorkspaceStore from '@/store/useWorkspaceStore';
 // One organization-wide cursor stream feeds every issue card. Keeping this at
 // the workspace boundary avoids one Firestore listener per card or per board.
 export default function IssueReadStateBridge() {
-  const { activeOrgId, currentUser } = useAppContext();
+  // `subscribableOrgId`, а не `activeOrgId`: цей міст змонтований у layout
+  // сусідом до `WorkspaceOrganizationRouteGuard`, тобто ВИЩЕ за нього. Гвард
+  // тримає екрани, поки довідник організацій не підтверджено, а міст під той
+  // гвард не потрапляє — і підписувався саме у вікні, яке гвард існує щоб
+  // закрити. Звідси `[IssueReadStateBridge] Missing or insufficient permissions`
+  // у консолі кожного холодного входу.
+  const { subscribableOrgId: activeOrgId, currentUser } = useAppContext();
   const userId = currentUser?.uid || currentUser?.id || null;
   const setIssueReadState = useWorkspaceStore(state => state.setIssueReadState);
   const resetIssueReadState = useWorkspaceStore(state => state.resetIssueReadState);

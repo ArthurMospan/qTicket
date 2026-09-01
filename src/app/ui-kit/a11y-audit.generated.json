@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 261,
-    "elements": 2237,
+    "elements": 2258,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -43,7 +43,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:223",
+      "location": "src/components/profile/ProfileView.jsx:256",
       "attributes": [
         "title"
       ]
