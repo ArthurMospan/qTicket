@@ -6,6 +6,7 @@ import {
   normalizeQuickTeamProvision,
   quickTeamIdentityId,
   quickTeamOrganizationId,
+  quickTeamPortalBranding,
 } from '@/lib/integrations/quickteamContract.mjs';
 import {
   readSignedQuickTeamRequest,
@@ -195,12 +196,17 @@ export async function POST(request) {
         ownerId: owner.qTicketUserId,
         timezone: payload.organization.timezone,
         onboarded: true,
+        // Two brands, and they were the same value twice.
+        //
+        // `name`/`logo` above are the organization — what the staff shell says
+        // over the queue. `portalBranding` is what a customer sees on their own
+        // portal, and the fields have always been separate here while being fed
+        // one value, so a company could not name its desk anything but itself.
+        // The snapshot may now carry `organization.portal`; when it does not,
+        // this falls back to the organization and nothing changes.
         portalBranding: {
           source: 'quickteam',
-          name: payload.organization.name,
-          logo: payload.organization.logo,
-          sidebarTheme: payload.organization.sidebarTheme,
-          sidebarColor: payload.organization.sidebarColor,
+          ...quickTeamPortalBranding(payload.organization),
         },
         quickTeam: {
           sourceOrganizationId: payload.sourceOrganizationId,

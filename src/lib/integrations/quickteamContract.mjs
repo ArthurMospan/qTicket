@@ -97,6 +97,43 @@ function normalizeStaffMember(value) {
   return { sourceUserId, email, name, avatar, role };
 }
 
+// The brand a customer sees, when it is not the brand the staff see.
+//
+// QuickTeam owns both and sends both. Wearing the tenant's own identity is the
+// right default and nobody should have to configure it — but «OneB» the company
+// and «OneB Підтримка» the desk are not always the same name, logo or colour,
+// and until this block existed the client portal had no way to be told apart
+// from the workspace that runs it.
+//
+// An absent `portal` is not «no brand», it is «the same one», and an empty
+// field inside a present `portal` inherits that one field — so a tenant who
+// only renames the desk keeps its logo and its colour without restating them.
+function normalizePortalBrand(value, organization) {
+  if (!value || typeof value !== 'object') return null;
+  const sidebarTheme = ['dark', 'light', 'custom'].includes(value.sidebarTheme)
+    ? value.sidebarTheme
+    : organization.sidebarTheme;
+  return {
+    name: cleanText(value.name, 160) || organization.name,
+    logo: cleanText(value.logo, 2000) || organization.logo,
+    sidebarTheme,
+    sidebarColor: cleanText(value.sidebarColor, 80) || organization.sidebarColor,
+  };
+}
+
+// What the client-facing shell is painted with, whether or not the tenant
+// overrode anything. One reader, so no call site holds its own copy of the
+// fallback and no screen can disagree with another about whose brand it wears.
+export function quickTeamPortalBranding(organization) {
+  const portal = organization?.portal || organization || {};
+  return {
+    name: portal.name || '',
+    logo: portal.logo || '',
+    sidebarTheme: portal.sidebarTheme || 'dark',
+    sidebarColor: portal.sidebarColor || '',
+  };
+}
+
 export function normalizeQuickTeamProvision(value) {
   if (value?.version !== QUICKTEAM_CONTRACT_VERSION) {
     return { error: 'unsupported_version' };
@@ -125,6 +162,13 @@ export function normalizeQuickTeamProvision(value) {
   const sidebarTheme = ['dark', 'light', 'custom'].includes(value?.organization?.sidebarTheme)
     ? value.organization.sidebarTheme
     : 'dark';
+  const organization = {
+    name,
+    logo: cleanText(value?.organization?.logo, 2000),
+    sidebarTheme,
+    sidebarColor: cleanText(value?.organization?.sidebarColor, 80),
+    timezone: cleanText(value?.organization?.timezone, 80) || 'Europe/Kyiv',
+  };
   return {
     data: {
       version: QUICKTEAM_CONTRACT_VERSION,
@@ -132,15 +176,26 @@ export function normalizeQuickTeamProvision(value) {
       revision,
       entitlement: value?.entitlement === 'inactive' ? 'inactive' : 'active',
       organization: {
-        name,
-        logo: cleanText(value?.organization?.logo, 2000),
-        sidebarTheme,
-        sidebarColor: cleanText(value?.organization?.sidebarColor, 80),
-        timezone: cleanText(value?.organization?.timezone, 80) || 'Europe/Kyiv',
+        ...organization,
+        portal: normalizePortalBrand(value?.organization?.portal, organization),
       },
       staff,
     },
   };
+}
+
+// «А воно взагалі працює?» asked as a request rather than answered with a
+// number on a card. The signed round trip is the answer: if this returns, the
+// secret, the clock and the origin all agree, and the revision it reports is
+// the one qTicket actually holds — which is the only way QuickTeam can tell «я
+// синхронізував» from «я думаю, що синхронізував». It carries the client portal
+// address too, because whoever asks whether the desk works is one question away
+// from asking where to send their customers.
+export function normalizeQuickTeamPing(value) {
+  if (value?.version !== QUICKTEAM_CONTRACT_VERSION) return { error: 'unsupported_version' };
+  const sourceOrganizationId = cleanText(value?.sourceOrganizationId);
+  if (!sourceOrganizationId) return { error: 'invalid_payload' };
+  return { data: { sourceOrganizationId } };
 }
 
 // The unread ask carries no more than the launch does: which organization and

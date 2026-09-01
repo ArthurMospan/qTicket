@@ -8,9 +8,13 @@ Firebase project, primary browser session or database.
 
 ## Contract status
 
-Both repositories implement version 1: QuickTeam has the owner activation,
-existing-member selection, signed provisioning and launch producer; qTicket has
-the provisioning, launch and one-time token consumers. Production use still
+Both repositories implement version 1: QuickTeam has the owner activation, the
+per-person staff roster with its qTicket role and client-portal brand, signed
+provisioning, the launch producer and the connection probe; qTicket has the
+provisioning, launch, unread, ping and one-time token consumers. The
+`organization.portal` block and `/ping` were added on 2026-09-01 and are both
+additive: a snapshot without `portal` behaves exactly as version 1 always did,
+so the two deployments may be updated in either order. Production use still
 requires the same shared secret on both deployments and a live two-account
 acceptance check. A plain qTicket `/login` is client-only. The native staff form
 is an opt-in development/recovery path, never production onboarding.
@@ -69,7 +73,13 @@ staff snapshot, not a list of changes:
     "logo": "https://cdn.example/logo.png",
     "sidebarTheme": "custom",
     "sidebarColor": "#1c1c1c",
-    "timezone": "Europe/Kyiv"
+    "timezone": "Europe/Kyiv",
+    "portal": {
+      "name": "OneB Підтримка",
+      "logo": "https://cdn.example/support-logo.png",
+      "sidebarTheme": "light",
+      "sidebarColor": ""
+    }
   },
   "staff": [
     {
@@ -115,6 +125,16 @@ Rules of the snapshot:
 - Branding is copied into `organization.portalBranding` with source
   `quickteam`. The external client shell draws this snapshot even though the
   staff shell and client-facing portal branding are separate concerns.
+- `organization.portal` is optional and is that separate concern made
+  settable. `name`/`logo` outside it are the organization — what the staff
+  shell says over the queue; `portal` is what a customer sees on their own
+  portal. The two fields were always separate in qTicket and were always fed
+  one value, so a company could not name its desk anything but itself.
+  An absent `portal` means «the same brand» and reproduces the old behaviour
+  exactly; an empty field inside a present `portal` inherits that one field,
+  so a tenant who renames only the desk keeps its logo and its colour without
+  restating them. QuickTeam still owns the value — qTicket does not edit it and
+  overwrites its copy from every snapshot.
 - Provisioning does not copy QuickTeam projects or tasks. A qTicket client
   project is a support boundary owned by qTicket.
 - A snapshot with `entitlement: "inactive"` immediately refuses new launches
@@ -208,6 +228,50 @@ Two deliberate exceptions to the rules above:
 A failure to reach qTicket is not a failure of the QuickTeam rail: the badge is
 simply absent, and the row still opens the product.
 
+## Connection probe
+
+`POST /api/integrations/quickteam/ping` answers what qTicket actually holds
+for an organization:
+
+```json
+{ "version": 1, "sourceOrganizationId": "quickteam-org-id" }
+```
+
+```json
+{
+  "version": 1,
+  "organizationId": "qto_…",
+  "known": true,
+  "revision": 7,
+  "entitlement": "active",
+  "portalUrl": "https://qticket.example.com/login",
+  "portalBrand": { "name": "OneB Підтримка", "logo": "", "sidebarTheme": "light", "sidebarColor": "" }
+}
+```
+
+QuickTeam's card used to answer «а воно взагалі працює?» with a revision number
+out of its own database — what QuickTeam believes it sent, not what arrived, and
+a failed provisioning leaves that number looking exactly like a successful one.
+A reply here proves the origin, the shared secret and the two clocks agree, and
+its `revision` is the one qTicket really stored; QuickTeam compares the two and
+says «розсинхронізовано» when they differ.
+
+Two differences from every other endpoint:
+
+- **It does not refuse an inactive organization.** Whether the add-on is off is
+  part of the answer, and a probe that goes quiet when the news is bad is worse
+  than no probe. `known: false` means qTicket has never seen this organization.
+- **No nonce is recorded**, for the reason `/unread` skips it. The signature and
+  the five-minute window still apply.
+
+It names no person, no client and no incident: a state, a revision, and the
+address a customer would use. It deliberately counts no seats — that query is
+`orgId ==` together with `role in`, which needs a composite index this project
+does not carry, and a probe that fails on a missing index lies about the one
+thing it exists to report. `portalUrl` is there because QuickTeam cannot work it out —
+the origin is qTicket's own deployment setting, and «куди я відправляю клієнтів?»
+was until now answered by asking somebody.
+
 ## Transferring a request into a QuickTeam task
 
 The one call that goes the other way: qTicket signs, QuickTeam verifies. Same
@@ -260,6 +324,7 @@ somebody else's tracker is the same fact in a longer form.
 | Data | Authority |
 | --- | --- |
 | Internal organization identity and branding | QuickTeam |
+| Client-portal brand (`organization.portal`) | QuickTeam |
 | Add-on entitlement | QuickTeam provisioning/commercial authority |
 | Enabled owner/admin/manager directory | QuickTeam selection |
 | qTicket client projects and their support roster | qTicket |

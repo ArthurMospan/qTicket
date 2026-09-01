@@ -5,8 +5,10 @@ import {
   createQuickTeamSignedRequest,
   quickTeamAppConfig,
   normalizeQuickTeamLaunch,
+  normalizeQuickTeamPing,
   normalizeQuickTeamProvision,
   normalizeQuickTeamUnread,
+  quickTeamPortalBranding,
   quickTeamIdentityId,
   quickTeamOrganizationId,
   quickTeamStaffUid,
@@ -79,6 +81,98 @@ test('provisioning accepts one exact owner and only internal qTicket roles', () 
   const clientRole = structuredClone(valid.data);
   clientRole.staff[1].role = 'client_admin';
   assert.equal(normalizeQuickTeamProvision(clientRole).error, 'invalid_staff');
+});
+
+// Дві марки, які були одним значенням двічі. `name`/`logo` — це організація,
+// те, що бачить персонал над чергою; `portal` — те, що бачить клієнт у своєму
+// порталі. Поля в qTicket завжди були різні й завжди годувалися одним
+// значенням, тож компанія не могла назвати свою підтримку інакше, ніж собою.
+const brandSnapshot = portal => normalizeQuickTeamProvision({
+  version: 1,
+  sourceOrganizationId: 'quickteam-org-1',
+  revision: 3,
+  entitlement: 'active',
+  organization: {
+    name: 'OneB',
+    logo: 'https://cdn.example/logo.png',
+    sidebarTheme: 'custom',
+    sidebarColor: '#121212',
+    timezone: 'Europe/Kyiv',
+    ...(portal === undefined ? {} : { portal }),
+  },
+  staff: [{ sourceUserId: 'owner-1', email: 'owner@example.com', name: 'Owner', role: 'owner' }],
+});
+
+test('без portal клієнтський портал носить марку організації', () => {
+  const snapshot = brandSnapshot(undefined);
+  assert.equal(snapshot.error, undefined);
+  assert.equal(snapshot.data.organization.portal, null);
+  // Головне в цьому тесті — що нічого не змінилося для знімка, який про portal
+  // не знає. Стара поведінка — це і є фолбек.
+  assert.deepEqual(quickTeamPortalBranding(snapshot.data.organization), {
+    name: 'OneB',
+    logo: 'https://cdn.example/logo.png',
+    sidebarTheme: 'custom',
+    sidebarColor: '#121212',
+  });
+});
+
+test('порожнє поле в portal успадковує саме себе, а не всю марку', () => {
+  const snapshot = brandSnapshot({ name: 'OneB Підтримка', sidebarTheme: 'light' });
+  assert.equal(snapshot.error, undefined);
+  assert.deepEqual(quickTeamPortalBranding(snapshot.data.organization), {
+    name: 'OneB Підтримка',
+    // Лого й колір ніхто не перевизначав — вони лишаються організаційні.
+    logo: 'https://cdn.example/logo.png',
+    sidebarTheme: 'light',
+    sidebarColor: '#121212',
+  });
+  // Марка персоналу не поїхала за марком клієнта.
+  assert.equal(snapshot.data.organization.name, 'OneB');
+  assert.equal(snapshot.data.organization.sidebarTheme, 'custom');
+});
+
+test('portal з негодящою темою бере тему організації, а не dark', () => {
+  const snapshot = brandSnapshot({ name: 'Desk', sidebarTheme: 'neon' });
+  assert.equal(quickTeamPortalBranding(snapshot.data.organization).sidebarTheme, 'custom');
+});
+
+// Марка персоналу і марка клієнта — два різні поля в одному документі, і
+// провіженінг писав в обидва одне значення.
+test('провіженінг пише марку персоналу і марку клієнта з різних джерел', async () => {
+  const route = await readFile(
+    new URL('../src/app/api/integrations/quickteam/provision/route.js', import.meta.url),
+    'utf8',
+  );
+  // Організація — те, що бачить персонал над чергою.
+  assert.ok(route.includes('name: payload.organization.name'));
+  // Портал — те, що бачить клієнт, через один фолбек, який знає про portal.
+  assert.ok(route.includes('...quickTeamPortalBranding(payload.organization)'));
+  assert.ok(route.includes("source: 'quickteam'"));
+});
+
+test('пінг просить лише організацію і нічого про людину', () => {
+  assert.deepEqual(
+    normalizeQuickTeamPing({ version: 1, sourceOrganizationId: 'org-1', sourceUserId: 'nosy' }).data,
+    { sourceOrganizationId: 'org-1' },
+  );
+  assert.equal(normalizeQuickTeamPing({ version: 2, sourceOrganizationId: 'org-1' }).error, 'unsupported_version');
+  assert.equal(normalizeQuickTeamPing({ version: 1 }).error, 'invalid_payload');
+});
+
+// Проба, яка мовчить, коли новина погана, гірша за відсутню пробу: чи вимкнене
+// доповнення — це частина відповіді, а не причина не відповідати.
+test('пінг відповідає і про організацію, якої qTicket не знає', async () => {
+  const route = await readFile(
+    new URL('../src/app/api/integrations/quickteam/ping/route.js', import.meta.url),
+    'utf8',
+  );
+  assert.match(route, /known: organizationSnap.exists/);
+  assert.match(route, /portalUrl:/);
+  assert.doesNotMatch(route, /code: 'inactive'/);
+  // Ревізія, яку qTicket справді тримає — вона й відрізняє «я синхронізував»
+  // від «я думаю, що синхронізував».
+  assert.match(route, /revision: Number(organization.quickTeam?.revision || 0)/);
 });
 
 test('source ids map to stable opaque qTicket ids', () => {
