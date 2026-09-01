@@ -146,14 +146,16 @@ export default function ProfileView({ user, onClose }) {
                 {user.email}
               </a>
             )}
-            {/* And the two a customer may add to that address. This is not the
-                контакт-картка that went out with the task manager: nobody's
-                city, nobody's birthday, nobody's mood — a number and a handle,
-                filled in by the person on the other side of a request so the
-                desk can reach them when a thread is the wrong shape for the
-                question. Drawn only where they exist, and they exist only where
-                somebody typed them; the member directory never sends either
-                field to a customer, so this line is the desk's alone. */}
+            {/* And the two anybody here may add to that address. This is not
+                the контакт-картка that went out with the task manager:
+                nobody's city, nobody's birthday, nobody's mood — a number and a
+                handle, entered in «Особистий профіль» by the person themselves,
+                on both sides of the desk, for the thread that turns out to be
+                the wrong shape for the question. qTicket's own fields: nothing
+                syncs them from QuickTeam and they are blank until somebody
+                types them. Drawn only where they exist, and read by everyone
+                the directory answers to — which for a customer is the people on
+                their own projects and nobody else. */}
             {(user.phone || user.telegram) && (
               <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-muted">
                 {user.phone && (

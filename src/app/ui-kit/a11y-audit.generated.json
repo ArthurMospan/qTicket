@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:2552",
+      "location": "src/app/(app)/settings/page.js:2551",
       "attributes": [
         "title",
         "aria-label"
@@ -43,7 +43,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:221",
+      "location": "src/components/profile/ProfileView.jsx:223",
       "attributes": [
         "title"
       ]

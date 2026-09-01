@@ -2176,7 +2176,7 @@ export default function SettingsPage() {
             <Row label="Посада" desc="Ваша роль у компанії — підтримка бачить її у профілі">
               <InlineEditField value={jobTitle} onChange={setJobTitle} saved={currentUser?.title || ''} onSave={() => saveProfileField('title', jobTitle)} className="w-[260px]" />
             </Row>
-            <Row label="Телефон" desc="Якщо питання швидше вирішити дзвінком">
+            <Row label="Телефон" desc="Якщо питання швидше вирішити дзвінком — бачить команда проєкту">
               <InlineEditField value={phone} onChange={setPhone} saved={currentUser?.phone || ''} onSave={() => saveProfileField('phone', phone)} className="w-[260px]" />
             </Row>
             <Row label="Telegram" desc="Нікнейм без @ (наприклад: username)">
@@ -2211,13 +2211,12 @@ export default function SettingsPage() {
                 answer what somebody has open and never how to reach them; the
                 customer's half of this screen has carried these two rows all
                 along, and the desk's half — the half that actually gets called
-                — had neither. They stay inside the organization: the member
-                directory sends `phone` and `telegram` only to internal seats,
-                never to a customer. */}
-            <Row label="Телефон" desc="Бачать лише колеги з підтримки">
+                — had neither. Filling one in publishes it to the people you
+                work with here, which is the point of the field. */}
+            <Row label="Телефон" desc="Бачать усі, з ким ви працюєте в qTicket">
               <InlineEditField value={phone} onChange={setPhone} saved={currentUser?.phone || ''} onSave={() => saveProfileField('phone', phone)} className="w-[260px]" />
             </Row>
-            <Row label="Telegram" desc="Нікнейм без @ (наприклад: username)">
+            <Row label="Telegram" desc="Нікнейм без @ — бачать усі, з ким ви працюєте в qTicket">
               <InlineEditField value={telegram} onChange={setTelegram} saved={currentUser?.telegram || ''} onSave={() => saveProfileField('telegram', telegram)} className="w-[260px]" />
             </Row>
           </Card>

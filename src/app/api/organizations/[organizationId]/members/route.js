@@ -12,25 +12,35 @@ import { isClientRole } from '@/lib/utils/can';
 // whether somebody can still be given work. There used to be a second one on
 // the same record, the mood line a person set for themselves, and the directory
 // announced every profile as "active" because that one was written last.
-// `phone` and `telegram` are here, and a customer gets them for their own side
-// only.
+// `phone` and `telegram` go to everybody this directory answers to, and that is
+// what they are for.
 //
-// A customer fills them in so the desk can reach them when a thread is the
-// wrong shape for the question; support's own numbers are not a customer's to
-// read, and that half is unchanged — the desk is reached through the request.
-// What the flat refusal also withheld was a customer's own colleagues from each
-// other: a `client_admin` opened «Співробітники», picked one of their own
-// people, and the profile had a name, a photo and nothing else, on a screen
-// whose whole purpose is administering those people. They work at the same
-// company and typed the number in themselves. So the answer is per person
-// rather than per reader — `CLIENT_SIDE_PROFILE_FIELDS` for somebody on the
-// customer's own side of the desk, `CLIENT_PROFILE_FIELDS` for the desk.
+// They are qTicket's own fields. Nothing syncs them from QuickTeam, they are
+// blank until a person types them into «Особистий профіль» here, and both sides
+// of the desk have that screen — support since 2026-09-01. Somebody who fills
+// one in is publishing a way to be reached inside this workspace, and the
+// person on the other end of a request is exactly who ends up needing it.
+//
+// Two readings were wrong before this one. First the field was refused to every
+// client reader — «support's numbers are not a customer's to read» — which also
+// hid a customer's own colleagues from each other, on the very screen a
+// `client_admin` administers those colleagues from. Then it was split per
+// person, which fixed that half and kept the other. Neither was the rule: a
+// contact somebody enters here is entered to be used.
+//
+// What limits the answer is the roster, not the field list. A client reader
+// only ever receives the people on their own projects (`clientProjectMemberIds`
+// below) — their colleagues and the agents on those projects, never the rest of
+// the organization. `skills` and `birthday` stay out: they are the social card
+// this product deleted, listed only because a legacy profile may still hold one.
 const PUBLIC_PROFILE_FIELDS = [
   'name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title',
   'phone', 'telegram', 'skills', 'timezone', 'birthday',
 ];
-const CLIENT_PROFILE_FIELDS = ['name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title', 'timezone'];
-const CLIENT_SIDE_PROFILE_FIELDS = [...CLIENT_PROFILE_FIELDS, 'phone', 'telegram'];
+const CLIENT_PROFILE_FIELDS = [
+  'name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title', 'timezone',
+  'phone', 'telegram',
+];
 const NESTED_PROFILE_FIELDS = ['skills', 'timezone', 'birthday'];
 
 function serializeValue(value) {
@@ -96,13 +106,7 @@ export async function GET(request, context) {
     const members = memberships.map((membership, index) => {
       const profile = profileSnaps[index]?.exists ? profileSnaps[index].data() : {};
       const safeProfile = {};
-      // Who is being read decides, not only who is reading: a customer sees
-      // their own colleagues' contacts and never the desk's.
-      const visibleProfileFields = !clientViewer
-        ? PUBLIC_PROFILE_FIELDS
-        : isClientRole(membership.role)
-          ? CLIENT_SIDE_PROFILE_FIELDS
-          : CLIENT_PROFILE_FIELDS;
+      const visibleProfileFields = clientViewer ? CLIENT_PROFILE_FIELDS : PUBLIC_PROFILE_FIELDS;
       for (const field of visibleProfileFields) {
         if (profile[field] !== undefined) safeProfile[field] = serializeValue(profile[field]);
       }
