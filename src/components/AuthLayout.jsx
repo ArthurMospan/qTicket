@@ -107,7 +107,7 @@ export default function AuthLayout({
             {brand ? (
               <OrganizationMark name={brand.name} logo={brand.logo} size="sm" appearance="sidebar" />
             ) : (
-              <Image src="/logo-min.svg" alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
+              <Image src="/qticket_white.svg" alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
             )}
             <h1
               className={`ui-type-section-title tracking-tight leading-tight truncate ${theme ? '' : 'text-white'}`}

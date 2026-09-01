@@ -18,8 +18,8 @@ export default function manifest() {
     background_color: '#f4f4f5',
     theme_color: '#f4f4f5',
     icons: [
-      { src: '/favicon.png', sizes: '32x32', type: 'image/png' },
-      { src: '/quickteam.png', sizes: '436x436', type: 'image/png', purpose: 'any' },
+      { src: '/favicon_qticket.png', sizes: '32x32', type: 'image/png' },
+      { src: '/qticket-icon.png', sizes: '436x436', type: 'image/png', purpose: 'any' },
     ],
     shortcuts: [
       { name: 'Огляд підтримки', url: '/overview' },

@@ -376,7 +376,7 @@ export default function WorkspaceSidebar() {
                   </Link>
                 ) : (
                   <Link href={homeHref} className="flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity">
-                    <Image src={theme.isDark ? '/logo-min.svg' : '/logo-min-dark.svg'} alt="QT" width={32} height={32} loading="eager" className="object-contain" />
+                    <Image src={theme.isDark ? '/qticket_white.svg' : '/qticket.svg'} alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
                   </Link>
                 )}
                 {brandingReady && (

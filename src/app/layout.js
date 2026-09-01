@@ -58,11 +58,16 @@ export const metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '48x48' },
-      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon_qticket.png', type: 'image/png', sizes: '32x32' },
     ],
     // The 32px favicon was also serving as the home-screen icon, which is why
     // "Add to Home Screen" produced a blurry square.
-    apple: { url: '/quickteam.png', sizes: '436x436' },
+    //
+    // І це був знак QuickTeam. qTicket ставили на домашній екран, а на ньому
+    // з'являвся чужий логотип — рівно та сама протічка, що й у списку
+    // інтеграцій навпроти. Тепер це власний знак продукту, зведений із
+    // `qticket.svg` на полотні маніфесту.
+    apple: { url: '/qticket-icon.png', sizes: '436x436' },
   },
   appleWebApp: {
     capable: true,

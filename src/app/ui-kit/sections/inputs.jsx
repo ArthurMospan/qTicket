@@ -98,7 +98,7 @@ export default function InputsSection() {
 
       <PreviewBlock title="Brand image upload" description="Фактичний світлий ImageUpload із налаштувань профілю та брендування." filePath="src/app/(app)/settings/page.js" fullWidth>
         <div className="max-w-[380px] rounded-[16px] border border-line bg-white p-[20px]">
-          <ImageUpload value="/favicon.png" onChange={() => {}} theme="light" />
+          <ImageUpload value="/favicon_qticket.png" onChange={() => {}} theme="light" />
         </div>
       </PreviewBlock>
 

@@ -16,11 +16,15 @@ const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 // перший другим. Логотип у вкладці міняв колір залежно від того, чи є
 // непрочитане. Тепер обидва файли — один малюнок, і нікому його підміняти.
 //
+// Малюнок відтоді змінився — це знак qTicket, темний на прозорому, — а
+// інваріант ні: `.ico` збирається з того самого `favicon_qticket.png`, який
+// оголошено як PNG-іконку, тож розійтися вони не можуть.
+//
 // Скільки непрочитаного, каже заголовок вкладки, і тільки про чат.
 test('обидва оголошені файли іконки несуть один малюнок', async () => {
   const { readFileSync } = await import('node:fs');
   const icoPath = new URL('../src/app/favicon.ico', import.meta.url);
-  const pngPath = new URL('../public/favicon.png', import.meta.url);
+  const pngPath = new URL('../public/favicon_qticket.png', import.meta.url);
   const ico = readFileSync(icoPath);
   const png = readFileSync(pngPath);
 
@@ -38,14 +42,20 @@ test('обидва оголошені файли іконки несуть од�
   const pixelOffset = frame.readUInt32LE(0);
   const centre = (y, x) => {
     const source = pixelOffset + (31 - y) * 32 * 4 + x * 4;
-    return [frame[source + 2], frame[source + 1], frame[source]];
+    return [frame[source + 2], frame[source + 1], frame[source], frame[source + 3]];
   };
-  // Плитка темна, а логотип на ній світлий. Якщо колись стане навпаки —
-  // це і є той самий чорний логотип, через який іконка міняла колір.
-  const [r, g, b] = centre(16, 16);
-  assert.ok(r < 80 && g < 80 && b < 80, `плитка .ico має бути темною, а вона ${r},${g},${b}`);
+  // Знак темний і непрозорий у центрі — між очима, — і прозорий у кутку.
+  // Перевіряється саме пара: один лише «темний центр» пройшов би й для
+  // суцільного чорного квадрата, а один лише «прозорий кут» — для порожнього
+  // файлу.
+  const [r, g, b, a] = centre(16, 16);
+  assert.ok(r < 80 && g < 80 && b < 80, `знак у .ico має бути темним, а він ${r},${g},${b}`);
+  assert.equal(a, 255, 'знак у .ico має бути непрозорим');
+  assert.equal(centre(1, 1)[3], 0, 'кут .ico має лишатися прозорим');
+  // І око світле: якщо знак колись інвертують, це побачить саме ця пара.
+  assert.ok(centre(16, 11)[0] > 200, 'око знака має лишатися світлим');
 
-  // PNG — той самий малюнок 32×32, а не окремий чорний логотип на прозорому.
+  // PNG — той самий малюнок 32×32 з альфою.
   assert.equal(png.readUInt32BE(16), 32);
   assert.equal(png.readUInt32BE(20), 32);
   assert.equal(png[25], 6, 'RGBA');
