@@ -114,7 +114,6 @@ test('QUI-80 gives every FilterBar selector a semantic icon role', async () => {
   assert.match(project, /filterRole="status"[\s\S]{0,120}value=\{scope\}/);
   assert.match(project, /filterRole="member"[\s\S]{0,120}value=\{assigneeFilter\}/);
   assert.match(project, /filterRole="priority"[\s\S]{0,120}value=\{priorityFilter\}/);
-  assert.match(my, /filterRole="status"[\s\S]{0,140}value=\{filters\.status\}/);
   assert.match(my, /filterRole="member"[\s\S]{0,140}value=\{filters\.assigned\}/);
   assert.match(my, /filterRole="priority"[\s\S]{0,140}value=\{filters\.priority\}/);
   assert.match(my, /filterRole="date"[\s\S]{0,140}value=\{filters\.period\}/);

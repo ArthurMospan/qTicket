@@ -49,13 +49,12 @@ import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 // filter are then literally the same predicate, not two readings of one
 // sentence.
 function filterTasks(tasks, filters, waitingOnUsIds, waitingOnClientIds) {
-  const { projects, status, assigned, waiting, priority, type, period } = filters;
+  const { projects, assigned, waiting, priority, type, period } = filters;
   const periodDays = period === '7days' ? 7 : period === '30days' ? 30 : 0;
   const cutoff = periodDays ? Date.now() - periodDays * 24 * 60 * 60 * 1000 : 0;
 
   return tasks.filter(t => {
     if (projects && projects.length > 0 && !projects.includes(t.projectId)) return false;
-    if (status !== 'all' && (t.columnId || t.status) !== status) return false;
     if (assigned === 'unassigned' && (t.assigneeIds || []).length > 0) return false;
     if (assigned !== 'all' && assigned !== 'unassigned' && !(t.assigneeIds || []).includes(assigned)) return false;
     if (waiting === 'us' && !waitingOnUsIds.has(t.id)) return false;
@@ -247,12 +246,7 @@ export default function IncidentQueuePage() {
   );
 
   const normalizedSearch = myTaskSearch.trim().toLowerCase();
-  // A hidden control must not keep filtering. «Статус» belongs to the list, so
-  // switching back to the board drops whatever it was holding — otherwise a
-  // board would silently show one column's worth of cards with nothing on
-  // screen saying why.
-  const effectiveFilters = viewMode === 'list' ? filters : { ...filters, status: 'all' };
-  const filtered = filterTasks(tasks, effectiveFilters, waitingOnUsIds, waitingOnClientIds).filter(t => {
+  const filtered = filterTasks(tasks, filters, waitingOnUsIds, waitingOnClientIds).filter(t => {
     const p = projects.find(proj => proj.id === t.projectId);
     if (!p || p.status === 'archived') return false;
     if (!normalizedSearch) return true;
@@ -263,7 +257,6 @@ export default function IncidentQueuePage() {
     activeOrgId,
     myTaskSearch,
     filters.projects.join(','),
-    filters.status,
     filters.assigned,
     filters.waiting,
     filters.priority,
@@ -299,25 +292,15 @@ export default function IncidentQueuePage() {
                 searchPlaceholder="Пошук проєкту..."
                 filterRole="project"
               />
-              {/* A status filter over a board whose columns *are* the
-                  statuses picks one column and empties the other four, and
-                  which columns stand there at all is already «Налаштування
-                  колонок», one control to the right. So it belongs to the list
-                  and only to the list, where there are no columns to read a
-                  status off. */}
-              {viewMode === 'list' && (
-                <Select
-                  filterRole="status"
-                  ariaLabel="Фільтр за статусом"
-                  variant="ghost"
-                  value={filters.status}
-                  onChange={(val) => setFilters({ status: val })}
-                  options={[
-                    { value: 'all', label: 'Усі статуси' },
-                    ...statuses.map(status => ({ value: status.id, label: status.label })),
-                  ]}
-                />
-              )}
+              {/* There is no status filter on this screen, on either view.
+                  On the board the columns *are* the statuses and which of them
+                  stand there is «Налаштування колонок», one control to the
+                  right; in the list the status is on every row and the list is
+                  grouped by category. So the control could only ever repeat
+                  what the reader is already looking at — and «Усі статуси»,
+                  its own neutral value, was the widest thing in the row saying
+                  nothing at all. What a status genuinely cannot answer is who
+                  owes the next word, and that is the control below. */}
               {/* Who owes the next word. A status cannot answer it — a request
                   can stand in «У роботі» all week with the client's question
                   unanswered — so it is a slice of the queue of its own, and the

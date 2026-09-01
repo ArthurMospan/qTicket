@@ -145,7 +145,6 @@ export function restoredViewQuery(schema, storedQuery, currentQuery) {
 export const INCIDENT_QUEUE_VIEW_SCHEMA = Object.freeze({
   view: { default: 'kanban', values: ['kanban', 'list'] },
   projects: { default: [], type: 'list' },
-  status: { default: 'all' },
   assigned: { default: 'all' },
   waiting: { default: 'all', values: ['all', 'us', 'client'] },
   priority: { default: 'all' },
