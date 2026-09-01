@@ -64,6 +64,28 @@ export function organizationLoadRetryDelay(attempt) {
  * @param {boolean} quotaRefused чи бачив цей браузер щойно відмову за квотою
  * @returns {{title: string, description: string}}
  */
+/**
+ * Чи це відмова, яку ще рано показувати.
+ *
+ * Довідник організацій приходить двічі: спершу з кешу браузера, потім із
+ * сервера. Поки другий не відповів, застосунок уже обрав активну організацію з
+ * першого й підписав на неї слухачів — і якщо кеш пам'ятає простір, членства в
+ * якому цей акаунт не має, кожен із них повертає `permission-denied`. Звідси
+ * «Немає доступу до цих даних» одразу після входу, яке зникає після F5: до
+ * перезавантаження сервер уже відповів, і вибір цього разу правильний.
+ *
+ * Тобто в цьому вікні `permission-denied` означає не «вам відмовлено», а «ще
+ * не вирішилось». Вікно скінченне: воно закривається, щойно сервер відповість,
+ * — і тоді справжня відмова показується як завжди.
+ *
+ * @param {unknown} error що впало
+ * @param {boolean} directoryVerified чи відповів сервер про склад організацій
+ */
+export function isUnresolvedAccessError(error, directoryVerified) {
+  if (directoryVerified) return false;
+  return organizationLoadErrorKind(error) === 'permission-denied';
+}
+
 export function workspaceDataFailureCopy(error, quotaRefused = false) {
   const kind = organizationLoadErrorKind(error);
   if (kind === 'permission-denied') {

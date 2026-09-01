@@ -1682,8 +1682,8 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:572",
-            "src/app/(app)/my/page.js:352",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
+            "src/app/(app)/my/page.js:356",
             "src/components/workspace/IssueDetail.jsx:1211",
             "src/components/workspace/IssueDetail.jsx:1214"
           ]
@@ -1700,13 +1700,13 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:588",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:374",
-            "src/app/(app)/overview/page.js:227",
+            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/overview/page.js:231",
             "src/app/(app)/page.js:861",
             "src/app/(app)/settings/page.js:2624",
             "src/app/(app)/settings/page.js:2690",
@@ -1730,11 +1730,11 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:679",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:911",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:685",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:917",
             "src/app/(app)/error.js:94",
-            "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:251",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/overview/page.js:255",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/components/CreateTaskModal.jsx:409",
@@ -1762,7 +1762,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/my/page.js:402",
+            "src/app/(app)/my/page.js:406",
             "src/app/(app)/page.js:896",
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
@@ -1771,7 +1771,7 @@
             "src/app/(app)/settings/page.js:3061",
             "src/app/(app)/settings/page.js:3143",
             "src/app/(app)/settings/page.js:604",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:193",
             "src/components/InviteMemberDialog.jsx:222",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
@@ -1819,7 +1819,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:152",
+            "src/app/(app)/team/page.js:157",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -1851,20 +1851,20 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:572",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:679",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:911",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:685",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:917",
             "src/app/(app)/layout.js:144",
-            "src/app/(app)/my/page.js:352",
-            "src/app/(app)/my/page.js:374",
-            "src/app/(app)/my/page.js:402",
-            "src/app/(app)/overview/page.js:251",
+            "src/app/(app)/my/page.js:356",
+            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/my/page.js:406",
+            "src/app/(app)/overview/page.js:255",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:896",
             "src/app/(app)/settings/page.js:249",
             "src/app/(app)/settings/page.js:3061",
             "src/app/(app)/settings/page.js:3143",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:193",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/InviteMemberDialog.jsx:222",
             "src/components/profile/ProfileView.jsx:96",
@@ -1898,10 +1898,10 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:588",
             "src/app/(app)/error.js:94",
-            "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:227",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/overview/page.js:231",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:861",
             "src/app/(app)/settings/page.js:2995",
@@ -1955,7 +1955,7 @@
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:152",
+            "src/app/(app)/team/page.js:157",
             "src/components/MobileNav.jsx:408",
             "src/components/WorkspaceHeader.jsx:336",
             "src/components/WorkspaceHeader.jsx:352",
@@ -1985,21 +1985,21 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:572",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:679",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:911",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:588",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:685",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:917",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:352",
-            "src/app/(app)/my/page.js:374",
-            "src/app/(app)/my/page.js:402",
-            "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:227",
-            "src/app/(app)/overview/page.js:251",
+            "src/app/(app)/my/page.js:356",
+            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/my/page.js:406",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/overview/page.js:231",
+            "src/app/(app)/overview/page.js:255",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:861",
@@ -2023,8 +2023,8 @@
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:152",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:157",
+            "src/app/(app)/team/page.js:193",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
@@ -2100,21 +2100,21 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:572",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:679",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:911",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:588",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:685",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:917",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:352",
-            "src/app/(app)/my/page.js:374",
-            "src/app/(app)/my/page.js:402",
-            "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:227",
-            "src/app/(app)/overview/page.js:251",
+            "src/app/(app)/my/page.js:356",
+            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/my/page.js:406",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/overview/page.js:231",
+            "src/app/(app)/overview/page.js:255",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:861",
@@ -2138,8 +2138,8 @@
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:152",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:157",
+            "src/app/(app)/team/page.js:193",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
@@ -2207,19 +2207,19 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:572",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:679",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:911",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:685",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:917",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:352",
-            "src/app/(app)/my/page.js:374",
-            "src/app/(app)/my/page.js:402",
-            "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:251",
+            "src/app/(app)/my/page.js:356",
+            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/my/page.js:406",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/overview/page.js:255",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:896",
@@ -2237,8 +2237,8 @@
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
-            "src/app/(app)/team/page.js:152",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:157",
+            "src/app/(app)/team/page.js:193",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
@@ -2293,8 +2293,8 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/overview/page.js:227",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:588",
+            "src/app/(app)/overview/page.js:231",
             "src/app/(app)/page.js:861"
           ]
         },
@@ -2330,19 +2330,19 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:572",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:679",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:911",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:578",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:588",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:685",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:917",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:352",
-            "src/app/(app)/my/page.js:374",
-            "src/app/(app)/my/page.js:402",
-            "src/app/(app)/my/page.js:458",
-            "src/app/(app)/overview/page.js:227",
-            "src/app/(app)/overview/page.js:251",
+            "src/app/(app)/my/page.js:356",
+            "src/app/(app)/my/page.js:378",
+            "src/app/(app)/my/page.js:406",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/overview/page.js:231",
+            "src/app/(app)/overview/page.js:255",
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:861",
@@ -2363,8 +2363,8 @@
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:152",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:157",
+            "src/app/(app)/team/page.js:193",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
@@ -2794,17 +2794,17 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:598",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:607",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:620",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:631",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:642",
-            "src/app/(app)/my/page.js:275",
-            "src/app/(app)/my/page.js:289",
-            "src/app/(app)/my/page.js:299",
-            "src/app/(app)/my/page.js:316",
-            "src/app/(app)/my/page.js:326",
-            "src/app/(app)/my/page.js:336",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:604",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:613",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:626",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:637",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:648",
+            "src/app/(app)/my/page.js:279",
+            "src/app/(app)/my/page.js:293",
+            "src/app/(app)/my/page.js:303",
+            "src/app/(app)/my/page.js:320",
+            "src/app/(app)/my/page.js:330",
+            "src/app/(app)/my/page.js:340",
             "src/app/(app)/page.js:876",
             "src/app/(app)/page.js:877",
             "src/app/(app)/page.js:878",
@@ -2844,17 +2844,17 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:598",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:607",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:620",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:631",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:642",
-            "src/app/(app)/my/page.js:275",
-            "src/app/(app)/my/page.js:289",
-            "src/app/(app)/my/page.js:299",
-            "src/app/(app)/my/page.js:316",
-            "src/app/(app)/my/page.js:326",
-            "src/app/(app)/my/page.js:336",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:604",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:613",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:626",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:637",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:648",
+            "src/app/(app)/my/page.js:279",
+            "src/app/(app)/my/page.js:293",
+            "src/app/(app)/my/page.js:303",
+            "src/app/(app)/my/page.js:320",
+            "src/app/(app)/my/page.js:330",
+            "src/app/(app)/my/page.js:340",
             "src/app/(app)/page.js:876",
             "src/app/(app)/page.js:877",
             "src/app/(app)/page.js:878"
@@ -2902,9 +2902,9 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:598",
-            "src/app/(app)/my/page.js:275",
-            "src/app/(app)/my/page.js:289"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:604",
+            "src/app/(app)/my/page.js:279",
+            "src/app/(app)/my/page.js:293"
           ]
         },
         "member": {
@@ -2916,8 +2916,8 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:607",
-            "src/app/(app)/my/page.js:299",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:613",
+            "src/app/(app)/my/page.js:303",
             "src/app/(app)/page.js:876"
           ]
         },
@@ -2928,8 +2928,8 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:620",
-            "src/app/(app)/my/page.js:316"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:626",
+            "src/app/(app)/my/page.js:320"
           ]
         },
         "type": {
@@ -2939,8 +2939,8 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:631",
-            "src/app/(app)/my/page.js:326"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:637",
+            "src/app/(app)/my/page.js:330"
           ]
         },
         "date": {
@@ -2952,8 +2952,8 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:642",
-            "src/app/(app)/my/page.js:336",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:648",
+            "src/app/(app)/my/page.js:340",
             "src/app/(app)/page.js:877"
           ]
         },
@@ -3011,7 +3011,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:266",
+            "src/app/(app)/my/page.js:270",
             "src/components/workspace/IssueDetail.jsx:1686",
             "src/components/workspace/IssueDetail.jsx:1703",
             "src/components/workspace/IssueDetail.jsx:1746",
@@ -3028,7 +3028,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:266"
+            "src/app/(app)/my/page.js:270"
           ]
         },
         "(default)": {
@@ -3053,7 +3053,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:266"
+            "src/app/(app)/my/page.js:270"
           ]
         },
         "(default)": {
@@ -3075,7 +3075,7 @@
     "Surface": {
       "preset": {
         "panel": {
-          "count": 13,
+          "count": 12,
           "routes": [
             "/",
             "/[projectId]",
@@ -3084,14 +3084,13 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:544",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:700",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:782",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:903",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:933",
-            "src/app/(app)/overview/page.js:293",
-            "src/app/(app)/overview/page.js:389",
-            "src/app/(app)/overview/page.js:439",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:550",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:706",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:788",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:909",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
+            "src/app/(app)/overview/page.js:273",
+            "src/app/(app)/overview/page.js:354",
             "src/app/(app)/page.js:832",
             "src/app/(app)/page.js:908",
             "src/app/(app)/page.js:915",
@@ -3100,18 +3099,22 @@
           ]
         },
         "nested-card": {
-          "count": 7,
+          "count": 10,
           "routes": [
             "/[projectId]",
+            "/overview",
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:817",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:822",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:827",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:838",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:848",
-            "src/app/(app)/team/page.js:174",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:823",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:828",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:833",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:844",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:854",
+            "src/app/(app)/overview/page.js:302",
+            "src/app/(app)/overview/page.js:398",
+            "src/app/(app)/overview/page.js:448",
+            "src/app/(app)/team/page.js:179",
             "src/components/InviteLinkSection.jsx:138"
           ]
         },
@@ -3161,14 +3164,14 @@
             "/clients"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:544",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:550",
             "src/app/(app)/page.js:832",
             "src/app/(app)/page.js:908",
             "src/app/(app)/page.js:930"
           ]
         },
         "md": {
-          "count": 17,
+          "count": 19,
           "routes": [
             "/",
             "/[projectId]",
@@ -3178,18 +3181,20 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:700",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:782",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:817",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:822",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:827",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:838",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:848",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:903",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:933",
-            "src/app/(app)/overview/page.js:293",
-            "src/app/(app)/overview/page.js:389",
-            "src/app/(app)/overview/page.js:439",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:706",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:788",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:823",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:828",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:833",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:844",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:854",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:909",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
+            "src/app/(app)/overview/page.js:273",
+            "src/app/(app)/overview/page.js:302",
+            "src/app/(app)/overview/page.js:354",
+            "src/app/(app)/overview/page.js:398",
+            "src/app/(app)/overview/page.js:448",
             "src/app/(app)/page.js:915",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
@@ -3210,7 +3215,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:174"
+            "src/app/(app)/team/page.js:179"
           ]
         },
         "sm": {
@@ -3226,7 +3231,7 @@
       },
       "composition": {
         "(default)": {
-          "count": 23,
+          "count": 25,
           "routes": [
             "/",
             "/[projectId]",
@@ -3236,24 +3241,26 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:544",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:700",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:782",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:817",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:822",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:827",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:838",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:848",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:903",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:933",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:550",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:706",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:788",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:823",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:828",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:833",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:844",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:854",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:909",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/layout.js:131",
-            "src/app/(app)/overview/page.js:293",
-            "src/app/(app)/overview/page.js:389",
-            "src/app/(app)/overview/page.js:439",
+            "src/app/(app)/overview/page.js:273",
+            "src/app/(app)/overview/page.js:302",
+            "src/app/(app)/overview/page.js:354",
+            "src/app/(app)/overview/page.js:398",
+            "src/app/(app)/overview/page.js:448",
             "src/app/(app)/page.js:832",
             "src/app/(app)/page.js:915",
             "src/app/(app)/page.js:930",
-            "src/app/(app)/team/page.js:174",
+            "src/app/(app)/team/page.js:179",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:138",
             "src/components/InviteLinkSection.jsx:162",
@@ -3308,7 +3315,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:486",
+            "src/app/(app)/overview/page.js:495",
             "src/app/(app)/settings/page.js:237",
             "src/app/(app)/settings/page.js:2838",
             "src/app/(app)/settings/page.js:3136",
@@ -3402,7 +3409,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:166",
-            "src/app/(app)/overview/page.js:486",
+            "src/app/(app)/overview/page.js:495",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceHeader.jsx:532",
             "src/components/WorkspaceInfoCenter.jsx:135",
@@ -3484,7 +3491,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:166",
-            "src/app/(app)/overview/page.js:486",
+            "src/app/(app)/overview/page.js:495",
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
             "src/components/WorkspaceInfoCenter.jsx:135",
@@ -3540,7 +3547,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:166",
-            "src/app/(app)/overview/page.js:486",
+            "src/app/(app)/overview/page.js:495",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:237",
             "src/app/(app)/settings/page.js:2838",
@@ -3589,7 +3596,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:166",
-            "src/app/(app)/overview/page.js:486",
+            "src/app/(app)/overview/page.js:495",
             "src/app/(app)/settings/page.js:237",
             "src/app/(app)/settings/page.js:2838",
             "src/app/(app)/settings/page.js:3136",
@@ -3645,7 +3652,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:166",
-            "src/app/(app)/overview/page.js:486",
+            "src/app/(app)/overview/page.js:495",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:237",
             "src/app/(app)/settings/page.js:2838",
@@ -3812,9 +3819,9 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:299",
-            "src/app/(app)/overview/page.js:395",
-            "src/app/(app)/overview/page.js:445"
+            "src/app/(app)/overview/page.js:308",
+            "src/app/(app)/overview/page.js:404",
+            "src/app/(app)/overview/page.js:454"
           ]
         },
         "danger": {
@@ -3863,9 +3870,9 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/overview/page.js:299",
-            "src/app/(app)/overview/page.js:395",
-            "src/app/(app)/overview/page.js:445",
+            "src/app/(app)/overview/page.js:308",
+            "src/app/(app)/overview/page.js:404",
+            "src/app/(app)/overview/page.js:454",
             "src/components/InviteLinkSection.jsx:156"
           ]
         },
@@ -4030,7 +4037,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:449",
+            "src/app/(app)/my/page.js:453",
             "src/app/(app)/page.js:560",
             "src/components/SupportDialog.jsx:48",
             "src/components/WorkspaceHeader.jsx:495",
@@ -4059,7 +4066,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:449"
+            "src/app/(app)/my/page.js:453"
           ]
         },
         "(default)": {
@@ -4113,7 +4120,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:449",
+            "src/app/(app)/my/page.js:453",
             "src/components/WorkspaceInfoCenter.jsx:269"
           ]
         },
@@ -4145,7 +4152,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:449"
+            "src/app/(app)/my/page.js:453"
           ]
         },
         "(default)": {
@@ -4191,12 +4198,12 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:678",
-            "src/app/(app)/my/page.js:397",
-            "src/app/(app)/overview/page.js:246",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:684",
+            "src/app/(app)/my/page.js:401",
+            "src/app/(app)/overview/page.js:250",
             "src/app/(app)/page.js:568",
             "src/app/(app)/page.js:885",
-            "src/app/(app)/team/page.js:183",
+            "src/app/(app)/team/page.js:188",
             "src/components/CreateTaskModal.jsx:433",
             "src/components/workspace/QuickTeamTransferDialog.jsx:135"
           ]
@@ -4210,7 +4217,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:686",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
             "src/app/(app)/settings/page.js:2189",
             "src/components/InviteMemberDialog.jsx:215",
             "src/components/workspace/IssueDetail.jsx:1402",
@@ -4243,12 +4250,12 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:136",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:701",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:858",
-            "src/app/(app)/overview/page.js:309",
-            "src/app/(app)/overview/page.js:401",
-            "src/app/(app)/overview/page.js:451",
-            "src/app/(app)/team/page.js:197",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:707",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:864",
+            "src/app/(app)/overview/page.js:318",
+            "src/app/(app)/overview/page.js:410",
+            "src/app/(app)/overview/page.js:460",
+            "src/app/(app)/team/page.js:202",
             "src/components/profile/ProfileView.jsx:242",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
           ]
@@ -4261,7 +4268,7 @@
             "/clients"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:551",
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:916"
           ]
@@ -4295,11 +4302,11 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:136",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:701",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:858",
-            "src/app/(app)/overview/page.js:309",
-            "src/app/(app)/overview/page.js:401",
-            "src/app/(app)/overview/page.js:451",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:707",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:864",
+            "src/app/(app)/overview/page.js:318",
+            "src/app/(app)/overview/page.js:410",
+            "src/app/(app)/overview/page.js:460",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
           ]
         },
@@ -4313,11 +4320,11 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:551",
             "src/app/(app)/layout.js:132",
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:916",
-            "src/app/(app)/team/page.js:197",
+            "src/app/(app)/team/page.js:202",
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/profile/ProfileView.jsx:242",
@@ -4335,11 +4342,11 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:136",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:701",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:858",
-            "src/app/(app)/overview/page.js:309",
-            "src/app/(app)/overview/page.js:401",
-            "src/app/(app)/overview/page.js:451",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:707",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:864",
+            "src/app/(app)/overview/page.js:318",
+            "src/app/(app)/overview/page.js:410",
+            "src/app/(app)/overview/page.js:460",
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
@@ -4355,11 +4362,11 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:551",
             "src/app/(app)/layout.js:132",
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:916",
-            "src/app/(app)/team/page.js:197",
+            "src/app/(app)/team/page.js:202",
             "src/components/profile/ProfileView.jsx:242",
             "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
@@ -4380,10 +4387,10 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:536",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:542",
             "src/app/(app)/loading.js:28",
-            "src/app/(app)/my/page.js:391",
-            "src/app/(app)/overview/page.js:242",
+            "src/app/(app)/my/page.js:395",
+            "src/app/(app)/overview/page.js:246",
             "src/app/(app)/page.js:822",
             "src/app/(app)/page.js:848",
             "src/app/(app)/page.js:910",
@@ -4527,8 +4534,8 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:147",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:869",
-            "src/app/(app)/overview/page.js:467"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:875",
+            "src/app/(app)/overview/page.js:476"
           ]
         },
         "lg": {
@@ -4577,8 +4584,8 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:147",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:869",
-            "src/app/(app)/overview/page.js:467",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:875",
+            "src/app/(app)/overview/page.js:476",
             "src/app/(app)/settings/page.js:2151",
             "src/app/(app)/settings/page.js:2195",
             "src/app/(app)/settings/page.js:2239",
@@ -4647,8 +4654,8 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:871",
-            "src/app/(app)/overview/page.js:469",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:877",
+            "src/app/(app)/overview/page.js:478",
             "src/components/SupportDialog.jsx:62"
           ]
         },
@@ -4686,8 +4693,8 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:663",
-            "src/app/(app)/my/page.js:361",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:669",
+            "src/app/(app)/my/page.js:365",
             "src/components/InviteMemberDialog.jsx:163",
             "src/components/workspace/IssueDetail.jsx:1332"
           ]
@@ -4721,8 +4728,8 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:663",
-            "src/app/(app)/my/page.js:361",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:669",
+            "src/app/(app)/my/page.js:365",
             "src/app/(app)/settings/page.js:3037",
             "src/components/InviteMemberDialog.jsx:163",
             "src/components/profile/ProfileView.jsx:174"
@@ -4830,7 +4837,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:137"
+            "src/app/(app)/team/page.js:142"
           ]
         }
       }
@@ -4852,7 +4859,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:175"
+            "src/app/(app)/team/page.js:180"
           ]
         }
       }
@@ -4873,32 +4880,32 @@
     "DetailSection": {
       "density": {
         "(default)": {
-          "count": 6,
+          "count": 9,
           "routes": [
             "/[projectId]",
-            "/[projectId]/issue/[issueId]"
+            "/[projectId]/issue/[issueId]",
+            "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:818",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:823",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:828",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:839",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:849",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:824",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:829",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:834",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:845",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:855",
+            "src/app/(app)/overview/page.js:303",
+            "src/app/(app)/overview/page.js:399",
+            "src/app/(app)/overview/page.js:449",
             "src/components/workspace/IssueDetail.jsx:2038"
           ]
         },
         "panel": {
-          "count": 5,
+          "count": 2,
           "routes": [
-            "/[projectId]",
-            "/overview"
+            "/[projectId]"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:904",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:934",
-            "src/app/(app)/overview/page.js:294",
-            "src/app/(app)/overview/page.js:390",
-            "src/app/(app)/overview/page.js:440"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:910",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:940"
           ]
         },
         "group": {
@@ -4924,8 +4931,8 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:597",
-            "src/app/(app)/my/page.js:265"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:603",
+            "src/app/(app)/my/page.js:269"
           ]
         },
         "projects": {

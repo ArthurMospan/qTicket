@@ -65,7 +65,7 @@ import {
 } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { summarizeCycleTimes } from '@/lib/utils/velocityMetrics.mjs';
 import { reliableCompletedAtMillis } from '@/lib/utils/completionDates.mjs';
-import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
+import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
@@ -184,6 +184,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     activeOrgId,
     orgRole,
     switchOrg,
+    orgDirectoryVerified,
   } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const resourceContextReady = !resourceOrganizationId || activeOrgId === resourceOrganizationId;
@@ -477,13 +478,18 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     router.push(`${window.location.pathname}?${params.toString()}`);
   }, [router]);
 
+  const loadError = projectsError || issuesError || membersError || workflowError;
+  // Ще не відмова — ще не вирішилось. Див. `isUnresolvedAccessError`.
+  const resolvingAccess = isUnresolvedAccessError(loadError, orgDirectoryVerified);
   const loading = !resourceContextReady
     || projectsLoading
     || issuesLoading
     || membersLoading
-    || workflowLoading;
-  const loadError = projectsError || issuesError || membersError || workflowError;
-  const failure = loadError ? workspaceDataFailureCopy(loadError, isQuotaRefused()) : null;
+    || workflowLoading
+    || resolvingAccess;
+  const failure = loadError && !resolvingAccess
+    ? workspaceDataFailureCopy(loadError, isQuotaRefused())
+    : null;
   // Why this board looked nothing like the one on «Звернення», which is the
   // same component with the same cards. That screen gives kanban the viewport:
   // the page stops scrolling and the columns scroll inside themselves, which is
@@ -494,7 +500,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   // it is about: a list scrolls, an empty state scrolls, a failure scrolls.
   const boardFillsScreen = activeTab === 'incidents'
     && viewMode === 'kanban'
-    && !loadError
+    && !failure
     && visibleIssues.length > 0;
   const canManageProject = can(orgRole, 'edit:project_settings');
   const canInviteClient = can(orgRole, 'manage:team');
@@ -673,7 +679,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
             ) : null}
           />
 
-          {loadError ? (
+          {failure ? (
             <div className="mx-auto flex min-h-[420px] max-w-[520px] flex-col justify-center gap-3">
               <Alert variant="error" title={failure.title} description={failure.description} />
               <Button onClick={() => window.location.reload()} style="secondary" size="md">

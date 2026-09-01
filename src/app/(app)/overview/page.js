@@ -25,6 +25,7 @@ import {
   AlertTriangle,
   CircleCheck,
   CircleDotDashed,
+  History,
   Inbox,
   MessageCircleReply,
   Plus,
@@ -40,7 +41,7 @@ import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { issueActivityFeed } from '@/lib/utils/issueActivityFeed.mjs';
-import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
+import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 
 function timestampMillis(value) {
@@ -94,6 +95,7 @@ export default function OverviewPage() {
     projects,
     projectsLoading,
     projectsError,
+    orgDirectoryVerified,
   } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const canCreateClient = can(orgRole, 'create:project');
@@ -200,9 +202,11 @@ export default function OverviewPage() {
     .sort((left, right) => right.open - left.open || left.project.name.localeCompare(right.project.name, 'uk-UA'))
     .slice(0, 6), [activeProjects, openIssues]);
 
-  const loading = projectsLoading || issuesLoading || membersLoading || workflowLoading;
   const loadError = projectsError || issuesError || membersError || workflowError;
-  const failure = loadError
+  // Ще не відмова — ще не вирішилось. Див. `isUnresolvedAccessError`.
+  const resolvingAccess = isUnresolvedAccessError(loadError, orgDirectoryVerified);
+  const loading = projectsLoading || issuesLoading || membersLoading || workflowLoading || resolvingAccess;
+  const failure = loadError && !resolvingAccess
     ? workspaceDataFailureCopy(loadError, isQuotaRefused())
     : null;
   const loadingLabel = clientViewer
@@ -241,7 +245,7 @@ export default function OverviewPage() {
           <div role="status" aria-busy="true" className="flex min-h-[420px] items-center justify-center">
             <LoadingSpinner size="md" label={loadingLabel} />
           </div>
-        ) : loadError ? (
+        ) : failure ? (
           <div className="mx-auto flex min-h-[420px] max-w-[520px] flex-col justify-center gap-3">
             <Alert
               variant="error"
@@ -261,7 +265,12 @@ export default function OverviewPage() {
              it belongs to and blew the three tiles out to 440px against
              support's 290. Same component, same screen, two very different
              lines — for no reason other than what happened to sit beside it. */
-          <div className="flex flex-col gap-[20px] xl:max-w-[1040px]">
+          /* Сіра панель-підложка, на ній білі картки — той самий шар, що
+             й на «Аналітиці» проєкту та на «Аналітиці» в QuickTeam. Доти цей
+             екран був плитками й сірими слабами просто на білому, тобто двома
+             різними мовами для двох екранів, які відповідають на одне питання
+             різного масштабу: «як справи загалом» і «як справи в цього». */
+          <Surface preset="panel" padding="md" className="flex flex-col gap-4 xl:max-w-[1040px]">
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
               <KpiCard
                 icon={Inbox}
@@ -290,9 +299,9 @@ export default function OverviewPage() {
               />
             </div>
 
-            <Surface preset="panel" padding="md">
+            <Surface preset="nested-card" padding="md">
               <DetailSection
-                density="panel"
+                icon={History}
                 title="Останні дії"
                 description="Що сталося у ваших зверненнях останнім часом."
                 action={clientSpace ? (
@@ -340,9 +349,9 @@ export default function OverviewPage() {
                 )}
               </DetailSection>
             </Surface>
-          </div>
+          </Surface>
         ) : (
-          <div className="flex flex-col gap-[20px]">
+          <Surface preset="panel" padding="md" className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
               <KpiCard
                 icon={Inbox}
@@ -385,10 +394,10 @@ export default function OverviewPage() {
               />
             </div>
 
-            <div className="grid items-start gap-[20px] xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.8fr)]">
-              <Surface preset="panel" padding="md">
+            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.8fr)]">
+              <Surface preset="nested-card" padding="md">
                 <DetailSection
-                  density="panel"
+                  icon={History}
                   title="Останні дії"
                   description="Що сталося у зверненнях усіх доступних проєктів."
                   action={(
@@ -436,9 +445,9 @@ export default function OverviewPage() {
                 </DetailSection>
               </Surface>
 
-              <Surface preset="panel" padding="md">
+              <Surface preset="nested-card" padding="md">
                 <DetailSection
-                  density="panel"
+                  icon={UsersRound}
                   title="Проєкти"
                   description="Відкриті звернення за проєктами."
                   action={(
@@ -493,7 +502,7 @@ export default function OverviewPage() {
                 </DetailSection>
               </Surface>
             </div>
-          </div>
+          </Surface>
         )}
       </div>
     </div>

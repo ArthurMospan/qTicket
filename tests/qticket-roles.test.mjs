@@ -416,8 +416,15 @@ test('«Огляд» — один екран, який знає, хто диви
   assert.match(overview, /clientViewer, memberById/);
   assert.doesNotMatch(clientHalf, /showAssignee=\{false\}/);
   assert.doesNotMatch(clientHalf, /<ListRow|<TaskIdentity/);
-  // Обгортка — `Surface preset="panel"` з `DetailSection density="panel"`.
-  assert.match(clientHalf, /<Surface preset="panel"[\s\S]{0,120}<DetailSection\s+density="panel"/);
+  // Обгортка — сіра `Surface preset="panel"`, а на ній біла `nested-card` з
+  // `DetailSection`: той самий шар, що й «Аналітика» проєкту та «Аналітика» в
+  // QuickTeam. Доти тут був сірий слаб просто на білому.
+  assert.match(clientHalf, /<Surface preset="panel"/);
+  assert.match(clientHalf, /<Surface preset="nested-card"[\s\S]{0,120}<DetailSection/);
+  assert.ok(
+    clientHalf.indexOf('<Surface preset="panel"') < clientHalf.indexOf('<Surface preset="nested-card"'),
+    'біла картка має лежати на сірій панелі, а не навпаки',
+  );
   assert.match(clientHalf, /title="Останні дії"/);
   assert.match(clientHalf, /description="[^"]+"/);
 

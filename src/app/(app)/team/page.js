@@ -10,7 +10,7 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useMobilePaneBack } from '@/lib/hooks/useMobilePaneBack';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
-import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
+import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { Plus, User } from 'lucide-react';
@@ -45,7 +45,7 @@ import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchR
 // never arrives here at all; the client boundary in `clientPortalRoutes.mjs`
 // answers that, so this file holds no second opinion about it.
 export default function TeamPage() {
-  const { currentUser, orgRole, projects } = useAppContext();
+  const { currentUser, orgRole, projects, orgDirectoryVerified } = useAppContext();
   const { members, loading, error: membersError, inviteMember } = useOrganization();
   const { positions = [] } = useWorkflowConfig();
 
@@ -132,7 +132,12 @@ export default function TeamPage() {
 
   // Одне питання на три екрани: відмова в доступі, вичерпана квота й обрив
   // мережі — це три різні речі, і всі три казали «перевірте зʼєднання».
-  const dataFailure = workspaceDataFailureCopy(membersError, isQuotaRefused());
+  // Ще не відмова — ще не вирішилось. Див. `isUnresolvedAccessError`. Панель
+  // праворуч показує тим часом свій звичайний порожній стан, а не картку
+  // помилки про доступ, якого ніхто ще не питав остаточно.
+  const dataFailure = membersError && !isUnresolvedAccessError(membersError, orgDirectoryVerified)
+    ? workspaceDataFailureCopy(membersError, isQuotaRefused())
+    : null;
   return (
     <SidebarLayout
       context="team"
@@ -177,7 +182,7 @@ export default function TeamPage() {
             label={clientViewer ? 'До списку співробітників' : 'До списку команди'}
             className="absolute left-[16px] top-[16px] z-20"
           />
-          {membersError ? (
+          {dataFailure ? (
             <div className="flex flex-1 items-center justify-center p-6">
               <div className="flex w-full max-w-[460px] flex-col gap-3">
                 <Alert

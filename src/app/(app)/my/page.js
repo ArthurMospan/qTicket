@@ -9,7 +9,7 @@ import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import AgileBoard from '@/components/workspace/AgileBoard';
 import { Alert, PageHeader, StatusTransitionPicker, StatusVisibilityPicker, TaskListView } from '@/components/ui';
-import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
+import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { Settings2, List, Kanban } from 'lucide-react';
 import { Select, MultiSelect } from '@/components/ui/Select';
@@ -61,7 +61,7 @@ function filterTasks(tasks, filters, waitingOnUsIds) {
 }
 
 export default function IncidentQueuePage() {
-  const { currentUser, projects, activeOrgId, orgRole } = useAppContext();
+  const { currentUser, projects, activeOrgId, orgRole, orgDirectoryVerified } = useAppContext();
   const { members } = useOrganization();
   const { labels, types, priorities, statuses, categoryColumns } = useWorkflowConfig();
   const uid = currentUser?.uid || currentUser?.id;
@@ -253,7 +253,11 @@ export default function IncidentQueuePage() {
 
   // Одне питання на три екрани: відмова в доступі, вичерпана квота й обрив
   // мережі — це три різні речі, і всі три казали «перевірте зʼєднання».
-  const dataFailure = workspaceDataFailureCopy(tasksError, isQuotaRefused());
+  // Ще не відмова — ще не вирішилось. Див. `isUnresolvedAccessError`.
+  const resolvingAccess = isUnresolvedAccessError(tasksError, orgDirectoryVerified);
+  const dataFailure = tasksError && !resolvingAccess
+    ? workspaceDataFailureCopy(tasksError, isQuotaRefused())
+    : null;
   if (clientViewer) return null;
   return (
     <div className={`flex-1 h-full bg-transparent ${viewMode === 'kanban' ? 'overflow-hidden' : 'qt-nav-scroll overflow-y-auto overflow-x-hidden hide-scrollbar'}`}>
@@ -386,12 +390,12 @@ export default function IncidentQueuePage() {
 
         {/* Main Content Area */}
         <div className={viewMode === 'kanban' ? 'flex min-h-0 flex-1 flex-col' : ''}>
-        {loading ? (
+        {loading || resolvingAccess ? (
           <div role="status" aria-busy="true" className="flex min-h-[320px] flex-1 items-center justify-center">
             <LoadingSpinner size="md" />
             <span className="sr-only">Завантаження…</span>
           </div>
-        ) : tasksError ? (
+        ) : dataFailure ? (
           <div className="flex min-h-[320px] flex-1 items-center justify-center p-6">
             <div className="flex w-full max-w-[480px] flex-col gap-3">
               <Alert
