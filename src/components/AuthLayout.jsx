@@ -181,12 +181,19 @@ export default function AuthLayout({
               thing on a screen whose job is the sign-in buttons above it.
               Marked `data-ui-control="auth-footer-support"`.
 
-              It is not drawn on a branded screen. This opens qTicket's own
-              support channels, and a client of the tenant who presses «Підтримка»
-              on their supplier's portal expects their supplier — not the
-              Telegram account of the company that made the software. The
-              tenant's own support is the incidents they are being invited to. */}
-          {!brand && (
+              It is not drawn on a client's screen at all, branded or not. This
+              opens qTicket's own support channels, and somebody who presses
+              «Підтримка» on their supplier's portal expects their supplier —
+              not the Telegram account of the company that made the software.
+              The tenant's own support is the requests they are signing in to
+              write. `portalMode` was the half of that rule that was missing:
+              an invitation carries the tenant's identity and was already
+              exempt, but the plain «Портал підтримки» screen does not know
+              whose portal it is — and «we do not know which desk this is» is
+              not a reason to offer ours. What stays is the help centre, which
+              publishes only what the least privileged reader may open, and the
+              three documents, which are the ones being agreed to here. */}
+          {!brand && !portalMode && (
             <button
               type="button"
               data-ui-control="auth-footer-support"

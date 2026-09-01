@@ -16,38 +16,46 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 //
 // Measured glyph ink (ascent + descent, not the line box, which carries
 // descender space nobody sees) is 14 for the 16px/700 name and 12 for the
-// 12px/500 label, giving 19 + 17. This test recomputes the split, so changing a
-// font size in the lockup fails here instead of drifting quietly.
+// 12px/500 label. The label leads, so the top row is the 12 and the split is
+// 17 + 19. This test recomputes it, so changing a font size in the lockup fails
+// here instead of drifting quietly.
 
 const COLUMN_HEIGHT = 36;
 const INK = { name: 14, label: 12 };
 
-const nameRowFor = ({ name, label }) =>
-  Math.round(COLUMN_HEIGHT / 2 + (name - label) / 2);
+const topRowFor = (top, bottom) =>
+  Math.round(COLUMN_HEIGHT / 2 + (top - bottom) / 2);
 
 test('the brand lockup splits its 36px on the ink, not down the middle', () => {
-  assert.equal(nameRowFor(INK), 19);
-  assert.equal(COLUMN_HEIGHT - nameRowFor(INK), 17);
-  assert.equal(nameRowFor(INK) + (COLUMN_HEIGHT - nameRowFor(INK)), COLUMN_HEIGHT);
+  assert.equal(topRowFor(INK.label, INK.name), 17);
+  assert.equal(COLUMN_HEIGHT - topRowFor(INK.label, INK.name), 19);
+  // Flipping the order flips the split with it — the derivation is about which
+  // line leads, not about which words are in it.
+  assert.equal(topRowFor(INK.name, INK.label), 19);
 });
 
-// There is one lockup, and both readers get it: the big line names the space
-// you are in, the small line says what that space is.
+// There is one lockup, and both readers get it: the small line says what this
+// place is, the big line under it names which one you are in.
 //
-// The client's corner has always read that way. The staff rail read the other
-// way round and did it in two different arrangements — «qTicket» big over the
-// tenant's name small when the tenant had no branding, the two swapped when it
-// did. Three shapes for one corner, and in one of them the organization the
-// reader actually works in was the small print above their own product's name.
+// It used to read the other way round, which put the switcher — a control that
+// changes the organization — on the row that says «qTicket», one line below the
+// organization it changes. The staff rail had also drawn it in two different
+// arrangements before that: «qTicket» big over the tenant's name small when the
+// tenant had no branding, the two swapped when it did.
 test('the sidebar ships one lockup for both readers', async () => {
   const sidebar = await read('src/components/WorkspaceSidebar.jsx');
-  const nameLine = /className="h-\[19px\] truncate text-\[16px\] font-bold leading-\[19px\] tracking-tight"/g;
-  const labelLine = /className="h-\[17px\] truncate text-\[12px\] font-medium leading-\[17px\]"/g;
+  const nameLine = /truncate text-\[16px\] font-bold leading-\[19px\] tracking-tight/g;
+  const labelLine = /className="block h-\[17px\] truncate text-\[12px\] font-medium leading-\[17px\]"/g;
   // Written once, not once per reader: `SidebarBrandLockup` takes the two pairs
   // of words as props, so a client's portal and a staff rail cannot drift apart
   // again the way three separate blocks of markup already had.
-  assert.equal((sidebar.match(nameLine) || []).length, 1);
+  // Two spellings of the name row — one inside the switcher, one without it —
+  // and one label row above them both.
+  assert.equal((sidebar.match(nameLine) || []).length, 2);
   assert.equal((sidebar.match(labelLine) || []).length, 1);
+  // The label leads: it is the first of the two lines in the lockup's markup.
+  const lockup = sidebar.slice(sidebar.indexOf('function SidebarBrandLockup({'));
+  assert.ok(lockup.search(labelLine) < lockup.search(nameLine));
   assert.match(sidebar, /function SidebarBrandLockup\(\{/);
   assert.match(sidebar, /label=\{clientViewer \? 'Портал підтримки' : 'qTicket'\}/);
 

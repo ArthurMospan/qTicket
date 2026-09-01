@@ -29,18 +29,19 @@ import {
 /**
  * The two lines beside the mark, and there is one of them.
  *
- * The big line names the space you are in; the small line says what that space
- * is. A client's corner has always read that way — the provider's name over
- * «Портал підтримки» — and the staff rail read the other way round, in two
- * arrangements: «qTicket» big over the tenant's name small when the tenant had
- * no branding, the two swapped when it did. Three shapes for one corner, and in
- * one of them the organization somebody actually works in was the small print
- * above their vendor's name.
+ * The small line says what this place is; the big line under it names which one
+ * you are in. «Портал підтримки» over the provider's name, «qTicket» over the
+ * organization's — the arrangement the QuickTeam rail already draws for a
+ * branded workspace, so the same corner of two products is not laid out two
+ * ways. It read the other way round here, which put the switcher — a control
+ * that changes the *organization* — on the row that says «qTicket», one line
+ * below the organization it changes.
  *
  * The column is 36px and the words sit on the logo's axis rather than on the
- * text box's: for rows of ink 14 and 12, `nameRow = 18 + (14 − 12) / 2` gives
- * 19 + 17. Whoever changes a font size here re-measures — the split is derived
- * in `tests/sidebar-brand-lockup.test.mjs`.
+ * text box's: for a top row of ink 12 over a bottom row of ink 14,
+ * `topRow = 18 + (12 − 14) / 2` gives 17 + 19. Whoever changes a font size here
+ * re-measures — the split is derived in `tests/sidebar-brand-lockup.test.mjs`.
+ * QuickTeam eyeballed the same pair at 15 + 21; this is the measured one.
  *
  * `canSwitch` is the whole of the switcher's presence. One organization is not
  * a choice, and a control that opens a picker of one is an invitation to find
@@ -59,41 +60,39 @@ function SidebarBrandLockup({
   return (
     <>
       <Link href={href} className="hover:opacity-80 transition-opacity">
-        <h1
-          data-ui-type="branding-title"
-          className="h-[19px] truncate text-[16px] font-bold leading-[19px] tracking-tight"
-          style={{ color: theme.text }}
-        >
-          {name}
-        </h1>
-      </Link>
-      {canSwitch ? (
-        <button
-          type="button"
-          onClick={onSwitch}
-          aria-label={switchLabel}
-          // The row takes the width it is given and the name is the part that
-          // yields: `w-fit` plus a 120px name, a counter and a chevron adds up
-          // to 156px in a column that is 140px wide, so the row simply hung
-          // over the collapse button the moment a second organization had
-          // anything unread.
-          className="flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors"
-          style={{ color: theme.muted }}
-        >
-          <span className="min-w-0 truncate">{label}</span>
-          {unreadElsewhere > 0 && (
-            <Counter variant="dot" size="sm" appearance="sidebar" />
-          )}
-          <ChevronsUpDown size={12} className="shrink-0" aria-hidden />
-        </button>
-      ) : (
-        <span
-          className="h-[17px] truncate text-[12px] font-medium leading-[17px]"
-          style={{ color: theme.muted }}
-        >
+        <span className="block h-[17px] truncate text-[12px] font-medium leading-[17px]" style={{ color: theme.muted }}>
           {label}
         </span>
-      )}
+      </Link>
+      <h1 data-ui-type="branding-title" className="h-[19px] min-w-0">
+        {canSwitch ? (
+          <button
+            type="button"
+            onClick={onSwitch}
+            aria-label={switchLabel}
+            // The row takes the width it is given and the name is the part that
+            // yields: `w-fit` plus a 120px name, a counter and a chevron adds up
+            // to 156px in a column that is 140px wide, so the row simply hung
+            // over the collapse button the moment a second organization had
+            // anything unread.
+            className="flex w-full min-w-0 items-center gap-[4px] text-left transition-colors"
+            style={{ color: theme.text }}
+          >
+            <span className="truncate text-[16px] font-bold leading-[19px] tracking-tight">{name}</span>
+            {unreadElsewhere > 0 && (
+              <Counter variant="dot" size="sm" appearance="sidebar" />
+            )}
+            <ChevronsUpDown size={12} className="shrink-0" aria-hidden />
+          </button>
+        ) : (
+          <span
+            className="block truncate text-[16px] font-bold leading-[19px] tracking-tight"
+            style={{ color: theme.text }}
+          >
+            {name}
+          </span>
+        )}
+      </h1>
     </>
   );
 }

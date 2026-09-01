@@ -18,7 +18,7 @@
       "shell": 11,
       "other": 1
     },
-    "styledNativeControls": 6,
+    "styledNativeControls": 5,
     "reviewedNativeControls": 7,
     "manualLabels": 0,
     "manualModalShells": 0,
@@ -82,7 +82,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:190",
+      "location": "src/components/AuthLayout.jsx:197",
       "className": "",
       "text": "Підтримка",
       "childElements": [],
@@ -224,7 +224,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:393",
+      "location": "src/components/WorkspaceSidebar.jsx:392",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -239,7 +239,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:416",
+      "location": "src/components/WorkspaceSidebar.jsx:415",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -254,7 +254,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:489",
+      "location": "src/components/WorkspaceSidebar.jsx:488",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -269,15 +269,15 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:71",
-      "className": "flex h-[17px] w-full min-w-0 items-center gap-[4px] text-left text-[12px] font-medium leading-[17px] transition-colors",
+      "location": "src/components/WorkspaceSidebar.jsx:69",
+      "className": "flex w-full min-w-0 items-center gap-[4px] text-left transition-colors",
       "text": "",
       "childElements": [
         "span",
         "ChevronsUpDown"
       ],
       "ariaLabel": "",
-      "styled": true,
+      "styled": false,
       "reviewed": "",
       "resembles": "IconAction",
       "structure": "shell",
@@ -330,7 +330,7 @@
   "repeatedNativeFingerprints": [],
   "reviewedNativeControls": [
     {
-      "location": "src/components/AuthLayout.jsx:190",
+      "location": "src/components/AuthLayout.jsx:197",
       "tag": "button",
       "context": "auth-footer-support"
     },
@@ -350,17 +350,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:393",
+      "location": "src/components/WorkspaceSidebar.jsx:392",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:416",
+      "location": "src/components/WorkspaceSidebar.jsx:415",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:489",
+      "location": "src/components/WorkspaceSidebar.jsx:488",
       "tag": "button",
       "context": "branding-action"
     }
