@@ -34,19 +34,36 @@ const DENSITIES = {
 };
 
 /**
- * One row of a divided list, as a real button.
+ * One row of a divided list. A button where it opens something, a plain row
+ * where it does not.
+ *
+ * Not every list of these leads anywhere: a customer reads the desk's roster
+ * and opens nobody, because a support profile carries the other customers that
+ * person works with. Those lists used to drop out of the component and
+ * hand-write `px-4 py-4 sm:px-5` on a `div` to match this file's `roomy` — one
+ * list, two implementations, and the copy would keep the old numbers the day
+ * the density changed here. Passing no `onClick` is the whole of it: no
+ * button, no hover, no tab stop, the same geometry.
  *
  * @param {'compact'|'roomy'} props.density Row height: a search result against a table row.
  * @param {React.ReactNode} props.children The row's own layout — flex, grid, whatever it needs.
- * @param {(event) => void} props.onClick Opens whatever the row stands for.
+ * @param {(event) => void} props.onClick Opens whatever the row stands for. Without it the row is inert.
  * @param {string} props.className Placement and layout in the parent only.
  */
 export default function ListRow({ density = 'compact', children, onClick, className = '', ...props }) {
+  const geometry = `w-full text-left ${DENSITIES[density] ?? DENSITIES.compact} ${className}`;
+  if (!onClick) {
+    return (
+      <div className={geometry} {...props}>
+        {children}
+      </div>
+    );
+  }
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left transition-colors hover:bg-line ${DENSITIES[density] ?? DENSITIES.compact} ${className}`}
+      className={`${geometry} transition-colors hover:bg-line`}
       {...props}
     >
       {children}

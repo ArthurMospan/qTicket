@@ -37,6 +37,7 @@ import {
   UserPlus,
   UsersRound,
 } from 'lucide-react';
+import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import AgileBoard from '@/components/workspace/AgileBoard';
 import BoardConfigModal from '@/components/workspace/BoardConfigModal';
 import CreateTaskModal from '@/components/CreateTaskModal';
@@ -51,7 +52,7 @@ import { canWhileRoleLoads, can, isClientRole } from '@/lib/utils/can';
 import { isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
-import { issuePath, taskDisplayKey } from '@/lib/utils/issueKeys.mjs';
+import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { plural } from '@/lib/utils/plural.mjs';
@@ -109,15 +110,6 @@ function waitingSinceMillis(issue) {
     || 0;
 }
 
-// Скільки воно вже чекає, словами. Годинник читається тут, у модульній функції,
-// з тієї ж причини, що й у `periodCutoff` вище.
-function waitingLabel(issue) {
-  const since = waitingSinceMillis(issue);
-  if (!since) return 'щойно';
-  const days = Math.max(0, Math.floor((Date.now() - since) / (24 * 60 * 60 * 1000)));
-  if (days === 0) return 'сьогодні';
-  return `${days} ${plural(days, ['день', 'дні', 'днів'])}`;
-}
 
 const SCOPE_OPTIONS = [
   { value: 'open', label: 'Відкриті' },
@@ -147,12 +139,16 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
     <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
       {members.map(member => {
         const memberId = member.id || member.uid;
-        const Row = onOpen ? ListRow : 'div';
         return (
-          <Row
+          // One row, whether or not it opens. It used to be `ListRow` for the
+          // client's own colleagues and a hand-written `div` carrying a copy of
+          // `ListRow`'s padding for the support side — so a customer, who may
+          // open neither, read their entire «Учасники» tab in the copy.
+          <ListRow
             key={memberId}
-            {...(onOpen ? { density: 'roomy', onClick: () => onOpen(memberId) } : {})}
-            className={onOpen ? 'flex items-center gap-3' : 'flex items-center gap-3 px-4 py-4 sm:px-5'}
+            density="roomy"
+            onClick={onOpen ? () => onOpen(memberId) : undefined}
+            className="flex items-center gap-3"
           >
             <UserAvatar user={member} size="md" />
             <div className="min-w-0 flex-1">
@@ -166,7 +162,7 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
             <Pill tone="neutral" size="sm" shape="badge">
               {organizationRoleLabel(member.role)}
             </Pill>
-          </Row>
+          </ListRow>
         );
       })}
     </Card>
@@ -526,15 +522,11 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   // What stays withheld is one step finer and unchanged: which agent holds a
   // particular request. A desk that will not say who works here is not
   // protecting its routing, it is hiding.
-  const tabs = PROJECT_TABS
-    .map(tab => ({
-      ...tab,
-      // A count where one means something. «Аналітика» is not a list, and a
-      // number beside it would be a number about nothing.
-      count: tab.id === 'incidents'
-        ? visibleIssues.length
-        : tab.id === 'people' ? projectMembers.length : undefined,
-    }));
+  // No numbers beside the tabs. They counted what the tab you are standing on
+  // is already showing you — «Звернення 12» over a list of twelve, «Учасники 4»
+  // over four faces — and on the tab you are *not* standing on, a filtered
+  // count is a number whose rule is on another screen. A tab names a place.
+  const tabs = PROJECT_TABS;
 
   if (loading) {
     return (
@@ -572,7 +564,16 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            actions={(
+            // Nothing, rather than an empty box. Every control in this group
+            // belongs to somebody: the gear to whoever may change the project,
+            // «Створити звернення» to the customer — and only the customer,
+            // because only a client opens a request. A «Менеджер підтримки»
+            // therefore holds neither, and the group used to render anyway: an
+            // empty `div`, zero pixels wide, still a flex item, still taking
+            // the row's 8px gap. So the tabs stopped 40px from the edge on the
+            // one role that sees no buttons, while the view switcher directly
+            // under them stopped at the page's own 32px.
+            actions={(canManageProject && !clientViewer) || canOpenIncident ? (
               <div className="flex items-center gap-2">
                 {canManageProject && !clientViewer && (
                   <Button
@@ -597,7 +598,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                   </Button>
                 )}
               </div>
-            )}
+            ) : null}
             filters={activeTab === 'incidents' ? (
               <div className="flex w-full items-center justify-between">
               <FilterBar>
@@ -857,8 +858,8 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                         title={clientViewer ? 'Чекають на вашу відповідь' : 'Чекають на відповідь підтримки'}
                         count={attentionIssues.length}
                         description={clientViewer
-                          ? 'Підтримка відповіла останньою — далі слово за вами.'
-                          : 'Клієнт написав останнім, і відповіді ще не було.'}
+                          ? 'Підтримка відповіла останньою — далі слово за вами. Найдавніші зверху.'
+                          : 'Клієнт написав останнім, і відповіді ще не було. Найдавніші зверху.'}
                       >
                         {attentionIssues.length === 0 ? (
                           <EmptyState
@@ -872,23 +873,31 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                           />
                         ) : (
                           <>
+                            {/* `TaskRow`, the row every other list of requests
+                                in the product is made of — the queue on this
+                                same screen one tab away, «Звернення», a
+                                profile's list. This panel had its own: title,
+                                key and a duration, hand-written, so the one
+                                place a customer meets a list of their own
+                                requests drew them in a shape they see nowhere
+                                else. The duration went with it; «найдавніші
+                                зверху» is in the description above, and the
+                                row now carries what the rest of the product
+                                puts on a request. */}
                             <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
                               {attentionIssues.slice(0, 5).map(issue => (
-                                <ListRow
+                                <TaskRow
                                   key={issue.id}
-                                  density="roomy"
+                                  issue={issue}
+                                  issues={issues}
+                                  allIssues={issues}
+                                  members={clientViewer ? projectMembers : members}
+                                  projectId={project.id}
+                                  projectName={project.name}
+                                  showAssignee
+                                  assigneeSource={clientViewer ? 'client' : 'support'}
                                   onClick={() => router.push(issuePath(issue, project))}
-                                  className="flex items-center gap-3"
-                                >
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-[13px] font-bold text-ink">{issue.title}</p>
-                                    <p className="mt-1 truncate text-[11px] text-muted">{taskDisplayKey(issue, project)}</p>
-                                  </div>
-                                  {/* Без порогів і без кольору: «три дні» — це
-                                      факт, а «три дні — це погано» була б SLA,
-                                      якої в продукті немає. */}
-                                  <span className="shrink-0 text-[12px] text-muted">{waitingLabel(issue)}</span>
-                                </ListRow>
+                                />
                               ))}
                             </Card>
                             {attentionIssues.length > 5 && (

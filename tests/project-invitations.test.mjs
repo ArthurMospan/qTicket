@@ -110,6 +110,36 @@ test('an existing client can be invited into another project, and keeps their ro
   assert.match(route, /'User is already a member'/);
 });
 
+// The same rule, at the other door. The email invitation has added the second
+// project since the day the rule was written; the link — the door the owner
+// actually uses, because it is the one with a QR code on it — answered «ви вже
+// маєте доступ» and wrote nothing. Two halves of one rule, and only one of them
+// was ever built.
+test('an invite link into a second project adds it instead of reporting a no-op', async () => {
+  const route = await read('../src/app/api/invitations/link/accept/route.js');
+  const landing = await read('../src/app/invite/[token]/InviteLandingClient.jsx');
+
+  const seated = route.slice(
+    route.indexOf('if (membershipSnapshot.exists) {'),
+    route.indexOf('if (archiveSnapshot.exists)'),
+  );
+  // The seat is read, never rewritten: a support agent opening a client link
+  // must not lose their own role, and neither must a client_admin be demoted.
+  assert.match(seated, /const currentRole = membershipSnapshot\.data\(\)\.role;/);
+  assert.doesNotMatch(seated, /transaction\.set\(membershipReference/);
+  // Only a client role widens this way, and only into a project they are not
+  // already on — which is what keeps a second tab from spending a use.
+  assert.match(seated, /if \(!isClientRole\(currentRole\) \|\| team\.includes\(uid\)\) \{/);
+  assert.match(seated, /projectAdded: false/);
+  assert.match(seated, /team: FieldValue\.arrayUnion\(uid\)/);
+  assert.match(seated, /usedCount: FieldValue\.increment\(1\)/);
+  // And the answer travels, so the landing page can stop reporting a change as
+  // «nothing happened».
+  assert.match(route, /projectAdded: result\.projectAdded/);
+  assert.match(landing, /joined\?\.projectAdded/);
+  assert.match(landing, /'Проєкт додано'/);
+});
+
 test('the screens a client reads no longer assume they hold exactly one project', async () => {
   const [overview, sidebar, team] = await Promise.all([
     read('../src/app/(app)/overview/page.js'),
@@ -123,11 +153,16 @@ test('the screens a client reads no longer assume they hold exactly one project'
   assert.match(overview, /activeProjects\.length === 1 \? activeProjects\[0\] : null/);
   assert.doesNotMatch(overview, /const clientSpace = activeProjects\[0\]/);
 
-  // The rail keeps its single entry for the ordinary case and lists projects
-  // under a heading for the other — the same block support already has.
+  // The rail keeps its single entry for the ordinary case and, for the other,
+  // swaps it for «Проєкти» and lists them below the divider — the same block
+  // support already has, drawn for a shorter list. There is no heading over
+  // either list: QuickTeam's rail has none, and two halves of one product do
+  // not draw one rail two ways.
   assert.match(sidebar, /clientProjects\.length === 1/);
   assert.match(sidebar, /clientViewer && clientProjects\.length < 2 \?/);
-  assert.match(sidebar, /clientViewer \? 'МОЇ ЗВЕРНЕННЯ' : 'ПРОЄКТИ'/);
+  assert.match(sidebar, /href: '\/clients', icon: Folder, label: 'Проєкти'/);
+  assert.doesNotMatch(sidebar, /'МОЇ ЗВЕРНЕННЯ'/);
+  assert.doesNotMatch(sidebar, /'ПРОЄКТИ'/);
 
   // The roster spans every project the reader is on, not the first of them.
   assert.match(team, /const clientSpaces = useMemo/);

@@ -11,8 +11,9 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useOrganization } from '@/lib/hooks/useOrganization';
-import { isOnProjectTeam, isPrivilegedRole } from '@/lib/utils/projectAccess.mjs';
+import { isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { isActiveMember, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
+import { isClientRole } from '@/lib/utils/can';
 
 // A support profile answers three questions and no others: who this is, which
 // clients they are on, and what they have open. The task manager this product
@@ -26,6 +27,7 @@ export default function ProfileView({ user, onClose }) {
   const { currentUser, projects, orgRole } = useAppContext();
   const {
     tasks,
+    allIssues,
   } = useAllMyTasks(user?.id || user?.uid);
   const { positions = [], closedStatusIds } = useWorkflowConfig();
   const { members: orgMembers } = useOrganization();
@@ -43,7 +45,24 @@ export default function ProfileView({ user, onClose }) {
     || user.title
     || organizationRoleLabel(memberRecord?.role || user.role);
 
-  const allActiveTasks = tasks.filter(task => {
+  // «Звернення» means a different set on each side of the desk, because being
+  // «on» a request does. An agent is put on one — `assigneeIds` — and that is
+  // what `useAllMyTasks` answers. A customer never is: `assigneeIds` is
+  // support's routing and a client role is never written into it, so this tab
+  // read zero on every customer's profile no matter how many requests they had
+  // opened. Theirs is the set they are actually on: the requests they wrote,
+  // plus the ones their own administrator made them answerable for
+  // (`clientAssigneeIds`) — the same two facts `issueDisplayParticipants`
+  // draws on their cards.
+  const viewedRole = memberRecord?.role || user.role || null;
+  const viewedIsClient = isClientRole(viewedRole);
+  const ownedIssues = viewedIsClient
+    ? allIssues.filter(issue => (
+      (issue.reporterId || issue.createdBy) === uid
+      || (Array.isArray(issue.clientAssigneeIds) && issue.clientAssigneeIds.includes(uid))
+    ))
+    : tasks;
+  const allActiveTasks = ownedIssues.filter(task => {
     const project = projects.find(item => item.id === task.projectId);
     return project?.status !== 'archived' && !closedStatusIds.includes(task.columnId || task.status);
   });
@@ -62,9 +81,6 @@ export default function ProfileView({ user, onClose }) {
   // a member holds only the projects they are on — making the list they see the
   // intersection of the two, and «спільні» the only honest word for it.
   const projectListIsComplete = isAdminOrOwner || isMe;
-  // And an owner or an admin *being looked at* reaches every project without
-  // being on it, so a short list under their name is not the whole story.
-  const viewedReachesEveryProject = isPrivilegedRole(memberRecord?.role || user.role || null);
 
   // A profile is a place you look somebody up from. Opening one of their tasks
   // used to close the profile and land you on a task page — two navigations to
@@ -183,13 +199,13 @@ export default function ProfileView({ user, onClose }) {
             {/* Client spaces */}
             <div className="flex flex-col gap-3">
               <h3 className="ui-type-column-title text-muted uppercase tracking-wider">
-                {projectListIsComplete ? 'Проєкти' : 'Спільні клієнти'}
+                {projectListIsComplete ? 'Проєкти' : 'Спільні проєкти'}
               </h3>
               {memberProjects.length === 0 ? (
                 <p className="text-[14px] text-faint italic">
                   {projectListIsComplete
-                    ? 'Не закріплений за жодним клієнтом.'
-                    : 'Спільних клієнтів немає.'}
+                    ? 'Не закріплений за жодним проєктом.'
+                    : 'Спільних проєктів немає.'}
                 </p>
               ) : (
                 // A wrapped row of capsules, not a stack of full-width panels.
@@ -217,19 +233,15 @@ export default function ProfileView({ user, onClose }) {
                   ))}
                 </div>
               )}
-              {/* Said whether or not the list is empty: for an owner or an admin
-                  «не входить до жодного проєкту» would otherwise read as «has no
-                  access to anything», which is the opposite of the truth. */}
-              {viewedReachesEveryProject && (
-                <p className="text-[11px] leading-[1.4] text-muted">
-                  Має доступ до всіх клієнтів організації за роллю — тут лише ті, за якими закріплений.
-                </p>
-              )}
-              {!projectListIsComplete && (
-                <p className="text-[11px] leading-[1.4] text-muted">
-                  Показані лише клієнти, до яких маєте доступ ви.
-                </p>
-              )}
+              {/* Two footnotes stood here and neither one was read. «Має
+                  доступ до всіх клієнтів організації за роллю» and «Показані
+                  лише клієнти, до яких маєте доступ ви» explained the scoping
+                  of a list of chips to somebody who opened a profile to find
+                  out who a colleague is. The scoping is still true; the
+                  heading is what carries it — «Проєкти» for the whole answer,
+                  «Спільні проєкти» for the intersection — and a heading that
+                  names the list needs no paragraph under it saying the same
+                  thing in more words. */}
             </div>
 
             {/* Rates section removed as user requested to only configure rates via settings positions */}
@@ -242,7 +254,9 @@ export default function ProfileView({ user, onClose }) {
               <EmptyState
                 icon={TaskIcon}
                 title="Немає активних звернень"
-                description="Звернення, призначені на учасника, з’являться тут автоматично"
+                description={viewedIsClient
+                  ? 'Звернення, які ця людина відкриє, з’являться тут автоматично'
+                  : 'Звернення, призначені на учасника, з’являться тут автоматично'}
               />
             ) : (
               <>

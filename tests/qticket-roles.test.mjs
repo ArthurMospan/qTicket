@@ -135,7 +135,9 @@ test('клієнт і підтримка бачать один екран, і з
   assert.doesNotMatch(board, /useSprints|AnalyticsTab|QtPlusProjectTab/);
   // The rail is the same component too. A client sees «Огляд» · «Мої звернення»
   // · «Налаштування», and a client administrator one more between them:
-  // «Співробітники», the roster they actually administer.
+  // «Співробітники», the roster they actually administer. «Мої звернення» has
+  // a single address only while there is a single project; holding several
+  // turns it into «Проєкти», which is a real screen for them now.
   assert.match(sidebar, /const topNav = clientViewer/);
   assert.match(sidebar, /label: 'Мої звернення'/);
   const clientRail = sidebar.slice(
@@ -144,7 +146,7 @@ test('клієнт і підтримка бачать один екран, і з
   );
   assert.deepEqual(
     [...clientRail.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
-    ['Огляд', 'Мої звернення', 'Співробітники', 'Налаштування'],
+    ['Огляд', 'Мої звернення', 'Проєкти', 'Співробітники', 'Налаштування'],
   );
   // And that fourth one is conditional on the role, not on the audience: a
   // `client_member` administers nobody, and the route boundary refuses them

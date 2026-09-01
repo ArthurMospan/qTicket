@@ -8,6 +8,7 @@ import {
   inviteLinkUsable,
   inviteTokenLooksWellFormed,
 } from '@/lib/server/inviteLinks.mjs';
+import { isClientRole } from '@/lib/utils/can';
 import { MEMBERSHIP_ARCHIVE } from '@/lib/utils/orgMembership.mjs';
 import { hasActiveQuickTeamEntitlement } from '@/lib/utils/quickTeamManaged.mjs';
 
@@ -95,12 +96,39 @@ export async function POST(request) {
         return { error: true };
       }
 
-      // Somebody who is already seated is simply let in. Re-opening the link
-      // in a second tab must not spend one of its uses, and a link must never
-      // rewrite a seat that already exists — that is how a support agent who
-      // clicked a client link would have lost their own role.
+      // Somebody who is already seated keeps their seat — a link must never
+      // rewrite a role that already exists, which is how a support agent who
+      // clicked a client link would have lost their own.
+      //
+      // But «already seated» is not «already here». One invitation names one
+      // project and a client may hold several, so a link into a *second*
+      // project has to add that project; it used to answer «ви вже маєте
+      // доступ» and do nothing at all, which made «one person, one project» a
+      // rule of the product that the data never had. The email invitation has
+      // always added it (`type: 'project_added'`); this door had not.
+      //
+      // Only a client role is let through it. An internal seat reaching a
+      // client link is the collision `orgMembership.mjs` describes and stays
+      // refused here as before: nothing is written, nothing is spent.
+      //
+      // A use is spent only when the project is actually added, so re-opening
+      // the link in a second tab still costs nothing.
       if (membershipSnapshot.exists) {
-        return { organizationId, projectId, alreadyMember: true };
+        const currentRole = membershipSnapshot.data().role;
+        const team = Array.isArray(projectSnapshot.data().team) ? projectSnapshot.data().team : [];
+        if (!isClientRole(currentRole) || team.includes(uid)) {
+          return { organizationId, projectId, alreadyMember: true, projectAdded: false };
+        }
+        transaction.update(projectReference, {
+          team: FieldValue.arrayUnion(uid),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+        transaction.update(inviteReference, {
+          usedCount: FieldValue.increment(1),
+          lastUsedAt: FieldValue.serverTimestamp(),
+          lastUsedBy: uid,
+        });
+        return { organizationId, projectId, alreadyMember: true, projectAdded: true };
       }
 
       // A client who was removed and now walks back in through a link consumes
@@ -131,7 +159,7 @@ export async function POST(request) {
         lastUsedAt: FieldValue.serverTimestamp(),
         lastUsedBy: uid,
       });
-      return { organizationId, projectId, alreadyMember: false };
+      return { organizationId, projectId, alreadyMember: false, projectAdded: true };
     });
 
     if (result.error) return INVALID();
@@ -140,6 +168,7 @@ export async function POST(request) {
       organizationId: result.organizationId,
       projectId: result.projectId,
       alreadyMember: result.alreadyMember,
+      projectAdded: result.projectAdded,
     });
   } catch (error) {
     return routeErrorResponse(error, { context: 'Invitation link accept', fallbackMessage: 'Internal Server Error' });

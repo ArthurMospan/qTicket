@@ -16,7 +16,7 @@ export default function PublicLayout({ children }) {
         До вмісту
       </a>
       <header className="sticky top-0 z-20 border-b border-line bg-surface">
-        <div className="mx-auto flex h-[64px] w-full max-w-[880px] items-center px-4 sm:px-6">
+        <div className="mx-auto flex h-[56px] w-full max-w-[880px] items-center px-4 sm:px-6">
           <Link href="/" aria-label="qTicket — головна" className="flex min-w-0 items-center gap-[10px]">
             <Image src="/logo-min-dark.svg" alt="" width={32} height={32} loading="eager" />
             <span className="ui-type-section-title truncate text-ink">qTicket</span>

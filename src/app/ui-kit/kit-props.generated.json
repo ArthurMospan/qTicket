@@ -2579,7 +2579,7 @@
     },
     "ListRow": {
       "file": "src/components/ui/Layout/ListRow.jsx",
-      "summary": "One row of a divided list, as a real button.",
+      "summary": "One row of a divided list. A button where it opens something, a plain row where it does not.",
       "props": [
         {
           "name": "className",
@@ -2603,7 +2603,7 @@
           "default": "",
           "type": "(event) => void",
           "values": [],
-          "description": "Opens whatever the row stands for."
+          "description": "Opens whatever the row stands for. Without it the row is inert."
         }
       ]
     },

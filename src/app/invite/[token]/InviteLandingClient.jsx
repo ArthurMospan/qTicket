@@ -227,13 +227,23 @@ export default function InviteLandingClient() {
           <>
             <span className="mb-5 inline-flex items-center gap-1.5 text-[12px] font-semibold" style={ink}>
               <CheckCircle2 size={14} aria-hidden />
-              {joined?.alreadyMember ? 'Ви вже маєте доступ' : 'Доступ відкрито'}
+              {/* Three outcomes, not two. «Ви вже маєте доступ» was said to
+                  somebody who had just been added to a *second* project — the
+                  one sentence in the product that reported a change as a
+                  no-op. `projectAdded` is what the route actually did. */}
+              {!joined?.alreadyMember
+                ? 'Доступ відкрито'
+                : joined?.projectAdded
+                  ? 'Проєкт додано'
+                  : 'Ви вже маєте доступ'}
             </span>
             <h1 className="ui-type-display-title tracking-tight" style={ink}>
               {`Вітаємо в «${preview?.organizationName || ''}»`}
             </h1>
             <p className="mt-4 text-[13px] leading-relaxed" style={muted}>
-              Переносимо вас до ваших звернень…
+              {joined?.alreadyMember && joined?.projectAdded
+                ? `«${preview?.clientSpaceName || 'Проєкт'}» додано до ваших проєктів. Переносимо…`
+                : 'Переносимо вас до ваших звернень…'}
             </p>
             <button
               type="button"

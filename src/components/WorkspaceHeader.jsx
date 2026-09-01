@@ -623,9 +623,25 @@ export default function WorkspaceHeader() {
   const pathname = usePathname();
   const { mode, project, placeholder, label } = useHeaderMode(pathname, projects, breadcrumbs, orgRole);
 
-  const [projectSearch,   setProjectSearch]   = useState(false); // inline search toggle for project mode
+  const [projectSearchToggled, setProjectSearchToggled] = useState(false); // inline search toggle for project mode
   const [globalQuery,     setGlobalQuery]     = useState('');
   const [showSearch,      setShowSearch]      = useState(false);
+
+  // A trail of one crumb, and the crumb is the page's own title.
+  //
+  // «Проєкти › Назва» is a trail; for a customer the first half is a screen
+  // they may not open, so it was dropped and what remained was the project's
+  // name — printed in the header directly above the same name in 24px bold as
+  // the page title. A customer with one project has nowhere above them to go,
+  // so there is nothing for a trail to say, and the header's left side does
+  // what it does on every other screen the product has: it searches. A
+  // customer holding several *does* have somewhere to go — «Проєкти» is a real
+  // address for them now — so their trail comes back with both crumbs.
+  const clientViewer = isClientRole(orgRole);
+  const clientSpaceCount = (projects || []).filter(item => item.status !== 'archived').length;
+  const clientHasManyProjects = clientViewer && clientSpaceCount > 1;
+  const soloProjectCrumb = mode === 'project' && clientViewer && !clientHasManyProjects;
+  const projectSearch = projectSearchToggled || soloProjectCrumb;
 
   const {
     results: searchResults,
@@ -640,7 +656,7 @@ export default function WorkspaceHeader() {
   // silently filters unrelated content.
   useEffect(() => {
     queueMicrotask(() => {
-      setProjectSearch(false);
+      setProjectSearchToggled(false);
       setProjectSearchQuery('');
       setTeamSearch('');
       setWorkspaceSearch('');
@@ -733,7 +749,7 @@ export default function WorkspaceHeader() {
         onSearchClear={() => {
           if (projectSearch) {
             setProjectSearchQuery('');
-            setProjectSearch(false);
+            setProjectSearchToggled(false);
           } else if (pathname.startsWith('/team')) {
             setTeamSearch('');
           } else if (pathname.startsWith('/my')) {
@@ -750,10 +766,11 @@ export default function WorkspaceHeader() {
         searchOutsideResultCount={outsideResultCount}
         searchOutsideLoading={searchLoading}
         projectName={project?.name}
-        // The trail starts at «Клієнти» only for somebody who can open it.
-        showParentCrumb={!isClientRole(orgRole)}
+        // The trail starts at «Проєкти» only for somebody who can open it —
+        // support always, and a customer who holds more than one.
+        showParentCrumb={!clientViewer || clientHasManyProjects}
         projectSearchActive={projectSearch}
-        onProjectSearchToggle={() => setProjectSearch(true)}
+        onProjectSearchToggle={() => setProjectSearchToggled(true)}
         breadcrumbs={breadcrumbs}
         rightContent={<WorkspaceHeaderRight currentUser={currentUser} signOut={signOut} />}
       />

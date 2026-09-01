@@ -143,8 +143,15 @@ export const ORGANIZATION_ROLE_LABELS = Object.freeze({
   owner: 'Власник',
   admin: 'Адміністратор',
   member: 'Менеджер підтримки',
-  client_admin: 'Адміністратор клієнта',
-  client_member: 'Співробітник клієнта',
+  // Named by the place, not by the party. «Адміністратор клієнта» and
+  // «Співробітник клієнта» read the roster from the desk's chair, and the
+  // person wearing the label is the one who opens the screen: qTicket tells a
+  // customer's administrator that they are somebody's client, in their own
+  // profile, on their own project. The project is what these two roles are
+  // scoped to — one project, named on the invitation — so the project is what
+  // names them.
+  client_admin: 'Адміністратор проєкту',
+  client_member: 'Співробітник',
 });
 
 export function organizationRoleLabel(role) {

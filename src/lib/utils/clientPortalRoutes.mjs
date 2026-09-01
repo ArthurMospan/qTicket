@@ -52,6 +52,18 @@ export function isClientPortalRoute(pathname = '', clientProjectIds = [], role =
   // The answer lives here rather than in a guard inside the screen, because two
   // opinions about who may open an address is exactly how the two drift apart.
   if (path === '/team' || path === '/team/') return role === 'client_admin';
+  // «Проєкти», and only for somebody who holds more than one.
+  //
+  // A client may be invited into several projects, and until that happened the
+  // rail had one address to offer and the grid behind it was support's. It is
+  // the same screen — `projects` is already scoped to what this account can
+  // open, and every control on a card is behind a permission a client role does
+  // not hold — so the boundary is the count, not a second copy of the screen.
+  // One project needs no list: «Мої звернення» already points straight at it,
+  // and a grid of one card is a page that says nothing.
+  if (path === '/clients' || path === '/clients/') {
+    return (Array.isArray(clientProjectIds) ? clientProjectIds : []).length > 1;
+  }
   // A request opens from the portal and the page still enforces its exact scope.
   if (/^\/[^/]+\/issue\/[^/]+\/?$/.test(path)) return true;
 

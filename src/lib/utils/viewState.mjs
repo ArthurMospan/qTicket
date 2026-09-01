@@ -147,7 +147,7 @@ export const INCIDENT_QUEUE_VIEW_SCHEMA = Object.freeze({
   projects: { default: [], type: 'list' },
   status: { default: 'all' },
   assigned: { default: 'all' },
-  waiting: { default: 'all', values: ['all', 'us'] },
+  waiting: { default: 'all', values: ['all', 'us', 'client'] },
   priority: { default: 'all' },
   type: { default: 'all' },
   period: { default: 'all', values: ['all', '7days', '30days'] },

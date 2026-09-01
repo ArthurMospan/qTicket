@@ -80,7 +80,10 @@ export default function MobileNav({ keyboardOpen = false }) {
         // disagreed about both.
         ...(clientProjects.length === 1
           ? [{ href: clientSpaceHref, icon: TaskIcon, label: 'Мої звернення', exact: false }]
-          : []),
+          // The desktop rail's answer to the same problem, in the bar: several
+          // projects have no single address, so the entry becomes the screen
+          // that lists them. The bar and the rail name the same places.
+          : [{ href: '/clients', icon: Folder, label: 'Проєкти' }]),
         // «Співробітники» stood here and pointed at `/settings?section=team` —
         // the settings rail names that same destination again on the screen it
         // opens. The client roster lives at `/team` now.
@@ -344,7 +347,7 @@ export default function MobileNav({ keyboardOpen = false }) {
                 anywhere on a phone to reach the second one. */}
             <div className="flex items-center justify-between px-[20px] pb-[8px]">
               <p className="text-[11px] font-bold text-[var(--sb-muted)] uppercase tracking-wider">
-                {clientViewer ? 'Мої звернення' : 'Проєкти'}
+                Проєкти
               </p>
               {can(orgRole, 'create:project') && (
                 <IconAction

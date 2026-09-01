@@ -22,8 +22,29 @@ test('the project carries an analytics tab, and no tiles over the board', async 
   const incidents = page.slice(page.indexOf("activeTab === 'incidents' && ("), page.indexOf("activeTab === 'analytics' && ("));
   assert.doesNotMatch(incidents, /<KpiCard/);
 
-  // A count beside a tab that is not a list would be a number about nothing.
-  assert.match(page, /tab\.id === 'people' \? projectMembers\.length : undefined/);
+  // No counts beside the tabs at all. They counted what the tab you are
+  // standing on already shows, and on the tab you are not standing on they
+  // reported a filtered number whose rule is on another screen.
+  assert.match(page, /const tabs = PROJECT_TABS;/);
+  assert.doesNotMatch(page, /projectMembers\.length : undefined/);
+  assert.doesNotMatch(page, /count: tab\.id === 'incidents'/);
+});
+
+// A gap is drawn by a box, and a box with nothing in it is still a box.
+test('the header draws no action group for a role that holds no action', async () => {
+  const page = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+
+  // Every control in that group belongs to somebody: the gear to whoever may
+  // change the project, «Створити звернення» to the customer and only the
+  // customer. A «Менеджер підтримки» holds neither, and the group rendered
+  // anyway — an empty flex item, zero pixels wide, still taking the row's 8px
+  // gap, so the tabs stopped 40px from the edge while the view switcher
+  // directly under them stopped at the page's own 32px.
+  assert.match(
+    page,
+    /actions=\{\(canManageProject && !clientViewer\) \|\| canOpenIncident \? \(/,
+  );
+  assert.doesNotMatch(page, /actions=\{\(\s+<div className="flex items-center gap-2">/);
 });
 
 test('the numbers are measured, never promised, and never leak the other customers', async () => {

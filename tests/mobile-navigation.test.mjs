@@ -69,13 +69,16 @@ test('the bar offers a client the same destinations the rail does', async () => 
   // one product, one record, two navigations disagreeing about both.
   assert.deepEqual(
     [...clientTabs.matchAll(/label: '([^']+)'/g)].map(match => match[1]),
-    ['Огляд', 'Мої звернення'],
+    ['Огляд', 'Мої звернення', 'Проєкти'],
   );
   assert.match(clientTabs, /icon: TaskIcon, label: 'Мої звернення'/);
   assert.match(sidebar, /icon: TaskIcon, label: 'Мої звернення'/);
-  // And the entry stands down where it cannot name a destination: a customer
-  // holding two projects gets the list below instead, on both navigations.
+  // And the entry changes where it cannot name a destination: a customer
+  // holding two projects gets «Проєкти» — a screen that lists them — on both
+  // navigations, plus the list below.
   assert.match(clientTabs, /clientProjects\.length === 1/);
+  assert.match(clientTabs, /href: '\/clients', icon: Folder, label: 'Проєкти'/);
+  assert.match(sidebar, /href: '\/clients', icon: Folder, label: 'Проєкти'/);
   assert.match(nav, /\(!clientViewer \|\| clientProjects\.length > 1\)/);
   // `/overview` serves both audiences, so both navigations lead there and the
   // phone no longer opens on a list where the desktop opens on a summary.

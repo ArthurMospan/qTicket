@@ -2,7 +2,7 @@
 // src/components/WorkspaceSidebar.jsx
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import Image from 'next/image';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
@@ -10,7 +10,7 @@ import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui
 import {
   Blocks,
   Folder, Users, Settings, ChevronsUpDown,
-  Plus, LayoutDashboard, PanelLeftClose, PanelLeftOpen,
+  LayoutDashboard, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
@@ -20,7 +20,7 @@ import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
 import WorkspaceHelpMenu from '@/components/WorkspaceHelpMenu';
 
-import { can, isClientRole } from '@/lib/utils/can';
+import { isClientRole } from '@/lib/utils/can';
 import {
   organizationPortalBackground,
   resolveOrganizationPortalBrand,
@@ -118,7 +118,6 @@ function SidebarBrandLockup({
 
 export default function WorkspaceSidebar() {
   const pathname  = usePathname();
-  const router    = useRouter();
   const searchParams = useSearchParams();
   const { projects, activeOrg, activeOrgId, orgRole, currentUser, orgLoading, allOrgs } = useAppContext();
   const clientViewer = isClientRole(orgRole);
@@ -249,9 +248,9 @@ export default function WorkspaceSidebar() {
   // One is the ordinary case and keeps the rail it had: «Мої звернення»
   // pointing straight at that project, which is a real address — the same
   // `[projectId]` screen support opens. Several, and a single entry cannot
-  // name them, so the rail lists them under a heading exactly as it lists a
-  // support seat's projects. Nothing about that group is client-specific; it is
-  // the same block, drawn for a shorter list.
+  // name them, so the entry becomes «Проєкти» and the rail lists them below the
+  // divider exactly as it lists a support seat's projects. Nothing about that
+  // group is client-specific; it is the same block, drawn for a shorter list.
   const clientProjects = useMemo(
     () => (projects || []).filter(project => project.status !== 'archived'),
     [projects],
@@ -270,7 +269,12 @@ export default function WorkspaceSidebar() {
         // and the two halves of the product named one record with two glyphs.
         ...(clientProjects.length === 1
           ? [{ href: clientSpaceHref, icon: TaskIcon, label: 'Мої звернення', exact: false }]
-          : []),
+          // Several, and «Мої звернення» has no single address to point at. The
+          // entry the support rail calls «Проєкти» is the one that does, and it
+          // opens the same grid scoped to the projects this person holds — a
+          // customer working with two suppliers' desks, or with two of one
+          // supplier's spaces, was told they had access and shown one of them.
+          : [{ href: '/clients', icon: Folder, label: 'Проєкти' }]),
         // «Співробітники» used to point at `/settings?section=team` — an address
         // the settings rail named a second time on the screen it opened, so one
         // destination was named twice on one screen. The duplicate is gone from
@@ -489,34 +493,21 @@ export default function WorkspaceSidebar() {
 
       {clientViewer && clientProjects.length < 2 ? (
         // One project needs no list: «Мої звернення» in the navigation above
-        // already points at it, and a heading over a single row is a heading
-        // that says nothing.
+        // already points at it, so a divider and a single row below it would
+        // be the same address drawn twice.
         <div className="flex-1" />
       ) : (
         <>
       <div className="mx-[12px] mt-[16px] mb-[16px]" style={{ borderTop: '1px solid var(--sb-border)' }} />
 
-      {/* Client workspaces are internal support navigation. */}
+      {/* Client workspaces are internal support navigation.
+
+          Без заголовка «ПРОЄКТИ» і без «+», як у QuickTeam: список папок під
+          розділювачем — це і є проєкти, підпис до нього нічого не додавав, а
+          новий проєкт створюють із «Проєктів», де для цього стоїть підписана
+          кнопка. Дві половини одного продукту не малюють один і той самий рейл
+          двома способами. */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {!collapsed && (
-          <div className="flex items-center justify-between px-[16px] mb-[16px]">
-            <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--sb-muted-header)' }}>
-              {clientViewer ? 'МОЇ ЗВЕРНЕННЯ' : 'ПРОЄКТИ'}
-            </p>
-            {can(orgRole, 'create:project') && (
-              <button
-                onClick={() => router.push('/clients?new=1')}
-                data-ui-control="branding-action"
-                className="transition-colors" title="Новий проєкт"
-                style={{ color: 'var(--sb-muted-header)' }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--sb-text)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--sb-muted-header)'; }}
-              >
-                <Plus size={16} />
-              </button>
-            )}
-          </div>
-        )}
         <div className="flex flex-col gap-[4px]">
           {(projects || [])
             .filter(p => p.status !== 'archived')

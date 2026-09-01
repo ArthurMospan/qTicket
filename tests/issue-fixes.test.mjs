@@ -114,11 +114,11 @@ test('QUI-80 gives every FilterBar selector a semantic icon role', async () => {
   assert.match(project, /filterRole="status"[\s\S]{0,120}value=\{scope\}/);
   assert.match(project, /filterRole="member"[\s\S]{0,120}value=\{assigneeFilter\}/);
   assert.match(project, /filterRole="priority"[\s\S]{0,120}value=\{priorityFilter\}/);
-  assert.match(my, /filterRole="status"[\s\S]{0,100}value=\{filters\.status\}/);
-  assert.match(my, /filterRole="member"[\s\S]{0,100}value=\{filters\.assigned\}/);
-  assert.match(my, /filterRole="priority"[\s\S]{0,100}value=\{filters\.priority\}/);
-  assert.match(my, /filterRole="date"[\s\S]{0,100}value=\{filters\.period\}/);
-  assert.match(my, /filterRole="type"[\s\S]{0,100}value=\{filters\.type\}/);
+  assert.match(my, /filterRole="status"[\s\S]{0,140}value=\{filters\.status\}/);
+  assert.match(my, /filterRole="member"[\s\S]{0,140}value=\{filters\.assigned\}/);
+  assert.match(my, /filterRole="priority"[\s\S]{0,140}value=\{filters\.priority\}/);
+  assert.match(my, /filterRole="date"[\s\S]{0,140}value=\{filters\.period\}/);
+  assert.match(my, /filterRole="type"[\s\S]{0,140}value=\{filters\.type\}/);
 });
 
 test('QUI-79 reuses the chat attachment viewer on issue details', async () => {

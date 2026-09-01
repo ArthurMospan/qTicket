@@ -229,11 +229,13 @@ test('a profile says which projects name the person', async () => {
   // A member holds only their own projects, so the list they see is the
   // intersection — and says so, rather than reading as the whole answer.
   assert.match(profile, /const projectListIsComplete = isAdminOrOwner \|\| isMe;/);
-  assert.match(profile, /Спільні клієнти/);
-  assert.match(profile, /Показані лише клієнти, до яких маєте доступ ви\./);
-  // And an owner or an admin being looked at reaches every project without
-  // being on it, so a short list under their name is not the whole story.
-  assert.match(profile, /const viewedReachesEveryProject = isPrivilegedRole\(/);
+  // And it says so in the heading rather than in a footnote under the chips.
+  // A «клієнт» is a person or a company; the container is a «проєкт», and this
+  // list is of containers.
+  assert.match(profile, /Спільні проєкти/);
+  assert.doesNotMatch(profile, /Спільні клієнти/);
+  assert.doesNotMatch(profile, /Показані лише клієнти/);
+  assert.doesNotMatch(profile, /Має доступ до всіх клієнтів організації/);
 });
 
 // The other half of the same afternoon: a task screen with nowhere to type.

@@ -69,8 +69,8 @@ test('an organization role is written in one place, in Ukrainian', async () => {
     owner: 'Власник',
     admin: 'Адміністратор',
     member: 'Менеджер підтримки',
-    client_admin: 'Адміністратор клієнта',
-    client_member: 'Співробітник клієнта',
+    client_admin: 'Адміністратор проєкту',
+    client_member: 'Співробітник',
   });
   assert.equal(organizationRoleLabel('owner'), 'Власник');
   assert.equal(organizationRoleLabel('admin'), 'Адміністратор');

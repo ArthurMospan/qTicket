@@ -41,7 +41,7 @@ import {
   Send
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Alert, Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Tabs, Textarea, ToggleSwitch, UserAvatar, useConfirm } from '@/components/ui';
+import { Button, Card, ColorSwatch, IconAction, InnerNavigation, Input, Label, LoadingSpinner, MobilePaneBack, PageHeader, Pill, PriorityBadge, Select, SidebarLayout, Tabs, Textarea, ToggleSwitch, UserAvatar, useConfirm } from '@/components/ui';
 import ImageUpload from '@/components/ui/ImageUpload';
 import {
   CHANNEL_DEFAULTS,
@@ -2185,26 +2185,40 @@ export default function SettingsPage() {
           </Card>
         </Section>
       ) : (
-        <Section title="Особистий профіль" desc="Ваші імʼя, фото та пошта приходять із QuickTeam разом із доступом до qTicket">
-          <Alert
-            variant="info"
-            title="Профіль керується в QuickTeam"
-            description="Змініть їх у своєму профілі QuickTeam — qTicket отримає нові значення з наступною синхронізацією. Тут вони показані, але не редагуються: друга копія одного поля завжди програє тій, яку присилають."
-            className="mb-4"
-          />
+        <Section title="Особистий профіль" desc="Імʼя, фото та пошта приходять із QuickTeam; контакти ви заповнюєте тут">
+          {/* No banner over this card. It said «Профіль керується в QuickTeam»
+              in three sentences directly under a section description that says
+              the same thing in one, above three fields that are visibly greyed
+              out and carry the reason on each row. Four ways of saying one
+              thing, and the loudest of them was a coloured block the reader had
+              to scroll past every time they came here to type a phone number. */}
           <Card preset="borderless" padding="lg">
             <Row label="Аватар" desc="Те саме фото, що у вашому профілі QuickTeam">
               <UserAvatar user={currentUser} size="xl" />
             </Row>
-            <Row label="Ім'я" desc="Показується у команді підтримки та зверненнях">
+            <Row label="Ім'я" desc="Приходить із QuickTeam — змініть його там">
               <div className="w-full sm:w-[260px]">
                 <Input size="md" value={currentUser?.name || ''} readOnly disabled />
               </div>
             </Row>
-            <Row label="Email" desc="Використовується для входу та запрошень">
+            <Row label="Email" desc="Приходить із QuickTeam — використовується для входу">
               <div className="w-full sm:w-[260px]">
                 <Input size="md" value={currentUser?.email || ''} readOnly disabled />
               </div>
+            </Row>
+            {/* And the two fields QuickTeam does not send, which is exactly why
+                they are editable here. A colleague's profile in «Команда» could
+                answer what somebody has open and never how to reach them; the
+                customer's half of this screen has carried these two rows all
+                along, and the desk's half — the half that actually gets called
+                — had neither. They stay inside the organization: the member
+                directory sends `phone` and `telegram` only to internal seats,
+                never to a customer. */}
+            <Row label="Телефон" desc="Бачать лише колеги з підтримки">
+              <InlineEditField value={phone} onChange={setPhone} saved={currentUser?.phone || ''} onSave={() => saveProfileField('phone', phone)} className="w-[260px]" />
+            </Row>
+            <Row label="Telegram" desc="Нікнейм без @ (наприклад: username)">
+              <InlineEditField value={telegram} onChange={setTelegram} saved={currentUser?.telegram || ''} onSave={() => saveProfileField('telegram', telegram)} className="w-[260px]" />
             </Row>
           </Card>
         </Section>

@@ -873,7 +873,14 @@ export default function WorkspacePage({ clientsRoute = false } = {}) {
           }
           filters={
             <FilterBar context="projects">
-              <Select filterRole="member" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant="ghost" />
+              {/* «За працівником» filters this grid by the support member a
+                  project is staffed with, which is a question about the desk's
+                  own roster. A customer holds a handful of projects and none of
+                  that roster, so the control would offer them a list of other
+                  people's names to slice their own two cards by. */}
+              {!clientViewer && (
+                <Select filterRole="member" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant="ghost" />
+              )}
               <Select filterRole="date" options={dateOptions} value={dateFilter} onChange={setDateFilter} variant="ghost" />
               <Select filterRole="sort" options={sortOptions} value={sortOption} onChange={setSortOption} variant="ghost" />
             </FilterBar>

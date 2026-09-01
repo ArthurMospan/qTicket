@@ -135,9 +135,11 @@ test('the shipped schema keeps its agreed keys', () => {
   );
   assert.equal(INCIDENT_QUEUE_VIEW_SCHEMA.assignee, undefined);
   // `waiting=us` is the address «Чекають на нас» on the overview leads to, so
-  // the tile and the filtered list are one set said twice.
+  // the tile and the filtered list are one set said twice. `client` is the
+  // mirror the queue could not ask for, though `waitingOnClientIssues` had
+  // computed it for the customer's own overview all along.
   assert.deepEqual(
     INCIDENT_QUEUE_VIEW_SCHEMA.waiting,
-    { default: 'all', values: ['all', 'us'] },
+    { default: 'all', values: ['all', 'us', 'client'] },
   );
 });

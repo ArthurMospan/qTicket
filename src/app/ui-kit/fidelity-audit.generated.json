@@ -11,15 +11,15 @@
     "productFiles": 173,
     "parsedFiles": 173,
     "parseErrors": 0,
-    "nativeControls": 15,
+    "nativeControls": 14,
     "structures": {
       "chat": 2,
       "settings": 1,
-      "shell": 11,
+      "shell": 10,
       "other": 1
     },
     "styledNativeControls": 5,
-    "reviewedNativeControls": 7,
+    "reviewedNativeControls": 6,
     "manualLabels": 0,
     "manualModalShells": 0,
     "manualPills": 0,
@@ -31,7 +31,7 @@
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 15,
+    "button": 14,
     "input": 0,
     "textarea": 0,
     "select": 0
@@ -95,7 +95,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:233",
+      "location": "src/components/MobileNav.jsx:236",
       "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
       "text": "",
       "childElements": [
@@ -111,7 +111,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:298",
+      "location": "src/components/MobileNav.jsx:301",
       "className": "flex min-w-0 items-center gap-[6px] text-left",
       "text": "",
       "childElements": [
@@ -127,7 +127,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:386",
+      "location": "src/components/MobileNav.jsx:389",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -158,7 +158,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:205",
+      "location": "src/components/profile/ProfileView.jsx:221",
       "className": "ui-native-control",
       "text": "",
       "childElements": [
@@ -224,7 +224,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:411",
+      "location": "src/components/WorkspaceSidebar.jsx:415",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -239,7 +239,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:434",
+      "location": "src/components/WorkspaceSidebar.jsx:438",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -247,21 +247,6 @@
       ],
       "ariaLabel": "Розгорнути бічну панель",
       "styled": true,
-      "reviewed": "branding-action",
-      "resembles": "IconAction",
-      "structure": "shell",
-      "routes": []
-    },
-    {
-      "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:507",
-      "className": "transition-colors",
-      "text": "",
-      "childElements": [
-        "Plus"
-      ],
-      "ariaLabel": "Новий проєкт",
-      "styled": false,
       "reviewed": "branding-action",
       "resembles": "IconAction",
       "structure": "shell",
@@ -295,15 +280,15 @@
   },
   "nativeHotspots": [
     {
-      "file": "src/components/WorkspaceSidebar.jsx",
-      "count": 4
-    },
-    {
       "file": "src/components/AuthLayout.jsx",
       "count": 3
     },
     {
       "file": "src/components/MobileNav.jsx",
+      "count": 3
+    },
+    {
+      "file": "src/components/WorkspaceSidebar.jsx",
       "count": 3
     },
     {
@@ -335,12 +320,12 @@
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:386",
+      "location": "src/components/MobileNav.jsx:389",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:205",
+      "location": "src/components/profile/ProfileView.jsx:221",
       "tag": "button",
       "context": "profile-project-chip"
     },
@@ -350,17 +335,12 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:411",
+      "location": "src/components/WorkspaceSidebar.jsx:415",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:434",
-      "tag": "button",
-      "context": "branding-action"
-    },
-    {
-      "location": "src/components/WorkspaceSidebar.jsx:507",
+      "location": "src/components/WorkspaceSidebar.jsx:438",
       "tag": "button",
       "context": "branding-action"
     }

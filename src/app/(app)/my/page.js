@@ -21,7 +21,11 @@ import Surface from '@/components/ui/Surface';
 import FilterBar from '@/components/ui/FilterBar';
 import Dialog from '@/components/ui/Dialog';
 import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
-import { categorizeIssues, waitingOnUsIssues } from '@/lib/utils/incidentQueueMetrics.mjs';
+import {
+  categorizeIssues,
+  waitingOnClientIssues,
+  waitingOnUsIssues,
+} from '@/lib/utils/incidentQueueMetrics.mjs';
 import {
   availableStatusesInCategory,
   resolveCategoryStatusId,
@@ -39,10 +43,12 @@ import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 
 
 
-// `waitingOnUsIds` is the set «Чекають на нас» counts, resolved once by
-// `waitingOnUsIssues` and handed in — the tile on the overview and this filter
-// are then literally the same predicate, not two readings of one sentence.
-function filterTasks(tasks, filters, waitingOnUsIds) {
+// `waitingOnUsIds` and `waitingOnClientIds` are the sets «Чекають на нас» and
+// «Чекають на клієнта» count, resolved once by `waitingOnUsIssues` and
+// `waitingOnClientIssues` and handed in — the tile on the overview and this
+// filter are then literally the same predicate, not two readings of one
+// sentence.
+function filterTasks(tasks, filters, waitingOnUsIds, waitingOnClientIds) {
   const { projects, status, assigned, waiting, priority, type, period } = filters;
   const periodDays = period === '7days' ? 7 : period === '30days' ? 30 : 0;
   const cutoff = periodDays ? Date.now() - periodDays * 24 * 60 * 60 * 1000 : 0;
@@ -53,6 +59,7 @@ function filterTasks(tasks, filters, waitingOnUsIds) {
     if (assigned === 'unassigned' && (t.assigneeIds || []).length > 0) return false;
     if (assigned !== 'all' && assigned !== 'unassigned' && !(t.assigneeIds || []).includes(assigned)) return false;
     if (waiting === 'us' && !waitingOnUsIds.has(t.id)) return false;
+    if (waiting === 'client' && !waitingOnClientIds.has(t.id)) return false;
     if (priority !== 'all' && (t.priority || NO_PRIORITY_ID) !== priority) return false;
     if (type !== 'all' && t.type !== type) return false;
     if (cutoff && timestampMillis(t.createdAt) < cutoff) return false;
@@ -220,16 +227,32 @@ export default function IncidentQueuePage() {
 
   // Resolved from the queue already in memory — the same call the «Чекають на
   // нас» tile on the overview counts, so the tile and this list are one set.
+  const categorizedTasks = useMemo(
+    () => categorizeIssues(tasks, statuses),
+    [statuses, tasks],
+  );
   const waitingOnUsIds = useMemo(
     () => new Set(
-      waitingOnUsIssues(categorizeIssues(tasks, statuses), supportUserIds)
-        .map(issue => issue.id),
+      waitingOnUsIssues(categorizedTasks, supportUserIds).map(issue => issue.id),
     ),
-    [statuses, supportUserIds, tasks],
+    [categorizedTasks, supportUserIds],
+  );
+  // The other half of the same question. A queue has two ways of standing
+  // still and the screen could only name one of them.
+  const waitingOnClientIds = useMemo(
+    () => new Set(
+      waitingOnClientIssues(categorizedTasks, supportUserIds).map(issue => issue.id),
+    ),
+    [categorizedTasks, supportUserIds],
   );
 
   const normalizedSearch = myTaskSearch.trim().toLowerCase();
-  const filtered = filterTasks(tasks, filters, waitingOnUsIds).filter(t => {
+  // A hidden control must not keep filtering. «Статус» belongs to the list, so
+  // switching back to the board drops whatever it was holding — otherwise a
+  // board would silently show one column's worth of cards with nothing on
+  // screen saying why.
+  const effectiveFilters = viewMode === 'list' ? filters : { ...filters, status: 'all' };
+  const filtered = filterTasks(tasks, effectiveFilters, waitingOnUsIds, waitingOnClientIds).filter(t => {
     const p = projects.find(proj => proj.id === t.projectId);
     if (!p || p.status === 'archived') return false;
     if (!normalizedSearch) return true;
@@ -276,28 +299,46 @@ export default function IncidentQueuePage() {
                 searchPlaceholder="Пошук проєкту..."
                 filterRole="project"
               />
-              <Select
-                filterRole="status"
-                variant="ghost"
-                value={filters.status}
-                onChange={(val) => setFilters({ status: val })}
-                options={[
-                  { value: 'all', label: 'Усі статуси' },
-                  ...statuses.map(status => ({ value: status.id, label: status.label })),
-                ]}
-              />
+              {/* A status filter over a board whose columns *are* the
+                  statuses picks one column and empties the other four, and
+                  which columns stand there at all is already «Налаштування
+                  колонок», one control to the right. So it belongs to the list
+                  and only to the list, where there are no columns to read a
+                  status off. */}
+              {viewMode === 'list' && (
+                <Select
+                  filterRole="status"
+                  ariaLabel="Фільтр за статусом"
+                  variant="ghost"
+                  value={filters.status}
+                  onChange={(val) => setFilters({ status: val })}
+                  options={[
+                    { value: 'all', label: 'Усі статуси' },
+                    ...statuses.map(status => ({ value: status.id, label: status.label })),
+                  ]}
+                />
+              )}
               {/* Who owes the next word. A status cannot answer it — a request
                   can stand in «У роботі» all week with the client's question
                   unanswered — so it is a slice of the queue of its own, and the
-                  address «Чекають на нас» on the overview leads to. */}
+                  address «Чекають на нас» on the overview leads to.
+                  Its neutral value used to read «Будь-яка черга», which named
+                  a thing this product does not have: there is one queue, and
+                  «черга» here meant «whose turn it is». The three options say
+                  that outright now, and the third one — «Чекають на клієнта» —
+                  is the half the screen could not ask for at all, though
+                  `waitingOnClientIssues` had computed it for the customer's
+                  own overview all along. */}
               <Select
                 filterRole="status"
+                ariaLabel="Чия черга відповідати"
                 variant="ghost"
                 value={filters.waiting}
                 onChange={(val) => setFilters({ waiting: val })}
                 options={[
-                  { value: 'all', label: 'Будь-яка черга' },
+                  { value: 'all', label: 'Усі звернення' },
                   { value: 'us', label: 'Чекають на нас' },
+                  { value: 'client', label: 'Чекають на клієнта' },
                 ]}
               />
               <Select
