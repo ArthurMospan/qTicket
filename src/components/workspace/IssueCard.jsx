@@ -391,9 +391,16 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
               <div className="flex -space-x-[8px] overflow-visible" aria-label="Учасники звернення">
                 {participants.length > 0 ? (
                   participants.slice(0, 5).map(({ id, member, roles }) => {
+                    // Named from the chair the card is read in, like the
+                    // strip on the request itself. `assigneeSource` already
+                    // knows which chair that is — it is what decides whose
+                    // faces are drawn — and the customer's copy used to hover
+                    // «відповідальний клієнта» over their own colleague.
                     const roleLabels = roles.map(role => ({
                       assignee: 'відповідальний',
-                      'client-assignee': 'відповідальний клієнта',
+                      'client-assignee': assigneeSource === 'client'
+                        ? 'відповідальний з вашого боку'
+                        : 'відповідальний клієнта',
                       author: 'автор',
                       subscriber: 'підписник',
                     })[role]);

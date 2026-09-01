@@ -30,6 +30,16 @@ import Pill from '@/components/ui/DataDisplay/Pill';
 // Giving one component both jobs is how a list of things and a list of
 // happenings stop looking like different questions.
 //
+// Most rows are one line, and one line is centred.
+//
+// The row was `items-start` always, with a `mt-[1px]` on the face and another
+// on the time chip to nudge them back — two fudges compensating for an
+// alignment that was wrong for the common case. A 28px face and a 20px chip
+// pinned to the top of an 18px line sit visibly high, and the whole feed read
+// as if it had slipped. Where there *is* a second line the top edge is right,
+// because the face belongs to the sentence rather than to the block; so the row
+// aligns to what it actually contains, and neither offset is needed either way.
+//
 // The face is optional and its absence is meaningful rather than a fallback: a
 // customer is never told which agent acted, so their feed carries sentences with
 // no subject and must not draw a placeholder circle where a person would be.
@@ -69,9 +79,9 @@ export default function ActivityRow({
       // The same edge and the same hover as a task row: white ground, hairline
       // border, and a ring rather than a fill under the pointer. One list
       // shape for one product.
-      className={`group flex w-full items-start gap-3 rounded-[12px] border border-line bg-white p-[12px] text-left transition-all duration-200 hover:!ring-4 hover:!ring-line ${className}`}
+      className={`group flex w-full ${detail ? 'items-start' : 'items-center'} gap-3 rounded-[12px] border border-line bg-white p-[12px] text-left transition-all duration-200 hover:!ring-4 hover:!ring-line ${className}`}
     >
-      <span className="mt-[1px] flex h-7 w-7 shrink-0 items-center justify-center">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center">
         {actor ? (
           <UserAvatar user={actor} size="sm" />
         ) : fromSupport ? (
@@ -110,7 +120,7 @@ export default function ActivityRow({
       {/* `surface` was a white chip on a grey row. The row is white now, so
           the chip takes the grey — same shape, inverted ground. */}
       {time && (
-        <Pill tone="neutral" size="sm" weight="medium" className="mt-[1px] shrink-0">
+        <Pill tone="neutral" size="sm" weight="medium" className="shrink-0">
           {time}
         </Pill>
       )}

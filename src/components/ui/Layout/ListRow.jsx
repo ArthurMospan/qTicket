@@ -33,6 +33,28 @@ const DENSITIES = {
   roomy: 'px-4 py-4 sm:px-5',
 };
 
+// Two lists, and the product genuinely has both.
+//
+// `divided` is a run of rows inside one white card, separated by hairlines and
+// with nothing but a hover under the pointer: a search result, a support
+// channel — things read as one block, where the block is the object and the row
+// is a line of it.
+//
+// `card` is the row as its own tile: white ground, hairline edge, 12px radius,
+// a ring under the pointer, stacked with a gap. It is not a new shape — it is
+// exactly what `TaskRow` and `ActivityRow` already draw, which is to say it is
+// the shape this product uses whenever the *row* is the object. Two screens
+// were drawing lists of that second kind in the first kind's clothes: a
+// project's «Учасники» and «Проєкти» on «Огляд», where each row stands for a
+// whole thing you open and none of them belong to a single block. Corners went
+// round only at the top and bottom of the run, one hover swept a continuous
+// slab, and nobody could say why those lists looked unlike every other list in
+// the product. They looked unlike it because they were.
+const SHAPES = {
+  divided: '',
+  card: 'rounded-[12px] border border-line bg-white',
+};
+
 /**
  * One row of a divided list. A button where it opens something, a plain row
  * where it does not.
@@ -46,12 +68,21 @@ const DENSITIES = {
  * button, no hover, no tab stop, the same geometry.
  *
  * @param {'compact'|'roomy'} props.density Row height: a search result against a table row.
+ * @param {'divided'|'card'} props.shape A line of one block, or a tile of its own. See above.
  * @param {React.ReactNode} props.children The row's own layout — flex, grid, whatever it needs.
  * @param {(event) => void} props.onClick Opens whatever the row stands for. Without it the row is inert.
  * @param {string} props.className Placement and layout in the parent only.
  */
-export default function ListRow({ density = 'compact', children, onClick, className = '', ...props }) {
-  const geometry = `w-full text-left ${DENSITIES[density] ?? DENSITIES.compact} ${className}`;
+export default function ListRow({
+  density = 'compact',
+  shape = 'divided',
+  children,
+  onClick,
+  className = '',
+  ...props
+}) {
+  const surface = SHAPES[shape] ?? SHAPES.divided;
+  const geometry = `w-full text-left ${surface} ${DENSITIES[density] ?? DENSITIES.compact} ${className}`;
   if (!onClick) {
     return (
       <div className={geometry} {...props}>
@@ -59,11 +90,18 @@ export default function ListRow({ density = 'compact', children, onClick, classN
       </div>
     );
   }
+  // A tile lights up with a ring, a line of a block with a fill — the same
+  // difference `TaskRow` and `SearchModal` already draw, for the same reason:
+  // a fill on a tile fights its own edge, and a ring around a line of a card
+  // is a rectangle drawn inside another rectangle.
+  const hover = shape === 'card'
+    ? 'transition-all duration-200 hover:!ring-4 hover:!ring-line'
+    : 'transition-colors hover:bg-line';
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`${geometry} transition-colors hover:bg-line`}
+      className={`${geometry} ${hover}`}
       {...props}
     >
       {children}

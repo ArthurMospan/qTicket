@@ -1,6 +1,6 @@
 'use client';
 import { AlertTriangle, BarChart2, TrendingDown } from 'lucide-react';
-import { DistributionBar, KpiCard, Sparkline } from '@/components/ui';
+import { DistributionBar, KpiCard, Sparkline, Surface } from '@/components/ui';
 import { PreviewBlock } from '../preview';
 
 // What is left of the reporting vocabulary after qTicket stopped reporting:
@@ -17,6 +17,10 @@ export default function ChartsSection() {
         component="KpiCard"
         fullWidth
       >
+        {/* On the panel the product always gives them: the card draws no
+            border of its own, so a preview on white would be a white tile on
+            white. */}
+        <Surface preset="panel" padding="md" className="w-full">
         <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard icon={BarChart2} value="18 / 46" label="Звернення в роботі" sub="39% виконано" />
           <KpiCard
@@ -29,6 +33,7 @@ export default function ChartsSection() {
           />
           <KpiCard icon={AlertTriangle} value={3} label="Прострочено" sub="потребують уваги" />
         </div>
+        </Surface>
       </PreviewBlock>
 
       <PreviewBlock

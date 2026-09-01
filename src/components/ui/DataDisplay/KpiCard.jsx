@@ -20,16 +20,18 @@ import Sparkline from '@/components/ui/Charts/Sparkline';
 // letter-spacing — the eyebrow style — which meant the quietest text on the
 // card was set in the loudest available treatment, four times per row.
 //
-// The border is drawn, not transparent, and that is the third change. These sit
-// on the workspace content area, which is white — so a white card with a
-// transparent border on it was a figure with no edge at all, and «Огляд» opened
-// with five numbers floating on nothing. The border was already in the box
-// model, holding the space so the hover ring had somewhere to land; giving it
-// `line` costs no layout and is the same boundary `bordered-card` draws for
-// every other data-heavy block in the kit. Wrapping the row in a grey panel was
-// the other way to make the cards read, and it buys a slab across the top of
-// the product's front screen plus a concentric-radius rule, to say something an
-// edge already says.
+// The border is gone, and that is the third change — reversing the second.
+//
+// It was drawn because these cards sat on the white content area, where a white
+// card with no edge is a figure floating on nothing. The comment that added it
+// named the other way out and argued against it: «wrapping the row in a grey
+// panel … to say something an edge already says». The product then went and did
+// exactly that — every KPI row in it, on «Огляд» for both readers and on a
+// project's «Аналітика», is inside a `Surface preset="panel"`. So the premise
+// is no longer true: the cards have a ground, and the edge became a grey
+// outline traced around a white tile on grey, which is the one thing the panel
+// was drawn to avoid. The hover ring stands on its own; the two pixels the
+// border held in the box model were never anything but the border.
 //
 // On a phone the whole row is two columns wide, and the arithmetic stopped
 // working: a 151px tile minus 20px of padding on each side leaves 111px, and
@@ -64,7 +66,7 @@ export default function KpiCard({
   className = '',
 }) {
   const content = (
-    <div className={`rounded-[16px] border border-line bg-white p-5 transition-all duration-200 max-md:p-4 ${onClick ? 'cursor-pointer hover:ring-4 hover:ring-line' : ''} ${className}`}>
+    <div className={`rounded-[16px] bg-white p-5 transition-all duration-200 max-md:p-4 ${onClick ? 'cursor-pointer hover:ring-4 hover:ring-line' : ''} ${className}`}>
       <div className="mb-3 flex items-start justify-between gap-2">
         {Icon && (
           <div className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-canvas">

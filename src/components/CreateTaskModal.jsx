@@ -626,7 +626,12 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
           {clientMode && teamMembers.length > 1 && (
             <div className="flex flex-col gap-[6px] lg:col-span-2">
               <div className="flex items-center justify-between gap-3">
-                <Label>Від клієнта</Label>
+                {/* Only a customer reaches this field — `clientMode` is the
+                    customer's form — so it is named from their chair. It read
+                    «Від клієнта», which told the one person who sees it that
+                    they are the клієнт, on the form they came to ask for help
+                    on. */}
+                <Label>Ваша команда</Label>
                 <span className="text-[10px] font-medium text-muted">Можна вибрати кількох</span>
               </div>
               <div className="flex flex-wrap gap-2">

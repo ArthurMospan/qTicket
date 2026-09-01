@@ -65,25 +65,46 @@ export default function SurfacesSection() {
       <PreviewBlock
         title="Рядок списку"
         component="ListRow"
-        description="Рядок у списку з роздільниками: без рамки, без радіуса, без заливки в спокої. Роздільники малює список, рядок малює лише те, що стається під курсором. Розкладка лишається на місці виклику — один із двох це flex зі стрілкою в кінці, другий сітка на шість колонок; кіт володіє тим, що рядок списку це справжня кнопка з однією шкалою висоти й одним наведенням."
+        description="Дві форми, бо в продукті справді дві. `divided` — рядок усередині однієї білої картки, розділювачі малює список, а рядок лише те, що стається під курсором: результат пошуку, канал підтримки, тобто те, що читається як один блок. `card` — рядок як власна плитка з рамкою, радіусом і кільцем при наведенні: те саме, що вже малюють `TaskRow` й `ActivityRow`, і потрібне там, де сам рядок є об’єктом — «Учасники» проєкту, «Проєкти» на «Огляді». Без onClick рядок інертний: не кнопка, не в табі, без ховера."
         filePath="src/components/ui/Layout/ListRow.jsx"
         fullWidth
       >
-        <div className="w-full max-w-[420px] overflow-hidden rounded-[12px] border border-line bg-white">
-          <div className="divide-y divide-[#f0f0f0]">
-            <ListRow density="compact" className="flex items-center justify-between">
-              <span className="text-[13px] font-semibold text-ink">QT-104 · Зворотний звʼязок</span>
-              <span className="font-mono text-[10px] text-faint">compact</span>
-            </ListRow>
-            <ListRow density="compact" className="flex items-center justify-between">
-              <span className="text-[13px] font-semibold text-ink">QT-118 · Експорт у CSV</span>
-              <span className="font-mono text-[10px] text-faint">compact</span>
-            </ListRow>
-            <ListRow density="roomy" className="flex items-center justify-between">
-              <span className="text-[13px] font-bold text-ink">Артур Моспан</span>
-              <span className="font-mono text-[10px] text-faint">roomy</span>
-            </ListRow>
+        <div className="flex w-full flex-col gap-[20px] sm:flex-row">
+          <div className="w-full max-w-[420px] overflow-hidden rounded-[12px] border border-line bg-white">
+            <div className="divide-y divide-[#f0f0f0]">
+              <ListRow density="compact" onClick={() => {}} className="flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-ink">QT-104 · Зворотний звʼязок</span>
+                <span className="font-mono text-[10px] text-faint">divided · compact</span>
+              </ListRow>
+              <ListRow density="compact" onClick={() => {}} className="flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-ink">QT-118 · Експорт у CSV</span>
+                <span className="font-mono text-[10px] text-faint">divided · compact</span>
+              </ListRow>
+              <ListRow density="roomy" className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-ink">Артур Моспан</span>
+                <span className="font-mono text-[10px] text-faint">divided · інертний</span>
+              </ListRow>
+            </div>
           </div>
+
+          {/* On the grey panel these are read on, because a white tile with a
+              hairline edge on white says nothing. */}
+          <Surface preset="panel" padding="md" className="w-full max-w-[420px]">
+            <div className="flex flex-col gap-2">
+              <ListRow shape="card" density="roomy" onClick={() => {}} className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-ink">Acme Corp</span>
+                <span className="font-mono text-[10px] text-faint">card · roomy</span>
+              </ListRow>
+              <ListRow shape="card" density="roomy" onClick={() => {}} className="flex items-center justify-between">
+                <span className="text-[13px] font-bold text-ink">Northwind</span>
+                <span className="font-mono text-[10px] text-faint">card · roomy</span>
+              </ListRow>
+              <ListRow shape="card" density="compact" className="flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-ink">Артур Моспан</span>
+                <span className="font-mono text-[10px] text-faint">card · інертний</span>
+              </ListRow>
+            </div>
+          </Surface>
         </div>
       </PreviewBlock>
 

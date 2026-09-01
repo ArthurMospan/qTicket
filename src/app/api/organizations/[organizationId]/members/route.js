@@ -12,16 +12,25 @@ import { isClientRole } from '@/lib/utils/can';
 // whether somebody can still be given work. There used to be a second one on
 // the same record, the mood line a person set for themselves, and the directory
 // announced every profile as "active" because that one was written last.
-// `phone` and `telegram` are here and deliberately not in the client list
-// below. A customer fills them in so the desk can reach them when a thread is
-// the wrong shape for the question; that is a line from the customer to their
-// supplier, not a directory the whole workspace publishes. Support's own
-// numbers are not a customer's to read, and neither are a colleague's.
+// `phone` and `telegram` are here, and a customer gets them for their own side
+// only.
+//
+// A customer fills them in so the desk can reach them when a thread is the
+// wrong shape for the question; support's own numbers are not a customer's to
+// read, and that half is unchanged — the desk is reached through the request.
+// What the flat refusal also withheld was a customer's own colleagues from each
+// other: a `client_admin` opened «Співробітники», picked one of their own
+// people, and the profile had a name, a photo and nothing else, on a screen
+// whose whole purpose is administering those people. They work at the same
+// company and typed the number in themselves. So the answer is per person
+// rather than per reader — `CLIENT_SIDE_PROFILE_FIELDS` for somebody on the
+// customer's own side of the desk, `CLIENT_PROFILE_FIELDS` for the desk.
 const PUBLIC_PROFILE_FIELDS = [
   'name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title',
   'phone', 'telegram', 'skills', 'timezone', 'birthday',
 ];
 const CLIENT_PROFILE_FIELDS = ['name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title', 'timezone'];
+const CLIENT_SIDE_PROFILE_FIELDS = [...CLIENT_PROFILE_FIELDS, 'phone', 'telegram'];
 const NESTED_PROFILE_FIELDS = ['skills', 'timezone', 'birthday'];
 
 function serializeValue(value) {
@@ -87,7 +96,13 @@ export async function GET(request, context) {
     const members = memberships.map((membership, index) => {
       const profile = profileSnaps[index]?.exists ? profileSnaps[index].data() : {};
       const safeProfile = {};
-      const visibleProfileFields = clientViewer ? CLIENT_PROFILE_FIELDS : PUBLIC_PROFILE_FIELDS;
+      // Who is being read decides, not only who is reading: a customer sees
+      // their own colleagues' contacts and never the desk's.
+      const visibleProfileFields = !clientViewer
+        ? PUBLIC_PROFILE_FIELDS
+        : isClientRole(membership.role)
+          ? CLIENT_SIDE_PROFILE_FIELDS
+          : CLIENT_PROFILE_FIELDS;
       for (const field of visibleProfileFields) {
         if (profile[field] !== undefined) safeProfile[field] = serializeValue(profile[field]);
       }

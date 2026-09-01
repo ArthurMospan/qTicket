@@ -254,6 +254,20 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   const { projects, currentUser, activeOrg, activeOrgId, orgRole } = useAppContext();
   const clientViewer = isClientRole(orgRole);
   const internalViewer = Boolean(orgRole) && !clientViewer;
+  // The cell opposite «Підтримка», named from the chair it is read in.
+  //
+  // «Від клієнта» is what the desk calls that side and it is the right word
+  // there. It was drawn for the customer too — so a person who opened an
+  // account to write to their supplier was told, on their own request, above
+  // their own colleagues, that they are the клієнт. The rule this product does
+  // keep is that the *record* has one name for everybody; a label that names
+  // one of two sides has to name it from somewhere, and there is no word that
+  // is «them» from both chairs. One expression, three call sites — the strip,
+  // its narrow variant, and the mobile sheet.
+  const clientSideLabel = clientViewer ? 'Ваша команда' : 'Від клієнта';
+  const clientSideAriaLabel = clientViewer
+    ? 'Відповідальні з вашого боку'
+    : 'Відповідальні з боку клієнта';
   // This screen is shared: support works a «звернення» here and the client
   // whose portal is «Мої звернення» reads about the same one. Every string
   // about the record itself comes from here, so the screen cannot grow a
@@ -1699,11 +1713,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       without a qualifier means theirs; support's cell above
                       says whose it is. */}
                   <div className={`max-lg:hidden ${attributeItemClass}`} onClick={e => { if (isArchived || !canEditContent) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-                    <span className={attributeLabelClass}>Від клієнта</span>
+                    <span className={attributeLabelClass}>{clientSideLabel}</span>
                     <MultiSelect
                       compact
                       showSelectedAvatars
-                      ariaLabel="Відповідальні з боку клієнта"
+                      ariaLabel={clientSideAriaLabel}
                       disabled={!canEditClientAssignees}
                       value={clientAssigneeIds}
                       onChange={ids => update({ clientAssigneeIds: ids })}
@@ -1852,11 +1866,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                       for putting it where the reader already looks, not for
                       putting it last. */}
                   <div className={`max-lg:hidden ${attributeItemClass}`} onClick={e => { if (isArchived) return; if (e.target.tagName === 'SPAN' || e.target === e.currentTarget) e.currentTarget.querySelector('button')?.click(); }}>
-                    <span className={attributeLabelClass}>Від клієнта</span>
+                    <span className={attributeLabelClass}>{clientSideLabel}</span>
                     <MultiSelect
                       compact
                       showSelectedAvatars
-                      ariaLabel="Відповідальні з боку клієнта"
+                      ariaLabel={clientSideAriaLabel}
                       disabled={!canEditClientAssignees}
                       value={clientAssigneeIds}
                       onChange={ids => update({ clientAssigneeIds: ids })}
@@ -1970,10 +1984,10 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Від клієнта</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">{clientSideLabel}</span>
                           <MultiSelect
                             showSelectedAvatars
-                            ariaLabel="Відповідальні з боку клієнта"
+                            ariaLabel={clientSideAriaLabel}
                             disabled={!canEditClientAssignees}
                             value={clientAssigneeIds}
                             onChange={ids => update({ clientAssigneeIds: ids })}

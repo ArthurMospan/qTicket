@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 90,
-    "props": 661,
-    "documentedProps": 661,
+    "props": 662,
+    "documentedProps": 662,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -2604,6 +2604,16 @@
           "type": "(event) => void",
           "values": [],
           "description": "Opens whatever the row stands for. Without it the row is inert."
+        },
+        {
+          "name": "shape",
+          "default": "'divided'",
+          "type": "'divided'|'card'",
+          "values": [
+            "card",
+            "divided"
+          ],
+          "description": "A line of one block, or a tile of its own. See above."
         }
       ]
     },

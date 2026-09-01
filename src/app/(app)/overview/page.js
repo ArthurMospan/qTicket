@@ -6,7 +6,6 @@ import {
   ActivityRow,
   Alert,
   Button,
-  Card,
   DetailSection,
   EmptyState,
   KpiCard,
@@ -473,10 +472,19 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                  /* One tile per project, not one slab with hairlines
+                      across it. Each row here stands for a whole project you
+                      open — they are not lines of a single block — so they are
+                      drawn the way this product draws a row that is its own
+                      object everywhere else: `TaskRow`, `ActivityRow`, and now
+                      this. The old shape rounded only the first and last
+                      corners of the run and swept one hover across the whole
+                      slab. */
+                  <div className="flex flex-col gap-2">
                     {projectSummary.map(({ project, open, unassigned }) => (
                       <ListRow
                         key={project.id}
+                        shape="card"
                         density="roomy"
                         onClick={() => router.push(`/${encodeURIComponent(project.id)}`)}
                         className="flex items-center gap-3"
@@ -497,7 +505,7 @@ export default function OverviewPage() {
                         </Pill>
                       </ListRow>
                     ))}
-                  </Card>
+                  </div>
                 )}
                 </DetailSection>
               </Surface>

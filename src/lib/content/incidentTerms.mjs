@@ -69,10 +69,44 @@ export const CLIENT_ONLY_FORBIDDEN_WORDS = Object.freeze([
   'трекер',
 ]);
 
+// The word for the reader themselves, banned only where the reader is known.
+//
+// «Клієнт» is the desk's word for the other side and it is the right word
+// *there*: an agent looking at a queue is looking at their clients, and
+// «Запросити клієнта», «Команда клієнта» and «Клієнт написав останнім» all stay.
+// Turned around it says, to somebody who opened an account to write to their
+// supplier, «you are the client» — on their own request, over their own
+// colleagues, on the form they came to ask for help on. It was doing exactly
+// that in three places at once: «Від клієнта» on the attribute strip, the same
+// label on the composer only a customer ever opens, and «відповідальний
+// клієнта» hovering over their own colleague's face on a board card.
+//
+// So it is not in the list above, which is scanned across whole files and
+// cannot tell a staff branch from a client one — it would have condemned every
+// correct use in the product. It belongs to the checks that *know* the reader:
+// the record's own vocabulary, the catalogue a client role is handed, the
+// palette built for that role, the titles their tabs carry. Where a label
+// genuinely has to name one of two sides, it is named from the chair it is read
+// in — «Ваша команда» opposite «Підтримка». That is not the two-vocabulary trap
+// `incidentTerms()` refuses: that rule is about the name of the *record*, which
+// stays «звернення» for everybody.
+export const CLIENT_ADDRESSED_WORDS = Object.freeze([
+  'клієнт',
+]);
+
 // What a client-readable surface is checked against: everything.
 export const CLIENT_FORBIDDEN_WORDS = Object.freeze([
   ...TASK_MANAGER_WORDS,
   ...CLIENT_ONLY_FORBIDDEN_WORDS,
+]);
+
+// And what a surface addressed to a client is checked against: the above plus
+// the word for the reader. Deliberately a second list rather than a wider
+// `CLIENT_FORBIDDEN_WORDS` — that one is also asked of every staff article and
+// of whole files, where «Запросити клієнта» names a button that exists.
+export const CLIENT_ADDRESSED_FORBIDDEN_WORDS = Object.freeze([
+  ...CLIENT_FORBIDDEN_WORDS,
+  ...CLIENT_ADDRESSED_WORDS,
 ]);
 
 // Every string about the record itself, in the one voice the product speaks.

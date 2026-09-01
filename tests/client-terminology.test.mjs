@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 import { copyStrings, walkSources } from './copy-strings.mjs';
 import {
+  CLIENT_ADDRESSED_FORBIDDEN_WORDS,
   CLIENT_FORBIDDEN_WORDS,
   CLIENT_ONLY_FORBIDDEN_WORDS,
   INCIDENT_TERMS_TABLE,
@@ -34,19 +35,27 @@ import { notificationCountTitle } from '../src/lib/utils/notificationGrouping.mj
 
 const lower = value => String(value || '').toLocaleLowerCase('uk-UA');
 
-function taskManagerWordsIn(text) {
+function taskManagerWordsIn(text, words = CLIENT_FORBIDDEN_WORDS) {
   const haystack = lower(text);
-  return CLIENT_FORBIDDEN_WORDS.filter(word => haystack.includes(word));
+  return words.filter(word => haystack.includes(word));
 }
 
-function assertClean(text, what) {
-  const found = taskManagerWordsIn(text);
+function assertClean(text, what, words) {
+  const found = taskManagerWordsIn(text, words);
   assert.deepEqual(found, [], `${what} still says ${found.join(', ')}`);
 }
 
+// Where the reader is known to be a customer, «клієнт» goes too. The desk's
+// word for the other side is the right word on the desk's own screens and in
+// the staff half of the catalogue; turned around it tells somebody who opened
+// an account to write to their supplier that they are the клієнт.
+const assertAddressesAClient = (text, what) =>
+  assertClean(text, what, CLIENT_ADDRESSED_FORBIDDEN_WORDS);
+
 test('the vocabulary the product speaks carries none of the task manager', () => {
   for (const [key, value] of Object.entries(INCIDENT_TERMS_TABLE)) {
-    assertClean(value, `INCIDENT_TERMS_TABLE.${key}`);
+    // One table for both readers, so it answers to the stricter list.
+    assertAddressesAClient(value, `INCIDENT_TERMS_TABLE.${key}`);
   }
   // There is one table and no way to ask for another. The file used to export a
   // `staff` half and a `client` half, and asserting only the client half clean
@@ -86,7 +95,7 @@ test('the Ctrl+K palette a client opens offers nothing from a task manager', () 
   });
   assert.ok(commands.length > 0);
   for (const command of commands) {
-    assertClean(`${command.label} ${command.hint || ''}`, `palette command ${command.id}`);
+    assertAddressesAClient(`${command.label} ${command.hint || ''}`, `palette command ${command.id}`);
   }
   // The record is named the same way it is named on the portal behind it.
   const create = commands.find(command => command.id === 'action-new-issue');
@@ -101,8 +110,8 @@ test('a client tab never reads as somebody else’s project', () => {
   assert.equal(routeTitle('/', [], { clientPortal: true }), 'Мої звернення');
   // Their one deep route is their own incident. Before the spaces resolve there
   // is no name for it, and the fallback used to be «Проєкт».
-  assertClean(routeTitle('/acme/issue/i1', [], { clientPortal: true }), 'client deep-route title');
-  assertClean(
+  assertAddressesAClient(routeTitle('/acme/issue/i1', [], { clientPortal: true }), 'client deep-route title');
+  assertAddressesAClient(
     workspaceDocumentTitle({ pathname: '/acme/issue/i1', clientPortal: true }),
     'client document title',
   );
@@ -155,7 +164,10 @@ test('every published help article is safe to hand a client', () => {
     }
   }
   for (const article of helpArticlesForRole('client_member')) {
-    assertClean(JSON.stringify(article), `client-readable help article ${article.id}`);
+    assertAddressesAClient(JSON.stringify(article), `client-readable help article ${article.id}`);
+  }
+  for (const article of helpArticlesForRole('client_admin')) {
+    assertAddressesAClient(JSON.stringify(article), `client-readable help article ${article.id}`);
   }
 });
 
@@ -234,6 +246,31 @@ test('no screen a client renders carries support’s word for a seat', () => {
     + 'and the bulk bar already say.\n\n'
     + problems.join('\n'),
   );
+});
+
+// The three places the product told a customer they are the клієнт, and the
+// shape of the answer in each: a label that names one of two sides is named
+// from the chair it is read in. Not the record — «звернення» stays one word for
+// everybody, which is what `incidentTerms()` refuses an argument for.
+test('a label that names a side is named from the chair it is read in', () => {
+  const detail = readFileSync(join(ROOT, 'src/components/workspace/IssueDetail.jsx'), 'utf8');
+  const composer = readFileSync(join(ROOT, 'src/components/CreateTaskModal.jsx'), 'utf8');
+  const card = readFileSync(join(ROOT, 'src/components/workspace/IssueCard.jsx'), 'utf8');
+
+  // The attribute strip, opposite «Підтримка». One expression, three call
+  // sites — the strip, its narrow variant and the mobile sheet.
+  assert.match(detail, /const clientSideLabel = clientViewer \? 'Ваша команда' : 'Від клієнта';/);
+  assert.doesNotMatch(detail, />Від клієнта</);
+
+  // The composer, which only a customer ever opens in `clientMode` — so the
+  // label there has one reader and no excuse.
+  const clientField = composer.slice(composer.indexOf('clientMode && teamMembers.length > 1'));
+  assert.match(clientField, /<Label>Ваша команда<\/Label>/);
+  assert.doesNotMatch(composer, /<Label>Від клієнта<\/Label>/);
+
+  // And the faces on a board card, where it was a hover title over the
+  // customer's own colleague.
+  assert.match(card, /assigneeSource === 'client'\s*\?\s*'відповідальний з вашого боку'/);
 });
 
 test('a screen claiming to be support-only sends a client away before it paints', () => {

@@ -142,7 +142,10 @@ const SOURCES = {
   },
   AttributeTrigger: { variant: { literal: ['cell', 'details'] } },
   ColorSwatch: { size: { literal: ['choice', 'theme', 'trigger'] } },
-  ListRow: { density: { literal: ['compact', 'roomy'] } },
+  ListRow: {
+    density: { map: ['Layout/ListRow.jsx', 'DENSITIES'] },
+    shape: { map: ['Layout/ListRow.jsx', 'SHAPES'] },
+  },
   FormGroup: { gap: { literal: ['sm', 'md'] } },
   Tabs: {
     variant: { literal: ['raised', 'underline'] },

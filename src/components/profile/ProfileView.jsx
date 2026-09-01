@@ -261,7 +261,7 @@ export default function ProfileView({ user, onClose }) {
             ) : (
               <>
                 {allActiveTasks.map(task => {
-                  const projectName = projects.find(p => p.id === task.projectId)?.name || 'Клієнт';
+                  const projectName = projects.find(p => p.id === task.projectId)?.name || 'Проєкт';
                   return (
                     <TaskRow
                       key={task.id}

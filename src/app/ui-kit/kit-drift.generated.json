@@ -9,13 +9,13 @@
   },
   "totals": {
     "componentsWithVariants": 38,
-    "declaredValues": 341,
+    "declaredValues": 343,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
     "usedAndPreviewed": 167,
     "usedWithoutPreview": 0,
-    "declaredUnused": 158
+    "declaredUnused": 160
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -224,6 +224,12 @@
       "component": "Card",
       "prop": "padding",
       "value": "md",
+      "namespace": null
+    },
+    {
+      "component": "Card",
+      "prop": "padding",
+      "value": "none",
       "namespace": null
     },
     {
@@ -500,6 +506,12 @@
       "component": "Label",
       "prop": "context",
       "value": "inline",
+      "namespace": null
+    },
+    {
+      "component": "ListRow",
+      "prop": "shape",
+      "value": "divided",
       "namespace": null
     },
     {
@@ -1461,6 +1473,10 @@
       "density": [
         "compact",
         "roomy"
+      ],
+      "shape": [
+        "card",
+        "divided"
       ]
     },
     "FormGroup": {
@@ -1562,8 +1578,7 @@
   "usage": {
     "EmptyState.density.compact": 8,
     "EmptyState.surface.card": 10,
-    "Card.preset.borderless": 15,
-    "Card.padding.none": 3,
+    "ListRow.shape.card": 2,
     "ListRow.density.roomy": 3,
     "UserAvatar.size.md": 2,
     "Pill.tone.neutral": 8,
@@ -1626,6 +1641,7 @@
     "Pill.size.lg": 4,
     "Pill.weight.medium": 11,
     "Button.size.icon": 12,
+    "Card.preset.borderless": 12,
     "Card.padding.lg": 8,
     "UserAvatar.size.xl": 1,
     "Input.size.md": 3,
@@ -1914,6 +1930,8 @@
     "Label.context.inline",
     "ListRow.density.compact",
     "ListRow.density.roomy",
+    "ListRow.shape.card",
+    "ListRow.shape.divided",
     "LoadingSpinner.size.lg",
     "LoadingSpinner.size.md",
     "LoadingSpinner.size.sm",

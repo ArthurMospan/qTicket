@@ -681,6 +681,8 @@
     ],
     "Surface": [
       "surfaces",
+      "progress",
+      "charts",
       "feedback",
       "dialogs",
       "inner-nav-layout",

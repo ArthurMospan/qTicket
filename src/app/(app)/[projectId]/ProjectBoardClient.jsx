@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   Alert,
   Button,
-  Card,
   DetailSection,
   DistributionBar,
   EmptyState,
@@ -136,16 +135,20 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
   }
 
   return (
-    <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+    // One tile per person. A member is a whole thing, not a line of a block, so
+    // the row is drawn the way every other object-row in this product is —
+    // white ground, hairline edge, its own corners. It used to be a run inside
+    // one card with hairlines between, a shape nothing else here uses; and one
+    // half of it was `ListRow` while the other was a hand-written `div`
+    // carrying a copy of `ListRow`'s padding, so a customer — who may open
+    // neither side — read the whole tab in the copy.
+    <div className="flex flex-col gap-2">
       {members.map(member => {
         const memberId = member.id || member.uid;
         return (
-          // One row, whether or not it opens. It used to be `ListRow` for the
-          // client's own colleagues and a hand-written `div` carrying a copy of
-          // `ListRow`'s padding for the support side — so a customer, who may
-          // open neither, read their entire «Учасники» tab in the copy.
           <ListRow
             key={memberId}
+            shape="card"
             density="roomy"
             onClick={onOpen ? () => onOpen(memberId) : undefined}
             className="flex items-center gap-3"
@@ -165,7 +168,7 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
           </ListRow>
         );
       })}
-    </Card>
+    </div>
   );
 }
 
@@ -884,7 +887,14 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                                 зверху» is in the description above, and the
                                 row now carries what the rest of the product
                                 puts on a request. */}
-                            <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                            {/* The container `TaskListView` gives these rows,
+                                and for the same reason: a `TaskRow` already is
+                                a bordered, rounded tile with a hover ring, so
+                                a divided card around it drew a second edge
+                                against the first, `overflow-hidden` cropped
+                                the ring, and the rows came out stuck together
+                                with their corners cut off. */}
+                            <div className="flex flex-col gap-2">
                               {attentionIssues.slice(0, 5).map(issue => (
                                 <TaskRow
                                   key={issue.id}
@@ -899,7 +909,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                                   onClick={() => router.push(issuePath(issue, project))}
                                 />
                               ))}
-                            </Card>
+                            </div>
                             {attentionIssues.length > 5 && (
                               <p className="text-[12px] text-muted">
                                 І ще {attentionIssues.length - 5} — уся черга на вкладці «Звернення».
