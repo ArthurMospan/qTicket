@@ -11,7 +11,7 @@
   },
   "totals": {
     "files": 260,
-    "elements": 2224,
+    "elements": 2230,
     "namelessControls": 0,
     "imagesWithoutAlt": 0,
     "positiveTabIndex": 0,
@@ -27,7 +27,7 @@
   "runtimeNameVerification": [
     {
       "element": "Button",
-      "location": "src/app/(app)/settings/page.js:2505",
+      "location": "src/app/(app)/settings/page.js:2537",
       "attributes": [
         "title",
         "aria-label"
@@ -43,7 +43,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/profile/ProfileView.jsx:178",
+      "location": "src/components/profile/ProfileView.jsx:205",
       "attributes": [
         "title"
       ]

@@ -923,7 +923,16 @@ export default function SettingsPage() {
 
 
   // ── Profile ──
+  //
+  // Three of these exist only on a customer's half, and they are the answer to
+  // «як з цією людиною звʼязатись, коли порталу мало». A support desk needs a
+  // number and a handle far more often than it needs a colleague's biography —
+  // the mood line, the «Про себе» paragraph and the city went out with the task
+  // manager this product was forked from, and they stay out.
   const [displayName,   setDisplayName]   = useState('');
+  const [jobTitle,      setJobTitle]      = useState('');
+  const [phone,         setPhone]         = useState('');
+  const [telegram,      setTelegram]      = useState('');
   const [customAvatar,  setCustomAvatar]  = useState('');
   const [customAvatarStoragePath, setCustomAvatarStoragePath] = useState('');
   const [customAvatarResourceType, setCustomAvatarResourceType] = useState('image');
@@ -931,6 +940,9 @@ export default function SettingsPage() {
   // Whether any profile field is unsaved (for the leave guard).
   const profileDirty =
     displayName !== (currentUser?.name || '') ||
+    jobTitle !== (currentUser?.title || '') ||
+    phone !== (currentUser?.phone || '') ||
+    telegram !== (currentUser?.telegram || '') ||
     customAvatar !== (currentUser?.customAvatar || '');
 
   // Discard unsaved profile edits (used when the user chooses to leave without
@@ -938,6 +950,9 @@ export default function SettingsPage() {
   // re-prompt on every navigation).
   const revertProfile = useCallback(() => {
     setDisplayName(currentUser?.name || '');
+    setJobTitle(currentUser?.title || '');
+    setPhone(currentUser?.phone || '');
+    setTelegram(currentUser?.telegram || '');
     setCustomAvatar(currentUser?.customAvatar || '');
     setCustomAvatarStoragePath(currentUser?.customAvatarStoragePath || '');
     setCustomAvatarResourceType(currentUser?.customAvatarResourceType || 'image');
@@ -1131,6 +1146,9 @@ export default function SettingsPage() {
     if (currentUser) {
       queueMicrotask(() => {
         if (currentUser.name && !displayName) setDisplayName(currentUser.name);
+        if (currentUser.title && !jobTitle) setJobTitle(currentUser.title);
+        if (currentUser.phone && !phone) setPhone(currentUser.phone);
+        if (currentUser.telegram && !telegram) setTelegram(currentUser.telegram);
         if (currentUser.customAvatar && !customAvatar) setCustomAvatar(currentUser.customAvatar);
         setCustomAvatarStoragePath(currentUser.customAvatarStoragePath || '');
         setCustomAvatarResourceType(currentUser.customAvatarResourceType || 'image');
@@ -2149,6 +2167,20 @@ export default function SettingsPage() {
             <Row label="Email" desc="Використовується для входу та запрошень">
               <span className="text-[13px] text-muted">{currentUser?.email}</span>
             </Row>
+            {/* Хто ви в компанії й як із вами звʼязатись — те, що підтримці
+                справді треба знати про людину по той бік звернення, і чого в
+                профілі не було зовсім. Не «про себе»: сторінка колеги в
+                таск-менеджері, з якого це форкнули, нікому не допомогла
+                відповісти на звернення. Усе тут необовʼязкове. */}
+            <Row label="Посада" desc="Ваша роль у компанії — підтримка бачить її у профілі">
+              <InlineEditField value={jobTitle} onChange={setJobTitle} saved={currentUser?.title || ''} onSave={() => saveProfileField('title', jobTitle)} className="w-[260px]" />
+            </Row>
+            <Row label="Телефон" desc="Якщо питання швидше вирішити дзвінком">
+              <InlineEditField value={phone} onChange={setPhone} saved={currentUser?.phone || ''} onSave={() => saveProfileField('phone', phone)} className="w-[260px]" />
+            </Row>
+            <Row label="Telegram" desc="Нікнейм без @ (наприклад: username)">
+              <InlineEditField value={telegram} onChange={setTelegram} saved={currentUser?.telegram || ''} onSave={() => saveProfileField('telegram', telegram)} className="w-[260px]" />
+            </Row>
           </Card>
         </Section>
       ) : (
@@ -2894,26 +2926,14 @@ export default function SettingsPage() {
           </Card>
           )}
 
-          {/* What is left of «Організація і бренд»: one row, in the section
-              about what this account cannot change from here. The section it
-              replaces was five read-only rows behind a rail entry of its own —
-              a promise that there is something to do, kept by a description of
-              somewhere else. Only for an internal seat: a client has no
-              QuickTeam side and their organization is simply their supplier. */}
-          {!clientViewer && (
-            <Card preset="borderless" padding="lg">
-              <Row
-                label="Організація і бренд"
-                desc="Назву, логотип, колір порталу та активацію qTicket змінюють у QuickTeam → «Налаштування» → «Інтеграції» → «qTicket» і синхронізують звідти"
-              >
-                <Pill tone={org?.quickTeam?.entitlement === 'active' ? 'success' : 'warning'} size="md">
-                  {org?.quickTeam?.entitlement === 'active'
-                    ? 'Синхронізовано з QuickTeam'
-                    : 'Доповнення неактивне'}
-                </Pill>
-              </Row>
-            </Card>
-          )}
+          {/* «Організація і бренд» was cut down to one row here and is now cut
+              the rest of the way. «Безпека» answers who has been in this
+              account and how anybody gets in at all; a badge saying the tenant
+              name and logo are synchronised from QuickTeam answers none of that,
+              and the row's own description was an instruction for a different
+              product. Nothing was lost with it — it changed nothing, and the
+              section's copy already says the organization is set up in
+              QuickTeam. */}
 
           <Card preset="borderless" padding="lg">
             <Row label="Вийти з акаунта" desc="Завершити сесію на цьому пристрої">

@@ -12,9 +12,14 @@ import { isClientRole } from '@/lib/utils/can';
 // whether somebody can still be given work. There used to be a second one on
 // the same record, the mood line a person set for themselves, and the directory
 // announced every profile as "active" because that one was written last.
+// `phone` and `telegram` are here and deliberately not in the client list
+// below. A customer fills them in so the desk can reach them when a thread is
+// the wrong shape for the question; that is a line from the customer to their
+// supplier, not a directory the whole workspace publishes. Support's own
+// numbers are not a customer's to read, and neither are a colleague's.
 const PUBLIC_PROFILE_FIELDS = [
   'name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title',
-  'skills', 'timezone', 'birthday',
+  'phone', 'telegram', 'skills', 'timezone', 'birthday',
 ];
 const CLIENT_PROFILE_FIELDS = ['name', 'email', 'customAvatar', 'avatar', 'photoURL', 'title', 'timezone'];
 const NESTED_PROFILE_FIELDS = ['skills', 'timezone', 'birthday'];

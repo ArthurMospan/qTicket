@@ -411,7 +411,7 @@ test('every collapse control that folds a group of tasks is the same button', as
 // own, and a rail entry is a promise that there is something to do behind it.
 // What is left is the one fact none of the other sections carried: that the
 // brand and the add-on's activation are QuickTeam's, and where to change them.
-test('the brand is QuickTeam’s, said once, where nothing else can be changed either', async () => {
+test('the brand is QuickTeam’s, and «Налаштування» no longer says so at all', async () => {
   const settings = await read('../src/app/(app)/settings/page.js');
 
   assert.doesNotMatch(settings, /case 'workspace': \{/);
@@ -421,10 +421,14 @@ test('the brand is QuickTeam’s, said once, where nothing else can be changed e
   assert.match(settings, /MERGED_SECTIONS = \{[^}]*workspace: 'account'/);
   assert.match(settings, /MERGED_SECTIONS = \{[^}]*billing: 'account'/);
 
-  assert.match(settings, /label="Організація і бренд"/);
-  assert.match(settings, /org\?\.quickTeam\?\.entitlement === 'active'/);
-  // Only an internal seat: a client has no QuickTeam side to be sent to.
-  assert.match(settings, /\{!clientViewer && \(\s*<Card preset="borderless" padding="lg">\s*<Row\s*label="Організація і бренд"/);
+  // The row is gone, at the owner's instruction. «Безпека» answers who has
+  // been in this account and how anybody gets in at all; a badge saying the
+  // tenant name and logo are synchronised from QuickTeam answered none of that,
+  // and its description was an instruction for a different product. It changed
+  // nothing, and the section's own copy already says where the organization is
+  // set up.
+  assert.doesNotMatch(settings, /label="Організація і бренд"/);
+  assert.doesNotMatch(settings, /Синхронізовано з QuickTeam/);
 
   // Nothing on this screen writes the brand, and nothing previews a change to
   // it — a colour wheel, an upload and a live preview all belonged to an editor

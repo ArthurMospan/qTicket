@@ -158,7 +158,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:178",
+      "location": "src/components/profile/ProfileView.jsx:205",
       "className": "ui-native-control",
       "text": "",
       "childElements": [
@@ -340,7 +340,7 @@
       "context": "navigation-sheet-row"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:178",
+      "location": "src/components/profile/ProfileView.jsx:205",
       "tag": "button",
       "context": "profile-project-chip"
     },

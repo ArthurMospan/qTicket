@@ -130,6 +130,33 @@ export default function ProfileView({ user, onClose }) {
                 {user.email}
               </a>
             )}
+            {/* And the two a customer may add to that address. This is not the
+                контакт-картка that went out with the task manager: nobody's
+                city, nobody's birthday, nobody's mood — a number and a handle,
+                filled in by the person on the other side of a request so the
+                desk can reach them when a thread is the wrong shape for the
+                question. Drawn only where they exist, and they exist only where
+                somebody typed them; the member directory never sends either
+                field to a customer, so this line is the desk's alone. */}
+            {(user.phone || user.telegram) && (
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-muted">
+                {user.phone && (
+                  <a href={`tel:${user.phone.replace(/[^\d+]/g, '')}`} className="hover:text-ink transition-colors">
+                    {user.phone}
+                  </a>
+                )}
+                {user.telegram && (
+                  <a
+                    href={`https://t.me/${String(user.telegram).replace(/^@/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-ink transition-colors"
+                  >
+                    @{String(user.telegram).replace(/^@/, '')}
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* The action row is gone with the last action in it. That circle
