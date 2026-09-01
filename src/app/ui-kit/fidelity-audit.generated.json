@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 172,
-    "parsedFiles": 172,
+    "productFiles": 173,
+    "parsedFiles": 173,
     "parseErrors": 0,
     "nativeControls": 15,
     "structures": {
@@ -54,7 +54,7 @@
   "nativeControls": [
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:132",
+      "location": "src/components/AuthLayout.jsx:139",
       "className": "w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 hover:border-white/30 transition-colors cursor-pointer",
       "text": "",
       "childElements": [],
@@ -67,7 +67,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:149",
+      "location": "src/components/AuthLayout.jsx:156",
       "className": "w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-red-400 hover:bg-white/5 transition-colors text-left",
       "text": "Вийти",
       "childElements": [
@@ -82,7 +82,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/AuthLayout.jsx:197",
+      "location": "src/components/AuthLayout.jsx:204",
       "className": "",
       "text": "Підтримка",
       "childElements": [],
@@ -330,7 +330,7 @@
   "repeatedNativeFingerprints": [],
   "reviewedNativeControls": [
     {
-      "location": "src/components/AuthLayout.jsx:197",
+      "location": "src/components/AuthLayout.jsx:204",
       "tag": "button",
       "context": "auth-footer-support"
     },
@@ -386,17 +386,17 @@
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/settings/page.js:531",
+      "location": "src/app/(app)/settings/page.js:532",
       "tag": "div",
       "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     },
     {
-      "location": "src/app/(app)/settings/page.js:551",
+      "location": "src/app/(app)/settings/page.js:552",
       "tag": "div",
       "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
     },
     {
-      "location": "src/app/(app)/settings/page.js:595",
+      "location": "src/app/(app)/settings/page.js:596",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
@@ -436,7 +436,7 @@
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },
     {
-      "location": "src/components/WorkspaceOrganizationRouteGuard.jsx:50",
+      "location": "src/components/WorkspaceOrganizationRouteGuard.jsx:61",
       "tag": "div",
       "className": "w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm"
     }

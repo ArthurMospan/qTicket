@@ -88,6 +88,7 @@ import {
   priorityPresentation,
 } from '@/lib/utils/priorities.mjs';
 import { isSystemTaskTypeId } from '@/lib/utils/taskTypes.mjs';
+import { CLIENT_LOGIN_PROVIDERS } from '@/lib/utils/loginProviders.mjs';
 
 // ── Constants ────────────────────────────────────────────────────────
 const NOOP = () => {};
@@ -2869,12 +2870,21 @@ export default function SettingsPage() {
               in the signed snapshot and comes back on the next sync — so a
               second place to attach or detach a provider is a copy that loses
               the argument. Staff keep the sessions above, which are qTicket's
-              own record of this browser opening this app. */}
+              own record of this browser opening this app.
+
+              And it lists the doors that open. This section is drawn for
+              clients, and it was offering a client OneB — the provider `/login`
+              draws only for staff — beside a GitHub whose button is behind a
+              flag that is off. Two of its three live rows attached a provider
+              that could not then be used to sign in, which is not a setting but
+              an invitation to try and come back with nothing.
+              `CLIENT_LOGIN_PROVIDERS` is the same answer the sign-in screen
+              gives, asked once instead of twice. */}
           {clientViewer && (
           <Card preset="borderless" padding="lg">
             <GroupLabel label="Способи входу" />
             <div className="divide-y divide-canvas">
-              <LoginMethodItem
+              {CLIENT_LOGIN_PROVIDERS.github && <LoginMethodItem
                 icon={<GitHubLogo size={18} />}
                 title="GitHub"
                 detail={hasGithubAuth ? 'Підключено до поточного акаунта' : 'Вхід через GitHub OAuth'}
@@ -2884,7 +2894,7 @@ export default function SettingsPage() {
                 disabled={Boolean(authMethodLoading)}
                 onConnect={handleConnectGitHub}
                 onDisconnect={handleDisconnectGitHub}
-              />
+              />}
               <LoginMethodItem
                 icon={<GoogleLogo size={18} />}
                 title="Google"
@@ -2896,7 +2906,7 @@ export default function SettingsPage() {
                 onConnect={handleConnectGoogle}
                 onDisconnect={handleDisconnectGoogle}
               />
-              <LoginMethodItem
+              {CLIENT_LOGIN_PROVIDERS.oneb && <LoginMethodItem
                 icon={<OneBMark />}
                 title="OneB"
                 detail={hasOneBAuth
@@ -2908,7 +2918,7 @@ export default function SettingsPage() {
                 disabled={Boolean(authMethodLoading)}
                 onConnect={handleConnectOneB}
                 onDisconnect={handleDisconnectOneB}
-              />
+              />}
               <LoginMethodItem
                 icon={<Mail size={18} />}
                 title="Email"

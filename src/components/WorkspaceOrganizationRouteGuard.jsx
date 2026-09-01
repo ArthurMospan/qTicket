@@ -29,13 +29,24 @@ export default function WorkspaceOrganizationRouteGuard({ children }) {
     }
   }, [activeOrgId, requestedOrg, switchOrg]);
 
+  // The address is stamped with the organization it is showing, so a link
+  // copied out of the workspace carries it — and only an organization the
+  // server has confirmed may be written into it.
+  //
+  // Without that condition this stamped whatever `activeOrgId` happened to be,
+  // including the one the cached, not-yet-authoritative directory had chosen,
+  // which may be a workspace this account has no membership in. The server
+  // directory then arrived without it, and the check below found a `?org=`
+  // naming a workspace with no membership and announced that a notification had
+  // led there. Nothing had: it was reading its own handwriting, on an address
+  // somebody had reached by plainly signing in.
   useEffect(() => {
-    if (!requestedOrgId && activeOrgId) {
-      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-      const scoped = withNotificationOrganization(current, activeOrgId);
-      if (scoped && scoped !== current) window.history.replaceState(null, '', scoped);
-    }
-  }, [activeOrgId, requestedOrgId]);
+    if (requestedOrgId || !activeOrgId) return;
+    if (orgLoading || !orgDirectoryVerified) return;
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const scoped = withNotificationOrganization(current, activeOrgId);
+    if (scoped && scoped !== current) window.history.replaceState(null, '', scoped);
+  }, [activeOrgId, requestedOrgId, orgLoading, orgDirectoryVerified]);
 
   if (!requestedOrgId || requestedOrgId === activeOrgId) return children;
   if (requestedOrg) return <LoadingScreen />;
@@ -49,8 +60,13 @@ export default function WorkspaceOrganizationRouteGuard({ children }) {
     <div className="w-full h-full flex items-center justify-center bg-canvas p-6">
       <div data-ui-surface="local" className="w-full max-w-[420px] rounded-[20px] border border-line bg-white p-6 text-center shadow-sm">
         <h1 className="ui-type-section-title text-ink mb-2">Немає доступу до організації</h1>
+        {/* Не «сповіщення»: `?org=` несе так само скопійоване посилання,
+            закладка й запрошення — а найчастіша причина не «вас прибрали», а
+            «ви зайшли іншим акаунтом». Речення називає обидві можливості, бо
+            котра з них правдива, знає тільки читач. */}
         <p className="text-[13px] text-muted mb-5">
-          Сповіщення веде до організації, учасником якої ви більше не є. Через цю помилку нічого не було видалено.
+          Посилання веде до організації, до якої цей акаунт не має доступу. Якщо ви входили іншим способом —
+          Google, GitHub чи OneB — це інший акаунт. Нічого не видалено.
         </p>
         <Button
           onClick={() => router.replace('/')}

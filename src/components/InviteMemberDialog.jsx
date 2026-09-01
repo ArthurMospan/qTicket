@@ -16,8 +16,8 @@ import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { isClientRole } from '@/lib/utils/can';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
+import { GITHUB_LOGIN_ENABLED } from '@/lib/utils/loginProviders.mjs';
 
-const GITHUB_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GITHUB_LOGIN_ENABLED === 'true';
 
 /**
  * The only two invitations qTicket issues, and there is no third.

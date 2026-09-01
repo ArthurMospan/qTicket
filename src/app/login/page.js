@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Headphones } from 'lucide-react';
 import AnimatedLogo from '@/components/AnimatedLogo';
+import { GITHUB_LOGIN_ENABLED } from '@/lib/utils/loginProviders.mjs';
 import AuthLayout from '@/components/AuthLayout';
 import { useAppContext } from '@/lib/context/AppContext';
 import { getSafeAuthRedirect } from '@/lib/utils/authRedirect';
@@ -70,7 +71,6 @@ function getInitialClientLogin() {
   return !(STAFF_LOGIN_ENABLED && mode === 'staff');
 }
 
-const GITHUB_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GITHUB_LOGIN_ENABLED === 'true';
 // Production staff enter through the signed QuickTeam launch. The old native
 // staff form remains opt-in for isolated development and legacy recovery only;
 // a plain /login is always the external client portal.

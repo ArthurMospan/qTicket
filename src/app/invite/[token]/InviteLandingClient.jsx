@@ -10,6 +10,7 @@ import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { organizationPortalBackground } from '@/lib/utils/organizationBranding.mjs';
 import { withNotificationOrganization } from '@/lib/utils/notificationNavigation.mjs';
 import { computeSidebarTheme } from '@/lib/utils/sidebarTheme';
+import { GITHUB_LOGIN_ENABLED } from '@/lib/utils/loginProviders.mjs';
 
 // Whoever opens this link is on their way into their supplier's support portal,
 // and that is what the screen has to look like from the first frame. The token
@@ -24,7 +25,6 @@ import { computeSidebarTheme } from '@/lib/utils/sidebarTheme';
 // How long the «вітаємо» stays on screen before the workspace takes over.
 const HANDOVER_MS = 2000;
 
-const GITHUB_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GITHUB_LOGIN_ENABLED === 'true';
 const INVALID_MESSAGE = 'Посилання недійсне або протерміноване';
 
 // The auth shell's own control, the same white pill `/login` uses. A kit

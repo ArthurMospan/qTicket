@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAppContext } from '@/lib/context/AppContext';
-import { Headphones, X, LogOut } from 'lucide-react';
+import { X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { IconAction, OrganizationMark } from '@/components/ui';
 import SupportDialog from '@/components/SupportDialog';
@@ -99,12 +99,13 @@ export default function AuthLayout({
         {/* Header - Padding matches WorkspaceSidebar: pt-24px, px-20px */}
         <div className="w-full flex items-center justify-between pt-[24px] px-[20px] pb-[16px] shrink-0 relative z-50">
           <div className="flex items-center gap-[12px] min-w-0">
+            {/* Знак орендаря, коли ми знаємо, чий це портал; наш власний,
+                коли ні. Тут стояли навушники в сірому кружечку — гліф, який не
+                належить жодному з двох і не називає нічого: на екрані, що вже
+                написаний словами «Портал підтримки», він каже те саме втретє
+                картинкою. Продукт, який відчиняє ці двері, має свій знак. */}
             {brand ? (
               <OrganizationMark name={brand.name} logo={brand.logo} size="sm" appearance="sidebar" />
-            ) : portalMode ? (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white" aria-hidden>
-                <Headphones size={17} />
-              </div>
             ) : (
               <Image src="/logo-min.svg" alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
             )}
@@ -117,6 +118,12 @@ export default function AuthLayout({
           </div>
 
           <div className="flex items-center gap-6">
+            {/* Чий це софт — тихо, у куті, і тільки там, де великий напис уже
+                зайнятий чимось іншим. На брендованому екрані цього немає:
+                клієнт орендаря бачить орендаря, і більше нікого. */}
+            {portalMode && !brand && (
+              <span className="text-[13px] font-semibold text-white/40">qTicket</span>
+            )}
             {onClose ? (
               <IconAction
                 label="Закрити"
