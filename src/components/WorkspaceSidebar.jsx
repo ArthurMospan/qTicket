@@ -37,11 +37,20 @@ import {
  * that changes the *organization* — on the row that says «qTicket», one line
  * below the organization it changes.
  *
- * The column is 36px and the words sit on the logo's axis rather than on the
- * text box's: for a top row of ink 12 over a bottom row of ink 14,
- * `topRow = 18 + (12 − 14) / 2` gives 17 + 19. Whoever changes a font size here
- * re-measures — the split is derived in `tests/sidebar-brand-lockup.test.mjs`.
- * QuickTeam eyeballed the same pair at 15 + 21; this is the measured one.
+ * The numbers are QuickTeam's, to the pixel, and that is a requirement rather
+ * than a coincidence: one corner in two products cannot be two corners. That
+ * rail derives its split from the ink too — it simply measured this pair
+ * differently, 10 for the leading 12px/500 label and 17 for the 16px/700 name
+ * under it, which gives `labelRow = 18 + (10 − 17) / 2` and a split of
+ * 15 + 21. What stood here was a second measurement of the same two lines, and
+ * two measurements of one pair are not both right; the one tuned against the
+ * rendered rail is the one that stays.
+ *
+ * So the sizes, weights, heights and colours below are copied from
+ * `qt-workspace/src/components/WorkspaceSidebar.jsx` as they are. The one thing
+ * not copied is the switcher's element: there it is a `div role="button"`, here
+ * a real button behind `canSwitch`. That is invisible on screen and held by a
+ * test. `tests/sidebar-brand-lockup.test.mjs` recomputes the split.
  *
  * `canSwitch` is the whole of the switcher's presence. One organization is not
  * a choice, and a control that opens a picker of one is an invitation to find
@@ -57,42 +66,52 @@ function SidebarBrandLockup({
   onSwitch,
   theme,
 }) {
+  const nameStyle = { fontSize: 16, lineHeight: '21px', fontWeight: 700 };
+
   return (
     <>
       <Link href={href} className="hover:opacity-80 transition-opacity">
-        <span className="block h-[17px] truncate text-[12px] font-medium leading-[17px]" style={{ color: theme.muted }}>
+        <h1
+          data-ui-type="branding-title"
+          className="tracking-tight truncate transition-all"
+          style={{
+            color: theme.mutedHeader || theme.muted,
+            fontSize: 12,
+            height: 15,
+            lineHeight: '15px',
+            fontWeight: 500,
+          }}
+        >
           {label}
-        </span>
+        </h1>
       </Link>
-      <h1 data-ui-type="branding-title" className="h-[19px] min-w-0">
-        {canSwitch ? (
-          <button
-            type="button"
-            onClick={onSwitch}
-            aria-label={switchLabel}
-            // The row takes the width it is given and the name is the part that
-            // yields: `w-fit` plus a 120px name, a counter and a chevron adds up
-            // to 156px in a column that is 140px wide, so the row simply hung
-            // over the collapse button the moment a second organization had
-            // anything unread.
-            className="flex w-full min-w-0 items-center gap-[4px] text-left transition-colors"
-            style={{ color: theme.text }}
-          >
-            <span className="truncate text-[16px] font-bold leading-[19px] tracking-tight">{name}</span>
-            {unreadElsewhere > 0 && (
-              <Counter variant="dot" size="sm" appearance="sidebar" />
-            )}
-            <ChevronsUpDown size={12} className="shrink-0" aria-hidden />
-          </button>
-        ) : (
-          <span
-            className="block truncate text-[16px] font-bold leading-[19px] tracking-tight"
-            style={{ color: theme.text }}
-          >
-            {name}
-          </span>
-        )}
-      </h1>
+      {canSwitch ? (
+        <button
+          type="button"
+          onClick={onSwitch}
+          aria-label={switchLabel}
+          // The row takes the width it is given and the name is the part that
+          // yields: `w-fit` plus a 120px name, a counter and a chevron adds up
+          // to 156px in a column that is 140px wide, so the row simply hung
+          // over the collapse button the moment a second organization had
+          // anything unread.
+          className="flex w-full min-w-0 items-center gap-[4px] text-left cursor-pointer transition-colors"
+          style={{ color: theme.text, height: 21 }}
+        >
+          <span className="min-w-0 truncate transition-all" style={nameStyle}>{name}</span>
+          {unreadElsewhere > 0 && (
+            <Counter variant="dot" size="sm" appearance="sidebar" />
+          )}
+          <ChevronsUpDown size={12} className="shrink-0" style={{ color: theme.muted }} aria-hidden />
+        </button>
+      ) : (
+        <span
+          className="flex w-full min-w-0 items-center transition-colors"
+          style={{ color: theme.text, height: 21 }}
+        >
+          <span className="min-w-0 truncate transition-all" style={nameStyle}>{name}</span>
+        </span>
+      )}
     </>
   );
 }

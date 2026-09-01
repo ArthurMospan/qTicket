@@ -14,24 +14,24 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 //
 //   nameRow = H/2 + (nameInk − labelInk) / 2
 //
-// Measured glyph ink (ascent + descent, not the line box, which carries
-// descender space nobody sees) is 14 for the 16px/700 name and 12 for the
-// 12px/500 label. The label leads, so the top row is the 12 and the split is
-// 17 + 19. This test recomputes it, so changing a font size in the lockup fails
-// here instead of drifting quietly.
+// The ink is QuickTeam's measurement of the very same two lines, because this
+// corner and that one have to be one corner: 10 for the 12px/500 label that
+// leads and 17 for the 16px/700 name under it, giving 15 + 21. This file used
+// to carry a different measurement of the same pair — 12 and 14, giving
+// 17 + 19 — and two measurements of one pair are not both right. The one tuned
+// against the rendered rail is the one that stays.
 
 const COLUMN_HEIGHT = 36;
-const INK = { name: 14, label: 12 };
+// `qt-workspace/tests/sidebar-brand-lockup.test.mjs`, INK.branded.
+const INK = { label: 10, name: 17 };
 
-const topRowFor = (top, bottom) =>
-  Math.round(COLUMN_HEIGHT / 2 + (top - bottom) / 2);
+const labelRowFor = ({ label, name }) =>
+  Math.round(COLUMN_HEIGHT / 2 + (label - name) / 2);
 
 test('the brand lockup splits its 36px on the ink, not down the middle', () => {
-  assert.equal(topRowFor(INK.label, INK.name), 17);
-  assert.equal(COLUMN_HEIGHT - topRowFor(INK.label, INK.name), 19);
-  // Flipping the order flips the split with it — the derivation is about which
-  // line leads, not about which words are in it.
-  assert.equal(topRowFor(INK.name, INK.label), 19);
+  assert.equal(labelRowFor(INK), 15);
+  assert.equal(COLUMN_HEIGHT - labelRowFor(INK), 21);
+  assert.equal(labelRowFor(INK) + (COLUMN_HEIGHT - labelRowFor(INK)), COLUMN_HEIGHT);
 });
 
 // There is one lockup, and both readers get it: the small line says what this
@@ -44,15 +44,19 @@ test('the brand lockup splits its 36px on the ink, not down the middle', () => {
 // tenant had no branding, the two swapped when it did.
 test('the sidebar ships one lockup for both readers', async () => {
   const sidebar = await read('src/components/WorkspaceSidebar.jsx');
-  const nameLine = /truncate text-\[16px\] font-bold leading-\[19px\] tracking-tight/g;
-  const labelLine = /className="block h-\[17px\] truncate text-\[12px\] font-medium leading-\[17px\]"/g;
+  // The two rows, spelled the way the QuickTeam rail spells them.
+  const nameLine = /style=\{nameStyle\}/g;
+  const labelLine = /fontSize: 12,[\s\S]{0,60}height: 15,[\s\S]{0,60}lineHeight: '15px',[\s\S]{0,60}fontWeight: 500,/g;
   // Written once, not once per reader: `SidebarBrandLockup` takes the two pairs
   // of words as props, so a client's portal and a staff rail cannot drift apart
   // again the way three separate blocks of markup already had.
   // Two spellings of the name row — one inside the switcher, one without it —
-  // and one label row above them both.
+  // and one label row above them both. Both name rows read one `nameStyle`, so
+  // the switcher and the plain line cannot drift apart.
   assert.equal((sidebar.match(nameLine) || []).length, 2);
   assert.equal((sidebar.match(labelLine) || []).length, 1);
+  assert.match(sidebar, /const nameStyle = \{ fontSize: 16, lineHeight: '21px', fontWeight: 700 \};/);
+  assert.equal((sidebar.match(/style=\{\{ color: theme\.text, height: 21 \}\}/g) || []).length, 2);
   // The label leads: it is the first of the two lines in the lockup's markup.
   const lockup = sidebar.slice(sidebar.indexOf('function SidebarBrandLockup({'));
   assert.ok(lockup.search(labelLine) < lockup.search(nameLine));

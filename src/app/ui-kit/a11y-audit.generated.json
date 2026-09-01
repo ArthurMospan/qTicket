@@ -215,7 +215,7 @@
     },
     {
       "element": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:69",
+      "location": "src/components/WorkspaceSidebar.jsx:89",
       "attributes": [
         "aria-label"
       ]

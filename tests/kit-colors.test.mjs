@@ -145,12 +145,13 @@ test('a counter on a branded rail takes the rail’s own two colours', async () 
   // The client's portal lockup and the staff rail are one control now, written
   // once — the staff row used to be a hand-rolled `div role="button"` with its
   // own classes and its own arithmetic beside the client's real button.
-  const switcherRow = /className="flex w-full min-w-0 items-center gap-\[4px\] text-left transition-colors"/g;
+  const switcherRow = /className="flex w-full min-w-0 items-center gap-\[4px\] text-left cursor-pointer transition-colors"/g;
   assert.equal((sidebar.match(switcherRow) || []).length, 1);
   // The name is the child that truncates; the counter and the chevron hold
   // their size. The row moved from the label line to the organization line when
-  // the lockup was flipped — the arithmetic it protects did not.
-  assert.equal((sidebar.match(/<span className="truncate text-\[16px\] font-bold leading-\[19px\] tracking-tight">/g) || []).length, 1);
-  assert.match(sidebar, /<ChevronsUpDown size=\{12\} className="shrink-0" aria-hidden \/>/);
+  // the lockup took the QuickTeam rail's arrangement — the arithmetic it
+  // protects did not.
+  assert.equal((sidebar.match(/<span className="min-w-0 truncate transition-all" style=\{nameStyle\}>/g) || []).length, 2);
+  assert.match(sidebar, /<ChevronsUpDown size=\{12\} className="shrink-0" style=\{\{ color: theme\.muted \}\} aria-hidden \/>/);
   assert.doesNotMatch(sidebar, /data-ui-pill="branding-counter"/);
 });

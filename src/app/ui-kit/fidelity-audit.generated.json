@@ -224,7 +224,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:392",
+      "location": "src/components/WorkspaceSidebar.jsx:411",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -239,7 +239,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:415",
+      "location": "src/components/WorkspaceSidebar.jsx:434",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -254,7 +254,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:488",
+      "location": "src/components/WorkspaceSidebar.jsx:507",
       "className": "transition-colors",
       "text": "",
       "childElements": [
@@ -269,8 +269,8 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:69",
-      "className": "flex w-full min-w-0 items-center gap-[4px] text-left transition-colors",
+      "location": "src/components/WorkspaceSidebar.jsx:89",
+      "className": "flex w-full min-w-0 items-center gap-[4px] text-left cursor-pointer transition-colors",
       "text": "",
       "childElements": [
         "span",
@@ -350,17 +350,17 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:392",
+      "location": "src/components/WorkspaceSidebar.jsx:411",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:415",
+      "location": "src/components/WorkspaceSidebar.jsx:434",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:488",
+      "location": "src/components/WorkspaceSidebar.jsx:507",
       "tag": "button",
       "context": "branding-action"
     }
