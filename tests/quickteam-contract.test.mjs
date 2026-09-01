@@ -17,7 +17,7 @@ import {
   hasActiveQuickTeamEntitlement,
   quickTeamSnapshotOpensOrganization,
 } from '../src/lib/utils/quickTeamManaged.mjs';
-import { quickTeamSeatChanges } from '../src/lib/utils/orgMembership.mjs';
+import { clientSeatCollisions, quickTeamSeatChanges } from '../src/lib/utils/orgMembership.mjs';
 
 const secret = 'test-shared-secret-with-at-least-32-characters';
 
@@ -185,7 +185,9 @@ test('провіженінг відмовляє першому неактивн�
   // Організація, яка ніколи не купувала qTicket, не має коштувати нікому
   // облікового запису тут. Далі — перед записом самої організації та місць.
   const decision = route.indexOf('quickTeamSnapshotOpensOrganization');
-  const staffResolution = route.indexOf('resolveQuickTeamStaff(payload.staff)');
+  // Виклик більше не однорядковий — знімок фільтрується від зіткнень із
+  // клієнтськими місцями, — але правило те саме: спершу рішення, потім акаунти.
+  const staffResolution = route.indexOf('await resolveQuickTeamStaff(');
   const organizationWrite = route.indexOf('transaction.set(organizationRef');
   const seatWrite = route.indexOf('MEMBERSHIP_COLLECTION).doc(seatId)');
   assert.ok(decision > 0 && staffResolution > 0 && organizationWrite > 0 && seatWrite > 0);
@@ -251,6 +253,58 @@ test('співробітник, знятий у QuickTeam і повернути�
   assert.deepEqual(restore.returning.map(seat => seat.userId), ['agent-uid']);
   assert.deepEqual(restore.returning[0].projectIds, ['client-a', 'client-b']);
   assert.equal(restore.returning[0].seat.positionId, 'support');
+});
+
+test('знімок персоналу не займає місце, на якому вже сидить клієнт', async () => {
+  const memberships = [
+    { userId: 'owner-uid', role: 'owner' },
+    { userId: 'both-uid', role: 'client_admin' },
+    { userId: 'agent-uid', role: 'member' },
+  ];
+
+  // Та сама пошта — один акаунт qTicket, і роль у членстві одна. Тому це не
+  // «дві ролі», а заміна однієї на іншу: адмін дістає кожен проєкт організації,
+  // тобто черги всіх інших клієнтів.
+  const collisions = clientSeatCollisions({
+    candidates: [
+      { sourceUserId: 'qt-1', email: 'owner@example.com', role: 'owner', userId: 'owner-uid' },
+      { sourceUserId: 'qt-2', email: 'both@example.com', role: 'admin', userId: 'both-uid' },
+      { sourceUserId: 'qt-3', email: 'agent@example.com', role: 'member', userId: 'agent-uid' },
+      { sourceUserId: 'qt-4', email: 'new@example.com', role: 'member', userId: '' },
+    ],
+    memberships,
+  });
+  assert.deepEqual(collisions.map(conflict => conflict.sourceUserId), ['qt-2']);
+  assert.equal(collisions[0].currentRole, 'client_admin');
+  assert.equal(collisions[0].requestedRole, 'admin');
+
+  // Ніхто інший не зачеплений: чинний персонал лишається персоналом, а нова
+  // людина без акаунта в qTicket не може зіткнутися ні з чим.
+  assert.deepEqual(
+    clientSeatCollisions({
+      candidates: [{ sourceUserId: 'qt-3', email: 'agent@example.com', role: 'admin', userId: 'agent-uid' }],
+      memberships,
+    }),
+    [],
+  );
+
+  const route = await readFile(
+    new URL('../src/app/api/integrations/quickteam/provision/route.js', import.meta.url),
+    'utf8',
+  );
+  // Перевірка йде до `resolveQuickTeamStaff`, бо той створює і переписує акаунти
+  // Firebase — після нього відмовляти вже нікому не безкоштовно.
+  assert.ok(
+    route.indexOf('clientSeatCollisions({') < route.indexOf('resolveQuickTeamStaff('),
+    'зіткнення шукається після того, як акаунти вже переписані',
+  );
+  // Місце не пишеться навіть у гонці: транзакція перепитує документи, які
+  // збирається перезаписати.
+  assert.match(route, /if \(blockedUserIds\.has\(member\.qTicketUserId\)\) continue;/);
+  // Власник — єдине зіткнення, що відмовляє весь знімок.
+  assert.match(route, /client_seat_conflict/);
+  // І QuickTeam дізнається, чому колега лишився без місця.
+  assert.match(route, /\{ conflicts \}/);
 });
 
 test('provisioning повертає місце тим самим шляхом, що й екран команди', async () => {

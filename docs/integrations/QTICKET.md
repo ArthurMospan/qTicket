@@ -94,6 +94,21 @@ Rules of the snapshot:
 - qTicket maps source ids to opaque stable ids. If the verified email already
   belongs to a qTicket Firebase account, that account is linked instead of
   creating a duplicate identity.
+- That linking stops at a customer. A qTicket membership is one document per
+  person per organization holding one role, so a staff seat written over a
+  `client_admin` or `client_member` does not add a relationship — it replaces
+  one, hands an external person every other customer's queue, and retroactively
+  moves everything they ever wrote from «клієнт написав» to «підтримка
+  відповіла». Such a member is **skipped**: no seat, no identity mapping, no
+  profile rewrite, and no Firebase account touched. The response lists them
+  under `conflicts` (`sourceUserId`, `email`, `requestedRole`, `currentRole`) so
+  QuickTeam can tell the administrator why that colleague has no qTicket seat.
+  The remedy is a different address, or removing the client seat in qTicket
+  first — never a silent conversion. The mirror direction has always been
+  refused: qTicket will not invite an existing staff member as a customer.
+- The `owner` of a snapshot is the one collision that refuses the whole
+  snapshot with `409 client_seat_conflict` and writes nothing, because the
+  organization document names exactly one and half of that state is not a state.
 - Staff absent from a newer complete snapshot lose their membership, receive an
   archived seat and are removed from every qTicket client-project roster. Their
   incidents, comments, audit history and time records are not rewritten.
@@ -119,7 +134,8 @@ Rules of the snapshot:
   may therefore send the whole estate; only its customers land here.
 
 The response contains the stable qTicket `organizationId`, applied `revision`
-and `status: applied | unchanged | skipped`.
+and `status: applied | unchanged | skipped`, plus `conflicts` when the snapshot
+named somebody who already holds a client seat.
 
 ## Staff launch and session separation
 

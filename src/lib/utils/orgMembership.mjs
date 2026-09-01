@@ -13,13 +13,56 @@
 // is never moved or stripped: that is a record of what happened, not a
 // permission, and rewriting it is how a workspace loses its own history.
 
-import { INTERNAL_ROLES } from './can.js';
+import { INTERNAL_ROLES, isClientRole } from './can.js';
 
 export const MEMBERSHIP_COLLECTION = 'orgMemberships';
 export const MEMBERSHIP_ARCHIVE = 'orgMembershipArchive';
 
 export function membershipId(organizationId, userId) {
   return `${organizationId}_${userId}`;
+}
+
+/**
+ * The seats a QuickTeam snapshot must not take, because a customer is sitting
+ * in them.
+ *
+ * A membership is one document per person per organization and it holds one
+ * role, so «staff» and «client» are not two hats somebody can wear at once —
+ * writing one over the other does not add a relationship, it replaces one.
+ * Provisioning resolves QuickTeam staff by verified email, which is exactly how
+ * it reached a client seat: the same address is one qTicket account, and the
+ * snapshot wrote `admin` over `client_admin` without asking.
+ *
+ * That is not a cosmetic collision. An admin reaches every project of the
+ * organization, so it hands an external person every other customer's queue.
+ * It also rewrites the past: who counts as the desk is read from the *current*
+ * role, so every request that person ever wrote in flips from «чекають на вас»
+ * to «чекають на нас» the moment the seat changes hands. And the undo is
+ * destructive — pulling them out of the next snapshot marks the seat departing,
+ * which archives it and clears them from every `project.team` they were on,
+ * client access included.
+ *
+ * So the collision is refused rather than resolved. The invitation route has
+ * always refused the mirror of it — you cannot invite an existing staff member
+ * as a customer — and this is the direction that was left open.
+ *
+ * @param {object} options
+ * @param {Array<{sourceUserId: string, email: string, role: string, userId: string}>}
+ *   options.candidates Incoming staff, each with the qTicket uid this snapshot would land on.
+ * @param {Array<{userId: string, role: string}>} options.memberships The memberships this organization holds now.
+ * @returns {Array<{sourceUserId: string, email: string, requestedRole: string, userId: string, currentRole: string}>}
+ */
+export function clientSeatCollisions({ candidates = [], memberships = [] }) {
+  const roleByUser = new Map(memberships.map(membership => [membership.userId, membership.role]));
+  return candidates
+    .filter(candidate => candidate.userId && isClientRole(roleByUser.get(candidate.userId)))
+    .map(candidate => ({
+      sourceUserId: candidate.sourceUserId,
+      email: candidate.email,
+      requestedRole: candidate.role,
+      userId: candidate.userId,
+      currentRole: roleByUser.get(candidate.userId),
+    }));
 }
 
 /**

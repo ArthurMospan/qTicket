@@ -4,6 +4,7 @@ import { getAdminDb } from '@/lib/server/firebaseAdmin';
 import { routeErrorResponse } from '@/lib/server/apiErrors';
 import {
   normalizeQuickTeamProvision,
+  quickTeamIdentityId,
   quickTeamOrganizationId,
 } from '@/lib/integrations/quickteamContract.mjs';
 import {
@@ -13,13 +14,39 @@ import {
 import { restoreProjectAccess } from '@/lib/server/orgMembership';
 import { quickTeamSnapshotOpensOrganization } from '@/lib/utils/quickTeamManaged.mjs';
 import {
+  clientSeatCollisions,
   MEMBERSHIP_ARCHIVE,
   MEMBERSHIP_COLLECTION,
   membershipId,
   quickTeamSeatChanges,
 } from '@/lib/utils/orgMembership.mjs';
+import { isClientRole } from '@/lib/utils/can';
 
 const MAX_TRANSACTION_WRITES = 450;
+
+// Which qTicket account each incoming staff member would land on, asked without
+// touching one.
+//
+// `resolveQuickTeamStaff` answers the same question by creating and rewriting
+// Firebase Auth accounts, which is too late to refuse anything — see
+// `clientSeatCollisions`. So the seat is checked first, in reads only, along
+// the same two steps that resolution takes: the identity map if this person has
+// been provisioned before, otherwise the verified email. Somebody with neither
+// is new here and can collide with nothing.
+async function resolveExistingSeatCandidates(db, staff) {
+  return Promise.all(staff.map(async member => {
+    const identity = await db.collection('quickTeamIdentities')
+      .doc(quickTeamIdentityId(member.sourceUserId))
+      .get();
+    const mapped = identity.data()?.qTicketUserId || '';
+    if (mapped) return { ...member, userId: mapped };
+    const byEmail = await db.collection('users')
+      .where('email', '==', member.email)
+      .limit(1)
+      .get();
+    return { ...member, userId: byEmail.empty ? '' : byEmail.docs[0].id };
+  }));
+}
 
 export async function POST(request) {
   try {
@@ -58,7 +85,34 @@ export async function POST(request) {
       }, { headers: { 'Cache-Control': 'private, no-store' } });
     }
 
-    const staff = await resolveQuickTeamStaff(payload.staff);
+    // A customer's seat is not free for the desk to take. Read before the
+    // staff are resolved, for the same reason the entitlement is: resolution
+    // rewrites Firebase Auth accounts, and by then the answer would have cost
+    // this person their identity. The transaction asks again below, of the
+    // documents it is about to write.
+    const membershipsBefore = await db.collection(MEMBERSHIP_COLLECTION)
+      .where('orgId', '==', organizationId)
+      .get();
+    const conflicts = clientSeatCollisions({
+      candidates: await resolveExistingSeatCandidates(db, payload.staff),
+      memberships: membershipsBefore.docs.map(document => document.data()),
+    });
+    // Every other conflict costs that one seat. The owner's costs the snapshot:
+    // there is exactly one, the organization document names them, and an
+    // organization whose owner is a customer of itself is not a state to write
+    // half of.
+    if (conflicts.some(conflict => conflict.requestedRole === 'owner')) {
+      return NextResponse.json({
+        organizationId,
+        error: 'Власник у знімку вже є клієнтом цієї організації в qTicket',
+        code: 'client_seat_conflict',
+        conflicts,
+      }, { status: 409, headers: { 'Cache-Control': 'private, no-store' } });
+    }
+    const blockedSourceIds = new Set(conflicts.map(conflict => conflict.sourceUserId));
+    const staff = await resolveQuickTeamStaff(
+      payload.staff.filter(member => !blockedSourceIds.has(member.sourceUserId)),
+    );
     const incomingUserIds = new Set(staff.map(member => member.qTicketUserId));
     const owner = staff.find(member => member.role === 'owner');
 
@@ -96,6 +150,16 @@ export async function POST(request) {
       const membershipRefs = new Map(membershipsSnap.docs.map(
         document => [document.data().userId, document.ref],
       ));
+      // The authority on whose seat this is. The pre-flight above read the same
+      // collection a moment earlier and is only ever allowed to refuse; this
+      // reads the documents the transaction is about to overwrite, so a seat
+      // that became a customer's in between is still not taken.
+      const blockedUserIds = new Set(membershipsSnap.docs
+        .filter(document => isClientRole(document.data().role))
+        .map(document => document.data().userId));
+      if (blockedUserIds.has(owner.qTicketUserId)) {
+        throw Object.assign(new Error('Owner seat belongs to a client'), { code: 'CLIENT_SEAT_CONFLICT' });
+      }
       const changes = quickTeamSeatChanges({
         incomingUserIds: [...incomingUserIds],
         memberships: membershipsSnap.docs.map(document => document.data()),
@@ -149,6 +213,7 @@ export async function POST(request) {
       }, { merge: true });
 
       for (const member of staff) {
+        if (blockedUserIds.has(member.qTicketUserId)) continue;
         const seatId = membershipId(organizationId, member.qTicketUserId);
         transaction.set(member.identityRef, {
           provider: 'quickteam',
@@ -230,8 +295,19 @@ export async function POST(request) {
       organizationId,
       status: result.status,
       revision: result.revision,
+      // Named on every answer, not only the one that skipped them: a snapshot
+      // QuickTeam sends twice is `unchanged` the second time, and the reason a
+      // colleague never got a qTicket seat must not go out with the first
+      // response nobody read.
+      ...(conflicts.length ? { conflicts } : {}),
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
+    if (error?.code === 'CLIENT_SEAT_CONFLICT') {
+      return NextResponse.json({
+        error: 'Власник у знімку вже є клієнтом цієї організації в qTicket',
+        code: 'client_seat_conflict',
+      }, { status: 409 });
+    }
     if (error?.code === 'SNAPSHOT_TOO_LARGE') {
       return NextResponse.json({ error: error.message, code: 'snapshot_too_large' }, { status: 413 });
     }
