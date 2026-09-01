@@ -2,7 +2,7 @@
 // src/lib/context/OrgContext.js
 // Multi-org context: loads ALL organizations the current user belongs to,
 // keeps the active org choice inside this tab, and provides switchOrg().
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   collection, query, where, getDocs, getDocsFromServer,
   doc, onSnapshot,
@@ -31,6 +31,13 @@ const ORG_LOAD_RETRY_LIMIT = 3;
 // How often returning to the tab may re-verify the organization directory.
 // See `refreshOnFocus` below for why this is a repair path and not a refresh.
 const DIRECTORY_RECHECK_MS = 30 * 60 * 1000;
+// Скільки часу відмови вважаються однією подією.
+//
+// Не обмеження частоти: коли доступ до організації зникає, відмовляють усі
+// слухачі одразу, і перевіряти довідник треба один раз на цю пачку. Далі
+// перевірка вільна — цей шлях узагалі відкривається лише на справжній відмові
+// в правах, а вона нечаста.
+const REFUSAL_REVALIDATION_WINDOW_MS = 5 * 1000;
 const OrgContext = createContext(null);
 
 function persistTabOrganization(orgId) {
@@ -66,6 +73,17 @@ export function OrgProvider({ user, children }) {
   // Guards use this bit before turning a missing provisional entry into an
   // access-denied screen.
   const [orgDirectoryVerified, setOrgDirectoryVerified] = useState(false);
+  // Перепитати довідник — з ефекту, який його не будує.
+  //
+  // `refreshOrganizationDirectory` живе в замиканні ефекту нижче, а звертається
+  // до нього слухач активної організації, який стоїть в іншому ефекті. Ref —
+  // єдиний спосіб дати другому доступ до першого, не перебудовуючи підписку на
+  // членства щоразу.
+  const revalidateDirectoryRef = useRef(null);
+  // Відмови приходять пачкою — організація, членство, і все, що на них
+  // зав'язане. Перепитувати довідник треба один раз на пачку, а не на кожен
+  // слухач. Вікно коротке: це не обмеження частоти, а склеювання сплеску.
+  const lastDirectoryRevalidationRef = useRef(0);
 
   // ── Apply an org as active (Internal helper) ─────────────────────────
   const applyOrg = useCallback((orgData, role) => {
@@ -407,7 +425,12 @@ export function OrgProvider({ user, children }) {
     };
     window.addEventListener('focus', refreshOnFocus);
     window.addEventListener('online', refreshOnFocus);
+    revalidateDirectoryRef.current = () => {
+      directoryRetryAttempt = 0;
+      refreshOrganizationDirectory();
+    };
     return () => {
+      revalidateDirectoryRef.current = null;
       cancelled = true;
       if (retryTimer) window.clearTimeout(retryTimer);
       if (directoryRetryTimer) window.clearTimeout(directoryRetryTimer);
@@ -432,6 +455,40 @@ export function OrgProvider({ user, children }) {
   useEffect(() => {
     if (!activeOrgId) return;
 
+    // Відмова тут — це запитання до довідника, а не рядок у консолі.
+    //
+    // Обидва ці слухачі мовчки ковтали `permission-denied` під коментарем
+    // «expected during logout». Під час виходу це справді так. Але той самий
+    // обробник спрацьовує, коли в QuickTeam вимикають доповнення поки вкладка
+    // відкрита: entitlement лежить на документі організації, а не на членстві,
+    // тож жодна підписка на членства не змінюється й ніщо не перезапитує
+    // довідник. Організація лишалась обраною, лишалась у перемикачі, а кожен
+    // екран продовжував питати й отримувати відмову — і показував «Немає
+    // доступу до цих даних. Сесія могла завершитися», тимчасом як сесія була
+    // ціла, а вимкнули доповнення.
+    //
+    // Слухач, який це помічає першим, дивиться саме на той документ, чий
+    // entitlement усе вирішує. Тож він більше не мовчить: він просить
+    // `/api/organizations` перевірити довідник Admin SDK. Відповідь
+    // авторитетна й веде себе сама — `buildOrganizationList` викидає
+    // організацію, яку продукт відмовляється відкривати, і людина опиняється
+    // там, де правда: без цього робочого простору, а не перед карткою про
+    // зіпсовану сесію.
+    //
+    // Якщо ж довідник підтвердить, що простір на місці, нічого не зміниться —
+    // і відмова справді була тим, чим її вважали: миттю під час виходу.
+    const handleActiveOrganizationRefusal = (scope, err) => {
+      if (organizationLoadErrorKind(err) !== 'permission-denied') {
+        console.warn(`${scope} error:`, err.message);
+        return;
+      }
+      console.warn(`${scope} refused; re-verifying the directory:`, err.message);
+      const now = Date.now();
+      if (now - lastDirectoryRevalidationRef.current < REFUSAL_REVALIDATION_WINDOW_MS) return;
+      lastDirectoryRevalidationRef.current = now;
+      revalidateDirectoryRef.current?.();
+    };
+
     // Sync organization data
     const unsubOrg = onSnapshot(doc(db, 'organizations', activeOrgId), (snap) => {
       if (snap.exists()) {
@@ -450,7 +507,7 @@ export function OrgProvider({ user, children }) {
         });
       }
     }, (err) => {
-      console.warn('[OrgContext] org sync permission error (expected during logout):', err.message);
+      handleActiveOrganizationRefusal('[OrgContext] org sync', err);
     });
 
     // Sync role from orgMemberships
@@ -461,7 +518,7 @@ export function OrgProvider({ user, children }) {
         if (snap.exists()) setOrgRole(snap.data().role);
         else if (!snap.metadata.fromCache) setOrgRole(null);
       }, (err) => {
-        console.warn('[OrgContext] membership sync permission error (expected during logout):', err.message);
+        handleActiveOrganizationRefusal('[OrgContext] membership sync', err);
       });
     }
 

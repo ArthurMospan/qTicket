@@ -94,3 +94,45 @@ test('копія відмови лишається однією на всі ек
   const screens = await readdir(new URL('../src/app/(app)', import.meta.url), { withFileTypes: true });
   assert.ok(screens.length > 0);
 });
+
+// Друга половина тієї самої причини: entitlement, знятий поки вкладка відкрита.
+//
+// `organizationEntitlementActive` можна не пройти двома способами. Перший —
+// організація ще не підтверджена; його тримає шлюз вище. Другий — entitlement
+// справді `inactive`: у QuickTeam вимкнули доповнення, поки людина сиділа в
+// qTicket. Довідник у цей момент уже підтверджений, тож шлюз пропускає, і все
+// правильно: простір БУВ робочим, коли його перевіряли.
+//
+// Помітити зміну може лише той слухач, що дивиться на документ організації —
+// той самий, чий entitlement усе вирішує. Він обидва рази ковтав відмову під
+// коментарем «expected during logout», і це правда рівно під час виходу.
+// Entitlement лежить на організації, а не на членстві, тож жодна підписка на
+// членства не змінюється й ніщо не перезапитує довідник: організація лишалась
+// обраною, і людина читала «Сесія могла завершитися» про цілу сесію.
+test('відмова активної організації перепитує довідник, а не пишеться в консоль', async () => {
+  const context = await read('../src/lib/context/OrgContext.js');
+
+  // Один обробник, і його викликають обидва слухачі активної організації.
+  assert.match(context, /const handleActiveOrganizationRefusal = \(scope, err\) =>/);
+  assert.equal(
+    (context.match(/handleActiveOrganizationRefusal\(/g) || []).length,
+    2,
+    'обробник має викликатись обома слухачами — організації та членства',
+  );
+
+  // Старе мовчання не повертається.
+  assert.doesNotMatch(
+    context,
+    /console\.warn\('\[OrgContext\] (org|membership) sync permission error/,
+    'відмова активної організації більше не є рядком у консолі й нічим більше',
+  );
+
+  // Відмова в правах веде до авторитетної перевірки, а не до здогадки.
+  assert.match(context, /organizationLoadErrorKind\(err\) !== 'permission-denied'/);
+  assert.match(context, /revalidateDirectoryRef\.current\?\.\(\)/);
+  assert.match(
+    context,
+    /REFUSAL_REVALIDATION_WINDOW_MS/,
+    'пачка одночасних відмов має перепитувати довідник один раз',
+  );
+});
