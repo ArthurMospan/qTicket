@@ -22,14 +22,18 @@ import {
   UserAvatar,
 } from '@/components/ui';
 import {
+  AlarmClock,
   CircleCheck,
   CircleDotDashed,
+  Columns3,
+  Flag,
   Inbox,
   Kanban,
   MessageCircleReply,
   List,
   Plus,
   Settings2,
+  Shapes,
   UserPlus,
   UsersRound,
 } from 'lucide-react';
@@ -47,11 +51,18 @@ import { canWhileRoleLoads, can, isClientRole } from '@/lib/utils/can';
 import { isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
+import { issuePath, taskDisplayKey } from '@/lib/utils/issueKeys.mjs';
 import { activeMembers, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { plural } from '@/lib/utils/plural.mjs';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
-import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
+import {
+  assigneeIdsOf,
+  categorizeIssues,
+  incidentQueueMetrics,
+  waitingOnClientIssues,
+  waitingOnUsIssues,
+} from '@/lib/utils/incidentQueueMetrics.mjs';
 import { summarizeCycleTimes } from '@/lib/utils/velocityMetrics.mjs';
 import { reliableCompletedAtMillis } from '@/lib/utils/completionDates.mjs';
 import { workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
@@ -87,6 +98,25 @@ const PROJECT_TABS = [
 function periodCutoff(period) {
   const days = period === '7days' ? 7 : period === '30days' ? 30 : 0;
   return days ? Date.now() - days * 24 * 60 * 60 * 1000 : 0;
+}
+
+// Відколи звернення чекає на відповідь: остання репліка в розмові, а якщо її
+// ще не було — коли його завели. Сортування списку читає тільки цю мітку.
+function waitingSinceMillis(issue) {
+  return timestampMillis(issue?.lastCommentAt)
+    || timestampMillis(issue?.updatedAt)
+    || timestampMillis(issue?.createdAt)
+    || 0;
+}
+
+// Скільки воно вже чекає, словами. Годинник читається тут, у модульній функції,
+// з тієї ж причини, що й у `periodCutoff` вище.
+function waitingLabel(issue) {
+  const since = waitingSinceMillis(issue);
+  if (!since) return 'щойно';
+  const days = Math.max(0, Math.floor((Date.now() - since) / (24 * 60 * 60 * 1000)));
+  if (days === 0) return 'сьогодні';
+  return `${days} ${plural(days, ['день', 'дні', 'днів'])}`;
 }
 
 const SCOPE_OPTIONS = [
@@ -315,14 +345,56 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         }))
         .filter(item => item.value > 0);
     };
+    // Хто що несе. Одне звернення на двох рахується обом — питання тут
+    // «скільки на людині», а не «як поділити сотню»; `DistributionBar` міряє
+    // від найбільшого стовпчика, а не від суми, тож нічого не обіцяє про неї.
+    const openByAssignee = new Map();
+    let unassigned = 0;
+    for (const entry of categorizedIssues) {
+      if (entry.category === 'done') continue;
+      const assignees = assigneeIdsOf(entry.issue);
+      if (assignees.length === 0) {
+        unassigned += 1;
+        continue;
+      }
+      for (const userId of assignees) {
+        openByAssignee.set(userId, (openByAssignee.get(userId) || 0) + 1);
+      }
+    }
+    const byAssignee = supportMembers
+      .map(member => {
+        const userId = member.id || member.uid;
+        return {
+          id: userId,
+          label: member.name || member.displayName || member.email || 'Учасник',
+          value: openByAssignee.get(userId) || 0,
+        };
+      })
+      .filter(row => row.value > 0)
+      .sort((left, right) => right.value - left.value);
+    if (unassigned > 0) byAssignee.push({ id: 'unassigned', label: 'Не призначені', value: unassigned });
+
+    // Найдавніші зверху: список і плитка «Чекають на нас» — та сама функція, тож
+    // число над ним і рядки в ньому не можуть розійтися.
+    const oldestFirst = list => [...list].sort(
+      (left, right) => waitingSinceMillis(left) - waitingSinceMillis(right),
+    );
+
     return {
       metrics,
       cycle,
       byStatus: bucketise(statuses || [], issue => issue.columnId || issue.status),
       byType: bucketise(types || [], issue => issue.type),
       byPriority: bucketise(priorities || [], issue => issue.priority || NO_PRIORITY_ID),
+      byAssignee,
+      waitingOnUs: oldestFirst(waitingOnUsIssues(categorizedIssues, supportUserIds)),
+      waitingOnClient: oldestFirst(waitingOnClientIssues(categorizedIssues, supportUserIds)),
     };
-  }, [categorizedIssues, issues, priorities, statuses, supportUserIds, types]);
+  }, [categorizedIssues, issues, priorities, statuses, supportMembers, supportUserIds, types]);
+
+  // Чиє зараз слово, з боку того, хто дивиться. Клієнтові ніколи не показують
+  // чергу підтримки, а підтримці — те, що клієнт ще не прочитав.
+  const attentionIssues = clientViewer ? analytics.waitingOnClient : analytics.waitingOnUs;
 
   const actor = useMemo(() => ({
     userId: currentUser?.uid || currentUser?.id,
@@ -701,54 +773,129 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
               )}
 
               {activeTab === 'analytics' && (
-                <div className="flex flex-col gap-[20px]">
-                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    <KpiCard icon={Inbox} value={analytics.metrics.open} label="Відкриті" sub="ще в роботі" />
-                    <KpiCard icon={CircleCheck} value={analytics.metrics.resolved} label="Вирішені" sub="за весь час" />
-                    {/* The mirror of the overview's pair, read from whichever
-                        side of the desk is looking. A customer is never told
-                        what the desk owes *other* customers, and never told
-                        which agent owes it. */}
-                    <KpiCard
-                      icon={MessageCircleReply}
-                      value={clientViewer ? analytics.metrics.waitingOnClient : analytics.metrics.waitingOnUs}
-                      label={clientViewer ? 'Чекають на вас' : 'Чекають на нас'}
-                      sub={clientViewer ? 'підтримка відповіла останньою' : 'клієнт написав останнім'}
-                    />
-                    {/* Measured, never promised. This is how long requests have
-                        actually taken; it is not a target, and qTicket has no
-                        SLA to compare it against — the owner rejected those
-                        outright, and a median that quietly becomes a promise is
-                        how one grows back. `sampleSize` is on the card because
-                        a median of two requests is not a fact about a desk. */}
-                    <KpiCard
-                      icon={CircleDotDashed}
-                      value={analytics.cycle.medianDays === null ? '—' : `${analytics.cycle.medianDays} д`}
-                      label="Медіанний час до вирішення"
-                      sub={analytics.cycle.sampleSize
-                        ? `за ${analytics.cycle.sampleSize} ${plural(analytics.cycle.sampleSize, ['зверненням', 'зверненнями', 'зверненнями'])}`
-                        : 'ще нема вирішених'}
-                    />
-                  </div>
+                /* Сіра панель-підложка, на ній білі картки — той самий шар, що
+                   й «Аналітика» проєкту в QuickTeam, бо це те саме питання про
+                   те саме. Доти екран був рядом плиток і трьома сірими слабами
+                   просто на білому: жодної межі між «показники» і «розрізи», і
+                   жодного місця, у яке можна натиснути — цифра називала
+                   проблему й не вела до неї. */
+                <Surface preset="panel" padding="md">
+                  <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                      <KpiCard icon={Inbox} value={analytics.metrics.open} label="Відкриті" sub="ще в роботі" />
+                      <KpiCard icon={CircleCheck} value={analytics.metrics.resolved} label="Вирішені" sub="за весь час" />
+                      {/* The mirror of the overview's pair, read from whichever
+                          side of the desk is looking. A customer is never told
+                          what the desk owes *other* customers, and never told
+                          which agent owes it. */}
+                      <KpiCard
+                        icon={MessageCircleReply}
+                        value={clientViewer ? analytics.metrics.waitingOnClient : analytics.metrics.waitingOnUs}
+                        label={clientViewer ? 'Чекають на вас' : 'Чекають на нас'}
+                        sub={clientViewer ? 'підтримка відповіла останньою' : 'клієнт написав останнім'}
+                      />
+                      {/* Measured, never promised. This is how long requests have
+                          actually taken; it is not a target, and qTicket has no
+                          SLA to compare it against — the owner rejected those
+                          outright, and a median that quietly becomes a promise is
+                          how one grows back. `sampleSize` is on the card because
+                          a median of two requests is not a fact about a desk. */}
+                      <KpiCard
+                        icon={CircleDotDashed}
+                        value={analytics.cycle.medianDays === null ? '—' : `${analytics.cycle.medianDays} д`}
+                        label="Медіанний час до вирішення"
+                        sub={analytics.cycle.sampleSize
+                          ? `за ${analytics.cycle.sampleSize} ${plural(analytics.cycle.sampleSize, ['зверненням', 'зверненнями', 'зверненнями'])}`
+                          : 'ще нема вирішених'}
+                      />
+                    </div>
 
-                  <div className="grid items-start gap-[20px] xl:grid-cols-3">
-                    <Surface preset="panel" padding="md">
-                      <DetailSection density="panel" title="За статусом" description="Де зараз стоять звернення цього проєкту.">
-                        <DistributionBar items={analytics.byStatus} emptyLabel="Звернень ще немає" />
-                      </DetailSection>
-                    </Surface>
-                    <Surface preset="panel" padding="md">
-                      <DetailSection density="panel" title="За типом" description="Про що звертаються найчастіше.">
-                        <DistributionBar items={analytics.byType} emptyLabel="Звернень ще немає" />
-                      </DetailSection>
-                    </Surface>
-                    <Surface preset="panel" padding="md">
-                      <DetailSection density="panel" title="За пріоритетом" description="Наскільки терміновими їх позначили.">
-                        <DistributionBar items={analytics.byPriority} emptyLabel="Звернень ще немає" />
+                    {/* Підписи під заголовками пішли: «За статусом» над стовпчиками
+                        зі статусами не потребує речення, яке каже те саме вдруге, а
+                        три таких речення забирали рядок висоти в кожної картки. */}
+                    <div className="grid items-start gap-4 xl:grid-cols-3">
+                      <Surface preset="nested-card" padding="md">
+                        <DetailSection icon={Columns3} title="За статусом">
+                          <DistributionBar items={analytics.byStatus} emptyLabel="Звернень ще немає" />
+                        </DetailSection>
+                      </Surface>
+                      <Surface preset="nested-card" padding="md">
+                        <DetailSection icon={Shapes} title="За типом">
+                          <DistributionBar items={analytics.byType} emptyLabel="Звернень ще немає" />
+                        </DetailSection>
+                      </Surface>
+                      <Surface preset="nested-card" padding="md">
+                        <DetailSection icon={Flag} title="За пріоритетом">
+                          <DistributionBar items={analytics.byPriority} emptyLabel="Звернень ще немає" />
+                        </DetailSection>
+                      </Surface>
+                    </div>
+
+                    {/* Хто скільки несе — факт про те, як влаштована черга, тож
+                        його не показують клієнтові: скільки звернень на людині,
+                        яка йому відповідає, не його питання і не його справа. */}
+                    {!clientViewer && (
+                      <Surface preset="nested-card" padding="md">
+                        <DetailSection icon={UsersRound} title="Відкриті по менеджерах">
+                          <DistributionBar items={analytics.byAssignee} emptyLabel="Відкритих звернень немає" />
+                        </DetailSection>
+                      </Surface>
+                    )}
+
+                    {/* Єдиний блок екрана, у який можна натиснути, і єдиний, що
+                        називає роботу поіменно. Решта тут — числа про минуле;
+                        це — черга, яка стоїть просто зараз, найдавніше зверху. */}
+                    <Surface preset="nested-card" padding="md">
+                      <DetailSection
+                        icon={AlarmClock}
+                        title={clientViewer ? 'Чекають на вашу відповідь' : 'Чекають на відповідь підтримки'}
+                        count={attentionIssues.length}
+                        description={clientViewer
+                          ? 'Підтримка відповіла останньою — далі слово за вами.'
+                          : 'Клієнт написав останнім, і відповіді ще не було.'}
+                      >
+                        {attentionIssues.length === 0 ? (
+                          <EmptyState
+                            icon={CircleCheck}
+                            title="Нічого не чекає"
+                            description={clientViewer
+                              ? 'Ви відповіли на всі звернення.'
+                              : 'На кожне звернення цього клієнта вже відповіли.'}
+                            density="compact"
+                            surface="card"
+                          />
+                        ) : (
+                          <>
+                            <Card preset="borderless" padding="none" className="overflow-hidden divide-y divide-line">
+                              {attentionIssues.slice(0, 5).map(issue => (
+                                <ListRow
+                                  key={issue.id}
+                                  density="roomy"
+                                  onClick={() => router.push(issuePath(issue, project))}
+                                  className="flex items-center gap-3"
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-[13px] font-bold text-ink">{issue.title}</p>
+                                    <p className="mt-1 truncate text-[11px] text-muted">{taskDisplayKey(issue, project)}</p>
+                                  </div>
+                                  {/* Без порогів і без кольору: «три дні» — це
+                                      факт, а «три дні — це погано» була б SLA,
+                                      якої в продукті немає. */}
+                                  <span className="shrink-0 text-[12px] text-muted">{waitingLabel(issue)}</span>
+                                </ListRow>
+                              ))}
+                            </Card>
+                            {attentionIssues.length > 5 && (
+                              <p className="text-[12px] text-muted">
+                                І ще {attentionIssues.length - 5} — уся черга на вкладці «Звернення».
+                              </p>
+                            )}
+                          </>
+                        )}
                       </DetailSection>
                     </Surface>
                   </div>
-                </div>
+                </Surface>
               )}
 
               {activeTab === 'people' && (
