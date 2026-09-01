@@ -8,6 +8,21 @@ import Pill from '@/components/ui/DataDisplay/Pill';
 // ─── UI Kit: Activity Row ────────────────────────────────────────────────────
 // One line of «що сталося»: who, what, to which request, when.
 //
+// It is a white row on a grey panel, with `TaskRow`'s edge and `TaskRow`'s
+// hover ring — because it is read in a list exactly the way a task list is
+// read, and it was drawn as neither. It had no ground of its own, so a feed of
+// them was one grey field with sentences in it: nothing said where a row ended
+// and the next began, and the two lines of a single event were as far apart as
+// two different events. Its hover was `bg-canvas`, which is the colour of the
+// panel it sits on — the same mistake `ListRow` carried, and here it meant the
+// row under the pointer did not light up, it vanished into the panel.
+//
+// The contrast went the same way. The sentence was `muted` on grey and the
+// message under it `faint` — 1.7:1, the least legible thing in the product, on
+// the one line a customer actually came to read. Both sit on `ink-soft` now;
+// the two proper nouns of the sentence — who acted and which request — keep
+// full `ink`, which is the only weight that has to carry down a column.
+//
 // Not `TaskRow` with different content. A task row is about a record — its
 // status, its priority, its people — and is read down a column by comparing
 // those. This is about an *event*, read newest-first, and the request it
@@ -51,7 +66,10 @@ export default function ActivityRow({
     <button
       type="button"
       onClick={onClick}
-      className={`group flex w-full items-start gap-3 rounded-[12px] px-3 py-2.5 text-left transition-colors hover:bg-canvas ${className}`}
+      // The same edge and the same hover as a task row: white ground, hairline
+      // border, and a ring rather than a fill under the pointer. One list
+      // shape for one product.
+      className={`group flex w-full items-start gap-3 rounded-[12px] border border-line bg-white p-[12px] text-left transition-all duration-200 hover:!ring-4 hover:!ring-line ${className}`}
     >
       <span className="mt-[1px] flex h-7 w-7 shrink-0 items-center justify-center">
         {actor ? (
@@ -73,7 +91,7 @@ export default function ActivityRow({
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-[13px] leading-[18px] text-muted">
+        <span className="block text-[13px] leading-[18px] text-ink-soft">
           {actorName && <strong className="font-semibold text-ink">{actorName} </strong>}
           {text}
           {issueKey && (
@@ -82,15 +100,17 @@ export default function ActivityRow({
               <span className="font-semibold text-ink">{issueKey}</span>
             </>
           )}
-          {title && <span className="text-muted"> · {title}</span>}
+          {title && <span> · {title}</span>}
         </span>
         {detail && (
-          <span className="mt-0.5 block truncate text-[12px] leading-[16px] text-faint">{detail}</span>
+          <span className="mt-1 block truncate text-[12px] leading-[16px] text-ink-soft">{detail}</span>
         )}
       </span>
 
+      {/* `surface` was a white chip on a grey row. The row is white now, so
+          the chip takes the grey — same shape, inverted ground. */}
       {time && (
-        <Pill tone="surface" size="sm" weight="medium" className="mt-[1px] shrink-0">
+        <Pill tone="neutral" size="sm" weight="medium" className="mt-[1px] shrink-0">
           {time}
         </Pill>
       )}

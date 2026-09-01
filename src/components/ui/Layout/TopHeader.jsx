@@ -103,7 +103,11 @@ export default function TopHeader({
           searchLocalResultCount={searchLocalResultCount}
           searchOutsideResultCount={searchOutsideResultCount}
           searchOutsideLoading={searchOutsideLoading}
-          searchPlaceholder={`Пошук звернень проєкту "${projectName}"...`}
+          // Not the project's name. This field opens *over* the trail that
+          // just named it, in 200px of text room — a placeholder carrying
+          // «Пошук звернень проєкту "Назва клієнта"...» was cut around the
+          // opening quote on every project whose name ran past a word.
+          searchPlaceholder="Пошук звернень проєкту..."
         />
       );
     }

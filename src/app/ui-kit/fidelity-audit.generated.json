@@ -431,7 +431,7 @@
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:505",
+      "location": "src/components/WorkspaceHeader.jsx:513",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

@@ -318,7 +318,7 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-2">
                     {activityFeed.map(entry => (
                       <ActivityRow
                         key={entry.id}
@@ -413,7 +413,7 @@ export default function OverviewPage() {
                      activity: a drag renumbers every card in the column it
                      lands in. The feed reads `lastActivity*`, which the writers
                      set on purpose. */
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-2">
                     {activityFeed.map(entry => (
                       <ActivityRow
                         key={entry.id}

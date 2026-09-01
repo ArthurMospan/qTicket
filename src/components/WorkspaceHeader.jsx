@@ -130,13 +130,21 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
     return { mode: 'breadcrumbs', project };
   }
 
+  // A placeholder has a width, and it is about thirty characters.
+  //
+  // `HeaderSearch` is 320px wide at most and spends 24 of them on the icon and
+  // 76 on the ⌘K hint, so the text has 220px — some thirty characters at 13px.
+  // Every line here was written as a sentence and cut mid-word by the input:
+  // «Пошук звернень, проєктів і кома…» named three things and finished none of
+  // them, which is worse than naming two. So they name what fits, and the
+  // palette — which the field escalates into — is where the third is searched.
   if (pathname === '/') {
     return {
       mode: 'search',
       project: null,
       placeholder: isClientRole(orgRole)
-        ? 'Пошук за номером або темою звернення...'
-        : 'Пошук звернень, проєктів і команди...',
+        ? 'Пошук за номером або темою...'
+        : 'Пошук звернень і проєктів...',
     };
   }
   // «Огляд» serves both audiences now, so its placeholder has to as well. It
@@ -148,8 +156,8 @@ function useHeaderMode(pathname, projects, breadcrumbs = [], orgRole = '') {
       mode: 'search',
       project: null,
       placeholder: isClientRole(orgRole)
-        ? 'Пошук за номером або темою звернення...'
-        : 'Пошук звернень, проєктів і команди...',
+        ? 'Пошук за номером або темою...'
+        : 'Пошук звернень і проєктів...',
     };
   }
   if (pathname.startsWith('/clients')) {
