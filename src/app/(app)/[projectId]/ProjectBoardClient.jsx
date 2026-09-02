@@ -463,15 +463,18 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     router.push('/clients');
   }, [router, showToast]);
 
-  // «Команда клієнта» opens a person where they can actually be found. The rows
-  // used to go to `/team?member=…`, and `/team` is the support roster — it
-  // filters every client role out — so the id it was asked for was never in the
-  // list and the screen selected whoever happened to be first instead. The
+  // A person, opened where they can actually be found. The rows of «Команда
+  // клієнта» used to go to `/team?member=…`, and `/team` is the support roster —
+  // it filters every client role out — so the id it was asked for was never in
+  // the list and the screen selected whoever happened to be first instead. The
   // profile overlay the layout already mounts answers for any member of the
   // organization, which is what `HoverCard` uses everywhere else. Widening the
   // roster to hold customers was the other way to make that link true, and that
   // is a boundary, not a bug.
-  const openClientProfile = useCallback(memberId => {
+  //
+  // It is also what a customer uses for a support face, for the same reason:
+  // they have no roster screen to be sent to.
+  const openProfileOverlay = useCallback(memberId => {
     const params = new URLSearchParams(window.location.search);
     params.set('member', memberId);
     router.push(`${window.location.pathname}?${params.toString()}`);
@@ -950,7 +953,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       emptyDescription={clientViewer
                         ? 'Запросити колегу можна в розділі «Співробітники».'
                         : 'Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників.'}
-                      onOpen={openClientProfile}
+                      onOpen={openProfileOverlay}
                     />
                     </DetailSection>
                   </Surface>
@@ -969,11 +972,28 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       emptyDescription={clientViewer
                         ? 'Щойно за вашим проєктом закріплять працівників, вони зʼявляться тут.'
                         : 'Додайте внутрішніх працівників у налаштуваннях проєкту.'}
-                      // Names, not doors, for a customer: `/team` is the staff
-                      // roster and the profile behind it lists the other
-                      // customers that person works with.
+                      // A door for both, and two different doors.
+                      //
+                      // A customer used to get names only, on the reasoning that
+                      // the profile behind a support face lists the other
+                      // customers that person works with. It does not: every
+                      // list on that profile — the projects, the open
+                      // requests — is built from `projects` in the app context,
+                      // and a client's copy of that holds their own spaces and
+                      // nothing else. So the page a customer would have reached
+                      // says who this person is, which of *their* projects they
+                      // are on and what they have open *there*, which is
+                      // precisely what somebody clicks a support face to find
+                      // out. A name that cannot be clicked in a product where
+                      // every other name can is read as a broken link.
+                      //
+                      // Support keeps `/team`, the roster screen, because they
+                      // came from a list and a list is what they go back to; a
+                      // customer has no staff roster, so theirs is the overlay
+                      // the layout already mounts — the same one their own
+                      // employees open from «Команда клієнта».
                       onOpen={clientViewer
-                        ? undefined
+                        ? openProfileOverlay
                         : memberId => router.push(`/team?member=${encodeURIComponent(memberId)}`)}
                     />
                     </DetailSection>

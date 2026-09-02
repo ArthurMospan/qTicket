@@ -296,11 +296,18 @@ test('a member profile offers qTicket actions only', async () => {
   assert.doesNotMatch(profile, /Написати повідомлення/);
   assert.doesNotMatch(profile, /Написати повідомлення/);
   assert.doesNotMatch(profile, /Екстрений виклик|Створити подію|\/calendar\?new=1/);
-  // Nothing here administers the seat: no menu, and no link into a settings
-  // section that can only list who QuickTeam sent.
+  // Nothing here administers the seat: no role menu, and no link into a
+  // settings section that can only list who QuickTeam sent.
   assert.doesNotMatch(profile, /Керування доступом/);
   assert.doesNotMatch(profile, /section=team&user=/);
-  assert.doesNotMatch(profile, /<ContextMenu/);
+  assert.doesNotMatch(profile, /setMemberRole|deactivateMember|manage:member_roles/);
+  // The one menu that is here does not touch the seat: it puts this person on
+  // another project, from the row of projects it adds to. Which projects are on
+  // it is a permission question and is answered by the matrix, not by the
+  // component.
+  assert.match(profile, /Додати до проєкту/);
+  assert.match(profile, /can\(orgRole, 'manage:team'\)/);
+  assert.match(profile, /can\(orgRole, 'invite:client_member'\)/);
 
   // And nothing is left on the queue to receive such a request: the composer
   // there is gone, and with it the `assignee` the circle used to carry.

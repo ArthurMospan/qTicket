@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigateAfterOverlayClose } from '@/lib/hooks/useOverlayHistory';
-import { Mail, Phone, Send, X } from 'lucide-react';
+import { Folder, Mail, Phone, Plus, Send, X } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
-import { Button, Pill, Tabs, EmptyState } from '@/components/ui';
+import { Button, ContextMenu, Pill, Tabs, EmptyState } from '@/components/ui';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
@@ -11,9 +11,11 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useAllMyTasks } from '@/lib/hooks/useAllMyTasks';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { useOrganization } from '@/lib/hooks/useOrganization';
+import { updateProjectSettings } from '@/lib/services/projects';
+import { userFacingErrorMessage } from '@/lib/utils/errors';
 import { isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
 import { isActiveMember, organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
-import { isClientRole } from '@/lib/utils/can';
+import { can, isClientRole } from '@/lib/utils/can';
 
 // A support profile answers three questions and no others: who this is, which
 // clients they are on, and what they have open. The task manager this product
@@ -24,14 +26,16 @@ import { isClientRole } from '@/lib/utils/can';
 export default function ProfileView({ user, onClose }) {
   const router = useRouter();
   const openIssueQuickView = useWorkspaceStore(state => state.openIssueQuickView);
+  const showToast = useWorkspaceStore(state => state.showToast);
   const { currentUser, projects, orgRole } = useAppContext();
   const {
     tasks,
     allIssues,
   } = useAllMyTasks(user?.id || user?.uid);
   const { positions = [], closedStatusIds } = useWorkflowConfig();
-  const { members: orgMembers } = useOrganization();
+  const { members: orgMembers, inviteMember } = useOrganization();
   const [activeTab, setActiveTab] = useState('profile');
+  const [addingProjectId, setAddingProjectId] = useState('');
 
   if (!user) return null;
 
@@ -86,6 +90,68 @@ export default function ProfileView({ user, onClose }) {
   // a member holds only the projects they are on — making the list they see the
   // intersection of the two, and «спільні» the only honest word for it.
   const projectListIsComplete = isAdminOrOwner || isMe;
+
+  // ── «+» beside the projects ────────────────────────────────────────────────
+  //
+  // The list answered where somebody is and offered no way to put them
+  // anywhere: adding a colleague to a project meant opening that project's
+  // settings and finding them in a picker, and adding one of your own
+  // employees to a second space meant inviting them again by email — to an
+  // address you already have on the screen in front of you. The capsule that
+  // says «Додати» sits in the row of capsules it adds to, and the menu behind
+  // it lists exactly the projects this reader may put this person into.
+  //
+  // Two readers, two mechanisms, and the difference is whose roster it is. An
+  // owner or an admin edits the project's own team, sent with the baseline it
+  // was read against so a concurrent change is not overwritten — the same call
+  // «Налаштування проєкту» makes. A client administrator has no such right and
+  // does not need one: an invitation naming somebody who already holds a seat
+  // adds the project and never touches their role, which is precisely «додати
+  // до ще одного проєкту» said in the one verb the rules allow them.
+  //
+  // Nobody adds anybody across the desk. Support manages client access in the
+  // project's «Учасники» tab, where a customer's seat is a different question
+  // from a colleague's, so this control never crosses that line in either
+  // direction.
+  const viewerId = currentUser?.id || currentUser?.uid;
+  const canEditProjectTeam = can(orgRole, 'manage:team') && !viewedIsClient;
+  const canAddToOwnSpaces = orgRole === 'client_admin'
+    && can(orgRole, 'invite:client_member')
+    && viewedIsClient
+    && Boolean(user.email);
+  // Not memoised, and deliberately: every hook in this component runs above the
+  // `if (!user) return null` guard, so a `useMemo` down here would be a hook
+  // behind a condition. It is a filter over the projects already in memory.
+  const addableProjects = isMe || (!canEditProjectTeam && !canAddToOwnSpaces)
+    ? []
+    : (projects || [])
+      .filter(project => project.status !== 'archived' && !isOnProjectTeam(project, uid))
+      // A client administrator may only name a project they are on themselves;
+      // the invitation route refuses anything else, so offering it would be
+      // offering a refusal.
+      .filter(project => canEditProjectTeam || isOnProjectTeam(project, viewerId))
+      .sort((left, right) => String(left.name || '').localeCompare(String(right.name || ''), 'uk'));
+
+  const addToProject = async project => {
+    if (addingProjectId) return;
+    setAddingProjectId(project.id);
+    try {
+      if (canEditProjectTeam) {
+        const team = Array.isArray(project.team) ? project.team : [];
+        await updateProjectSettings(project.id, {
+          team: [...new Set([...team, uid])],
+          teamBaseline: team,
+        });
+      } else {
+        await inviteMember(user.email, viewerId, viewedRole || 'client_member', [project.id]);
+      }
+      showToast(`Додано до проєкту «${project.name}»`, 'success');
+    } catch (error) {
+      showToast(userFacingErrorMessage(error, 'Не вдалося додати до проєкту'), 'error');
+    } finally {
+      setAddingProjectId('');
+    }
+  };
 
   // A profile is a place you look somebody up from. Opening one of their tasks
   // used to close the profile and land you on a task page — two navigations to
@@ -236,7 +302,7 @@ export default function ProfileView({ user, onClose }) {
               <h3 className="ui-type-column-title text-muted uppercase tracking-wider">
                 {projectListIsComplete ? 'Проєкти' : 'Спільні проєкти'}
               </h3>
-              {memberProjects.length === 0 ? (
+              {memberProjects.length === 0 && addableProjects.length === 0 ? (
                 <p className="text-[14px] text-faint italic">
                   {projectListIsComplete
                     ? 'Не закріплений за жодним проєктом.'
@@ -251,7 +317,7 @@ export default function ProfileView({ user, onClose }) {
                 // so its geometry is written once; the button around it adds the
                 // one thing a Pill has no business knowing, that this one opens
                 // something.
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {memberProjects.map(project => (
                     <button
                       key={project.id}
@@ -266,6 +332,36 @@ export default function ProfileView({ user, onClose }) {
                       </Pill>
                     </button>
                   ))}
+                  {/* The last capsule in the row is the one that adds another.
+                      It wears the same chip the projects wear, because it lands
+                      in the same list — a button of a different shape parked
+                      beside them would read as a control over the section
+                      rather than as the next item in it. */}
+                  {addableProjects.length > 0 && (
+                    <ContextMenu
+                      align="start"
+                      dropdownClassName="w-[240px]"
+                      trigger={(
+                        <button
+                          type="button"
+                          title="Додати до проєкту"
+                          aria-label="Додати до проєкту"
+                          disabled={Boolean(addingProjectId)}
+                          className="ui-native-control"
+                          data-ui-control="profile-project-chip"
+                        >
+                          <Pill appearance="outline" tone="surface-ink" size="lg" weight="medium" icon={Plus}>
+                            Додати
+                          </Pill>
+                        </button>
+                      )}
+                      items={addableProjects.map(project => ({
+                        label: project.name || project.id,
+                        icon: Folder,
+                        onClick: () => addToProject(project),
+                      }))}
+                    />
+                  )}
                 </div>
               )}
               {/* Two footnotes stood here and neither one was read. «Має
