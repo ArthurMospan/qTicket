@@ -141,6 +141,9 @@ export default function IncidentQueuePage() {
   // The same gate, asked once of a selection: a bulk status change was the way
   // around it.
   const [pendingBulk, setPendingBulk] = useState(null);
+  // And which exact status a bulk move into a category means — see
+  // `handleBulkUpdate`.
+  const [pendingBulkStatus, setPendingBulkStatus] = useState(null);
   const [assigningBeforeMove, setAssigningBeforeMove] = useState(false);
   // This board's columns are the five shared status categories, so what a person
   // folds away here is a category too. Kept under its own key: the old value held
@@ -277,6 +280,35 @@ export default function IncidentQueuePage() {
   };
 
   const handleBulkUpdate = async (action, value, selectedIssues) => {
+    // Which exact status, when there is one to choose.
+    //
+    // This board's columns are categories, because it spans every project a
+    // person is on and no two of them are guaranteed to share a status. For one
+    // card that ambiguity is already resolved by asking; for a selection it was
+    // resolved silently, per request, by `resolveCategoryStatusId` — so a bulk
+    // move into «Прийнято» landed six requests on whichever status of that
+    // category came first, and nobody was asked which.
+    //
+    // The question is only askable when there is a single answer to give: every
+    // request in one project, and that project offering more than one status in
+    // the category. A selection spanning two projects has no shared status to
+    // pick, so it keeps the per-project resolution — which is not a fallback,
+    // it is the only thing that can be true.
+    if (action === 'status' && value?.mode === 'category') {
+      const projectIds = [...new Set(selectedIssues.map(issue => issue.projectId).filter(Boolean))];
+      const project = projectIds.length === 1
+        ? (projects || []).find(item => item.id === projectIds[0])
+        : null;
+      const candidates = project
+        ? availableStatusesInCategory(value.id, statuses, {
+          hiddenStatusIds: Array.isArray(project.hiddenColumns) ? project.hiddenColumns : [],
+        })
+        : [];
+      if (candidates.length > 1) {
+        setPendingBulkStatus({ action, value, selectedIssues, project, candidates });
+        return;
+      }
+    }
     if (action === 'status' && value?.id) {
       const needing = issuesNeedingAssigneeForMove({
         issues: selectedIssues,
@@ -290,6 +322,20 @@ export default function IncidentQueuePage() {
       }
     }
     await applyBulkAction(action, value, selectedIssues);
+  };
+
+  // Answered, and then re-asked as a status: the assignee gate below still
+  // applies, and the two questions arrive in the order the single drag asks
+  // them — where it is going, then who is taking it.
+  const selectPendingBulkStatus = async statusId => {
+    const pending = pendingBulkStatus;
+    if (!pending) return;
+    setPendingBulkStatus(null);
+    await handleBulkUpdate(
+      pending.action,
+      { mode: 'status', id: statusId },
+      pending.selectedIssues,
+    );
   };
 
   const confirmPendingBulk = async assigneeIds => {
@@ -591,6 +637,26 @@ export default function IncidentQueuePage() {
           </div>
         </Dialog>
       )}
+
+      {/* The same dialog, asked of a selection. Its columns and its choice are
+          identical; the card under the chosen one stands for the selection
+          rather than being all of it, which is why the title counts. */}
+      {pendingBulkStatus ? (
+        <StatusTransitionPicker
+          isOpen
+          issue={pendingBulkStatus.selectedIssues[0]}
+          project={pendingBulkStatus.project}
+          statuses={pendingBulkStatus.candidates}
+          categoryLabel={statusCategoryLabel(pendingBulkStatus.value.id)}
+          count={pendingBulkStatus.selectedIssues.length}
+          issues={allIssues}
+          issueLinks={issueLinks}
+          members={members}
+          labels={labels}
+          onSelect={selectPendingBulkStatus}
+          onClose={() => setPendingBulkStatus(null)}
+        />
+      ) : null}
 
       {pendingStatusMove ? (
         <StatusTransitionPicker

@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
 import IssueCard from '@/components/workspace/IssueCard';
+import { plural } from '@/lib/utils/plural.mjs';
 
 /**
  * Chooses the exact project status after a card was dropped on a shared
@@ -17,6 +18,10 @@ import IssueCard from '@/components/workspace/IssueCard';
  * @param {object} props.project Project that owns the task and its statuses.
  * @param {object[]} props.statuses Exact status columns available at the destination.
  * @param {string} props.categoryLabel Shared category selected on the personal board.
+ * @param {number} props.count How many requests are being moved. More than one
+ *   is a bulk change: the columns and the choice are identical, and the card
+ *   below the chosen one stands for the selection rather than being all of it,
+ *   so the title says the number instead of a key.
  * @param {object[]} props.issues Tasks available for parent/child context on the card.
  * @param {object[]} props.issueLinks Links used to show whether the task is blocked.
  * @param {object[]} props.members Organization members shown on the task card.
@@ -31,6 +36,7 @@ export default function StatusTransitionPicker({
   project,
   statuses = [],
   categoryLabel = '',
+  count = 1,
   issues = [],
   issueLinks = [],
   members = [],
@@ -65,7 +71,9 @@ export default function StatusTransitionPicker({
       onClose={busy ? undefined : onClose}
       presentation="dialog"
       titleContext="dialog"
-      title={`Куди перемістити ${issueKey}?`}
+      title={count > 1
+        ? `Куди перемістити ${count} ${plural(count, ['звернення', 'звернення', 'звернень'])}?`
+        : `Куди перемістити ${issueKey}?`}
       description={`У категорії «${categoryLabel}» кілька статусів — оберіть потрібний.`}
       size="lg"
       bodyPadding="flush"

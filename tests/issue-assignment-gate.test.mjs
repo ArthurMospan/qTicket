@@ -200,3 +200,28 @@ test('the dialog offers people who can actually open the request', async () => {
   // rule, shared — see `assignableMembersFor`.
   assert.match(queue, /assignableMembersFor\(\{/);
 });
+
+// A bulk move into a category resolved the exact status silently, per request,
+// while the identical drag of one card stopped and asked which.
+test('a bulk move into a category asks which status, when there is one to ask about', async () => {
+  const queue = await read('../src/app/(app)/my/page.js');
+
+  // Only askable when there is a single answer to give: every request in one
+  // project, and that project offering more than one status in the category.
+  assert.match(queue, /if \(action === 'status' && value\?\.mode === 'category'\) \{/);
+  assert.match(queue, /const projectIds = \[\.\.\.new Set\(selectedIssues\.map\(issue => issue\.projectId\)/);
+  assert.match(queue, /projectIds\.length === 1/);
+  assert.match(queue, /if \(candidates\.length > 1\) \{\s*setPendingBulkStatus\(/);
+
+  // Answered, then re-asked as a status — so the assignee gate still applies,
+  // and the two questions arrive in the order a single drag asks them.
+  assert.match(
+    queue,
+    /await handleBulkUpdate\(\s*pending\.action,\s*\{ mode: 'status', id: statusId \},/,
+  );
+  // The dialog counts rather than naming one request's key.
+  assert.match(queue, /count=\{pendingBulkStatus\.selectedIssues\.length\}/);
+
+  const picker = await read('../src/components/ui/TaskManagement/StatusTransitionPicker.jsx');
+  assert.match(picker, /count > 1/);
+});
