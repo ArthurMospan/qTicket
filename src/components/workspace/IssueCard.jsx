@@ -8,6 +8,7 @@ import { Lock } from 'lucide-react';
 import { CalendarIcon, TaskIcon } from '@/lib/design/icons';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { isDueDateOverdue, parseDueDate } from '@/lib/utils/date';
+import { isClientRole } from '@/lib/utils/can';
 import { organizationTimeZone } from '@/lib/utils/timeZone.mjs';
 import Tag from '@/components/ui/DataDisplay/Tag';
 import { useLocalization } from '@/lib/hooks/useLocalization';
@@ -65,7 +66,7 @@ function hexToRgba(hex, alpha) {
 // back for them, reading the other field. See `issueDisplayParticipants`.
 export default function IssueCard({ issue, issues = [], allIssues, issueLinks = [], members = [], labels = [], index, projectId, projectName, showProjectName = false, showStatusName = false, showAssignee = true, assigneeSource = 'support', isArchived, interactive = true, selected = false, selectionActive = false, onSelect, className = '', cardRef, virtualStyle, dragProvided, dragSnapshot }) {
   const router   = useRouter();
-  const { currentUser, projects = [], activeOrg } = useAppContext();
+  const { currentUser, projects = [], activeOrg, orgRole } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
   const project = projects.find(candidate => candidate.id === projectId);
   const currentUserId = currentUser?.uid || currentUser?.id;
@@ -106,8 +107,17 @@ export default function IssueCard({ issue, issues = [], allIssues, issueLinks = 
     })
     .filter(Boolean);
 
-  const due       = parseDueDate(issue.dueDate, { timeZone });
-  const isOverdue = isDueDateOverdue(issue.dueDate, { timeZone })
+  // The resolution date is the desk's own planning, and the customer is not
+  // shown it: a date they can read is a promised resolution time, and qTicket
+  // promises none. ROADMAP has said so since 2026-08-31 and this card said it
+  // to nobody — the chip was drawn for every reader, so the one fact the
+  // product withholds was on every card the customer opened. A rule the code
+  // contradicts is worse than either answer; this is the code catching up,
+  // because the owner chose to keep the rule.
+  const showDueDate = !isClientRole(orgRole);
+  const due       = showDueDate ? parseDueDate(issue.dueDate, { timeZone }) : null;
+  const isOverdue = showDueDate
+    && isDueDateOverdue(issue.dueDate, { timeZone })
     && !closedStatusIds.includes(issue.columnId || issue.status);
 
   const contextIssues = allIssues || issues;

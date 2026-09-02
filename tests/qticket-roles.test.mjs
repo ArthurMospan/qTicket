@@ -681,3 +681,36 @@ test('клієнтська сесія не може відкрити внутр�
   assert.match(layout, /router\.replace\(`\/\?org=\$\{encodeURIComponent\(activeOrgId\)\}`\)/);
   assert.match(layout, /if \(clientRouteDenied\) \{[\s\S]{0,360}Повертаємо до порталу підтримки/);
 });
+
+// The one fact qTicket withholds from a customer, and it was withheld nowhere.
+//
+// ROADMAP has said since 2026-08-31 that the resolution date is not shown to
+// the client — a date they can read is a promised resolution time, and this
+// product promises none. The composer obeyed it. The card, the list row and the
+// request's own attribute strip drew it for every reader, so the date was on
+// every surface the customer opens; the rule existed only in prose. It was
+// found by the owner on 2026-09-02, after the history had been taught to
+// withhold it — which had made the product inconsistent in the other direction:
+// visible everywhere, and silent about changing.
+test('термін вирішення прихований від клієнта на кожній поверхні, а не лише в документації', async () => {
+  const [card, row, detail, composer] = await Promise.all([
+    read('../src/components/workspace/IssueCard.jsx'),
+    read('../src/components/ui/TaskManagement/TaskRow.jsx'),
+    read('../src/components/workspace/IssueDetail.jsx'),
+    read('../src/components/CreateTaskModal.jsx'),
+  ]);
+
+  // The chip and the cell are computed, not merely hidden by CSS: an overdue
+  // date must not colour a row it is not drawn on.
+  for (const source of [card, row]) {
+    assert.match(source, /const showDueDate = !isClientRole\(orgRole\);/);
+    assert.match(source, /showDueDate \? parseDueDate\(/);
+    assert.match(source, /const isOverdue = showDueDate\s*&& isDueDateOverdue\(/);
+  }
+  // Both halves of the attribute strip — the wide row and the «Деталі» popover
+  // that carries the cells which do not fit.
+  assert.match(detail, /max-lg:hidden \$\{attributeItemClass\} \$\{internalViewer \? '' : 'hidden'\}/);
+  assert.match(detail, /flex-col gap-1\.5 \$\{internalViewer \? 'flex' : 'hidden'\}/);
+  // And the composer, which had it right all along.
+  assert.match(composer, /\{!clientMode && \(\s*<div[\s\S]{0,120}Термін вирішення/);
+});

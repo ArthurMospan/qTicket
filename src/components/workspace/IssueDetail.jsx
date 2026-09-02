@@ -1898,8 +1898,11 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     />
                   </div>
 
-                  {/* Due date */}
-                  <div className={`max-lg:hidden ${attributeItemClass}`}>
+                  {/* Due date. Support's own planning: a date the customer can
+                      read is a promised resolution time, and qTicket promises
+                      none. The cell was drawn for both readers, so the one fact
+                      the product withholds sat in the customer's own strip. */}
+                  <div className={`max-lg:hidden ${attributeItemClass} ${internalViewer ? '' : 'hidden'}`}>
                     <span className={attributeLabelClass}>Термін вирішення</span>
                     <DatePicker
                       compact
@@ -1953,7 +1956,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     )}
                   >
                       <div className="flex w-[248px] max-w-full flex-col gap-4">
-                        <div className="flex flex-col gap-1.5">
+                        <div className={`flex-col gap-1.5 ${internalViewer ? 'flex' : 'hidden'}`}>
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
                           <DatePicker
                             compact

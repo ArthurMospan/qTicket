@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import { isDueDateOverdue, parseDueDate } from '@/lib/utils/date';
+import { isClientRole } from '@/lib/utils/can';
 import { organizationTimeZone } from '@/lib/utils/timeZone.mjs';
 import { useAppContext } from '@/lib/context/AppContext';
 import TypeBadge from '@/components/ui/DataDisplay/TypeBadge';
@@ -70,7 +71,7 @@ export default function TaskRow({
   onSelect,
 }) {
   const router = useRouter();
-  const { currentUser, projects = [], activeOrg } = useAppContext();
+  const { currentUser, projects = [], activeOrg, orgRole } = useAppContext();
   const timeZone = organizationTimeZone(activeOrg);
   const project = projects.find(candidate => candidate.id === projectId);
   const currentUserId = currentUser?.uid || currentUser?.id;
@@ -125,8 +126,17 @@ export default function TaskRow({
     .map(uid => members.find(m => (m.id || m.uid) === uid))
     .filter(Boolean);
 
-  const due = parseDueDate(task.dueDate, { timeZone });
-  const isOverdue = isDueDateOverdue(task.dueDate, { timeZone })
+  // The resolution date is the desk's own planning, and the customer is not
+  // shown it: a date they can read is a promised resolution time, and qTicket
+  // promises none. ROADMAP has said so since 2026-08-31 and this row said it
+  // to nobody — the chip was drawn for every reader, so the one fact the
+  // product withholds was on every row the customer read. A rule the code
+  // contradicts is worse than either answer; this is the code catching up,
+  // because the owner chose to keep the rule.
+  const showDueDate = !isClientRole(orgRole);
+  const due = showDueDate ? parseDueDate(task.dueDate, { timeZone }) : null;
+  const isOverdue = showDueDate
+    && isDueDateOverdue(task.dueDate, { timeZone })
     && !closedStatusIds.includes(task.columnId)
     && !closedStatusIds.includes(task.status);
 
