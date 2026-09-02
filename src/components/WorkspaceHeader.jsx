@@ -26,7 +26,12 @@ import { Counter, Dialog, Pill, TextAction } from '@/components/ui';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useRouter, usePathname } from 'next/navigation';
 import { groupNotifications } from '@/lib/utils/notificationGrouping.mjs';
-import { notificationDestinationWithOrganization, notificationOpenLabel } from '@/lib/utils/notificationNavigation.mjs';
+import {
+  notificationDestination,
+  notificationDestinationWithOrganization,
+  notificationOpenLabel,
+  notificationRow,
+} from '@/lib/utils/notificationNavigation.mjs';
 import { incidentTerms } from '@/lib/content/incidentTerms.mjs';
 import { GLOBAL_NOTIFICATION_Z_INDEX } from '@/lib/utils/overlayLayers.mjs';
 import { useFloatingOverlay } from '@/lib/hooks/useFloatingOverlay';
@@ -292,8 +297,18 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
 
   // A row can stand for several records. Opening it answers all of them: they
   // are the same conversation, and the reader is now in it.
-  const handleNotifClick = (row) => {
-    const n = row.notification;
+  //
+  // Two callers, two shapes, and for one of them this used to be a crash. The
+  // bell passes a grouped row — `{ notification, items }`; the live card in the
+  // corner passes the notification itself, and reading `.notification` off it
+  // gave `undefined`, so the very next line threw on `.organizationId` and the
+  // click did nothing at all. A card that arrives to say «somebody wrote to
+  // you» and cannot be opened is the one thing it must not be. One record is a
+  // row of one.
+  const handleNotifClick = (target) => {
+    const row = notificationRow(target);
+    const n = row?.notification;
+    if (!n) return;
     if (n.organizationId && !allOrgs.some(org => org.id === n.organizationId)) {
       showToast('Ви більше не маєте доступу до організації цього сповіщення', 'error');
       return;
@@ -591,7 +606,12 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
               time={timeAgo(card.createdAt)}
               tone={card.type === 'emergency' ? 'emergency' : 'default'}
               openLabel={notificationOpenLabel(card, { record: notificationRecord })}
-              onOpen={card.link ? () => handleNotifClick(card) : undefined}
+              // Asked of the same function the bell asks. `card.link` is only
+              // one of the three ways a notification names a destination — the
+              // other two are derived from `projectId`/`issueId` — so every
+              // card whose sender did not store an explicit link was drawn as a
+              // card you cannot click, and most of them do not store one.
+              onOpen={notificationDestination(card) ? () => handleNotifClick(card) : undefined}
               onDismiss={() => dismissLiveNotif(card.id)}
               style={{ animation: 'slideUpIn 0.3s cubic-bezier(0.16,1,0.3,1)' }}
             />

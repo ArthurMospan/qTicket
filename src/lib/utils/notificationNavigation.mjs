@@ -99,3 +99,28 @@ export function notificationDestinationWithOrganization(notification) {
     notification?.organizationId,
   );
 }
+
+/**
+ * The bell groups records into rows; the live card in the corner is one record
+ * on its own. Both are opened by the same handler, and it used to read
+ * `.notification` off whatever it was given — so the card, which *is* the
+ * notification, produced `undefined` and the next line threw. Clicking a live
+ * notification did nothing at all, in this product and in QuickTeam.
+ *
+ * One record is a row of one. Written here, beside the destination it will be
+ * asked for next, so both shapes are answered in one place rather than in a
+ * component nobody can call from a test.
+ *
+ * @param {object} target A grouped row (`{ notification, items }`) or a bare notification.
+ * @returns {{notification: object, items: object[]}|null} The row form, or null for nothing openable.
+ */
+export function notificationRow(target) {
+  if (!target || typeof target !== 'object') return null;
+  if (target.notification && typeof target.notification === 'object') {
+    return {
+      notification: target.notification,
+      items: Array.isArray(target.items) ? target.items : [target.notification],
+    };
+  }
+  return { notification: target, items: [target] };
+}

@@ -6,6 +6,7 @@ import {
   notificationOpenLabel,
   notificationDestinationWithOrganization,
   normalizeNotificationLink,
+  notificationRow,
   withNotificationOrganization,
 } from '../src/lib/utils/notificationNavigation.mjs';
 
@@ -182,4 +183,52 @@ test('an incident marks its own bell records read while it is open', async () =>
   assert.match(timeline, /notification\.type === 'commented'\s*\|\| notification\.type === 'mentioned'/);
   // Nothing is read in a tab nobody is looking at.
   assert.match(timeline, /if \(!isActive \|\| !tabVisible\) return;\s*dismissIssueNotifications\(\);/);
+});
+
+// The card in the corner said somebody had written to you, and clicking it did
+// nothing whatsoever — the handler behind it read `.notification` off a record
+// that *was* the notification, and threw on the next line.
+test('one notification opens the same way as a grouped row of them', () => {
+  const record = {
+    id: 'n-1',
+    type: 'commented',
+    organizationId: 'org-1',
+    projectId: 'project-1',
+    issueId: 'ENG-12',
+    read: false,
+  };
+
+  // The live card hands over the record itself. It is a row of one, and the
+  // record inside it is the record — not `undefined`.
+  const single = notificationRow(record);
+  assert.equal(single.notification, record);
+  assert.deepEqual(single.items, [record]);
+
+  // The bell hands over a group, and nothing about that changes.
+  const second = { ...record, id: 'n-2' };
+  const grouped = notificationRow({ id: 'row-1', notification: record, items: [record, second] });
+  assert.equal(grouped.notification, record);
+  assert.deepEqual(grouped.items, [record, second]);
+
+  // Both forms lead to the same place, which is the point of opening either.
+  assert.equal(
+    notificationDestinationWithOrganization(single.notification),
+    notificationDestinationWithOrganization(grouped.notification),
+  );
+  assert.equal(notificationRow(null), null);
+  assert.equal(notificationRow('n-1'), null);
+});
+
+// The second half of the same failure: even once the click worked, the card was
+// only *drawn* as a control when the sender had stored an explicit `link`.
+test('a live card is a control whenever the notification names a destination', () => {
+  // No `link` at all — the destination is derived from the two ids, exactly as
+  // the bell has always derived it.
+  assert.equal(
+    notificationDestination({ projectId: 'project-1', issueId: 'ENG-12' }),
+    '/project-1/issue/ENG-12',
+  );
+  assert.equal(notificationDestination({ projectId: 'project-1' }), '/project-1');
+  // And nothing to open stays nothing to open, so the card is not a control.
+  assert.equal(notificationDestination({ type: 'alert' }), '');
 });
