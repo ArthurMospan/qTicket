@@ -1,40 +1,39 @@
 'use client';
 
-// Кеш брендингу сайдбару в localStorage. Документ організації їде з Firestore
-// асинхронно, тому без кешу після перезавантаження сайдбар секунду світить
-// стандартною темною темою і лише потім перемальовується в брендовану. Кеш
-// віддає останній відомий брендинг одразу; щойно приходять живі дані — вони
-// стають джерелом правди і оновлюють кеш.
+// Кеш одного бренду, який носять обидва читачі — рейка підтримки й клієнтський
+// портал — у localStorage. Документ організації їде з Firestore асинхронно,
+// тому без кешу після перезавантаження рейка секунду світить стандартною
+// темною темою і лише потім перемальовується в колір організації. Кеш віддає
+// останній відомий бренд одразу; щойно приходять живі дані — вони стають
+// джерелом правди й оновлюють кеш.
 import { useEffect, useState } from 'react';
 import { SIDEBAR_THEME_VERSION } from '@/lib/utils/sidebarTheme';
 import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
 const cacheKey = orgId => `qt_sidebar_brand_${orgId}`;
 
-// One tenant, one brand.
+// One tenant, one brand, one reader.
 //
 // This used to read the organization's own `customBranding`/`logo`/
 // `sidebarTheme`/`sidebarColor` — the fields the inherited task manager wrote
-// when somebody set a colour inside it. The client portal, meanwhile, reads
+// when somebody set a colour inside it — while the client portal read
 // `portalBranding`, the snapshot QuickTeam signs and sends. Two fields, one
 // company: the same organization was white in QuickTeam and purple in
 // qTicket's staff rail, and nothing on either screen said which was wrong.
 //
 // QuickTeam owns the brand. `resolveOrganizationPortalBrand` is that single
 // answer — it prefers the synced snapshot and falls back to the organization's
-// own fields for a tenant that predates the sync — and both surfaces read it.
-// The `customBranding` gate is gone with it: it was a paid plan's switch, and
-// qTicket has no plans to switch.
+// own fields for a tenant that predates the sync — and every surface reads it:
+// the staff rail, the client portal, the phone's sheet, the picker, the tab.
+// It answers for a tenant without a logo too. This returned `null` for one,
+// so a tenant with a colour and no logo got the default dark rail on the staff
+// side while the client got the colour — the last place the two readers were
+// still two. The `customBranding` gate went the same way: it was a paid plan's
+// switch, and qTicket has no plans to switch.
 function normalizeBrand(org) {
   if (!org) return null;
-  const brand = resolveOrganizationPortalBrand(org);
-  if (!brand.logo) return null;
-  return {
-    customBranding: true,
-    logo: brand.logo,
-    sidebarTheme: brand.sidebarTheme,
-    sidebarColor: brand.sidebarColor || null,
-  };
+  const { name, logo, sidebarTheme, sidebarColor } = resolveOrganizationPortalBrand(org);
+  return { name, logo, sidebarTheme, sidebarColor };
 }
 
 export function useCachedOrgBranding(activeOrgId, activeOrg) {
@@ -55,7 +54,8 @@ export function useCachedOrgBranding(activeOrgId, activeOrg) {
     });
   }, [activeOrgId]);
 
-  // Живі дані оновлюють кеш (у т.ч. коли брендинг вимкнули — пишемо null).
+  // Живі дані оновлюють кеш: наступне перезавантаження стартує з того бренду,
+  // який QuickTeam надіслав останнім.
   useEffect(() => {
     if (!activeOrgId || !activeOrg) return;
     try {

@@ -18,10 +18,13 @@ import {
 import { TaskIcon } from '@/lib/design/icons';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { useWorkspaceHelp } from '@/components/WorkspaceHelpMenu';
-import { computeSidebarTheme, computeTranslucentSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
+import { computeSidebarTheme, computeTranslucentSidebarTheme } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
 import { useModalFocus } from '@/lib/hooks/useModalFocus';
-import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
+import {
+  organizationPortalBackground,
+  resolveOrganizationPortalBrand,
+} from '@/lib/utils/organizationBranding.mjs';
 
 // The bar is glass: the organization's colour at this much opacity over a blur
 // of whatever is scrolling underneath. It is a request rather than a setting —
@@ -121,40 +124,21 @@ export default function MobileNav({ keyboardOpen = false }) {
     0,
   );
 
-  // Close the sheet on navigation
-  const sidebarPreview = useWorkspaceStore(s => s.sidebarPreview);
+  // One brand for the sheet and the bar, read the way the desktop rail reads
+  // it: the brand QuickTeam sends, or its cached copy for the second before the
+  // organization document arrives. No `clientViewer` in it — the corner of the
+  // sheet named the organization to staff and the desk to a customer, so the
+  // owner who set a desk name in QuickTeam saw it on the customer's phone only.
   const portalBrand = useMemo(
     () => resolveOrganizationPortalBrand(activeOrg),
     [activeOrg],
   );
-  // Кеш брендингу — без мигання стандартної теми, поки org завантажується.
   const orgBrand = useCachedOrgBranding(activeOrgId, activeOrg);
-  const isBranded = sidebarPreview
-    ? Boolean(sidebarPreview.customBranding && sidebarPreview.logo)
-    : Boolean(orgBrand?.customBranding && orgBrand?.logo);
-
-  const theme = useMemo(() => {
-    if (clientViewer) {
-      const bgColor = portalBrand.sidebarTheme === 'light' ? SIDEBAR_PRESETS.light
-        : portalBrand.sidebarTheme === 'custom'
-          ? (portalBrand.sidebarColor || SIDEBAR_PRESETS.dark)
-          : SIDEBAR_PRESETS.dark;
-      return computeSidebarTheme(bgColor);
-    }
-
-    const source = sidebarPreview || (isBranded ? {
-      theme: orgBrand?.sidebarTheme || 'dark',
-      color: orgBrand?.sidebarColor || SIDEBAR_PRESETS.dark,
-    } : null);
-
-    if (!source) return computeSidebarTheme(SIDEBAR_PRESETS.dark);
-
-    const bgColor = source.theme === 'light' ? SIDEBAR_PRESETS.light
-      : source.theme === 'custom' ? (source.color || SIDEBAR_PRESETS.dark)
-      : SIDEBAR_PRESETS.dark;
-
-    return computeSidebarTheme(bgColor);
-  }, [clientViewer, isBranded, orgBrand?.sidebarTheme, orgBrand?.sidebarColor, portalBrand, sidebarPreview]);
+  const { sidebarTheme, sidebarColor } = orgBrand || portalBrand;
+  const theme = useMemo(
+    () => computeSidebarTheme(organizationPortalBackground({ sidebarTheme, sidebarColor })),
+    [sidebarTheme, sidebarColor],
+  );
 
   // The sheet is opaque and wears `theme`; the bar is glass and wears this.
   // Same organization colour, tokens derived from what it looks like through
@@ -167,6 +151,7 @@ export default function MobileNav({ keyboardOpen = false }) {
   // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня.
   useSidebarThemeBoot(theme, Boolean(activeOrg), activeOrgId);
 
+  // Close the sheet on navigation.
   useEffect(() => { queueMicrotask(() => setMoreOpen(false)); }, [pathname]);
 
 
@@ -292,8 +277,8 @@ export default function MobileNav({ keyboardOpen = false }) {
               <div className="flex items-center justify-between px-[20px] pb-[8px]">
                 <div className="flex min-w-0 items-center gap-[10px] text-[var(--sb-text)]">
                   <OrganizationMark
-                    name={clientViewer ? portalBrand.name : (activeOrg?.name || 'qTicket')}
-                    logo={clientViewer ? portalBrand.logo : (activeOrg?.logo || activeOrg?.logoUrl || '')}
+                    name={portalBrand.name}
+                    logo={portalBrand.logo}
                     size="sm"
                     appearance="sidebar"
                   />
@@ -304,7 +289,7 @@ export default function MobileNav({ keyboardOpen = false }) {
                       className="flex min-w-0 items-center gap-[6px] text-left"
                     >
                       <span className="truncate text-[15px] font-bold">
-                        {clientViewer ? portalBrand.name : (activeOrg?.name || 'qTicket')}
+                        {portalBrand.name}
                       </span>
                       {otherOrgUnreadCount > 0 && (
                         <Counter variant="dot" size="sm" appearance="sidebar" />
@@ -313,7 +298,7 @@ export default function MobileNav({ keyboardOpen = false }) {
                     </button>
                   ) : (
                     <span className="truncate text-[15px] font-bold">
-                      {clientViewer ? portalBrand.name : (activeOrg?.name || 'qTicket')}
+                      {portalBrand.name}
                     </span>
                   )}
                 </div>

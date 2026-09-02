@@ -95,7 +95,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:236",
+      "location": "src/components/MobileNav.jsx:221",
       "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
       "text": "",
       "childElements": [
@@ -111,7 +111,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:301",
+      "location": "src/components/MobileNav.jsx:286",
       "className": "flex min-w-0 items-center gap-[6px] text-left",
       "text": "",
       "childElements": [
@@ -127,7 +127,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:389",
+      "location": "src/components/MobileNav.jsx:374",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -241,7 +241,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:424",
+      "location": "src/components/WorkspaceSidebar.jsx:401",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -256,7 +256,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:447",
+      "location": "src/components/WorkspaceSidebar.jsx:424",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -271,7 +271,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:90",
+      "location": "src/components/WorkspaceSidebar.jsx:89",
       "className": "flex w-full min-w-0 items-center gap-[4px] text-left cursor-pointer transition-colors",
       "text": "",
       "childElements": [
@@ -337,7 +337,7 @@
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:389",
+      "location": "src/components/MobileNav.jsx:374",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
@@ -357,12 +357,12 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:424",
+      "location": "src/components/WorkspaceSidebar.jsx:401",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:447",
+      "location": "src/components/WorkspaceSidebar.jsx:424",
       "tag": "button",
       "context": "branding-action"
     }

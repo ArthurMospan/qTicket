@@ -3408,7 +3408,7 @@
     },
     "OrganizationMark": {
       "file": "src/components/ui/DataDisplay/OrganizationMark.jsx",
-      "summary": "The logo or initial that identifies an organization. organization's own record — never a design decision, which is why it is an inline value rather than a token.",
+      "summary": "The logo or initial that identifies an organization.",
       "props": [
         {
           "name": "appearance",

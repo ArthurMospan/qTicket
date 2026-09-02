@@ -29,12 +29,15 @@ export default function WorkspaceDocumentTitle() {
   const unread = useWorkspaceStore(state => state.notificationUnreadByOrg[activeOrgId] || 0);
 
   const clientPortal = isClientRole(orgRole);
+  // The desk's name for both readers. The tab wore the organization's own name
+  // for staff while the rail beside it had already switched to the desk name
+  // for a client — the same fork the rail had, ended on the same day.
   const portalBrand = resolveOrganizationPortalBrand(activeOrg);
   const baseTitle = workspaceDocumentTitle({
     pathname,
     breadcrumbs,
     projects,
-    organizationName: clientPortal ? portalBrand.name : activeOrg?.name,
+    organizationName: portalBrand.name,
     clientPortal,
   });
 

@@ -38,13 +38,13 @@ function orgLogoBackdrop(org) {
   return '#ffffff';
 }
 
-function OrgBigCard({ org, role, roleId, unreadCount, onClick }) {
-  const clientPortal = isClientRole(roleId);
+function OrgBigCard({ org, role, unreadCount, onClick }) {
   const portalBrand = resolveOrganizationPortalBrand(org);
-  // Чиє це місце — питання ролі; чиє це обличчя — ні. Клієнт бачить назву
-  // порталу постачальника, працівник — назву власної організації, а логотип в
-  // обох випадках той самий, що малює рейка.
-  const displayName = clientPortal ? portalBrand.name : (org.name || 'Без назви');
+  // Одне обличчя для обох читачів. Назву тут обирала роль — клієнт бачив назву
+  // служби підтримки, працівник назву власної організації, — тоді як логотип
+  // уже був спільний. Назва служби — та, яку власник задає в інтеграції qTicket
+  // у QuickTeam; з 2026-09-02 її показують усім і ця картка, і рейка, і вкладка.
+  const displayName = portalBrand.name;
   const logoSrc = portalBrand.logo;
 
   return (
@@ -141,16 +141,11 @@ export default function OrgSwitcherScreen({ onClose }) {
   const roleLabel = (org) => organizationRoleLabel(orgRoles?.[org.id]);
 
   const isExpanding = !!expandingOrg;
-  const expandingRole = expandingOrg ? orgRoles?.[expandingOrg.org.id] : null;
   const expandingPortalBrand = expandingOrg
     ? resolveOrganizationPortalBrand(expandingOrg.org)
     : null;
   const expandingLogo = expandingOrg ? expandingPortalBrand.logo : '';
-  const expandingName = expandingOrg
-    ? (isClientRole(expandingRole)
-      ? expandingPortalBrand.name
-      : (expandingOrg.org.name || 'Організація'))
-    : '';
+  const expandingName = expandingOrg ? expandingPortalBrand.name : '';
 
   return (
     <div
@@ -178,7 +173,6 @@ export default function OrgSwitcherScreen({ onClose }) {
                 key={org.id}
                 org={org}
                 role={roleLabel(org)}
-                roleId={orgRoles?.[org.id]}
                 unreadCount={unreadByOrg[org.id] || 0}
                 onClick={(e) => handleSelect(e, org)}
               />

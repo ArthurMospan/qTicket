@@ -141,3 +141,80 @@ test('that check fails on the rail that shipped the chevron to everybody', () =>
   `;
   assert.equal(unguardedSwitcherOpeners(shipped).length, 1);
 });
+
+// The corner is drawn once, for both readers.
+//
+// It was drawn by role. A client's branch wrapped `OrganizationMark` in a bare
+// anchor and read `portalBrand`; a staff branch drew a raw `<img>` and read
+// `activeOrg.name`, with qTicket's own glyph for a tenant without a logo. Three
+// things the owner noticed came out of that one fork. The desk name he set in
+// QuickTeam's qTicket integration reached the client's rail and not his own.
+// The client's corner sat 2px off: an inline-flex mark inside a blockified
+// anchor grows a line box with the strut's descent under it — measured, 38px
+// against the staff link's 32 — so the logo rose 2px, the two lines dropped 1px
+// and everything below the header moved down 2px. And the kit's `sidebar`
+// appearance painted `--sb-active` under the client's logo, a translucent plate
+// the staff corner beside it never had. One brand, one link, one mark; the
+// ground stays only under a fallback initial, which needs a shape to sit in.
+test('the corner is drawn once, for both readers', async () => {
+  const [sidebar, mobile, mark, cache, store] = await Promise.all([
+    read('src/components/WorkspaceSidebar.jsx'),
+    read('src/components/MobileNav.jsx'),
+    read('src/components/ui/DataDisplay/OrganizationMark.jsx'),
+    read('src/lib/hooks/useCachedOrgBranding.js'),
+    read('src/store/useWorkspaceStore.js'),
+  ]);
+
+  for (const [name, source] of [['sidebar', sidebar], ['mobile nav', mobile]]) {
+    // Neither the name nor the logo is chosen by who is looking.
+    assert.doesNotMatch(source, /clientViewer \? portalBrand/, `${name}: the brand is picked by role`);
+    assert.doesNotMatch(source, /activeOrg\?\.name/, `${name}: the corner reads the organization's own name`);
+    assert.match(source, /name=\{portalBrand\.name\}/, name);
+    assert.match(source, /logo=\{portalBrand\.logo\}/, name);
+    // And neither is the colour: one brand, or its cached copy before the
+    // organization document arrives, turned into a rail colour by the one
+    // function the invitation landing page also uses. No preview from a
+    // settings editor that no longer exists, no second ladder of presets.
+    assert.match(source, /const \{ sidebarTheme, sidebarColor \} = orgBrand \|\| portalBrand;/, name);
+    assert.match(source, /computeSidebarTheme\(organizationPortalBackground\(\{ sidebarTheme, sidebarColor \}\)\)/, name);
+    assert.doesNotMatch(source, /sidebarPreview|isBranded|SIDEBAR_PRESETS|customBranding/, name);
+  }
+
+  // One mark, in a link that is a 32px block — the same box QuickTeam's rail
+  // gives its logo, so the mark and the two lines beside it share one axis.
+  assert.equal((sidebar.match(/<OrganizationMark/g) || []).length, 1);
+  assert.match(
+    sidebar,
+    /<Link\s+href=\{homeHref\}\s+className="block h-\[32px\] w-\[32px\][^"]*"[^>]*>\s*<OrganizationMark/,
+  );
+  assert.doesNotMatch(sidebar, /<img\s+src=/);
+  assert.doesNotMatch(sidebar, /qticket_white\.svg|from 'next\/image'/);
+  // One accessible name for the switcher: the one the phone's sheet and
+  // QuickTeam's rail already use. «Змінити портал підтримки» was the client's
+  // half of the fork.
+  assert.match(sidebar, /switchLabel="Змінити організацію"/);
+  assert.doesNotMatch(sidebar, /Змінити портал підтримки/);
+
+  // The kit paints no ground under a logo on the rail, and keeps one under the
+  // initial. `APPEARANCE_CLASSES` stays a lookup map with the same three keys —
+  // `scripts/kit-variants.mjs` reads variants from maps like it — and the
+  // ground moves to a second map that is applied only when no image is shown.
+  const sidebarEntry = mark.match(/const APPEARANCE_CLASSES = \{[\s\S]*?sidebar: '([^']*)'/)?.[1] || '';
+  assert.ok(sidebarEntry.length > 0, 'the sidebar appearance is declared');
+  assert.doesNotMatch(sidebarEntry, /bg-/);
+  assert.match(mark, /const INITIAL_GROUND = \{[\s\S]*?sidebar: 'bg-\[var\(--sb-active\)\]'/);
+  assert.match(mark, /showImage \? '' : \(INITIAL_GROUND\[appearance\] \|\| ''\)/);
+  // The other two appearances keep their ground under a logo: a bordered
+  // canvas tile under a wordmark is the design in lists and in the picker.
+  assert.match(mark, /surface: 'border border-line bg-canvas text-ink'/);
+  assert.match(mark, /inverse: 'border-\[3px\] border-transparent bg-surface-dark text-white'/);
+
+  // The cache is the same brand, whole. It answered `null` for a tenant with
+  // no logo, so a tenant with a colour and no logo got the default dark rail on
+  // the staff side while the client got the colour.
+  assert.match(cache, /const \{ name, logo, sidebarTheme, sidebarColor \} = resolveOrganizationPortalBrand\(org\);/);
+  assert.doesNotMatch(cache, /if \(!brand\.logo\) return null|customBranding: true/);
+
+  // And nothing previews a brand: qTicket does not edit it, QuickTeam does.
+  assert.doesNotMatch(store, /sidebarPreview|setSidebarPreview|clearSidebarPreview/);
+});

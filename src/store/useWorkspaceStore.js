@@ -281,11 +281,6 @@ const useWorkspaceStore = create((set, get) => ({
   localization: null,
   setLocalization: (loc) => set({ localization: loc }),
 
-  // ── Sidebar theme live-preview (settings page → sidebar) ─────────
-  sidebarPreview: null,  // { theme: 'dark'|'light'|'custom', color: '#hex' } | null
-  setSidebarPreview: (preview) => set({ sidebarPreview: preview }),
-  clearSidebarPreview: () => set({ sidebarPreview: null }),
-
   // UI state below the AppContext outlives React route trees. On an
   // organization switch that is useful for account-wide notifications, but
   // dangerous for records that belong to the workspace we just left. Clear
@@ -308,7 +303,6 @@ const useWorkspaceStore = create((set, get) => ({
       myTaskSearch: '',
       projectSearch: '',
       localSearchFeedback: null,
-      sidebarPreview: null,
     });
   },
 }));

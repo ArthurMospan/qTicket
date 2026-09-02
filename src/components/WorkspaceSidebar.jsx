@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
-import Image from 'next/image';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
 import { Counter, IconAction, OrganizationMark, Skeleton } from '@/components/ui';
 import {
@@ -16,7 +15,7 @@ import { TaskIcon } from '@/lib/design/icons';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { useProjectUnreadIndicators } from '@/lib/hooks/useProjectUnreadIndicators';
 import Tooltip from '@/components/ui/Navigation/Tooltip';
-import { computeSidebarTheme, SIDEBAR_PRESETS } from '@/lib/utils/sidebarTheme';
+import { computeSidebarTheme } from '@/lib/utils/sidebarTheme';
 import { useCachedOrgBranding, useSidebarThemeBoot } from '@/lib/hooks/useCachedOrgBranding';
 import WorkspaceHelpMenu from '@/components/WorkspaceHelpMenu';
 
@@ -30,13 +29,13 @@ import {
  * The two lines beside the mark, and there is one of them.
  *
  * The small line says what this place is; the big line under it names which one
- * you are in — «Портал підтримки» over whoever runs it, which is the provider
- * for a customer and the reader's own company for a member of staff. It is the
- * arrangement the QuickTeam rail already draws for a branded workspace, so the
- * same corner of two products is not laid out two ways. It read the other way
- * round here, which put the switcher — a control that changes the
- * *organization* — on the row that named the product, one line below the
- * organization it changes.
+ * you are in — «Портал підтримки» over the desk's own name, the one brand
+ * QuickTeam sends, read the same by a customer and by the member of staff who
+ * runs the desk. It is the arrangement the QuickTeam rail already draws for a
+ * branded workspace, so the same corner of two products is not laid out two
+ * ways. It read the other way round here, which put the switcher — a control
+ * that changes the *organization* — on the row that named the product, one
+ * line below the organization it changes.
  *
  * The numbers are QuickTeam's, to the pixel, and that is a requirement rather
  * than a coincidence: one corner in two products cannot be two corners. That
@@ -151,55 +150,34 @@ export default function WorkspaceSidebar() {
     0,
   );
 
-  // ── Sidebar theme & Preview ──
-  const sidebarPreview = useWorkspaceStore(s => s.sidebarPreview);
+  // ── One brand, one rail ──
+  // `portalBrand` is the brand QuickTeam sends, resolved from the live
+  // organization document; `orgBrand` is the same brand, or its cached copy
+  // for the second before that document arrives — which is what keeps a
+  // branded rail from flashing dark on a reload. There is no `clientViewer`
+  // anywhere in this corner: the theme, the mark and the name were each chosen
+  // by role, and the owner set a desk name in QuickTeam's qTicket integration
+  // and saw it on the client's rail only. The invitation landing page paints
+  // itself from the same two functions, so the front door and the rail are the
+  // same shade of the same company.
   const portalBrand = useMemo(
     () => resolveOrganizationPortalBrand(activeOrg),
     [activeOrg],
   );
-
-  // ── Custom branding ──
-  // orgBrand віддає кешований брендинг, поки документ організації ще
-  // завантажується — без мигання стандартної теми при перезавантаженні.
   const orgBrand = useCachedOrgBranding(activeOrgId, activeOrg);
-  const isBranded = sidebarPreview
-    ? Boolean(sidebarPreview.customBranding && sidebarPreview.logo)
-    : Boolean(orgBrand?.customBranding && orgBrand?.logo);
-
-  const orgLogoToUse = sidebarPreview?.logo || orgBrand?.logo;
-
-
-  const theme = useMemo(() => {
-    // The external portal always carries the support provider's identity. It
-    // is not the inherited paid "replace qTicket in the staff sidebar"
-    // feature: it is how a client knows who receives their incident. A later
-    // QuickTeam activation writes this snapshot under `portalBranding`.
-    // The invitation landing page paints itself from the same two functions,
-    // so the front door and the rail are the same shade of the same company.
-    if (clientViewer) return computeSidebarTheme(organizationPortalBackground(portalBrand));
-
-    // Priority: live preview from settings > org data (or its cache) > default dark
-    const source = sidebarPreview || (isBranded ? {
-      theme: orgBrand?.sidebarTheme || 'dark',
-      color: orgBrand?.sidebarColor || SIDEBAR_PRESETS.dark,
-    } : null);
-
-    if (!source) return computeSidebarTheme(SIDEBAR_PRESETS.dark);
-
-    const bgColor = source.theme === 'light' ? SIDEBAR_PRESETS.light
-      : source.theme === 'custom' ? (source.color || SIDEBAR_PRESETS.dark)
-      : SIDEBAR_PRESETS.dark;
-
-    return computeSidebarTheme(bgColor);
-  }, [clientViewer, isBranded, orgBrand?.sidebarTheme, orgBrand?.sidebarColor, portalBrand, sidebarPreview]);
+  const { sidebarTheme, sidebarColor } = orgBrand || portalBrand;
+  const theme = useMemo(
+    () => computeSidebarTheme(organizationPortalBackground({ sidebarTheme, sidebarColor })),
+    [sidebarTheme, sidebarColor],
+  );
 
   // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня.
   useSidebarThemeBoot(theme, Boolean(activeOrg), activeOrgId);
 
-  // Поки не приїхали живі дані (чи live-preview з налаштувань) — лого й назва
-  // організації невідомі. Замість того щоб на мить показати "Company name" /
-  // биту картинку, показуємо скелетон; логотип рендериться лише коли готово.
-  const brandingReady = Boolean(sidebarPreview) || Boolean(activeOrg);
+  // Поки не приїхав документ організації — лого й назва невідомі. Замість
+  // того щоб на мить показати биту картинку чи чужу назву, показуємо скелетон;
+  // знак рендериться лише коли готово.
+  const brandingReady = Boolean(activeOrg);
 
   useEffect(() => {
     const match = pathname.match(/^\/([^/]+)/);
@@ -325,7 +303,7 @@ export default function WorkspaceSidebar() {
               <div className="flex items-center min-w-0 flex-1">
                 {!brandingReady ? (
                   /* ── Skeleton: доки не приїхали дані організації, краще
-                     нічого не показувати, ніж "Company name" / бите лого ── */
+                     нічого не показувати, ніж чужу назву чи бите лого ── */
                   <>
                     {/* `--sb-hover` is rgba(255,255,255,0.04) on a dark sidebar
                         — four percent of white, which is a hover tint and not
@@ -347,8 +325,34 @@ export default function WorkspaceSidebar() {
                       </div>
                     </div>
                   </>
-                ) : clientViewer ? (
-                  <Link href={homeHref} className="shrink-0 transition-opacity hover:opacity-80" aria-label="На головну">
+                ) : (
+                  /* The tenant's mark, drawn once for both readers. It was
+                     three branches — the client's `OrganizationMark` in a bare
+                     anchor, a raw `<img>` for staff of a tenant with a logo,
+                     and qTicket's own glyph for staff of one without — and the
+                     fork is where the corner came apart: the client read the
+                     desk name QuickTeam sends and staff the organization's own,
+                     so the owner set a desk name and saw it on the client's
+                     rail only.
+                     The link is a 32px block on purpose. The mark is an
+                     inline-flex span, and a blockified anchor holding one grows
+                     a line box with the strut's descent under it: measured, the
+                     client's anchor was 38px tall against the staff link's 32,
+                     so the logo sat 2px higher, the two lines 1px lower, and
+                     everything under the header 2px down. A 32px block puts
+                     the mark and the words on one axis, as in QuickTeam's rail.
+                     A tenant without a logo shows its initial to staff as it
+                     already did to clients — one corner, not two — and the
+                     product no longer marks itself here: a white-label rail
+                     that names its vendor in the corner is not white-label.
+                     The card that flipped on hover to show the qTicket logo on
+                     its back went earlier, for the same reason. */
+                  <Link
+                    href={homeHref}
+                    className="block h-[32px] w-[32px] shrink-0 transition-opacity hover:opacity-80"
+                    title="На головну"
+                    aria-label="На головну"
+                  >
                     <OrganizationMark
                       name={portalBrand.name}
                       logo={portalBrand.logo}
@@ -356,54 +360,27 @@ export default function WorkspaceSidebar() {
                       appearance="sidebar"
                     />
                   </Link>
-                ) : isBranded ? (
-                  /* The tenant's mark, and only the tenant's. This used to be
-                     a card that flipped on hover to show the qTicket logo on
-                     its back: a white-label rail that revealed its vendor to
-                     anybody who moved a pointer across the corner. A brand the
-                     tenant chose does not turn over — on either side. */
-                  <Link
-                    href={homeHref}
-                    className="block w-[32px] h-[32px] shrink-0 transition-opacity hover:opacity-80"
-                    title="На головну"
-                    aria-label="На головну"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={orgLogoToUse}
-                      alt={activeOrg?.name || 'Logo'}
-                      className="w-[32px] h-[32px] rounded-[8px] object-cover"
-                    />
-                  </Link>
-                ) : (
-                  <Link href={homeHref} className="flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity">
-                    <Image src={theme.isDark ? '/qticket_white.svg' : '/qticket.svg'} alt="qTicket" width={32} height={32} loading="eager" className="object-contain" />
-                  </Link>
                 )}
                 {brandingReady && (
                   <div className="flex flex-col min-w-0 ml-[12px]">
-                    {/* One pair of words for both readers, because both are in
-                        the same place. A client is in their supplier's support
-                        portal; a member of staff is in the support portal they
-                        run — the small line says what this is and the big line
-                        under it names whose it is, which is true of a customer
-                        looking at their provider and of an agent looking at
-                        their own company.
+                    {/* One pair of words and one name for both readers,
+                        because both are in the same place: the small line
+                        says what this is and the big line under it names
+                        whose it is. The name is the desk's — `portalBranding`,
+                        the one the owner sets in QuickTeam's qTicket
+                        integration, and the organization's own name only where
+                        no desk name was set. Staff read `activeOrg.name` here
+                        until 2026-09-02 while a client read the desk name, so
+                        the owner who set one saw it on the client's rail alone.
                         The staff line used to say «qTicket» instead, which
                         named the software rather than the place and put the
                         vendor's name over an organization that white-labels the
-                        whole rail below it. The product still marks itself
-                        where a mark belongs: the glyph beside these two lines,
-                        for any organization that has not supplied its own. */}
+                        whole rail below it. */}
                     <SidebarBrandLockup
                       href={homeHref}
-                      name={clientViewer
-                        ? portalBrand.name
-                        : (activeOrg?.name || 'Company name')}
+                      name={portalBrand.name}
                       label="Портал підтримки"
-                      switchLabel={clientViewer
-                        ? 'Змінити портал підтримки'
-                        : 'Змінити організацію'}
+                      switchLabel="Змінити організацію"
                       canSwitch={(allOrgs || []).length > 1}
                       unreadElsewhere={otherOrgUnreadCount}
                       onSwitch={() => setShowOrgSwitcher(true)}

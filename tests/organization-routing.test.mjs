@@ -314,7 +314,11 @@ test('the workspace remounts and clears shared UI state when organization scope 
 
   assert.match(layout, /<ConfirmProvider key=\{activeOrgId\}>/);
   assert.match(context, /useLayoutEffect\(\(\) => \{[\s\S]*resetOrganizationScope\(\)/);
-  assert.match(store, /resetOrganizationScope:[\s\S]*quickView: null,[\s\S]*breadcrumbs: \[\],[\s\S]*sidebarPreview: null/);
+  // `sidebarPreview` used to close this list. It was the settings page's live
+  // preview of a brand edit, and qTicket no longer edits the brand — QuickTeam
+  // owns it — so the field, its setters and this reset of it are gone.
+  assert.match(store, /resetOrganizationScope:[\s\S]*quickView: null,[\s\S]*breadcrumbs: \[\],/);
+  assert.doesNotMatch(store, /sidebarPreview/);
 });
 
 test('role-filtered organization caches are isolated by organization, user and role', async () => {

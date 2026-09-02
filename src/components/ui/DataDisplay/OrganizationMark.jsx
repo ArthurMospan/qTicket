@@ -14,8 +14,20 @@ const SIZE_CLASSES = {
 
 const APPEARANCE_CLASSES = {
   surface: 'border border-line bg-canvas text-ink',
-  sidebar: 'bg-[var(--sb-active)] text-[var(--sb-text)]',
+  sidebar: 'text-[var(--sb-text)]',
   inverse: 'border-[3px] border-transparent bg-surface-dark text-white',
+};
+
+// The ground under a fallback initial, for the appearance that paints none
+// under a logo. On the rail a logo lies directly on the rail colour, as it does
+// in QuickTeam's rail: `--sb-active` is eight percent of white, and painted
+// under an image it was a translucent plate behind the client's mark that the
+// staff corner beside it — a bare `<img>` at the time — never had. A letter
+// still needs a shape to sit in, so the initial keeps it. `surface` and
+// `inverse` are not here on purpose: a bordered canvas tile under a wordmark is
+// the design in lists and in the picker.
+const INITIAL_GROUND = {
+  sidebar: 'bg-[var(--sb-active)]',
 };
 
 /**
@@ -25,6 +37,9 @@ const APPEARANCE_CLASSES = {
  * @param {string} props.logo Public organization logo URL.
  * @param {'sm'|'md'|'picker'} props.size Named geometry from the UI Kit.
  * @param {'surface'|'sidebar'|'inverse'} props.appearance Surface contrast.
+ *   On `sidebar` a logo lies directly on the rail colour and only the fallback
+ *   initial gets a ground (`INITIAL_GROUND`); the other two paint theirs under
+ *   the logo and the initial alike.
  * @param {string} props.background What the logo is laid on, as a colour from the
  *   organization's own record — never a design decision, which is why it is an
  *   inline value rather than a token. A wordmark is very often a transparent PNG
@@ -55,7 +70,9 @@ export default function OrganizationMark({
       data-ui-appearance={appearance}
       className={`inline-flex shrink-0 items-center justify-center overflow-hidden font-bold ${
         SIZE_CLASSES[size] || SIZE_CLASSES.sm
-      } ${APPEARANCE_CLASSES[appearance] || APPEARANCE_CLASSES.surface} ${className}`}
+      } ${APPEARANCE_CLASSES[appearance] || APPEARANCE_CLASSES.surface} ${
+        showImage ? '' : (INITIAL_GROUND[appearance] || '')
+      } ${className}`}
       // Only under an image. An initial is drawn in the appearance's own ink,
       // and painting the tenant's colour behind it would put a brand colour
       // under a letter the brand never chose.

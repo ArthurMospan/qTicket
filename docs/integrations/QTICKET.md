@@ -123,18 +123,20 @@ Rules of the snapshot:
   archived seat and are removed from every qTicket client-project roster. Their
   incidents, comments, audit history and time records are not rewritten.
 - Branding is copied into `organization.portalBranding` with source
-  `quickteam`. The external client shell draws this snapshot even though the
-  staff shell and client-facing portal branding are separate concerns.
-- `organization.portal` is optional and is that separate concern made
-  settable. `name`/`logo` outside it are the organization — what the staff
-  shell says over the queue; `portal` is what a customer sees on their own
-  portal. The two fields were always separate in qTicket and were always fed
-  one value, so a company could not name its desk anything but itself.
-  An absent `portal` means «the same brand» and reproduces the old behaviour
-  exactly; an empty field inside a present `portal` inherits that one field,
-  so a tenant who renames only the desk keeps its logo and its colour without
-  restating them. QuickTeam still owns the value — qTicket does not edit it and
-  overwrites its copy from every snapshot.
+  `quickteam`, and that is the one brand qTicket wears everywhere: the staff
+  rail, the client portal, the organization picker, the phone's sheet and the
+  tab title all read it through `resolveOrganizationPortalBrand`. There is no
+  second brand for the staff shell. The split existed — the staff rail read
+  `name`/`logo` while the client read `portalBranding` — and was retired on
+  2026-09-02, because the owner set a desk name and saw it on the client's
+  rail only.
+- `organization.portal` is optional and, when present, is that brand: a desk
+  allowed to look like «OneB Підтримка» rather than like the company, to
+  everyone who opens qTicket. An absent `portal` means the organization's own
+  name, logo and colour; an empty field inside a present `portal` inherits
+  that one field, so a tenant who renames only the desk keeps its logo and its
+  colour without restating them. QuickTeam still owns the value — qTicket does
+  not edit it and overwrites its copy from every snapshot.
 - Provisioning does not copy QuickTeam projects or tasks. A qTicket client
   project is a support boundary owned by qTicket.
 - A snapshot with `entitlement: "inactive"` immediately refuses new launches
@@ -324,7 +326,7 @@ somebody else's tracker is the same fact in a longer form.
 | Data | Authority |
 | --- | --- |
 | Internal organization identity and branding | QuickTeam |
-| Client-portal brand (`organization.portal`) | QuickTeam |
+| Desk brand (`organization.portal`), worn by every qTicket surface | QuickTeam |
 | Add-on entitlement | QuickTeam provisioning/commercial authority |
 | Enabled owner/admin/manager directory | QuickTeam selection |
 | qTicket client projects and their support roster | qTicket |
