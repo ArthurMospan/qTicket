@@ -56,7 +56,7 @@ import {
   AlignLeft, Heart, Clock, History, PanelRightClose, PanelRightOpen, X, Plus, Search, Settings2, Share2, Send, MoreHorizontal, Pencil, Check, Trash2, Paperclip, ChevronRight, Minus, Eye, EyeOff, ExternalLink,
   Play, Square as StopIcon,
   Link2, Copy, CopyPlus, MessageCircle, Sparkles, Tag as TagIcon, Archive, ArchiveRestore,
-  Maximize2, User, Users, CircleDot, Ban, Undo2,
+  Maximize2, User, Users, Ban, Undo2,
 } from 'lucide-react';
 import { ParentTaskIcon, TaskIcon } from '@/lib/design/icons';
 import { taskTypeIcon } from '@/lib/design/taskTypeIcons';
@@ -71,7 +71,6 @@ import { existingParentIssueId } from '@/lib/utils/issueHierarchyModel.mjs';
 import { issueCompletionBlockers } from '@/lib/utils/issueExecution.mjs';
 import {
   cancelScheduledIssueSeen,
-  markIssueUnread,
   scheduleIssueSeen,
 } from '@/lib/services/issueReadState';
 import { issueActivityCursor } from '@/lib/utils/issueReadState.mjs';
@@ -552,7 +551,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // The revision itself is read from a ref rather than from the effect's
   // dependencies: activity arriving while the task is open must not restart this
   // effect, or leaving would consume whatever the last render happened to hold.
-  const consumeRef = useRef({ millis: 0, suppressed: false });
+  const consumeRef = useRef({ millis: 0 });
   useEffect(() => {
     consumeRef.current.millis = issueActivityAt;
   }, [issueActivityAt]);
@@ -562,14 +561,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     // canonical-key redirect below remounts this component a beat after a task
     // opens, and that remount is not a reader walking away.
     cancelScheduledIssueSeen(issueId);
-    consumeRef.current.suppressed = false;
     return () => {
       // Reading the ref *at cleanup time* is the point: the value the reader is
       // recorded as having seen is the one on screen when they walked away, not
       // the one this effect happened to start with.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      const { millis, suppressed } = consumeRef.current;
-      if (suppressed || !millis) return;
+      const { millis } = consumeRef.current;
+      if (!millis) return;
       scheduleIssueSeen({
         organizationId: activeOrgId,
         issueId,
@@ -580,28 +578,19 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     };
   }, [activeOrgId, currentUserId, issueId]);
 
-  // Putting a task back into your own inbox. The cursor goes to just before the
-  // newest activity, so the dot returns on the board and the boundary in the
-  // timeline lands on the change that made you want to come back — and this
-  // visit stops consuming, or closing the task would immediately undo it.
-  const lastSeenMillis = useWorkspaceStore(state => state.issueReadState[issueId] || 0);
-  const handleMarkUnread = async () => {
-    consumeRef.current.suppressed = true;
-    try {
-      await markIssueUnread({
-        organizationId: activeOrgId,
-        issueId,
-        userId: currentUserId,
-        activityMillis: issueActivityAt,
-        currentSeenMillis: lastSeenMillis,
-      });
-      showToast(terms.markedUnread);
-    } catch (error) {
-      consumeRef.current.suppressed = false;
-      reportLoadError('[IssueDetail] mark issue unread', error);
-      showToast('Не вдалося позначити непрочитаною', 'error');
-    }
-  };
+  // «Позначити непрочитаним» стояло тут і пішло звідси на прохання власника.
+  //
+  // Воно рухало твій особистий курсор прочитаного на мить перед останньою
+  // дією: крапка «нове» поверталась на картку, а межа в стрічці ставала на ту
+  // зміну, через яку ти хотів повернутись. Механізм працював — питання було не
+  // в ньому, а в тому, кому він потрібен. Стіл підтримки не читає звернення
+  // повторно за списком непрочитаного: він читає їх за статусом, і те, до чого
+  // треба повернутись, або відкрите, або комусь призначене. Ознака «я це ще не
+  // дочитав», яку людина ставить собі сама, — це нагадування без нагадувань, і
+  // єдине, що вона змінювала, — крапка, яку наступний же візит гасив.
+  //
+  // Автоматичне непрочитане лишається все: воно відповідає на «що змінилось,
+  // поки мене не було», і на нього ніхто не натискає.
 
   useEffect(() => {
     if (isModal || !canonicalIssuePath || issueLocator === issueRouteIdentifier(issue, project)) return;
@@ -1241,12 +1230,6 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 : []),
               ...(SHOW_INHERITED_TASK_SHORTCUTS && canEditIssue
                 ? [{ label: 'Скопіювати AI-промпт', icon: Sparkles, onClick: copyAiPrompt }]
-                : []),
-              // Only offered when there is somebody else's activity to un-see.
-              // Marking a task you were the last to touch as unread would light
-              // no dot: your own change is never new to you, on a card or here.
-              ...(issueActivityAt && lastActivityActorId !== currentUserId
-                ? [{ label: 'Позначити непрочитаним', icon: CircleDot, onClick: handleMarkUnread }]
                 : []),
               ...(!isArchived ? [
                 // «Стежити» writes `watcherIds` on the incident, which is a

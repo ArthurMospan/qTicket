@@ -117,7 +117,6 @@ export const INCIDENT_TERMS_TABLE = Object.freeze({
 
   linkCopied: 'Посилання на звернення скопійовано',
   copyLink: 'Копіювати посилання на звернення',
-  markedUnread: 'Звернення позначено непрочитаним',
   options: 'Опції звернення',
 
   notFound: 'Звернення не знайдено',

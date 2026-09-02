@@ -78,10 +78,20 @@ test('a task is consumed by being left, never by being rendered', async () => {
   assert.match(source, /scheduleIssueSeen\(/);
   assert.match(source, /cancelScheduledIssueSeen\(issueId\)/);
 
+  // Nothing sets the cursor by hand any more. «Позначити непрочитаним» put a
+  // task back into your own inbox and was removed on the owner's call: the desk
+  // returns to a request by its status, not by a flag somebody set on
+  // themselves, and the only thing the flag changed was a dot the next visit
+  // put out again. What stays is the automatic half — what changed while you
+  // were away — which nobody presses.
   const service = await readFile(new URL('../src/lib/services/issueReadState.js', import.meta.url), 'utf8');
-  // Marking unread must not reset a cursor that already sits further back, or
-  // pressing it would consume the older changes it was meant to preserve.
-  assert.match(service, /if \(currentSeenMillis && currentSeenMillis <= target\) return true;/);
+  assert.doesNotMatch(service, /markIssueUnread/);
+  assert.doesNotMatch(source, /markIssueUnread/);
+  // The row, not the word: the file explains in prose what used to be here.
+  assert.doesNotMatch(source, /label: 'Позначити непрочитаним'/);
+  // And with it the suppression flag it was the only caller of: leaving a task
+  // now always records what was on screen, with no branch that skips it.
+  assert.doesNotMatch(source, /suppressed/);
 });
 
 const conversation = [

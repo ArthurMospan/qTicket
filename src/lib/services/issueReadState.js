@@ -40,33 +40,3 @@ export function cancelScheduledIssueSeen(issueId) {
   clearTimeout(timer);
   scheduled.delete(issueId);
 }
-
-/**
- * Put a task back into the reader's inbox.
- *
- * The cursor is moved to just before the task's newest activity rather than to
- * the beginning of time: "я до цього ще повернусь" is about the change that just
- * happened, and a cursor reset to zero would announce every line of a task's
- * history as new. A cursor that already sits below that point is left alone —
- * the task is unread further back than this, and raising it would consume
- * changes the reader never saw.
- */
-export async function markIssueUnread({
-  organizationId,
-  issueId,
-  userId,
-  activityMillis,
-  currentSeenMillis = 0,
-}) {
-  if (!organizationId || !issueId || !userId || !activityMillis) return false;
-  cancelScheduledIssueSeen(issueId);
-  const target = activityMillis - 1;
-  if (currentSeenMillis && currentSeenMillis <= target) return true;
-  await markIssueSeen({
-    organizationId,
-    issueId,
-    userId,
-    lastSeenAt: new Date(target),
-  });
-  return true;
-}
