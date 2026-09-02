@@ -299,6 +299,16 @@ export function isCustomerVisibleAuditEntry(entry) {
   if (!action) return false;
   if (STAFF_ONLY_ACTIONS.has(action)) return false;
   if (action === 'moved' && auditValue(entry.from) === auditValue(entry.to)) return false;
+  if (CUSTOMER_WITHHELD_FIELDS.includes(auditedFieldOf(entry))) return false;
+  // A bulk action carries its patch as JSON rather than as a field name, so it
+  // is checked by what it wrote: a mass deadline change is the same fact under
+  // a different action id, and it leaks the same way.
+  if (action.startsWith(BULK_ACTION_PREFIX)) {
+    const written = Object.keys(bulkPatch(entry?.to));
+    if (written.length > 0 && written.every(field => CUSTOMER_WITHHELD_FIELDS.includes(field))) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -306,3 +316,27 @@ const STAFF_ONLY_ACTIONS = new Set([
   'quickteam-transferred',
   'project-team-granted',
 ]);
+
+/**
+ * The fields a customer is not shown, and therefore must not be told changed.
+ *
+ * There is one, and ROADMAP has carried the reason since 2026-08-31: a
+ * resolution date a customer can read is a promised resolution time, and
+ * qTicket promises none. The request's own strip withholds it and so does the
+ * board card — and then the history started announcing «Дедлайн змінено на
+ * «5 вер»» to the same reader, which is worse than showing the field outright:
+ * it names a promise *and* the date, in the one place both sides read together.
+ *
+ * A change nobody may see is a change nobody may be told about. That is not the
+ * same rule as `STAFF_ONLY_ACTIONS` above — those are actions the desk takes
+ * about its own machinery; this is a field of the request itself.
+ */
+export const CUSTOMER_WITHHELD_FIELDS = Object.freeze(['dueDate']);
+
+/** The audited field an entry is about, or `''` for an action that is not a field change. */
+export function auditedFieldOf(entry) {
+  const action = typeof entry?.action === 'string' ? entry.action : '';
+  if (entry?.field) return entry.field;
+  if (action.startsWith('changed_')) return action.slice('changed_'.length);
+  return ACTION_FIELDS[action] || '';
+}

@@ -1,5 +1,6 @@
 import { issueActivity } from './issueReadState.mjs';
 import { ISSUE_BULK_ACTION_BY_ID } from '../bulk/issueBulkActions.mjs';
+import { CUSTOMER_WITHHELD_FIELDS } from './issueAuditEvents.mjs';
 
 /**
  * «Останні дії» — what happened, rather than what was touched.
@@ -115,6 +116,23 @@ export function issueActivityEntry(issue, {
 } = {}) {
   const activity = issueActivity(issue);
   if (!activity.millis || !issue?.id) return null;
+
+  // An edit the reader cannot see is not news for them.
+  //
+  // The resolution date is withheld from a customer everywhere — the strip, the
+  // card, and now their half of the history — and the feed was the last place
+  // still announcing it, as «Підтримка оновила звернення» about a field they
+  // cannot find. Which is worse than showing the date: the only way to act on
+  // «something changed, and you may not know what» is to ask.
+  //
+  // `lastActivityFields` is written by the route that made the change. An older
+  // request has none, and none means «we do not know», which is not grounds to
+  // hide a row.
+  if (clientViewer && Array.isArray(issue.lastActivityFields) && issue.lastActivityFields.length > 0) {
+    const anythingTheyCanSee = issue.lastActivityFields
+      .some(field => !CUSTOMER_WITHHELD_FIELDS.includes(field));
+    if (!anythingTheyCanSee) return null;
+  }
 
   const type = hasPhrase(activity.type) ? activity.type : 'updated';
   const actorId = issue.lastActivityActorId || issue.createdBy || issue.reporterId || '';

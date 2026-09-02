@@ -177,24 +177,16 @@ export async function PATCH(request, context) {
         );
       }
 
-      transaction.update(issueRef, {
-        ...patch,
-        updatedAt: now,
-        lastActivityType: 'updated',
-        lastActivityAt: now,
-        lastActivityActorId: authorization.user.uid,
-        lastActivityActorName: actorName,
-      });
-      transaction.update(projectRef, { updatedAt: now });
-
       // The same history the browser writes for a support edit, written here
       // because a client may not write to `audit/` at all — and the change
       // still belongs in the record.
+      const changedFields = [];
       for (const field of AUDITED_ISSUE_FIELDS) {
         if (patch[field] === undefined) continue;
         const from = auditValue(current[field]);
         const to = auditValue(patch[field]);
         if (from === to) continue;
+        changedFields.push(field);
         const factOnly = FACT_ONLY_AUDITED_FIELDS.includes(field);
         recordIssueHistory(transaction, issueRef, {
           userId: authorization.user.uid,
@@ -205,6 +197,22 @@ export async function PATCH(request, context) {
           createdAt: now,
         });
       }
+
+      transaction.update(issueRef, {
+        ...patch,
+        updatedAt: now,
+        lastActivityType: 'updated',
+        lastActivityAt: now,
+        lastActivityActorId: authorization.user.uid,
+        lastActivityActorName: actorName,
+        // Which fields this edit was about, so a feed can tell whether it has
+        // anything to say to the person reading it. «Оновила звернення» about a
+        // resolution date the customer is not shown is a notification that
+        // something they cannot find has changed — the worst kind, because the
+        // only way to act on it is to ask.
+        lastActivityFields: changedFields,
+      });
+      transaction.update(projectRef, { updatedAt: now });
     });
 
     return NextResponse.json({ ok: true, issueId, fields: Object.keys(patch) });

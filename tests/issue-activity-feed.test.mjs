@@ -131,3 +131,36 @@ test('a customer’s participants include the desk, and the roster can resolve t
   const row = await readFile(new URL('../src/components/ui/TaskManagement/TaskRow.jsx', import.meta.url), 'utf8');
   assert.match(row, /\.\.\.\(task\.assigneeIds \|\| \[\]\),\s*\.\.\.\(task\.clientAssigneeIds \|\| \[\]\),/);
 });
+
+// «Підтримка оновила звернення» about a field the customer is not shown is the
+// worst kind of notice: the only way to act on it is to ask what changed.
+test('an edit the customer may not see is not news for them', () => {
+  const deadlineOnly = issue({
+    id: 'd1',
+    lastActivityAt: 40,
+    lastActivityType: 'updated',
+    lastActivityFields: ['dueDate'],
+  });
+  const alsoSomethingVisible = issue({
+    id: 'd2',
+    lastActivityAt: 30,
+    lastActivityType: 'updated',
+    lastActivityFields: ['dueDate', 'priority'],
+  });
+  // An older request remembers no fields at all, and «we do not know» is not
+  // grounds to hide a row.
+  const unknownFields = issue({ id: 'd3', lastActivityAt: 20, lastActivityType: 'updated' });
+
+  const forClient = issueActivityFeed(
+    [deadlineOnly, alsoSomethingVisible, unknownFields],
+    { supportUserIds, memberById, clientViewer: true },
+  );
+  assert.deepEqual(forClient.map(entry => entry.id), ['d2', 'd3']);
+
+  // The desk sets the date and reads its own record of it in full.
+  const forSupport = issueActivityFeed(
+    [deadlineOnly, alsoSomethingVisible, unknownFields],
+    { supportUserIds, memberById, clientViewer: false },
+  );
+  assert.deepEqual(forSupport.map(entry => entry.id), ['d1', 'd2', 'd3']);
+});

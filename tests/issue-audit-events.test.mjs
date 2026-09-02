@@ -233,11 +233,10 @@ test('every change to a request reaches the person who filed it, signed', () => 
   recordIssueHistory(writer, issueRef, { ...actor, action: 'created', from: null, to: 'QT-1' });
   recordIssueHistory(writer, issueRef, { ...actor, action: 'moved', from: 'backlog', to: 'qa' });
   recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_priority', from: 'low', to: 'high' });
-  recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_dueDate', from: null, to: '1730000000000' });
   recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_assigneeIds', from: '[]', to: '["member-a"]' });
   recordIssueHistory(writer, issueRef, { ...actor, action: 'cancelled' });
 
-  for (const action of ['created', 'moved', 'changed_priority', 'changed_dueDate', 'changed_assigneeIds', 'cancelled']) {
+  for (const action of ['created', 'moved', 'changed_priority', 'changed_assigneeIds', 'cancelled']) {
     assert.deepEqual(
       collectionsFor(action),
       ['audit', 'statusHistory'],
@@ -303,4 +302,37 @@ test('every route that writes a task history writes both halves of it', async ()
     );
     assert.match(source, /recordIssueHistory/, `${path} records no history at all`);
   }
+});
+
+// The one field the product withholds from the customer, and the history was
+// the last place still announcing it to them.
+test('a resolution date changes without the customer being told it did', () => {
+  const { writer, issueRef, collectionsFor } = historyWriter();
+  const actor = { userId: 'agent-1', userName: 'Оля' };
+
+  // A date a customer can read is a promised resolution time, and qTicket
+  // promises none — so their strip, their card and their half of the history
+  // all withhold it. «Дедлайн змінено на «5 вер»» named the promise *and* the
+  // date, in the one place both sides read together.
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_dueDate', from: null, to: '1730000000000' });
+  assert.deepEqual(collectionsFor('changed_dueDate'), ['audit']);
+
+  // The same fact under a different action id leaks the same way.
+  recordIssueHistory(writer, issueRef, {
+    ...actor,
+    action: 'bulk_deadline',
+    from: JSON.stringify({ dueDate: null }),
+    to: JSON.stringify({ dueDate: '1730000000000' }),
+  });
+  assert.deepEqual(collectionsFor('bulk_deadline'), ['audit']);
+
+  // A bulk change that moved something else as well still reaches them: what is
+  // withheld is the date, not every edit that happened to touch one.
+  recordIssueHistory(writer, issueRef, {
+    ...actor,
+    action: 'bulk_priority',
+    from: JSON.stringify({ dueDate: null, priority: 'low' }),
+    to: JSON.stringify({ dueDate: '1730000000000', priority: 'high' }),
+  });
+  assert.deepEqual(collectionsFor('bulk_priority'), ['audit', 'statusHistory']);
 });
