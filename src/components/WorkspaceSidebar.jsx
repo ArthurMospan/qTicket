@@ -138,7 +138,11 @@ export default function WorkspaceSidebar() {
   // twice. One publisher, many readers: the bridge publishes the number,
   // everything else reads it.
   const userId = currentUser?.id || currentUser?.uid;
-  const { unreadProjectIds, markProjectRead } = useProjectUnreadIndicators(userId, activeOrgId);
+  // Крапка біля проєкту гасне, коли прочитано записи за ним — відкривши ті
+  // звернення або в дзвонику. Не при вході в проєкт: раніше URL проєкту гасив
+  // усі його записи разом, і сповіщення про звернення, яких людина не
+  // відкривала, зникали, щойно вона зайшла в сусіднє.
+  const { unreadProjectIds } = useProjectUnreadIndicators(userId, activeOrgId);
   // Число публікує `WorkspaceNotificationBridge` — і воно вже готове. Тут
   // стояла друга копія тієї самої підміни «сповіщення або курсори», накладена
   // поверх опублікованого числа, у якому підміна вже відбулася: та сама умова
@@ -178,14 +182,6 @@ export default function WorkspaceSidebar() {
   // того щоб на мить показати биту картинку чи чужу назву, показуємо скелетон;
   // знак рендериться лише коли готово.
   const brandingReady = Boolean(activeOrg);
-
-  useEffect(() => {
-    const match = pathname.match(/^\/([^/]+)/);
-    const projectId = match?.[1];
-    if (projectId && projects?.some(project => project.id === projectId)) {
-      markProjectRead(projectId).catch(error => console.error('[WorkspaceSidebar] mark project read', error));
-    }
-  }, [pathname, projects, markProjectRead]);
 
   const isActive = (href, exact, section) => {
     const targetPath = href.split('?')[0];

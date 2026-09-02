@@ -3,12 +3,12 @@ name: Scheduled notifications
 # Vercel Hobby allows one cron run per day, which is useless for a queue that
 # has to be drained every minute, so the sweep is driven from here.
 #
-# GitHub does not honour `*/5 * * * *` either. Measured on this repository, a
-# five-minute schedule actually starts a run roughly once an hour during the day
-# and once every two to three hours overnight. So one run stays alive sweeping
-# on a real interval instead of firing once and exiting, and
-# `cancel-in-progress: true` makes the next scheduled run replace the loop
-# rather than double it.
+# GitHub does not honour `*/5 * * * *` either. Measured on the sibling QuickTeam
+# repository, a five-minute schedule actually starts a run every one to four and
+# a half hours. So one run stays alive sweeping on a real interval instead of
+# firing once and exiting — for six hours, the most a job may run, so that the
+# gaps between scheduled starts are covered — and `cancel-in-progress: true`
+# makes the next scheduled run replace the loop rather than double it.
 #
 # ── Three schedules, because the work is three different costs ──────────────
 #
@@ -56,7 +56,15 @@ jobs:
   dispatch:
     if: github.event.schedule == '*/5 * * * *'
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    # The job's ceiling on GitHub, and the loop runs almost all of it. Measured
+    # on the sibling QuickTeam repository over three days, the five-minute
+    # schedule started a run every one to four and a half hours — so a
+    # fifty-minute loop left the outbox unattended for most of every hour, and a
+    # reminder due at 13:15 reached Telegram at 20:58. Six hours of loop against
+    # a schedule that fires at least every four and a half means somebody is
+    # always sweeping; `cancel-in-progress` hands over to the next scheduled run
+    # without ever doubling up.
+    timeout-minutes: 360
     concurrency:
       group: scheduled-notifications-dispatch
       cancel-in-progress: true
@@ -67,7 +75,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ vars.APP_URL || 'https://qticket-qt.vercel.app' }}
           SWEEP_INTERVAL_SECONDS: '60'
-          SWEEP_MINUTES: '50'
+          SWEEP_MINUTES: '355'
           MODE: dispatch
         run: bash .github/scripts/sweep-notifications.sh
 

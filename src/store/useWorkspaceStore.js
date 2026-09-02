@@ -1,6 +1,11 @@
 // src/store/useWorkspaceStore.js
 import { create } from 'zustand';
 import {
+  pushVisibleConversation,
+  removeVisibleConversation,
+  topVisibleConversation,
+} from '@/lib/utils/visibleConversations.mjs';
+import {
   notificationCountTitle,
   notificationGroupKey,
 } from '@/lib/utils/notificationGrouping.mjs';
@@ -180,38 +185,55 @@ const useWorkspaceStore = create((set, get) => ({
     set({ liveNotifs: [] });
   },
 
-  // Which conversation the reader currently has in front of them, published by
-  // whichever pane is showing it: `{ kind: 'issue', id }`. The live popup reads
-  // it and stays down for a message that arrived on the very screen it would
-  // have covered — announcing what somebody is already reading is noise, and on
-  // an incident page it landed on top of the conversation itself.
+  // Which conversations the reader currently has in front of them, published by
+  // whichever panes are showing them: `{ kind: 'issue', id }`.
+  // `visibleConversation` is the topmost — what the reader is actually looking
+  // at. The notification stream reads it: a record about that conversation is
+  // neither announced nor left unread, because announcing what somebody is
+  // already reading is noise, and on an incident page the card landed on top of
+  // the conversation itself.
   //
-  // Cleared against the target that registered it, so a pane unmounting after
-  // the next one has already registered does not wipe the newer answer.
+  // A stack, not a slot. An incident opens as a window over another screen, and
+  // with one slot closing that window left nothing registered — the conversation
+  // underneath was still on screen and no longer counted as such. Each pane
+  // removes only its own entry, so a pane unmounting after the next one has
+  // registered does not wipe the newer answer either.
+  visibleConversations: [],
   visibleConversation: null,
-  setVisibleConversation: (conversation) => set({ visibleConversation: conversation }),
-  clearVisibleConversation: (conversation) => set(state => (
-    state.visibleConversation
-    && state.visibleConversation.kind === conversation?.kind
-    && state.visibleConversation.id === conversation?.id
-      ? { visibleConversation: null }
-      : {}
-  )),
+  setVisibleConversation: (conversation) => set(state => {
+    const next = pushVisibleConversation(state.visibleConversations, conversation);
+    return next === state.visibleConversations
+      ? {}
+      : { visibleConversations: next, visibleConversation: topVisibleConversation(next) };
+  }),
+  clearVisibleConversation: (conversation) => set(state => {
+    const next = removeVisibleConversation(state.visibleConversations, conversation);
+    return next === state.visibleConversations
+      ? {}
+      : { visibleConversations: next, visibleConversation: topVisibleConversation(next) };
+  }),
 
   // One shared notification stream for the whole workspace. This avoids
   // separate Firestore listeners in the header, sidebar and org switcher.
   notifications: [],
   notificationsLoading: true,
   notificationActions: null,
-  setNotificationCenter: (notifications, loading, actions) => set({
+  // Whether the live window holds as many records as it can. Fifty is a window,
+  // not the world: once it is full, an unread record older than the fiftieth is
+  // invisible to it, and the bell has to take its number from the server count
+  // below instead of from the records it can see.
+  notificationWindowFull: false,
+  setNotificationCenter: (notifications, loading, actions, windowFull = false) => set({
     notifications,
     notificationsLoading: loading,
     notificationActions: actions,
+    notificationWindowFull: windowFull,
   }),
   clearNotificationCenter: () => set({
     notifications: [],
     notificationsLoading: false,
     notificationActions: null,
+    notificationWindowFull: false,
   }),
 
   // Server-authoritative unread in-app totals for every membership org. The
@@ -294,6 +316,7 @@ const useWorkspaceStore = create((set, get) => ({
       toast: null,
       _toastTimer: null,
       liveNotifs: [],
+      visibleConversations: [],
       visibleConversation: null,
       issueReadState: {},
       issueReadStateLoaded: false,

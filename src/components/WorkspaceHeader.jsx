@@ -241,12 +241,25 @@ export function WorkspaceHeaderRight({ currentUser, signOut }) {
   });
 
   const scopedNotifications = notifications.filter(n => n.organizationId === activeOrgId);
-  const unreadCount = scopedNotifications.filter(n => !n.read).length;
+  // Fifty records is a window, not the world. While the window is not full, every
+  // record there is sits in it and the count is exact. Once it is full, an unread
+  // record older than the fiftieth is invisible to it — a busy day pushed unread
+  // items out of sight and the bell said nothing — so the number comes from the
+  // server's count instead, the same one the organization switcher shows.
+  const windowFull = useWorkspaceStore(s => s.notificationWindowFull);
+  const unreadByOrganization = useWorkspaceStore(s => s.notificationUnreadByOrg);
+  const windowUnreadCount = scopedNotifications.filter(n => !n.read).length;
+  const serverUnreadCount = unreadByOrganization[activeOrgId];
+  const unreadCount = windowFull && typeof serverUnreadCount === 'number'
+    ? serverUnreadCount
+    : windowUnreadCount;
   const hasEmergency = scopedNotifications.some(n => n.type === 'emergency' && !n.read);
   const shownNotifications = notifFilter === 'unread'
     ? scopedNotifications.filter(n => !n.read)
     : scopedNotifications;
-  const readCount = scopedNotifications.length - unreadCount;
+  // The read ones are counted from the window itself: that is what «Очистити
+  // прочитані» will visibly remove, and a server total does not belong in it.
+  const readCount = scopedNotifications.length - windowUnreadCount;
   // Group by day, preserving the sorted order, and then collapse each day into
   // one row per conversation: three comments on one task are one line saying so,
   // not three identical lines pushing everything else out of the fifty the panel

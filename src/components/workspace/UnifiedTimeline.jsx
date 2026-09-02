@@ -346,8 +346,6 @@ export default function UnifiedTimeline({
   const showToast = useWorkspaceStore(state => state.showToast);
   const setVisibleConversation = useWorkspaceStore(state => state.setVisibleConversation);
   const clearVisibleConversation = useWorkspaceStore(state => state.clearVisibleConversation);
-  const notifications = useWorkspaceStore(state => state.notifications);
-  const markNotificationRead = useWorkspaceStore(state => state.notificationActions?.markRead);
   const confirmDialog = useConfirm();
   const project = projects.find(item => item.id === projectId);
   // The history is read out through the live workflow: a project that renamed a
@@ -1015,41 +1013,23 @@ export default function UnifiedTimeline({
     }).catch(error => reportLoadError('[task-chat] mark changes seen', error));
   }, [activeOrgId, issueId, myId, newestActivityMillis]);
 
-  // A notification exists to bring somebody to a conversation. Standing in that
-  // conversation, the record has already done its whole job, so it is marked
-  // read instead of sitting in the bell as a badge for something on screen.
-  const dismissIssueNotifications = useCallback(() => {
-    if (!markNotificationRead || !issueId) return;
-    const answered = notifications.filter(notification => (
-      !notification.read
-      && notification.issueId === issueId
-      && (notification.type === 'commented' || notification.type === 'mentioned')
-    ));
-    if (answered.length === 0) return;
-    Promise.allSettled(answered.map(notification => markNotificationRead(notification.id)));
-  }, [issueId, markNotificationRead, notifications]);
-
-  // Знято щойно воно з'явилось, а не тоді, коли межа непрочитаного втрапить у
-  // видиму частину списку. Це те саме, що робочий чат робить для відкритого
-  // каналу, і зверненню бракувало саме цього: запис приходив, дзвоник спалахував
-  // «(1)», а за півсекунди спостерігач кінця стрічки гасив його — і так на
-  // кожне повідомлення. Лічильник, який блимає над розмовою, що ти її читаєш, —
-  // це не інформація.
-  //
-  // Курсор прочитаного цього не стосується: він і далі живе за суворішим
-  // правилом (`consumeConversation`), бо позначка «прочитано» на повідомленні —
-  // обіцянка іншій людині, а запис у дзвонику — лише спосіб тебе сюди привести.
-  useEffect(() => {
-    if (!isActive || !tabVisible) return;
-    dismissIssueNotifications();
-  }, [dismissIssueNotifications, isActive, tabVisible]);
-
-  // Reading the conversation, in every sense this product keeps one: the
-  // messages, the changes, the line that says where you stopped, and the
-  // records in the bell that were only ever there to bring you here. Three
+  // Reading the conversation, in every sense this screen keeps one: the
+  // messages, the changes, and the line that says where you stopped. Three
   // callers reach it — the unread line coming into view, the end of the feed
   // coming into view, and answering — and they must not each remember their own
   // half of the list.
+  //
+  // The records in the bell are not on this list any more. They used to be
+  // marked read here, by a list of two types this file kept — and the popup's
+  // own rule, which covers every type an incident produces, lived elsewhere, so
+  // a status change on the incident you were reading was silenced and left
+  // unread at once. Publishing the conversation below is all this screen does
+  // about the bell now; `useNotifications` reads it and settles the records,
+  // before the counter ever draws them.
+  //
+  // Курсор прочитаного лишається тут і живе за суворішим правилом, бо позначка
+  // «прочитано» на повідомленні — обіцянка іншій людині, а запис у дзвонику —
+  // лише спосіб тебе сюди привести.
   const consumeConversation = useCallback(() => {
     if (!myId) return;
     // Only the newest message from each other author carries a mark: it is the
@@ -1059,12 +1039,12 @@ export default function UnifiedTimeline({
     if (receipts.length > 0) markCommentsRead(receipts, myId);
     consumeChanges();
     setBoundary(current => (current.read ? current : { ...current, read: true }));
-    dismissIssueNotifications();
-  }, [consumeChanges, dismissIssueNotifications, markCommentsRead, myId, unreadMessages]);
+  }, [consumeChanges, markCommentsRead, myId, unreadMessages]);
 
-  // What the reader currently has in front of them, so the live notification
-  // popup can stay down for a message that arrived on this very screen instead
-  // of landing on top of the conversation it is announcing.
+  // What the reader currently has in front of them. The notification stream
+  // reads it: a record about this conversation is neither announced — the card
+  // would land on top of the conversation it describes — nor left unread in the
+  // bell.
   useEffect(() => {
     if (!isActive || !issueId) return undefined;
     const conversation = { kind: 'issue', id: issueId };

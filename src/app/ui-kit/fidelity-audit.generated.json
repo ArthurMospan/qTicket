@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 177,
-    "parsedFiles": 177,
+    "productFiles": 178,
+    "parsedFiles": 178,
     "parseErrors": 0,
     "nativeControls": 15,
     "structures": {
@@ -241,7 +241,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:401",
+      "location": "src/components/WorkspaceSidebar.jsx:397",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -256,7 +256,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:424",
+      "location": "src/components/WorkspaceSidebar.jsx:420",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -357,12 +357,12 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:401",
+      "location": "src/components/WorkspaceSidebar.jsx:397",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:424",
+      "location": "src/components/WorkspaceSidebar.jsx:420",
       "tag": "button",
       "context": "branding-action"
     }
@@ -428,12 +428,12 @@
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1702",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1682",
       "tag": "div",
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:528",
+      "location": "src/components/WorkspaceHeader.jsx:541",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

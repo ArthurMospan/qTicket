@@ -1,11 +1,20 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
+// Which projects have unread records in the bell — the dot beside a project in
+// the rail.
+//
+// The dot goes out when the records behind it are read, and nothing else puts
+// it out. Walking into the project used to: the rail marked every unread record
+// of the project read the moment its URL opened, which took the records of every
+// other incident in that project with it — you opened one and the bell forgot
+// the three you had not looked at — and it did so by reading the account's
+// whole notification collection on every navigation. A record is read where its
+// conversation is on screen (`useNotifications`), or by hand in the bell.
 export function useProjectUnreadIndicators(userId, organizationId) {
   const notifications = useWorkspaceStore(state => state.notifications);
-  const notificationActions = useWorkspaceStore(state => state.notificationActions);
 
   const unreadProjectIds = useMemo(() => new Set(
     userId
@@ -16,10 +25,5 @@ export function useProjectUnreadIndicators(userId, organizationId) {
       : [],
   ), [notifications, organizationId, userId]);
 
-  const markProjectRead = useCallback(async projectId => {
-    if (!userId || !notificationActions?.markProjectRead) return;
-    await notificationActions.markProjectRead(projectId, organizationId);
-  }, [notificationActions, organizationId, userId]);
-
-  return { unreadProjectIds, markProjectRead };
+  return { unreadProjectIds };
 }

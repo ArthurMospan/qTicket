@@ -68,17 +68,25 @@ export default function WorkspaceNotificationBridge() {
     && document.visibilityState === 'visible'
     && isConversationOnScreen(notification, useWorkspaceStore.getState().visibleConversation)
   ), []);
-  // Одна відповідь на обидва канали оголошення. Доти перевірка стояла всередині
-  // `onNew`, тобто після дзвіночка: картку вона знімала, звук — ні.
-  const shouldAnnounce = useCallback(
-    notification => !readerIsWatching(notification),
-    [readerIsWatching],
-  );
+  // Одна відповідь на все, що з неї випливає: такий запис не дзвенить, не
+  // спливає карткою і не лежить непрочитаним. Доти перевірка стояла всередині
+  // `onNew`, тобто після дзвіночка: картку вона знімала, звук — ні; а гасила
+  // записи сама сторінка звернення, за своїм списком типів і вже після того, як
+  // лічильник блимнув.
   const notificationCenter = useNotifications(userId, {
     activeOrganizationId: activeOrgId,
     onNew: showLiveNotif,
-    shouldAnnounce,
+    readerIsWatching,
   });
+  // Розмова перед читачем змінилась: записи про те, що тепер на екрані, гаснуть
+  // так само, як гасне запис, що приходить у відкриту розмову. Підписка тут, а
+  // не в `readerIsWatching`: той читає стор у момент приходу запису і не має
+  // перебудовувати потік сповіщень на кожне перемикання панелі.
+  const visibleConversation = useWorkspaceStore(state => state.visibleConversation);
+  const { settleVisible } = notificationCenter;
+  useEffect(() => {
+    settleVisible();
+  }, [settleVisible, visibleConversation]);
   // Одне число, одне джерело: непрочитані сповіщення організації, які цей хук
   // публікує в стор. Поруч із ним колись стояв другий підрахунок —
   // курсори прочитаного корпоративного чату — і `||`, що обирав між ними за
@@ -93,14 +101,18 @@ export default function WorkspaceNotificationBridge() {
   // Six seconds is six seconds of somebody looking. A card that arrived while
   // the tab was in another window used to spend them there and be gone before
   // the reader came back, which is the one case the card exists for.
+  //
+  // Coming back is also when the records about the conversation left open are
+  // read: nothing is read in a tab nobody is looking at, so they waited.
   useEffect(() => {
     const syncVisibility = () => {
       if (document.visibilityState === 'visible') resumeLiveNotifs();
       else holdLiveNotifs();
+      if (document.visibilityState === 'visible') settleVisible();
     };
     document.addEventListener('visibilitychange', syncVisibility);
     return () => document.removeEventListener('visibilitychange', syncVisibility);
-  }, [holdLiveNotifs, resumeLiveNotifs]);
+  }, [holdLiveNotifs, resumeLiveNotifs, settleVisible]);
 
   const actions = useMemo(() => ({
     markAllRead: notificationCenter.markAllRead,
@@ -108,19 +120,28 @@ export default function WorkspaceNotificationBridge() {
     markUnread: notificationCenter.markUnread,
     removeNotification: notificationCenter.removeNotification,
     clearRead: notificationCenter.clearRead,
-    markProjectRead: notificationCenter.markProjectRead,
   }), [
     notificationCenter.markAllRead,
     notificationCenter.markRead,
     notificationCenter.markUnread,
     notificationCenter.removeNotification,
     notificationCenter.clearRead,
-    notificationCenter.markProjectRead,
   ]);
 
   useEffect(() => {
-    setNotificationCenter(notificationCenter.notifications, notificationCenter.loading, actions);
-  }, [actions, notificationCenter.loading, notificationCenter.notifications, setNotificationCenter]);
+    setNotificationCenter(
+      notificationCenter.notifications,
+      notificationCenter.loading,
+      actions,
+      notificationCenter.windowFull,
+    );
+  }, [
+    actions,
+    notificationCenter.loading,
+    notificationCenter.notifications,
+    notificationCenter.windowFull,
+    setNotificationCenter,
+  ]);
 
   useEffect(() => {
     for (const [id, timers] of emergencyTimers.current.entries()) {

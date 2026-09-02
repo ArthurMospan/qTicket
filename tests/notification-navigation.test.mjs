@@ -171,18 +171,25 @@ test('live notification cards stand in a stack, one countdown each', async () =>
 
 // The record that exists only to bring you somewhere you already are.
 test('an incident marks its own bell records read while it is open', async () => {
-  const [timeline, route] = await Promise.all([
+  const [timeline, route, hook, presence] = await Promise.all([
     readFile(new URL('../src/components/workspace/UnifiedTimeline.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/app/api/notifications/route.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/hooks/useNotifications.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/utils/notificationPresence.mjs', import.meta.url), 'utf8'),
   ]);
 
   // The record names the incident it belongs to, written by the one route that
   // creates notifications.
   assert.match(route, /issueId, projectId,|issueId,/);
-  assert.match(timeline, /notification\.issueId === issueId/);
-  assert.match(timeline, /notification\.type === 'commented'\s*\|\| notification\.type === 'mentioned'/);
-  // Nothing is read in a tab nobody is looking at.
-  assert.match(timeline, /if \(!isActive \|\| !tabVisible\) return;\s*dismissIssueNotifications\(\);/);
+  // The pane publishes the incident it shows and keeps no list of its own about
+  // which records to read: the notification stream settles them with the rule
+  // the popup already follows — every type the incident produces — and it
+  // answers the tab coming back. Nothing is read in a tab nobody is looking at,
+  // which is the bridge's `document.visibilityState` check, not the page's.
+  assert.match(timeline, /const conversation = \{ kind: 'issue', id: issueId \};/);
+  assert.doesNotMatch(timeline, /notificationActions\?\.markRead/);
+  assert.match(presence, /notification\.issueId === id/);
+  assert.match(hook, /settleRecordsOnScreen\(/);
 });
 
 // The card in the corner said somebody had written to you, and clicking it did

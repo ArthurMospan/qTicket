@@ -295,11 +295,11 @@ test('sending a message reads the conversation and takes the line down', async (
   // One place decides what «read» means, so three callers cannot each remember
   // their own half of it.
   assert.match(timeline, /const consumeConversation = useCallback\(\(\) => \{/);
-  assert.match(timeline, /dismissIssueNotifications\(\);/);
-  // Including the records in the bell, which existed only to bring the reader
-  // to the conversation they are now standing in.
-  assert.match(timeline, /notification\.issueId === issueId/);
-  assert.match(timeline, /notification\.type === 'commented'\s*\|\| notification\.type === 'mentioned'/);
+  // The records in the bell are not this screen's to read: it publishes the
+  // conversation it shows, and the notification stream settles them with the
+  // same rule for every type the incident produces.
+  assert.doesNotMatch(timeline, /dismissIssueNotifications/);
+  assert.match(timeline, /const conversation = \{ kind: 'issue', id: issueId \};/);
 });
 
 // One person speaking without interruption is drawn as one run.
@@ -443,7 +443,8 @@ test('the pane showing a conversation says so, and the popup asks before it fire
   assert.match(bridge, /document\.visibilityState === 'visible'/);
 });
 
-// The check that suppresses the card has to suppress the chime as well.
+// The check that suppresses the card has to suppress the chime as well — and
+// settle the record, which is the same question asked a third time.
 test('nothing announces a message arriving in the conversation on screen', async () => {
   const [hook, bridge] = await Promise.all([
     read('../src/lib/hooks/useNotifications.js'),
@@ -453,28 +454,38 @@ test('nothing announces a message arriving in the conversation on screen', async
   // The gate stands before the chime, not between the chime and the popup —
   // which is where it used to stand, so the card was suppressed and the sound
   // played anyway on the very incident page the message had landed on.
-  const announceGate = hook.indexOf('!announce(n)');
+  const announceGate = hook.indexOf('watching(n)) return;');
   const chime = hook.indexOf('playChime()', hook.indexOf('const prefs = prefsRef.current'));
-  assert.ok(announceGate > 0, 'the hook asks whether to announce at all');
+  assert.ok(announceGate > 0, 'the hook asks whether the reader is watching');
   assert.ok(announceGate < chime, 'and asks before it plays anything');
   // The bell keeps the record either way: the gate returns before the channels,
-  // never before the list the panel draws.
-  assert.match(hook, /setNotifications\(docs\);/);
+  // never before the list the panel draws — and that list is published with the
+  // records on screen already settled, so the counter never draws them unread.
+  assert.match(hook, /publish\(settleOnScreen\(docs\)/);
   // One decision, passed in by the only component that knows what is on screen.
-  assert.match(bridge, /shouldAnnounce,\s*\}\);/);
+  assert.match(bridge, /readerIsWatching,\s*\}\);/);
 });
 
 // A badge for something you are looking at is not information.
 test('the conversation clears its own bell records while it is open', async () => {
-  const timeline = await read('../src/components/workspace/UnifiedTimeline.jsx');
+  const [timeline, hook, bridge] = await Promise.all([
+    read('../src/components/workspace/UnifiedTimeline.jsx'),
+    read('../src/lib/hooks/useNotifications.js'),
+    read('../src/components/WorkspaceNotificationBridge.jsx'),
+  ]);
 
-  // Not on the intersection observer's schedule: that consumed the record about
-  // half a second after it arrived, so every message lit «(1)» and put it out
-  // again while the reader watched.
-  assert.match(timeline, /if \(!isActive \|\| !tabVisible\) return;\s*dismissIssueNotifications\(\);/);
-  // Two types, because the product produces two. The messenger's `chat_message`
-  // went with the messenger, and a reply inside an incident is a `commented`.
-  assert.match(timeline, /notification\.type === 'commented' \|\| notification\.type === 'mentioned'\)/);
+  // The pane marks nothing read itself any more. It publishes what it shows, and
+  // the stream settles the records — at the snapshot, so nothing lights «(1)»
+  // and puts it out again while the reader watches, and again when the pane in
+  // front changes or the tab comes back.
+  assert.doesNotMatch(timeline, /dismissIssueNotifications/);
+  assert.match(timeline, /setVisibleConversation\(conversation\);/);
+  assert.match(bridge, /\}, \[settleVisible, visibleConversation\]\);/);
+  assert.match(bridge, /document\.visibilityState === 'visible'\) settleVisible\(\);/);
+  // Every type the incident produces, through the one presence rule — not a
+  // hand-kept list of two that left a status change silenced and unread. The
+  // messenger's `chat_message` went with the messenger.
+  assert.match(hook, /settleRecordsOnScreen\(\s*docs,\s*record => !settledIds\.has\(record\.id\) && watching\(record\),\s*\)/);
   assert.doesNotMatch(timeline, /chat_message/);
 });
 
