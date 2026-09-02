@@ -5,6 +5,12 @@ import { useAppContext } from '@/lib/context/AppContext';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { useOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCounts';
 import { isConversationOnScreen } from '@/lib/utils/notificationPresence.mjs';
+import {
+  emergencyRecordsToAlarm,
+  readAlarmedIds,
+  rememberAlarmed,
+  writeAlarmedIds,
+} from '@/lib/utils/emergencyAlarm.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
 // Synthesised locally instead of streamed from assets.mixkit.co. Pulling an
@@ -45,7 +51,9 @@ export default function WorkspaceNotificationBridge() {
   // міст теж стоїть вище за гвард маршруту.
   const { currentUser, subscribableOrgId: activeOrgId } = useAppContext();
   const userId = currentUser?.id || currentUser?.uid;
-  const playedEmergencyIds = useRef(new Set());
+  // Which emergencies this browser has already sounded — read from
+  // localStorage on first use, so a reload does not sound them again.
+  const alarmedIdsRef = useRef(null);
   const emergencyTimers = useRef(new Map());
   const showLiveNotif = useWorkspaceStore(state => state.showLiveNotif);
   const clearLiveNotif = useWorkspaceStore(state => state.clearLiveNotif);
@@ -156,22 +164,26 @@ export default function WorkspaceNotificationBridge() {
       }
     }
 
-    notificationCenter.notifications.forEach(notification => {
-      if (
-        notification.type !== 'emergency'
-        || notification.read
-        || notification.organizationId !== activeOrgId
-        || playedEmergencyIds.current.has(notification.id)
-      ) return;
-
-      playedEmergencyIds.current.add(notification.id);
+    // Sounds for what is new to this browser and still fresh — not for every
+    // unread emergency on every page load, which is what a memory that lived
+    // only in a ref amounted to. The rules are in lib/utils/emergencyAlarm.mjs.
+    if (alarmedIdsRef.current === null) {
+      alarmedIdsRef.current = readAlarmedIds(typeof window !== 'undefined' ? window.localStorage : null);
+    }
+    const sounding = emergencyRecordsToAlarm(notificationCenter.notifications, {
+      organizationId: activeOrgId,
+      alarmedIds: alarmedIdsRef.current,
+    });
+    if (!sounding.length) return;
+    alarmedIdsRef.current = rememberAlarmed(alarmedIdsRef.current, sounding.map(item => item.id));
+    writeAlarmedIds(typeof window !== 'undefined' ? window.localStorage : null, alarmedIdsRef.current);
+    sounding.forEach(notification => {
       playEmergencyAlarm();
       emergencyTimers.current.set(notification.id, [
         window.setTimeout(playEmergencyAlarm, 3000),
         window.setTimeout(playEmergencyAlarm, 6000),
       ]);
     });
-
   }, [activeOrgId, notificationCenter.notifications]);
 
   useEffect(() => {
