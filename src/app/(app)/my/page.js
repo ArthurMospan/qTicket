@@ -36,7 +36,7 @@ import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
 import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
-import { activeMembers } from '@/lib/utils/orgMembership.mjs';
+import { assignableMembersFor } from '@/lib/utils/assignableMembers.mjs';
 import { issuesNeedingAssigneeForMove, needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
 import { useViewState } from '@/lib/hooks/useViewState';
 import { INCIDENT_QUEUE_VIEW_SCHEMA } from '@/lib/utils/viewState.mjs';
@@ -226,30 +226,15 @@ export default function IncidentQueuePage() {
   // time — the project board and the request's own page are the other two — and
   // it was the one left out, so a card dragged out of «Новий» here went through
   // unowned while the same drag on a project board stopped and asked.
-  // Who may take the requests being moved: the support side of their projects'
-  // rosters.
-  //
-  // This queue spans every project a person is on, so a selection can too — and
-  // the same people are about to be written to all of them. The honest set is
-  // therefore the intersection: somebody on three of the four projects cannot
-  // be made answerable for the fourth. One request is that rule with a list of
-  // one. An empty intersection is a real answer, and the dialog says so rather
-  // than offering names the write would refuse.
-  const assignmentCandidates = useMemo(() => {
-    const affected = pendingBulk
+  // Who may take the requests being moved — the one rule, shared with the bulk
+  // bar and with a request's own page. See `assignableMembersFor`.
+  const assignmentCandidates = useMemo(() => assignableMembersFor({
+    members,
+    issues: pendingBulk
       ? pendingBulk.needing
-      : (pendingAssignment?.issue ? [pendingAssignment.issue] : []);
-    const projectIds = [...new Set(affected.map(issue => issue.projectId).filter(Boolean))];
-    if (projectIds.length === 0) return [];
-    const rosters = projectIds.map(projectId => new Set(
-      (projects || []).find(item => item.id === projectId)?.team || [],
-    ));
-    return activeMembers(members).filter(member => {
-      if (isClientRole(member.role)) return false;
-      const uid = member.id || member.uid;
-      return rosters.every(roster => roster.has(uid));
-    });
-  }, [members, pendingAssignment, pendingBulk, projects]);
+      : (pendingAssignment?.issue ? [pendingAssignment.issue] : []),
+    projects,
+  }), [members, pendingAssignment, pendingBulk, projects]);
 
   const gateOrCommit = async (move, statusId = null) => {
     const issue = move.issue || tasks.find(item => item.id === move.issueId);

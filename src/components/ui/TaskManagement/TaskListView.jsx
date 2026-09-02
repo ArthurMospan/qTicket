@@ -18,6 +18,7 @@ import { prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { useIssueSelection } from '@/lib/hooks/useIssueSelection';
 import { compareIssues } from '@/lib/utils/optimistic.mjs';
+import { assignableMembersFor } from '@/lib/utils/assignableMembers.mjs';
 
 // How much of one section this view draws before it asks. The board answers the
 // same question by virtualizing — a column keeps a viewport of cards in the DOM
@@ -308,7 +309,9 @@ export default function TaskListView({
           label: group.label,
           dotColor: group.color,
         }))}
-        memberOptions={activeMembers(members).map(member => ({
+        /* Who this selection may be given to, not who exists — see
+           `assignableMembersFor`. */
+        memberOptions={assignableMembersFor({ members, issues: selectedIssues, projects }).map(member => ({
           value: member.id || member.uid,
           label: member.name || member.email || 'Учасник',
           user: member,

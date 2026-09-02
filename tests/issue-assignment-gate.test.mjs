@@ -196,6 +196,7 @@ test('the dialog offers people who can actually open the request', async () => {
   assert.match(detail, /members=\{assignableMembers\}/);
   assert.doesNotMatch(detail, /members=\{supportDirectory\}/);
   // The queue spans projects, so a selection can too: the same people are
-  // written to all of them, which makes the intersection the honest set.
-  assert.match(queue, /return rosters\.every\(roster => roster\.has\(uid\)\)/);
+  // written to all of them, which makes the intersection the honest set. One
+  // rule, shared — see `assignableMembersFor`.
+  assert.match(queue, /assignableMembersFor\(\{/);
 });

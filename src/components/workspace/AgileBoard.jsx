@@ -16,6 +16,7 @@ import { COLUMN_VIRTUALIZATION_THRESHOLD } from '@/lib/utils/boardRendering.mjs'
 import VirtualDroppableColumn from './VirtualDroppableColumn';
 import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { useIssueSelection } from '@/lib/hooks/useIssueSelection';
+import { assignableMembersFor } from '@/lib/utils/assignableMembers.mjs';
 import {
   createUkrainianDndAnnouncements,
   UKRAINIAN_DRAG_HANDLE_USAGE_INSTRUCTIONS,
@@ -685,7 +686,12 @@ export default function AgileBoard({
             label: column.label,
             dotColor: column.color,
           }))}
-          memberOptions={activeMembers(members).map(member => ({
+          /* Who this selection may be given to, not who exists. The bar
+             listed the whole organization on every board — the same defect
+             the request's own page and the assignee dialog both had, and the
+             one that makes assigning somebody the side door into a project
+             they are not on. */
+          memberOptions={assignableMembersFor({ members, issues: selectedIssues, projects }).map(member => ({
             value: member.id || member.uid,
             label: member.name || member.email || 'Учасник',
             user: member,

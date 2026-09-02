@@ -1727,7 +1727,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:672",
-            "src/app/(app)/my/page.js:477",
+            "src/app/(app)/my/page.js:462",
             "src/components/workspace/IssueDetail.jsx:1243",
             "src/components/workspace/IssueDetail.jsx:1246"
           ]
@@ -1749,7 +1749,7 @@
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:499",
+            "src/app/(app)/my/page.js:484",
             "src/app/(app)/overview/page.js:258",
             "src/app/(app)/page.js:787",
             "src/app/(app)/settings/page.js:2649",
@@ -1777,7 +1777,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:1028",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:781",
             "src/app/(app)/error.js:94",
-            "src/app/(app)/my/page.js:583",
+            "src/app/(app)/my/page.js:568",
             "src/app/(app)/overview/page.js:282",
             "src/app/(app)/page.js:488",
             "src/app/(app)/page.js:489",
@@ -1806,7 +1806,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/my/page.js:527",
+            "src/app/(app)/my/page.js:512",
             "src/app/(app)/page.js:829",
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
@@ -1865,11 +1865,11 @@
           "files": [
             "src/app/(app)/team/page.js:178",
             "src/app/(app)/team/page.js:187",
-            "src/components/workspace/AgileBoard.jsx:373",
-            "src/components/workspace/AgileBoard.jsx:454",
-            "src/components/workspace/AgileBoard.jsx:470",
-            "src/components/workspace/AgileBoard.jsx:555",
-            "src/components/workspace/AgileBoard.jsx:589",
+            "src/components/workspace/AgileBoard.jsx:374",
+            "src/components/workspace/AgileBoard.jsx:455",
+            "src/components/workspace/AgileBoard.jsx:471",
+            "src/components/workspace/AgileBoard.jsx:556",
+            "src/components/workspace/AgileBoard.jsx:590",
             "src/components/workspace/IssueDetail.jsx:1394"
           ]
         },
@@ -1900,9 +1900,9 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:672",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:781",
             "src/app/(app)/layout.js:144",
-            "src/app/(app)/my/page.js:477",
-            "src/app/(app)/my/page.js:499",
-            "src/app/(app)/my/page.js:527",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/my/page.js:484",
+            "src/app/(app)/my/page.js:512",
             "src/app/(app)/overview/page.js:282",
             "src/app/(app)/page.js:488",
             "src/app/(app)/page.js:829",
@@ -1945,7 +1945,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:682",
             "src/app/(app)/error.js:94",
-            "src/app/(app)/my/page.js:583",
+            "src/app/(app)/my/page.js:568",
             "src/app/(app)/overview/page.js:258",
             "src/app/(app)/page.js:489",
             "src/app/(app)/page.js:787",
@@ -2007,11 +2007,11 @@
             "src/components/WorkspaceHeader.jsx:367",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/WorkspaceInfoCenter.jsx:102",
-            "src/components/workspace/AgileBoard.jsx:373",
-            "src/components/workspace/AgileBoard.jsx:454",
-            "src/components/workspace/AgileBoard.jsx:470",
-            "src/components/workspace/AgileBoard.jsx:555",
-            "src/components/workspace/AgileBoard.jsx:589",
+            "src/components/workspace/AgileBoard.jsx:374",
+            "src/components/workspace/AgileBoard.jsx:455",
+            "src/components/workspace/AgileBoard.jsx:471",
+            "src/components/workspace/AgileBoard.jsx:556",
+            "src/components/workspace/AgileBoard.jsx:590",
             "src/components/workspace/IssueDetail.jsx:1394",
             "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
@@ -2040,10 +2040,10 @@
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:477",
-            "src/app/(app)/my/page.js:499",
-            "src/app/(app)/my/page.js:527",
-            "src/app/(app)/my/page.js:583",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/my/page.js:484",
+            "src/app/(app)/my/page.js:512",
+            "src/app/(app)/my/page.js:568",
             "src/app/(app)/overview/page.js:258",
             "src/app/(app)/overview/page.js:282",
             "src/app/(app)/page.js:488",
@@ -2082,11 +2082,11 @@
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
             "src/components/profile/ProfileView.jsx:183",
-            "src/components/workspace/AgileBoard.jsx:373",
-            "src/components/workspace/AgileBoard.jsx:454",
-            "src/components/workspace/AgileBoard.jsx:470",
-            "src/components/workspace/AgileBoard.jsx:555",
-            "src/components/workspace/AgileBoard.jsx:589",
+            "src/components/workspace/AgileBoard.jsx:374",
+            "src/components/workspace/AgileBoard.jsx:455",
+            "src/components/workspace/AgileBoard.jsx:471",
+            "src/components/workspace/AgileBoard.jsx:556",
+            "src/components/workspace/AgileBoard.jsx:590",
             "src/components/workspace/BoardConfigModal.jsx:191",
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
@@ -2156,10 +2156,10 @@
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:477",
-            "src/app/(app)/my/page.js:499",
-            "src/app/(app)/my/page.js:527",
-            "src/app/(app)/my/page.js:583",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/my/page.js:484",
+            "src/app/(app)/my/page.js:512",
+            "src/app/(app)/my/page.js:568",
             "src/app/(app)/overview/page.js:258",
             "src/app/(app)/overview/page.js:282",
             "src/app/(app)/page.js:488",
@@ -2199,11 +2199,11 @@
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
             "src/components/profile/ProfileView.jsx:183",
-            "src/components/workspace/AgileBoard.jsx:373",
-            "src/components/workspace/AgileBoard.jsx:454",
-            "src/components/workspace/AgileBoard.jsx:470",
-            "src/components/workspace/AgileBoard.jsx:555",
-            "src/components/workspace/AgileBoard.jsx:589",
+            "src/components/workspace/AgileBoard.jsx:374",
+            "src/components/workspace/AgileBoard.jsx:455",
+            "src/components/workspace/AgileBoard.jsx:471",
+            "src/components/workspace/AgileBoard.jsx:556",
+            "src/components/workspace/AgileBoard.jsx:590",
             "src/components/workspace/BoardConfigModal.jsx:191",
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
@@ -2263,10 +2263,10 @@
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:477",
-            "src/app/(app)/my/page.js:499",
-            "src/app/(app)/my/page.js:527",
-            "src/app/(app)/my/page.js:583",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/my/page.js:484",
+            "src/app/(app)/my/page.js:512",
+            "src/app/(app)/my/page.js:568",
             "src/app/(app)/overview/page.js:282",
             "src/app/(app)/page.js:488",
             "src/app/(app)/page.js:489",
@@ -2301,11 +2301,11 @@
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
             "src/components/profile/ProfileView.jsx:183",
-            "src/components/workspace/AgileBoard.jsx:373",
-            "src/components/workspace/AgileBoard.jsx:454",
-            "src/components/workspace/AgileBoard.jsx:470",
-            "src/components/workspace/AgileBoard.jsx:555",
-            "src/components/workspace/AgileBoard.jsx:589",
+            "src/components/workspace/AgileBoard.jsx:374",
+            "src/components/workspace/AgileBoard.jsx:455",
+            "src/components/workspace/AgileBoard.jsx:471",
+            "src/components/workspace/AgileBoard.jsx:556",
+            "src/components/workspace/AgileBoard.jsx:590",
             "src/components/workspace/BoardConfigModal.jsx:191",
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:232",
@@ -2386,10 +2386,10 @@
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
-            "src/app/(app)/my/page.js:477",
-            "src/app/(app)/my/page.js:499",
-            "src/app/(app)/my/page.js:527",
-            "src/app/(app)/my/page.js:583",
+            "src/app/(app)/my/page.js:462",
+            "src/app/(app)/my/page.js:484",
+            "src/app/(app)/my/page.js:512",
+            "src/app/(app)/my/page.js:568",
             "src/app/(app)/overview/page.js:258",
             "src/app/(app)/overview/page.js:282",
             "src/app/(app)/page.js:488",
@@ -2425,10 +2425,10 @@
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/profile/ProfileView.jsx:183",
-            "src/components/workspace/AgileBoard.jsx:454",
-            "src/components/workspace/AgileBoard.jsx:470",
-            "src/components/workspace/AgileBoard.jsx:555",
-            "src/components/workspace/AgileBoard.jsx:589",
+            "src/components/workspace/AgileBoard.jsx:455",
+            "src/components/workspace/AgileBoard.jsx:471",
+            "src/components/workspace/AgileBoard.jsx:556",
+            "src/components/workspace/AgileBoard.jsx:590",
             "src/components/workspace/BoardConfigModal.jsx:191",
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
@@ -2488,7 +2488,7 @@
             "/my"
           ],
           "files": [
-            "src/components/workspace/AgileBoard.jsx:373"
+            "src/components/workspace/AgileBoard.jsx:374"
           ]
         },
         "inline-add-action": {
@@ -2849,11 +2849,11 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:722",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:733",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:744",
-            "src/app/(app)/my/page.js:412",
-            "src/app/(app)/my/page.js:424",
-            "src/app/(app)/my/page.js:441",
-            "src/app/(app)/my/page.js:451",
-            "src/app/(app)/my/page.js:461",
+            "src/app/(app)/my/page.js:397",
+            "src/app/(app)/my/page.js:409",
+            "src/app/(app)/my/page.js:426",
+            "src/app/(app)/my/page.js:436",
+            "src/app/(app)/my/page.js:446",
             "src/app/(app)/page.js:808",
             "src/app/(app)/page.js:810",
             "src/app/(app)/page.js:811",
@@ -2908,11 +2908,11 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:722",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:733",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:744",
-            "src/app/(app)/my/page.js:412",
-            "src/app/(app)/my/page.js:424",
-            "src/app/(app)/my/page.js:441",
-            "src/app/(app)/my/page.js:451",
-            "src/app/(app)/my/page.js:461",
+            "src/app/(app)/my/page.js:397",
+            "src/app/(app)/my/page.js:409",
+            "src/app/(app)/my/page.js:426",
+            "src/app/(app)/my/page.js:436",
+            "src/app/(app)/my/page.js:446",
             "src/app/(app)/page.js:808",
             "src/app/(app)/page.js:810",
             "src/app/(app)/page.js:811"
@@ -2963,7 +2963,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:699",
-            "src/app/(app)/my/page.js:412"
+            "src/app/(app)/my/page.js:397"
           ]
         },
         "member": {
@@ -2976,7 +2976,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:709",
-            "src/app/(app)/my/page.js:424",
+            "src/app/(app)/my/page.js:409",
             "src/app/(app)/page.js:808"
           ]
         },
@@ -2988,7 +2988,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:722",
-            "src/app/(app)/my/page.js:441"
+            "src/app/(app)/my/page.js:426"
           ]
         },
         "type": {
@@ -2999,7 +2999,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:733",
-            "src/app/(app)/my/page.js:451"
+            "src/app/(app)/my/page.js:436"
           ]
         },
         "date": {
@@ -3012,7 +3012,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:744",
-            "src/app/(app)/my/page.js:461",
+            "src/app/(app)/my/page.js:446",
             "src/app/(app)/page.js:810"
           ]
         },
@@ -3072,7 +3072,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:383",
+            "src/app/(app)/my/page.js:368",
             "src/components/workspace/IssueDetail.jsx:1712",
             "src/components/workspace/IssueDetail.jsx:1729",
             "src/components/workspace/IssueDetail.jsx:1772",
@@ -3089,7 +3089,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:383"
+            "src/app/(app)/my/page.js:368"
           ]
         },
         "(default)": {
@@ -3114,7 +3114,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:383"
+            "src/app/(app)/my/page.js:368"
           ]
         },
         "(default)": {
@@ -3423,11 +3423,11 @@
             "/my"
           ],
           "files": [
-            "src/components/workspace/AgileBoard.jsx:463",
-            "src/components/workspace/AgileBoard.jsx:480",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:564",
-            "src/components/workspace/AgileBoard.jsx:599"
+            "src/components/workspace/AgileBoard.jsx:464",
+            "src/components/workspace/AgileBoard.jsx:481",
+            "src/components/workspace/AgileBoard.jsx:509",
+            "src/components/workspace/AgileBoard.jsx:565",
+            "src/components/workspace/AgileBoard.jsx:600"
           ]
         },
         "danger": {
@@ -3510,11 +3510,11 @@
             "src/components/InviteMemberDialog.jsx:257",
             "src/components/profile/ProfileView.jsx:199",
             "src/components/profile/ProfileView.jsx:207",
-            "src/components/workspace/AgileBoard.jsx:463",
-            "src/components/workspace/AgileBoard.jsx:480",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:564",
-            "src/components/workspace/AgileBoard.jsx:599",
+            "src/components/workspace/AgileBoard.jsx:464",
+            "src/components/workspace/AgileBoard.jsx:481",
+            "src/components/workspace/AgileBoard.jsx:509",
+            "src/components/workspace/AgileBoard.jsx:565",
+            "src/components/workspace/AgileBoard.jsx:600",
             "src/components/workspace/IssueCard.jsx:421"
           ]
         },
@@ -3588,11 +3588,11 @@
             "src/components/profile/ProfileView.jsx:199",
             "src/components/profile/ProfileView.jsx:330",
             "src/components/profile/ProfileView.jsx:353",
-            "src/components/workspace/AgileBoard.jsx:463",
-            "src/components/workspace/AgileBoard.jsx:480",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:564",
-            "src/components/workspace/AgileBoard.jsx:599",
+            "src/components/workspace/AgileBoard.jsx:464",
+            "src/components/workspace/AgileBoard.jsx:481",
+            "src/components/workspace/AgileBoard.jsx:509",
+            "src/components/workspace/AgileBoard.jsx:565",
+            "src/components/workspace/AgileBoard.jsx:600",
             "src/components/workspace/IssueCard.jsx:421",
             "src/components/workspace/IssueDetail.jsx:1595",
             "src/components/workspace/UnifiedTimeline.jsx:236"
@@ -3627,11 +3627,11 @@
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/profile/ProfileView.jsx:199",
             "src/components/profile/ProfileView.jsx:207",
-            "src/components/workspace/AgileBoard.jsx:463",
-            "src/components/workspace/AgileBoard.jsx:480",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:564",
-            "src/components/workspace/AgileBoard.jsx:599",
+            "src/components/workspace/AgileBoard.jsx:464",
+            "src/components/workspace/AgileBoard.jsx:481",
+            "src/components/workspace/AgileBoard.jsx:509",
+            "src/components/workspace/AgileBoard.jsx:565",
+            "src/components/workspace/AgileBoard.jsx:600",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336",
             "src/components/workspace/IssueCard.jsx:421",
@@ -3679,11 +3679,11 @@
             "src/components/profile/ProfileView.jsx:207",
             "src/components/profile/ProfileView.jsx:330",
             "src/components/profile/ProfileView.jsx:353",
-            "src/components/workspace/AgileBoard.jsx:463",
-            "src/components/workspace/AgileBoard.jsx:480",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:564",
-            "src/components/workspace/AgileBoard.jsx:599",
+            "src/components/workspace/AgileBoard.jsx:464",
+            "src/components/workspace/AgileBoard.jsx:481",
+            "src/components/workspace/AgileBoard.jsx:509",
+            "src/components/workspace/AgileBoard.jsx:565",
+            "src/components/workspace/AgileBoard.jsx:600",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336",
             "src/components/workspace/IssueDetail.jsx:1595",
@@ -3732,11 +3732,11 @@
             "src/components/WorkspaceHeader.jsx:547",
             "src/components/profile/ProfileView.jsx:199",
             "src/components/profile/ProfileView.jsx:207",
-            "src/components/workspace/AgileBoard.jsx:463",
-            "src/components/workspace/AgileBoard.jsx:480",
-            "src/components/workspace/AgileBoard.jsx:508",
-            "src/components/workspace/AgileBoard.jsx:564",
-            "src/components/workspace/AgileBoard.jsx:599",
+            "src/components/workspace/AgileBoard.jsx:464",
+            "src/components/workspace/AgileBoard.jsx:481",
+            "src/components/workspace/AgileBoard.jsx:509",
+            "src/components/workspace/AgileBoard.jsx:565",
+            "src/components/workspace/AgileBoard.jsx:600",
             "src/components/workspace/IssueCard.jsx:421",
             "src/components/workspace/IssueDetail.jsx:1595"
           ]
@@ -4120,7 +4120,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:574",
+            "src/app/(app)/my/page.js:559",
             "src/app/(app)/page.js:486",
             "src/components/SupportDialog.jsx:48",
             "src/components/WorkspaceHeader.jsx:510",
@@ -4149,7 +4149,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:574"
+            "src/app/(app)/my/page.js:559"
           ]
         },
         "(default)": {
@@ -4203,7 +4203,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:574",
+            "src/app/(app)/my/page.js:559",
             "src/components/WorkspaceInfoCenter.jsx:269"
           ]
         },
@@ -4235,7 +4235,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/my/page.js:574"
+            "src/app/(app)/my/page.js:559"
           ]
         },
         "(default)": {
@@ -4282,7 +4282,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:780",
-            "src/app/(app)/my/page.js:522",
+            "src/app/(app)/my/page.js:507",
             "src/app/(app)/overview/page.js:277",
             "src/app/(app)/page.js:494",
             "src/app/(app)/page.js:818",
@@ -4471,7 +4471,7 @@
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:627",
             "src/app/(app)/loading.js:28",
-            "src/app/(app)/my/page.js:516",
+            "src/app/(app)/my/page.js:501",
             "src/app/(app)/overview/page.js:273",
             "src/app/(app)/page.js:748",
             "src/app/(app)/page.js:774",
@@ -4796,7 +4796,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:765",
-            "src/app/(app)/my/page.js:486",
+            "src/app/(app)/my/page.js:471",
             "src/components/InviteMemberDialog.jsx:272",
             "src/components/workspace/IssueDetail.jsx:1358"
           ]
@@ -4831,7 +4831,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:765",
-            "src/app/(app)/my/page.js:486",
+            "src/app/(app)/my/page.js:471",
             "src/app/(app)/settings/page.js:3062",
             "src/components/InviteMemberDialog.jsx:272",
             "src/components/profile/ProfileView.jsx:223"
@@ -5034,7 +5034,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:697",
-            "src/app/(app)/my/page.js:382"
+            "src/app/(app)/my/page.js:367"
           ]
         },
         "projects": {
