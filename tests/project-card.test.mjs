@@ -50,13 +50,19 @@ test('the featured card shows the last three actions, not one', () => {
 test('an action row is a target, and looks like one under the pointer', () => {
   // The whole row links to the task; only the title used to, with nothing on
   // the card saying so, so the block behaved like a caption you could hit by
-  // accident.
-  assert.match(projectPage, /recentActions\.map\(action => \([\s\S]{0,900}<Link/);
+  // accident. It is `ActivityRow` now — the same row «Огляд» draws — and it
+  // stays a real anchor there rather than becoming a button, because a feed row
+  // is a destination and a `<button>` cannot be middle-clicked into a new tab.
+  const row = read('../src/components/ui/DataDisplay/ActivityRow.jsx');
+  assert.match(projectPage, /recentActions\.map\(action => \([\s\S]{0,600}<ActivityRow/);
+  assert.match(projectPage, /href=\{issuePath\(action\)\}/);
+  assert.match(row, /if \(href\) \{[\s\S]{0,200}<Link href=\{href\}/);
   // And the hover is visible. A row sitting on `canvas` that hovered to
   // `canvas` was a transition whose two ends were four points apart on a
   // 255-point scale — a hover you could not see. One step darker is one you
   // can point at.
-  assert.match(projectPage, /bg-canvas[^"]*hover:bg-line/);
+  assert.match(row, /bg-canvas[\s\S]{0,200}hover:bg-line/);
+  assert.doesNotMatch(row, /hover:bg-canvas/);
   assert.doesNotMatch(projectPage, /hover:bg-canvas/);
 });
 

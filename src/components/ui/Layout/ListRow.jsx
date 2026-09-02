@@ -31,6 +31,9 @@ import React from 'react';
 const DENSITIES = {
   compact: 'px-4 py-2.5',
   roomy: 'px-4 py-4 sm:px-5',
+  // The feed's own height, so a list of records and a list of events sitting in
+  // two panels of one screen line up. See `soft` below.
+  feed: 'px-[10px] py-[7px]',
 };
 
 // Two lists, and the product genuinely has both.
@@ -53,6 +56,14 @@ const DENSITIES = {
 const SHAPES = {
   divided: '',
   card: 'rounded-[12px] border border-line bg-white',
+  // The third one, and it is the quietest: a grey tile on a white panel, no
+  // edge of its own, filling one step darker under the pointer. It is what the
+  // project card's activity has always drawn and what `ActivityRow` draws now,
+  // and «Проєкти» on «Огляд» sits in the panel next to that feed — so a list of
+  // projects and a list of events had to stop being a bordered white tile
+  // beside a grey one. `card` stays for the lists that stand alone on a panel
+  // of their own, where the edge is the only thing separating a row from it.
+  soft: 'rounded-[10px] bg-canvas',
 };
 
 /**
@@ -67,8 +78,8 @@ const SHAPES = {
  * the density changed here. Passing no `onClick` is the whole of it: no
  * button, no hover, no tab stop, the same geometry.
  *
- * @param {'compact'|'roomy'} props.density Row height: a search result against a table row.
- * @param {'divided'|'card'} props.shape A line of one block, or a tile of its own. See above.
+ * @param {'compact'|'roomy'|'feed'} props.density Row height: a search result, a table row, or a line of a feed.
+ * @param {'divided'|'card'|'soft'} props.shape A line of one block, a tile of its own, or a quiet grey tile on a white panel. See above.
  * @param {React.ReactNode} props.children The row's own layout — flex, grid, whatever it needs.
  * @param {(event) => void} props.onClick Opens whatever the row stands for. Without it the row is inert.
  * @param {string} props.className Placement and layout in the parent only.

@@ -378,12 +378,12 @@
       "className": "w-full max-w-[420px] bg-white border border-line rounded-[16px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center"
     },
     {
-      "location": "src/app/(app)/page.js:168",
+      "location": "src/app/(app)/page.js:169",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/page.js:180",
+      "location": "src/app/(app)/page.js:181",
       "tag": "div",
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },

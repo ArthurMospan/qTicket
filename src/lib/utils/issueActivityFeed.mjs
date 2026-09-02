@@ -136,13 +136,19 @@ export function issueActivityEntry(issue, {
  * Requests with no recorded activity fall out rather than sorting to the
  * bottom: a row that cannot say what happened is not an entry in a list of what
  * happened.
+ *
+ * @param {number} limit How many entries to keep, or 0 for all of them. It used
+ *   to default to eight and there was no way to ask for the ninth: a desk with
+ *   a busy morning read «Останні дії» and saw a fixed window with nothing
+ *   saying it was a window. Paging belongs to the screen, which now takes the
+ *   whole feed and reveals it in batches, so the cap here is opt-in.
  */
-export function issueActivityFeed(issues, options = {}, limit = 8) {
-  return (issues || [])
+export function issueActivityFeed(issues, options = {}, limit = 0) {
+  const feed = (issues || [])
     .map(issue => issueActivityEntry(issue, options))
     .filter(Boolean)
-    .sort((left, right) => right.millis - left.millis)
-    .slice(0, limit);
+    .sort((left, right) => right.millis - left.millis);
+  return limit > 0 ? feed.slice(0, limit) : feed;
 }
 
 export { SUPPORT_ACTOR };

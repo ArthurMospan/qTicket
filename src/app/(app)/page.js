@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ExternalLink, Archive, ArchiveRestore, Inbox, Plus, Folder, Clock, Users, TrendingUp, Target, ArrowRight, MoreVertical, Trash2, User, Settings2 } from 'lucide-react';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
+import ActivityRow from '@/components/ui/DataDisplay/ActivityRow';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { can, isClientRole } from '@/lib/utils/can';
@@ -456,46 +457,28 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
         // people did, this is a thing you have to do something about.
         <TaskCounters mentions={mentionCount} className="self-end" />
       )}
+      {/* The whole row is the link, not the task title inside it. Only the
+          title used to be clickable and nothing said so, so the block behaved
+          like a caption you could accidentally hit.
+
+          The shape this card invented is the kit's `ActivityRow` now, and
+          «Огляд» draws the same one: one event, one row, one product. It was
+          the other way round for a while — this card had the compact grey row
+          and «Огляд» had a bordered white tile of its own, which is two lists
+          of the same sentences looking like two applications. */}
       {recentActions.map(action => (
-        // The whole row is the link, not the task title inside it. Only the
-        // title used to be clickable and nothing said so, so the block behaved
-        // like a caption you could accidentally hit.
-        //
-        // The hover fill is `line`, not a lighter `canvas`. A row already
-        // sitting on `canvas` that hovers to `canvas` is a hover you cannot
-        // see: the two ends of the transition were four points apart on a
-        // 255-point scale. One step darker is a step you can point at.
-        <Link
+        <ActivityRow
           key={action.id}
           href={issuePath(action)}
           onClick={(e) => e.stopPropagation()}
-          title="Відкрити звернення"
-          className="group/activity no-nav flex items-center gap-[8px] rounded-[10px] bg-canvas px-[10px] py-[7px] text-[12px] text-ink transition-colors hover:bg-line"
-        >
-          {/* No avatar when nothing recorded who acted — a placeholder face in
-              front of the sentence read as a person whose picture had failed to
-              load. */}
-          {action.actorUser
-            ? <UserAvatar user={action.actorUser} size="xs" />
-            : <span aria-hidden className="h-[6px] w-[6px] shrink-0 rounded-full bg-faint" />}
-
-          <p className="min-w-0 flex-1 truncate leading-tight text-muted">
-            {action.actor && <span className="font-bold text-ink">{action.actor} </span>}
-            {action.action}{' '}
-            {/* No underline on hover. The whole row already fills from
-                `canvas` to `line` under the pointer, which says «this is one
-                thing and it is clickable» better than a line under four words
-                inside it — and an underline on part of a row that is entirely
-                a link claims the rest of the row is not. */}
-            <span className="font-semibold text-ink">
-              {action.issueKey}: {action.title}
-            </span>
-          </p>
-
-          {action.time && (
-            <span className="shrink-0 text-[10px] font-medium text-muted">{timeAgoString(action.time)}</span>
-          )}
-        </Link>
+          className="no-nav"
+          actor={action.actorUser}
+          actorName={action.actor}
+          text={action.action}
+          issueKey={action.issueKey}
+          title={action.title}
+          time={timeAgoString(action.time)}
+        />
       ))}
     </div>
   );

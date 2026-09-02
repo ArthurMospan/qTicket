@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ActivityRow,
@@ -22,8 +22,11 @@ import {
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import {
   AlertTriangle,
+  ChevronDown,
+  ChevronUp,
   CircleCheck,
   CircleDotDashed,
+  Folder,
   History,
   Inbox,
   MessageCircleReply,
@@ -42,6 +45,40 @@ import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/uti
 import { issueActivityFeed } from '@/lib/utils/issueActivityFeed.mjs';
 import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
+
+// How much of «Останні дії» is on screen at first, and how much a press adds.
+//
+// The feed used to be cut to eight by the builder, with nothing on the page
+// saying so: a desk that had a busy morning read the newest eight events and
+// had no way to reach the ninth. The numbers and the control are QuickTeam's —
+// ten, then twenty at a time, a quiet `TextAction` under the list with a
+// chevron on it, and «Згорнути» once there is nothing left to add.
+const INITIAL_ACTIVITY_ROWS = 10;
+const MORE_ACTIVITY_ROWS = 20;
+
+/**
+ * «Показати ще» / «Згорнути» under a feed, and nothing at all while the feed
+ * fits. Two screens read this page — a customer's and the desk's — and both
+ * draw the same list, so the control is written once rather than twice.
+ */
+function ActivityPager({ total, shown, onMore, onCollapse }) {
+  const remaining = total - shown;
+  const expanded = shown > INITIAL_ACTIVITY_ROWS;
+  if (remaining <= 0 && !expanded) return null;
+  return (
+    <div className="mt-1 flex justify-center border-t border-line pt-2">
+      {remaining > 0 ? (
+        <TextAction tone="muted" icon={ChevronDown} onClick={onMore}>
+          Показати ще {Math.min(MORE_ACTIVITY_ROWS, remaining)}
+        </TextAction>
+      ) : (
+        <TextAction tone="muted" icon={ChevronUp} onClick={onCollapse}>
+          Згорнути
+        </TextAction>
+      )}
+    </div>
+  );
+}
 
 function timestampMillis(value) {
   if (!value) return 0;
@@ -189,6 +226,11 @@ export default function OverviewPage() {
     () => issueActivityFeed(issues, { supportUserIds, clientViewer, memberById }),
     [clientViewer, issues, memberById, supportUserIds],
   );
+  // The whole feed is built; how much of it stands on screen is this screen's
+  // business. One counter serves both halves of the page, because exactly one
+  // of them is ever rendered.
+  const [shownActivity, setShownActivity] = useState(INITIAL_ACTIVITY_ROWS);
+  const visibleActivity = activityFeed.slice(0, shownActivity);
   const projectSummary = useMemo(() => activeProjects
     .map(project => {
       const projectOpen = openIssues.filter(item => item.issue.projectId === project.id);
@@ -326,8 +368,8 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {activityFeed.map(entry => (
+                  <div className="flex flex-col gap-[6px]">
+                    {visibleActivity.map(entry => (
                       <ActivityRow
                         key={entry.id}
                         actor={entry.actor}
@@ -344,6 +386,12 @@ export default function OverviewPage() {
                         }}
                       />
                     ))}
+                    <ActivityPager
+                      total={activityFeed.length}
+                      shown={visibleActivity.length}
+                      onMore={() => setShownActivity(value => value + MORE_ACTIVITY_ROWS)}
+                      onCollapse={() => setShownActivity(INITIAL_ACTIVITY_ROWS)}
+                    />
                   </div>
                 )}
               </DetailSection>
@@ -399,9 +447,13 @@ export default function OverviewPage() {
                   icon={History}
                   title="Останні дії"
                   description="Що сталося у зверненнях усіх доступних проєктів."
+                  // «Усі», like every other section's action on this page.
+                  // «Вся черга» named the destination's contents in words that
+                  // screen does not use about itself, and it was the only
+                  // action here that did not simply say «all of them».
                   action={(
                     <TextAction onClick={() => router.push('/my')} tone="ink" size="md">
-                      Вся черга
+                      Усі
                     </TextAction>
                   )}
                 >
@@ -421,8 +473,8 @@ export default function OverviewPage() {
                      activity: a drag renumbers every card in the column it
                      lands in. The feed reads `lastActivity*`, which the writers
                      set on purpose. */
-                  <div className="flex flex-col gap-2">
-                    {activityFeed.map(entry => (
+                  <div className="flex flex-col gap-[6px]">
+                    {visibleActivity.map(entry => (
                       <ActivityRow
                         key={entry.id}
                         actor={entry.actor}
@@ -439,14 +491,24 @@ export default function OverviewPage() {
                         }}
                       />
                     ))}
+                    <ActivityPager
+                      total={activityFeed.length}
+                      shown={visibleActivity.length}
+                      onMore={() => setShownActivity(value => value + MORE_ACTIVITY_ROWS)}
+                      onCollapse={() => setShownActivity(INITIAL_ACTIVITY_ROWS)}
+                    />
                   </div>
                 )}
                 </DetailSection>
               </Surface>
 
+              {/* A folder, which is what the rail calls this destination and
+                  what a project is. `UsersRound` was people — the same glyph
+                  that stands over «Без відповідального» three tiles up on this
+                  very screen, meaning something else there. */}
               <Surface preset="nested-card" padding="md">
                 <DetailSection
-                  icon={UsersRound}
+                  icon={Folder}
                   title="Проєкти"
                   description="Відкриті звернення за проєктами."
                   action={(
@@ -457,7 +519,7 @@ export default function OverviewPage() {
                 >
                 {projectSummary.length === 0 ? (
                   <EmptyState
-                    icon={UsersRound}
+                    icon={Folder}
                     title="Проєктів ще немає"
                     description={canCreateClient
                       ? 'Створіть окремий проєкт для першого клієнта.'
@@ -472,26 +534,25 @@ export default function OverviewPage() {
                     surface="card"
                   />
                 ) : (
-                  /* One tile per project, not one slab with hairlines
-                      across it. Each row here stands for a whole project you
-                      open — they are not lines of a single block — so they are
-                      drawn the way this product draws a row that is its own
-                      object everywhere else: `TaskRow`, `ActivityRow`, and now
-                      this. The old shape rounded only the first and last
-                      corners of the run and swept one hover across the whole
-                      slab. */
-                  <div className="flex flex-col gap-2">
+                  /* One tile per project, not one slab with hairlines across
+                      it: each row stands for a whole project you open, not for
+                      a line of a single block. It is the same quiet tile the
+                      feed in the panel to the left is made of — the two lists
+                      are read together and were drawn as a bordered white row
+                      beside a grey one, which is two panels of one screen
+                      looking like two screens. */
+                  <div className="flex flex-col gap-[6px]">
                     {projectSummary.map(({ project, open, unassigned }) => (
                       <ListRow
                         key={project.id}
-                        shape="card"
-                        density="roomy"
+                        shape="soft"
+                        density="feed"
                         onClick={() => router.push(`/${encodeURIComponent(project.id)}`)}
-                        className="flex items-center gap-3"
+                        className="flex items-center gap-[8px]"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[13px] font-bold text-ink">{project.name}</p>
-                          <p className="mt-1 text-[11px] text-muted">
+                          <p className="truncate text-[12px] font-bold leading-[18px] text-ink">{project.name}</p>
+                          <p className="mt-[3px] truncate text-[11px] leading-[15px] text-ink-soft">
                             {open} відкритих · {unassigned} без відповідального
                           </p>
                         </div>

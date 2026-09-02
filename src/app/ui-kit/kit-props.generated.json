@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 91,
-    "props": 670,
-    "documentedProps": 670,
+    "props": 671,
+    "documentedProps": 671,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -15,7 +15,7 @@
   "components": {
     "ActivityRow": {
       "file": "src/components/ui/DataDisplay/ActivityRow.jsx",
-      "summary": "One line of an activity feed: who did what, to which request, and when.",
+      "summary": "One line of an activity feed: who did what, to which request, and when. destination, and a `<button>` cannot be middle-clicked into a new tab.",
       "props": [
         {
           "name": "actor",
@@ -53,6 +53,13 @@
           "description": "The desk did it, and the reader is not told which agent. Draws a mark rather than a face, so the line keeps the weight of a named one."
         },
         {
+          "name": "href",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Where the row goes, as a real link: a feed row is a"
+        },
+        {
           "name": "issueKey",
           "default": "''",
           "type": "string",
@@ -64,7 +71,7 @@
           "default": "",
           "type": "() => void",
           "values": [],
-          "description": "Opens the request."
+          "description": "Opens the request, or rides along with `href` where the row sits inside another clickable card."
         },
         {
           "name": "text",
@@ -2591,12 +2598,13 @@
         {
           "name": "density",
           "default": "'compact'",
-          "type": "'compact'|'roomy'",
+          "type": "'compact'|'roomy'|'feed'",
           "values": [
             "compact",
+            "feed",
             "roomy"
           ],
-          "description": "Row height: a search result against a table row."
+          "description": "Row height: a search result, a table row, or a line of a feed."
         },
         {
           "name": "onClick",
@@ -2608,12 +2616,13 @@
         {
           "name": "shape",
           "default": "'divided'",
-          "type": "'divided'|'card'",
+          "type": "'divided'|'card'|'soft'",
           "values": [
             "card",
-            "divided"
+            "divided",
+            "soft"
           ],
-          "description": "A line of one block, or a tile of its own. See above."
+          "description": "A line of one block, a tile of its own, or a quiet grey tile on a white panel. See above."
         }
       ]
     },
