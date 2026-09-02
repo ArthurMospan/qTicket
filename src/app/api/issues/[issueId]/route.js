@@ -8,13 +8,13 @@ import {
   projectIssueCountIncrements,
 } from '@/lib/server/projectIssueCounts';
 import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages.mjs';
-import { rolesFor } from '@/lib/utils/can';
+import { can, rolesFor } from '@/lib/utils/can';
 import {
   AUDITED_ISSUE_FIELDS,
   FACT_ONLY_AUDITED_FIELDS,
   auditValue,
 } from '@/lib/utils/issueAuditEvents.mjs';
-import { pickIssueContentFields } from '@/lib/utils/issueContentFields.mjs';
+import { pickIssueContentFields, pickIssueDeskFields } from '@/lib/utils/issueContentFields.mjs';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import {
   issueTombstoneId,
@@ -70,7 +70,47 @@ export async function PATCH(request, context) {
     }
 
     const body = await readJsonBody(request);
-    const patch = pickIssueContentFields(body?.data ?? body);
+    const submitted = body?.data ?? body;
+    // Two halves of one patch, and two different permissions.
+    //
+    // The desk half — who is on the request, when it is due — used to be
+    // written straight from the browser, which is why neither side of the desk
+    // could read that it had happened. It comes through here now, behind
+    // `edit:issue`, which no client role holds: the route is what decides,
+    // exactly as it decides the content half above.
+    const deskPatch = pickIssueDeskFields(submitted);
+    const editsDesk = Object.keys(deskPatch).length > 0;
+    if (editsDesk && !can(authorization.membership?.role, 'edit:issue')) {
+      return NextResponse.json({
+        error: 'Робочий процес звернення веде підтримка',
+        code: 'DESK_FIELDS_FORBIDDEN',
+      }, { status: 403 });
+    }
+    if (deskPatch.assigneeIds !== undefined && !Array.isArray(deskPatch.assigneeIds)) {
+      return NextResponse.json({
+        error: 'Некоректне значення поля',
+        code: 'INVALID_FIELD',
+        field: 'assigneeIds',
+      }, { status: 400 });
+    }
+    if (deskPatch.dueDate !== undefined) {
+      // A `Date` reaches the server as an ISO string; clearing a deadline
+      // reaches it as `null`, which is a value rather than an omission.
+      if (deskPatch.dueDate === null) {
+        deskPatch.dueDate = null;
+      } else {
+        const parsed = new Date(deskPatch.dueDate);
+        if (Number.isNaN(parsed.getTime())) {
+          return NextResponse.json({
+            error: 'Некоректне значення поля',
+            code: 'INVALID_FIELD',
+            field: 'dueDate',
+          }, { status: 400 });
+        }
+        deskPatch.dueDate = Timestamp.fromDate(parsed);
+      }
+    }
+    const patch = { ...pickIssueContentFields(submitted), ...deskPatch };
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({
         error: 'Немає полів для збереження',

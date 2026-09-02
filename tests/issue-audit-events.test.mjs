@@ -83,7 +83,7 @@ test('people and labels are named, and an empty list says so', () => {
       from: JSON.stringify(['member-a']),
       to: JSON.stringify(['member-a', 'member-b']),
     }, CONTEXT),
-    'Виконавців змінено: «Оля» → «Оля, Дмитро»',
+    'Відповідальних змінено: «Оля» → «Оля, Дмитро»',
   );
   assert.equal(
     describeAuditEvent({
@@ -91,12 +91,12 @@ test('people and labels are named, and an empty list says so', () => {
       from: JSON.stringify(['member-a']),
       to: JSON.stringify([]),
     }, CONTEXT),
-    'Виконавців змінено: «Оля» → «ніхто»',
+    'Відповідальних змінено: «Оля» → «ніхто»',
   );
   // Entries written before this module existed carry a bare id, not JSON.
   assert.equal(
     describeAuditEvent({ action: 'changed_assigneeIds', from: '', to: 'member-b' }, CONTEXT),
-    'Виконавців змінено на «Дмитро»',
+    'Відповідальних змінено на «Дмитро»',
   );
   assert.equal(
     describeAuditEvent({ action: 'changed_labelIds', from: '[]', to: JSON.stringify(['label-a']) }, CONTEXT),
@@ -147,7 +147,7 @@ test('a bulk change reads in the same words a single edit produces', () => {
       from: JSON.stringify({ assigneeIds: ['member-a'] }),
       to: JSON.stringify({ assigneeIds: ['member-a', 'member-b'] }),
     }, CONTEXT),
-    'Виконавців змінено: «Оля» → «Оля, Дмитро»',
+    'Відповідальних змінено: «Оля» → «Оля, Дмитро»',
   );
   // A deadline is the one value that reaches the log as a serialised Firestore
   // Timestamp rather than a number.

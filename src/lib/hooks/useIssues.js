@@ -47,6 +47,7 @@ import {
   auditValue,
 } from '@/lib/utils/issueAuditEvents.mjs';
 import { compareIssues, pickPatchableFields, planDrop } from '@/lib/utils/optimistic.mjs';
+import { isRoutableIssuePatch } from '@/lib/utils/issueContentFields.mjs';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { isClientRole } from '@/lib/utils/can';
 
@@ -238,7 +239,24 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
           ...(data.order !== undefined ? { order: data.order } : {}),
         });
       }
-      if (Object.keys(directData).length > 0 && writesThroughContentApi) {
+      // One door for anything the route can take, whoever is asking.
+      //
+      // `writesThroughContentApi` used to be the whole answer, and it named the
+      // *reader* rather than the patch: a client went through the route because
+      // the rules refuse their direct write, and support went straight to
+      // Firestore because it may. The consequence was that no support edit was
+      // ever recorded — the route is what writes a request's history, and
+      // support was not using it, so a priority raised, a deadline moved and an
+      // agent put on a request left no line in the customer's feed and none in
+      // `audit/` either. The desk could not read its own work.
+      //
+      // So the question is now about the patch: everything the route accepts
+      // goes through the route. What is left for the direct write is the two
+      // patches it cannot express — an `arrayUnion` of a new attachment and the
+      // `arrayUnion`/`arrayRemove` of a watcher — which `isRoutableIssuePatch`
+      // recognises by the sentinel rather than by the field name.
+      const routeThisPatch = writesThroughContentApi || isRoutableIssuePatch(directData);
+      if (Object.keys(directData).length > 0 && routeThisPatch) {
         await patchIssueContentViaApi(issueId, directData);
       } else if (Object.keys(directData).length > 0) {
         const actorId = userId || currentUserId;
@@ -263,7 +281,8 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
 
     // Touch parent project. The content route does this inside its own
     // transaction, and a client may not write a project document at all.
-    if (Object.keys(directData).length > 0 && !writesThroughContentApi) {
+    if (Object.keys(directData).length > 0 && !writesThroughContentApi
+      && !isRoutableIssuePatch(directData)) {
       await updateDoc(doc(db, 'projects', projectId), {
         updatedAt: serverTimestamp()
       }).catch(() => {});

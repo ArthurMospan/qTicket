@@ -18,6 +18,11 @@ export const AUDITED_ISSUE_FIELDS = Object.freeze([
   'title',
   'priority',
   'assigneeIds',
+  // The customer's own routing — which of their people is answering. It is a
+  // field both sides may write and neither side could read a change to: the
+  // one thing a client can decide about how a request is handled left no line
+  // at all, on either feed.
+  'clientAssigneeIds',
   'type',
   'dueDate',
   'labelIds',
@@ -31,7 +36,8 @@ const FIELD_LABELS = Object.freeze({
   columnId: 'статус',
   priority: 'пріоритет',
   title: 'назву',
-  assigneeIds: 'виконавців',
+  assigneeIds: 'відповідальних',
+  clientAssigneeIds: 'відповідальних з боку клієнта',
   type: 'тип',
   dueDate: 'дедлайн',
   labelIds: 'мітки',
@@ -136,7 +142,7 @@ function formatAuditValue(field, value, context) {
     timeZone,
   } = context || {};
 
-  if (field === 'assigneeIds') {
+  if (field === 'assigneeIds' || field === 'clientAssigneeIds') {
     const ids = idsOf(value);
     if (ids.length === 0) return 'ніхто';
     return ids.map(id => nameOf(members, id, 'учасник')).join(', ');
