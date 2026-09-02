@@ -34,8 +34,16 @@ test('лише client_admin отримує окреме право запрос�
   );
 });
 
-test('client_admin не може підвищити роль через тіло запрошення', () => {
-  for (const requested of ['owner', 'admin', 'member', 'client_admin', 'client_member', 'anything']) {
+test('client_admin обирає між двома клієнтськими ролями і не виходить за них', () => {
+  // Він адмініструє людей власної компанії, тож може призначити ще одного
+  // адміністратора — інакше запрошення в клієнта закінчуються разом з
+  // відпусткою однієї людини. Обидві ролі однаково прив'язані до проєкту, на
+  // якому він сам стоїть.
+  assert.equal(invitedRoleFor('client_admin', 'client_admin'), 'client_admin');
+  assert.equal(invitedRoleFor('client_member', 'client_admin'), 'client_member');
+  // Все інше — це місце в команді підтримки, а його роздає лише QuickTeam.
+  // Запит на нього не підвищує нікого: він падає на підлогу дозволеного.
+  for (const requested of ['owner', 'admin', 'member', 'anything', '', null, undefined]) {
     assert.equal(invitedRoleFor(requested, 'client_admin'), 'client_member');
   }
   assert.equal(invitedRoleFor('client_admin', 'admin'), 'client_admin');
@@ -74,11 +82,12 @@ test('клієнтське запрошення завжди прив’язан
   assert.match(scope, /clientScopedInvitation && !snapshot\.data\(\)\.team\?\.includes\(inviterUid\)/);
   assert.match(scope, /scope: clientInvitee \? 'client-project' : 'organization'/);
   assert.match(acceptRoute, /isClientRole\(invitation\.role\) \? invitation\.role : 'client_member'/);
-  // Проєкт більше не питається окремо: діалог відкривають або зі сторінки
-  // клієнтського проєкту, або з простору самого клієнта, і обидва вже його
-  // назвали. `projectIds` іде в запит як є, а сервер тримає межу «рівно один».
-  assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : 'client_admin'/);
-  assert.match(dialog, /inviteMember\(normalizedEmail, uid, invitedRole, projectIds\)/);
+  // Проєкт питається тільки тоді, коли є з чого обирати: адміністратор
+  // клієнта може стояти на кількох просторах, і доти «+» біля «Співробітники»
+  // просто зникав. Хоч скільки їх у списку, в запит іде рівно один — межу
+  // «рівно один» тримає сервер, а діалог не має способу надіслати більше.
+  assert.match(dialog, /inviteMember\(normalizedEmail, uid, invitedRole, \[projectId\]\)/);
+  assert.doesNotMatch(dialog, /inviteMember\([^)]*projectIds\)/);
 });
 
 test('без поштового провайдера клієнт отримує ручну інструкцію, а не недоступну вкладку', async () => {
@@ -326,24 +335,30 @@ test('qTicket не має самостійного шляху до внутрі�
     read('../firestore.rules'),
   ]);
 
-  // Діалог і далі не пропонує внутрішньої ролі й не має QR-половини старого
-  // механізму: qTicket видає рівно два запрошення.
-  // No internal role is on offer here — that seat is QuickTeam's to grant, and
-  // this dialog issues exactly two client roles, both fixed by where it was
-  // opened from. «Посилання та QR» used to be in this pattern as a third way of
-  // saying «this is not QuickTeam's dialog», and it was the wrong marker: the
-  // tab really does show a link and a QR code, so naming it is accuracy rather
-  // than a leak. What must not appear is a role.
-  assert.doesNotMatch(dialog, /Менеджер підтримки|Адміністратор'/);
-  // The choice this dialog does not offer is stated instead of left blank: the
-  // role and the project it grants, as facts rather than controls.
+  // Діалог пропонує рівно дві ролі, і обидві клієнтські. Внутрішнє місце —
+  // QuickTeam-ове, і його тут не називають ані в списку варіантів, ані в
+  // жодному рядку копії. «Посилання та QR» колись стояло в цьому переліку як
+  // третій спосіб сказати «це не діалог QuickTeam», і це був хибний маркер:
+  // вкладка справді показує посилання й QR-код. Не має зʼявлятись саме роль.
+  assert.match(dialog, /const CLIENT_ROLE_OPTIONS = \[/);
+  for (const option of ["value: 'client_member'", "value: 'client_admin'"]) {
+    assert.ok(dialog.includes(option), option);
+  }
+  for (const internal of ["value: 'member'", "value: 'admin'", "value: 'owner'", 'Менеджер підтримки']) {
+    assert.ok(!dialog.includes(internal), internal);
+  }
+  // Половина підтримки не має вибору й не вдає його: вона садить першого
+  // адміністратора клієнта і каже це фактом, а не контролом.
   assert.match(dialog, /organizationRoleLabel\(invitedRole\)/);
-  assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : 'client_admin'/);
+  assert.match(dialog, /const invitedRole = clientInvite \? role : 'client_admin'/);
 
   // 1. Виписати внутрішню роль неможливо: `isClientRole` — умова, а не
   //    підстраховка, і немає гілки, що повертає щось інше.
   assert.match(helper, /if \(!isClientRole\(requestedRole\)\) throw new Error\('INTERNAL_ROLE_REFUSED'\)/);
-  assert.match(helper, /if \(inviterRole === 'client_admin'\) return 'client_member'/);
+  // Адміністратор клієнта видає обидва клієнтські місця своєї компанії, і
+  // жодного іншого: запит на внутрішнє падає на підлогу дозволеного, а не
+  // піднімає нікого.
+  assert.match(helper, /return isClientRole\(requestedRole\) \? requestedRole : 'client_member'/);
   assert.doesNotMatch(helper, /return 'member'|return 'admin'|return 'owner'/);
 
   // 2. Маршрут створення питає саме цю функцію, а не власний список ролей, і
@@ -547,9 +562,14 @@ test('керування співробітниками клієнта живе 
   assert.match(team, /orgRole === 'client_admin'\s*&& can\(orgRole, 'invite:client_member'\)/);
   assert.match(team, /title="Запросити співробітника"/);
   // Те саме вікно, що й у клієнтському просторі: пошта на одній вкладці,
-  // посилання з QR — на другій. Роль, яку воно видає, лишається client_member.
+  // посилання з QR — на другій.
   assert.match(team, /<InviteMemberDialog[\s\S]{0,220}clientMode/);
-  assert.match(team, /projectIds=\{\[clientSpace\.id\]\}/);
+  // Усі простори цього адміністратора, а не один. Кнопка зникала, щойно їх
+  // ставало двоє — і чим більше проєктів вела людина, тим менше могла; питання
+  // «в який?» тепер ставить сам діалог.
+  assert.match(team, /projects=\{clientSpaces\}/);
+  assert.match(team, /&& clientSpaces\.length > 0;/);
+  assert.doesNotMatch(team, /clientSpaces\.length === 1 \? clientSpaces\[0\] : null/);
   assert.doesNotMatch(team, /clientAdminMode/);
 });
 

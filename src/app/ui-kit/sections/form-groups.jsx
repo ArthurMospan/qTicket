@@ -1,10 +1,12 @@
 'use client';
+import { useState } from 'react';
 import { Input } from '@/components/ui/Input';
-import { FormGroup, Label } from '@/components/ui';
-import { Bell, Users, MapPin } from 'lucide-react';
+import { FormGroup, Label, OptionCard } from '@/components/ui';
+import { Bell, Users, MapPin, Shield, UserRound } from 'lucide-react';
 import { PreviewBlock } from '../preview';
 
 export default function FormGroupsSection() {
+  const [role, setRole] = useState('client_member');
 
   return (
     <div className="flex flex-col gap-[32px]">
@@ -43,6 +45,31 @@ export default function FormGroupsSection() {
             <Label icon={MapPin}>Місце</Label>
             <Input placeholder="Офіс або кімната" />
           </div>
+        </div>
+      </PreviewBlock>
+
+      <PreviewBlock
+        title="Option Card"
+        component="OptionCard"
+        description="Один вибір із набору, намальований карткою, бо варіанти різняться наслідком, а не словом: «цей зможе запрошувати інших» не вміщується в підпис радіо-кнопки. Обраний тримає чорнильну рамку, залитий гліф і галочку. Геометрія — QuickTeam-ова, до пікселя: той самий діалог запрошення існує в обох продуктах."
+        filePath="src/components/ui/Forms/OptionCard.jsx"
+        fullWidth
+      >
+        <div className="grid max-w-[640px] gap-2 sm:grid-cols-2">
+          <OptionCard
+            icon={UserRound}
+            title="Співробітник"
+            description="Створює звернення й пише в них."
+            selected={role === 'client_member'}
+            onClick={() => setRole('client_member')}
+          />
+          <OptionCard
+            icon={Shield}
+            title="Адміністратор"
+            description="Те саме, плюс запрошує інших співробітників."
+            selected={role === 'client_admin'}
+            onClick={() => setRole('client_admin')}
+          />
         </div>
       </PreviewBlock>
 

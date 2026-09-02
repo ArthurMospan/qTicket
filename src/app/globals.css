@@ -727,6 +727,82 @@
     border-color: var(--color-line-strong);
     background: var(--color-canvas);
   }
+  /* One choice out of a set, drawn as a card because the options differ by a
+     consequence rather than by a word — «Запросити співробітника» says what
+     each role will be able to do. The numbers are QuickTeam's, to the pixel:
+     the same dialog exists in both products, and one control cannot be two
+     controls. */
+  .ui-native-control[data-ui-control='option-card'] {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border-width: 2px;
+    border-color: transparent;
+    border-radius: var(--ui-radius-surface);
+    background: var(--color-canvas);
+    padding: 16px;
+    text-align: left;
+    transition: border-color 150ms, background-color 150ms, opacity 150ms;
+  }
+  .ui-native-control[data-ui-control='option-card']:hover:not(:disabled) {
+    background: var(--color-line);
+  }
+  .ui-native-control[data-ui-control='option-card'][data-ui-state='selected'] {
+    border-color: var(--color-ink);
+    background: var(--color-canvas);
+  }
+  .ui-native-control[data-ui-control='option-card']:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .ui-native-control[data-ui-control='option-card'] > [data-ui-part='glyph'] {
+    display: flex;
+    height: 40px;
+    width: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-muted);
+  }
+  .ui-native-control[data-ui-control='option-card'][data-ui-state='selected'] > [data-ui-part='glyph'] {
+    background: var(--color-ink);
+    color: var(--color-surface);
+  }
+  .ui-native-control[data-ui-control='option-card'] > [data-ui-part='body'] {
+    min-width: 0;
+    flex: 1 1 0%;
+  }
+  .ui-native-control[data-ui-control='option-card'] [data-ui-part='title'] {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .ui-native-control[data-ui-control='option-card'] [data-ui-part='description'] {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    line-height: 16px;
+    color: var(--color-muted);
+  }
+  .ui-native-control[data-ui-control='option-card'] > [data-ui-part='tick'] {
+    display: flex;
+    height: 20px;
+    width: 20px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    border-radius: 999px;
+    border: 1px solid var(--color-faint);
+  }
+  .ui-native-control[data-ui-control='option-card'][data-ui-state='selected'] > [data-ui-part='tick'] {
+    border-color: transparent;
+    background: var(--color-ink);
+    color: var(--color-surface);
+  }
   .ui-native-control[data-ui-control='choice-card'] {
     display: flex;
     align-items: center;

@@ -20,8 +20,23 @@ export function isClientRole(role) {
   return CLIENT_ROLES.includes(role);
 }
 
+/**
+ * The seat an invitation may actually open, whatever its body asked for.
+ *
+ * A client administrator administers their own company's people, and that now
+ * includes handing one of them the same job. Both of the roles they may issue
+ * are client roles and both are scoped to a project they are on themselves —
+ * the invitation route re-derives the project from their own membership — so
+ * the widening reaches exactly as far as they already do: a customer with two
+ * administrators, rather than one person whose holiday takes the invitations
+ * with them. What they still cannot do is name a support seat: an internal role
+ * asked for here comes back as `client_member`, which is the floor of what they
+ * are allowed to give and not a quiet upgrade.
+ */
 export function invitedRoleFor(requestedRole, inviterRole) {
-  if (inviterRole === 'client_admin') return 'client_member';
+  if (inviterRole === 'client_admin') {
+    return CLIENT_ROLES.includes(requestedRole) ? requestedRole : 'client_member';
+  }
   return INVITABLE_ROLES.includes(requestedRole) ? requestedRole : 'member';
 }
 
@@ -44,9 +59,11 @@ export const PERMISSIONS = {
   // one undivided "team management" right, because the product splits it:
   // inviting and deactivating are owner+admin, while ownership stays in QuickTeam.
   'manage:team': ['owner', 'admin'],          // Запрошення, склад команди клієнта
-  // A client administrator may invite a client member only into a project
-  // they already belong to. The invitation route enforces that project scope;
-  // this permission must never be used as a substitute for `manage:team`.
+  // A client administrator may invite one of their own people — as a member or
+  // as a second administrator — and only into a project they already belong to.
+  // The invitation route enforces that project scope and `invitedRoleFor`
+  // enforces the pair of roles; this permission must never be used as a
+  // substitute for `manage:team`, and it never opens a support seat.
   'invite:client_member': ['owner', 'admin', 'client_admin'],
   'manage:member_roles': ['owner', 'admin'],  // member ↔ admin, /api/organizations/[id]/members/[memberId]
   'deactivate:member': ['owner', 'admin'],    // Забрати доступ, лишивши дані

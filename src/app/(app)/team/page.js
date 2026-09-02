@@ -45,7 +45,7 @@ import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchR
 // never arrives here at all; the client boundary in `clientPortalRoutes.mjs`
 // answers that, so this file holds no second opinion about it.
 export default function TeamPage() {
-  const { currentUser, orgRole, projects, orgDirectoryVerified } = useAppContext();
+  const { activeOrg, currentUser, orgRole, projects, orgDirectoryVerified } = useAppContext();
   const { members, loading, error: membersError, inviteMember } = useOrganization();
   const { positions = [] } = useWorkflowConfig();
 
@@ -62,14 +62,35 @@ export default function TeamPage() {
       project.status !== 'archived' && isOnProjectTeam(project, currentUserId)
     ))
     : []), [clientViewer, currentUserId, projects]);
-  // The invitation stays here only while there is one project to invite into.
-  // With several, «в який?» is a question this rail has nowhere to ask, and the
-  // project's own «Учасники» tab asks it by being open — see ProjectBoardClient.
-  const clientSpace = clientSpaces.length === 1 ? clientSpaces[0] : null;
+  // The invitation used to stay here only while there was one project to invite
+  // into: with several, «в який?» was a question this rail had nowhere to ask,
+  // so the «+» simply vanished and the one screen that administers a customer's
+  // people stopped offering to add any — the more projects an administrator
+  // had, the less they could do. The question is the dialog's, like every other
+  // question about an invitation, and it is asked by a picker over exactly the
+  // spaces listed below.
   const canInviteEmployees = orgRole === 'client_admin'
     && can(orgRole, 'invite:client_member')
-    && Boolean(clientSpace);
+    && clientSpaces.length > 0;
   const [showInvite, setShowInvite] = useState(false);
+
+  // The support roster's own «+», and it does not invite anybody.
+  //
+  // Who holds a qTicket seat is decided in QuickTeam and re-sent whole on the
+  // next provisioning sync, so an invitation here would be a change the next
+  // snapshot undoes. But a roster with no «+» where every other roster in the
+  // product has one reads as a missing feature rather than as a decision, and
+  // the place the decision is actually made — «Налаштування» → «Інтеграції» →
+  // «qTicket» in QuickTeam — is three screens away in another product. So the
+  // control exists and is honest about where it goes: it leaves.
+  //
+  // Only when there is somewhere to go. The condition is the sidebar's, for the
+  // same reason it is the sidebar's: a link to a guessed origin would be worse
+  // than no link, and a client has no QuickTeam side at all.
+  const quickTeamUrl = (process.env.NEXT_PUBLIC_QUICKTEAM_URL || '').trim();
+  const staffSeatsHref = !clientViewer && quickTeamUrl && activeOrg?.quickTeam?.sourceOrganizationId
+    ? `${quickTeamUrl.replace(/\/$/, '')}/settings?section=integrations`
+    : '';
 
   // QUI-104. Search can now answer with a person, and an answer has to land on
   // that person rather than on whoever happens to be first in the list.
@@ -162,6 +183,15 @@ export default function TeamPage() {
                 title="Запросити співробітника"
                 aria-label="Запросити співробітника"
               />
+            ) : staffSeatsHref ? (
+              <Button
+                style="ghost"
+                size="icon-xs"
+                icon={Plus}
+                onClick={() => window.open(staffSeatsHref, '_blank', 'noopener,noreferrer')}
+                title="Додати працівника — у налаштуваннях інтеграції QuickTeam"
+                aria-label="Додати працівника у налаштуваннях інтеграції QuickTeam"
+              />
             ) : null}
           />
       )}
@@ -213,17 +243,19 @@ export default function TeamPage() {
 
       {/* The employee invitation, in the one place that administers employees.
           The same dialog the client space uses for its administrator: an email
-          on one tab and a link with its QR code on the other, and the role it
-          may issue is fixed to `client_member` by the dialog, by the invitation
-          route and by `firestore.rules` — not by this screen. */}
+          on one tab and a link with its QR code on the other. Which of this
+          administrator's spaces the invitation names, and which of the two
+          client seats it opens, are the dialog's own two questions — and both
+          answers are re-derived server-side by `resolveInvitationScope` and
+          `invitedRoleFor`, so this screen decides neither. */}
       {canInviteEmployees && (
         <InviteMemberDialog
           isOpen={showInvite}
           onClose={() => setShowInvite(false)}
           inviteMember={inviteMember}
           clientMode
-          projectIds={[clientSpace.id]}
-          spaceName={clientSpace.name}
+          projects={clientSpaces}
+          spaceName={clientSpaces.length === 1 ? clientSpaces[0].name : ''}
         />
       )}
     </SidebarLayout>

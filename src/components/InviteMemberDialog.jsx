@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Check, Copy, Link2, Mail } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, Copy, Link2, Mail, Shield, UserRound } from 'lucide-react';
 import Dialog from '@/components/ui/Dialog';
 import Pill from '@/components/ui/DataDisplay/Pill';
 import Surface from '@/components/ui/Surface';
 import Tabs from '@/components/ui/Tabs';
+import OptionCard from '@/components/ui/Forms/OptionCard';
+import FormGroup from '@/components/ui/Forms/FormGroup';
+import { Select } from '@/components/ui/Select';
 import InviteLinkSection from '@/components/InviteLinkSection';
 import Alert from '@/components/ui/Feedback/Alert';
 import Button from '@/components/ui/Button';
@@ -16,8 +19,25 @@ import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { isClientRole } from '@/lib/utils/can';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
-import { GITHUB_LOGIN_ENABLED } from '@/lib/utils/loginProviders.mjs';
 
+// The two seats a client administrator may hand out, and what each one means to
+// the person receiving it. Said as a consequence rather than as a job title:
+// «Адміністратор» on its own does not tell anybody that this is the one who can
+// invite the rest of the department.
+const CLIENT_ROLE_OPTIONS = [
+  {
+    value: 'client_member',
+    label: 'Співробітник',
+    description: 'Створює звернення й пише в них.',
+    icon: UserRound,
+  },
+  {
+    value: 'client_admin',
+    label: 'Адміністратор',
+    description: 'Те саме, плюс запрошує інших співробітників у цей проєкт.',
+    icon: Shield,
+  },
+];
 
 /**
  * The only two invitations qTicket issues, and there is no third.
@@ -25,9 +45,18 @@ import { GITHUB_LOGIN_ENABLED } from '@/lib/utils/loginProviders.mjs';
  * Support staff are enabled in QuickTeam and arrive through signed
  * provisioning, so this dialog never offers an internal role: it either seats a
  * client administrator in one client project (`clientAdminMode`, opened from
- * that project) or lets that administrator add one of their own employees
- * (`clientMode`). Both carry the project they were opened for, so neither asks
- * a question the screen has already answered.
+ * that project) or lets that administrator add one of their own people
+ * (`clientMode`).
+ *
+ * The two questions it does ask are the two the screen behind it cannot answer:
+ * which of that administrator's projects the invitation is for, when they hold
+ * more than one, and which of the two client seats it opens. Both are re-derived
+ * on the server — `resolveInvitationScope` refuses a project the author is not
+ * on, `invitedRoleFor` refuses anything but a client role — so what is chosen
+ * here is a convenience, never the authorization.
+ *
+ * @param {object[]} props.projects The client spaces this invitation may name. One means no question; several put a picker on the dialog.
+ * @param {string[]} props.projectIds Legacy single-project form, kept for the support-side «Запросити клієнта».
  */
 export default function InviteMemberDialog({
   isOpen,
@@ -35,6 +64,7 @@ export default function InviteMemberDialog({
   inviteMember,
   clientMode = false,
   clientAdminMode = false,
+  projects = [],
   projectIds = [],
   spaceName = '',
 }) {
@@ -57,8 +87,28 @@ export default function InviteMemberDialog({
   // in the moment of inviting them.
   const [tab, setTab] = useState('email');
 
-  const invitedRole = clientInvite ? 'client_member' : 'client_admin';
-  const linkProjectId = Array.isArray(projectIds) ? projectIds[0] : '';
+  // Which client spaces this invitation may name.
+  //
+  // The «+» beside «Співробітники» used to disappear the moment an
+  // administrator was on a second project, because the rail had nowhere to ask
+  // «в який?» — so the one screen that administers a customer's people stopped
+  // offering to add any. The question belongs in the dialog, where every other
+  // question about the invitation already is.
+  const spaces = useMemo(() => {
+    const listed = (Array.isArray(projects) ? projects : []).filter(project => project?.id);
+    if (listed.length) return listed;
+    return (Array.isArray(projectIds) ? projectIds : [])
+      .filter(Boolean)
+      .map(id => ({ id, name: spaceName }));
+  }, [projects, projectIds, spaceName]);
+
+  const [projectId, setProjectId] = useState('');
+  const [role, setRole] = useState('client_member');
+  // The support-side invitation seats a client administrator and asks nothing:
+  // it is opened from one project, for the one role that project needs first.
+  const invitedRole = clientInvite ? role : 'client_admin';
+  const selectedSpace = spaces.find(space => space.id === projectId) || null;
+  const selectedSpaceName = selectedSpace?.name || spaceName;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -69,12 +119,17 @@ export default function InviteMemberDialog({
       setSent(false);
       setUndelivered(false);
       setPendingAccessEmail('');
+      setRole('client_member');
+      setProjectId(spaces.length === 1 ? spaces[0].id : '');
     });
+    // The spaces are read at the moment the dialog opens; re-running this on
+    // every re-render of the list behind it would reset a half-typed address.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const copyLoginInstructions = async () => {
     const loginUrl = new URL('/login?mode=client', window.location.origin).toString();
-    const instructions = `Вам підготовлено доступ до порталу підтримки «${portalName}».\n\n1. Відкрийте: ${loginUrl}\n2. Увійдіть через ${GITHUB_LOGIN_ENABLED ? 'Google або GitHub' : 'Google'}.\n3. Використайте акаунт з адресою ${pendingAccessEmail} — вона має точно збігатися з адресою запрошення.\n\nПісля першого входу доступ до проєкту підключиться автоматично.`;
+    const instructions = `Вам підготовлено доступ до порталу підтримки «${portalName}».\n\n1. Відкрийте: ${loginUrl}\n2. Увійдіть з адресою ${pendingAccessEmail} — вона має точно збігатися з адресою запрошення.\n\nПісля першого входу доступ до проєкту підключиться автоматично.`;
 
     try {
       await navigator.clipboard.writeText(instructions);
@@ -87,6 +142,10 @@ export default function InviteMemberDialog({
   const handleInvite = async event => {
     event.preventDefault();
     if (inviting) return;
+    if (!projectId) {
+      showToast('Оберіть проєкт, у який запрошуєте', 'error');
+      return;
+    }
     if (!email.trim()) {
       setEmailError('Вкажіть email учасника');
       return;
@@ -96,7 +155,7 @@ export default function InviteMemberDialog({
     try {
       const uid = currentUser?.id || currentUser?.uid;
       const normalizedEmail = email.trim().toLowerCase();
-      const result = await inviteMember(normalizedEmail, uid, invitedRole, projectIds);
+      const result = await inviteMember(normalizedEmail, uid, invitedRole, [projectId]);
       setSent(true);
       if (result.emailSent === false) {
         // The invitation exists and works — it is accepted automatically on the
@@ -134,28 +193,62 @@ export default function InviteMemberDialog({
       bodyPadding="invite"
     >
       <div className="flex flex-col gap-6">
-        {/* What QuickTeam's version puts here is a role picker: two OptionCards
-            deciding what the invitation grants. qTicket has no such choice —
-            the role is fixed by where the dialog was opened from, and the
-            server re-derives it anyway — so the dialog used to begin with a
-            pair of narrow tabs against a lot of white, which is why it read as
-            the poorer relation of the same screen.
-            The answer is not to invent a choice. It is to state the one that
-            has already been made: who is being invited, and into which project.
-            Same weight, same structure, and nothing on it pretends to be a
-            control. */}
-        <Surface preset="inset" padding="md" className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Роль</span>
-            <Pill tone="ink-subtle" size="md">{organizationRoleLabel(invitedRole)}</Pill>
-          </div>
-          {spaceName ? (
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Проєкт</span>
-              <p className="truncate text-[13px] font-semibold text-ink">{spaceName}</p>
+        {/* What QuickTeam puts at the top of this dialog is a role picker, and
+            for the invitation a client administrator issues there is now a real
+            choice to put there: a colleague who files requests, or a second
+            administrator who can also invite the rest of the department. The
+            same control, the same two cards, the same geometry — one dialog in
+            two products cannot be two dialogs.
+
+            The support-side invitation still has no choice to offer: it seats
+            the client's first administrator, from the project it was opened
+            for, and the server re-derives that anyway. It states the decision
+            instead of inventing a control for it. */}
+        {clientInvite ? (
+          <section>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-muted">Роль у проєкті</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {CLIENT_ROLE_OPTIONS.map(option => (
+                <OptionCard
+                  key={option.value}
+                  selected={role === option.value}
+                  icon={option.icon}
+                  title={option.label}
+                  description={option.description}
+                  onClick={() => setRole(option.value)}
+                />
+              ))}
             </div>
-          ) : null}
-        </Surface>
+          </section>
+        ) : null}
+
+        {spaces.length > 1 ? (
+          <FormGroup label="Проєкт" required>
+            <Select
+              size="lg"
+              value={projectId}
+              onChange={setProjectId}
+              placeholder="Оберіть проєкт"
+              ariaLabel="Проєкт, у який запрошуємо"
+              options={spaces.map(space => ({ value: space.id, label: space.name || space.id }))}
+            />
+          </FormGroup>
+        ) : (
+          <Surface preset="inset" padding="md" className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            {!clientInvite && (
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Роль</span>
+                <Pill tone="ink-subtle" size="md">{organizationRoleLabel(invitedRole)}</Pill>
+              </div>
+            )}
+            {selectedSpaceName ? (
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Проєкт</span>
+                <p className="truncate text-[13px] font-semibold text-ink">{selectedSpaceName}</p>
+              </div>
+            ) : null}
+          </Surface>
+        )}
 
         {/* Full width, both halves equal. Two tabs floated left in a `lg`
             dialog left the eye no reason to believe they were the whole of the
@@ -171,7 +264,16 @@ export default function InviteMemberDialog({
         />
 
         {tab === 'link' ? (
-          <InviteLinkSection role={invitedRole} projectId={linkProjectId} spaceName={spaceName} />
+          projectId ? (
+            <InviteLinkSection role={invitedRole} projectId={projectId} spaceName={selectedSpaceName} />
+          ) : (
+            // A link is minted the moment this tab opens, and it is minted *for*
+            // a project. With none chosen there is nothing to mint, and a link
+            // to the wrong space is worse than a sentence asking which one.
+            <Alert variant="info" title="Спочатку оберіть проєкт">
+              Посилання відкриває доступ до одного проєкту, тож його неможливо створити, поки не обрано, до якого саме.
+            </Alert>
+          )
         ) : (
         <form noValidate onSubmit={handleInvite} className="flex flex-col gap-3">
           <Label required>
@@ -216,8 +318,8 @@ export default function InviteMemberDialog({
               <div className="flex flex-col items-start gap-3">
                 <p>
                   {clientInvite
-                    ? <>Передайте інструкцію співробітнику в месенджері. Під час входу він має використати {GITHUB_LOGIN_ENABLED ? 'Google або GitHub-акаунт' : 'Google-акаунт'} з адресою <strong>{pendingAccessEmail}</strong>.</>
-                    : <>Передайте інструкцію адміністратору клієнта в месенджері. Він має увійти через Google-акаунт з адресою <strong>{pendingAccessEmail}</strong>.</>}
+                    ? <>Передайте інструкцію співробітнику в месенджері. Під час входу він має використати адресу <strong>{pendingAccessEmail}</strong>.</>
+                    : <>Передайте інструкцію адміністратору клієнта в месенджері. Він має увійти з адресою <strong>{pendingAccessEmail}</strong>.</>}
                 </p>
                 <Button type="button" style="secondary" size="sm" icon={Copy} onClick={copyLoginInstructions}>
                   Скопіювати інструкцію
@@ -225,10 +327,17 @@ export default function InviteMemberDialog({
               </div>
             </Alert>
           ) : (
+            // The line under the field used to name Google, and one provider on
+            // one screen is a promise the login page does not make: it already
+            // offers more than one door, and email sign-in is on its way. What
+            // the reader actually needs to know is that the invitation is a
+            // letter and that it lands in this project — the address matters
+            // because the seat is bound to it, not because of whose account it
+            // happens to be.
             <p className="text-[11px] leading-5 text-muted">
               {clientInvite
-                ? 'Вкажіть email Google-акаунта співробітника. Після створення скопіюйте інструкцію та надішліть її в месенджері.'
-                : 'Вкажіть email адміністратора клієнта. Якщо пошта не налаштована, система одразу підготує інструкцію для месенджера.'}
+                ? 'Людина отримає лист із безпечним входом до вашого проєкту.'
+                : 'Людина отримає лист із безпечним входом до цього проєкту. Якщо пошта не налаштована, система одразу підготує інструкцію для месенджера.'}
             </p>
           )}
         </form>

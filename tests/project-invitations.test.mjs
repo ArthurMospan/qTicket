@@ -166,5 +166,10 @@ test('the screens a client reads no longer assume they hold exactly one project'
 
   // The roster spans every project the reader is on, not the first of them.
   assert.match(team, /const clientSpaces = useMemo/);
-  assert.match(team, /clientSpaces\.length === 1 \? clientSpaces\[0\] : null/);
+  // And so does the invitation. It used to be offered only while there was one
+  // space to invite into — «в який?» was a question the rail could not ask — so
+  // an administrator of two projects lost the «+» entirely. The whole list goes
+  // to the dialog, which asks.
+  assert.match(team, /projects=\{clientSpaces\}/);
+  assert.doesNotMatch(team, /clientSpaces\.length === 1 \? clientSpaces\[0\] : null/);
 });
