@@ -20,6 +20,7 @@ import {
   issueTombstoneId,
   issueUndoExpiresAt,
 } from '@/lib/utils/issueTrash.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 const MAX_TRANSACTIONAL_CHILD_PROMOTION = 400;
 
@@ -155,7 +156,7 @@ export async function PATCH(request, context) {
         const to = auditValue(patch[field]);
         if (from === to) continue;
         const factOnly = FACT_ONLY_AUDITED_FIELDS.includes(field);
-        transaction.create(issueRef.collection('audit').doc(), {
+        recordIssueHistory(transaction, issueRef, {
           userId: authorization.user.uid,
           userName: actorName,
           action: `changed_${field}`,

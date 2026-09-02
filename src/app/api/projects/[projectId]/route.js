@@ -19,6 +19,7 @@ import {
   projectIssuePrefix,
   suggestAvailableIssuePrefix,
 } from '@/lib/utils/issueKeys.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 const MAX_PROJECT_SETTINGS_TRANSACTION_WRITES = 450;
 
@@ -290,7 +291,7 @@ export async function PATCH(request, context) {
               ? { completedAt: FieldValue.delete() }
               : {}),
           });
-          transaction.create(issueRef.collection('audit').doc(), {
+          recordIssueHistory(transaction, issueRef, {
             userId: loaded.authorization.user.uid,
             userName: loaded.authorization.user.name
               || loaded.authorization.user.email

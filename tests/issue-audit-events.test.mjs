@@ -5,7 +5,9 @@ import {
   AUDITED_ISSUE_FIELDS,
   auditValue,
   describeAuditEvent,
+  isCustomerVisibleAuditEntry,
 } from '../src/lib/utils/issueAuditEvents.mjs';
+import { recordIssueHistory } from '../src/lib/server/issueHistory.mjs';
 
 const CONTEXT = {
   statuses: [
@@ -199,5 +201,106 @@ test('the fields worth logging live next to the phrases that read them', async (
   assert.match(hook, /for \(const field of AUDITED_ISSUE_FIELDS\)/);
   for (const field of ['dueDate', 'labelIds', 'type', 'description']) {
     assert.ok(AUDITED_ISSUE_FIELDS.includes(field), field);
+  }
+});
+
+// ── The customer's half of the record ───────────────────────────────────────
+//
+// Their thread used to hold two kinds of line — «Створено звернення» and
+// «Статус змінено» — with nobody's name on either, while the support copy of
+// the same thread held every change and signed all of them.
+
+// A fake of the two things `recordIssueHistory` touches: a transaction that
+// remembers what it was asked to create, and a document reference that hands
+// out subcollections by name.
+function historyWriter() {
+  const written = [];
+  const issueRef = {
+    collection: name => ({ doc: () => ({ collection: name }) }),
+  };
+  return {
+    issueRef,
+    written,
+    writer: { create: (ref, data) => written.push({ collection: ref.collection, data }) },
+    collectionsFor: action => written.filter(row => row.data.action === action).map(row => row.collection),
+  };
+}
+
+test('every change to a request reaches the person who filed it, signed', () => {
+  const { writer, issueRef, written, collectionsFor } = historyWriter();
+  const actor = { userId: 'agent-1', userName: 'Оля' };
+
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'created', from: null, to: 'QT-1' });
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'moved', from: 'backlog', to: 'qa' });
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_priority', from: 'low', to: 'high' });
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_dueDate', from: null, to: '1730000000000' });
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'changed_assigneeIds', from: '[]', to: '["member-a"]' });
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'cancelled' });
+
+  for (const action of ['created', 'moved', 'changed_priority', 'changed_dueDate', 'changed_assigneeIds', 'cancelled']) {
+    assert.deepEqual(
+      collectionsFor(action),
+      ['audit', 'statusHistory'],
+      `${action} belongs in both feeds`,
+    );
+  }
+  // The copy is the entry, actor and all — the customer reads who did it.
+  const mirrored = written.filter(row => row.collection === 'statusHistory');
+  assert.ok(mirrored.every(row => row.data.userId === 'agent-1' && row.data.userName === 'Оля'));
+});
+
+test('the desk keeps its own machinery to itself', () => {
+  const { writer, issueRef, collectionsFor } = historyWriter();
+  const actor = { userId: 'agent-1', userName: 'Оля' };
+
+  // Where the supplier tracks the work is the supplier's business.
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'quickteam-transferred' });
+  // A change to the client roster is readable on the roster.
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'project-team-granted', to: ['member-a'] });
+  // And a card tidied inside its own column is not something that happened to
+  // the request — `describeAuditEvent` reads it out as «Позицію на дошці
+  // змінено», which is a sentence about a board the customer never opens.
+  recordIssueHistory(writer, issueRef, { ...actor, action: 'moved', from: 'qa', to: 'qa' });
+
+  assert.deepEqual(collectionsFor('quickteam-transferred'), ['audit']);
+  assert.deepEqual(collectionsFor('project-team-granted'), ['audit']);
+  assert.deepEqual(collectionsFor('moved'), ['audit']);
+});
+
+test('an entry with no action belongs to neither feed', () => {
+  assert.equal(isCustomerVisibleAuditEntry({}), false);
+  assert.equal(isCustomerVisibleAuditEntry(null), false);
+  assert.equal(isCustomerVisibleAuditEntry({ action: '' }), false);
+});
+
+// The mirror is only true if nothing writes history around it.
+test('every route that writes a task history writes both halves of it', async () => {
+  const routes = [
+    '../src/app/api/issues/route.js',
+    '../src/app/api/issues/[issueId]/status/route.js',
+    '../src/app/api/issues/[issueId]/route.js',
+    '../src/app/api/issues/[issueId]/archive/route.js',
+    '../src/app/api/issues/[issueId]/cancel/route.js',
+    '../src/app/api/issues/[issueId]/restore/route.js',
+    '../src/app/api/issues/[issueId]/parent/route.js',
+    '../src/app/api/issues/bulk/route.js',
+    '../src/app/api/organizations/[organizationId]/workflow/route.js',
+    '../src/app/api/projects/[projectId]/route.js',
+  ];
+  const sources = await Promise.all(routes.map(path =>
+    readFile(new URL(path, import.meta.url), 'utf8').then(text => [path, text])));
+
+  for (const [path, source] of sources) {
+    assert.doesNotMatch(
+      source,
+      /transaction\.create\(issueRef\.collection\('audit'\)/,
+      `${path} writes the audit directly instead of through recordIssueHistory`,
+    );
+    assert.doesNotMatch(
+      source,
+      /collection\('statusHistory'\)/,
+      `${path} keeps a second opinion about what a customer may read`,
+    );
+    assert.match(source, /recordIssueHistory/, `${path} records no history at all`);
   }
 });

@@ -261,3 +261,42 @@ export function describeAuditEvent(entry, context = {}) {
   }
   return changeSentence(field, from, to, context);
 }
+
+/**
+ * Which lines of a task's history the customer who filed it may read.
+ *
+ * There are two feeds because the two sides of the desk are entitled to
+ * different things — `audit/` is the support-side work record, `statusHistory/`
+ * is what the server copies into the customer's half — and until now that copy
+ * was two actions wide and carried no actor at all. A customer's thread said
+ * «Створено звернення», then «Статус змінено», and nothing else ever happened
+ * in it: a deadline moved, a priority was raised, an agent was put on the
+ * request, and the one screen they came to read showed none of it while the
+ * support copy of the same screen showed all of it.
+ *
+ * So the rule is stated the other way round now. Everything a customer would be
+ * told by looking at the request is theirs to read in the order it happened;
+ * what stays behind is the desk's own machinery:
+ *
+ *   • `quickteam-transferred` — where the supplier tracks the work is the
+ *     supplier's business, and this is the one line ROADMAP names as staff-only.
+ *   • `project-team-granted` — who was added to the client's roster is a change
+ *     to the roster, and it is readable there.
+ *   • a `moved` whose `from` equals its `to` — a card reordered inside its own
+ *     column. Nothing happened to the request; the board was tidied.
+ *
+ * @param {object} entry An entry in the shape `audit/` stores.
+ * @returns {boolean} Whether the same entry belongs in `statusHistory/` too.
+ */
+export function isCustomerVisibleAuditEntry(entry) {
+  const action = typeof entry?.action === 'string' ? entry.action : '';
+  if (!action) return false;
+  if (STAFF_ONLY_ACTIONS.has(action)) return false;
+  if (action === 'moved' && auditValue(entry.from) === auditValue(entry.to)) return false;
+  return true;
+}
+
+const STAFF_ONLY_ACTIONS = new Set([
+  'quickteam-transferred',
+  'project-team-granted',
+]);

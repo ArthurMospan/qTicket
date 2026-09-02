@@ -1580,21 +1580,19 @@ export default function UnifiedTimeline({
           }
 
           if (item._type === 'audit') {
-            // `statusHistory` — the feed a customer reads — stores no actor on
-            // purpose: which agent moved a request is the routing withheld from
-            // them everywhere else. So nearly every entry on their side arrives
-            // with no `userId` and no `userName`, and this line fell through to
-            // the organization's own name. A customer's thread therefore opened
-            // with «OneB Створено звернення» — their own request, attributed to
-            // their supplier, at the top of the one screen they came to read.
-            // An entry with no actor now has none, and the sentence stands on
-            // its own, which is what a system line is.
+            // Both feeds carry their actor now — `statusHistory` is written as
+            // a copy of the audit entry, actor included, so a customer reads
+            // who moved their request and not only that it moved. Entries
+            // written before that stored no `userId` at all, and this line used
+            // to fall through to the organization's own name for them: a
+            // customer's thread opened with «OneB Створено звернення», their
+            // own request attributed to their supplier. An entry with no actor
+            // has none, and the sentence stands on its own, which is what a
+            // system line is.
             //
-            // `created` is the exception and it leaks nothing: the person who
-            // opened the request is the customer, and their name is already on
-            // the request. It is the difference between a thread that starts
-            // with somebody doing something and one that starts with a fact
-            // nobody caused.
+            // `created` keeps its fallback for exactly those older entries: the
+            // person who opened the request is the customer, and their name is
+            // already on the request.
             const actorId = item.action === 'created'
               ? (item.userId || issue?.reporterId || issue?.createdBy || '')
               : item.userId;

@@ -13,6 +13,7 @@ import {
   canRestoreIssueTombstone,
   issueTombstoneId,
 } from '@/lib/utils/issueTrash.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 function restoreError(code, status, message) {
   const error = new Error(code);
@@ -120,7 +121,7 @@ export async function POST(request, context) {
         ...projectIssueCountIncrements(countDeltas, issue.projectId),
         updatedAt: now,
       });
-      transaction.create(issueRef.collection('audit').doc(), {
+      recordIssueHistory(transaction, issueRef, {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',
         action: 'restored',

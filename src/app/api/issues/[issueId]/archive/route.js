@@ -9,6 +9,7 @@ import {
 } from '@/lib/server/projectIssueCounts';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import { rolesFor } from '@/lib/utils/can';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 // Archiving and un-archiving a task. Reversible, with no clock on it — the
 // tombstone flow behind DELETE is the other thing, and the two are deliberately
@@ -120,7 +121,7 @@ export async function PATCH(request, context) {
         lastActivityActorName: authorization.user.name || authorization.user.email || '',
         lastActivityActorAvatar: authorization.user.picture || null,
       });
-      transaction.create(issueRef.collection('audit').doc(), {
+      recordIssueHistory(transaction, issueRef, {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',
         action: archived ? 'archived' : 'unarchived',

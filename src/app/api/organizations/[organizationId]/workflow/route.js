@@ -25,6 +25,7 @@ import {
   sameStringSet,
   WORKFLOW_MUTATION_SECTIONS,
 } from '@/lib/utils/workflowMutation.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 const MAX_TRANSACTION_WRITES = 450;
 
@@ -414,7 +415,7 @@ export async function PATCH(request, context) {
           updates.completedAt = FieldValue.delete();
         }
         transaction.update(issueRef, updates);
-        transaction.create(issueRef.collection('audit').doc(), {
+        recordIssueHistory(transaction, issueRef, {
           userId: authorization.user.uid,
           userName: authorization.user.name || authorization.user.email || '',
           action: 'workflow-status-migrated',

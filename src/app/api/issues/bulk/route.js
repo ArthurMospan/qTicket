@@ -34,6 +34,7 @@ import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { assigneesOutsideProject, projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import { can, rolesFor } from '@/lib/utils/can';
 import { DEFAULT_ORGANIZATION_TIME_ZONE, zonedDateTimeToUtcMs } from '@/lib/utils/timeZone.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 const ACTION_CONCURRENCY = 8;
 
@@ -385,7 +386,7 @@ export async function POST(request) {
           // — they conflicted, retried with backoff, and serialised the whole
           // operation behind one hot row. It is written once per project after
           // the loop instead, which is the same fact stated once.
-          transaction.create(issueRef.collection('audit').doc(), {
+          recordIssueHistory(transaction, issueRef, {
             userId: authorization.user.uid,
             userName: authorization.user.name || authorization.user.email || '',
             action: `bulk_${actionId}`,

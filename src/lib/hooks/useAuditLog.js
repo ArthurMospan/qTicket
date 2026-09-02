@@ -22,11 +22,16 @@ export const AUDIT_WINDOW = 50;
  * One of an issue's two history feeds, newest first.
  *
  * There are two because the two sides of the desk are entitled to different
- * things. `audit` is the support-side work record — who reassigned it, who moved
- * it, when — and `firestore.rules` refuses it to a client role. `statusHistory`
- * is the one fact from it a customer is entitled to, written server-side into a
- * collection of its own because rules cannot require a `where` clause, so
- * «the audit, but only the status rows» is not a condition that can be written.
+ * things. `audit` is the whole support-side work record and `firestore.rules`
+ * refuses it to a client role; `statusHistory` is the part of it the customer
+ * who filed the request may read, written server-side into a collection of its
+ * own because rules cannot require a `where` clause, so «the audit, but only
+ * the rows they may see» is not a condition that can be written.
+ *
+ * Which rows those are is `isCustomerVisibleAuditEntry`, and it is nearly all
+ * of them: what stays behind is the desk's own machinery — where the supplier
+ * tracks the work, who was added to a roster, a card reordered inside its own
+ * column.
  *
  * Same query, same shape, same reader: the entries are written in the audit's
  * own shape so `describeAuditEvent` reads both out in the same words.
@@ -71,7 +76,7 @@ export function useAuditLog(issueId, windowSize = AUDIT_WINDOW) {
   return useIssueHistoryFeed(issueId, 'audit', windowSize);
 }
 
-/** What happened to the request, for the person who filed it. */
+/** What happened to the request, for the person who filed it — actor included. */
 export function useStatusHistory(issueId, windowSize = AUDIT_WINDOW) {
   return useIssueHistoryFeed(issueId, 'statusHistory', windowSize);
 }

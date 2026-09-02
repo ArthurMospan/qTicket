@@ -109,7 +109,7 @@ test('bulk route enforces auth, project scope, canonical routes and partial resu
   assert.match(route, /deleteIssue\(internal/);
   assert.match(route, /transitionIssueStatus\(internal/);
   assert.match(route, /db\.runTransaction/);
-  assert.match(route, /collection\('audit'\)/);
+  assert.match(route, /recordIssueHistory\(transaction, issueRef,/);
   assert.match(route, /const failed = results\.filter/);
   assert.match(route, /NextResponse\.json\(\{[\s\S]*requested:[\s\S]*updated:[\s\S]*failed,/);
   // The notice names the people to be told. It is routing data for the server's

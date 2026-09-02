@@ -29,6 +29,7 @@ import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages
 import { resolveNewIssueType } from '@/lib/utils/issueCreationModel.mjs';
 import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import { issueParentStatusConflict } from '@/lib/utils/issueStatusTransition.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 function normalizedDate(value) {
   if (value == null || value === '') return null;
@@ -436,15 +437,9 @@ export async function POST(request) {
           : {}),
       });
       // The first line of the customer's own history, so their thread opens with
-      // the request existing rather than with nothing at all. See the status
-      // route for why this is a subcollection of its own and carries no actor.
-      transaction.create(issueRef.collection('statusHistory').doc(), {
-        action: 'created',
-        from: null,
-        to: status,
-        createdAt: now,
-      });
-      transaction.create(issueRef.collection('audit').doc(), {
+      // the request existing rather than with nothing at all — and now with the
+      // name of whoever opened it, which on a client's own request is their own.
+      recordIssueHistory(transaction, issueRef, {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',
         action: 'created',
@@ -457,7 +452,7 @@ export async function POST(request) {
       // put this person on the project" is the project document itself, which
       // remembers the members but not the moment.
       if (assigneesToAddToTeam.length) {
-        transaction.create(issueRef.collection('audit').doc(), {
+        recordIssueHistory(transaction, issueRef, {
           userId: authorization.user.uid,
           userName: authorization.user.name || authorization.user.email || '',
           action: 'project-team-granted',

@@ -15,6 +15,7 @@ import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages
 import { rolesFor } from '@/lib/utils/can';
 import { issueParentStatusConflict } from '@/lib/utils/issueStatusTransition.mjs';
 import { resolveClosedStatusIds } from '@/lib/utils/workflowDefaults.mjs';
+import { recordIssueHistory } from '@/lib/server/issueHistory.mjs';
 
 function hierarchyTransactionError(details) {
   const error = new Error(details.code);
@@ -223,7 +224,7 @@ export async function PATCH(request, context) {
         issueHierarchyVersion: FieldValue.increment(1),
         updatedAt: now,
       });
-      transaction.create(issueRef.collection('audit').doc(), {
+      recordIssueHistory(transaction, issueRef, {
         userId: authorization.user.uid,
         userName: authorization.user.name || authorization.user.email || '',
         action: 'parent-changed',
