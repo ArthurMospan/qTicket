@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, Link2, Mail, Shield, UserRound } from 'lucide-react';
 import Dialog from '@/components/ui/Dialog';
-import Pill from '@/components/ui/DataDisplay/Pill';
 import Surface from '@/components/ui/Surface';
 import Tabs from '@/components/ui/Tabs';
 import OptionCard from '@/components/ui/Forms/OptionCard';
@@ -17,23 +16,31 @@ import Label from '@/components/ui/Forms/Label';
 import { useAppContext } from '@/lib/context/AppContext';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { isClientRole } from '@/lib/utils/can';
-import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 
-// The two client seats, and only one of them is this dialog's to give.
+// The two client seats. Both are the desk's to give; a client administrator
+// gives only the first.
 //
-// «Адміністратор» is drawn and disabled rather than left out, because leaving
-// it out would answer a question a customer does have — «can I make my
-// colleague an administrator?» — with silence, and the second card is the
-// shortest place to say what the seat is and who decides it.
+// One dialog, one shape, whoever opened it: the same two cards, the same
+// project row, the same two tabs. The owner saw «Запросити клієнта» and
+// «Запросити співробітника» drawn as two different dialogs on 2026-09-02 and
+// asked for one — what differs between them is who may pick which card, and
+// nothing else.
 //
-// Why it is not on offer: granting a role is half a feature, and the other half
-// is taking it back. qTicket has no screen that demotes a client administrator,
-// on purpose — the desk does not administer a customer's people, and a
-// customer's roster is not a place to put a role editor. So this seat stays
-// with the one flow that is already reversible by the people who own it: the
-// desk seats a client administrator from the project's «Учасники» tab. Three
-// places agree — this card, `invitedRoleFor`, and `inviteLinkRole`.
+// «Адміністратор» is drawn and disabled for a client administrator rather than
+// left out, because leaving it out would answer a question a customer does
+// have — «can I make my colleague an administrator?» — with silence, and the
+// card is the shortest place to say what the seat is and who decides it.
+//
+// Why it is not theirs to give: granting a role is half a feature, and the
+// other half is taking it back. qTicket has no screen that demotes a client
+// administrator, on purpose — the desk does not administer a customer's
+// people, and a customer's roster is not a place to put a role editor. So the
+// seat stays with the one flow that is already reversible by the people who
+// own it: the desk seats a client administrator from the project's «Учасники»
+// tab, or from the empty queue of a project nobody has entered yet. Three
+// places agree — `clientLocked` on this card, `invitedRoleFor`, and
+// `inviteLinkRole`.
 const CLIENT_ROLE_OPTIONS = [
   {
     value: 'client_member',
@@ -44,9 +51,11 @@ const CLIENT_ROLE_OPTIONS = [
   {
     value: 'client_admin',
     label: 'Адміністратор',
-    description: 'Визначається лише працівниками з підтримки. Може запрошувати в проєкт співробітників.',
+    description: 'Те саме, і запрошує в проєкт своїх співробітників.',
+    // What the card says to the one reader who cannot pick it.
+    lockedDescription: 'Призначає лише підтримка. Запрошує в проєкт співробітників.',
     icon: Shield,
-    disabled: true,
+    clientLocked: true,
   },
 ];
 
@@ -59,11 +68,13 @@ const CLIENT_ROLE_OPTIONS = [
  * that project) or lets that administrator add one of their own people
  * (`clientMode`).
  *
- * The one question it asks is the one the screen behind it cannot answer: which
- * of that administrator's projects the invitation is for, when they hold more
- * than one. The answer is re-derived on the server — `resolveInvitationScope`
- * refuses a project the author is not on, `invitedRoleFor` refuses every role
- * but `client_member` — so what is chosen here is a convenience, never the
+ * It asks two questions, each only of the reader who has a choice: which of
+ * the two client seats, asked of the desk (a client administrator's answer is
+ * fixed, and the card says so), and which of that administrator's projects,
+ * asked when they hold more than one. Both answers are re-derived on the
+ * server — `resolveInvitationScope` refuses a project the author is not on,
+ * `invitedRoleFor` refuses a client administrator every role but
+ * `client_member` — so what is chosen here is a convenience, never the
  * authorization.
  *
  * @param {object[]} props.projects The client spaces this invitation may name. One means no question; several put a picker on the dialog.
@@ -114,13 +125,13 @@ export default function InviteMemberDialog({
   }, [projects, projectIds, spaceName]);
 
   const [projectId, setProjectId] = useState('');
-  const [role, setRole] = useState('client_member');
-  // The support-side invitation seats a client administrator and asks nothing:
-  // it is opened from one project, for the one role that project needs first.
-  // The client-side one asks, and today there is one answer to pick — the
-  // server re-derives it either way, so this is what is shown, never what is
-  // enforced.
-  const invitedRole = clientInvite ? role : 'client_admin';
+  // The desk is offered the administrator's seat first: a new project needs
+  // one before anything else, and that is the reader who arrives here from an
+  // empty queue. A client administrator's answer is not read at all — the
+  // server fixes it and the disabled card says so — so the state below is
+  // only what the cards draw.
+  const [role, setRole] = useState(clientInvite ? 'client_member' : 'client_admin');
+  const invitedRole = clientInvite ? 'client_member' : role;
   const selectedSpace = spaces.find(space => space.id === projectId) || null;
   const selectedSpaceName = selectedSpace?.name || spaceName;
 
@@ -133,7 +144,7 @@ export default function InviteMemberDialog({
       setSent(false);
       setUndelivered(false);
       setPendingAccessEmail('');
-      setRole('client_member');
+      setRole(clientInvite ? 'client_member' : 'client_admin');
       setProjectId(spaces.length === 1 ? spaces[0].id : '');
     });
     // The spaces are read at the moment the dialog opens; re-running this on
@@ -178,7 +189,7 @@ export default function InviteMemberDialog({
         // login address when no letter was delivered.
         setUndelivered(true);
         setPendingAccessEmail(normalizedEmail);
-        showToast(clientInvite ? 'Доступ підготовлено — передайте інструкцію співробітнику' : 'Запрошення створено — передайте інструкцію для входу', 'success');
+        showToast('Запрошення створено — передайте інструкцію для входу', 'success');
       } else {
         // A reactivated or already registered account is still notified by the
         // same best-effort letter, so the successful delivery is accurately
@@ -209,34 +220,32 @@ export default function InviteMemberDialog({
       <div className="flex flex-col gap-6">
         {/* What QuickTeam puts at the top of this dialog is a role picker, and
             this one wears the same two cards, the same geometry: one dialog in
-            two products cannot be two dialogs. What differs is that here the
-            second card is disabled — see `CLIENT_ROLE_OPTIONS` for why a seat
-            nothing in the product can take back is not a seat this dialog
-            gives. A picker of one is still worth drawing when the option it
-            greys out is the question people arrive with.
-
-            The support-side invitation has no choice to offer at all: it seats
-            the client's first administrator, from the project it was opened
-            for, and the server re-derives that anyway. It states the decision
-            instead of inventing a control for it. */}
-        {clientInvite ? (
-          <section>
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-muted">Роль у проєкті</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {CLIENT_ROLE_OPTIONS.map(option => (
+            two products cannot be two dialogs — and one dialog opened by two
+            readers cannot be two dialogs either. The desk picks either seat. A
+            client administrator sees the same two cards with the second one
+            disabled — see `CLIENT_ROLE_OPTIONS` for why a seat nothing in the
+            product can take back is not a seat they give. A picker of one is
+            still worth drawing when the option it greys out is the question
+            people arrive with. */}
+        <section>
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-muted">Роль у проєкті</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {CLIENT_ROLE_OPTIONS.map(option => {
+              const locked = clientInvite && Boolean(option.clientLocked);
+              return (
                 <OptionCard
                   key={option.value}
-                  selected={!option.disabled && role === option.value}
-                  disabled={option.disabled}
+                  selected={!locked && invitedRole === option.value}
+                  disabled={locked}
                   icon={option.icon}
                   title={option.label}
-                  description={option.description}
-                  onClick={option.disabled ? undefined : () => setRole(option.value)}
+                  description={locked ? option.lockedDescription : option.description}
+                  onClick={locked ? undefined : () => setRole(option.value)}
                 />
-              ))}
-            </div>
-          </section>
-        ) : null}
+              );
+            })}
+          </div>
+        </section>
 
         {spaces.length > 1 ? (
           <FormGroup label="Проєкт" required>
@@ -249,22 +258,12 @@ export default function InviteMemberDialog({
               options={spaces.map(space => ({ value: space.id, label: space.name || space.id }))}
             />
           </FormGroup>
-        ) : (
-          <Surface preset="inset" padding="md" className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            {!clientInvite && (
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Роль</span>
-                <Pill tone="ink-subtle" size="md">{organizationRoleLabel(invitedRole)}</Pill>
-              </div>
-            )}
-            {selectedSpaceName ? (
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Проєкт</span>
-                <p className="truncate text-[13px] font-semibold text-ink">{selectedSpaceName}</p>
-              </div>
-            ) : null}
+        ) : selectedSpaceName ? (
+          <Surface preset="inset" padding="md" className="flex min-w-0 items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Проєкт</span>
+            <p className="truncate text-[13px] font-semibold text-ink">{selectedSpaceName}</p>
           </Surface>
-        )}
+        ) : null}
 
         {/* Full width, both halves equal. Two tabs floated left in a `lg`
             dialog left the eye no reason to believe they were the whole of the
@@ -293,7 +292,7 @@ export default function InviteMemberDialog({
         ) : (
         <form noValidate onSubmit={handleInvite} className="flex flex-col gap-3">
           <Label required>
-            {clientInvite ? 'Email співробітника' : 'Email адміністратора клієнта'}
+            {invitedRole === 'client_admin' ? 'Email адміністратора клієнта' : 'Email співробітника'}
           </Label>
           <div className="flex gap-2">
             {/* The kit's standard large control, both halves. They used to
@@ -323,19 +322,15 @@ export default function InviteMemberDialog({
               disabled={sent}
               icon={sent ? Check : null}
             >
-              {sent
-                ? (clientInvite ? 'Доступ готовий' : (undelivered ? 'Створено' : 'Надіслано'))
-                : (clientInvite ? 'Надати доступ' : 'Запросити')}
+              {sent ? (undelivered ? 'Створено' : 'Надіслано') : 'Запросити'}
             </Button>
           </div>
           {emailError && <span className="text-[11px] text-danger">{emailError}</span>}
           {undelivered ? (
-            <Alert variant="info" title={clientInvite ? 'Доступ підготовлено без листа' : 'Запрошення підготовлено без листа'}>
+            <Alert variant="info" title="Запрошення підготовлено без листа">
               <div className="flex flex-col items-start gap-3">
                 <p>
-                  {clientInvite
-                    ? <>Передайте інструкцію співробітнику в месенджері. Під час входу він має використати адресу <strong>{pendingAccessEmail}</strong>.</>
-                    : <>Передайте інструкцію адміністратору клієнта в месенджері. Він має увійти з адресою <strong>{pendingAccessEmail}</strong>.</>}
+                  Передайте інструкцію в месенджері. Людина має увійти з адресою <strong>{pendingAccessEmail}</strong>.
                 </p>
                 <Button type="button" style="secondary" size="sm" icon={Copy} onClick={copyLoginInstructions}>
                   Скопіювати інструкцію
@@ -351,9 +346,7 @@ export default function InviteMemberDialog({
             // because the seat is bound to it, not because of whose account it
             // happens to be.
             <p className="text-[11px] leading-5 text-muted">
-              {clientInvite
-                ? 'Людина отримає лист із безпечним входом до вашого проєкту.'
-                : 'Людина отримає лист із безпечним входом до цього проєкту. Якщо пошта не налаштована, система одразу підготує інструкцію для месенджера.'}
+              Людина отримає лист із безпечним входом до цього проєкту. Якщо пошта не налаштована, система одразу підготує інструкцію для месенджера.
             </p>
           )}
         </form>

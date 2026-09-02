@@ -607,6 +607,31 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   // stops being able to say who asked for what. The composer is therefore the
   // one action on this screen that belongs to the client and not to staff.
   const canOpenIncident = clientViewer && !isReadOnly;
+  // The empty queue of a project no client has entered yet is where the desk
+  // is told to invite one — and until 2026-09-02 it was told in a sentence,
+  // with the button two clicks away on «Учасники». The sentence and the button
+  // now travel together: the instruction is drawn only for a reader holding
+  // the permission it names, and only while there is nobody to have followed
+  // it. Once a client sits on the project the invitation is done, and the
+  // queue simply waits for them.
+  const inviteFromEmptyQueue = !clientViewer && canInviteClient && clientMembers.length === 0;
+  const emptyQueue = clientViewer
+    ? {
+      description: 'Якщо виникла проблема або запитання, створіть звернення — команда підтримки відповість у ньому.',
+      action: canOpenIncident ? INCIDENT_TERMS_TABLE.composerSubmit : null,
+      onAction: canOpenIncident ? () => setShowComposer(true) : null,
+    }
+    : inviteFromEmptyQueue
+      ? {
+        description: 'Клієнт ще не звертався. Запросіть його адміністратора, щоб він міг це зробити.',
+        action: 'Запросити клієнта',
+        onAction: () => setShowClientInvite(true),
+      }
+      : {
+        description: 'Клієнт ще не звертався. Коли він створить звернення, воно зʼявиться тут.',
+        action: null,
+        onAction: null,
+      };
   // Both tabs, both readers. «Учасники» was staff-only on the reasoning that a
   // customer's space is administered *about* them rather than *by* them — true
   // of the gear in the header, and not true of the roster: the people on this
@@ -803,13 +828,9 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       <EmptyState
                         icon={Inbox}
                         title={issues.length === 0 ? 'Звернень ще немає' : 'За цими фільтрами нічого немає'}
-                        description={issues.length === 0
-                          ? clientViewer
-                            ? 'Якщо виникла проблема або запитання, створіть звернення — команда підтримки відповість у ньому.'
-                            : 'Клієнт ще не звертався. Запросіть його адміністратора, щоб він міг це зробити.'
-                          : 'Змініть стан або пріоритет у фільтрах.'}
-                        action={canOpenIncident && issues.length === 0 ? INCIDENT_TERMS_TABLE.composerSubmit : null}
-                        onAction={canOpenIncident && issues.length === 0 ? () => setShowComposer(true) : null}
+                        description={issues.length === 0 ? emptyQueue.description : 'Змініть стан або пріоритет у фільтрах.'}
+                        action={issues.length === 0 ? emptyQueue.action : null}
+                        onAction={issues.length === 0 ? emptyQueue.onAction : null}
                         density="compact"
                         surface="card"
                       />

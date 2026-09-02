@@ -92,7 +92,7 @@ test('без поштового провайдера клієнт отримує
     read('../src/components/InviteMemberDialog.jsx'),
     read('../src/app/login/page.js'),
   ]);
-  assert.match(dialog, /Доступ підготовлено без листа/);
+  assert.match(dialog, /Запрошення підготовлено без листа/);
   assert.match(dialog, /Скопіювати інструкцію/);
   assert.match(dialog, /\/login\?mode=client/);
   assert.doesNotMatch(dialog, /надішліть\s+посилання з вкладки «Посилання та QR»/);
@@ -344,16 +344,21 @@ test('qTicket не має самостійного шляху до внутрі�
   for (const internal of ["value: 'member'", "value: 'admin'", "value: 'owner'", 'Менеджер підтримки']) {
     assert.ok(!dialog.includes(internal), internal);
   }
-  // І з двох намальованих карток видається одна. Друга стоїть вимкненою — не
-  // схованою, бо «а чи можу я зробити колегу адміністратором?» — питання, з
-  // яким приходять, і картка коротше за все каже, де відповідь.
-  assert.match(dialog, /value: 'client_admin',[\s\S]{0,200}disabled: true,/);
-  assert.match(dialog, /disabled=\{option\.disabled\}/);
-  assert.match(dialog, /onClick=\{option\.disabled \? undefined :/);
-  // Половина підтримки не має вибору й не вдає його: вона садить першого
-  // адміністратора клієнта і каже це фактом, а не контролом.
-  assert.match(dialog, /organizationRoleLabel\(invitedRole\)/);
-  assert.match(dialog, /const invitedRole = clientInvite \? role : 'client_admin'/);
+  // Одна форма для обох читачів: ті самі дві картки, і хто відкрив діалог,
+  // вирішує лише те, яку з них можна натиснути. Адміністратору клієнта з двох
+  // видається одна; друга стоїть вимкненою — не схованою, бо «а чи можу я
+  // зробити колегу адміністратором?» — питання, з яким приходять, і картка
+  // коротше за все каже, де відповідь. Підтримці відкриті обидві, і місце
+  // адміністратора запропоноване першим: новому проєкту потрібен саме він.
+  assert.match(dialog, /value: 'client_admin',[\s\S]{0,400}clientLocked: true,/);
+  assert.match(dialog, /const locked = clientInvite && Boolean\(option\.clientLocked\)/);
+  assert.match(dialog, /disabled=\{locked\}/);
+  assert.match(dialog, /onClick=\{locked \? undefined :/);
+  assert.doesNotMatch(dialog, /\{clientInvite \? \(\s*<section>/);
+  // Відповідь адміністратора клієнта не читається взагалі — сервер її фіксує,
+  // тож і діалог не вдає, що вона щось важить.
+  assert.match(dialog, /const invitedRole = clientInvite \? 'client_member' : role/);
+  assert.match(dialog, /useState\(clientInvite \? 'client_member' : 'client_admin'\)/);
 
   // 1. Виписати внутрішню роль неможливо: `isClientRole` — умова, а не
   //    підстраховка, і немає гілки, що повертає щось інше.

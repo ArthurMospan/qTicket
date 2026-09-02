@@ -173,3 +173,19 @@ test('the screens a client reads no longer assume they hold exactly one project'
   assert.match(team, /projects=\{clientSpaces\}/);
   assert.doesNotMatch(team, /clientSpaces\.length === 1 \? clientSpaces\[0\] : null/);
 });
+
+// A project nobody from the client has entered yet used to greet the desk with
+// a sentence — «Запросіть його адміністратора» — and the button that does it
+// two clicks away on «Учасники». The owner opened a fresh project on 2026-09-02
+// and asked why the button was not there. It is now, and only while it is the
+// right button: for a reader who holds `manage:team`, and only until a client
+// sits on the project.
+test('the empty queue of a new project offers the invitation, and only while nobody has followed it', async () => {
+  const board = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+  assert.match(board, /const inviteFromEmptyQueue = !clientViewer && canInviteClient && clientMembers\.length === 0/);
+  assert.match(board, /Клієнт ще не звертався\. Запросіть його адміністратора, щоб він міг це зробити\.',\s*action: 'Запросити клієнта',\s*onAction: \(\) => setShowClientInvite\(true\)/);
+  assert.match(board, /Клієнт ще не звертався\. Коли він створить звернення, воно зʼявиться тут\.',\s*action: null/);
+  // The instruction and the button travel together: no sentence telling
+  // somebody to invite a client is drawn for a reader who cannot.
+  assert.equal((board.match(/Запросіть його адміністратора/g) || []).length, 1);
+});
