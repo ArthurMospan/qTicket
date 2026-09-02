@@ -8,7 +8,7 @@ import { useOrganization } from '@/lib/hooks/useOrganization';
 import { useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import AgileBoard from '@/components/workspace/AgileBoard';
-import { Alert, PageHeader, StatusTransitionPicker, StatusVisibilityPicker, TaskListView } from '@/components/ui';
+import { Alert, AssigneePicker, PageHeader, StatusTransitionPicker, StatusVisibilityPicker, TaskListView } from '@/components/ui';
 import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { Settings2, List, Kanban } from 'lucide-react';
@@ -36,6 +36,8 @@ import { taskTypeSelectOption } from '@/lib/design/taskTypeIcons';
 import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mjs';
 import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
 import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
+import { activeMembers } from '@/lib/utils/orgMembership.mjs';
+import { needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
 import { useViewState } from '@/lib/hooks/useViewState';
 import { INCIDENT_QUEUE_VIEW_SCHEMA } from '@/lib/utils/viewState.mjs';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
@@ -91,6 +93,7 @@ export default function IncidentQueuePage() {
     moveTask,
     moveTaskToCategory,
     compareTaskCards,
+    updateTask,
   } = useAllMyTasks(uid, { includeAll: true });
   const showToast = useWorkspaceStore(s => s.showToast);
   const resolveBulkStatusId = useCallback((issue, value) => {
@@ -133,6 +136,9 @@ export default function IncidentQueuePage() {
   }, [clientViewer, orgRole, router]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pendingStatusMove, setPendingStatusMove] = useState(null);
+  // A move waiting on a name — see `gateOrCommit`.
+  const [pendingAssignment, setPendingAssignment] = useState(null);
+  const [assigningBeforeMove, setAssigningBeforeMove] = useState(false);
   // This board's columns are the five shared status categories, so what a person
   // folds away here is a category too. Kept under its own key: the old value held
   // status ids, which mean nothing to these columns.
@@ -208,16 +214,65 @@ export default function IncidentQueuePage() {
       return;
     }
 
-    await commitMove({ issueId, categoryId, position });
+    await gateOrCommit({ issueId, categoryId, position, issue });
+  };
+
+  // The second question, asked after the first where both apply: «Звернення»
+  // may need to know which status inside a category, and then still needs to
+  // know who is taking it. This queue is the third place one request moves at a
+  // time — the project board and the request's own page are the other two — and
+  // it was the one left out, so a card dragged out of «Новий» here went through
+  // unowned while the same drag on a project board stopped and asked.
+  // Who may take the request being moved: the support side of its own
+  // project's roster.
+  const assignmentCandidates = useMemo(() => {
+    const project = (projects || []).find(
+      item => item.id === pendingAssignment?.issue?.projectId,
+    );
+    const roster = new Set(Array.isArray(project?.team) ? project.team : []);
+    return activeMembers(members).filter(member => (
+      !isClientRole(member.role) && roster.has(member.id || member.uid)
+    ));
+  }, [members, pendingAssignment, projects]);
+
+  const gateOrCommit = async (move, statusId = null) => {
+    const issue = move.issue || tasks.find(item => item.id === move.issueId);
+    if (needsAssigneeForMove({
+      issue,
+      toStatusId: statusId,
+      toCategoryId: move.categoryId,
+      statuses,
+      internalViewer: !clientViewer && canWhileRoleLoads(orgRole, 'edit:issue'),
+    })) {
+      setPendingAssignment({ move, statusId, issue });
+      return true;
+    }
+    return commitMove(move, statusId);
   };
 
   const selectPendingStatus = async statusId => {
     if (!pendingStatusMove || pendingStatusMove.busy) return;
     const move = pendingStatusMove;
     setPendingStatusMove(current => current ? { ...current, busy: true } : current);
-    const saved = await commitMove(move, statusId);
+    const saved = await gateOrCommit(move, statusId);
     if (saved) setPendingStatusMove(null);
     else setPendingStatusMove(current => current ? { ...current, busy: false } : current);
+  };
+
+  const confirmPendingAssignment = async assigneeIds => {
+    if (!pendingAssignment) return;
+    setAssigningBeforeMove(true);
+    try {
+      // The people first, then the move — the other order puts the request in
+      // «Прийнято» with nobody on it for a render.
+      await updateTask(pendingAssignment.issue.id, { assigneeIds });
+      await commitMove(pendingAssignment.move, pendingAssignment.statusId);
+      setPendingAssignment(null);
+    } catch (error) {
+      showToast(error?.message || 'Не вдалося призначити відповідального', 'error');
+    } finally {
+      setAssigningBeforeMove(false);
+    }
   };
 
   const handleBulkUpdate = async (action, value, selectedIssues) => {
@@ -526,6 +581,23 @@ export default function IncidentQueuePage() {
           onClose={() => setPendingStatusMove(null)}
         />
       ) : null}
+
+      {/* Asked after the status where both apply. The roster is the project's
+          support side — this queue spans several projects, so «хто вільний» is
+          answered by the people on the one the request belongs to, not by
+          everybody in the organization. */}
+      <AssigneePicker
+        isOpen={Boolean(pendingAssignment)}
+        issueKey={pendingAssignment?.issue?.issueKey || 'звернення'}
+        statusLabel={pendingAssignment?.statusId
+          ? (statuses.find(status => status.id === pendingAssignment.statusId)?.label || '')
+          : statusCategoryLabel(pendingAssignment?.move?.categoryId)}
+        members={assignmentCandidates}
+        initialSelected={[]}
+        busy={assigningBeforeMove}
+        onConfirm={confirmPendingAssignment}
+        onClose={() => setPendingAssignment(null)}
+      />
     </div>
   );
 }

@@ -33,8 +33,17 @@ function categoryOf(statusId, statuses) {
 /**
  * Whether this move has to name somebody first.
  *
+ * Two ways to say where it is going, because the product has two boards. A
+ * project's board drops a card on a *status* — its columns are the project's
+ * own statuses. «Звернення» spans every project a person is on, so no two of
+ * them are guaranteed to share a status and its columns are *categories*; the
+ * exact status is chosen afterwards, or not at all when the category holds one.
+ * The rule is about the category either way, so it takes whichever the caller
+ * has.
+ *
  * @param {object} options.issue The request being moved.
- * @param {string} options.toStatusId Where it is going.
+ * @param {string} options.toStatusId Where it is going, on a board of statuses.
+ * @param {string} options.toCategoryId Where it is going, on a board of categories.
  * @param {object[]} options.statuses The project's live workflow.
  * @param {boolean} options.internalViewer Whether the person moving it may assign at all.
  * @returns {boolean} True when the desk is taking the request on and nobody is on it.
@@ -42,12 +51,15 @@ function categoryOf(statusId, statuses) {
 export function needsAssigneeForMove({
   issue,
   toStatusId,
+  toCategoryId,
   statuses = [],
   internalViewer = false,
 } = {}) {
-  if (!internalViewer || !issue || !toStatusId) return false;
+  if (!internalViewer || !issue) return false;
+  const destination = toCategoryId || (toStatusId ? categoryOf(toStatusId, statuses) : '');
+  if (!destination) return false;
   if (assigneeIdsOf(issue).length > 0) return false;
   const from = categoryOf(issue.columnId || issue.status, statuses);
   if (from !== 'backlog') return false;
-  return categoryOf(toStatusId, statuses) !== 'backlog';
+  return destination !== 'backlog';
 }

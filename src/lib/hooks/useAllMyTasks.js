@@ -29,6 +29,7 @@ import { reportLoadError } from '@/lib/utils/errors';
 import { pickPatchableFields, planDrop } from '@/lib/utils/optimistic.mjs';
 import { issueCompletionBlockers } from '@/lib/utils/issueExecution.mjs';
 import { issueParticipants } from '@/lib/utils/issueParticipants.mjs';
+import { isRoutableIssuePatch } from '@/lib/utils/issueContentFields.mjs';
 import { statusLabel } from '@/lib/utils/workflowDefaults.mjs';
 import {
   resolveCategoryStatusId,
@@ -42,6 +43,7 @@ import {
 } from '@/lib/utils/myTaskOrder.mjs';
 import { sendNotification } from '@/lib/hooks/useNotifications';
 import {
+  patchIssueContentViaApi,
   syncIssueRemindersViaApi,
   transitionIssueStatusViaApi,
 } from '@/lib/services/issues';
@@ -354,7 +356,15 @@ export function useAllMyTasks(userId, { includeAll = false } = {}) {
           ...(data.order !== undefined ? { order: data.order } : {}),
         });
       }
-      if (Object.keys(directData).length > 0) {
+      // The same door `useIssues` goes through, for the same reason and with
+      // one extra: this copy wrote straight to Firestore *and* set no
+      // `lastActivity*` at all, so an edit made from «Звернення» was invisible
+      // twice over — no line in either history feed, and no bump to the stamp
+      // «Останні дії» reads. It looked like nothing had happened because
+      // nothing said it had.
+      if (Object.keys(directData).length > 0 && isRoutableIssuePatch(directData)) {
+        await patchIssueContentViaApi(taskId, directData);
+      } else if (Object.keys(directData).length > 0) {
         await updateDoc(doc(db, 'issues', taskId), {
           ...directData,
           updatedAt: serverTimestamp(),
