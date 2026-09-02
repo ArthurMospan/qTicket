@@ -25,6 +25,12 @@ const APPEARANCE_CLASSES = {
  * @param {string} props.logo Public organization logo URL.
  * @param {'sm'|'md'|'picker'} props.size Named geometry from the UI Kit.
  * @param {'surface'|'sidebar'|'inverse'} props.appearance Surface contrast.
+ * @param {string} props.background What the logo is laid on, as a colour from the
+ *   organization's own record — never a design decision, which is why it is an
+ *   inline value rather than a token. A wordmark is very often a transparent PNG
+ *   or SVG in one ink, and against the picker's dark ground half of them vanish;
+ *   the tenant's own brand colour is the ground the logo was drawn for. Omitted,
+ *   the appearance decides, and the fallback initial always uses the appearance.
  * @param {string} props.className Placement in the parent only.
  */
 export default function OrganizationMark({
@@ -32,6 +38,7 @@ export default function OrganizationMark({
   logo = '',
   size = 'sm',
   appearance = 'surface',
+  background = '',
   className = '',
 }) {
   const [failedLogo, setFailedLogo] = useState('');
@@ -49,6 +56,10 @@ export default function OrganizationMark({
       className={`inline-flex shrink-0 items-center justify-center overflow-hidden font-bold ${
         SIZE_CLASSES[size] || SIZE_CLASSES.sm
       } ${APPEARANCE_CLASSES[appearance] || APPEARANCE_CLASSES.surface} ${className}`}
+      // Only under an image. An initial is drawn in the appearance's own ink,
+      // and painting the tenant's colour behind it would put a brand colour
+      // under a letter the brand never chose.
+      style={showImage && background ? { backgroundColor: background } : undefined}
       aria-label={showImage ? undefined : safeName}
     >
       {showImage ? (

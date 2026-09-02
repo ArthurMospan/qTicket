@@ -15,38 +15,37 @@ import { useOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCo
 import { isClientRole } from '@/lib/utils/can';
 import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
 
-function orgIsBranded(org) {
-  return Boolean(org?.customBranding);
-}
-
-// А ось це — не брендинг.
-//
-// Логотип організації і брендинг сайдбару — дві різні речі, і в налаштуваннях
-// вони лежать у двох різних картках: «Логотип організації» під «Організація»
-// — це обличчя tenant, а `customBranding` визначає оформлення його рейки.
-// Цей екран питає «яка з ваших організацій?» — тут логотип є відповіддю на це
-// питання, а не купленою можливістю. Він запитував `orgIsBranded`, тож варто
-// було вимкнути світч у налаштуваннях (або злетіти з Lite) — і всі організації
-// ставали однаковими сірими кружечками з літерою.
-function orgLogo(org) {
-  return org?.logo || org?.logoUrl || '';
-}
-
 // Логотипи бувають темні/прозорі (png, svg) і зливаються з темним фоном
 // пікера. Тому під лого завжди є підложка: біла за замовчуванням, або колір
-// брендингу, якщо власник обрав свій колір сайдбару.
+// бренду, якщо власник обрав свій колір рейки.
+//
+// Один tenant — один бренд, і це той самий, що читає рейка.
+//
+// Тут довго стояла власна відповідь: `org.customBranding`, `org.sidebarTheme`,
+// `org.sidebarColor` — поля, які писав успадкований таск-менеджер, коли хтось
+// колись обрав у ньому колір. Рейку з них зняли (див. `useCachedOrgBranding`:
+// «та сама організація була білою в QuickTeam і фіолетовою в рейці qTicket»),
+// а цей екран лишився єдиним місцем, що їх читає. Тому під час кліку кружок
+// на мить наливався кольором, якого більше немає ніде в продукті — вибором,
+// зробленим роки тому й скасованим усюди, крім цієї анімації.
+//
+// `resolveOrganizationPortalBrand` — та сама одна відповідь: спершу знімок,
+// який підписує й надсилає QuickTeam, і лише потім власні поля організації,
+// що передують синхронізації.
 function orgLogoBackdrop(org) {
-  if (orgIsBranded(org) && org?.sidebarTheme === 'custom' && org?.sidebarColor) {
-    return org.sidebarColor;
-  }
+  const brand = resolveOrganizationPortalBrand(org);
+  if (brand.sidebarTheme === 'custom' && brand.sidebarColor) return brand.sidebarColor;
   return '#ffffff';
 }
 
 function OrgBigCard({ org, role, roleId, unreadCount, onClick }) {
   const clientPortal = isClientRole(roleId);
   const portalBrand = resolveOrganizationPortalBrand(org);
+  // Чиє це місце — питання ролі; чиє це обличчя — ні. Клієнт бачить назву
+  // порталу постачальника, працівник — назву власної організації, а логотип в
+  // обох випадках той самий, що малює рейка.
   const displayName = clientPortal ? portalBrand.name : (org.name || 'Без назви');
-  const logoSrc = clientPortal ? portalBrand.logo : orgLogo(org);
+  const logoSrc = portalBrand.logo;
 
   return (
     <button
@@ -54,12 +53,22 @@ function OrgBigCard({ org, role, roleId, unreadCount, onClick }) {
       className="flex flex-col items-center gap-4 transition-all duration-300 group/item w-[160px] group-hover/list:opacity-30 hover:!opacity-100"
     >
       <div className="relative">
-        <span id={`org-circle-${org.id}`} className="relative z-10 block shadow-xl transition-all duration-300 group-hover/item:scale-[1.02]">
+        {/* Обгортка кругла, бо тінь, яку вона відкидає, кругла.
+            `shadow-xl` стояв на `block`-спані без радіуса — знак усередині
+            круглий, а тінь під ним квадратна, і на темному тлі пікера це
+            читалось як прямокутна пластина, підкладена під логотип. Сам спан
+            лишається тим, чим є: якорем для `getBoundingClientRect`, з якого
+            стартує анімація розкриття. */}
+        <span
+          id={`org-circle-${org.id}`}
+          className="relative z-10 inline-block rounded-full shadow-xl transition-transform duration-300 group-hover/item:scale-[1.02]"
+        >
           <OrganizationMark
             name={displayName}
             logo={logoSrc}
             size="picker"
             appearance="inverse"
+            background={orgLogoBackdrop(org)}
           />
         </span>
         {unreadCount > 0 && (
@@ -136,9 +145,7 @@ export default function OrgSwitcherScreen({ onClose }) {
   const expandingPortalBrand = expandingOrg
     ? resolveOrganizationPortalBrand(expandingOrg.org)
     : null;
-  const expandingLogo = expandingOrg
-    ? (isClientRole(expandingRole) ? expandingPortalBrand.logo : orgLogo(expandingOrg.org))
-    : '';
+  const expandingLogo = expandingOrg ? expandingPortalBrand.logo : '';
   const expandingName = expandingOrg
     ? (isClientRole(expandingRole)
       ? expandingPortalBrand.name

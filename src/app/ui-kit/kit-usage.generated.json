@@ -4004,7 +4004,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/OrgSwitcherScreen.jsx:66"
+            "src/components/OrgSwitcherScreen.jsx:75"
           ]
         }
       },
@@ -4023,7 +4023,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/OrgSwitcherScreen.jsx:66"
+            "src/components/OrgSwitcherScreen.jsx:75"
           ]
         }
       },
@@ -4034,7 +4034,7 @@
           "files": [
             "src/components/MobileNav.jsx:251",
             "src/components/MobileNav.jsx:310",
-            "src/components/OrgSwitcherScreen.jsx:66",
+            "src/components/OrgSwitcherScreen.jsx:75",
             "src/components/WorkspaceSidebar.jsx:104"
           ]
         },
@@ -4060,7 +4060,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/OrgSwitcherScreen.jsx:66"
+            "src/components/OrgSwitcherScreen.jsx:75"
           ]
         },
         "(default)": {

@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 91,
-    "props": 669,
-    "documentedProps": 669,
+    "props": 670,
+    "documentedProps": 670,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -3322,7 +3322,7 @@
     },
     "OrganizationMark": {
       "file": "src/components/ui/DataDisplay/OrganizationMark.jsx",
-      "summary": "The logo or initial that identifies an organization.",
+      "summary": "The logo or initial that identifies an organization. organization's own record — never a design decision, which is why it is an inline value rather than a token.",
       "props": [
         {
           "name": "appearance",
@@ -3330,6 +3330,13 @@
           "type": "'surface'|'sidebar'|'inverse'",
           "values": [],
           "description": "Surface contrast."
+        },
+        {
+          "name": "background",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "What the logo is laid on, as a colour from the"
         },
         {
           "name": "className",
