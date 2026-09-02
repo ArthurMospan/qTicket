@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Headphones } from 'lucide-react';
-import AnimatedLogo from '@/components/AnimatedLogo';
 import { GITHUB_LOGIN_ENABLED } from '@/lib/utils/loginProviders.mjs';
 import AuthLayout from '@/components/AuthLayout';
 import { useAppContext } from '@/lib/context/AppContext';
@@ -211,16 +209,14 @@ export default function LoginPage() {
   return (
     <AuthLayout portalMode={clientLogin}>
       <div className="w-full max-w-[360px] flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
-        <div className="mb-[24px]">
-          {clientLogin ? (
-            <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px] bg-white/10 text-white" aria-hidden>
-              <Headphones size={34} strokeWidth={1.8} />
-            </div>
-          ) : (
-            <AnimatedLogo />
-          )}
-        </div>
-
+        {/* Нічого над заголовком.
+            Тут стояли дві різні картинки для двох дверей: анімований знак
+            продукту для працівника і навушники в скругленому квадраті для
+            клієнта. Друга не називала нічого — гліф «консультація» над написом
+            «Вхід до порталу підтримки» каже те саме вдруге, картинкою, — а
+            перша дублювала знак, який уже стоїть у шапці цієї ж картки, за
+            двадцять пікселів вище. Екран входу — це заголовок і кнопки; усе
+            інше на ньому лише відсуває кнопки нижче. */}
         <h1 className="text-white text-[28px] font-black tracking-tight mb-[30px]">
           {clientLogin ? 'Вхід до порталу підтримки' : 'Службовий вхід'}
         </h1>

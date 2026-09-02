@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import AnimatedLogo from '@/components/AnimatedLogo';
 import AuthLayout from '@/components/AuthLayout';
 import { Button } from '@/components/ui';
 import { useAppContext } from '@/lib/context/AppContext';
@@ -63,7 +62,7 @@ export default function QuickTeamLoginPage() {
   }, [code, router, signInWithAuthToken]);
 
   return (
-    <AuthLayout>
+    <AuthLayout transitional>
       <div className="flex w-full max-w-[420px] flex-col items-center text-center">
         {error ? (
           <>
@@ -82,8 +81,10 @@ export default function QuickTeamLoginPage() {
           </>
         ) : (
           <>
-            <AnimatedLogo />
-            <h1 className="ui-type-display-title mt-6 text-white">Відкриваємо qTicket</h1>
+            {/* Знак продукту стоїть у шапці цієї ж картки. Ще один, удвічі
+                більший, посеред екрана, який живе секунду й веде далі, — це
+                не вітання, це затримка з логотипом. */}
+            <h1 className="ui-type-display-title text-white">Відкриваємо qTicket</h1>
             <p className="mt-3 text-[13px] text-white/60">
               Підтверджуємо ваш доступ через QuickTeam. Повторно входити не потрібно.
             </p>

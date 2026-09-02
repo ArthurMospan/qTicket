@@ -38,8 +38,12 @@ export function useWorkspaceHelp() {
     { label: 'Написати у підтримку', icon: Headphones, onClick: () => setSupportOpen(true) },
     { isDivider: true },
     { label: 'Довідка', icon: BookOpen, onClick: () => setInfoPane('help') },
-    { label: 'Гарячі клавіші', icon: Keyboard, onClick: () => setShortcutsOpen(true) },
     { label: 'Новини', icon: Newspaper, onClick: () => setInfoPane('news') },
+    // Шпаргалка стоїть останньою в цій трійці: довідку й новини читають, а
+    // гарячі клавіші пригадують — це найрідше з трьох, тож воно й найнижче.
+    // Той самий порядок, що в рейці QuickTeam: одне меню в двох продуктах не
+    // може бути двома меню.
+    { label: 'Гарячі клавіші', icon: Keyboard, onClick: () => setShortcutsOpen(true) },
     { isDivider: true },
     // A contract needs an address that can be linked, printed and cited, so
     // these three stay full pages.

@@ -92,10 +92,12 @@ test('Shift+click opens selection mode; a plain click still cannot', async () =>
   // And the card in Help has to say both halves: shift starts a selection, and
   // the next shift+click is what makes it a range.
   const shortcuts = await read('src/lib/content/shortcuts.mjs');
-  // The sheet hangs off the sidebar's «?», which every role has, so no row in
-  // it names the record — «завдання» would be the wrong word for a client and
-  // one static list cannot say both. It names the row you clicked instead.
-  assert.match(shortcuts, /Почати вибір із цього рядка/);
+  // The sheet hangs off the sidebar's «?», which every role has. It used to
+  // avoid naming the record at all — «завдання» is the wrong word for a
+  // customer, and a static list cannot say two words — so it said «рядка»,
+  // which is true of a list and not of the board beside it. There is one word
+  // now, and it is right for both readers: `incidentTerms` holds exactly one.
+  assert.match(shortcuts, /Почати вибір із цього звернення/);
   assert.match(shortcuts, /вибрати все між першим і цим/);
 });
 

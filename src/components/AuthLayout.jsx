@@ -34,23 +34,31 @@ const BRANDED_FOOTER_LINK_CLASS = 'text-[12px] font-medium opacity-60 transition
  * The shell around every screen outside the workspace, wearing the tenant's
  * identity whenever the screen knows whose it is.
  *
- * `portalMode` is the honest anonymous case: a plain `/login` cannot know which
- * support provider a visitor belongs to until they have signed in, so it shows
- * a headset and «Портал підтримки» rather than qTicket's own mark. An
- * invitation link is the case where the screen *does* know — carrying the
- * organization identity is what the token is for — and then the client meets
- * their supplier's logo, name and colour on the way in, exactly as they will
- * once they are inside.
+ * A screen that knows whose portal it is wears the tenant: an invitation link
+ * carries the organization identity — that is what the token is for — so the
+ * client meets their supplier's logo, name and colour on the way in, exactly as
+ * they will once they are inside.
  *
- * Staff screens (`/login?mode=staff`, `/login/quickteam`) pass neither and keep
- * qTicket's own identity: qTicket is the product the support team bought.
+ * Every other screen wears qTicket's, and there is no third answer any more.
+ * `portalMode` used to put «Портал підтримки» in the corner with a small grey
+ * «qTicket» opposite it, which is two names for one door: an anonymous
+ * `/login` cannot know which support provider the visitor belongs to, and «we
+ * do not know» is not something to write in the place a product signs itself.
+ * The name is the software's, once, where a name goes; what `portalMode` still
+ * decides is the footer, below.
  *
  * @param {{name: string, logo: string, theme: object}} props.brand Tenant name, logo, and a `computeSidebarTheme` result. The card is branded through the same `--sb-*` variables as the workspace rail, so one organization colour cannot produce two shades.
+ * @param {boolean} props.transitional A screen that is passed through rather than
+ *   acted on — the QuickTeam handoff, which verifies a token and navigates away.
+ *   It keeps the footer's documents and drops the one control on it: nobody
+ *   writes to support from a corridor, and if the launch does fail the screen
+ *   answers with «Повернутися до QuickTeam», which is where that failure lives.
  */
 export default function AuthLayout({
   children,
   onClose,
   portalMode = false,
+  transitional = false,
   brand = null,
 }) {
   const { currentUser, signOut } = useAppContext();
@@ -101,9 +109,8 @@ export default function AuthLayout({
           <div className="flex items-center gap-[12px] min-w-0">
             {/* Знак орендаря, коли ми знаємо, чий це портал; наш власний,
                 коли ні. Тут стояли навушники в сірому кружечку — гліф, який не
-                належить жодному з двох і не називає нічого: на екрані, що вже
-                написаний словами «Портал підтримки», він каже те саме втретє
-                картинкою. Продукт, який відчиняє ці двері, має свій знак. */}
+                належить жодному з двох і не називає нічого. Продукт, який
+                відчиняє ці двері, має свій знак. */}
             {brand ? (
               <OrganizationMark name={brand.name} logo={brand.logo} size="sm" appearance="sidebar" />
             ) : (
@@ -113,17 +120,15 @@ export default function AuthLayout({
               className={`ui-type-section-title tracking-tight leading-tight truncate ${theme ? '' : 'text-white'}`}
               style={theme ? { color: theme.text } : undefined}
             >
-              {brand ? brand.name : (portalMode ? 'Портал підтримки' : 'qTicket')}
+              {brand ? brand.name : 'qTicket'}
             </h1>
           </div>
 
           <div className="flex items-center gap-6">
-            {/* Чий це софт — тихо, у куті, і тільки там, де великий напис уже
-                зайнятий чимось іншим. На брендованому екрані цього немає:
-                клієнт орендаря бачить орендаря, і більше нікого. */}
-            {portalMode && !brand && (
-              <span className="text-[13px] font-semibold text-white/40">qTicket</span>
-            )}
+            {/* Тут висіло друге «qTicket» — сіре, дрібне, у протилежному куті
+                від великого напису. Воно існувало рівно тому, що великий напис
+                казав «Портал підтримки»: коли головне місце зайняте описом, ім'я
+                тікає в кут. Головне місце більше не зайняте. */}
             {onClose ? (
               <IconAction
                 label="Закрити"
@@ -208,7 +213,7 @@ export default function AuthLayout({
               лежить на `z-[200]` і перекриває його, тож кнопка ще й нічого не
               показувала. Обидві біди мають одну причину: підвал екрана входу
               малювався там, де входу немає. */}
-          {!brand && !portalMode && !onClose && (
+          {!brand && !portalMode && !onClose && !transitional && (
             <button
               type="button"
               data-ui-control="auth-footer-support"

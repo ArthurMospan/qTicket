@@ -38,7 +38,7 @@ export default function KeyboardShortcutsDialog({ isOpen, onClose }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Гарячі клавіші"
-      description="Перші дві групи працюють будь-де, решта — там, де написано."
+      description="Перша група працює будь-де, решта — там, де написано."
       size="md"
       presentation="dialog"
     >

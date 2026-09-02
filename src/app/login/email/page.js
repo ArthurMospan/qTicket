@@ -2,8 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, AtSign } from 'lucide-react';
-import AnimatedLogo from '@/components/AnimatedLogo';
+import { ArrowLeft } from 'lucide-react';
 import AuthLayout from '@/components/AuthLayout';
 import { useAppContext } from '@/lib/context/AppContext';
 import { getSafeAuthRedirect } from '@/lib/utils/authRedirect';
@@ -51,14 +50,8 @@ export default function EmailLoginPage() {
           Назад
         </button>
 
-        <div className="mb-[24px]">
-          <AnimatedLogo />
-        </div>
-
-        <div className="w-[52px] h-[52px] rounded-[16px] bg-white/10 border border-white/10 flex items-center justify-center text-white/70 mb-5">
-          <AtSign size={23} strokeWidth={2.4} />
-        </div>
-
+        {/* Ані знака, ані гліфа — те саме правило, що на решті дверей входу:
+            заголовок і кнопки, і нічого, що просто відсуває їх нижче. */}
         <h1 className="text-white text-[28px] font-black tracking-tight mb-[10px]">
           Email - Soon
         </h1>
