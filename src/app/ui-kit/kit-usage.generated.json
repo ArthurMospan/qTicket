@@ -2,13 +2,13 @@
   "generatedBy": "scripts/scan-kit-usage.mjs",
   "scope": "authenticated-workspace",
   "totals": {
-    "components": 90,
-    "used": 90,
+    "components": 91,
+    "used": 91,
     "unused": 0,
-    "covered": 83,
+    "covered": 84,
     "uncovered": 0,
     "routes": 8,
-    "previews": 124,
+    "previews": 125,
     "internal": 7,
     "unlisted": 0
   },
@@ -55,6 +55,7 @@
       "ListRow",
       "LoadingSpinner",
       "MarkdownEditor",
+      "OptionCard",
       "PageHeader",
       "Pill",
       "PriorityIcon",
@@ -218,14 +219,18 @@
       "Alert",
       "Button",
       "Checkbox",
+      "ContextMenu",
       "Dialog",
       "EmptyState",
+      "FormGroup",
       "Input",
       "Label",
       "MemberRail",
       "MobilePaneBack",
+      "OptionCard",
       "Pill",
       "PriorityIcon",
+      "Select",
       "SidebarLayout",
       "Surface",
       "Tabs",
@@ -528,7 +533,7 @@
     },
     "ContextMenu": {
       "file": "src/components/ui/ContextMenu.jsx",
-      "count": 4,
+      "count": 5,
       "showcased": true,
       "usedByKit": [
         "BulkActionBar",
@@ -539,11 +544,13 @@
         "/[projectId]",
         "/[projectId]/issue/[issueId]",
         "/clients",
-        "/my"
+        "/my",
+        "/team"
       ],
       "usedIn": [
         "src/app/(app)/page.js",
         "src/components/WorkspaceHelpMenu.jsx",
+        "src/components/profile/ProfileView.jsx",
         "src/components/workspace/AgileBoard.jsx",
         "src/components/workspace/IssueDetail.jsx"
       ]
@@ -737,16 +744,18 @@
     },
     "FormGroup": {
       "file": "src/components/ui/Forms/FormGroup.jsx",
-      "count": 1,
+      "count": 2,
       "showcased": true,
       "usedByKit": [
         "ProjectSettingsForm"
       ],
       "routes": [
-        "/[projectId]"
+        "/[projectId]",
+        "/team"
       ],
       "usedIn": [
-        "src/components/CreateTaskModal.jsx"
+        "src/components/CreateTaskModal.jsx",
+        "src/components/InviteMemberDialog.jsx"
       ]
     },
     "HeaderSearch": {
@@ -1077,6 +1086,19 @@
         "src/components/WorkspaceHeader.jsx"
       ]
     },
+    "OptionCard": {
+      "file": "src/components/ui/Forms/OptionCard.jsx",
+      "count": 1,
+      "showcased": true,
+      "usedByKit": [],
+      "routes": [
+        "/[projectId]",
+        "/team"
+      ],
+      "usedIn": [
+        "src/components/InviteMemberDialog.jsx"
+      ]
+    },
     "OrganizationMark": {
       "file": "src/components/ui/DataDisplay/OrganizationMark.jsx",
       "count": 4,
@@ -1237,7 +1259,7 @@
     },
     "Select": {
       "file": "src/components/ui/Select.jsx",
-      "count": 7,
+      "count": 8,
       "showcased": true,
       "usedByKit": [
         "BulkActionBar"
@@ -1248,7 +1270,8 @@
         "/[projectId]/issue/[issueId]",
         "/clients",
         "/my",
-        "/settings"
+        "/settings",
+        "/team"
       ],
       "usedIn": [
         "src/app/(app)/[projectId]/ProjectBoardClient.jsx",
@@ -1256,6 +1279,7 @@
         "src/app/(app)/page.js",
         "src/app/(app)/settings/page.js",
         "src/components/CreateTaskModal.jsx",
+        "src/components/InviteMemberDialog.jsx",
         "src/components/workspace/IssueDetail.jsx",
         "src/components/workspace/QuickTeamTransferDialog.jsx"
       ]
@@ -1676,7 +1700,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:585",
             "src/app/(app)/my/page.js:380",
             "src/components/workspace/IssueDetail.jsx:1225",
             "src/components/workspace/IssueDetail.jsx:1228"
@@ -1694,7 +1718,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:592",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:595",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:144",
@@ -1702,15 +1726,15 @@
             "src/app/(app)/my/page.js:402",
             "src/app/(app)/overview/page.js:230",
             "src/app/(app)/page.js:861",
-            "src/app/(app)/settings/page.js:2637",
-            "src/app/(app)/settings/page.js:2703",
-            "src/app/(app)/settings/page.js:2740",
-            "src/app/(app)/settings/page.js:2963",
-            "src/app/(app)/settings/page.js:2988",
-            "src/app/(app)/settings/page.js:3008",
+            "src/app/(app)/settings/page.js:2649",
+            "src/app/(app)/settings/page.js:2715",
+            "src/app/(app)/settings/page.js:2752",
+            "src/app/(app)/settings/page.js:2975",
+            "src/app/(app)/settings/page.js:3000",
+            "src/app/(app)/settings/page.js:3020",
             "src/components/InviteLinkSection.jsx:140",
-            "src/components/InviteMemberDialog.jsx:200",
-            "src/components/WorkspaceOrganizationRouteGuard.jsx:71"
+            "src/components/InviteMemberDialog.jsx:302",
+            "src/components/WorkspaceOrganizationRouteGuard.jsx:80"
           ]
         },
         "md": {
@@ -1724,8 +1748,8 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:689",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:936",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/error.js:94",
             "src/app/(app)/my/page.js:486",
             "src/app/(app)/overview/page.js:254",
@@ -1761,12 +1785,12 @@
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
             "src/app/(app)/settings/page.js:249",
-            "src/app/(app)/settings/page.js:2818",
-            "src/app/(app)/settings/page.js:3074",
-            "src/app/(app)/settings/page.js:3156",
+            "src/app/(app)/settings/page.js:2830",
+            "src/app/(app)/settings/page.js:3086",
+            "src/app/(app)/settings/page.js:3168",
             "src/app/(app)/settings/page.js:604",
-            "src/app/(app)/team/page.js:193",
-            "src/components/InviteMemberDialog.jsx:222",
+            "src/app/(app)/team/page.js:223",
+            "src/components/InviteMemberDialog.jsx:324",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/workspace/IssueDetail.jsx:1420",
@@ -1779,7 +1803,7 @@
             "src/components/workspace/IssueDetail.jsx:2302",
             "src/components/workspace/IssueDetail.jsx:2330",
             "src/components/workspace/IssueDetail.jsx:2340",
-            "src/components/workspace/UnifiedTimeline.jsx:1668"
+            "src/components/workspace/UnifiedTimeline.jsx:1666"
           ]
         },
         "icon": {
@@ -1790,7 +1814,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2551",
+            "src/app/(app)/settings/page.js:2563",
             "src/app/(app)/settings/page.js:656",
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
@@ -1798,14 +1822,14 @@
             "src/app/(app)/settings/page.js:684",
             "src/components/MobileNav.jsx:411",
             "src/components/WorkspaceHelpMenu.jsx:85",
-            "src/components/profile/ProfileView.jsx:117",
+            "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/IssueDetail.jsx:1311",
             "src/components/workspace/IssueDetail.jsx:1322",
-            "src/components/workspace/UnifiedTimeline.jsx:1782"
+            "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
         },
         "icon-xs": {
-          "count": 7,
+          "count": 8,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
@@ -1813,7 +1837,8 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:157",
+            "src/app/(app)/team/page.js:178",
+            "src/app/(app)/team/page.js:187",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -1826,8 +1851,8 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:336",
-            "src/components/WorkspaceHeader.jsx:352"
+            "src/components/WorkspaceHeader.jsx:351",
+            "src/components/WorkspaceHeader.jsx:367"
           ]
         }
       },
@@ -1845,9 +1870,9 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:689",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:936",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:585",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/my/page.js:380",
             "src/app/(app)/my/page.js:402",
@@ -1856,12 +1881,12 @@
             "src/app/(app)/page.js:562",
             "src/app/(app)/page.js:903",
             "src/app/(app)/settings/page.js:249",
-            "src/app/(app)/settings/page.js:3074",
-            "src/app/(app)/settings/page.js:3156",
-            "src/app/(app)/team/page.js:193",
+            "src/app/(app)/settings/page.js:3086",
+            "src/app/(app)/settings/page.js:3168",
+            "src/app/(app)/team/page.js:223",
             "src/components/CreateTaskModal.jsx:409",
-            "src/components/InviteMemberDialog.jsx:222",
-            "src/components/profile/ProfileView.jsx:117",
+            "src/components/InviteMemberDialog.jsx:324",
+            "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/BoardConfigModal.jsx:191",
             "src/components/workspace/BoardConfigModal.jsx:203",
             "src/components/workspace/BoardConfigModal.jsx:215",
@@ -1892,16 +1917,16 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:592",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:595",
             "src/app/(app)/error.js:94",
             "src/app/(app)/my/page.js:486",
             "src/app/(app)/overview/page.js:230",
             "src/app/(app)/page.js:563",
             "src/app/(app)/page.js:861",
-            "src/app/(app)/settings/page.js:3008",
+            "src/app/(app)/settings/page.js:3020",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
-            "src/components/InviteMemberDialog.jsx:200",
+            "src/components/InviteMemberDialog.jsx:302",
             "src/components/workspace/BoardConfigModal.jsx:235",
             "src/components/workspace/IssueDetail.jsx:1221",
             "src/components/workspace/IssueDetail.jsx:1420",
@@ -1910,7 +1935,7 @@
             "src/components/workspace/IssueDetail.jsx:2179",
             "src/components/workspace/IssueDetail.jsx:2269",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1668"
+            "src/components/workspace/UnifiedTimeline.jsx:1666"
           ]
         },
         "(default)": {
@@ -1921,11 +1946,11 @@
             "src/app/(app)/layout.js:118",
             "src/app/(app)/layout.js:147",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/WorkspaceOrganizationRouteGuard.jsx:71"
+            "src/components/WorkspaceOrganizationRouteGuard.jsx:80"
           ]
         },
         "ghost": {
-          "count": 28,
+          "count": 29,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
@@ -1936,23 +1961,24 @@
           "files": [
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
-            "src/app/(app)/settings/page.js:2551",
-            "src/app/(app)/settings/page.js:2637",
-            "src/app/(app)/settings/page.js:2703",
-            "src/app/(app)/settings/page.js:2740",
-            "src/app/(app)/settings/page.js:2818",
-            "src/app/(app)/settings/page.js:2963",
-            "src/app/(app)/settings/page.js:2988",
+            "src/app/(app)/settings/page.js:2563",
+            "src/app/(app)/settings/page.js:2649",
+            "src/app/(app)/settings/page.js:2715",
+            "src/app/(app)/settings/page.js:2752",
+            "src/app/(app)/settings/page.js:2830",
+            "src/app/(app)/settings/page.js:2975",
+            "src/app/(app)/settings/page.js:3000",
             "src/app/(app)/settings/page.js:604",
             "src/app/(app)/settings/page.js:656",
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:157",
+            "src/app/(app)/team/page.js:178",
+            "src/app/(app)/team/page.js:187",
             "src/components/MobileNav.jsx:411",
-            "src/components/WorkspaceHeader.jsx:336",
-            "src/components/WorkspaceHeader.jsx:352",
+            "src/components/WorkspaceHeader.jsx:351",
+            "src/components/WorkspaceHeader.jsx:367",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/workspace/AgileBoard.jsx:373",
@@ -1961,13 +1987,13 @@
             "src/components/workspace/AgileBoard.jsx:555",
             "src/components/workspace/AgileBoard.jsx:589",
             "src/components/workspace/IssueDetail.jsx:1382",
-            "src/components/workspace/UnifiedTimeline.jsx:1782"
+            "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
         }
       },
       "shape": {
         "(default)": {
-          "count": 80,
+          "count": 81,
           "routes": [
             "/",
             "/[projectId]",
@@ -1979,10 +2005,10 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:592",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:689",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:936",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:585",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:595",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
@@ -2001,34 +2027,35 @@
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
             "src/app/(app)/settings/page.js:249",
-            "src/app/(app)/settings/page.js:2551",
-            "src/app/(app)/settings/page.js:2637",
-            "src/app/(app)/settings/page.js:2703",
-            "src/app/(app)/settings/page.js:2740",
-            "src/app/(app)/settings/page.js:2818",
-            "src/app/(app)/settings/page.js:2963",
-            "src/app/(app)/settings/page.js:2988",
-            "src/app/(app)/settings/page.js:3008",
-            "src/app/(app)/settings/page.js:3074",
-            "src/app/(app)/settings/page.js:3156",
+            "src/app/(app)/settings/page.js:2563",
+            "src/app/(app)/settings/page.js:2649",
+            "src/app/(app)/settings/page.js:2715",
+            "src/app/(app)/settings/page.js:2752",
+            "src/app/(app)/settings/page.js:2830",
+            "src/app/(app)/settings/page.js:2975",
+            "src/app/(app)/settings/page.js:3000",
+            "src/app/(app)/settings/page.js:3020",
+            "src/app/(app)/settings/page.js:3086",
+            "src/app/(app)/settings/page.js:3168",
             "src/app/(app)/settings/page.js:604",
             "src/app/(app)/settings/page.js:656",
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:157",
-            "src/app/(app)/team/page.js:193",
+            "src/app/(app)/team/page.js:178",
+            "src/app/(app)/team/page.js:187",
+            "src/app/(app)/team/page.js:223",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
-            "src/components/InviteMemberDialog.jsx:200",
-            "src/components/InviteMemberDialog.jsx:222",
+            "src/components/InviteMemberDialog.jsx:302",
+            "src/components/InviteMemberDialog.jsx:324",
             "src/components/MobileNav.jsx:411",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
-            "src/components/WorkspaceOrganizationRouteGuard.jsx:71",
-            "src/components/profile/ProfileView.jsx:117",
+            "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
+            "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -2058,15 +2085,15 @@
             "src/components/workspace/IssueDetail.jsx:2340",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1668"
+            "src/components/workspace/UnifiedTimeline.jsx:1666"
           ]
         },
         "compact": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:336",
-            "src/components/WorkspaceHeader.jsx:352"
+            "src/components/WorkspaceHeader.jsx:351",
+            "src/components/WorkspaceHeader.jsx:367"
           ]
         },
         "circle": {
@@ -2076,13 +2103,13 @@
           ],
           "files": [
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/workspace/UnifiedTimeline.jsx:1782"
+            "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
         }
       },
       "surface": {
         "(default)": {
-          "count": 82,
+          "count": 83,
           "routes": [
             "/",
             "/[projectId]",
@@ -2094,10 +2121,10 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:592",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:689",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:936",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:585",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:595",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
@@ -2116,35 +2143,36 @@
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
             "src/app/(app)/settings/page.js:249",
-            "src/app/(app)/settings/page.js:2551",
-            "src/app/(app)/settings/page.js:2637",
-            "src/app/(app)/settings/page.js:2703",
-            "src/app/(app)/settings/page.js:2740",
-            "src/app/(app)/settings/page.js:2818",
-            "src/app/(app)/settings/page.js:2963",
-            "src/app/(app)/settings/page.js:2988",
-            "src/app/(app)/settings/page.js:3008",
-            "src/app/(app)/settings/page.js:3074",
-            "src/app/(app)/settings/page.js:3156",
+            "src/app/(app)/settings/page.js:2563",
+            "src/app/(app)/settings/page.js:2649",
+            "src/app/(app)/settings/page.js:2715",
+            "src/app/(app)/settings/page.js:2752",
+            "src/app/(app)/settings/page.js:2830",
+            "src/app/(app)/settings/page.js:2975",
+            "src/app/(app)/settings/page.js:3000",
+            "src/app/(app)/settings/page.js:3020",
+            "src/app/(app)/settings/page.js:3086",
+            "src/app/(app)/settings/page.js:3168",
             "src/app/(app)/settings/page.js:604",
             "src/app/(app)/settings/page.js:656",
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:157",
-            "src/app/(app)/team/page.js:193",
+            "src/app/(app)/team/page.js:178",
+            "src/app/(app)/team/page.js:187",
+            "src/app/(app)/team/page.js:223",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
-            "src/components/InviteMemberDialog.jsx:200",
-            "src/components/InviteMemberDialog.jsx:222",
+            "src/components/InviteMemberDialog.jsx:302",
+            "src/components/InviteMemberDialog.jsx:324",
             "src/components/MobileNav.jsx:411",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/WorkspaceOrganizationRouteGuard.jsx:71",
-            "src/components/profile/ProfileView.jsx:117",
+            "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
+            "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -2174,22 +2202,22 @@
             "src/components/workspace/IssueDetail.jsx:2340",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1668",
-            "src/components/workspace/UnifiedTimeline.jsx:1782"
+            "src/components/workspace/UnifiedTimeline.jsx:1666",
+            "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
         },
         "canvas": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:336",
-            "src/components/WorkspaceHeader.jsx:352"
+            "src/components/WorkspaceHeader.jsx:351",
+            "src/components/WorkspaceHeader.jsx:367"
           ]
         }
       },
       "color": {
         "(default)": {
-          "count": 75,
+          "count": 76,
           "routes": [
             "/",
             "/[projectId]",
@@ -2201,9 +2229,9 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:689",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:936",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:585",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
@@ -2220,32 +2248,33 @@
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
             "src/app/(app)/settings/page.js:249",
-            "src/app/(app)/settings/page.js:2551",
-            "src/app/(app)/settings/page.js:2637",
-            "src/app/(app)/settings/page.js:2703",
-            "src/app/(app)/settings/page.js:2740",
-            "src/app/(app)/settings/page.js:3074",
-            "src/app/(app)/settings/page.js:3156",
+            "src/app/(app)/settings/page.js:2563",
+            "src/app/(app)/settings/page.js:2649",
+            "src/app/(app)/settings/page.js:2715",
+            "src/app/(app)/settings/page.js:2752",
+            "src/app/(app)/settings/page.js:3086",
+            "src/app/(app)/settings/page.js:3168",
             "src/app/(app)/settings/page.js:604",
             "src/app/(app)/settings/page.js:656",
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
-            "src/app/(app)/team/page.js:157",
-            "src/app/(app)/team/page.js:193",
+            "src/app/(app)/team/page.js:178",
+            "src/app/(app)/team/page.js:187",
+            "src/app/(app)/team/page.js:223",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
-            "src/components/InviteMemberDialog.jsx:200",
-            "src/components/InviteMemberDialog.jsx:222",
+            "src/components/InviteMemberDialog.jsx:302",
+            "src/components/InviteMemberDialog.jsx:324",
             "src/components/MobileNav.jsx:411",
-            "src/components/WorkspaceHeader.jsx:336",
-            "src/components/WorkspaceHeader.jsx:352",
+            "src/components/WorkspaceHeader.jsx:351",
+            "src/components/WorkspaceHeader.jsx:367",
             "src/components/WorkspaceHelpMenu.jsx:85",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/WorkspaceOrganizationRouteGuard.jsx:71",
-            "src/components/profile/ProfileView.jsx:117",
+            "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
+            "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/AgileBoard.jsx:373",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
@@ -2274,8 +2303,8 @@
             "src/components/workspace/IssueDetail.jsx:2340",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1668",
-            "src/components/workspace/UnifiedTimeline.jsx:1782"
+            "src/components/workspace/UnifiedTimeline.jsx:1666",
+            "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
         },
         "dark": {
@@ -2287,7 +2316,7 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:592",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:595",
             "src/app/(app)/overview/page.js:230",
             "src/app/(app)/page.js:861"
           ]
@@ -2301,10 +2330,10 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2818",
-            "src/app/(app)/settings/page.js:2963",
-            "src/app/(app)/settings/page.js:2988",
-            "src/app/(app)/settings/page.js:3008",
+            "src/app/(app)/settings/page.js:2830",
+            "src/app/(app)/settings/page.js:2975",
+            "src/app/(app)/settings/page.js:3000",
+            "src/app/(app)/settings/page.js:3020",
             "src/app/(app)/settings/page.js:684",
             "src/components/workspace/BoardConfigModal.jsx:215"
           ]
@@ -2312,7 +2341,7 @@
       },
       "composition": {
         "(default)": {
-          "count": 71,
+          "count": 72,
           "routes": [
             "/",
             "/[projectId]",
@@ -2324,10 +2353,10 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:582",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:592",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:689",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:936",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:585",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:595",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:692",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:939",
             "src/app/(app)/error.js:94",
             "src/app/(app)/layout.js:144",
             "src/app/(app)/layout.js:147",
@@ -2344,31 +2373,32 @@
             "src/app/(app)/settings/page.js:2106",
             "src/app/(app)/settings/page.js:246",
             "src/app/(app)/settings/page.js:249",
-            "src/app/(app)/settings/page.js:2551",
-            "src/app/(app)/settings/page.js:2818",
-            "src/app/(app)/settings/page.js:2963",
-            "src/app/(app)/settings/page.js:2988",
-            "src/app/(app)/settings/page.js:3008",
-            "src/app/(app)/settings/page.js:3074",
-            "src/app/(app)/settings/page.js:3156",
+            "src/app/(app)/settings/page.js:2563",
+            "src/app/(app)/settings/page.js:2830",
+            "src/app/(app)/settings/page.js:2975",
+            "src/app/(app)/settings/page.js:3000",
+            "src/app/(app)/settings/page.js:3020",
+            "src/app/(app)/settings/page.js:3086",
+            "src/app/(app)/settings/page.js:3168",
             "src/app/(app)/settings/page.js:604",
             "src/app/(app)/settings/page.js:656",
             "src/app/(app)/settings/page.js:657",
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/app/(app)/team/page.js:157",
-            "src/app/(app)/team/page.js:193",
+            "src/app/(app)/team/page.js:178",
+            "src/app/(app)/team/page.js:187",
+            "src/app/(app)/team/page.js:223",
             "src/components/CreateTaskModal.jsx:409",
             "src/components/CreateTaskModal.jsx:412",
             "src/components/InviteLinkSection.jsx:140",
-            "src/components/InviteMemberDialog.jsx:200",
-            "src/components/InviteMemberDialog.jsx:222",
-            "src/components/WorkspaceHeader.jsx:336",
-            "src/components/WorkspaceHeader.jsx:352",
+            "src/components/InviteMemberDialog.jsx:302",
+            "src/components/InviteMemberDialog.jsx:324",
+            "src/components/WorkspaceHeader.jsx:351",
+            "src/components/WorkspaceHeader.jsx:367",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
-            "src/components/profile/ProfileView.jsx:117",
+            "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/AgileBoard.jsx:454",
             "src/components/workspace/AgileBoard.jsx:470",
             "src/components/workspace/AgileBoard.jsx:555",
@@ -2394,7 +2424,7 @@
             "src/components/workspace/IssueDetail.jsx:2269",
             "src/components/workspace/QuickTeamTransferDialog.jsx:94",
             "src/components/workspace/QuickTeamTransferDialog.jsx:95",
-            "src/components/workspace/UnifiedTimeline.jsx:1668"
+            "src/components/workspace/UnifiedTimeline.jsx:1666"
           ]
         },
         "workspace-guard": {
@@ -2403,7 +2433,7 @@
           "files": [
             "src/app/(app)/layout.js:114",
             "src/app/(app)/layout.js:118",
-            "src/components/WorkspaceOrganizationRouteGuard.jsx:71"
+            "src/components/WorkspaceOrganizationRouteGuard.jsx:80"
           ]
         },
         "settings-row-action": {
@@ -2412,9 +2442,9 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2637",
-            "src/app/(app)/settings/page.js:2703",
-            "src/app/(app)/settings/page.js:2740"
+            "src/app/(app)/settings/page.js:2649",
+            "src/app/(app)/settings/page.js:2715",
+            "src/app/(app)/settings/page.js:2752"
           ]
         },
         "sidebar-help-action": {
@@ -2452,7 +2482,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1782"
+            "src/components/workspace/UnifiedTimeline.jsx:1780"
           ]
         }
       }
@@ -2478,8 +2508,8 @@
           "files": [
             "src/app/(app)/settings/page.js:414",
             "src/app/(app)/settings/page.js:415",
-            "src/components/WorkspaceHeader.jsx:428",
-            "src/components/WorkspaceHeader.jsx:446"
+            "src/components/WorkspaceHeader.jsx:443",
+            "src/components/WorkspaceHeader.jsx:461"
           ]
         },
         "sm": {
@@ -2507,7 +2537,7 @@
             "src/components/workspace/UnifiedTimeline.jsx:1571",
             "src/components/workspace/UnifiedTimeline.jsx:1572",
             "src/components/workspace/UnifiedTimeline.jsx:1573",
-            "src/components/workspace/UnifiedTimeline.jsx:1709",
+            "src/components/workspace/UnifiedTimeline.jsx:1707",
             "src/components/workspace/UnifiedTimeline.jsx:287",
             "src/components/workspace/UnifiedTimeline.jsx:288"
           ]
@@ -2527,7 +2557,7 @@
             "src/components/MobileNav.jsx:353",
             "src/components/workspace/UnifiedTimeline.jsx:1571",
             "src/components/workspace/UnifiedTimeline.jsx:1572",
-            "src/components/workspace/UnifiedTimeline.jsx:1709",
+            "src/components/workspace/UnifiedTimeline.jsx:1707",
             "src/components/workspace/UnifiedTimeline.jsx:287"
           ]
         },
@@ -2560,14 +2590,14 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:428"
+            "src/components/WorkspaceHeader.jsx:443"
           ]
         },
         "surface-danger": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:446"
+            "src/components/WorkspaceHeader.jsx:461"
           ]
         },
         "surface-plain": {
@@ -2603,8 +2633,8 @@
             "src/app/(app)/settings/page.js:415",
             "src/components/MobileNav.jsx:320",
             "src/components/MobileNav.jsx:353",
-            "src/components/WorkspaceHeader.jsx:428",
-            "src/components/WorkspaceHeader.jsx:446"
+            "src/components/WorkspaceHeader.jsx:443",
+            "src/components/WorkspaceHeader.jsx:461"
           ]
         },
         "circle": {
@@ -2625,7 +2655,7 @@
             "src/components/workspace/UnifiedTimeline.jsx:1571",
             "src/components/workspace/UnifiedTimeline.jsx:1572",
             "src/components/workspace/UnifiedTimeline.jsx:1573",
-            "src/components/workspace/UnifiedTimeline.jsx:1709",
+            "src/components/workspace/UnifiedTimeline.jsx:1707",
             "src/components/workspace/UnifiedTimeline.jsx:287",
             "src/components/workspace/UnifiedTimeline.jsx:288"
           ]
@@ -2645,8 +2675,8 @@
             "src/app/(app)/settings/page.js:415",
             "src/components/MobileNav.jsx:320",
             "src/components/MobileNav.jsx:353",
-            "src/components/WorkspaceHeader.jsx:428",
-            "src/components/WorkspaceHeader.jsx:446",
+            "src/components/WorkspaceHeader.jsx:443",
+            "src/components/WorkspaceHeader.jsx:461",
             "src/components/profile/ProfileModal.jsx:41",
             "src/components/profile/ProfileModal.jsx:46"
           ]
@@ -2677,7 +2707,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1709"
+            "src/components/workspace/UnifiedTimeline.jsx:1707"
           ]
         }
       }
@@ -2723,7 +2753,7 @@
             "/team"
           ],
           "files": [
-            "src/components/InviteMemberDialog.jsx:185",
+            "src/components/InviteMemberDialog.jsx:287",
             "src/components/WorkspaceInfoCenter.jsx:151"
           ]
         }
@@ -2743,7 +2773,7 @@
             "src/app/(app)/settings/page.js:401",
             "src/app/(app)/settings/page.js:577",
             "src/components/CreateTaskModal.jsx:443",
-            "src/components/InviteMemberDialog.jsx:185",
+            "src/components/InviteMemberDialog.jsx:287",
             "src/components/WorkspaceInfoCenter.jsx:151",
             "src/components/workspace/IssueDetail.jsx:2160"
           ]
@@ -2764,7 +2794,7 @@
             "src/app/(app)/settings/page.js:401",
             "src/app/(app)/settings/page.js:577",
             "src/components/CreateTaskModal.jsx:443",
-            "src/components/InviteMemberDialog.jsx:185",
+            "src/components/InviteMemberDialog.jsx:287",
             "src/components/WorkspaceInfoCenter.jsx:151",
             "src/components/workspace/IssueDetail.jsx:2160"
           ]
@@ -2788,11 +2818,11 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:608",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:617",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:630",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:641",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:652",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:611",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:620",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:633",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:644",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:655",
             "src/app/(app)/my/page.js:315",
             "src/app/(app)/my/page.js:327",
             "src/app/(app)/my/page.js:344",
@@ -2801,11 +2831,11 @@
             "src/app/(app)/page.js:882",
             "src/app/(app)/page.js:884",
             "src/app/(app)/page.js:885",
-            "src/app/(app)/settings/page.js:2435",
-            "src/app/(app)/settings/page.js:2446",
+            "src/app/(app)/settings/page.js:2447",
             "src/app/(app)/settings/page.js:2458",
-            "src/app/(app)/settings/page.js:2469",
-            "src/app/(app)/settings/page.js:2480",
+            "src/app/(app)/settings/page.js:2470",
+            "src/app/(app)/settings/page.js:2481",
+            "src/app/(app)/settings/page.js:2492",
             "src/components/CreateTaskModal.jsx:456",
             "src/components/CreateTaskModal.jsx:538",
             "src/components/CreateTaskModal.jsx:547",
@@ -2825,6 +2855,16 @@
             "src/components/workspace/IssueDetail.jsx:2252",
             "src/components/workspace/QuickTeamTransferDialog.jsx:122"
           ]
+        },
+        "lg": {
+          "count": 1,
+          "routes": [
+            "/[projectId]",
+            "/team"
+          ],
+          "files": [
+            "src/components/InviteMemberDialog.jsx:227"
+          ]
         }
       },
       "variant": {
@@ -2837,11 +2877,11 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:608",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:617",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:630",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:641",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:652",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:611",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:620",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:633",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:644",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:655",
             "src/app/(app)/my/page.js:315",
             "src/app/(app)/my/page.js:327",
             "src/app/(app)/my/page.js:344",
@@ -2853,22 +2893,24 @@
           ]
         },
         "(default)": {
-          "count": 23,
+          "count": 24,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/settings"
+            "/settings",
+            "/team"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2435",
-            "src/app/(app)/settings/page.js:2446",
+            "src/app/(app)/settings/page.js:2447",
             "src/app/(app)/settings/page.js:2458",
-            "src/app/(app)/settings/page.js:2469",
-            "src/app/(app)/settings/page.js:2480",
+            "src/app/(app)/settings/page.js:2470",
+            "src/app/(app)/settings/page.js:2481",
+            "src/app/(app)/settings/page.js:2492",
             "src/components/CreateTaskModal.jsx:456",
             "src/components/CreateTaskModal.jsx:538",
             "src/components/CreateTaskModal.jsx:547",
             "src/components/CreateTaskModal.jsx:556",
+            "src/components/InviteMemberDialog.jsx:227",
             "src/components/workspace/IssueDetail.jsx:1630",
             "src/components/workspace/IssueDetail.jsx:1645",
             "src/components/workspace/IssueDetail.jsx:1660",
@@ -2894,7 +2936,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:608",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:611",
             "src/app/(app)/my/page.js:315"
           ]
         },
@@ -2907,7 +2949,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:617",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:620",
             "src/app/(app)/my/page.js:327",
             "src/app/(app)/page.js:882"
           ]
@@ -2919,7 +2961,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:630",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:633",
             "src/app/(app)/my/page.js:344"
           ]
         },
@@ -2930,7 +2972,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:641",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:644",
             "src/app/(app)/my/page.js:354"
           ]
         },
@@ -2943,7 +2985,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:652",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:655",
             "src/app/(app)/my/page.js:364",
             "src/app/(app)/page.js:884"
           ]
@@ -2959,22 +3001,24 @@
           ]
         },
         "(default)": {
-          "count": 23,
+          "count": 24,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
-            "/settings"
+            "/settings",
+            "/team"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2435",
-            "src/app/(app)/settings/page.js:2446",
+            "src/app/(app)/settings/page.js:2447",
             "src/app/(app)/settings/page.js:2458",
-            "src/app/(app)/settings/page.js:2469",
-            "src/app/(app)/settings/page.js:2480",
+            "src/app/(app)/settings/page.js:2470",
+            "src/app/(app)/settings/page.js:2481",
+            "src/app/(app)/settings/page.js:2492",
             "src/components/CreateTaskModal.jsx:456",
             "src/components/CreateTaskModal.jsx:538",
             "src/components/CreateTaskModal.jsx:547",
             "src/components/CreateTaskModal.jsx:556",
+            "src/components/InviteMemberDialog.jsx:227",
             "src/components/workspace/IssueDetail.jsx:1630",
             "src/components/workspace/IssueDetail.jsx:1645",
             "src/components/workspace/IssueDetail.jsx:1660",
@@ -3075,11 +3119,11 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:710",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:792",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:928",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:958",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:548",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:713",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:795",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:931",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:961",
             "src/app/(app)/overview/page.js:272",
             "src/app/(app)/overview/page.js:353",
             "src/app/(app)/page.js:832",
@@ -3097,15 +3141,15 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:827",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:832",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:837",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:848",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:858",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:830",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:835",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:840",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:851",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:861",
             "src/app/(app)/overview/page.js:301",
             "src/app/(app)/overview/page.js:397",
             "src/app/(app)/overview/page.js:447",
-            "src/app/(app)/team/page.js:179",
+            "src/app/(app)/team/page.js:209",
             "src/components/InviteLinkSection.jsx:138"
           ]
         },
@@ -3133,7 +3177,7 @@
             "/team"
           ],
           "files": [
-            "src/components/InviteMemberDialog.jsx:147"
+            "src/components/InviteMemberDialog.jsx:237"
           ]
         },
         "compact-bordered-card": {
@@ -3155,7 +3199,7 @@
             "/clients"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:548",
             "src/app/(app)/page.js:832",
             "src/app/(app)/page.js:915",
             "src/app/(app)/page.js:937"
@@ -3172,15 +3216,15 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:710",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:792",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:827",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:832",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:837",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:848",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:858",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:928",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:958",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:713",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:795",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:830",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:835",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:840",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:851",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:861",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:931",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:961",
             "src/app/(app)/overview/page.js:272",
             "src/app/(app)/overview/page.js:301",
             "src/app/(app)/overview/page.js:353",
@@ -3189,7 +3233,7 @@
             "src/app/(app)/page.js:922",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/InviteMemberDialog.jsx:147",
+            "src/components/InviteMemberDialog.jsx:237",
             "src/components/workspace/IssueDetail.jsx:2159"
           ]
         },
@@ -3206,7 +3250,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:179"
+            "src/app/(app)/team/page.js:209"
           ]
         },
         "sm": {
@@ -3232,16 +3276,16 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:545",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:710",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:792",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:827",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:832",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:837",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:848",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:858",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:928",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:958",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:548",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:713",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:795",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:830",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:835",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:840",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:851",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:861",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:931",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:961",
             "src/app/(app)/layout.js:131",
             "src/app/(app)/overview/page.js:272",
             "src/app/(app)/overview/page.js:301",
@@ -3251,11 +3295,11 @@
             "src/app/(app)/page.js:832",
             "src/app/(app)/page.js:922",
             "src/app/(app)/page.js:937",
-            "src/app/(app)/team/page.js:179",
+            "src/app/(app)/team/page.js:209",
             "src/components/InviteLinkSection.jsx:124",
             "src/components/InviteLinkSection.jsx:138",
             "src/components/InviteLinkSection.jsx:162",
-            "src/components/InviteMemberDialog.jsx:147",
+            "src/components/InviteMemberDialog.jsx:237",
             "src/components/workspace/IssueDetail.jsx:2159"
           ]
         },
@@ -3308,8 +3352,8 @@
           "files": [
             "src/app/(app)/overview/page.js:503",
             "src/app/(app)/settings/page.js:237",
-            "src/app/(app)/settings/page.js:2851",
-            "src/app/(app)/settings/page.js:3149",
+            "src/app/(app)/settings/page.js:2863",
+            "src/app/(app)/settings/page.js:3161",
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
             "src/components/workspace/IssueCard.jsx:324"
@@ -3322,9 +3366,9 @@
             "/team"
           ],
           "files": [
-            "src/components/InviteMemberDialog.jsx:150",
-            "src/components/WorkspaceHeader.jsx:532",
-            "src/components/profile/ProfileView.jsx:133"
+            "src/components/InviteMemberDialog.jsx:241",
+            "src/components/WorkspaceHeader.jsx:547",
+            "src/components/profile/ProfileView.jsx:199"
           ]
         },
         "warning": {
@@ -3333,16 +3377,17 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:141"
+            "src/components/profile/ProfileView.jsx:207"
           ]
         },
         "surface-ink": {
-          "count": 1,
+          "count": 2,
           "routes": [
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:264"
+            "src/components/profile/ProfileView.jsx:330",
+            "src/components/profile/ProfileView.jsx:353"
           ]
         },
         "count": {
@@ -3403,7 +3448,7 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:165",
             "src/app/(app)/overview/page.js:503",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:532",
+            "src/components/WorkspaceHeader.jsx:547",
             "src/components/WorkspaceInfoCenter.jsx:135",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336",
@@ -3434,11 +3479,11 @@
           ],
           "files": [
             "src/app/(app)/settings/page.js:237",
-            "src/app/(app)/settings/page.js:2851",
-            "src/app/(app)/settings/page.js:3149",
-            "src/components/InviteMemberDialog.jsx:150",
-            "src/components/profile/ProfileView.jsx:133",
-            "src/components/profile/ProfileView.jsx:141",
+            "src/app/(app)/settings/page.js:2863",
+            "src/app/(app)/settings/page.js:3161",
+            "src/components/InviteMemberDialog.jsx:241",
+            "src/components/profile/ProfileView.jsx:199",
+            "src/components/profile/ProfileView.jsx:207",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3448,7 +3493,7 @@
           ]
         },
         "lg": {
-          "count": 3,
+          "count": 4,
           "routes": [
             "/settings",
             "/team"
@@ -3456,7 +3501,8 @@
           "files": [
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
-            "src/components/profile/ProfileView.jsx:264"
+            "src/components/profile/ProfileView.jsx:330",
+            "src/components/profile/ProfileView.jsx:353"
           ]
         },
         "chat-day": {
@@ -3488,13 +3534,13 @@
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
             "src/components/WorkspaceInfoCenter.jsx:135",
-            "src/components/profile/ProfileView.jsx:141",
+            "src/components/profile/ProfileView.jsx:207",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336"
           ]
         },
         "(default)": {
-          "count": 17,
+          "count": 18,
           "routes": [
             "/",
             "/[projectId]",
@@ -3508,13 +3554,14 @@
           "files": [
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:237",
-            "src/app/(app)/settings/page.js:2851",
-            "src/app/(app)/settings/page.js:3149",
-            "src/components/InviteMemberDialog.jsx:150",
+            "src/app/(app)/settings/page.js:2863",
+            "src/app/(app)/settings/page.js:3161",
+            "src/components/InviteMemberDialog.jsx:241",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:532",
-            "src/components/profile/ProfileView.jsx:133",
-            "src/components/profile/ProfileView.jsx:264",
+            "src/components/WorkspaceHeader.jsx:547",
+            "src/components/profile/ProfileView.jsx:199",
+            "src/components/profile/ProfileView.jsx:330",
+            "src/components/profile/ProfileView.jsx:353",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3544,16 +3591,16 @@
             "src/app/(app)/overview/page.js:503",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:237",
-            "src/app/(app)/settings/page.js:2851",
-            "src/app/(app)/settings/page.js:3149",
+            "src/app/(app)/settings/page.js:2863",
+            "src/app/(app)/settings/page.js:3161",
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
-            "src/components/InviteMemberDialog.jsx:150",
+            "src/components/InviteMemberDialog.jsx:241",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:532",
+            "src/components/WorkspaceHeader.jsx:547",
             "src/components/WorkspaceInfoCenter.jsx:135",
-            "src/components/profile/ProfileView.jsx:133",
-            "src/components/profile/ProfileView.jsx:141",
+            "src/components/profile/ProfileView.jsx:199",
+            "src/components/profile/ProfileView.jsx:207",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3567,18 +3614,19 @@
           ]
         },
         "outline": {
-          "count": 1,
+          "count": 2,
           "routes": [
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:264"
+            "src/components/profile/ProfileView.jsx:330",
+            "src/components/profile/ProfileView.jsx:353"
           ]
         }
       },
       "preset": {
         "(default)": {
-          "count": 23,
+          "count": 24,
           "routes": [
             "/",
             "/[projectId]",
@@ -3593,17 +3641,18 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:165",
             "src/app/(app)/overview/page.js:503",
             "src/app/(app)/settings/page.js:237",
-            "src/app/(app)/settings/page.js:2851",
-            "src/app/(app)/settings/page.js:3149",
+            "src/app/(app)/settings/page.js:2863",
+            "src/app/(app)/settings/page.js:3161",
             "src/app/(app)/settings/page.js:625",
             "src/app/(app)/settings/page.js:640",
-            "src/components/InviteMemberDialog.jsx:150",
+            "src/components/InviteMemberDialog.jsx:241",
             "src/components/SearchModal.jsx:121",
-            "src/components/WorkspaceHeader.jsx:532",
+            "src/components/WorkspaceHeader.jsx:547",
             "src/components/WorkspaceInfoCenter.jsx:135",
-            "src/components/profile/ProfileView.jsx:133",
-            "src/components/profile/ProfileView.jsx:141",
-            "src/components/profile/ProfileView.jsx:264",
+            "src/components/profile/ProfileView.jsx:199",
+            "src/components/profile/ProfileView.jsx:207",
+            "src/components/profile/ProfileView.jsx:330",
+            "src/components/profile/ProfileView.jsx:353",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3651,12 +3700,12 @@
             "src/app/(app)/overview/page.js:503",
             "src/app/(app)/page.js:186",
             "src/app/(app)/settings/page.js:237",
-            "src/app/(app)/settings/page.js:2851",
-            "src/app/(app)/settings/page.js:3149",
-            "src/components/InviteMemberDialog.jsx:150",
-            "src/components/WorkspaceHeader.jsx:532",
-            "src/components/profile/ProfileView.jsx:133",
-            "src/components/profile/ProfileView.jsx:141",
+            "src/app/(app)/settings/page.js:2863",
+            "src/app/(app)/settings/page.js:3161",
+            "src/components/InviteMemberDialog.jsx:241",
+            "src/components/WorkspaceHeader.jsx:547",
+            "src/components/profile/ProfileView.jsx:199",
+            "src/components/profile/ProfileView.jsx:207",
             "src/components/workspace/AgileBoard.jsx:463",
             "src/components/workspace/AgileBoard.jsx:480",
             "src/components/workspace/AgileBoard.jsx:508",
@@ -3667,7 +3716,7 @@
           ]
         },
         "medium": {
-          "count": 8,
+          "count": 9,
           "routes": [
             "/",
             "/[projectId]",
@@ -3683,7 +3732,8 @@
             "src/app/(app)/settings/page.js:640",
             "src/components/SearchModal.jsx:121",
             "src/components/WorkspaceInfoCenter.jsx:135",
-            "src/components/profile/ProfileView.jsx:264",
+            "src/components/profile/ProfileView.jsx:330",
+            "src/components/profile/ProfileView.jsx:353",
             "src/components/workspace/IssueCard.jsx:324",
             "src/components/workspace/IssueCard.jsx:336",
             "src/components/workspace/UnifiedTimeline.jsx:236"
@@ -3710,7 +3760,7 @@
           ],
           "files": [
             "src/app/(app)/page.js:178",
-            "src/components/WorkspaceHeader.jsx:101"
+            "src/components/WorkspaceHeader.jsx:106"
           ]
         },
         "xs": {
@@ -3744,7 +3794,7 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:124"
+            "src/components/profile/ProfileView.jsx:190"
           ]
         },
         "lg": {
@@ -3835,7 +3885,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:470"
+            "src/components/WorkspaceHeader.jsx:485"
           ]
         },
         "(default)": {
@@ -3881,7 +3931,7 @@
           ],
           "files": [
             "src/components/InviteLinkSection.jsx:169",
-            "src/components/WorkspaceHeader.jsx:470"
+            "src/components/WorkspaceHeader.jsx:485"
           ]
         }
       }
@@ -3933,7 +3983,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1689"
+            "src/components/workspace/UnifiedTimeline.jsx:1687"
           ]
         }
       }
@@ -3946,8 +3996,8 @@
           "files": [
             "src/components/MobileNav.jsx:251",
             "src/components/MobileNav.jsx:310",
-            "src/components/WorkspaceSidebar.jsx:103",
-            "src/components/WorkspaceSidebar.jsx:531"
+            "src/components/WorkspaceSidebar.jsx:104",
+            "src/components/WorkspaceSidebar.jsx:540"
           ]
         },
         "md": {
@@ -3965,8 +4015,8 @@
           "files": [
             "src/components/MobileNav.jsx:251",
             "src/components/MobileNav.jsx:310",
-            "src/components/WorkspaceSidebar.jsx:103",
-            "src/components/WorkspaceSidebar.jsx:531"
+            "src/components/WorkspaceSidebar.jsx:104",
+            "src/components/WorkspaceSidebar.jsx:540"
           ]
         },
         "(default)": {
@@ -3985,14 +4035,14 @@
             "src/components/MobileNav.jsx:251",
             "src/components/MobileNav.jsx:310",
             "src/components/OrgSwitcherScreen.jsx:66",
-            "src/components/WorkspaceSidebar.jsx:103"
+            "src/components/WorkspaceSidebar.jsx:104"
           ]
         },
         "info": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:531"
+            "src/components/WorkspaceSidebar.jsx:540"
           ]
         }
       },
@@ -4003,7 +4053,7 @@
           "files": [
             "src/components/MobileNav.jsx:251",
             "src/components/MobileNav.jsx:310",
-            "src/components/WorkspaceSidebar.jsx:103"
+            "src/components/WorkspaceSidebar.jsx:104"
           ]
         },
         "inverse-outline": {
@@ -4017,7 +4067,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:531"
+            "src/components/WorkspaceSidebar.jsx:540"
           ]
         }
       }
@@ -4037,7 +4087,7 @@
             "src/app/(app)/my/page.js:477",
             "src/app/(app)/page.js:560",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:495",
+            "src/components/WorkspaceHeader.jsx:510",
             "src/components/workspace/BoardConfigModal.jsx:225",
             "src/components/workspace/QuickTeamTransferDialog.jsx:86"
           ]
@@ -4050,7 +4100,7 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:390",
-            "src/components/InviteMemberDialog.jsx:129",
+            "src/components/InviteMemberDialog.jsx:188",
             "src/components/WorkspaceInfoCenter.jsx:269",
             "src/components/profile/ProfileModal.jsx:28"
           ]
@@ -4088,7 +4138,7 @@
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:390",
-            "src/components/WorkspaceHeader.jsx:495",
+            "src/components/WorkspaceHeader.jsx:510",
             "src/components/profile/ProfileModal.jsx:28"
           ]
         },
@@ -4099,7 +4149,7 @@
             "/team"
           ],
           "files": [
-            "src/components/InviteMemberDialog.jsx:129"
+            "src/components/InviteMemberDialog.jsx:188"
           ]
         },
         "responsive": {
@@ -4133,9 +4183,9 @@
           "files": [
             "src/app/(app)/page.js:560",
             "src/components/CreateTaskModal.jsx:390",
-            "src/components/InviteMemberDialog.jsx:129",
+            "src/components/InviteMemberDialog.jsx:188",
             "src/components/SupportDialog.jsx:48",
-            "src/components/WorkspaceHeader.jsx:495",
+            "src/components/WorkspaceHeader.jsx:510",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BoardConfigModal.jsx:225",
             "src/components/workspace/QuickTeamTransferDialog.jsx:86"
@@ -4164,8 +4214,8 @@
           "files": [
             "src/app/(app)/page.js:560",
             "src/components/CreateTaskModal.jsx:390",
-            "src/components/InviteMemberDialog.jsx:129",
-            "src/components/WorkspaceHeader.jsx:495",
+            "src/components/InviteMemberDialog.jsx:188",
+            "src/components/WorkspaceHeader.jsx:510",
             "src/components/profile/ProfileModal.jsx:28",
             "src/components/workspace/BoardConfigModal.jsx:225",
             "src/components/workspace/QuickTeamTransferDialog.jsx:86"
@@ -4195,26 +4245,27 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:688",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:691",
             "src/app/(app)/my/page.js:425",
             "src/app/(app)/overview/page.js:249",
             "src/app/(app)/page.js:568",
             "src/app/(app)/page.js:892",
-            "src/app/(app)/team/page.js:188",
+            "src/app/(app)/team/page.js:218",
             "src/components/CreateTaskModal.jsx:433",
             "src/components/workspace/QuickTeamTransferDialog.jsx:135"
           ]
         },
         "info": {
-          "count": 4,
+          "count": 5,
           "routes": [
             "/[projectId]",
             "/[projectId]/issue/[issueId]",
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:696",
-            "src/components/InviteMemberDialog.jsx:215",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:699",
+            "src/components/InviteMemberDialog.jsx:273",
+            "src/components/InviteMemberDialog.jsx:317",
             "src/components/workspace/IssueDetail.jsx:1416",
             "src/components/workspace/QuickTeamTransferDialog.jsx:111"
           ]
@@ -4245,13 +4296,13 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:127",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:711",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:868",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:714",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:871",
             "src/app/(app)/overview/page.js:317",
             "src/app/(app)/overview/page.js:409",
             "src/app/(app)/overview/page.js:459",
-            "src/app/(app)/team/page.js:202",
-            "src/components/profile/ProfileView.jsx:289",
+            "src/app/(app)/team/page.js:232",
+            "src/components/profile/ProfileView.jsx:385",
             "src/components/workspace/QuickTeamTransferDialog.jsx:113"
           ]
         },
@@ -4263,7 +4314,7 @@
             "/clients"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:923"
           ]
@@ -4297,8 +4348,8 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:127",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:711",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:868",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:714",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:871",
             "src/app/(app)/overview/page.js:317",
             "src/app/(app)/overview/page.js:409",
             "src/app/(app)/overview/page.js:459",
@@ -4315,14 +4366,14 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/layout.js:132",
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:923",
-            "src/app/(app)/team/page.js:202",
+            "src/app/(app)/team/page.js:232",
             "src/components/WorkspaceInfoCenter.jsx:176",
             "src/components/WorkspaceInfoCenter.jsx:224",
-            "src/components/profile/ProfileView.jsx:289",
+            "src/components/profile/ProfileView.jsx:385",
             "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         }
@@ -4337,8 +4388,8 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:127",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:711",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:868",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:714",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:871",
             "src/app/(app)/overview/page.js:317",
             "src/app/(app)/overview/page.js:409",
             "src/app/(app)/overview/page.js:459",
@@ -4357,12 +4408,12 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:546",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:549",
             "src/app/(app)/layout.js:132",
             "src/app/(app)/page.js:833",
             "src/app/(app)/page.js:923",
-            "src/app/(app)/team/page.js:202",
-            "src/components/profile/ProfileView.jsx:289",
+            "src/app/(app)/team/page.js:232",
+            "src/components/profile/ProfileView.jsx:385",
             "src/components/workspace/UnifiedTimeline.jsx:1401"
           ]
         }
@@ -4382,21 +4433,21 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:537",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:540",
             "src/app/(app)/loading.js:28",
             "src/app/(app)/my/page.js:419",
             "src/app/(app)/overview/page.js:245",
             "src/app/(app)/page.js:822",
             "src/app/(app)/page.js:848",
             "src/app/(app)/page.js:917",
-            "src/app/(app)/settings/page.js:2520",
-            "src/app/(app)/settings/page.js:2618",
-            "src/app/(app)/settings/page.js:2663",
-            "src/app/(app)/settings/page.js:2733",
-            "src/app/(app)/settings/page.js:2831",
-            "src/app/(app)/settings/page.js:3091",
-            "src/app/(app)/settings/page.js:3114",
-            "src/app/(app)/settings/page.js:3137",
+            "src/app/(app)/settings/page.js:2532",
+            "src/app/(app)/settings/page.js:2630",
+            "src/app/(app)/settings/page.js:2675",
+            "src/app/(app)/settings/page.js:2745",
+            "src/app/(app)/settings/page.js:2843",
+            "src/app/(app)/settings/page.js:3103",
+            "src/app/(app)/settings/page.js:3126",
+            "src/app/(app)/settings/page.js:3149",
             "src/components/workspace/QuickTeamTransferDialog.jsx:108"
           ]
         }
@@ -4408,15 +4459,15 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:336"
+            "src/components/WorkspaceSidebar.jsx:337"
           ]
         },
         "caption": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:342",
-            "src/components/WorkspaceSidebar.jsx:345"
+            "src/components/WorkspaceSidebar.jsx:343",
+            "src/components/WorkspaceSidebar.jsx:346"
           ]
         }
       },
@@ -4425,21 +4476,21 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:336"
+            "src/components/WorkspaceSidebar.jsx:337"
           ]
         },
         "wide": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:342"
+            "src/components/WorkspaceSidebar.jsx:343"
           ]
         },
         "half": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:345"
+            "src/components/WorkspaceSidebar.jsx:346"
           ]
         }
       },
@@ -4448,9 +4499,9 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:336",
-            "src/components/WorkspaceSidebar.jsx:342",
-            "src/components/WorkspaceSidebar.jsx:345"
+            "src/components/WorkspaceSidebar.jsx:337",
+            "src/components/WorkspaceSidebar.jsx:343",
+            "src/components/WorkspaceSidebar.jsx:346"
           ]
         }
       }
@@ -4473,9 +4524,9 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2260",
-            "src/app/(app)/settings/page.js:2287",
-            "src/app/(app)/settings/page.js:2290",
+            "src/app/(app)/settings/page.js:2272",
+            "src/app/(app)/settings/page.js:2299",
+            "src/app/(app)/settings/page.js:2302",
             "src/components/CreateTaskModal.jsx:401"
           ]
         },
@@ -4485,8 +4536,8 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2312",
-            "src/app/(app)/settings/page.js:2342"
+            "src/app/(app)/settings/page.js:2324",
+            "src/app/(app)/settings/page.js:2354"
           ]
         }
       }
@@ -4497,7 +4548,7 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:369",
+            "src/components/WorkspaceHeader.jsx:384",
             "src/components/WorkspaceInfoCenter.jsx:279"
           ]
         }
@@ -4507,7 +4558,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceHeader.jsx:369"
+            "src/components/WorkspaceHeader.jsx:384"
           ]
         },
         "dialog-tabs": {
@@ -4529,12 +4580,12 @@
           "files": [
             "src/app/(app)/settings/page.js:2151",
             "src/app/(app)/settings/page.js:2195",
-            "src/app/(app)/settings/page.js:2252",
-            "src/app/(app)/settings/page.js:2433",
-            "src/app/(app)/settings/page.js:2810",
-            "src/app/(app)/settings/page.js:2897",
-            "src/app/(app)/settings/page.js:2961",
-            "src/app/(app)/settings/page.js:3057"
+            "src/app/(app)/settings/page.js:2264",
+            "src/app/(app)/settings/page.js:2445",
+            "src/app/(app)/settings/page.js:2822",
+            "src/app/(app)/settings/page.js:2909",
+            "src/app/(app)/settings/page.js:2973",
+            "src/app/(app)/settings/page.js:3069"
           ]
         },
         "(default)": {
@@ -4543,10 +4594,10 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:2523",
-            "src/app/(app)/settings/page.js:2621",
-            "src/app/(app)/settings/page.js:2666",
-            "src/app/(app)/settings/page.js:2736"
+            "src/app/(app)/settings/page.js:2535",
+            "src/app/(app)/settings/page.js:2633",
+            "src/app/(app)/settings/page.js:2678",
+            "src/app/(app)/settings/page.js:2748"
           ]
         },
         "sm": {
@@ -4566,16 +4617,16 @@
           "files": [
             "src/app/(app)/settings/page.js:2151",
             "src/app/(app)/settings/page.js:2195",
-            "src/app/(app)/settings/page.js:2252",
-            "src/app/(app)/settings/page.js:2433",
-            "src/app/(app)/settings/page.js:2523",
-            "src/app/(app)/settings/page.js:2621",
-            "src/app/(app)/settings/page.js:2666",
-            "src/app/(app)/settings/page.js:2736",
-            "src/app/(app)/settings/page.js:2810",
-            "src/app/(app)/settings/page.js:2897",
-            "src/app/(app)/settings/page.js:2961",
-            "src/app/(app)/settings/page.js:3057"
+            "src/app/(app)/settings/page.js:2264",
+            "src/app/(app)/settings/page.js:2445",
+            "src/app/(app)/settings/page.js:2535",
+            "src/app/(app)/settings/page.js:2633",
+            "src/app/(app)/settings/page.js:2678",
+            "src/app/(app)/settings/page.js:2748",
+            "src/app/(app)/settings/page.js:2822",
+            "src/app/(app)/settings/page.js:2909",
+            "src/app/(app)/settings/page.js:2973",
+            "src/app/(app)/settings/page.js:3069"
           ]
         },
         "bordered-compact": {
@@ -4670,13 +4721,15 @@
     "FormGroup": {
       "gap": {
         "(default)": {
-          "count": 2,
+          "count": 3,
           "routes": [
-            "/[projectId]"
+            "/[projectId]",
+            "/team"
           ],
           "files": [
             "src/components/CreateTaskModal.jsx:442",
-            "src/components/CreateTaskModal.jsx:455"
+            "src/components/CreateTaskModal.jsx:455",
+            "src/components/InviteMemberDialog.jsx:226"
           ]
         }
       }
@@ -4692,9 +4745,9 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:673",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:676",
             "src/app/(app)/my/page.js:389",
-            "src/components/InviteMemberDialog.jsx:163",
+            "src/components/InviteMemberDialog.jsx:256",
             "src/components/workspace/IssueDetail.jsx:1346"
           ]
         },
@@ -4704,7 +4757,7 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:3050"
+            "src/app/(app)/settings/page.js:3062"
           ]
         },
         "raised": {
@@ -4713,7 +4766,7 @@
             "/team"
           ],
           "files": [
-            "src/components/profile/ProfileView.jsx:157"
+            "src/components/profile/ProfileView.jsx:223"
           ]
         }
       },
@@ -4727,11 +4780,11 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:673",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:676",
             "src/app/(app)/my/page.js:389",
-            "src/app/(app)/settings/page.js:3050",
-            "src/components/InviteMemberDialog.jsx:163",
-            "src/components/profile/ProfileView.jsx:157"
+            "src/app/(app)/settings/page.js:3062",
+            "src/components/InviteMemberDialog.jsx:256",
+            "src/components/profile/ProfileView.jsx:223"
           ]
         },
         "pane-switch": {
@@ -4764,7 +4817,7 @@
             "src/components/CreateTaskModal.jsx:583",
             "src/components/CreateTaskModal.jsx:634",
             "src/components/CreateTaskModal.jsx:663",
-            "src/components/InviteMemberDialog.jsx:177",
+            "src/components/InviteMemberDialog.jsx:279",
             "src/components/workspace/BoardConfigModal.jsx:184"
           ]
         }
@@ -4814,7 +4867,7 @@
             "/[projectId]/issue/[issueId]"
           ],
           "files": [
-            "src/components/workspace/UnifiedTimeline.jsx:1659"
+            "src/components/workspace/UnifiedTimeline.jsx:1657"
           ]
         }
       }
@@ -4827,7 +4880,7 @@
             "/settings"
           ],
           "files": [
-            "src/app/(app)/settings/page.js:3207"
+            "src/app/(app)/settings/page.js:3219"
           ]
         },
         "team": {
@@ -4836,7 +4889,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:142"
+            "src/app/(app)/team/page.js:163"
           ]
         }
       }
@@ -4858,7 +4911,7 @@
             "/team"
           ],
           "files": [
-            "src/app/(app)/team/page.js:180"
+            "src/app/(app)/team/page.js:210"
           ]
         }
       }
@@ -4886,11 +4939,11 @@
             "/overview"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:828",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:833",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:838",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:849",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:859",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:831",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:836",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:841",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:852",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:862",
             "src/app/(app)/overview/page.js:302",
             "src/app/(app)/overview/page.js:398",
             "src/app/(app)/overview/page.js:448",
@@ -4903,8 +4956,8 @@
             "/[projectId]"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:929",
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:959"
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:932",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:962"
           ]
         },
         "group": {
@@ -4930,7 +4983,7 @@
             "/my"
           ],
           "files": [
-            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:607",
+            "src/app/(app)/[projectId]/ProjectBoardClient.jsx:610",
             "src/app/(app)/my/page.js:285"
           ]
         },
@@ -5046,6 +5099,7 @@
     "Task Attributes Panel — очима клієнта": "<div className=\"relative isolate -mx-2 px-2\">\n  <TaskAttributesPanel\n    context=\"clientTask\"\n    compact\n    primaryChildren={\n      <>\n        <div className={readOnlyItemClass}>\n          <span className={attributeLabelClass}>Статус</span>\n          <Select compact readOnly value=\"in-progress\" options={statusOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Тип</span>\n          <Select compact value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-sm:hidden ${attributeItemClass}`}>\n          <span className={attributeLabelClass}>Пріоритет</span>\n          <Select compact value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={`max-lg:hidden ${readOnlyItemClass}`}>\n          <span className={attributeLabelClass}>Підтримка</span>\n          <Select compact readOnly value=\"1\" options={memberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <div className={attributeItemClass}>\n          <span className={attributeLabelClass}>Відповідальні</span>\n          <Select compact value={clientMemberVal} onChange={setClientMemberVal} options={clientMemberOpts} buttonClassName={compactSelectClass} />\n        </div>\n\n        <Popover\n          position=\"bottom\"\n          hideCloseIcon\n          className=\"flex h-full items-center lg:hidden\"\n          triggerClassName=\"flex h-full w-full items-center justify-center\"\n          trigger={(\n            <AttributeTrigger\n              className=\"max-sm:px-0\"\n              aria-label=\"Деталі звернення\"\n              title=\"Пріоритет і тип\"\n            >\n              <Settings2 size={14} />\n              <span className=\"max-sm:hidden\">Деталі</span>\n            </AttributeTrigger>\n          )}\n        >\n          <div className=\"flex w-[248px] max-w-full flex-col gap-4\">\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Підтримка</span>\n              <Select readOnly value=\"1\" options={memberOpts} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5 sm:hidden\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Пріоритет</span>\n              <Select value={priority} onChange={setPriority} options={prioritySelectOptions(DEFAULT_PRIORITIES)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n            <div className=\"flex flex-col gap-1.5\">\n              <span className=\"text-[10px] font-bold uppercase tracking-wider text-muted\">Тип</span>\n              <Select value={type} onChange={setType} options={DEFAULT_TYPES.map(taskTypeSelectOption)} buttonClassName=\"h-[36px] w-full rounded-[10px] bg-canvas px-3 text-[13px] font-medium\" />\n            </div>\n          </div>\n        </Popover>\n      </>\n    }\n  />\n</div>",
     "Form Group Layouts": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Назва клієнта\">\n    <Input placeholder=\"Введіть назву...\" />\n  </FormGroup>\n\n  <FormGroup label=\"Електронна пошта\" required>\n    <Input placeholder=\"name@company.com\" />\n  </FormGroup>\n\n  <FormGroup label=\"Пароль\" required error=\"Пароль має містити щонайменше 8 символів\">\n    <Input type=\"password\" placeholder=\"••••••••\" error={true} />\n  </FormGroup>\n</div>",
     "Label з іконкою": "<div className=\"grid grid-cols-1 md:grid-cols-3 gap-[24px] max-w-[900px]\">\n  <FormGroup label=\"Учасники\" icon={Users}>\n    <Input placeholder=\"Додати учасників\" />\n  </FormGroup>\n\n  <FormGroup label=\"Нагадування\" icon={Bell} required>\n    <Input placeholder=\"За 15 хвилин\" />\n  </FormGroup>\n\n  <div className=\"flex flex-col gap-[6px]\">\n    <Label icon={MapPin}>Місце</Label>\n    <Input placeholder=\"Офіс або кімната\" />\n  </div>\n</div>",
+    "Option Card": "<div className=\"grid max-w-[640px] gap-2 sm:grid-cols-2\">\n  <OptionCard\n    icon={UserRound}\n    title=\"Співробітник\"\n    description=\"Створює звернення й пише в них.\"\n    selected={role === 'client_member'}\n    onClick={() => setRole('client_member')}\n  />\n  <OptionCard\n    icon={Shield}\n    title=\"Адміністратор\"\n    description=\"Те саме, плюс запрошує інших співробітників.\"\n    selected={role === 'client_admin'}\n    onClick={() => setRole('client_admin')}\n  />\n</div>",
     "Filter Bar — Projects Page": "<PageHeader\n  title=\"Проєкти\"\n  actions={<Button style=\"primary\" color=\"dark\" size=\"lg\" icon={Plus}>Новий проєкт</Button>}\n  filters={(\n    <FilterBar context=\"projects\">\n      <Select filterRole=\"member\" options={memberOptions} value={selectedMember} onChange={setSelectedMember} variant=\"ghost\" />\n      <Select filterRole=\"date\" options={dateOptions} value={dateFilter} onChange={setDateFilter} variant=\"ghost\" />\n      <Select filterRole=\"sort\" options={sortOptions} value={sortOption} onChange={setSortOption} variant=\"ghost\" />\n    </FilterBar>\n  )}\n/>",
     "Popover & Tooltip": "<div className=\"flex items-center gap-[24px] flex-wrap\">\n  <Popover\n    trigger={<Button style=\"secondary\">Показати Popover</Button>}\n    position=\"bottom\"\n  >\n    <div className=\"p-2\">\n      <h4 className=\"text-[14px] font-bold mb-1\">Інформаційне вікно</h4>\n      <p className=\"text-[12px] text-[#9a9a9a]\">Корисна інформація або додаткові налаштування.</p>\n    </div>\n  </Popover>\n\n  <Tooltip content=\"Це підказка при наведенні\" position=\"top\">\n    <Button style=\"secondary\">Наведіть для підказки</Button>\n  </Tooltip>\n</div>",
     "Context Menu": "<div className=\"flex items-start gap-[40px] flex-wrap\">\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Інтерактивне меню</span>\n    <ContextMenu\n      trigger={<Button style=\"secondary\" size=\"icon\" icon={MoreVertical}>Меню</Button>}\n      items={menuItems}\n    />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Меню-перемикач (мітки звернення)</span>\n    <ContextMenu\n      trigger={(\n        <Button style=\"secondary\" size=\"sm\" composition=\"inline-add-action\" icon={Plus}>\n          Додати мітку\n        </Button>\n      )}\n      dropdownClassName=\"w-[220px]\"\n      closeOnSelect={false}\n      items={toggleMenuItems}\n    />\n  </div>\n  <div className=\"flex flex-col gap-[8px]\">\n    <span className=\"text-[11px] font-bold text-[#9a9a9a] uppercase tracking-wider\">Меню людини (align=&quot;start&quot;)</span>\n    <ContextMenu\n      align=\"start\"\n      dropdownClassName=\"w-[210px]\"\n      trigger={(\n        <MetaTrigger\n          label=\"Автор:\"\n          user={{ id: 'u1', name: 'Артур Моспан' }}\n          name=\"Артур Моспан\"\n          className=\"text-[12px] font-medium text-muted\"\n        />\n      )}\n      items={[\n        { icon: User, label: 'Переглянути профіль' },\n        { icon: MessageCircle, label: 'Написати в чат' },\n      ]}\n    />\n  </div>\n</div>",

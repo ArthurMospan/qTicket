@@ -11,15 +11,15 @@
     "productFiles": 173,
     "parsedFiles": 173,
     "parseErrors": 0,
-    "nativeControls": 14,
+    "nativeControls": 15,
     "structures": {
       "chat": 2,
       "settings": 1,
-      "shell": 10,
+      "shell": 11,
       "other": 1
     },
     "styledNativeControls": 5,
-    "reviewedNativeControls": 6,
+    "reviewedNativeControls": 7,
     "manualLabels": 0,
     "manualModalShells": 0,
     "manualPills": 0,
@@ -31,20 +31,20 @@
     "localSharedNameCollisions": 0
   },
   "nativeByTag": {
-    "button": 14,
+    "button": 15,
     "input": 0,
     "textarea": 0,
     "select": 0
   },
   "kit": {
     "totals": {
-      "components": 90,
-      "used": 90,
+      "components": 91,
+      "used": 91,
       "unused": 0,
-      "covered": 83,
+      "covered": 84,
       "uncovered": 0,
       "routes": 8,
-      "previews": 124,
+      "previews": 125,
       "internal": 7,
       "unlisted": 0
     },
@@ -158,13 +158,30 @@
     },
     {
       "tag": "button",
-      "location": "src/components/profile/ProfileView.jsx:256",
+      "location": "src/components/profile/ProfileView.jsx:322",
       "className": "ui-native-control",
       "text": "",
       "childElements": [
         "Pill"
       ],
       "ariaLabel": "",
+      "styled": false,
+      "reviewed": "profile-project-chip",
+      "resembles": "IconAction",
+      "structure": "shell",
+      "routes": [
+        "/team"
+      ]
+    },
+    {
+      "tag": "button",
+      "location": "src/components/profile/ProfileView.jsx:345",
+      "className": "ui-native-control",
+      "text": "",
+      "childElements": [
+        "Pill"
+      ],
+      "ariaLabel": "Додати до проєкту",
       "styled": false,
       "reviewed": "profile-project-chip",
       "resembles": "IconAction",
@@ -224,7 +241,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:415",
+      "location": "src/components/WorkspaceSidebar.jsx:424",
       "className": "flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -239,7 +256,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:438",
+      "location": "src/components/WorkspaceSidebar.jsx:447",
       "className": "flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[10px] transition-colors",
       "text": "",
       "childElements": [
@@ -254,7 +271,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/WorkspaceSidebar.jsx:89",
+      "location": "src/components/WorkspaceSidebar.jsx:90",
       "className": "flex w-full min-w-0 items-center gap-[4px] text-left cursor-pointer transition-colors",
       "text": "",
       "childElements": [
@@ -292,11 +309,11 @@
       "count": 3
     },
     {
-      "file": "src/components/OrgSwitcherScreen.jsx",
-      "count": 1
+      "file": "src/components/profile/ProfileView.jsx",
+      "count": 2
     },
     {
-      "file": "src/components/profile/ProfileView.jsx",
+      "file": "src/components/OrgSwitcherScreen.jsx",
       "count": 1
     },
     {
@@ -325,7 +342,12 @@
       "context": "navigation-sheet-row"
     },
     {
-      "location": "src/components/profile/ProfileView.jsx:256",
+      "location": "src/components/profile/ProfileView.jsx:322",
+      "tag": "button",
+      "context": "profile-project-chip"
+    },
+    {
+      "location": "src/components/profile/ProfileView.jsx:345",
       "tag": "button",
       "context": "profile-project-chip"
     },
@@ -335,12 +357,12 @@
       "context": "chat-reply-quote"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:415",
+      "location": "src/components/WorkspaceSidebar.jsx:424",
       "tag": "button",
       "context": "branding-action"
     },
     {
-      "location": "src/components/WorkspaceSidebar.jsx:438",
+      "location": "src/components/WorkspaceSidebar.jsx:447",
       "tag": "button",
       "context": "branding-action"
     }
@@ -406,12 +428,12 @@
       "className": "relative flex h-[94dvh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:h-full sm:max-h-none sm:w-[min(1040px,88vw)] sm:rounded-none sm:pb-0"
     },
     {
-      "location": "src/components/workspace/UnifiedTimeline.jsx:1704",
+      "location": "src/components/workspace/UnifiedTimeline.jsx:1702",
       "tag": "div",
       "className": "mb-2 flex items-start gap-2 rounded-[10px] border border-line/70 bg-canvas/90 px-3 py-2 backdrop-blur-xl"
     },
     {
-      "location": "src/components/WorkspaceHeader.jsx:513",
+      "location": "src/components/WorkspaceHeader.jsx:528",
       "tag": "div",
       "className": "fixed w-[min(380px,calc(100vw-16px))] overflow-hidden rounded-[16px] border border-line bg-white shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
     },

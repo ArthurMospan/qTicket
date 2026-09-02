@@ -61,7 +61,12 @@ test('the sidebar ships one lockup for both readers', async () => {
   const lockup = sidebar.slice(sidebar.indexOf('function SidebarBrandLockup({'));
   assert.ok(lockup.search(labelLine) < lockup.search(nameLine));
   assert.match(sidebar, /function SidebarBrandLockup\(\{/);
-  assert.match(sidebar, /label=\{clientViewer \? 'Портал підтримки' : 'qTicket'\}/);
+  // One pair of words for both readers: «Портал підтримки» over whoever runs the
+  // portal — the provider for a customer, the reader's own company for staff.
+  // The staff line used to name the software instead, over an organization that
+  // white-labels the rail below it.
+  assert.match(sidebar, /label="Портал підтримки"/);
+  assert.doesNotMatch(sidebar, /label=\{clientViewer \? .* : 'qTicket'\}/);
 
   // Branding decides which mark is drawn, never how the words are arranged.
   assert.doesNotMatch(sidebar, /fontSize: isBranded/);

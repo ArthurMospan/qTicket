@@ -30,12 +30,13 @@ import {
  * The two lines beside the mark, and there is one of them.
  *
  * The small line says what this place is; the big line under it names which one
- * you are in. «Портал підтримки» over the provider's name, «qTicket» over the
- * organization's — the arrangement the QuickTeam rail already draws for a
- * branded workspace, so the same corner of two products is not laid out two
- * ways. It read the other way round here, which put the switcher — a control
- * that changes the *organization* — on the row that says «qTicket», one line
- * below the organization it changes.
+ * you are in — «Портал підтримки» over whoever runs it, which is the provider
+ * for a customer and the reader's own company for a member of staff. It is the
+ * arrangement the QuickTeam rail already draws for a branded workspace, so the
+ * same corner of two products is not laid out two ways. It read the other way
+ * round here, which put the switcher — a control that changes the
+ * *organization* — on the row that named the product, one line below the
+ * organization it changes.
  *
  * The numbers are QuickTeam's, to the pixel, and that is a requirement rather
  * than a coincidence: one corner in two products cannot be two corners. That
@@ -381,17 +382,25 @@ export default function WorkspaceSidebar() {
                 )}
                 {brandingReady && (
                   <div className="flex flex-col min-w-0 ml-[12px]">
-                    {/* A client is in the support provider's portal, not in
-                        qTicket, so the provider is the primary identity and the
-                        product name does not appear in their corner at all. A
-                        member of staff is in their own organization, inside
-                        qTicket. Two readers, two pairs of words, one lockup. */}
+                    {/* One pair of words for both readers, because both are in
+                        the same place. A client is in their supplier's support
+                        portal; a member of staff is in the support portal they
+                        run — the small line says what this is and the big line
+                        under it names whose it is, which is true of a customer
+                        looking at their provider and of an agent looking at
+                        their own company.
+                        The staff line used to say «qTicket» instead, which
+                        named the software rather than the place and put the
+                        vendor's name over an organization that white-labels the
+                        whole rail below it. The product still marks itself
+                        where a mark belongs: the glyph beside these two lines,
+                        for any organization that has not supplied its own. */}
                     <SidebarBrandLockup
                       href={homeHref}
                       name={clientViewer
                         ? portalBrand.name
                         : (activeOrg?.name || 'Company name')}
-                      label={clientViewer ? 'Портал підтримки' : 'qTicket'}
+                      label="Портал підтримки"
                       switchLabel={clientViewer
                         ? 'Змінити портал підтримки'
                         : 'Змінити організацію'}

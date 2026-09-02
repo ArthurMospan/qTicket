@@ -2206,13 +2206,25 @@ export default function SettingsPage() {
                 <Input size="md" value={currentUser?.email || ''} readOnly disabled />
               </div>
             </Row>
-            {/* And the two fields QuickTeam does not send, which is exactly why
-                they are editable here. A colleague's profile in «Команда» could
-                answer what somebody has open and never how to reach them; the
-                customer's half of this screen has carried these two rows all
+            {/* And the three fields QuickTeam does not send, which is exactly
+                why they are editable here. A colleague's profile in «Команда»
+                could answer what somebody has open and never how to reach them;
+                the customer's half of this screen has carried these rows all
                 along, and the desk's half — the half that actually gets called
-                — had neither. Filling one in publishes it to the people you
-                work with here, which is the point of the field. */}
+                — had none of them. Filling one in publishes it to the people
+                you work with here, which is the point of the field.
+
+                «Посада» is the one that was missing on this side alone, and it
+                is the one the roster reads: `positionName` in «Команда» and in
+                every profile falls through to `title`, so an agent with no
+                position assigned was listed by their *role* — «Учасник» under
+                four different people's names — while the customer sitting
+                opposite them had a way to say «Головний бухгалтер» and they did
+                not. It is qTicket's own field: provisioning writes the name,
+                the email and the avatar, and never touches this one. */}
+            <Row label="Посада" desc="Ваша роль у компанії — бачать усі, з ким ви працюєте в qTicket">
+              <InlineEditField value={jobTitle} onChange={setJobTitle} saved={currentUser?.title || ''} onSave={() => saveProfileField('title', jobTitle)} className="w-[260px]" />
+            </Row>
             <Row label="Телефон" desc="Бачать усі, з ким ви працюєте в qTicket">
               <InlineEditField value={phone} onChange={setPhone} saved={currentUser?.phone || ''} onSave={() => saveProfileField('phone', phone)} className="w-[260px]" />
             </Row>
