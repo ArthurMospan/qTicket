@@ -20,10 +20,20 @@ import { isClientRole } from '@/lib/utils/can';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 
-// The two seats a client administrator may hand out, and what each one means to
-// the person receiving it. Said as a consequence rather than as a job title:
-// «Адміністратор» on its own does not tell anybody that this is the one who can
-// invite the rest of the department.
+// The two client seats, and only one of them is this dialog's to give.
+//
+// «Адміністратор» is drawn and disabled rather than left out, because leaving
+// it out would answer a question a customer does have — «can I make my
+// colleague an administrator?» — with silence, and the second card is the
+// shortest place to say where that answer lives.
+//
+// Why it is not on offer: granting a role is half a feature, and the other half
+// is taking it back. qTicket has no screen that demotes a client administrator,
+// on purpose — the desk does not administer a customer's people, and a
+// customer's roster is not a place to put a role editor. So this seat stays
+// with the one flow that is already reversible by the people who own it: the
+// desk seats a client administrator from the project's «Учасники» tab. Three
+// places agree — this card, `invitedRoleFor`, and `inviteLinkRole`.
 const CLIENT_ROLE_OPTIONS = [
   {
     value: 'client_member',
@@ -34,8 +44,9 @@ const CLIENT_ROLE_OPTIONS = [
   {
     value: 'client_admin',
     label: 'Адміністратор',
-    description: 'Те саме, плюс запрошує інших співробітників у цей проєкт.',
+    description: 'Запрошує інших. Це місце відкриває підтримка — попросіть у зверненні.',
     icon: Shield,
+    disabled: true,
   },
 ];
 
@@ -48,12 +59,12 @@ const CLIENT_ROLE_OPTIONS = [
  * that project) or lets that administrator add one of their own people
  * (`clientMode`).
  *
- * The two questions it does ask are the two the screen behind it cannot answer:
- * which of that administrator's projects the invitation is for, when they hold
- * more than one, and which of the two client seats it opens. Both are re-derived
- * on the server — `resolveInvitationScope` refuses a project the author is not
- * on, `invitedRoleFor` refuses anything but a client role — so what is chosen
- * here is a convenience, never the authorization.
+ * The one question it asks is the one the screen behind it cannot answer: which
+ * of that administrator's projects the invitation is for, when they hold more
+ * than one. The answer is re-derived on the server — `resolveInvitationScope`
+ * refuses a project the author is not on, `invitedRoleFor` refuses every role
+ * but `client_member` — so what is chosen here is a convenience, never the
+ * authorization.
  *
  * @param {object[]} props.projects The client spaces this invitation may name. One means no question; several put a picker on the dialog.
  * @param {string[]} props.projectIds Legacy single-project form, kept for the support-side «Запросити клієнта».
@@ -106,6 +117,9 @@ export default function InviteMemberDialog({
   const [role, setRole] = useState('client_member');
   // The support-side invitation seats a client administrator and asks nothing:
   // it is opened from one project, for the one role that project needs first.
+  // The client-side one asks, and today there is one answer to pick — the
+  // server re-derives it either way, so this is what is shown, never what is
+  // enforced.
   const invitedRole = clientInvite ? role : 'client_admin';
   const selectedSpace = spaces.find(space => space.id === projectId) || null;
   const selectedSpaceName = selectedSpace?.name || spaceName;
@@ -194,13 +208,14 @@ export default function InviteMemberDialog({
     >
       <div className="flex flex-col gap-6">
         {/* What QuickTeam puts at the top of this dialog is a role picker, and
-            for the invitation a client administrator issues there is now a real
-            choice to put there: a colleague who files requests, or a second
-            administrator who can also invite the rest of the department. The
-            same control, the same two cards, the same geometry — one dialog in
-            two products cannot be two dialogs.
+            this one wears the same two cards, the same geometry: one dialog in
+            two products cannot be two dialogs. What differs is that here the
+            second card is disabled — see `CLIENT_ROLE_OPTIONS` for why a seat
+            nothing in the product can take back is not a seat this dialog
+            gives. A picker of one is still worth drawing when the option it
+            greys out is the question people arrive with.
 
-            The support-side invitation still has no choice to offer: it seats
+            The support-side invitation has no choice to offer at all: it seats
             the client's first administrator, from the project it was opened
             for, and the server re-derives that anyway. It states the decision
             instead of inventing a control for it. */}
@@ -211,11 +226,12 @@ export default function InviteMemberDialog({
               {CLIENT_ROLE_OPTIONS.map(option => (
                 <OptionCard
                   key={option.value}
-                  selected={role === option.value}
+                  selected={!option.disabled && role === option.value}
+                  disabled={option.disabled}
                   icon={option.icon}
                   title={option.label}
                   description={option.description}
-                  onClick={() => setRole(option.value)}
+                  onClick={option.disabled ? undefined : () => setRole(option.value)}
                 />
               ))}
             </div>

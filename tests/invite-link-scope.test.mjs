@@ -67,20 +67,16 @@ test('only owner, admin and client_admin may author a link at all', () => {
   }
 });
 
-test('staff mint a client administrator, a client administrator mints their own company', () => {
+test('staff mint a client administrator, a client administrator mints a colleague', () => {
   assert.equal(inviteLinkRole('client_admin', 'owner'), 'client_admin');
   assert.equal(inviteLinkRole('client_admin', 'admin'), 'client_admin');
   assert.equal(inviteLinkRole('client_member', 'admin'), 'client_member');
-  // A client administrator hands out either seat of their own company — the
-  // second administrator included, because one of them going on holiday must
-  // not take the invitations with them.
-  assert.equal(inviteLinkRole('client_admin', 'client_admin'), 'client_admin');
-  assert.equal(inviteLinkRole('client_member', 'client_admin'), 'client_member');
-  // Nothing they send widens the link past their own side of the desk: a
-  // support seat asked for here lands on the floor of what they may give, and
-  // the link is still refused every internal role by the two checks above.
+  // Nothing a client administrator sends can widen their own link — not to a
+  // support seat, and not to the second administrator's seat either: qTicket
+  // has no screen that takes that role back, so it is not one this side of the
+  // desk gives out.
+  assert.equal(inviteLinkRole('client_admin', 'client_admin'), 'client_member');
   assert.equal(inviteLinkRole('admin', 'client_admin'), 'client_member');
-  assert.equal(inviteLinkRole('owner', 'client_admin'), 'client_member');
   assert.equal(inviteLinkRole(undefined, 'client_admin'), 'client_member');
 });
 

@@ -67,15 +67,12 @@ export function inviteTokenLooksWellFormed(token) {
  */
 export function inviteLinkRole(requestedRole, inviterRole) {
   if (!LINK_AUTHOR_ROLES.has(inviterRole)) throw new Error('LINK_AUTHOR_REFUSED');
-  // A client administrator gives links to their own colleagues, as a member or
-  // as a second administrator of the same company. Nothing in the request can
-  // widen it past those two: an internal role asked for here does not throw, it
-  // lands on the floor of what they may give, exactly as the email invitation
-  // does — a standing offer must never be the loophole the one-shot invitation
-  // is not.
-  if (inviterRole === 'client_admin') {
-    return isClientRole(requestedRole) ? requestedRole : 'client_member';
-  }
+  // A client administrator has exactly one link to give, and it is for their
+  // own colleagues. Nothing in the request can widen that — not to a support
+  // seat, and not to the second administrator's seat either: see
+  // `invitedRoleFor` for why granting a role qTicket cannot take back is a
+  // door that only opens.
+  if (inviterRole === 'client_admin') return 'client_member';
   if (!isClientRole(requestedRole)) throw new Error('INTERNAL_ROLE_REFUSED');
   return requestedRole;
 }

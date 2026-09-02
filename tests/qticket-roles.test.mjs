@@ -34,16 +34,13 @@ test('лише client_admin отримує окреме право запрос�
   );
 });
 
-test('client_admin обирає між двома клієнтськими ролями і не виходить за них', () => {
-  // Він адмініструє людей власної компанії, тож може призначити ще одного
-  // адміністратора — інакше запрошення в клієнта закінчуються разом з
-  // відпусткою однієї людини. Обидві ролі однаково прив'язані до проєкту, на
-  // якому він сам стоїть.
-  assert.equal(invitedRoleFor('client_admin', 'client_admin'), 'client_admin');
-  assert.equal(invitedRoleFor('client_member', 'client_admin'), 'client_member');
-  // Все інше — це місце в команді підтримки, а його роздає лише QuickTeam.
-  // Запит на нього не підвищує нікого: він падає на підлогу дозволеного.
-  for (const requested of ['owner', 'admin', 'member', 'anything', '', null, undefined]) {
+test('client_admin не може підвищити роль через тіло запрошення', () => {
+  // Ані до місця в підтримці, ані до другого адміністраторського місця своєї
+  // компанії. Друге пробували видати 2026-09-02 і того ж дня забрали: видати
+  // роль — це половина, друга половина — забрати її назад, а екрана, що знімає
+  // адміністратора клієнта, в qTicket немає й не планується. Двері, які лише
+  // відчиняються, гірші за зачинені.
+  for (const requested of ['owner', 'admin', 'member', 'client_admin', 'client_member', 'anything', '', null, undefined]) {
     assert.equal(invitedRoleFor(requested, 'client_admin'), 'client_member');
   }
   assert.equal(invitedRoleFor('client_admin', 'admin'), 'client_admin');
@@ -347,6 +344,12 @@ test('qTicket не має самостійного шляху до внутрі�
   for (const internal of ["value: 'member'", "value: 'admin'", "value: 'owner'", 'Менеджер підтримки']) {
     assert.ok(!dialog.includes(internal), internal);
   }
+  // І з двох намальованих карток видається одна. Друга стоїть вимкненою — не
+  // схованою, бо «а чи можу я зробити колегу адміністратором?» — питання, з
+  // яким приходять, і картка коротше за все каже, де відповідь.
+  assert.match(dialog, /value: 'client_admin',[\s\S]{0,200}disabled: true,/);
+  assert.match(dialog, /disabled=\{option\.disabled\}/);
+  assert.match(dialog, /onClick=\{option\.disabled \? undefined :/);
   // Половина підтримки не має вибору й не вдає його: вона садить першого
   // адміністратора клієнта і каже це фактом, а не контролом.
   assert.match(dialog, /organizationRoleLabel\(invitedRole\)/);
@@ -355,10 +358,7 @@ test('qTicket не має самостійного шляху до внутрі�
   // 1. Виписати внутрішню роль неможливо: `isClientRole` — умова, а не
   //    підстраховка, і немає гілки, що повертає щось інше.
   assert.match(helper, /if \(!isClientRole\(requestedRole\)\) throw new Error\('INTERNAL_ROLE_REFUSED'\)/);
-  // Адміністратор клієнта видає обидва клієнтські місця своєї компанії, і
-  // жодного іншого: запит на внутрішнє падає на підлогу дозволеного, а не
-  // піднімає нікого.
-  assert.match(helper, /return isClientRole\(requestedRole\) \? requestedRole : 'client_member'/);
+  assert.match(helper, /if \(inviterRole === 'client_admin'\) return 'client_member'/);
   assert.doesNotMatch(helper, /return 'member'|return 'admin'|return 'owner'/);
 
   // 2. Маршрут створення питає саме цю функцію, а не власний список ролей, і
