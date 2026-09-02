@@ -37,7 +37,7 @@ import { NO_PRIORITY_ID, prioritySelectOptions } from '@/lib/utils/priorities.mj
 import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
 import { can, canWhileRoleLoads, isClientRole } from '@/lib/utils/can';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
-import { needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
+import { issuesNeedingAssigneeForMove, needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
 import { useViewState } from '@/lib/hooks/useViewState';
 import { INCIDENT_QUEUE_VIEW_SCHEMA } from '@/lib/utils/viewState.mjs';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
@@ -138,6 +138,9 @@ export default function IncidentQueuePage() {
   const [pendingStatusMove, setPendingStatusMove] = useState(null);
   // A move waiting on a name — see `gateOrCommit`.
   const [pendingAssignment, setPendingAssignment] = useState(null);
+  // The same gate, asked once of a selection: a bulk status change was the way
+  // around it.
+  const [pendingBulk, setPendingBulk] = useState(null);
   const [assigningBeforeMove, setAssigningBeforeMove] = useState(false);
   // This board's columns are the five shared status categories, so what a person
   // folds away here is a category too. Kept under its own key: the old value held
@@ -223,17 +226,30 @@ export default function IncidentQueuePage() {
   // time — the project board and the request's own page are the other two — and
   // it was the one left out, so a card dragged out of «Новий» here went through
   // unowned while the same drag on a project board stopped and asked.
-  // Who may take the request being moved: the support side of its own
-  // project's roster.
+  // Who may take the requests being moved: the support side of their projects'
+  // rosters.
+  //
+  // This queue spans every project a person is on, so a selection can too — and
+  // the same people are about to be written to all of them. The honest set is
+  // therefore the intersection: somebody on three of the four projects cannot
+  // be made answerable for the fourth. One request is that rule with a list of
+  // one. An empty intersection is a real answer, and the dialog says so rather
+  // than offering names the write would refuse.
   const assignmentCandidates = useMemo(() => {
-    const project = (projects || []).find(
-      item => item.id === pendingAssignment?.issue?.projectId,
-    );
-    const roster = new Set(Array.isArray(project?.team) ? project.team : []);
-    return activeMembers(members).filter(member => (
-      !isClientRole(member.role) && roster.has(member.id || member.uid)
+    const affected = pendingBulk
+      ? pendingBulk.needing
+      : (pendingAssignment?.issue ? [pendingAssignment.issue] : []);
+    const projectIds = [...new Set(affected.map(issue => issue.projectId).filter(Boolean))];
+    if (projectIds.length === 0) return [];
+    const rosters = projectIds.map(projectId => new Set(
+      (projects || []).find(item => item.id === projectId)?.team || [],
     ));
-  }, [members, pendingAssignment, projects]);
+    return activeMembers(members).filter(member => {
+      if (isClientRole(member.role)) return false;
+      const uid = member.id || member.uid;
+      return rosters.every(roster => roster.has(uid));
+    });
+  }, [members, pendingAssignment, pendingBulk, projects]);
 
   const gateOrCommit = async (move, statusId = null) => {
     const issue = move.issue || tasks.find(item => item.id === move.issueId);
@@ -276,7 +292,33 @@ export default function IncidentQueuePage() {
   };
 
   const handleBulkUpdate = async (action, value, selectedIssues) => {
+    if (action === 'status' && value?.id) {
+      const needing = issuesNeedingAssigneeForMove({
+        issues: selectedIssues,
+        ...(value.mode === 'category' ? { toCategoryId: value.id } : { toStatusId: value.id }),
+        statuses,
+        internalViewer: !clientViewer && canWhileRoleLoads(orgRole, 'edit:issue'),
+      });
+      if (needing.length > 0) {
+        setPendingBulk({ action, value, selectedIssues, needing });
+        return;
+      }
+    }
     await applyBulkAction(action, value, selectedIssues);
+  };
+
+  const confirmPendingBulk = async assigneeIds => {
+    if (!pendingBulk) return;
+    setAssigningBeforeMove(true);
+    try {
+      await applyBulkAction('assignees-add', assigneeIds, pendingBulk.needing);
+      await applyBulkAction(pendingBulk.action, pendingBulk.value, pendingBulk.selectedIssues);
+      setPendingBulk(null);
+    } catch (error) {
+      showToast(error?.message || 'Не вдалося призначити відповідальних', 'error');
+    } finally {
+      setAssigningBeforeMove(false);
+    }
   };
 
   // Resolved from the queue already in memory — the same call the «Чекають на
@@ -587,16 +629,17 @@ export default function IncidentQueuePage() {
           answered by the people on the one the request belongs to, not by
           everybody in the organization. */}
       <AssigneePicker
-        isOpen={Boolean(pendingAssignment)}
+        isOpen={Boolean(pendingAssignment || pendingBulk)}
         issueKey={pendingAssignment?.issue?.issueKey || 'звернення'}
+        count={pendingBulk ? pendingBulk.needing.length : 1}
         statusLabel={pendingAssignment?.statusId
           ? (statuses.find(status => status.id === pendingAssignment.statusId)?.label || '')
           : statusCategoryLabel(pendingAssignment?.move?.categoryId)}
         members={assignmentCandidates}
         initialSelected={[]}
         busy={assigningBeforeMove}
-        onConfirm={confirmPendingAssignment}
-        onClose={() => setPendingAssignment(null)}
+        onConfirm={pendingBulk ? confirmPendingBulk : confirmPendingAssignment}
+        onClose={() => { setPendingAssignment(null); setPendingBulk(null); }}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
 import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
+import { plural } from '@/lib/utils/plural.mjs';
 
 // ─── UI Kit: Assignee Picker ─────────────────────────────────────────────────
 // Who takes this request, asked at the one moment the answer matters.
@@ -30,6 +31,10 @@ import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
  *
  * @param {boolean} props.isOpen Whether the dialog is visible.
  * @param {string} props.issueKey The request being moved, named in the title.
+ * @param {number} props.count How many requests the answer will be written to.
+ *   More than one means a bulk move, and the dialog says the number rather than
+ *   a key: the rest of the selection is untouched, and a person about to assign
+ *   thirty requests at once has to be told that is what they are doing.
  * @param {string} props.statusLabel Where it is going, named in the confirm button.
  * @param {object[]} props.members Who may be chosen — the desk, already filtered by the caller. Each row shows `positionName`, then `title`, then the role.
  * @param {string[]} props.initialSelected Anyone already on the request.
@@ -40,6 +45,7 @@ import { organizationRoleLabel } from '@/lib/utils/orgMembership.mjs';
 export default function AssigneePicker({
   isOpen,
   issueKey = 'Звернення',
+  count = 1,
   statusLabel = '',
   members = [],
   initialSelected = [],
@@ -70,10 +76,14 @@ export default function AssigneePicker({
       onClose={busy ? undefined : onClose}
       presentation="dialog"
       titleContext="dialog"
-      title={`Хто візьме ${issueKey}?`}
-      description={statusLabel
-        ? `Звернення переходить у «${statusLabel}» — оберіть, хто за нього відповідає.`
-        : 'Звернення виходить із «Новий» — оберіть, хто за нього відповідає.'}
+      title={count > 1
+        ? `Хто візьме ${count} ${plural(count, ['звернення', 'звернення', 'звернень'])}?`
+        : `Хто візьме ${issueKey}?`}
+      description={count > 1
+        ? `${count} ${plural(count, ['звернення виходить', 'звернення виходять', 'звернень виходять'])} із «Новий» без відповідального. Решта вибраних лишиться як є.`
+        : (statusLabel
+          ? `Звернення переходить у «${statusLabel}» — оберіть, хто за нього відповідає.`
+          : 'Звернення виходить із «Новий» — оберіть, хто за нього відповідає.')}
       size="lg"
       bodyPadding="flush"
       footer={(

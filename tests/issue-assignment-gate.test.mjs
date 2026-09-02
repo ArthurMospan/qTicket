@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { needsAssigneeForMove } from '../src/lib/utils/issueAssignmentGate.mjs';
+import {
+  issuesNeedingAssigneeForMove,
+  needsAssigneeForMove,
+} from '../src/lib/utils/issueAssignmentGate.mjs';
 
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
@@ -107,9 +110,9 @@ test('every place a person moves one request asks, and all assign before moving'
   );
   // Cancelling cancels the move, not the assignment: the request stays where
   // it was rather than advancing unowned.
-  assert.match(board, /onClose=\{\(\) => setPendingMove\(null\)\}/);
+  assert.match(board, /setPendingMove\(null\); setPendingBulk\(null\);/);
   assert.match(detail, /onClose=\{\(\) => setPendingStatus\(''\)\}/);
-  assert.match(queue, /onClose=\{\(\) => setPendingAssignment\(null\)\}/);
+  assert.match(queue, /setPendingAssignment\(null\); setPendingBulk\(null\);/);
   // And on the queue it is the second question, asked after «which status» —
   // both can apply to one drag.
   assert.match(queue, /const saved = await gateOrCommit\(move, statusId\)/);
@@ -131,4 +134,68 @@ test('the dialog cannot be confirmed empty and says the same thing twice', async
   assert.match(picker, /<Check size=\{13\} \/>/);
   // A face you can recognise, at a size that is not on the generic scale.
   assert.match(picker, /size="assignee-choice"/);
+});
+
+// Select a column, move thirty requests, and every one of them left «Новий»
+// unowned — while the identical drag one card at a time stopped and asked.
+test('a bulk status change asks once, about the requests that need it', async () => {
+  const selection = [
+    { id: 'a', status: 'new', columnId: 'new', assigneeIds: [] },
+    { id: 'b', status: 'new', columnId: 'new', assigneeIds: ['member-a'] },
+    { id: 'c', status: 'accepted', columnId: 'accepted', assigneeIds: [] },
+    { id: 'd', status: 'new', columnId: 'new', assigneeIds: [] },
+  ];
+  const needing = issuesNeedingAssigneeForMove({
+    issues: selection,
+    toStatusId: 'working',
+    statuses: STATUSES,
+    internalViewer: true,
+  });
+  // Only the ones the move leaves unowned: `b` already has somebody, `c` is
+  // already out of the entry category.
+  assert.deepEqual(needing.map(issue => issue.id), ['a', 'd']);
+
+  // Nothing to ask about is not a question.
+  assert.deepEqual(
+    issuesNeedingAssigneeForMove({
+      issues: selection,
+      toStatusId: 'triage',
+      statuses: STATUSES,
+      internalViewer: true,
+    }),
+    [],
+  );
+
+  const [board, queue] = await Promise.all([
+    read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx'),
+    read('../src/app/(app)/my/page.js'),
+  ]);
+  for (const source of [board, queue]) {
+    assert.match(source, /if \(action === 'status' && value\?\.id\) \{/);
+    assert.match(source, /issuesNeedingAssigneeForMove\(\{/);
+    // The category board and the status board send different halves of the
+    // same value, and the gate takes whichever it is given.
+    assert.match(source, /value\.mode === 'category' \? \{ toCategoryId: value\.id \} : \{ toStatusId: value\.id \}/);
+    // Only the requests that needed a name get one; the rest of the selection
+    // keeps whoever is already on it.
+    assert.match(source, /applyBulkAction\('assignees-add', assigneeIds, pendingBulk\.needing\)/);
+    // And the dialog says how many it is about rather than naming one key.
+    assert.match(source, /count=\{pendingBulk \? pendingBulk\.needing\.length : 1\}/);
+  }
+});
+
+test('the dialog offers people who can actually open the request', async () => {
+  const [detail, queue] = await Promise.all([
+    read('../src/components/workspace/IssueDetail.jsx'),
+    read('../src/app/(app)/my/page.js'),
+  ]);
+  // The request's own page handed over the organization's whole support side
+  // and offered colleagues who are not on the project — an assignee is a person
+  // who has to be able to find their own work. It uses the list this screen
+  // already computes for its assignee picker.
+  assert.match(detail, /members=\{assignableMembers\}/);
+  assert.doesNotMatch(detail, /members=\{supportDirectory\}/);
+  // The queue spans projects, so a selection can too: the same people are
+  // written to all of them, which makes the intersection the honest set.
+  assert.match(queue, /return rosters\.every\(roster => roster\.has\(uid\)\)/);
 });

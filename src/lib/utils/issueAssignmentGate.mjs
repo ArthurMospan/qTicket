@@ -63,3 +63,32 @@ export function needsAssigneeForMove({
   if (from !== 'backlog') return false;
   return destination !== 'backlog';
 }
+
+/**
+ * The same question asked of a selection.
+ *
+ * A bulk status change was the way around this rule: select a column, move
+ * thirty requests, and every one of them left «Новий» with nobody on it while
+ * the identical drag one card at a time stopped and asked. A rule with a legal
+ * bypass is worse than no rule — it reads as a guarantee and is not one.
+ *
+ * It is still one question, not thirty: the dialog names how many requests the
+ * answer will be written to, and the rest of the selection is untouched.
+ *
+ * @returns {object[]} The requests in this selection that the move leaves unowned.
+ */
+export function issuesNeedingAssigneeForMove({
+  issues = [],
+  toStatusId,
+  toCategoryId,
+  statuses = [],
+  internalViewer = false,
+} = {}) {
+  return (issues || []).filter(issue => needsAssigneeForMove({
+    issue,
+    toStatusId,
+    toCategoryId,
+    statuses,
+    internalViewer,
+  }));
+}

@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 92,
-    "props": 680,
-    "documentedProps": 680,
+    "props": 681,
+    "documentedProps": 681,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -160,6 +160,13 @@
           "type": "boolean",
           "values": [],
           "description": "Whether the move is being saved."
+        },
+        {
+          "name": "count",
+          "default": "1",
+          "type": "number",
+          "values": [],
+          "description": "How many requests the answer will be written to."
         },
         {
           "name": "initialSelected",

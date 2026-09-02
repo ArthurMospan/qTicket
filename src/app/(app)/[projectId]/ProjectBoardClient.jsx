@@ -70,7 +70,7 @@ import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/o
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
-import { needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
+import { issuesNeedingAssigneeForMove, needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
 // Two tabs, not three. «Налаштування» was a third one whose body was a
@@ -484,10 +484,42 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     }
   }, [actor, finishMove, pendingMove, showToast, updateIssue]);
 
-  const handleBulkUpdate = useCallback(
-    (action, value, selectedIssues) => applyBulkAction(action, value, selectedIssues),
-    [applyBulkAction],
-  );
+  // A bulk status change was the way around the gate: select a column, move
+  // thirty requests, and every one of them leaves «Новий» unowned while the
+  // identical drag one card at a time stops and asks. One question for the
+  // selection, and the dialog says how many it will be written to.
+  const [pendingBulk, setPendingBulk] = useState(null);
+  const handleBulkUpdate = useCallback(async (action, value, selectedIssues) => {
+    if (action === 'status' && value?.id) {
+      const needing = issuesNeedingAssigneeForMove({
+        issues: selectedIssues,
+        ...(value.mode === 'category' ? { toCategoryId: value.id } : { toStatusId: value.id }),
+        statuses,
+        internalViewer: !clientViewer && canWhileRoleLoads(orgRole, 'edit:issue'),
+      });
+      if (needing.length > 0) {
+        setPendingBulk({ action, value, selectedIssues, needing });
+        return;
+      }
+    }
+    await applyBulkAction(action, value, selectedIssues);
+  }, [applyBulkAction, clientViewer, orgRole, statuses]);
+
+  const confirmPendingBulk = useCallback(async assigneeIds => {
+    if (!pendingBulk) return;
+    setAssigning(true);
+    try {
+      // Only the requests that needed a name get one; the rest of the selection
+      // keeps whoever is already on it.
+      await applyBulkAction('assignees-add', assigneeIds, pendingBulk.needing);
+      await applyBulkAction(pendingBulk.action, pendingBulk.value, pendingBulk.selectedIssues);
+      setPendingBulk(null);
+    } catch (error) {
+      showToast(userFacingErrorMessage(error, 'Не вдалося призначити відповідальних'), 'error');
+    } finally {
+      setAssigning(false);
+    }
+  }, [applyBulkAction, pendingBulk, showToast]);
 
   const handleArchiveProject = useCallback(async id => {
     try {
@@ -1067,14 +1099,15 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
           context, because the card has already landed optimistically by the
           time this opens and the answer decides whether that stands. */}
       <AssigneePicker
-        isOpen={Boolean(pendingMove)}
+        isOpen={Boolean(pendingMove || pendingBulk)}
         issueKey={pendingMove?.issue?.issueKey || 'звернення'}
+        count={pendingBulk ? pendingBulk.needing.length : 1}
         statusLabel={statuses.find(status => status.id === pendingMove?.columnId)?.label || ''}
         members={supportMembers}
         initialSelected={[]}
         busy={assigning}
-        onConfirm={confirmPendingMove}
-        onClose={() => setPendingMove(null)}
+        onConfirm={pendingBulk ? confirmPendingBulk : confirmPendingMove}
+        onClose={() => { setPendingMove(null); setPendingBulk(null); }}
       />
 
       {showSettings && project && (

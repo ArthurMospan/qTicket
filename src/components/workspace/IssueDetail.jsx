@@ -2372,7 +2372,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         isOpen={Boolean(pendingStatus)}
         issueKey={issue?.issueKey || 'звернення'}
         statusLabel={STATUSES.find(status => status.id === pendingStatus)?.label || ''}
-        members={supportDirectory}
+        // The project's team, not the organization's support side. This screen
+        // already computes that list for its own assignee picker — see
+        // `assignableMembers` — and handing this dialog the wider one offered
+        // colleagues who cannot open the request they were being given: an
+        // assignee is a person who has to be able to find their own work.
+        members={assignableMembers}
         initialSelected={[]}
         busy={assigningBeforeMove}
         onConfirm={confirmAssigneesThenMove}
