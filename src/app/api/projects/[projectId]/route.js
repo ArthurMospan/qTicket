@@ -60,10 +60,33 @@ export async function PATCH(request, context) {
     // `teamBaseline` below exists to prevent. Its one caller was a «Команда»
     // tab that nothing had rendered for some time.
     if (action === 'update-settings') {
+      // Every field here is a patch, present or absent — never a snapshot.
+      //
+      // `team` has been read that way for a while, for the reason `teamBaseline`
+      // spells out below: a save built from what a dialog was holding overwrites
+      // whatever happened while it was open. The other three were still
+      // snapshots, and both halves of that bit. A caller that sent only a team
+      // was refused for a name it never mentioned — «Некоректна назва або опис
+      // клієнта» on «Додати до проєкту» from a profile, which mentions no
+      // name — and had the refusal not fired, the same save would have written
+      // `name: ''`, `description: ''` and `hiddenColumns: []` over a live
+      // project: blanked its title and unhidden every column somebody had
+      // hidden. The 400 was the safer of two bugs.
+      //
+      // So a field that is not in the body is not in the write, and is not
+      // validated either.
+      const editsName = Object.prototype.hasOwnProperty.call(body, 'name');
+      const editsDescription = Object.prototype.hasOwnProperty.call(body, 'description');
+      const editsHidden = Object.prototype.hasOwnProperty.call(body, 'hiddenColumns');
       const name = typeof body.name === 'string' ? body.name.trim() : '';
       const description = typeof body.description === 'string' ? body.description.trim() : '';
-      if (!name || name.length > 160 || description.length > 10_000) {
-        return NextResponse.json({ error: 'Некоректна назва або опис клієнта' }, { status: 400 });
+      // Two facts, and they were reported as one sentence naming both — so a
+      // description ten thousand characters long said the name was wrong too.
+      if (editsName && (!name || name.length > 160)) {
+        return NextResponse.json({ error: 'Вкажіть назву проєкту — до 160 символів' }, { status: 400 });
+      }
+      if (editsDescription && description.length > 10_000) {
+        return NextResponse.json({ error: 'Опис проєкту задовгий' }, { status: 400 });
       }
 
       if (body.team !== undefined && !Array.isArray(body.team)) {
@@ -112,9 +135,16 @@ export async function PATCH(request, context) {
         .doc(project.organizationId)
         .collection('settings')
         .doc('workflow');
-      const requestedHidden = Array.isArray(body.hiddenColumns)
+      if (editsHidden && !Array.isArray(body.hiddenColumns)) {
+        return NextResponse.json({ error: 'Некоректна конфігурація колонок' }, { status: 400 });
+      }
+      // `null` means «this save is not about the columns», which is a different
+      // thing from «hide none of them» — and the second is what an absent field
+      // used to be read as.
+      const requestedHidden = editsHidden
         ? [...new Set(body.hiddenColumns.filter(value => typeof value === 'string'))]
-        : [];
+        : null;
+      const hiddenToApply = requestedHidden || [];
       const countDeltas = await projectIssueCountDeltasFor(db, project.organizationId);
       const settingsResult = await db.runTransaction(async transaction => {
         // Firestore re-runs this body on contention; the counter accumulator
@@ -167,7 +197,7 @@ export async function PATCH(request, context) {
             id: document.id,
           }));
           resolvedIssuePrefix = suggestAvailableIssuePrefix(
-            { name },
+            { name: name || currentProject.name || '' },
             organizationProjects,
             projectId,
           );
@@ -180,9 +210,11 @@ export async function PATCH(request, context) {
         // no longer falls back to whatever happens to be first in the list.
         const backlogStatusId = resolveEntryStatusId(workflow.statuses);
         if (
-          requestedHidden.some(statusId => !statusIds.includes(statusId))
-          || requestedHidden.includes(backlogStatusId)
-          || requestedHidden.length >= statusIds.length
+          editsHidden && (
+            hiddenToApply.some(statusId => !statusIds.includes(statusId))
+            || hiddenToApply.includes(backlogStatusId)
+            || hiddenToApply.length >= statusIds.length
+          )
         ) {
           throw projectTransactionError(
             'INVALID_HIDDEN_COLUMNS',
@@ -191,7 +223,7 @@ export async function PATCH(request, context) {
           );
         }
 
-        const issuesSnapshot = requestedHidden.length
+        const issuesSnapshot = hiddenToApply.length
           ? await transaction.get(
             db.collection('issues')
               .where('organizationId', '==', project.organizationId)
@@ -208,7 +240,7 @@ export async function PATCH(request, context) {
           currentIssues
             .filter(issue => (
               issue.deletionPending !== true
-              && requestedHidden.includes(issue.columnId || issue.status)
+              && hiddenToApply.includes(issue.columnId || issue.status)
             ))
             .map(issue => issue.id),
         );
@@ -305,17 +337,20 @@ export async function PATCH(request, context) {
           });
         }
         transaction.update(ref, {
-          name,
-          description,
+          ...(editsName ? { name } : {}),
+          ...(editsDescription ? { description } : {}),
           issuePrefix: resolvedIssuePrefix,
-          hiddenColumns: requestedHidden,
+          ...(editsHidden ? { hiddenColumns: hiddenToApply } : {}),
           team: resolvedTeam,
-          issueStatusVersion: FieldValue.increment(1),
+          // Bumped by a change to where tasks stand, which is what hiding a
+          // column does to them — not by a save that only added somebody to the
+          // roster.
+          ...(editsHidden ? { issueStatusVersion: FieldValue.increment(1) } : {}),
           ...projectIssueCountIncrements(countDeltas, projectId),
           updatedAt: now,
         });
         return {
-          hiddenColumns: requestedHidden,
+          hiddenColumns: editsHidden ? hiddenToApply : (currentProject.hiddenColumns || []),
           movedIssues: issueIdsToMove.size,
           issuePrefix: resolvedIssuePrefix,
           team: resolvedTeam,

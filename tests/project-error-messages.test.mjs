@@ -64,3 +64,32 @@ test('settings API actions no longer replace server errors with generic toasts',
     assert.doesNotMatch(settings, new RegExp(removedFallback));
   }
 });
+
+// «Додати до проєкту» from a profile sends a team and nothing else, and was
+// answered with «Некоректна назва або опис клієнта» — a refusal about a field
+// it never mentioned.
+test('a project save touches only the fields it names', async () => {
+  const [route, profile] = await Promise.all([
+    read('../src/app/api/projects/[projectId]/route.js'),
+    read('../src/components/profile/ProfileView.jsx'),
+  ]);
+
+  // Present-or-absent, like `team` already was. Without this the same save
+  // would not merely have been refused — it would have written `name: ''`,
+  // `description: ''` and `hiddenColumns: []` over a live project, which is the
+  // worse of the two bugs the 400 was hiding.
+  assert.match(route, /const editsName = Object\.prototype\.hasOwnProperty\.call\(body, 'name'\)/);
+  assert.match(route, /const editsDescription = Object\.prototype\.hasOwnProperty\.call\(body, 'description'\)/);
+  assert.match(route, /const editsHidden = Object\.prototype\.hasOwnProperty\.call\(body, 'hiddenColumns'\)/);
+  assert.match(route, /if \(editsName && \(!name \|\| name\.length > 160\)\)/);
+  assert.match(route, /if \(editsDescription && description\.length > 10_000\)/);
+  assert.match(route, /\.\.\.\(editsName \? \{ name \} : \{\}\)/);
+  assert.match(route, /\.\.\.\(editsDescription \? \{ description \} : \{\}\)/);
+  assert.match(route, /\.\.\.\(editsHidden \? \{ hiddenColumns: hiddenToApply \} : \{\}\)/);
+  // Two facts, reported as two: a description ten thousand characters long used
+  // to be announced as a bad name.
+  assert.doesNotMatch(route, /Некоректна назва або опис клієнта/);
+
+  // And the caller that found this still sends only what it means.
+  assert.match(profile, /await updateProjectSettings\(project\.id, \{\s*team: \[\.\.\.new Set\(\[\.\.\.team, uid\]\)\],\s*teamBaseline: team,/);
+});
