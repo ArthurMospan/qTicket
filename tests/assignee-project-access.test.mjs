@@ -296,5 +296,11 @@ test('the comment composer is on the task screen before the membership arrives',
   assert.match(workspace, /readOnly=\{clientViewer\}/);
   assert.match(workspace, /onMoveIssue=\{clientViewer \? undefined : handleMoveIssue\}/);
   assert.match(workspace, /onBulkUpdate=\{clientViewer \? undefined : handleBulkUpdate\}/);
-  assert.doesNotMatch(workspace, /updateIssue/);
+  // And still no general edit path on the board. There is exactly one
+  // `updateIssue` call on it, and it writes the assignees the move was stopped
+  // for — behind `needsAssigneeForMove`, which answers `false` for a client
+  // role, so the customer's copy of this board cannot reach it at all.
+  assert.deepEqual(workspace.match(/updateIssue\(/g) || [], ['updateIssue(']);
+  assert.match(workspace, /await updateIssue\(pendingMove\.issue\.id, \{ assigneeIds \}, actor\)/);
+  assert.match(workspace, /internalViewer: !clientViewer && canWhileRoleLoads\(orgRole, 'edit:issue'\)/);
 });

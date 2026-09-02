@@ -803,6 +803,49 @@
     background: var(--color-ink);
     color: var(--color-surface);
   }
+  /* One face in «Хто візьме це звернення?». The ring is the brand colour
+     picker's — 2px of ink, offset by 2 — because that is already what «this one
+     is chosen» looks like here; the tick repeats it for anybody who cannot
+     separate a thin outline from the ground behind it. */
+  .ui-native-control[data-ui-control='assignee-choice'] {
+    position: relative;
+    display: inline-flex;
+    border-radius: 999px;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 150ms, opacity 150ms;
+  }
+  .ui-native-control[data-ui-control='assignee-choice'][data-ui-state='selected'] {
+    outline-color: var(--color-ink);
+  }
+  label:hover > .ui-native-control[data-ui-control='assignee-choice'][data-ui-state='idle'] {
+    outline-color: var(--color-line-strong);
+  }
+  .peer:focus-visible ~ .ui-native-control[data-ui-control='assignee-choice'] {
+    outline-color: var(--color-ink);
+  }
+  .peer:disabled ~ .ui-native-control[data-ui-control='assignee-choice'] {
+    opacity: 0.6;
+  }
+  .ui-native-control[data-ui-control='assignee-choice'] > [data-ui-part='tick'] {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    height: 22px;
+    width: 22px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 2px solid var(--color-surface);
+    background: var(--color-ink);
+    color: var(--color-surface);
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+  .ui-native-control[data-ui-control='assignee-choice'][data-ui-state='selected'] > [data-ui-part='tick'] {
+    opacity: 1;
+  }
   .ui-native-control[data-ui-control='choice-card'] {
     display: flex;
     align-items: center;

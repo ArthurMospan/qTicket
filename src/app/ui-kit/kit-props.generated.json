@@ -5,9 +5,9 @@
     "documentation": "A description comes from JSDoc (@param props.name / @prop) or the trailing // comment beside the prop."
   },
   "totals": {
-    "components": 91,
-    "props": 672,
-    "documentedProps": 672,
+    "components": 92,
+    "props": 680,
+    "documentedProps": 680,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -147,6 +147,68 @@
             "warning"
           ],
           "description": "Colour and icon; carries the meaning, so it is never decorative."
+        }
+      ]
+    },
+    "AssigneePicker": {
+      "file": "src/components/ui/TaskManagement/AssigneePicker.jsx",
+      "summary": "Picks one or more people from the support team.",
+      "props": [
+        {
+          "name": "busy",
+          "default": "false",
+          "type": "boolean",
+          "values": [],
+          "description": "Whether the move is being saved."
+        },
+        {
+          "name": "initialSelected",
+          "default": "[]",
+          "type": "string[]",
+          "values": [],
+          "description": "Anyone already on the request."
+        },
+        {
+          "name": "isOpen",
+          "default": "",
+          "type": "boolean",
+          "values": [],
+          "description": "Whether the dialog is visible."
+        },
+        {
+          "name": "issueKey",
+          "default": "'Звернення'",
+          "type": "string",
+          "values": [],
+          "description": "The request being moved, named in the title."
+        },
+        {
+          "name": "members",
+          "default": "[]",
+          "type": "object[]",
+          "values": [],
+          "description": "Who may be chosen — the desk, already filtered by the caller. Each row shows `positionName`, then `title`, then the role."
+        },
+        {
+          "name": "onClose",
+          "default": "",
+          "type": "() => void",
+          "values": [],
+          "description": "Abandons the move; the request stays where it was."
+        },
+        {
+          "name": "onConfirm",
+          "default": "",
+          "type": "(userIds: string[]) => void",
+          "values": [],
+          "description": "Confirms the people and lets the move finish."
+        },
+        {
+          "name": "statusLabel",
+          "default": "''",
+          "type": "string",
+          "values": [],
+          "description": "Where it is going, named in the confirm button."
         }
       ]
     },
@@ -340,6 +402,7 @@
           "default": "'md'",
           "type": "string",
           "values": [
+            "assignee-choice",
             "chat-inline",
             "chat-member",
             "chat-mention",
@@ -5585,6 +5648,7 @@
           "default": "'md'",
           "type": "string|number",
           "values": [
+            "assignee-choice",
             "chat-inline",
             "chat-member",
             "chat-mention",

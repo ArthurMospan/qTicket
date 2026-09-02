@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Button, StatusTransitionPicker, TaskCounters, TaskIdentity, TaskListView } from '@/components/ui';
+import { AssigneePicker, Button, StatusTransitionPicker, TaskCounters, TaskIdentity, TaskListView } from '@/components/ui';
 import AgileBoard from '@/components/workspace/AgileBoard';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
 import { DEFAULT_STATUSES, useWorkflowConfig } from '@/lib/hooks/useWorkflowConfig';
@@ -9,6 +9,7 @@ import { PreviewBlock } from '../preview';
 
 export default function TaskCRMSection() {
   const [statusPickerOpen, setStatusPickerOpen] = useState(false);
+  const [assigneePickerOpen, setAssigneePickerOpen] = useState(false);
   const { statuses } = useWorkflowConfig();
   const firstStatusId = statuses[0]?.id || DEFAULT_STATUSES[0].id;
   const secondStatusId = statuses[1]?.id || firstStatusId;
@@ -131,6 +132,28 @@ export default function TaskCRMSection() {
             ]}
             onSelect={() => setStatusPickerOpen(false)}
             onClose={() => setStatusPickerOpen(false)}
+          />
+        ) : null}
+      </PreviewBlock>
+
+      <PreviewBlock
+        title="Assignee Picker — хто візьме звернення"
+        description="Сестра Status Transition Picker, і читається так само: звернення в дорозі, і рух не завершиться, поки не відповіли на одне питання. Питання ставиться рівно раз — коли звернення виходить із «Новий», тобто коли стіл бере його в роботу, — бо «Без відповідального» це число на «Огляді» й фільтр на дошці, а імені досі ніхто не питав. Обличчя, а не список імен: підтримка це чотири-десять людей, які знають одне одного. Обраний тримає ту саму обводку, що й вибір кольору бренду — 2px чорнила з відступом 2 — плюс галочку, бо тонка обводка на тлі це одна ознака, а треба дві. Вибір множинний: звернення справді буває двох людей, і поле за ним усюди масив. «Скасувати» скасовує *рух*, а не призначення — «я ще не готовий сказати хто» це чесна відповідь, і чесна реакція на неї лишити звернення там, де воно було."
+        filePath="src/components/ui/TaskManagement/AssigneePicker.jsx"
+        component="AssigneePicker"
+      >
+        <Button style="secondary" size="lg" onClick={() => setAssigneePickerOpen(true)}>
+          Перенести QUI-41 в «Прийнято»
+        </Button>
+        {assigneePickerOpen ? (
+          <AssigneePicker
+            isOpen
+            issueKey="QUI-41"
+            statusLabel="Прийнято"
+            members={demoMembers}
+            initialSelected={[]}
+            onConfirm={() => setAssigneePickerOpen(false)}
+            onClose={() => setAssigneePickerOpen(false)}
           />
         ) : null}
       </PreviewBlock>

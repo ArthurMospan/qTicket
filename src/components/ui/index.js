@@ -76,6 +76,7 @@ export { default as BulkActionBar } from './TaskManagement/BulkActionBar'
 export { default as MetaTrigger } from './DataDisplay/MetaTrigger'
 export { default as ProjectSettingsForm } from './TaskManagement/ProjectSettingsForm'
 export { default as StatusVisibilityPicker } from './TaskManagement/StatusVisibilityPicker'
+export { default as AssigneePicker } from './TaskManagement/AssigneePicker'
 export { default as StatusTransitionPicker } from './TaskManagement/StatusTransitionPicker'
 
 // ===== NAVIGATION COMPONENTS =====

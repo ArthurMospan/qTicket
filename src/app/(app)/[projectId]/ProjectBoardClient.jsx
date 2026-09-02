@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Alert,
+  AssigneePicker,
   Button,
   DetailSection,
   DistributionBar,
@@ -69,6 +70,7 @@ import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/o
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 import { archiveProject, deleteProject, restoreProject } from '@/lib/services/projects';
 import { userFacingErrorMessage } from '@/lib/utils/errors';
+import { needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 
 // Two tabs, not three. «Налаштування» was a third one whose body was a
@@ -195,6 +197,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     error: issuesError,
     createIssue,
     moveIssue,
+    updateIssue,
   } = useIssues(scopedProjectId, { includeLinks: false });
   const {
     members,
@@ -439,10 +442,47 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
   // Dragging a card is a workflow decision, and the workflow is internal. The
   // client's board is the same board in `readOnly`, so this handler is never
   // reached from their side — the drag context refuses the drop before it.
-  const handleMoveIssue = useCallback(
+  // Leaving «Новий» is the desk taking the request on, and a request taken on
+  // by nobody is what «Без відповідального» counts three screens away. So the
+  // move stops here and asks, once, at the only transition where the answer is
+  // still open — see `issueAssignmentGate` for why not at every move, not for
+  // a bulk one, and not for the customer.
+  const [pendingMove, setPendingMove] = useState(null);
+  const [assigning, setAssigning] = useState(false);
+  const finishMove = useCallback(
     (issueId, columnId, position) => moveIssue(issueId, columnId, position, actor),
     [actor, moveIssue],
   );
+  const handleMoveIssue = useCallback((issueId, columnId, position) => {
+    const moving = issues.find(item => item.id === issueId);
+    if (needsAssigneeForMove({
+      issue: moving,
+      toStatusId: columnId,
+      statuses,
+      internalViewer: !clientViewer && canWhileRoleLoads(orgRole, 'edit:issue'),
+    })) {
+      setPendingMove({ issue: moving, columnId, position });
+      return Promise.resolve();
+    }
+    return finishMove(issueId, columnId, position);
+  }, [clientViewer, finishMove, issues, orgRole, statuses]);
+
+  const confirmPendingMove = useCallback(async assigneeIds => {
+    if (!pendingMove) return;
+    setAssigning(true);
+    try {
+      // The people first, then the move: a card that lands in «Прийнято» and
+      // only then acquires a name would be, for one render, exactly the state
+      // this dialog exists to prevent.
+      await updateIssue(pendingMove.issue.id, { assigneeIds }, actor);
+      await finishMove(pendingMove.issue.id, pendingMove.columnId, pendingMove.position);
+      setPendingMove(null);
+    } catch (error) {
+      showToast(userFacingErrorMessage(error, 'Не вдалося призначити відповідального'), 'error');
+    } finally {
+      setAssigning(false);
+    }
+  }, [actor, finishMove, pendingMove, showToast, updateIssue]);
 
   const handleBulkUpdate = useCallback(
     (action, value, selectedIssues) => applyBulkAction(action, value, selectedIssues),
@@ -1021,6 +1061,21 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
           )}
         </div>
       </div>
+
+      {/* The one question a move out of «Новий» has to answer first. It is
+          rendered beside the board's other dialogs rather than inside the drag
+          context, because the card has already landed optimistically by the
+          time this opens and the answer decides whether that stands. */}
+      <AssigneePicker
+        isOpen={Boolean(pendingMove)}
+        issueKey={pendingMove?.issue?.issueKey || 'звернення'}
+        statusLabel={statuses.find(status => status.id === pendingMove?.columnId)?.label || ''}
+        members={supportMembers}
+        initialSelected={[]}
+        busy={assigning}
+        onConfirm={confirmPendingMove}
+        onClose={() => setPendingMove(null)}
+      />
 
       {showSettings && project && (
         <BoardConfigModal

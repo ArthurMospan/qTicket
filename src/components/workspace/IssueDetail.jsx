@@ -44,7 +44,7 @@ import { isCancelledIssue, withoutCancelledIssues } from '@/lib/utils/issueCance
 import { setIssueArchived, setIssueCancelled } from '@/lib/services/issues';
 import { activeMembers } from '@/lib/utils/orgMembership.mjs';
 import { MultiSelect, Select } from '@/components/ui/Select';
-import { Alert, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
+import { Alert, AssigneePicker, AttributeTrigger, ContextMenu, DetailLayout, DetailSection, getTaskAttributeChrome, IconAction, Pill, Popover, Surface, TaskAttributesPanel, Tabs, Tooltip, useConfirm } from '@/components/ui';
 import QuickTeamTransferDialog from '@/components/workspace/QuickTeamTransferDialog';
 import { useQuickTeamTransfer } from '@/lib/hooks/useQuickTeamTransfer';
 import Button from '@/components/ui/Button';
@@ -69,6 +69,7 @@ import { downloadMaterial } from '@/lib/utils/downloadMaterial';
 import { buildTaskAiPrompt } from '@/lib/utils/taskPrompt.mjs';
 import { existingParentIssueId } from '@/lib/utils/issueHierarchyModel.mjs';
 import { issueCompletionBlockers } from '@/lib/utils/issueExecution.mjs';
+import { needsAssigneeForMove } from '@/lib/utils/issueAssignmentGate.mjs';
 import {
   cancelScheduledIssueSeen,
   scheduleIssueSeen,
@@ -551,6 +552,12 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
   // The revision itself is read from a ref rather than from the effect's
   // dependencies: activity arriving while the task is open must not restart this
   // effect, or leaving would consume whatever the last render happened to hold.
+  // The request is mid-move and waiting on a name — see `handleStatusChange`.
+  // Declared with the rest of this screen's state rather than beside the
+  // handler that sets it: everything above the `issue` guard runs on every
+  // render, and a hook below it does not.
+  const [pendingStatus, setPendingStatus] = useState('');
+  const [assigningBeforeMove, setAssigningBeforeMove] = useState(false);
   const consumeRef = useRef({ millis: 0 });
   useEffect(() => {
     consumeRef.current.millis = issueActivityAt;
@@ -942,8 +949,30 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
     // task landed at whatever row its old number happened to name, and the
     // negative number every freshly created task carries always clamped to the
     // very top.
+    // Leaving «Новий» is the desk taking the request on, and nobody is on it.
+    // The same gate the board applies, at the other place one request moves at
+    // a time — see `issueAssignmentGate` for why here and not everywhere.
+    if (needsAssigneeForMove({ issue, toStatusId: s, statuses: STATUSES, internalViewer })) {
+      setPendingStatus(s);
+      return;
+    }
     try { await moveIssue(issueId, s, { index: 0 }, actor); }
     catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const confirmAssigneesThenMove = async assigneeIds => {
+    setAssigningBeforeMove(true);
+    try {
+      // The people first, then the move: a request that lands in «Прийнято» and
+      // only then acquires a name is, for one render, the state this asks about.
+      await setAssignees(assigneeIds);
+      await moveIssue(issueId, pendingStatus, { index: 0 }, actor);
+      setPendingStatus('');
+    } catch (err) {
+      showToast(err.message || 'Не вдалося призначити відповідального', 'error');
+    } finally {
+      setAssigningBeforeMove(false);
+    }
   };
 
   // Writes the whole assignee list in one go, then replays the per-person side
@@ -2337,6 +2366,18 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                 )}
             </DetailSection>
       </DetailLayout>
+
+      {/* The one question a move out of «Новий» has to answer first. */}
+      <AssigneePicker
+        isOpen={Boolean(pendingStatus)}
+        issueKey={issue?.issueKey || 'звернення'}
+        statusLabel={STATUSES.find(status => status.id === pendingStatus)?.label || ''}
+        members={supportDirectory}
+        initialSelected={[]}
+        busy={assigningBeforeMove}
+        onConfirm={confirmAssigneesThenMove}
+        onClose={() => setPendingStatus('')}
+      />
 
       {internalViewer && (
         <QuickTeamTransferDialog

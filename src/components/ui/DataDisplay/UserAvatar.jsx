@@ -23,6 +23,12 @@ export const AVATAR_SIZES = {
   'chat-member': 28,
   'chat-inline': 20,
   'chat-mention': 18,
+
+  // The face you pick somebody by, in `AssigneePicker`. Not a step on the
+  // generic scale: `xl` is 48 and `hero` is 96, and this is a portrait in a
+  // grid of four to ten of them — large enough to recognise a colleague at a
+  // glance, small enough that ten fit a dialog without scrolling.
+  'assignee-choice': 80,
 };
 
 // A raw number is still accepted, but only for genuinely computed sizes —
