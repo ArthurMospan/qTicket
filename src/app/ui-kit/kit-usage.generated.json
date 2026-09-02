@@ -1846,7 +1846,7 @@
             "src/app/(app)/settings/page.js:671",
             "src/app/(app)/settings/page.js:677",
             "src/app/(app)/settings/page.js:684",
-            "src/components/MobileNav.jsx:396",
+            "src/components/MobileNav.jsx:386",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/IssueDetail.jsx:1323",
@@ -2002,7 +2002,7 @@
             "src/app/(app)/settings/page.js:684",
             "src/app/(app)/team/page.js:178",
             "src/app/(app)/team/page.js:187",
-            "src/components/MobileNav.jsx:396",
+            "src/components/MobileNav.jsx:386",
             "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceHeader.jsx:380",
             "src/components/WorkspaceHelpMenu.jsx:89",
@@ -2077,7 +2077,7 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:318",
             "src/components/InviteMemberDialog.jsx:340",
-            "src/components/MobileNav.jsx:396",
+            "src/components/MobileNav.jsx:386",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
@@ -2193,7 +2193,7 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:318",
             "src/components/InviteMemberDialog.jsx:340",
-            "src/components/MobileNav.jsx:396",
+            "src/components/MobileNav.jsx:386",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
@@ -2293,7 +2293,7 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:318",
             "src/components/InviteMemberDialog.jsx:340",
-            "src/components/MobileNav.jsx:396",
+            "src/components/MobileNav.jsx:386",
             "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceHeader.jsx:380",
             "src/components/WorkspaceHelpMenu.jsx:89",
@@ -2477,7 +2477,7 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:396",
+            "src/components/MobileNav.jsx:386",
             "src/components/WorkspaceHelpMenu.jsx:89"
           ]
         },
@@ -2539,11 +2539,10 @@
           ]
         },
         "sm": {
-          "count": 2,
+          "count": 1,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:305",
-            "src/components/MobileNav.jsx:338"
+            "src/components/MobileNav.jsx:305"
           ]
         },
         "lg": {
@@ -2571,7 +2570,7 @@
       },
       "appearance": {
         "quiet": {
-          "count": 7,
+          "count": 6,
           "routes": [
             "/",
             "/[projectId]/issue/[issueId]",
@@ -2580,7 +2579,6 @@
           "files": [
             "src/app/(app)/page.js:212",
             "src/components/MobileNav.jsx:305",
-            "src/components/MobileNav.jsx:338",
             "src/components/workspace/UnifiedTimeline.jsx:1551",
             "src/components/workspace/UnifiedTimeline.jsx:1552",
             "src/components/workspace/UnifiedTimeline.jsx:1687",
@@ -2647,7 +2645,7 @@
       },
       "shape": {
         "(default)": {
-          "count": 7,
+          "count": 6,
           "routes": [
             "/",
             "/clients",
@@ -2658,7 +2656,6 @@
             "src/app/(app)/settings/page.js:414",
             "src/app/(app)/settings/page.js:415",
             "src/components/MobileNav.jsx:305",
-            "src/components/MobileNav.jsx:338",
             "src/components/WorkspaceHeader.jsx:456",
             "src/components/WorkspaceHeader.jsx:474"
           ]
@@ -2689,7 +2686,7 @@
       },
       "composition": {
         "(default)": {
-          "count": 9,
+          "count": 8,
           "routes": [
             "/",
             "/clients",
@@ -2700,7 +2697,6 @@
             "src/app/(app)/settings/page.js:414",
             "src/app/(app)/settings/page.js:415",
             "src/components/MobileNav.jsx:305",
-            "src/components/MobileNav.jsx:338",
             "src/components/WorkspaceHeader.jsx:456",
             "src/components/WorkspaceHeader.jsx:474",
             "src/components/profile/ProfileModal.jsx:41",

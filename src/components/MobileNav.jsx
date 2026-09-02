@@ -10,10 +10,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/lib/context/AppContext';
 import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { Button, Counter, IconAction, OrganizationMark } from '@/components/ui';
-import { can, isClientRole } from '@/lib/utils/can';
+import { isClientRole } from '@/lib/utils/can';
 import {
   Folder, LayoutDashboard, Menu, X,
-  Users, Settings, Plus, ChevronsUpDown, CircleHelp, UserRound,
+  Users, Settings, ChevronsUpDown, CircleHelp, UserRound,
 } from 'lucide-react';
 import { TaskIcon } from '@/lib/design/icons';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
@@ -329,22 +329,12 @@ export default function MobileNav({ keyboardOpen = false }) {
             {/* Support's client list — and, since a customer may hold more than
                 one project, theirs too. Without this a customer with two
                 projects had a bar entry that could not name either and no list
-                anywhere on a phone to reach the second one. */}
-            <div className="flex items-center justify-between px-[20px] pb-[8px]">
-              <p className="text-[11px] font-bold text-[var(--sb-muted)] uppercase tracking-wider">
-                Проєкти
-              </p>
-              {can(orgRole, 'create:project') && (
-                <IconAction
-                  label="Новий проєкт"
-                  icon={Plus}
-                  size="sm"
-                  appearance="quiet"
-                  onClick={() => { setMoreOpen(false); router.push('/clients?new=1'); }}
-                  className="-mr-[4px]"
-                />
-              )}
-            </div>
+                anywhere on a phone to reach the second one.
+
+                No «ПРОЄКТИ» heading and no «+» over the list: the rail has
+                neither — the list of folders *is* the projects, and a new one
+                is made from «Проєкти» — and the sheet kept its own copy, so the
+                two menus said different things about the same list. */}
             <div className="flex flex-col gap-[2px] px-[8px]">
               {(projects || [])
                 .filter(p => p.status !== 'archived')

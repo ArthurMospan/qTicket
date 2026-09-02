@@ -127,7 +127,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:374",
+      "location": "src/components/MobileNav.jsx:364",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -337,7 +337,7 @@
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:374",
+      "location": "src/components/MobileNav.jsx:364",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
