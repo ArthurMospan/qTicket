@@ -70,3 +70,27 @@ export function settleRecordsOnScreen(records, isWatching) {
   });
   return { records: next || records, settledIds };
 }
+
+/**
+ * Which of the records that have just arrived were witnessed — landed while
+ * their conversation was in front of the reader — and so are not notifications
+ * at all.
+ *
+ * A notification is about something that happened without you. A reply you
+ * watched land in the thread you were reading has nothing to tell you, and a
+ * grey «прочитано» row for it in the bell is not history, it is litter: the
+ * conversation itself is the record. So such a record is deleted the moment it
+ * arrives, before anything draws or announces it. This is the other half of
+ * `settleRecordsOnScreen`, which handles records that existed before the reader
+ * opened the conversation — those did their job, and stay as read.
+ *
+ * @param {object[]} records The records that arrived in this snapshot.
+ * @param {(record: object) => boolean} isWatching Whether the reader has this record's conversation in front of them right now.
+ * @returns {string[]} The ids to delete.
+ */
+export function witnessedRecordIds(records, isWatching) {
+  if (!Array.isArray(records) || typeof isWatching !== 'function') return [];
+  return records
+    .filter(record => record && record.id && !record.read && isWatching(record))
+    .map(record => record.id);
+}

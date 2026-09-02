@@ -8,12 +8,15 @@
 //
 // One rule about the conversation on screen, kept in one place. The server
 // writes every record unread — it cannot see anybody's screen — and this hook
-// is the one reader that can. So a record about the conversation in front of
-// the reader is neither announced nor left unread: it is stamped read the
-// instant it arrives, before anything draws it. Until this lived here, two
-// places each kept a piece of that rule — the popup asked one question, the
-// incident page marked two types read — and the counter lit up in the gap
-// between the record landing and the page noticing it.
+// is the one reader that can. A notification is about something that happened
+// without you, so a record that lands while its conversation is in front of the
+// reader is not one: it is deleted the instant it arrives, before anything
+// draws or announces it. A record that was already waiting when the reader
+// opened the conversation did its job — it brought them there — and stays in
+// the bell as read. Until this lived here, two places each kept a piece of
+// that rule — the popup asked one question, the incident page marked two types
+// read — and the counter lit up in the gap between the record landing and the
+// page noticing it.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   collection, query, where, orderBy, limit, onSnapshot, updateDoc, deleteDoc,
@@ -22,7 +25,7 @@ import {
 import { auth, db } from '@/lib/firebase';
 import { CHANNEL_DEFAULTS } from '@/lib/utils/notificationChannels.mjs';
 import { notificationGroupKey } from '@/lib/utils/notificationGrouping.mjs';
-import { settleRecordsOnScreen } from '@/lib/utils/notificationPresence.mjs';
+import { settleRecordsOnScreen, witnessedRecordIds } from '@/lib/utils/notificationPresence.mjs';
 import { invalidateOrganizationUnreadCounts } from '@/lib/hooks/useOrganizationUnreadCounts';
 
 // Live window kept in memory for the notification centre.
@@ -76,17 +79,16 @@ function playChime() {
   } catch { /* audio not available — silently skip */ }
 }
 
-// Позначити прочитаними одразу кілька записів — одним пакетом на кожні чотириста,
-// а не по запиту на запис.
-async function markManyRead(ids) {
+// Одним пакетом на кожні чотириста, а не по запиту на запис.
+async function writeEach(ids, mutate) {
   for (let index = 0; index < ids.length; index += WRITE_BATCH_LIMIT) {
     const batch = writeBatch(db);
-    ids.slice(index, index + WRITE_BATCH_LIMIT).forEach(id => {
-      batch.update(doc(db, 'notifications', id), { read: true });
-    });
+    ids.slice(index, index + WRITE_BATCH_LIMIT).forEach(id => mutate(batch, doc(db, 'notifications', id)));
     await batch.commit();
   }
 }
+const markManyRead = ids => writeEach(ids, (batch, ref) => batch.update(ref, { read: true }));
+const deleteMany = ids => writeEach(ids, (batch, ref) => batch.delete(ref));
 
 // Re-exported for callers that already import it from here. The definition
 // lives with the delivery rules in lib/utils/notificationChannels.mjs, which the
@@ -97,14 +99,13 @@ export function useNotifications(userId, {
   activeOrganizationId,
   onNew,
   // Чи має читач зараз перед очима розмову, якої стосується запис. Одна
-  // відповідь на все, що з цього випливає: такий запис не дзвенить, не спливає
-  // карткою і не лежить непрочитаним — він гаситься тієї ж миті, як прийшов,
-  // ще до того, як його щось намалює. Раніше «не турбувати за розмову, яку я
-  // зараз читаю» знало лише спливаюче вікно, а гасила записи сама сторінка
-  // звернення, за своїм списком типів і вже після того, як лічильник блимнув «+1».
-  //
-  // Запис у дзвоник це не скасовує: дзвоник — журнал, і в ньому подія має
-  // лишитись. Прочитаною.
+  // відповідь на все, що з цього випливає: запис, що прийшов у розмову на
+  // екрані, не дзвенить, не спливає карткою і не лягає в дзвоник узагалі — він
+  // видаляється тієї ж миті, як прийшов, ще до того, як його щось намалює. А
+  // запис, що вже чекав, коли читач відкрив розмову, гаситься: він своє
+  // зробив — привів сюди. Раніше «не турбувати за розмову, яку я зараз читаю»
+  // знало лише спливаюче вікно, а гасила записи сама сторінка звернення, за
+  // своїм списком типів і вже після того, як лічильник блимнув «+1».
   readerIsWatching,
 } = {}) {
   const [notifications, setNotifications] = useState([]);
@@ -190,7 +191,8 @@ export function useNotifications(userId, {
       if (typeof full === 'boolean') setWindowFull(full);
     };
     // Гасить записи про розмову на екрані — і в пам'яті, і в базі. Повертає той
-    // самий масив, якщо гасити нічого.
+    // самий масив, якщо гасити нічого. Це шлях для записів, що вже чекали, коли
+    // читач відкрив розмову: вони своє зробили і лишаються прочитаними.
     const settleOnScreen = docs => {
       const watching = readerIsWatchingRef.current;
       if (typeof watching !== 'function') return docs;
@@ -240,32 +242,43 @@ export function useNotifications(userId, {
         .filter(n => n.inapp !== false)
         .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
       const watching = readerIsWatchingRef.current;
+      // Записи, яких у попередньому снапшоті не було, — те, що щойно сталося.
+      const arrived = [];
       if (isFirstLoad.current) {
         // On first load: just populate seenIds, don't fire popups
         isFirstLoad.current = false;
         docs.forEach(d => seenIds.current.add(d.id));
       } else {
-        // On subsequent updates: detect new docs
         docs.forEach(n => {
-          if (!seenIds.current.has(n.id)) {
-            seenIds.current.add(n.id);
-            if (n.organizationId !== activeOrganizationIdRef.current) return;
-            // 0. Чи є про що оголошувати. Стоїть перед звуком, а не між звуком
-            //    і карткою: подія, яку читач бачить на екрані просто зараз, не
-            //    має ні дзвеніти, ні спливати — нижче вона ще й гаситься.
-            if (typeof watching === 'function' && watching(n)) return;
-            const prefs = prefsRef.current;
-            // 1. Sound chime — раз на серію, а не раз на повідомлення.
-            if (prefs.sound !== false && n.type !== 'emergency' && chimeAllowed(n)) playChime();
-            // 2. In-app popup callback (goes to store)
-            if (prefs.popup !== false && onNewRef.current) onNewRef.current(n);
-          }
+          if (seenIds.current.has(n.id)) return;
+          seenIds.current.add(n.id);
+          if (n.organizationId !== activeOrganizationIdRef.current) return;
+          arrived.push(n);
         });
       }
-      // Що на екрані — прочитане, ще до того, як список намальовано. Тому
-      // лічильник не блимає «+1» між приходом запису й тим, як сторінка його
-      // помітить.
-      publish(settleOnScreen(docs), snap.docs.length >= PAGE_SIZE);
+      // 0. Що сталося на очах — не сповіщення. Розмова була перед читачем, коли
+      //    це прийшло, тож запис ні дзвенить, ні спливає, ні лягає в дзвоник:
+      //    він видаляється до того, як список намальовано. Перевірка стоїть
+      //    перед звуком, а не між звуком і карткою.
+      const witnessed = new Set(witnessedRecordIds(arrived, watching));
+      arrived.forEach(n => {
+        if (witnessed.has(n.id)) return;
+        const prefs = prefsRef.current;
+        // 1. Sound chime — раз на серію, а не раз на повідомлення.
+        if (prefs.sound !== false && n.type !== 'emergency' && chimeAllowed(n)) playChime();
+        // 2. In-app popup callback (goes to store)
+        if (prefs.popup !== false && onNewRef.current) onNewRef.current(n);
+      });
+      if (witnessed.size) {
+        deleteMany([...witnessed])
+          .then(() => invalidateOrganizationUnreadCounts())
+          .catch(error => console.error('[useNotifications] discard witnessed', error));
+      }
+      const kept = witnessed.size ? docs.filter(n => !witnessed.has(n.id)) : docs;
+      // Що вже чекало на екрані — прочитане, ще до того, як список намальовано.
+      // Тому лічильник не блимає «+1» між приходом запису й тим, як сторінка
+      // його помітить.
+      publish(settleOnScreen(kept), snap.docs.length >= PAGE_SIZE);
       setLoading(false);
       invalidateOrganizationUnreadCounts();
     }, () => setLoading(false));
@@ -278,9 +291,8 @@ export function useNotifications(userId, {
     // tear it down and rebuild it.
   }, [userId, activeOrganizationId]);
 
-  // Розмова перед читачем змінилась або вкладка повернулась: записи про те, що
-  // тепер на екрані, гаснуть так само, як гасне запис, що приходить у відкриту
-  // розмову.
+  // Розмова перед читачем змінилась або вкладка повернулась: записи, що чекали
+  // на те, що тепер на екрані, гаснуть.
   const settleVisible = useCallback(() => {
     settleVisibleRef.current?.();
   }, []);

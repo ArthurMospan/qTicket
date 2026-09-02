@@ -3,7 +3,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { isConversationOnScreen, settleRecordsOnScreen } from '../src/lib/utils/notificationPresence.mjs';
+import {
+  isConversationOnScreen,
+  settleRecordsOnScreen,
+  witnessedRecordIds,
+} from '../src/lib/utils/notificationPresence.mjs';
 import {
   pushVisibleConversation,
   removeVisibleConversation,
@@ -12,7 +16,30 @@ import {
 
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 
-test('a record about the conversation on screen is read the moment it is seen', () => {
+// A notification is about something that happened without you.
+test('a record that lands in the conversation on screen is not a notification', () => {
+  const onScreen = { kind: 'issue', id: 'issue-1' };
+  const arrived = [
+    { id: 'a', type: 'commented', issueId: 'issue-1', read: false },
+    { id: 'b', type: 'status_changed', issueId: 'issue-1', read: false },
+    { id: 'c', type: 'commented', issueId: 'issue-2', read: false },
+    { id: 'e', type: 'emergency', issueId: 'issue-1', read: false },
+  ];
+  // Every type the incident produces, not a hand-kept list of two — and not an
+  // emergency, which interrupts whatever is on screen. Another incident's
+  // record is a notification like any other.
+  assert.deepEqual(
+    witnessedRecordIds(arrived, record => isConversationOnScreen(record, onScreen)),
+    ['a', 'b'],
+  );
+  // Nothing on screen, nothing witnessed; no predicate, nothing witnessed.
+  assert.deepEqual(witnessedRecordIds(arrived, record => isConversationOnScreen(record, null)), []);
+  assert.deepEqual(witnessedRecordIds(arrived, null), []);
+});
+
+// The record that was already waiting did its job — it brought the reader here
+// — and stays as the history of what the bell said.
+test('a record that waited for the reader is read, not deleted, when they arrive', () => {
   const records = [
     { id: 'a', type: 'commented', issueId: 'issue-1', read: false },
     { id: 'b', type: 'status_changed', issueId: 'issue-1', read: false },
@@ -25,10 +52,6 @@ test('a record about the conversation on screen is read the moment it is seen', 
     records,
     record => isConversationOnScreen(record, onScreen),
   );
-  // Every type the incident produces, not a hand-kept list of two: a status
-  // change on the incident you are reading is on your screen too. It used to be
-  // silenced and left unread at once, so the counter rose and nothing explained
-  // why.
   assert.deepEqual(settledIds, ['a', 'b']);
   assert.equal(settled[0].read, true);
   assert.equal(settled[1].read, true);
@@ -81,7 +104,7 @@ test('re-publishing the conversation already on top changes nothing', () => {
 });
 
 // Where the rule lives, and where it no longer does.
-test('the bell records for what is on screen are settled in one place', async () => {
+test('the bell records for what is on screen are decided in one place', async () => {
   const [hook, bridge, timeline, sidebar, indicators, store] = await Promise.all([
     read('../src/lib/hooks/useNotifications.js'),
     read('../src/components/WorkspaceNotificationBridge.jsx'),
@@ -90,14 +113,18 @@ test('the bell records for what is on screen are settled in one place', async ()
     read('../src/lib/hooks/useProjectUnreadIndicators.js'),
     read('../src/store/useWorkspaceStore.js'),
   ]);
-  // The hook settles at snapshot time — before the list is published, so the
-  // counter never shows the record it is about to consume — and again whenever
-  // the bridge says the screen changed.
-  assert.match(hook, /publish\(settleOnScreen\(docs\)/);
+  // Two fates, decided at snapshot time before the list is published. What
+  // arrived on screen is deleted — never announced, never drawn; what was
+  // already waiting is marked read. And again whenever the bridge says the
+  // screen changed, for the records that were waiting.
+  assert.match(hook, /const witnessed = new Set\(witnessedRecordIds\(arrived, watching\)\);/);
+  assert.match(hook, /deleteMany\(\[\.\.\.witnessed\]\)/);
+  assert.match(hook, /publish\(settleOnScreen\(kept\)/);
   assert.match(hook, /settleRecordsOnScreen\(/);
   assert.match(hook, /settleVisible,/);
-  // One predicate feeds both the announcement gate and the settlement.
-  assert.match(hook, /if \(typeof watching === 'function' && watching\(n\)\) return;/);
+  // Only what arrived is a candidate for deletion: the first snapshot of a
+  // subscription is history, not events, and is never witnessed.
+  assert.match(hook, /if \(n\.organizationId !== activeOrganizationIdRef\.current\) return;\s*arrived\.push\(n\);/);
   assert.match(bridge, /readerIsWatching,\s*\}\);/);
   assert.match(bridge, /settleVisible\(\);/);
   // The screen publishes what it shows and nothing else: no pane keeps its own
@@ -134,7 +161,7 @@ test('the bell counts from the server once its window is full', async () => {
     read('../src/components/WorkspaceNotificationBridge.jsx'),
     read('../src/store/useWorkspaceStore.js'),
   ]);
-  assert.match(hook, /publish\(settleOnScreen\(docs\), snap\.docs\.length >= PAGE_SIZE\)/);
+  assert.match(hook, /publish\(settleOnScreen\(kept\), snap\.docs\.length >= PAGE_SIZE\)/);
   assert.match(bridge, /notificationCenter\.windowFull/);
   assert.match(store, /notificationWindowFull/);
   assert.match(header, /notificationWindowFull/);

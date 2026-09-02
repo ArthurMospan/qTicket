@@ -454,14 +454,15 @@ test('nothing announces a message arriving in the conversation on screen', async
   // The gate stands before the chime, not between the chime and the popup —
   // which is where it used to stand, so the card was suppressed and the sound
   // played anyway on the very incident page the message had landed on.
-  const announceGate = hook.indexOf('watching(n)) return;');
+  const announceGate = hook.indexOf('if (witnessed.has(n.id)) return;');
   const chime = hook.indexOf('playChime()', hook.indexOf('const prefs = prefsRef.current'));
-  assert.ok(announceGate > 0, 'the hook asks whether the reader is watching');
+  assert.ok(announceGate > 0, 'the hook asks whether the reader witnessed it');
   assert.ok(announceGate < chime, 'and asks before it plays anything');
-  // The bell keeps the record either way: the gate returns before the channels,
-  // never before the list the panel draws — and that list is published with the
-  // records on screen already settled, so the counter never draws them unread.
-  assert.match(hook, /publish\(settleOnScreen\(docs\)/);
+  // A witnessed record is not a notification: it leaves before the list the
+  // panel draws is published, and what was already waiting is published read —
+  // so the counter never draws either unread.
+  assert.match(hook, /const kept = witnessed\.size \? docs\.filter\(n => !witnessed\.has\(n\.id\)\) : docs;/);
+  assert.match(hook, /publish\(settleOnScreen\(kept\)/);
   // One decision, passed in by the only component that knows what is on screen.
   assert.match(bridge, /readerIsWatching,\s*\}\);/);
 });
