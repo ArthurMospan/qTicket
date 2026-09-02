@@ -56,16 +56,24 @@ test('QUI-77 keeps task detail additions compact and floating menus stationary',
 });
 
 test('QUI-76 uses the shared deterministic avatar in project activity', async () => {
-  const source = await read('../src/app/(app)/page.js');
+  const [source, row] = await Promise.all([
+    read('../src/app/(app)/page.js'),
+    read('../src/components/ui/DataDisplay/ActivityRow.jsx'),
+  ]);
 
   // The synthesised actor is now conditional: with nothing recorded about who
   // acted there is no person to draw, so the avatar and the name line are both
   // omitted rather than rendered blank.
   assert.match(source, /actorUser:\s*actorUser\s*\|\|\s*\(actorName\s*\?\s*\{/);
+  // The card hands the actor to the kit's `ActivityRow` and stopped drawing the
+  // face itself: «Огляд» and this card are the same list of the same sentences,
+  // and they were two components that looked like two products.
+  assert.match(source, /<ActivityRow[\s\S]{0,260}actor=\{action\.actorUser\}/);
+  assert.doesNotMatch(source, /<UserAvatar user=\{action\.actorUser\}/);
   // Size is a scale token, not a literal: raw pixel sizes moved into
-  // AVATAR_SIZES so the avatar scale has one place to change. The card carries
-  // three rows now, so the face is the small one.
-  assert.match(source, /<UserAvatar user=\{action\.actorUser\} size="xs" \/>/);
+  // AVATAR_SIZES so the avatar scale has one place to change. A feed row is the
+  // compact one.
+  assert.match(row, /<UserAvatar user=\{actor\} size="xs" \/>/);
   assert.doesNotMatch(source, /action\.actor\.slice\(0,\s*2\)/);
 });
 
@@ -252,4 +260,25 @@ test('IssueDetail tolerates a request that has not arrived yet', async () => {
     'every `issue.` above the guard must be `issue?.` — this region runs with no request:\n'
     + unguarded.join('\n'),
   );
+});
+
+// A request in «Вирішено» was on its own page, in «Звернення», and nowhere on
+// the board — including in the «Вирішено» column that was drawn for it.
+test('the board never hides a category whose column it is drawing', async () => {
+  const board = await read('../src/app/(app)/[projectId]/ProjectBoardClient.jsx');
+
+  // The board reads `all`, whatever «Стан звернень» is holding. On a board the
+  // columns are the statuses, so a scope that drops a category empties a column
+  // that is still on screen — and the card vanished at the moment of the drop.
+  assert.match(board, /const effectiveScope = viewMode === 'list' \? scope : 'all';/);
+  assert.match(board, /if \(effectiveScope === 'open' && category === 'done'\) return false;/);
+  assert.match(board, /if \(effectiveScope === 'resolved' && category !== 'done'\) return false;/);
+  assert.doesNotMatch(board, /if \(scope === 'open'/);
+  assert.doesNotMatch(board, /if \(scope === 'resolved'/);
+
+  // And the control is not drawn where it does not apply: a hidden filter that
+  // keeps a value is how this comes back.
+  assert.match(board, /\{viewMode === 'list' && \(\s*<Select\s*filterRole="status"/);
+  // What the selection is scoped by is what the reader can actually see.
+  assert.doesNotMatch(board, /selectionScopeKey=\{`\$\{project\.id\}\|\$\{scope\}/);
 });

@@ -287,13 +287,28 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     () => categorizeIssues(issues, statuses),
     [issues, statuses],
   );
+  // «Стан звернень» belongs to the list, and only to the list.
+  //
+  // On the board the columns *are* the statuses, so a scope that removes a
+  // whole category removes the contents of a column that is still drawn: the
+  // board opened on «Відкриті», «Вирішено» stood there permanently empty, and a
+  // card dragged into it vanished at the moment of the drop. The request was
+  // fine — it was in «Звернення», it was on its own page — but the one screen
+  // whose whole job is «де воно зараз» answered «ніде». A customer got the same
+  // board and the same disappearance, on their own request, the moment support
+  // resolved it.
+  //
+  // So the board ignores it and does not draw the control either: a hidden
+  // control that keeps filtering is how this would come back. `/my` settled the
+  // same question the same way — see 5e3905e.
+  const effectiveScope = viewMode === 'list' ? scope : 'all';
   const visibleIssues = useMemo(() => {
     const query = workspaceSearch.trim().toLocaleLowerCase('uk-UA');
     const cutoff = periodCutoff(periodFilter);
     return categorizedIssues
       .filter(({ issue, category }) => {
-        if (scope === 'open' && category === 'done') return false;
-        if (scope === 'resolved' && category !== 'done') return false;
+        if (effectiveScope === 'open' && category === 'done') return false;
+        if (effectiveScope === 'resolved' && category !== 'done') return false;
         // Who is working on it is internal routing, so the filter that asks the
         // question is not offered to a client — and the state it holds cannot
         // be allowed to narrow their list behind their back either.
@@ -319,7 +334,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
         timestampMillis(right.updatedAt || right.createdAt)
         - timestampMillis(left.updatedAt || left.createdAt)
       ));
-  }, [assigneeFilter, categorizedIssues, clientViewer, periodFilter, priorityFilter, scope, typeFilter, workspaceSearch]);
+  }, [assigneeFilter, categorizedIssues, clientViewer, effectiveScope, periodFilter, priorityFilter, typeFilter, workspaceSearch]);
   usePublishLocalSearchResults(workspaceSearch, visibleIssues.length);
 
   // One customer's numbers, derived from the requests this screen already has.
@@ -608,14 +623,16 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
             filters={activeTab === 'incidents' ? (
               <div className="flex w-full items-center justify-between">
               <FilterBar>
-                <Select
-                  filterRole="status"
-                  ariaLabel="Стан звернень"
-                  variant="ghost"
-                  value={scope}
-                  onChange={setScope}
-                  options={SCOPE_OPTIONS}
-                />
+                {viewMode === 'list' && (
+                  <Select
+                    filterRole="status"
+                    ariaLabel="Стан звернень"
+                    variant="ghost"
+                    value={scope}
+                    onChange={setScope}
+                    options={SCOPE_OPTIONS}
+                  />
+                )}
                 {!clientViewer && (
                   <Select
                     filterRole="member"
@@ -761,7 +778,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                         onMoveIssue={clientViewer ? undefined : handleMoveIssue}
                         onBulkUpdate={clientViewer ? undefined : handleBulkUpdate}
                         canArchive={!clientViewer && canWhileRoleLoads(orgRole, 'delete:issue')}
-                        selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}|${typeFilter}|${periodFilter}`}
+                        selectionScopeKey={`${project.id}|${effectiveScope}|${assigneeFilter}|${priorityFilter}|${typeFilter}|${periodFilter}`}
                       />
                     </div>
                   ) : (
@@ -777,7 +794,7 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                       onBulkUpdate={clientViewer ? undefined : handleBulkUpdate}
                       bulkProgress={clientViewer ? null : bulkProgress}
                       canArchive={!clientViewer && canWhileRoleLoads(orgRole, 'delete:issue')}
-                      selectionScopeKey={`${project.id}|${scope}|${assigneeFilter}|${priorityFilter}|${typeFilter}|${periodFilter}`}
+                      selectionScopeKey={`${project.id}|${effectiveScope}|${assigneeFilter}|${priorityFilter}|${typeFilter}|${periodFilter}`}
                       emptyTitle="Звернень не знайдено"
                       emptyDescription="Змініть стан або пріоритет у фільтрах."
                     />
