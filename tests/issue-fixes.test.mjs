@@ -73,7 +73,8 @@ test('QUI-76 uses the shared deterministic avatar in project activity', async ()
   // Size is a scale token, not a literal: raw pixel sizes moved into
   // AVATAR_SIZES so the avatar scale has one place to change. A feed row is the
   // compact one.
-  assert.match(row, /<UserAvatar user=\{actor\} size="xs" \/>/);
+  assert.match(row, /avatar: 'xs',/);
+  assert.match(row, /<UserAvatar user=\{actor\} size=\{scale\.avatar\} \/>/);
   assert.doesNotMatch(source, /action\.actor\.slice\(0,\s*2\)/);
 });
 

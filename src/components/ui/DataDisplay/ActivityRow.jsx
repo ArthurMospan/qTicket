@@ -41,6 +41,32 @@ import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
 // `UserAvatar` given a nameless user draws exactly that circle, which is why
 // this decides rather than passing an empty object down.
 
+// Two sizes of one row, and every number in the pair moves together: the box,
+// the face, the sentence, the message under it and the time. A row that grew
+// its padding and kept a 16px face would read as a small row in a large box.
+const DENSITIES = {
+  compact: {
+    row: 'gap-[8px] rounded-[10px] px-[10px] py-[7px] text-[12px]',
+    slot: 'h-[20px] w-[20px]',
+    avatar: 'xs',
+    mark: 11,
+    dot: 'h-[6px] w-[6px]',
+    line: 'leading-[18px]',
+    detail: 'mt-[3px] text-[11px] leading-[15px]',
+    time: 'text-[10px]',
+  },
+  comfortable: {
+    row: 'gap-[10px] rounded-[12px] px-[12px] py-[10px] text-[13px]',
+    slot: 'h-[24px] w-[24px]',
+    avatar: 'sm',
+    mark: 13,
+    dot: 'h-[7px] w-[7px]',
+    line: 'leading-[20px]',
+    detail: 'mt-[4px] text-[12px] leading-[17px]',
+    time: 'text-[11px]',
+  },
+};
+
 /**
  * One line of an activity feed: who did what, to which request, and when.
  *
@@ -52,12 +78,18 @@ import UserAvatar from '@/components/ui/DataDisplay/UserAvatar';
  * @param {string} props.issueKey Short key of the request, e.g. ACME-12.
  * @param {string} props.title The request's own title.
  * @param {string} props.time Already formatted — the row does no date logic.
+ * @param {'compact'|'comfortable'} props.density How much room the row takes.
+ *   `compact` is the project card's, where three of these share the bottom of a
+ *   tile with a name, a face row and a counter above them. `comfortable` is a
+ *   feed that owns its panel — «Огляд» — where the same row set at a card's
+ *   scale reads as fine print on a screen with room to spare.
  * @param {string} props.href Where the row goes, as a real link: a feed row is a
  *   destination, and a `<button>` cannot be middle-clicked into a new tab. Given
  *   one, the row is an anchor; given only `onClick`, it stays a button.
  * @param {() => void} props.onClick Opens the request, or rides along with `href` where the row sits inside another clickable card.
  * @param {string} props.className Placement in the parent only.
  */
+
 export default function ActivityRow({
   actor = null,
   fromSupport = false,
@@ -67,43 +99,45 @@ export default function ActivityRow({
   issueKey = '',
   title = '',
   time = '',
+  density = 'compact',
   href = '',
   onClick,
   className = '',
 }) {
+  const scale = DENSITIES[density] || DENSITIES.compact;
   // The hover fill is `line`, not a lighter `canvas`: a row already sitting on
   // `canvas` that hovers to `canvas` is a hover you cannot see — the two ends
   // of the transition are four points apart on a 255-point scale.
   const rowClass = [
-    'group flex w-full gap-[8px] rounded-[10px] bg-canvas px-[10px] py-[7px]',
-    'text-left text-[12px] text-ink transition-colors hover:bg-line',
+    'group flex w-full bg-canvas text-left text-ink transition-colors hover:bg-line',
+    scale.row,
     detail ? 'items-start' : 'items-center',
     className,
   ].filter(Boolean).join(' ');
 
   const body = (
     <>
-      <span className={`flex h-[20px] w-[20px] shrink-0 items-center justify-center ${detail ? 'mt-[1px]' : ''}`}>
+      <span className={`flex ${scale.slot} shrink-0 items-center justify-center ${detail ? 'mt-[1px]' : ''}`}>
         {actor ? (
-          <UserAvatar user={actor} size="xs" />
+          <UserAvatar user={actor} size={scale.avatar} />
         ) : fromSupport ? (
           /* The desk, which is not a person and must not borrow a face — but
              is also not «nobody». Its rows were a dot and muted text, so a
              customer's own actions came out bold with a photo while the reply
              they came to read was the faintest line on the screen. A mark of
              the same size restores the weight without naming an agent. */
-          <span className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-white text-muted">
-            <LifeBuoy size={11} aria-hidden />
+          <span className={`flex ${scale.slot} items-center justify-center rounded-full bg-white text-muted`}>
+            <LifeBuoy size={scale.mark} aria-hidden />
           </span>
         ) : (
           /* Genuinely nobody: a dot, in the same 20px box, so the feed keeps
              one left edge whatever the subject is. */
-          <span className="h-[6px] w-[6px] rounded-full bg-faint" aria-hidden />
+          <span className={`${scale.dot} rounded-full bg-faint`} aria-hidden />
         )}
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block truncate leading-[18px] text-ink-soft">
+        <span className={`block truncate ${scale.line} text-ink-soft`}>
           {actorName && <strong className="font-bold text-ink">{actorName} </strong>}
           {text}
           {issueKey && (
@@ -116,12 +150,12 @@ export default function ActivityRow({
           )}
         </span>
         {detail && (
-          <span className="mt-[3px] block truncate text-[11px] leading-[15px] text-ink-soft">{detail}</span>
+          <span className={`block truncate ${scale.detail} text-ink-soft`}>{detail}</span>
         )}
       </span>
 
       {time && (
-        <span className={`shrink-0 text-[10px] font-medium text-muted ${detail ? 'mt-[3px]' : ''}`}>{time}</span>
+        <span className={`shrink-0 ${scale.time} font-medium text-muted ${detail ? 'mt-[3px]' : ''}`}>{time}</span>
       )}
     </>
   );

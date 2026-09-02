@@ -20,7 +20,8 @@ import useWorkspaceStore from '@/store/useWorkspaceStore';
 import { can, isClientRole } from '@/lib/utils/can';
 import { isExternalActorId } from '@/lib/utils/issueParticipants.mjs';
 import { issueActivity } from '@/lib/utils/issueReadState.mjs';
-import { ISSUE_BULK_ACTION_BY_ID } from '@/lib/bulk/issueBulkActions.mjs';
+import { issueActivityPhrase } from '@/lib/utils/issueActivityFeed.mjs';
+import { relativeTimeLabel } from '@/lib/utils/relativeTime.mjs';
 import BoardConfigModal from '@/components/workspace/BoardConfigModal';
 import {
   EmptyState,
@@ -278,64 +279,16 @@ const WorkspaceProjectCard = ({ project, archive, unarchive, members = [], allOr
 };
 
 // Helper Component for Real-time project statistics and details
-// What the activity record says happened, said two ways: with a person in front
-// of it, and without one when nothing recorded who acted.
 //
-// Every `lastActivityType` the product writes has a line here. The ones that
-// were missing did not read as missing: they fell through to «оновив завдання»,
-// so unarchiving a task, restoring one from «Нещодавно видалене» and every bulk
-// action in the product all announced themselves as a generic edit. The list of
-// writers is short and greppable — `lastActivityType:` across `src/app/api` and
-// `src/lib` — and anything new belongs here in the same change.
-//
-// Cancelling and archiving are written too, and they are deliberately still
-// listed even though `useProjectActivity` now filters both out of the feed: the
-// task is gone from the card, not the vocabulary, and an entry with no verb is
-// how this drifted the first time.
-const ISSUE_ACTIVITY_VERBS = {
-  comment: 'написав у чаті звернення',
-  created: 'створив звернення',
-  status: 'змінив статус звернення',
-  restored: 'відновив звернення',
-  archived: 'заархівував звернення',
-  unarchived: 'розархівував звернення',
-  cancelled: 'скасував звернення',
-  uncancelled: 'повернув звернення у роботу',
-  updated: 'оновив звернення',
-};
-const ISSUE_ACTIVITY_EVENTS = {
-  comment: 'Нове повідомлення в чаті звернення',
-  created: 'Створено звернення',
-  status: 'Змінено статус звернення',
-  restored: 'Відновлено звернення',
-  archived: 'Заархівовано звернення',
-  unarchived: 'Розархівовано звернення',
-  cancelled: 'Скасовано звернення',
-  uncancelled: 'Звернення повернуто в роботу',
-  updated: 'Оновлено звернення',
-};
-
-/**
- * The sentence for one recorded event, with a person in front of it or without.
- *
- * A bulk action writes `bulk_<actionId>`, and there are twenty-two of those. The
- * registry that already names every one of them for the menu and the help
- * article names them here too — a second list would be a second place for
- * «Скасувати» to be called something else.
- */
-function activityPhrase(type, hasActor) {
-  const known = (hasActor ? ISSUE_ACTIVITY_VERBS : ISSUE_ACTIVITY_EVENTS)[type];
-  if (known) return known;
-  if (typeof type === 'string' && type.startsWith('bulk_')) {
-    const action = ISSUE_BULK_ACTION_BY_ID.get(type.slice('bulk_'.length));
-    if (action) {
-      return hasActor
-        ? `виконав масову дію «${action.label}»`
-        : `Масова дія «${action.label}»`;
-    }
-  }
-  return hasActor ? 'оновив звернення' : 'Оновлено звернення';
-}
+// What the activity record says happened is `issueActivityPhrase`, and it lives
+// beside the feed on «Огляд» rather than here. This file used to hold its own
+// pair of tables — one with a person in front of the verb, one without — for
+// the same events in slightly different words, so a comment was «написав у
+// чаті звернення» on a card and «відповів у зверненні» in the feed above it.
+// Two vocabularies for one event is how a product starts describing itself two
+// ways depending on which screen you are standing on; and the copy here was the
+// one that fell behind, because every bulk action and every archive/cancel
+// verb had to be remembered in two places.
 
 // How many recent actions the featured card carries.
 //
@@ -405,7 +358,7 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
       actorUser: actorUser || (actorName ? { id: actorId || undefined, name: actorName, avatar: actorAvatar } : null),
       // Every type that was not a comment used to read «оновив завдання», so a
       // task that had just been created announced itself as updated.
-      action: activityPhrase(activity.type, Boolean(actorName)),
+      action: issueActivityPhrase(activity.type, actorName ? 'actor' : 'event'),
       time: activity.at,
       projectId: issue.projectId,
       id: issue.id,
@@ -428,16 +381,6 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
       .map(entry => describeAction(entry.issue, entry.activity))
       .filter(Boolean);
   }, [describeAction, isLarge, issues]);
-
-  const timeAgoString = (ts) => {
-    if (!ts) return '';
-    const d = ts?.toDate ? ts.toDate() : new Date(ts);
-    const diff = now - d.getTime();
-    if (diff < 60000) return 'щойно';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} хв тому`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)} год тому`;
-    return d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
-  };
 
   // The small cards carry nothing here at all. Everything that used to sit on
   // one — a row of counts, then a status band — was a number in a place too
@@ -477,7 +420,7 @@ function ProjectStatsSection({ isLarge, members, project, now, currentUser, orgL
           text={action.action}
           issueKey={action.issueKey}
           title={action.title}
-          time={timeAgoString(action.time)}
+          time={relativeTimeLabel(action.time, { now })}
         />
       ))}
     </div>

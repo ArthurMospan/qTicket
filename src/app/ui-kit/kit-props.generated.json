@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 91,
-    "props": 671,
-    "documentedProps": 671,
+    "props": 672,
+    "documentedProps": 672,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -15,7 +15,7 @@
   "components": {
     "ActivityRow": {
       "file": "src/components/ui/DataDisplay/ActivityRow.jsx",
-      "summary": "One line of an activity feed: who did what, to which request, and when. destination, and a `<button>` cannot be middle-clicked into a new tab.",
+      "summary": "One line of an activity feed: who did what, to which request, and when.",
       "props": [
         {
           "name": "actor",
@@ -37,6 +37,13 @@
           "type": "string",
           "values": [],
           "description": "Placement in the parent only."
+        },
+        {
+          "name": "density",
+          "default": "'compact'",
+          "type": "'compact'|'comfortable'",
+          "values": [],
+          "description": "How much room the row takes."
         },
         {
           "name": "detail",

@@ -1,4 +1,5 @@
 import { issueActivity } from './issueReadState.mjs';
+import { ISSUE_BULK_ACTION_BY_ID } from '../bulk/issueBulkActions.mjs';
 
 /**
  * «Останні дії» — what happened, rather than what was touched.
@@ -26,37 +27,78 @@ import { issueActivity } from './issueReadState.mjs';
 
 const SUPPORT_ACTOR = 'Підтримка';
 
-// What each recorded activity type reads as. `updated` is the fallback the
-// document itself uses when nothing more specific was written.
-const PHRASES = {
-  created: 'відкрив звернення',
-  comment: 'відповів у зверненні',
-  status: 'змінив статус звернення',
-  restored: 'відновив звернення',
-  updated: 'оновив звернення',
-};
+// Every `lastActivityType` the product writes, in the three voices a feed row
+// needs: a named person did it, the desk did it, or nobody is named.
+//
+// The desk's voice is feminine, to agree with «Підтримка». That subject exists
+// at all because the first version of this file was subjectless — «Нова
+// відповідь у зверненні KER-4» — on the argument that naming the desk is how
+// routing leaks one word at a time. Put on screen beside the support account,
+// that argument fell over: a customer's own actions rendered bold with a face
+// while support's rendered grey with a dot, so the two lines they actually came
+// for were the faintest things on the page. The rule being protected is «which
+// member of support is answering», and «Підтримка» names no member.
+//
+// The table used to be five rows long, and everything missing from it fell
+// through to «оновив звернення» — so cancelling a request, archiving one,
+// restoring one from «Нещодавно видалене» and all twenty-two bulk actions
+// announced themselves on «Огляд» as a generic edit. The request's own thread
+// said what actually happened; the feed above it did not, which is the one
+// thing the feed is for.
+//
+// It is also the only such table now. The project card kept its own pair —
+// `ISSUE_ACTIVITY_VERBS` and `ISSUE_ACTIVITY_EVENTS` — for the same events in
+// slightly different words, so one product described one event two ways
+// depending on which screen you were standing on.
+export const ISSUE_ACTIVITY_PHRASES = Object.freeze({
+  created: { actor: 'відкрив звернення', desk: 'відкрила звернення', event: 'Створено звернення' },
+  comment: { actor: 'відповів у зверненні', desk: 'відповіла у зверненні', event: 'Нове повідомлення у зверненні' },
+  status: { actor: 'змінив статус звернення', desk: 'змінила статус звернення', event: 'Змінено статус звернення' },
+  restored: { actor: 'відновив звернення', desk: 'відновила звернення', event: 'Відновлено звернення' },
+  archived: { actor: 'заархівував звернення', desk: 'заархівувала звернення', event: 'Заархівовано звернення' },
+  unarchived: { actor: 'розархівував звернення', desk: 'розархівувала звернення', event: 'Розархівовано звернення' },
+  cancelled: { actor: 'скасував звернення', desk: 'скасувала звернення', event: 'Скасовано звернення' },
+  uncancelled: { actor: 'повернув звернення в роботу', desk: 'повернула звернення в роботу', event: 'Звернення повернуто в роботу' },
+  imported: { actor: 'імпортував звернення', desk: 'імпортувала звернення', event: 'Звернення імпортовано' },
+  updated: { actor: 'оновив звернення', desk: 'оновила звернення', event: 'Оновлено звернення' },
+});
 
-// The same events with the desk as the subject, feminine to agree with
-// «Підтримка».
-//
-// The first version of this was subjectless — «Нова відповідь у зверненні
-// KER-4» — on the argument that naming the desk as an actor is how routing
-// leaks one word at a time. Put on screen beside the support account, that
-// argument fell over: a customer's own actions rendered bold with a face while
-// support's rendered grey with a 7px dot, so the two lines they actually came
-// for were the faintest things on the page and read as disabled rows.
-//
-// The rule being protected is «which member of support is answering», and
-// «Підтримка» names no member. It says the desk acted, which the customer can
-// see anyway from the reply sitting in their thread. Withholding the *fact*
-// bought nothing and cost the feed its legibility.
-const SUPPORT_PHRASES = {
-  created: 'відкрила звернення',
-  comment: 'відповіла у зверненні',
-  status: 'змінила статус звернення',
-  restored: 'відновила звернення',
-  updated: 'оновила звернення',
-};
+const BULK_ACTIVITY_PREFIX = 'bulk_';
+
+/**
+ * What one recorded event reads as, in the voice the row needs.
+ *
+ * A bulk operation writes `bulk_<actionId>`, and there are twenty-two of those.
+ * The registry that already names every one of them for the menu and the help
+ * article names them here too — a second list would be a second place for
+ * «Скасувати» to be called something else.
+ *
+ * @param {string} type The `lastActivityType` on the request.
+ * @param {'actor'|'desk'|'event'} voice Who the sentence is about.
+ */
+export function issueActivityPhrase(type, voice = 'actor') {
+  const known = ISSUE_ACTIVITY_PHRASES[type];
+  if (known) return known[voice] || known.actor;
+  if (typeof type === 'string' && type.startsWith(BULK_ACTIVITY_PREFIX)) {
+    const action = ISSUE_BULK_ACTION_BY_ID.get(type.slice(BULK_ACTIVITY_PREFIX.length));
+    if (action) {
+      const label = action.label.toLocaleLowerCase('uk-UA');
+      if (voice === 'event') return `Масова дія «${action.label}»`;
+      return voice === 'desk'
+        ? `виконала масову дію «${label}»`
+        : `виконав масову дію «${label}»`;
+    }
+  }
+  return ISSUE_ACTIVITY_PHRASES.updated[voice] || ISSUE_ACTIVITY_PHRASES.updated.actor;
+}
+
+/** Whether the feed has a sentence for this type, bulk actions included. */
+function hasPhrase(type) {
+  if (ISSUE_ACTIVITY_PHRASES[type]) return true;
+  return typeof type === 'string'
+    && type.startsWith(BULK_ACTIVITY_PREFIX)
+    && ISSUE_BULK_ACTION_BY_ID.has(type.slice(BULK_ACTIVITY_PREFIX.length));
+}
 
 /**
  * One line of the feed, or `null` where the request remembers nothing.
@@ -74,7 +116,7 @@ export function issueActivityEntry(issue, {
   const activity = issueActivity(issue);
   if (!activity.millis || !issue?.id) return null;
 
-  const type = PHRASES[activity.type] ? activity.type : 'updated';
+  const type = hasPhrase(activity.type) ? activity.type : 'updated';
   const actorId = issue.lastActivityActorId || issue.createdBy || issue.reporterId || '';
   const supportActor = Boolean(actorId) && supportUserIds.has(actorId);
 
@@ -118,9 +160,7 @@ export function issueActivityEntry(issue, {
     // avatar's place, so the line keeps the weight of a named one.
     fromSupport: desk,
     actorName: desk ? SUPPORT_ACTOR : (withhold || !actorName ? '' : actorName),
-    text: desk
-      ? SUPPORT_PHRASES[type]
-      : (withhold || !actorName ? SUPPORT_PHRASES[type] : PHRASES[type]),
+    text: issueActivityPhrase(type, desk || withhold || !actorName ? 'desk' : 'actor'),
     // The message itself, where the event was one. Trimmed by the writer
     // already; trimmed again here because a feed row is one line.
     detail: type === 'comment' ? String(issue.lastActivityText || '').trim() : '',

@@ -32,8 +32,11 @@ const DENSITIES = {
   compact: 'px-4 py-2.5',
   roomy: 'px-4 py-4 sm:px-5',
   // The feed's own height, so a list of records and a list of events sitting in
-  // two panels of one screen line up. See `soft` below.
-  feed: 'px-[10px] py-[7px]',
+  // two panels of one screen line up. See `soft` below. It follows
+  // `ActivityRow`'s `comfortable` scale, which is the one «Огляд» draws: the
+  // compact pair belongs to the project card, where three rows share the bottom
+  // of a tile.
+  feed: 'px-[12px] py-[10px]',
 };
 
 // Two lists, and the product genuinely has both.

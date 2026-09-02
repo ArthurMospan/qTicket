@@ -13,9 +13,9 @@
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 170,
+    "usedAndPreviewed": 168,
     "usedWithoutPreview": 0,
-    "declaredUnused": 159
+    "declaredUnused": 161
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -649,7 +649,19 @@
     {
       "component": "Pill",
       "prop": "tone",
+      "value": "info",
+      "namespace": "*[data-ui-pill-tone]"
+    },
+    {
+      "component": "Pill",
+      "prop": "tone",
       "value": "overlay",
+      "namespace": "*[data-ui-pill-tone]"
+    },
+    {
+      "component": "Pill",
+      "prop": "tone",
+      "value": "success",
       "namespace": "*[data-ui-pill-tone]"
     },
     {
@@ -1617,8 +1629,8 @@
     "TextAction.size.md": 4,
     "ListRow.shape.soft": 1,
     "ListRow.density.feed": 1,
-    "Pill.tone.info": 1,
-    "Pill.tone.success": 1,
+    "Pill.tone.surface-ink": 3,
+    "Pill.tone.surface": 2,
     "Pill.preset.avatar-counter": 2,
     "IconAction.size.md": 3,
     "IconAction.appearance.quiet": 9,
@@ -1656,7 +1668,7 @@
     "Dialog.bodyPadding.flush": 5,
     "Alert.variant.warning": 3,
     "SelectableChip.shape.person": 2,
-    "UserAvatar.size.xs": 8,
+    "UserAvatar.size.xs": 7,
     "SelectableChip.shape.label": 1,
     "Surface.padding.sm": 1,
     "TextAction.tone.danger": 1,
@@ -1701,7 +1713,6 @@
     "Pill.tone.warning": 2,
     "Tabs.variant.raised": 1,
     "Pill.appearance.outline": 2,
-    "Pill.tone.surface-ink": 2,
     "Button.composition.section-kebab": 2,
     "Pill.tone.count": 6,
     "UserAvatar.size.lg": 1,
@@ -1717,7 +1728,6 @@
     "Surface.preset.compact-bordered-card": 1,
     "Button.composition.inline-add-action": 3,
     "UserAvatar.size.chat-mention": 1,
-    "Pill.tone.surface": 1,
     "Pill.size.chat-day": 1,
     "IconAction.size.micro": 6,
     "IconAction.composition.chat-micro-action": 5,

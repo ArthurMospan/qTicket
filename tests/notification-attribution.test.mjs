@@ -88,15 +88,46 @@ test('project activity names only who the activity record says acted', async () 
   assert.doesNotMatch(page, /actorUser = members\.find\(m => m\.email && m\.email\.toLowerCase\(\) === issue\.reporterName/);
   assert.match(page, /const isExternalActor = isExternalActorId\(actorId\)/);
 
-  // Every activity type reads as itself; "created" used to render as "updated".
-  for (const verb of ['створив звернення', 'змінив статус звернення', 'відновив звернення', 'написав у чаті звернення']) {
-    assert.ok(page.includes(verb), verb);
+  // The card asks for the sentence in the voice it needs — a person did it, or
+  // nobody is named — from the one table that has them. It used to keep a
+  // second copy of that table, in slightly different words from the feed on
+  // «Огляд», and the copy was the one that fell behind.
+  assert.match(page, /issueActivityPhrase\(activity\.type, actorName \? 'actor' : 'event'\)/);
+  assert.doesNotMatch(page, /ISSUE_ACTIVITY_VERBS|ISSUE_ACTIVITY_EVENTS/);
+});
+
+// Every type the product writes reads as itself. «Створено» used to render as
+// «оновив», and so did cancelling, archiving, restoring and all twenty-two bulk
+// actions — on both surfaces, from two different tables.
+test('every recorded activity type has a sentence in all three voices', async () => {
+  const { ISSUE_ACTIVITY_PHRASES, issueActivityPhrase } = await import(
+    '../src/lib/utils/issueActivityFeed.mjs'
+  );
+
+  for (const [type, voices] of Object.entries(ISSUE_ACTIVITY_PHRASES)) {
+    for (const voice of ['actor', 'desk', 'event']) {
+      assert.ok(voices[voice] && voices[voice].trim(), `${type}.${voice}`);
+    }
   }
-  // And an unattributed event is phrased without a person rather than with a
-  // blank one.
-  for (const event of ['Створено звернення', 'Змінено статус звернення', 'Оновлено звернення']) {
-    assert.ok(page.includes(event), event);
-  }
+  // The four that used to fall through to «оновив звернення».
+  assert.equal(issueActivityPhrase('cancelled', 'actor'), 'скасував звернення');
+  assert.equal(issueActivityPhrase('cancelled', 'desk'), 'скасувала звернення');
+  assert.equal(issueActivityPhrase('cancelled', 'event'), 'Скасовано звернення');
+  assert.equal(issueActivityPhrase('archived', 'event'), 'Заархівовано звернення');
+  assert.equal(issueActivityPhrase('unarchived', 'event'), 'Розархівовано звернення');
+  assert.equal(issueActivityPhrase('uncancelled', 'actor'), 'повернув звернення в роботу');
+
+  // A bulk action is read out of the registry that already names it, in the
+  // same words its menu row uses.
+  const { ISSUE_BULK_ACTION_BY_ID } = await import('../src/lib/bulk/issueBulkActions.mjs');
+  const [bulkId, bulkAction] = [...ISSUE_BULK_ACTION_BY_ID.entries()][0];
+  assert.ok(
+    issueActivityPhrase(`bulk_${bulkId}`, 'event').includes(bulkAction.label),
+    'a bulk action names itself',
+  );
+  // And something nobody has a phrase for still says the honest generic rather
+  // than an empty string.
+  assert.equal(issueActivityPhrase('who-knows', 'actor'), 'оновив звернення');
 });
 
 // A drag renumbers every card in the column it lands in, so cards nobody

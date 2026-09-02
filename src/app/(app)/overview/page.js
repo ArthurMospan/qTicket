@@ -43,6 +43,7 @@ import { issuePath } from '@/lib/utils/issueKeys.mjs';
 import { statusCategoryOf } from '@/lib/utils/statusCategories.mjs';
 import { assigneeIdsOf, categorizeIssues, incidentQueueMetrics } from '@/lib/utils/incidentQueueMetrics.mjs';
 import { issueActivityFeed } from '@/lib/utils/issueActivityFeed.mjs';
+import { relativeTimeLabel } from '@/lib/utils/relativeTime.mjs';
 import { isUnresolvedAccessError, workspaceDataFailureCopy } from '@/lib/utils/organizationLoadErrors.mjs';
 import { isQuotaRefused } from '@/lib/utils/quotaState.mjs';
 
@@ -80,25 +81,10 @@ function ActivityPager({ total, shown, onMore, onCollapse }) {
   );
 }
 
-function timestampMillis(value) {
-  if (!value) return 0;
-  if (typeof value.toMillis === 'function') return value.toMillis();
-  if (typeof value.seconds === 'number') return value.seconds * 1000;
-  if (value instanceof Date) return value.getTime();
-  const parsed = new Date(value).getTime();
-  return Number.isFinite(parsed) ? parsed : 0;
-}
+// «02 вер, 14:30» on every row of a feed is a stamp you have to subtract
+// today's date from to learn the one thing you wanted. The project card has
+// printed the duration all along; this is that clock, shared.
 
-function formatUpdatedAt(value) {
-  const millis = timestampMillis(value);
-  if (!millis) return 'дата не вказана';
-  return new Intl.DateTimeFormat('uk-UA', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(millis));
-}
 
 /**
  * «Огляд» — one screen that knows who is looking.
@@ -379,7 +365,8 @@ export default function OverviewPage() {
                         detail={entry.detail}
                         issueKey={entry.issueKey}
                         title={entry.title}
-                        time={formatUpdatedAt(entry.at)}
+                        time={relativeTimeLabel(entry.at)}
+                        density="comfortable"
                         onClick={() => {
                           const href = issuePath(entry.issue, projectById.get(entry.projectId) || entry.projectId);
                           if (href) router.push(href);
@@ -484,7 +471,8 @@ export default function OverviewPage() {
                         detail={entry.detail}
                         issueKey={entry.issueKey}
                         title={entry.title}
-                        time={formatUpdatedAt(entry.at)}
+                        time={relativeTimeLabel(entry.at)}
+                        density="comfortable"
                         onClick={() => {
                           const href = issuePath(entry.issue, projectById.get(entry.projectId) || entry.projectId);
                           if (href) router.push(href);
@@ -548,12 +536,20 @@ export default function OverviewPage() {
                         shape="soft"
                         density="feed"
                         onClick={() => router.push(`/${encodeURIComponent(project.id)}`)}
-                        className="flex items-center gap-[8px]"
+                        className="flex items-center gap-[10px]"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[12px] font-bold leading-[18px] text-ink">{project.name}</p>
-                          <p className="mt-[3px] truncate text-[11px] leading-[15px] text-ink-soft">
-                            {open} відкритих · {unassigned} без відповідального
+                          <p className="truncate text-[13px] font-bold leading-[20px] text-ink">{project.name}</p>
+                          {/* The count on the right is the open one, so this
+                              line says the part the pill cannot: it used to
+                              repeat «N відкритих» two centimetres from the
+                              badge showing N. */}
+                          <p className="mt-[4px] truncate text-[12px] leading-[17px] text-ink-soft">
+                            {open === 0
+                              ? 'усе вирішено'
+                              : unassigned > 0
+                                ? `${unassigned} без відповідального`
+                                : 'усіх розподілено'}
                           </p>
                         </div>
                         {/* No chevron. `ListRow` is a real button and now
@@ -561,8 +557,16 @@ export default function OverviewPage() {
                             saying what the row already says — and at `faint` on
                             a panel it was the least legible thing on the
                             screen. */}
-                        <Pill tone={open ? 'info' : 'success'} size="sm" shape="badge">
-                          {open || 'Усе вирішено'}
+                        {/* Greys and inks, like every other number on this
+                            screen. A blue «info» pill and a green «success»
+                            one turned a quiet list into a traffic light, and
+                            on a grey tile the soft status grounds they sit on
+                            barely separate from it: two washes four points
+                            apart, carrying the loudest hues in the palette. An
+                            open count is not a status — it is how many, and
+                            how many is written in ink. */}
+                        <Pill tone={open ? 'surface-ink' : 'surface'} size="sm" shape="badge">
+                          {open}
                         </Pill>
                       </ListRow>
                     ))}

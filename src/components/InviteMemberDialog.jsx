@@ -25,7 +25,7 @@ import { organizationPortalName } from '@/lib/utils/organizationBranding.mjs';
 // «Адміністратор» is drawn and disabled rather than left out, because leaving
 // it out would answer a question a customer does have — «can I make my
 // colleague an administrator?» — with silence, and the second card is the
-// shortest place to say where that answer lives.
+// shortest place to say what the seat is and who decides it.
 //
 // Why it is not on offer: granting a role is half a feature, and the other half
 // is taking it back. qTicket has no screen that demotes a client administrator,
@@ -44,7 +44,7 @@ const CLIENT_ROLE_OPTIONS = [
   {
     value: 'client_admin',
     label: 'Адміністратор',
-    description: 'Запрошує інших. Це місце відкриває підтримка — попросіть у зверненні.',
+    description: 'Визначається лише працівниками з підтримки. Може запрошувати в проєкт співробітників.',
     icon: Shield,
     disabled: true,
   },
