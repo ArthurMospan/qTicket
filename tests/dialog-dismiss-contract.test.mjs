@@ -12,7 +12,7 @@ import { parse } from '@babel/parser';
 // stops drawing the button below md — a phone's dialog footer is a stack of
 // full-width rows, and «Скасувати» was spending one of them repeating the ×.
 //
-// Three ways that promise can rot, and all of them are silent:
+// Two ways that promise can rot, and both of them are silent:
 //   1. Somebody marks a button that also reverts, resets or steps back. Then a
 //      phone loses an action that has no other affordance. ConfirmProvider's
 //      «Скасувати» is exactly that shape — one of the two answers the dialog is
@@ -20,15 +20,16 @@ import { parse } from '@babel/parser';
 //   2. Somebody marks a button in a dialog that draws no × — no `title`, so no
 //      header at all, or `showCloseButton={false}`. Then a phone loses the only
 //      way out of the dialog.
-//   3. The button was the only thing in its footer. Hiding it leaves
-//      `.ui-dialog-footer` itself — a ~65px bar of border, padding and canvas
-//      with nothing inside it, which costs the phone more than the row the rule
-//      was saving. Two footers here are that shape, so the stylesheet's
-//      companion rule — take the bar when you take the last thing in it — is
-//      load-bearing rather than kept in reserve, and the fourth test both
-//      checks that rule and names the two footers standing on it.
-// None of the three shows up in a screenshot, in the drift report, or in a code
-// review of the file that broke it. They show up here.
+// Neither shows up in a screenshot, in the drift report, or in a code review of
+// the file that broke it. They show up here.
+//
+// A third shape was briefly a concern and is settled: a footer whose only child
+// closes the dialog. It keeps its button. Standing alone the button is not a
+// repeated answer but the action to take, and it crowds no other row, so it is
+// simply never marked — the «Фільтри» sheet and the column-visibility sheet
+// render on a phone exactly as they do on the desktop. The stylesheet no longer
+// has a rule about that shape, and the fourth test below no longer counts it:
+// it reads only where the `dismiss` rules are allowed to apply.
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SRC = join(ROOT, 'src');
@@ -140,44 +141,10 @@ function footerRoot(dialog, resolve) {
   return value;
 }
 
-const isDismissButton = node => node.type === 'JSXElement'
-  && elementName(node) === 'Button'
-  && Boolean(attribute(node, 'dismiss'));
-
-// Every shape a footer can come out in, each one the list of elements certainly
-// in it. `cond && <X/>` gives a shape with X and a shape without; `a ? <X/> :
-// <Y/>` gives X's shapes and Y's; a fragment multiplies its children's together.
-// All of it to answer one question: is there a way for this footer to render
-// nothing but dismisses, and so to become an empty bar below md?
-function shapes(node, resolve, seen = new Set()) {
-  if (!node) return [[]];
-  switch (node.type) {
-    case 'JSXExpressionContainer':
-      return shapes(node.expression, resolve, seen);
-    case 'Identifier':
-      if (seen.has(node.name)) return [[]];
-      return shapes(resolve(node.name), resolve, new Set([...seen, node.name]));
-    case 'ConditionalExpression':
-      return [...shapes(node.consequent, resolve, seen), ...shapes(node.alternate, resolve, seen)];
-    case 'LogicalExpression':
-      return [[], ...shapes(node.right, resolve, seen)];
-    case 'JSXFragment':
-      return node.children.reduce(
-        (heads, child) => shapes(child, resolve, seen).flatMap(tail => heads.map(head => [...head, ...tail])),
-        [[]],
-      );
-    case 'JSXElement':
-      return [[node]];
-    default:
-      return [[]];
-  }
-}
-
 async function collect() {
   const files = await sourceFiles(SRC);
-  const marked = [];      // every Button that carries `dismiss`
-  const inFooter = [];    // …and the Dialog whose `footer` it was found in
-  const dismissOnly = []; // …and the Dialogs whose whole footer can be dismisses
+  const marked = [];   // every Button that carries `dismiss`
+  const inFooter = []; // …and the Dialog whose `footer` it was found in
   for (const file of files) {
     const source = await readFile(file, 'utf8');
     if (!/(^|[^A-Za-z])dismiss($|[^A-Za-z])/.test(source)) continue;
@@ -205,12 +172,9 @@ async function collect() {
           closeForms: closeHandlerForms(source, node),
         });
       });
-      if (shapes(root, resolve).some(shape => shape.length > 0 && shape.every(isDismissButton))) {
-        dismissOnly.push({ where, line: node.loc.start.line });
-      }
     });
   }
-  return { marked, inFooter, dismissOnly };
+  return { marked, inFooter };
 }
 
 // globals.css as `@media` blocks and the rest. Comments go first: that file
@@ -240,17 +204,11 @@ function splitMedia(css) {
   return { blocks, outside };
 }
 
-const rulesIn = body => body.split('}').map(chunk => {
-  const [selector, declarations] = chunk.split('{');
-  if (declarations === undefined) return null;
-  return { selector: selector.trim().replace(/\s+/g, ' '), declarations };
-}).filter(Boolean);
-
 // Below md, and the same below md every time. `(width < 48rem)` is what Tailwind
 // 4.3 compiles `max-md:` into; `(max-width: 767px)` is a different query at a
 // viewport of 767.5px, which browser zoom and fractional device pixel ratios
 // produce all day. Either spelling is allowed here, one spelling per feature is
-// not negotiable: the bar and the button inside it must never land on opposite
+// not negotiable: the two rules that hide a dismiss must never land on opposite
 // sides of md.
 const BELOW_MD = /^\(\s*(?:width\s*<\s*48rem|max-width:\s*767(?:\.\d+)?px)\s*\)$/;
 
@@ -280,25 +238,18 @@ test('a `dismiss` button does exactly what its dialog\'s × does', async () => {
   assert.deepEqual(different, [], 'this button is hidden on a phone because the × replaces it — if its handler is not the dialog\'s onClose, something it does is only reachable above md');
 });
 
-// The one the first three cannot see. They read the buttons; this reads what is
-// left of the footer once the buttons are gone. A dialog whose footer is a lone
-// «Закрити» would hide that button below md and keep a bordered, padded, empty
-// ~65px bar, which is a worse phone than the one the rule set out to fix. So the
-// stylesheet must also take the bar, and it must take it at exactly the width it
-// takes the button.
-//
-// qTicket has two: the mobile «Фільтри» sheet (PageHeader.jsx, which a
-// client-portal user can open) and the column-visibility sheet on My Tasks
-// (my/page.js). Each is a single «Готово» over controls that apply as they are
-// touched — nothing to commit, so the button only closes — and each was drawing
-// a whole bar to repeat the ×. So the collapse rule is load-bearing here, not
-// held in reserve for QuickTeam, which has four of the same shape and is where
-// it was measured.
-test('a footer that can hold nothing but a dismiss goes with it', async () => {
-  const { dismissOnly, marked } = await collect();
+// The one the first three cannot see. They read the buttons; this reads the
+// stylesheet, and asks the only question left about it: where are these rules
+// allowed to apply? Below md and nowhere else, on one spelling of the query. A
+// `dismiss` rule that reached the desktop would take a button out of a row where
+// it is one of a line and hides nothing, and two spellings of "below md" would
+// disagree at 767.5px — ordinary under browser zoom or a fractional device pixel
+// ratio — leaving a footer with one of its two buttons drawn.
+test('every rule keyed on `dismiss` applies below md and nowhere else', async () => {
+  const { marked } = await collect();
   assert.ok(
     marked.length > 0,
-    'the prop is in use — this scan found nothing, so it is broken and the rule below is being checked against nothing',
+    'the prop is in use — this scan found nothing, so it is broken and the rules below are being checked against nothing',
   );
 
   const { blocks, outside } = splitMedia(await readFile(join(ROOT, 'src/app/globals.css'), 'utf8'));
@@ -316,43 +267,14 @@ test('a footer that can hold nothing but a dismiss goes with it', async () => {
   assert.equal(
     new Set(gated.map(block => block.condition)).size,
     1,
-    'the bar and the button inside it are one behaviour written twice — at a viewport of 767.5px two different queries disagree, and the footer collapses around a button still being drawn, or keeps a bar with nothing in it',
+    'the direct-child rule and the wrapped-child rule are one behaviour written twice — at a viewport of 767.5px two different queries disagree, and a footer keeps the copy it was supposed to lose',
   );
 
-  const collapse = gated
-    .flatMap(block => rulesIn(block.body))
-    .find(rule => rule.selector.startsWith(".ui-dialog-footer[data-ui-close-in-header='true']:not(")
-      && rule.selector.includes(':has(')
-      && rule.selector.includes(":not([data-ui-dismiss='true'])")
-      && /display:\s*none/.test(rule.declarations));
-  assert.ok(
-    collapse,
-    'globals.css must hide a `.ui-dialog-footer` with no child that is not a dismiss — without it such a dialog trades a repeated button for an empty bar. The negation is what spares every other footer: one real action in the bar and the bar stays',
-  );
-
-  // Which footers are standing on it, named rather than counted. A list is the
-  // only form of this that is worth asserting: the interesting event is a
-  // *third* entry appearing, because a footer becomes dismiss-only when its
-  // real action is deleted or made conditional — and then the question is
-  // whether the button that is left really only closes, which is a diff to read
-  // rather than something to find out on a phone. An entry disappearing is the
-  // same question backwards: a `dismiss` was dropped, or a real action moved in
-  // beside it and the bar should stay.
-  assert.deepEqual(
-    [...new Set(dismissOnly.map(item => item.where))].sort(),
-    ['src/app/(app)/my/page.js', 'src/components/ui/Layout/PageHeader.jsx'],
-    'these are the footers the collapse rule above actually takes below md — a new one has to be checked (does its last button only close?) before it is added here, and a missing one means a `dismiss` was lost or the bar has a real action again',
-  );
-
-  // And the shape that rule cannot reach, named rather than left to be
-  // rediscovered: `:has()` does not nest, so a footer whose one child is a
-  // *wrapper* round a dismiss would keep its empty bar. QuickTeamTransferDialog
-  // is the only wrapped footer here, and its wrapper holds a real action too, so
-  // its «Скасувати» is deliberately unmarked — marking it would take «Створити»
-  // down with the wrapper. This assertion is what says so out loud.
-  assert.deepEqual(
-    dismissOnly.filter(item => item.where.includes('QuickTeamTransferDialog')),
-    [],
-    'a wrapped footer cannot carry a dismiss on its inner button — flatten the footer to a fragment first, or move `dismiss` onto a wrapper that holds nothing else',
-  );
+  // There is deliberately no rule here about a footer whose only child is a
+  // dismiss, and no count of such footers. A footer like that keeps its button:
+  // standing alone it reads as the action to take rather than as a second copy
+  // of one, and it crowds nothing, so it costs the phone nothing. Which is why
+  // neither the «Фільтри» sheet nor the column-visibility sheet carries the mark
+  // — the whole point of marking is to remove a *repeated* answer, and a lone
+  // button is not one.
 });

@@ -197,16 +197,16 @@ export function PageHeader({
           title="Фільтри"
           size="sm"
           footer={(
-            // `dismiss`, and the whole bar goes with it below md. Every control
-            // in this sheet is the live filter itself — `stackedFilters` is the
-            // page's own FilterBar redrawn stacked, and each `sheetControl` is
-            // the component the desktop row holds — so all of them have already
-            // taken effect behind the sheet by the time a thumb reaches this
-            // button. «Готово» commits nothing; it closes, which is exactly
-            // what the × in the header above does. This footer holds nothing
-            // else, so the collapse rule takes the bordered, padded ~65px bar
-            // too, and the × stays the way out.
-            <Button style="primary" size="md" className="w-full" onClick={() => setMobileFiltersOpen(false)} dismiss>
+            // Deliberately not `dismiss`. Every control in this sheet is the
+            // live filter itself — `stackedFilters` is the page's own FilterBar
+            // redrawn stacked, and each `sheetControl` is the component the
+            // desktop row holds — so all of them have already taken effect
+            // behind the sheet by the time a thumb reaches this button, and
+            // «Готово» does no more than the × above it does. Marking it would
+            // hide it, and this footer holds nothing else: a lone button is not
+            // a repeated answer but the obvious thing to press, and it reads
+            // the same on a phone as it does on the desktop.
+            <Button style="primary" size="md" className="w-full" onClick={() => setMobileFiltersOpen(false)}>
               Готово
             </Button>
           )}

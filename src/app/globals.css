@@ -2279,32 +2279,40 @@
    asks the shell whether there is another way out, rather than carrying a list
    of modal names.
 
-   A button marked `dismiss` must do nothing except what the × does. The one in
-   this product that deliberately is not marked, and must not become so, is a
-   confirm dialog's «Скасувати» (ConfirmProvider): it is one of the two answers
-   the dialog is asking for, not a way out of being asked.
+   A button marked `dismiss` must do nothing except what the × does. Two shapes
+   in this product deliberately are not marked, and must not become so:
+
+     • a confirm dialog's «Скасувати» (ConfirmProvider). It is one of the two
+       answers the dialog is asking for, not a way out of being asked.
+     • a button that is the only thing in its footer — the mobile «Фільтри»
+       sheet (`PageHeader.jsx`) and the column-visibility sheet on My Tasks
+       (`my/page.js`), each a single «Готово» over controls that have already
+       applied themselves. It repeats the × as much as any «Скасувати» does, and
+       it stays anyway: standing alone it reads as the action to take rather
+       than as a second copy of one, and it is costing the phone nothing, since
+       there is no other row it is crowding. These two footers therefore render
+       on a phone exactly as they do on the desktop. What the rules below remove
+       is a *repeated* answer, never the only one.
 
    Outside @layer: `display` here is fighting Button's own `inline-flex`, and only
    an unlayered rule beats Tailwind's last layer — the same reason
    `.hide-scrollbar` and the 16px field rule sit up there.
 
-   The query is the range syntax Tailwind 4.3 compiles `max-md:` to, and all
-   three rules keyed on `dismiss` — the two here and the footer-collapse one
-   below them — use it, because the last of them hides the bar that holds the
-   button the first two hide. `(max-width: 767px)` is not the same query — at a
-   viewport of 767.5px, ordinary under browser zoom or a fractional device pixel
-   ratio, one fires and the other does not — and the bar and its only occupant
-   must never disagree about which side of md they are on. At 767 all three are
-   true and at 768 all three are false, so nothing at or above md moves.
+   The query is the range syntax Tailwind 4.3 compiles `max-md:` to, and both
+   rules keyed on `dismiss` use it. `(max-width: 767px)` is not the same query —
+   at a viewport of 767.5px, ordinary under browser zoom or a fractional device
+   pixel ratio, one fires and the other does not — and a footer's two buttons
+   must never disagree about which side of md they are on. At 767 both are true
+   and at 768 both are false, so nothing at or above md moves.
 
    The footer's own geometry — the column and the full-width rows this comment
    opens by quoting — is a separate `(max-width: 767px)` block up in @layer
-   components, and is deliberately not one of the three. It decides how the bar
-   lays out, never whether the bar or the button is drawn, so the sliver between
-   the two queries leaves a footer still shaped as a row with the dismiss
-   already gone: the wide arrangement minus one button, which is coherent rather
-   than broken. A rule that starts deciding what exists belongs in the range
-   query beside these three. */
+   components, and is deliberately not one of the two. It decides how the bar
+   lays out, never whether a button in it is drawn, so the sliver between the two
+   queries leaves a footer still shaped as a row with the dismiss already gone:
+   the wide arrangement minus one button, which is coherent rather than broken. A
+   rule that starts deciding what exists belongs in the range query beside these
+   two. */
 @media (width < 48rem) {
   .ui-dialog-footer[data-ui-close-in-header='true'] > [data-ui-dismiss='true'] {
     display: none;
@@ -2328,46 +2336,6 @@
    including the direct-child case that is doing all of the actual work. */
 @media (width < 48rem) {
   .ui-dialog-footer[data-ui-close-in-header='true'] > *:has(> [data-ui-dismiss='true']) {
-    display: none;
-  }
-}
-
-/* And where that button was the only thing in the footer, the footer goes with
-   it. Hiding the button alone would leave `.ui-dialog-footer` itself behind: its
-   border-top, its `py-4` and the `bg-canvas` under them are a ~65px bar with
-   nothing in it, which costs a phone more than the row it was meant to save.
-
-   Two dialogs in qTicket are that shape, and both were already on screen when
-   this rule arrived — they had simply not been marked, which is why the port
-   read as "no dialog here is shaped like this": the claim was true of the
-   marked buttons and of nothing else. The mobile «Фільтри» sheet
-   (`PageHeader.jsx`, and a client-portal user can open it) and the
-   column-visibility sheet on My Tasks (`my/page.js`) each hold one «Готово»
-   over controls that have already applied themselves, so each was a whole bar
-   drawn to repeat the ×. Every *other* marked «Скасувати» here does have a
-   «Зберегти», a «Створити» or a «Призначити» beside it, and those bars stay.
-   QuickTeam has four of the lone kind (a calendar event a member may only read,
-   an unexportable invoice, a timesheet day), which is where this rule was
-   written and measured; the two stylesheets are one contract, and
-   `tests/dialog-dismiss-contract.test.mjs` names the qTicket footers it now
-   applies to so a third one cannot arrive unnoticed.
-
-   Read the selector as "a footer with no child that is not a dismiss". One real
-   action anywhere in the bar keeps the whole bar, which is what stops this from
-   touching the footers the rules above serve. The dismiss inside still goes;
-   only the bar stays, because it still has something to carry.
-
-   `:has()` may not be nested inside `:has()`, so the wrapped case the rule above
-   covers is out of reach here — a footer whose one child is a wrapper round a
-   dismiss keeps its empty bar. Nothing in the product is shaped that way; when
-   something is, the wrapper is what carries `dismiss`, and this rule sees it.
-
-   `:has()` is asked of the browser here for the same reason the rule above asks
-   it: every `max-md:` utility in the bundle is already emitted as a range query,
-   so a browser too old to parse `:has()` (pre-2023) has no phone layout to gate
-   and lands on the footer it had before any of this. */
-@media (width < 48rem) {
-  .ui-dialog-footer[data-ui-close-in-header='true']:not(:has(> :not([data-ui-dismiss='true']))) {
     display: none;
   }
 }

@@ -614,14 +614,13 @@ export default function IncidentQueuePage() {
             // The picker below writes through `updateHiddenCategories` as each
             // box is ticked, so there is nothing here left to apply: «Готово»
             // only closes, which is what the × in the header already does.
-            // Marked, so below md the button goes and — this being the only
-            // thing in the bar — the bar goes with it rather than staying on as
-            // ~65px of border, padding and canvas with nothing inside.
+            // Deliberately not `dismiss` all the same — it is the only thing in
+            // this bar, and a lone button is the action to take rather than a
+            // second copy of one. It stays on a phone, as on the desktop.
             <Button
               style="primary"
               size="md"
               onClick={() => setShowSettingsModal(false)}
-              dismiss
             >
               Готово
             </Button>

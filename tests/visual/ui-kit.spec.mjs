@@ -22,11 +22,15 @@ import kitDrift from '../../src/app/ui-kit/kit-drift.generated.json' with { type
 // which is why this is an init script rather than a call after navigation.
 const FROZEN_TIME = Date.UTC(2026, 6, 12, 9, 0, 0);
 
-// Chromium cannot capture past 16384px in either dimension. The variant matrix
-// renders every declared value of every component and needs ~15300 of them, so
-// the ceiling sits just under the hard limit — and a section that outgrows it
-// fails loudly instead of quietly photographing half of itself.
+// Chromium cannot capture past 16384px in either dimension, so one frame stops
+// just under the hard limit. A section taller than this is photographed in
+// several frames (see `captureSection`) rather than failing — the matrix grows
+// with the kit and would otherwise have to be re-argued every few variants.
 const MAX_SHOT_HEIGHT = 16_000;
+
+// Frames are cheap; needing many of them is not a tall section but a section
+// that has stopped being one screen of anything.
+const MAX_SLICES = 6;
 
 // `next dev` keeps a hot-reload socket open that the test browser has no use
 // for and that fails its handshake on every load. It is the dev server talking
@@ -121,9 +125,46 @@ async function showSection(page, id) {
     await settle(page);
   }
 
-  const remaining = await scroller.evaluate(el => Math.ceil(el.scrollHeight - el.clientHeight));
-  expect(remaining, `section "${id}" does not fit in ${MAX_SHOT_HEIGHT}px`).toBeLessThanOrEqual(0);
+  const frames = await frameCount(scroller);
+  expect(frames, `section "${id}" needs ${frames} frames, which is not a tall section but a broken one`)
+    .toBeLessThanOrEqual(MAX_SLICES);
   return scroller;
+}
+
+// How many frames the section needs at the current viewport. One, for every
+// section this repo has: «Матриця варіантів» is the tallest at ~13800px, and
+// the committed baseline the Linux runner wrote is 13390px.
+async function frameCount(scroller) {
+  return scroller.evaluate(el => (
+    el.scrollHeight <= el.clientHeight ? 1 : Math.ceil(el.scrollHeight / el.clientHeight)
+  ));
+}
+
+// A section that outgrew one frame is photographed in consecutive frames rather
+// than failing. The ceiling used to be a countdown: «Матриця варіантів» renders
+// every declared value of every component, so it gains height every time the kit
+// gains a variant — and in QuickTeam, whose kit is the larger of the two, it
+// crossed 16000px the day `attribute-field` and `workflow-preview` were
+// declared. Here it is still one frame with ~2200px to spare, so this path does
+// not run yet; it is carried so the two suites stay one file, and so the day it
+// does run is a baseline update rather than a code change. The frames overlap at
+// the end — the last scroll clamps — which costs nothing and means no row falls
+// between two baselines. A section that still fits keeps its single `<id>.png`,
+// so no existing baseline moves.
+async function captureSection(page, scroller, id) {
+  const frames = await frameCount(scroller);
+  if (frames === 1) {
+    await expect(scroller).toHaveScreenshot(`${id}.png`);
+    return;
+  }
+
+  const step = await scroller.evaluate(el => el.clientHeight);
+  for (let frame = 0; frame < frames; frame += 1) {
+    await scroller.evaluate((el, top) => { el.scrollTop = top; }, frame * step);
+    await settle(page);
+    const clip = await scroller.boundingBox();
+    await expect(page).toHaveScreenshot(`${id}-${frame + 1}.png`, { clip });
+  }
 }
 
 // A section added to GROUPS without a baseline would otherwise be covered by
@@ -174,7 +215,7 @@ test('every catalogue section fits a phone viewport without page overflow', asyn
 for (const section of SECTIONS) {
   test(`${section.id} — ${section.label}`, async ({ page }) => {
     const scroller = await showSection(page, section.id);
-    await expect(scroller).toHaveScreenshot(`${section.id}.png`);
+    await captureSection(page, scroller, section.id);
   });
 }
 

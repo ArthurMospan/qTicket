@@ -47,26 +47,37 @@ const GLOBALS = join(ROOT, 'src', 'app', 'globals.css');
  * @returns {{selector: string, declarations: {property: string, value: string}[]}[]}
  */
 export function layeredCompositionRules(css = readFileSync(GLOBALS, 'utf8')) {
-  const start = css.indexOf('@layer components');
+  // Comments go before anything counts a brace. Both passes below are brace
+  // arithmetic — the depth scan that finds the end of the layer, and the split
+  // that separates a selector from its block — and prose is allowed to contain
+  // a brace. It does: the comment above `attribute-field` quotes a call site
+  // (`inputClassName={compactInputClass}`), so it split itself across two
+  // matches and the half after the brace arrived glued to the front of the next
+  // selector, which `querySelectorAll` then rejected outright. Stripping
+  // per-selector, as this did, cannot fix that: by then the `/*` and the `*/`
+  // are in different strings. This is the second time punctuation inside a
+  // comment has moved this module's output without the code changing; the first
+  // is the apostrophe in the header.
+  const source = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const start = source.indexOf('@layer components');
   if (start < 0) return [];
 
   let depth = 0;
-  let index = css.indexOf('{', start);
+  let index = source.indexOf('{', start);
   const open = index;
-  for (; index < css.length; index += 1) {
-    if (css[index] === '{') depth += 1;
-    else if (css[index] === '}') {
+  for (; index < source.length; index += 1) {
+    if (source[index] === '{') depth += 1;
+    else if (source[index] === '}') {
       depth -= 1;
       if (depth === 0) break;
     }
   }
-  const body = css.slice(open + 1, index);
+  const body = source.slice(open + 1, index);
 
   const rules = [];
   for (const match of body.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    // A rule is usually preceded by the comment explaining it, which the
-    // selector capture swallows whole.
-    const selector = match[1].replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    const selector = match[1].trim();
     if (!/\[data-ui-/.test(selector)) continue;
     if (/:hover|:focus|::/.test(selector)) continue;
 
