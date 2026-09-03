@@ -65,6 +65,15 @@ export const HeaderSearch = forwardRef(({
   return (
     <div className={`group/search relative flex h-[36px] min-w-0 w-full max-w-[320px] items-center border-b border-transparent transition-colors focus-within:border-line ${className}`}>
       <Search size={14} className="text-muted absolute left-0 pointer-events-none" />
+      {/* Below md the rule at the end of globals.css raises every typeable
+          field to 16px, because iOS zooms the page when a FOCUSED control is
+          smaller — and a zoomed page is worse than a loud placeholder. It
+          reads the input's own size, not the placeholder's, so the resting
+          state can go back to 13px on its own: at rest this field shows only
+          its placeholder, so the header reads as quietly on a phone as it
+          does here. What somebody types stays 16px, which is the half worth
+          keeping legible. Desktop is untouched — the field is 13px there
+          already, so the variant changes nothing above 767px. */}
       <input
         ref={ref}
         type="text"
@@ -77,7 +86,7 @@ export const HeaderSearch = forwardRef(({
         }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="h-full min-w-0 w-full bg-transparent pl-[24px] pr-[76px] text-[13px] text-ink outline-none placeholder:text-muted max-md:pr-[28px]"
+        className="h-full min-w-0 w-full bg-transparent pl-[24px] pr-[76px] text-[13px] text-ink outline-none placeholder:text-muted max-md:pr-[28px] max-md:placeholder:text-[13px]"
         {...props}
       />
       {value && (
