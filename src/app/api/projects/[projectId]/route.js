@@ -1,6 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
+import { authenticateRequest, authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
   projectIssueCountDeltasFor,
@@ -32,12 +32,16 @@ function projectTransactionError(code, status, message, details = {}) {
 // Editing a client space and deleting one are two permissions, so each verb
 // names its own rather than sharing one list that happens to be identical today.
 async function loadAuthorizedProject(request, projectId, allowedRoles) {
+  // The token before the record: the read below is how the route learns
+  // which organization to authorize against.
+  const identity = await authenticateRequest(request);
+  if (identity.error) return identity;
   const db = getAdminDb();
   const ref = db.collection('projects').doc(projectId);
   const snap = await ref.get();
   if (!snap.exists) return { error: 'Project not found', status: 404 };
   const project = snap.data();
-  const authorization = await authorizeOrgRequest(request, project.organizationId, allowedRoles);
+  const authorization = await authorizeOrgRequest(request, project.organizationId, allowedRoles, { identity });
   if (authorization.error) return authorization;
   return { db, ref, project, authorization };
 }

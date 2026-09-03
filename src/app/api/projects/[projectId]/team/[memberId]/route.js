@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import {
+  authenticateRequest,
   authorizeOrgRequest,
   FieldValue,
   getAdminDb,
@@ -31,6 +32,12 @@ import { resolveProjectTeamRemoval } from '@/lib/server/projectTeamRemoval.mjs';
 export async function DELETE(request, context) {
   try {
     const { projectId, memberId } = await context.params;
+    // The token before the record: the read below is how the route learns
+    // which organization to authorize against.
+    const identity = await authenticateRequest(request);
+    if (identity.error) {
+      return NextResponse.json({ error: identity.error }, { status: identity.status });
+    }
     const db = getAdminDb();
     const projectRef = db.collection('projects').doc(projectId);
     const projectSnap = await projectRef.get();
@@ -43,6 +50,7 @@ export async function DELETE(request, context) {
       request,
       project.organizationId,
       rolesFor('remove:client_member'),
+      { identity },
     );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });

@@ -3,6 +3,7 @@ import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { routeErrorResponse } from '@/lib/server/apiErrors';
 import { hasProjectAccess } from '@/lib/utils/projectAccess.mjs';
 import { canRestoreIssueTombstone } from '@/lib/utils/issueTrash.mjs';
+import { rolesFor } from '@/lib/utils/can';
 
 // What has been deleted and can still be brought back.
 //
@@ -26,7 +27,10 @@ function serializeMillis(value) {
 export async function GET(request) {
   try {
     const organizationId = new URL(request.url).searchParams.get('organizationId') || '';
-    const authorization = await authorizeOrgRequest(request, organizationId);
+    // Who may put a request back is who may see that it is gone. A customer
+    // holds neither: «Нещодавно видалене» is a support screen, and a title, a
+    // key and the name of whoever deleted it are the desk's business.
+    const authorization = await authorizeOrgRequest(request, organizationId, rolesFor('delete:issue'));
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }

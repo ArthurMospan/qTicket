@@ -1,6 +1,6 @@
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
+import { authenticateRequest, authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
@@ -47,6 +47,13 @@ function apiTransactionError(code, status, message, details = {}) {
 export async function PATCH(request, context) {
   try {
     const { issueId } = await context.params;
+    // The token before the record. The read below is how the route learns
+    // which organization to authorize against, and it must not be made on
+    // behalf of a caller who has not yet said who they are.
+    const identity = await authenticateRequest(request);
+    if (identity.error) {
+      return NextResponse.json({ error: identity.error }, { status: identity.status });
+    }
     const db = getAdminDb();
     const issueRef = db.collection('issues').doc(issueId);
     const issueSnap = await issueRef.get();
@@ -62,6 +69,7 @@ export async function PATCH(request, context) {
       request,
       issue.organizationId,
       rolesFor('edit:issue_content'),
+      { identity },
     );
     if (authorization.error) {
       return NextResponse.json({
@@ -212,13 +220,30 @@ export async function PATCH(request, context) {
 
     return NextResponse.json({ ok: true, issueId, fields: Object.keys(patch) });
   } catch (error) {
-    return routeErrorResponse(error, 'Не вдалося зберегти звернення');
+    // The transaction's own refusals — off the project, scope moved, record
+    // gone — carry a status and a code; they used to fall through to a 500
+    // because the helper was handed a string where it expects an options
+    // object, so a customer off their space saw «internal error», never 403.
+    if (error?.api) {
+      return NextResponse.json({
+        error: error.api.message,
+        code: error.api.code,
+      }, { status: error.api.status });
+    }
+    return routeErrorResponse(error, {
+      context: 'Issue PATCH',
+      fallbackMessage: 'Не вдалося зберегти звернення',
+    });
   }
 }
 
 export async function DELETE(request, context) {
   try {
     const { issueId } = await context.params;
+    const identity = await authenticateRequest(request);
+    if (identity.error) {
+      return NextResponse.json({ error: identity.error }, { status: identity.status });
+    }
     const db = getAdminDb();
     const issueRef = db.collection('issues').doc(issueId);
     const issueSnap = await issueRef.get();
@@ -239,6 +264,7 @@ export async function DELETE(request, context) {
       request,
       issue.organizationId,
       rolesFor('delete:issue'),
+      { identity },
     );
     if (authorization.error) {
       return NextResponse.json({

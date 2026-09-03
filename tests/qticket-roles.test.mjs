@@ -384,7 +384,11 @@ test('qTicket не має самостійного шляху до внутрі�
   // Умова на документ не захищає запит: браузер, якому відмовили в `get`,
   // отримував той самий документ списком. Тому список закритий геть.
   assert.match(rules, /allow list: if false;/);
-  assert.match(rules, /allow update: if isOrgAdminOrOwner\(resource\.data\.organizationId\) &&\s*!isInviteLinkInvitation\(resource\.data\) &&\s*!isInviteLinkInvitation\(request\.resource\.data\)/);
+  // Оновлення з браузера — лише скасування: `status` і `updatedAt`, і нічого
+  // більше. Роль, організацію, адресу й `type` переписати не можна, тож ані
+  // посилання з поштового запрошення, ані внутрішнього місця з клієнтського
+  // звідси не зробити.
+  assert.match(rules, /allow update: if isOrgAdminOrOwner\(resource\.data\.organizationId\) &&\s*!isInviteLinkInvitation\(resource\.data\) &&\s*request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\s*\.hasOnly\(\['status', 'updatedAt'\]\) &&\s*request\.resource\.data\.status == 'cancelled';/);
 
   // Старий помічник із внутрішньою роллю не повернувся під своїм ім'ям.
   await assert.rejects(

@@ -110,8 +110,14 @@ export async function authenticateRequest(request) {
   }
 }
 
-export async function authorizeOrgRequest(request, organizationId, allowedRoles = []) {
-  const authResult = await authenticateRequest(request);
+// `identity` is an `authenticateRequest` result a route has already obtained.
+// A route that must read a document to learn which organization to authorize
+// against verifies the token *before* that read — otherwise the read is made
+// on behalf of nobody, at any rate an anonymous caller likes, against a project
+// on a daily read cap — and passing the result here means the token is
+// verified once, not twice.
+export async function authorizeOrgRequest(request, organizationId, allowedRoles = [], { identity } = {}) {
+  const authResult = identity?.user ? identity : await authenticateRequest(request);
   if (authResult.error) return authResult;
   if (!organizationId) return { error: 'Organization is required', status: 400 };
 

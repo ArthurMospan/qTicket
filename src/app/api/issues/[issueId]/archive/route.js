@@ -1,6 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
+import { authenticateRequest, authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
 import { syncIssueReminderRows } from '@/lib/server/reminderJobs';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
@@ -37,6 +37,12 @@ export async function PATCH(request, context) {
     }
     const archived = body.archived;
 
+    // The token before the record: the read below is how the route learns
+    // which organization to authorize against.
+    const identity = await authenticateRequest(request);
+    if (identity.error) {
+      return NextResponse.json({ error: identity.error }, { status: identity.status });
+    }
     const db = getAdminDb();
     const issueRef = db.collection('issues').doc(issueId);
     const issueSnap = await issueRef.get();
@@ -51,6 +57,7 @@ export async function PATCH(request, context) {
       request,
       issue.organizationId,
       rolesFor('edit:issue'),
+      { identity },
     );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });

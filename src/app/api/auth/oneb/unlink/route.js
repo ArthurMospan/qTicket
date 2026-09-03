@@ -26,8 +26,12 @@ export async function DELETE(request) {
       oneb_connected: false,
     });
 
+    // The login route resolves a OneB sign-in by `onebId` alone, so an
+    // «unlinked» account that kept the id still let that OneB account in.
+    // Unlinking removes the binding, not only the flag.
     await getAdminDb().collection('users').doc(userRecord.uid).set({
       onebConnected: false,
+      onebId: FieldValue.delete(),
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
 

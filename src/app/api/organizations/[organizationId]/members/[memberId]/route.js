@@ -5,7 +5,7 @@ import {
   getAdminDb,
 } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
-import { can, rolesFor } from '@/lib/utils/can';
+import { can, isClientRole, rolesFor } from '@/lib/utils/can';
 import { reactivateMembership } from '@/lib/server/orgMembership';
 import {
   MEMBERSHIP_ARCHIVE,
@@ -197,6 +197,18 @@ export async function PATCH(request, context) {
       }
       if (action === 'role' && membership.role === 'owner') {
         throw memberMutationError('OWNER_ROLE', 409, 'Transfer ownership before changing this role');
+      }
+      // Every internal seat is QuickTeam-managed and refused above, so the
+      // only seat this route could still re-role was a customer's — into
+      // `admin`, with every other customer's queue. A client seat is
+      // project-scoped by construction and does not become staff here; staff
+      // arrive through provisioning and nowhere else.
+      if (action === 'role' && isClientRole(membership.role)) {
+        throw memberMutationError(
+          'CLIENT_SEAT',
+          409,
+          'Клієнтське місце не стає місцем підтримки; персонал додає QuickTeam',
+        );
       }
 
       const now = FieldValue.serverTimestamp();

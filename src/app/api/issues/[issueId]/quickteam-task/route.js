@@ -1,9 +1,15 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-import { authorizeOrgRequest, getAdminDb } from '@/lib/server/firebaseAdmin';
+import {
+  authenticateRequest,
+  authorizeOrgRequest,
+  enforceRateLimit,
+  getAdminDb,
+} from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import { rolesFor, isClientRole } from '@/lib/utils/can';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
+import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
 import {
   createQuickTeamTask,
   quickTeamSourceUserId,
@@ -51,6 +57,18 @@ export async function POST(request, context) {
       }, { status: 400 });
     }
 
+    // The token first, then the record: the read below learns which
+    // organization to authorize against, and a read made before anybody has
+    // said who they are is a read anybody can ask for.
+    const identity = await authenticateRequest(request);
+    if (identity.error) {
+      return NextResponse.json({ error: identity.error }, { status: identity.status });
+    }
+    // Each press is a fifteen-second call into another product.
+    if (!(await enforceRateLimit('quickteam-task', identity.user.uid, 20, 60))) {
+      return NextResponse.json({ error: 'Забагато запитів', code: 'RATE_LIMITED' }, { status: 429 });
+    }
+
     const db = getAdminDb();
     const issueRef = db.collection('issues').doc(issueId);
     const issueSnap = await issueRef.get();
@@ -65,12 +83,34 @@ export async function POST(request, context) {
       request,
       issue.organizationId,
       rolesFor('edit:issue'),
+      { identity },
     );
     if (authorization.error) {
       return NextResponse.json({ error: authorization.error }, { status: authorization.status });
     }
     if (isClientRole(authorization.membership?.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // The role says the person may transfer at all; the project says whether
+    // they may transfer *this* one. A support member reaches the requests of
+    // the client spaces they are on and no others — the same line every
+    // sibling route draws, and the one this route did not, so any internal
+    // seat could send any request's title and description out of the desk.
+    const projectSnap = await db.collection('projects').doc(issue.projectId).get();
+    const project = projectSnap.exists ? { ...projectSnap.data(), id: projectSnap.id } : null;
+    const projectAccessError = projectWriteError(
+      project,
+      issue.organizationId,
+      authorization.membership?.role,
+      authorization.user.uid,
+    );
+    if (projectAccessError) {
+      throw transferError(
+        'PROJECT_FORBIDDEN',
+        projectAccessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
+        projectAccessError,
+      );
     }
     // Asked after the session is verified, like the projects proxy beside it:
     // whether this deployment can reach QuickTeam is not something an anonymous
@@ -92,10 +132,7 @@ export async function POST(request, context) {
       );
     }
 
-    const [projectSnap] = await Promise.all([
-      db.collection('projects').doc(issue.projectId).get(),
-    ]);
-    const clientName = projectSnap.data()?.name || '';
+    const clientName = project?.name || '';
     const appOrigin = String(process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin).replace(/\/$/, '');
     const incidentUrl = `${appOrigin}${issuePath(issue, issue.projectId)}`;
     // qTicket composes the words about its own record. QuickTeam stores what it
