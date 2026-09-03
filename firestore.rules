@@ -210,9 +210,33 @@ service cloud.firestore {
 
     // ── users/{uid} — private self profile. Organization-visible profile
     //    fields are returned by /api/organizations/:id/members. ─────────
+    //
+    // A profile is the person's own to edit, with two exceptions the server
+    // reads as identity. `email` is what /api/invitations and QuickTeam
+    // provisioning look a person up by, so it may only ever equal the address
+    // the Firebase token carries — a profile that claimed somebody else's
+    // address took that person's next invitation and, under provisioning,
+    // their staff seat. The OneB binding (`onebId`, `onebConnected`) and the
+    // provisioning marks are written by /oauth2/result and /provision through
+    // the Admin SDK only: the login route resolves an account by `onebId`, so a
+    // browser that could write it would sign the next OneB login into itself.
+    function profileEmailIsOwn(data) {
+      return !('email' in data) || data.email == null ||
+        (data.email is string &&
+          data.email.lower() == request.auth.token.get('email', '').lower());
+    }
+    function profileKeepsIdentity(keys) {
+      return !keys.hasAny(['onebId', 'onebConnected', 'identitySource', 'authProvider']);
+    }
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
-      allow create, update: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() && request.auth.uid == uid &&
+        profileKeepsIdentity(request.resource.data.keys()) &&
+        profileEmailIsOwn(request.resource.data);
+      allow update: if signedIn() && request.auth.uid == uid &&
+        profileKeepsIdentity(request.resource.data.diff(resource.data).affectedKeys()) &&
+        (!('email' in request.resource.data.diff(resource.data).affectedKeys()) ||
+          profileEmailIsOwn(request.resource.data));
       allow delete: if false;
 
       match /settings/{settingsDoc} {
@@ -270,12 +294,21 @@ service cloud.firestore {
           isOrgAdminOrOwner(resource.data.organizationId));
       allow list: if false;
       allow create: if false; // Created by the authenticated invitation API.
-      // Neither the stored document nor the one replacing it may be a link.
-      // Without the second half an admin could turn an ordinary email
-      // invitation into a link by writing `type` and `tokenHash` onto it.
+      // The one thing a browser may do to an invitation is cancel it. The
+      // accept route seats whoever holds the document's `email` in the
+      // document's `organizationId` with the document's `role`, and the rule
+      // above authorizes against the organization the document names *now* —
+      // so an admin who could rewrite those three fields could write a seat
+      // for anyone in any organization, including one they are not in, and
+      // could turn a client invitation into a staff seat the product says only
+      // QuickTeam provisions. Nothing in the product edits an invitation from
+      // the browser except to cancel it; pinning the write to that keeps every
+      // other field the server's word.
       allow update: if isOrgAdminOrOwner(resource.data.organizationId) &&
         !isInviteLinkInvitation(resource.data) &&
-        !isInviteLinkInvitation(request.resource.data);
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'updatedAt']) &&
+        request.resource.data.status == 'cancelled';
       allow delete: if isOrgAdminOrOwner(resource.data.organizationId) &&
         !isInviteLinkInvitation(resource.data);
     }

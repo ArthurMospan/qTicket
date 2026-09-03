@@ -1409,3 +1409,54 @@ test('a stranger reads no history of a space they are not on', async () => {
   const outsiderDb = environment.authenticatedContext('client-other').firestore();
   await assertFails(getDoc(doc(outsiderDb, 'issues', 'issue-a', 'statusHistory', 'moved-3')));
 });
+
+// ── The two documents the server reads as identity ─────────────────────
+//
+// An invitation is accepted by seating whoever holds its `email` in its
+// `organizationId` with its `role`, and a profile's `email` is what the
+// invitation route and QuickTeam provisioning look a person up by. Both were
+// writable from the browser; each of these asserts the write that would have
+// handed somebody a seat they were never given.
+
+test('an admin may cancel an invitation but not change whom, where or as what it seats', async () => {
+  const adminDb = environment.authenticatedContext('admin-a').firestore();
+  const invitation = doc(adminDb, 'invitations', 'pending-email');
+  await assertFails(updateDoc(invitation, { role: 'admin' }));
+  await assertFails(updateDoc(invitation, { scope: 'organization', role: 'member' }));
+  await assertFails(updateDoc(invitation, { organizationId: 'org-b' }));
+  await assertFails(updateDoc(invitation, { email: 'admin@example.com' }));
+  await assertFails(updateDoc(invitation, { projectIds: ['project-b'] }));
+  await assertFails(updateDoc(invitation, { status: 'accepted' }));
+  await assertFails(updateDoc(invitation, { status: 'cancelled', role: 'admin' }));
+  await assertSucceeds(updateDoc(invitation, { status: 'cancelled', updatedAt: serverTimestamp() }));
+});
+
+test('a profile keeps its own address and never a binding the server owns', async () => {
+  const memberDb = environment.authenticatedContext('member-a', { email: 'member@example.com' }).firestore();
+  const profile = doc(memberDb, 'users', 'member-a');
+  await assertSucceeds(updateDoc(profile, { name: 'Renamed', timezone: 'Europe/Kyiv' }));
+  await assertSucceeds(updateDoc(profile, { email: 'member@example.com' }));
+  await assertSucceeds(updateDoc(profile, { email: 'Member@Example.com' }));
+  await assertFails(updateDoc(profile, { email: 'owner@example.com' }));
+  await assertFails(updateDoc(profile, { onebId: 'oneb-owner' }));
+  await assertFails(updateDoc(profile, { onebConnected: true }));
+  await assertFails(updateDoc(profile, { identitySource: 'quickteam' }));
+  await assertFails(updateDoc(profile, { authProvider: 'oneb' }));
+  // A token that carries no address can still edit the profile it has, and
+  // still cannot claim one.
+  const bareDb = environment.authenticatedContext('member-a').firestore();
+  await assertSucceeds(updateDoc(doc(bareDb, 'users', 'member-a'), { name: 'Renamed again' }));
+  await assertFails(updateDoc(doc(bareDb, 'users', 'member-a'), { email: 'owner@example.com' }));
+});
+
+test('a first sign-in seeds a profile with the token address and no identity binding', async () => {
+  // The shape useAuth writes on first sign-in, address included.
+  const newcomerDb = environment.authenticatedContext('newcomer', { email: 'newcomer@example.com' }).firestore();
+  const seed = { id: 'newcomer', name: 'Newcomer', avatar: '', role: 'user', createdAt: '2026-09-03T00:00:00.000Z' };
+  await assertFails(setDoc(doc(newcomerDb, 'users', 'newcomer'), { ...seed, email: 'owner@example.com' }, { merge: true }));
+  await assertFails(setDoc(doc(newcomerDb, 'users', 'newcomer'), { ...seed, email: 'newcomer@example.com', onebId: 'oneb-owner' }, { merge: true }));
+  await assertSucceeds(setDoc(doc(newcomerDb, 'users', 'newcomer'), { ...seed, email: 'newcomer@example.com' }, { merge: true }));
+  // A provider without an address seeds `email: null`, which claims nothing.
+  const phoneDb = environment.authenticatedContext('phone-only').firestore();
+  await assertSucceeds(setDoc(doc(phoneDb, 'users', 'phone-only'), { ...seed, id: 'phone-only', email: null }, { merge: true }));
+});
