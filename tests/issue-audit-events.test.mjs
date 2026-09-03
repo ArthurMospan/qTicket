@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import {
   AUDITED_ISSUE_FIELDS,
   auditValue,
+  auditedChange,
   describeAuditEvent,
   isCustomerVisibleAuditEntry,
 } from '../src/lib/utils/issueAuditEvents.mjs';
@@ -109,6 +110,50 @@ test('a description is a fact in the feed, never a diff', () => {
     describeAuditEvent({ action: 'changed_description', from: null, to: null }, CONTEXT),
     'Опис змінено',
   );
+  assert.deepEqual(
+    auditedChange('description', '- [ ] Зібрати макети', 'Інший текст'),
+    { action: 'changed_description', from: null, to: null },
+  );
+  // Every other field carries its two values, in the audit's own string form.
+  assert.deepEqual(
+    auditedChange('assigneeIds', ['member-b', 'member-a'], ['member-a']),
+    { action: 'changed_assigneeIds', from: '["member-a","member-b"]', to: '["member-a"]' },
+  );
+});
+
+// Six boxes ticked in half a minute read as six lines of «Опис змінено» on
+// COC-1 — the other side was told that something happened and nothing about
+// what. A ticked box is the commonest edit a description gets and the least
+// like an edit to the person making it.
+test('a ticked box is its own line, and the item is named', () => {
+  const before = '- [ ] Зібрати макети\n- [ ] Погодити копірайт';
+  const ticked = '- [x] Зібрати макети\n- [ ] Погодити копірайт';
+  assert.deepEqual(
+    auditedChange('description', before, ticked),
+    { action: 'checklist-item-checked', from: null, to: 'Зібрати макети' },
+  );
+  assert.deepEqual(
+    auditedChange('description', ticked, before),
+    { action: 'checklist-item-unchecked', from: null, to: 'Зібрати макети' },
+  );
+  assert.equal(
+    describeAuditEvent({ action: 'checklist-item-checked', from: null, to: 'Зібрати макети' }, CONTEXT),
+    'Відмічено пункт «Зібрати макети»',
+  );
+  assert.equal(
+    describeAuditEvent({ action: 'checklist-item-unchecked', from: null, to: 'Зібрати макети' }, CONTEXT),
+    'Знято відмітку з пункту «Зібрати макети»',
+  );
+  // An entry whose item did not survive still says what kind of thing it was.
+  assert.equal(
+    describeAuditEvent({ action: 'checklist-item-checked', from: null, to: null }, CONTEXT),
+    'Відмічено пункт чекліста',
+  );
+  // The customer ticks boxes in their own request and reads the line back.
+  assert.equal(isCustomerVisibleAuditEntry({ action: 'checklist-item-checked', to: 'Зібрати макети' }), true);
+  // A long item is quoted, not reprinted.
+  const long = 'x'.repeat(120);
+  assert.equal(auditedChange('description', `- [ ] ${long}`, `- [x] ${long}`).to.length, 80);
 });
 
 test('what the server did reads as what changed, not as its own action id', () => {

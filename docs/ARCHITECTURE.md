@@ -342,8 +342,9 @@ support changes for staff.
 ### The pieces
 
 - `src/lib/utils/issueAuditEvents.mjs` — which field changes are worth logging
-  (`AUDITED_ISSUE_FIELDS`) and how one reads out (`describeAuditEvent`). Pure, no
-  React. Covered by `tests/issue-audit-events.test.mjs`.
+  (`AUDITED_ISSUE_FIELDS`), what entry a change produces (`auditedChange`) and
+  how one reads out (`describeAuditEvent`). Pure, no React. Covered by
+  `tests/issue-audit-events.test.mjs`.
 - `src/lib/utils/issueReadState.mjs` — the cursor rules: `isIssueUnread` for a
   card, `isIssueChangeUnread` for one line of history, `unreadActivityLabel` for
   what the dot is about. Covered by `tests/issue-read-state.test.mjs`.
@@ -419,6 +420,21 @@ support changes for staff.
    written by Firestore, and the cursor it is measured against was copied from the
    task's own `lastActivityAt`. That is why the boundary needs no cursor of its
    own and no per-entry timestamp written by a client.
+12. **One door writes one line.** The content route records the history of
+   what it wrote in the same transaction, for a client and for support alike;
+   the browser writes a line only for the direct writes the route cannot take
+   (an `arrayUnion` of an attachment, a watcher). The browser's loop used to
+   guard on the reader instead of the door, and when support's edits were moved
+   through the route it kept writing its own line after the route had written
+   one: on 2026-09-02 every support edit of COC-1 stood twice in `audit/`, half
+   a second apart, while the customer's mirror had it once. `auditedChange` is
+   the one spelling of an entry, so the two doors cannot drift apart again.
+13. **A ticked box is not a rewritten description.** `auditedChange` recognises
+   the one edit a checkbox click makes — the same text with exactly one task
+   marker flipped — and records `checklist-item-checked` /
+   `checklist-item-unchecked` with the item's text, which the feed reads as
+   «Відмічено пункт «…»». Anything more than that flip is «Опис змінено», still
+   a fact and never a diff.
 
 ### Deliberate omissions
 
@@ -436,7 +452,8 @@ support changes for staff.
 
 Add the field to `AUDITED_ISSUE_FIELDS`, give it a label (and a value formatter
 if it is not a plain string) in the same module, and write it from wherever that
-field is saved. Server routes that already write `lastActivity*` also write their
+field is saved — through `auditedChange`, so both doors spell the entry the same
+way. Server routes that already write `lastActivity*` also write their
 own audit entry in the same transaction — `api/issues/[issueId]/status` is the
 example to copy.
 

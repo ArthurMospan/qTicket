@@ -100,3 +100,19 @@ test('the customer’s own routing finally reads as an event', () => {
     'Відповідальних змінено на «Оля»',
   );
 });
+
+// Measured on 2026-09-02 in `qticket-qt`, request COC-1: every support edit
+// stood twice in `audit/` — one row from the route's transaction and one from
+// the browser half a second later — while the customer's mirror had it once.
+// The loop that writes the browser's line guarded on the reader, not on the
+// door the patch went through.
+test('a patch that went through the route is not written into the history a second time', async () => {
+  const hook = await read('../src/lib/hooks/useIssues.js');
+  assert.match(hook, /if \(routeThisPatch\) break;/);
+  assert.doesNotMatch(hook, /if \(writesThroughContentApi\) break;/);
+  // Both doors spell the entry through the same function, so a ticked box
+  // reads the same whichever side wrote it.
+  assert.match(hook, /\.\.\.auditedChange\(field, current\[field\], directData\[field\]\)/);
+  const route = await read('../src/app/api/issues/[issueId]/route.js');
+  assert.match(route, /\.\.\.auditedChange\(field, current\[field\], patch\[field\]\)/);
+});

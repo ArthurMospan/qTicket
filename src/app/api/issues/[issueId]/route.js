@@ -11,8 +11,8 @@ import { localizedIssueAuthorizationMessage } from '@/lib/utils/issueApiMessages
 import { can, rolesFor } from '@/lib/utils/can';
 import {
   AUDITED_ISSUE_FIELDS,
-  FACT_ONLY_AUDITED_FIELDS,
   auditValue,
+  auditedChange,
 } from '@/lib/utils/issueAuditEvents.mjs';
 import { pickIssueContentFields, pickIssueDeskFields } from '@/lib/utils/issueContentFields.mjs';
 import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
@@ -183,17 +183,12 @@ export async function PATCH(request, context) {
       const changedFields = [];
       for (const field of AUDITED_ISSUE_FIELDS) {
         if (patch[field] === undefined) continue;
-        const from = auditValue(current[field]);
-        const to = auditValue(patch[field]);
-        if (from === to) continue;
+        if (auditValue(current[field]) === auditValue(patch[field])) continue;
         changedFields.push(field);
-        const factOnly = FACT_ONLY_AUDITED_FIELDS.includes(field);
         recordIssueHistory(transaction, issueRef, {
           userId: authorization.user.uid,
           userName: actorName,
-          action: `changed_${field}`,
-          from: factOnly ? null : from,
-          to: factOnly ? null : to,
+          ...auditedChange(field, current[field], patch[field]),
           createdAt: now,
         });
       }

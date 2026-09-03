@@ -1,6 +1,7 @@
 import { statusLabel } from './workflowDefaults.mjs';
 import { NO_PRIORITY_ID } from './priorities.mjs';
 import { ISSUE_BULK_ACTION_BY_ID } from '../bulk/issueBulkActions.mjs';
+import { checklistToggleBetween } from './markdownEditor.mjs';
 
 /**
  * Which field changes are worth a line in a task's history.
@@ -30,6 +31,43 @@ export const AUDITED_ISSUE_FIELDS = Object.freeze([
 ]);
 
 export const FACT_ONLY_AUDITED_FIELDS = Object.freeze(['description']);
+
+/** How much of a checklist item the feed quotes. It quotes a line; it does not reprint one. */
+const CHECKLIST_ITEM_MAX = 80;
+
+/**
+ * The history entry a field change produces — `action`, `from`, `to` — decided
+ * in one place for the route and the browser alike, so a change reads the same
+ * whichever door wrote it.
+ *
+ * A description is logged as a fact: both versions of a task's body inside one
+ * log entry is a document nobody reads in a feed. And the commonest edit to a
+ * description is not an edit to the person making it — a box ticked in a
+ * checklist — so that one is logged as what it was: the item, and whether it
+ * was ticked or cleared. Six boxes ticked in half a minute used to read as six
+ * lines of «Опис змінено», which told the other side that something happened
+ * and nothing about what.
+ *
+ * @param {string} field One of `AUDITED_ISSUE_FIELDS`.
+ * @param {*} before The stored value.
+ * @param {*} after The value being written.
+ * @returns {{ action: string, from: string|null, to: string|null }}
+ */
+export function auditedChange(field, before, after) {
+  if (!FACT_ONLY_AUDITED_FIELDS.includes(field)) {
+    return { action: `changed_${field}`, from: auditValue(before), to: auditValue(after) };
+  }
+  const toggle = field === 'description' ? checklistToggleBetween(before, after) : null;
+  if (!toggle) return { action: `changed_${field}`, from: null, to: null };
+  const item = toggle.item.length > CHECKLIST_ITEM_MAX
+    ? `${toggle.item.slice(0, CHECKLIST_ITEM_MAX - 1)}…`
+    : toggle.item;
+  return {
+    action: toggle.checked ? 'checklist-item-checked' : 'checklist-item-unchecked',
+    from: null,
+    to: item,
+  };
+}
 
 const FIELD_LABELS = Object.freeze({
   status: 'статус',
@@ -61,6 +99,10 @@ const ACTION_FIELDS = Object.freeze({
   moved: 'status',
   'workflow-status-migrated': 'status',
   'hidden-column-migrated': 'status',
+  // A ticked box is a change to the description, and is withheld or shown to
+  // the customer as one — it only reads differently.
+  'checklist-item-checked': 'description',
+  'checklist-item-unchecked': 'description',
 });
 
 /** Actions that are a fact rather than a change, in the words the feed says. */
@@ -232,6 +274,12 @@ function describeBulkEvent(entry, actionId, context) {
 export function describeAuditEvent(entry, context = {}) {
   const action = typeof entry?.action === 'string' ? entry.action : '';
   if (ACTION_TEXT[action]) return ACTION_TEXT[action];
+  if (action === 'checklist-item-checked' || action === 'checklist-item-unchecked') {
+    const item = typeof entry?.to === 'string' && entry.to ? `«${entry.to}»` : 'чекліста';
+    return action === 'checklist-item-checked'
+      ? `Відмічено пункт ${item}`
+      : `Знято відмітку з пункту ${item}`;
+  }
   if (action === 'parent-changed') {
     return entry?.to ? 'Основне звернення змінено' : 'Звернення відкріплено від основного';
   }

@@ -182,3 +182,37 @@ export function setTaskChecked(content, targetLine, checked) {
     return line.replace(/^(\s*[-*+]\s+\[)[ xX](\]\s+)/, `$1${checked ? 'x' : ' '}$2`);
   }).join('\n');
 }
+
+const TASK_LINE = /^(\s*[-*+]\s+\[)([ xX])(\]\s+)(.*)$/;
+
+/**
+ * Whether `after` is `before` with exactly one task box ticked or cleared —
+ * the edit a checkbox click makes — and which item it was.
+ *
+ * Anything else — the item reworded, two boxes flipped at once, a line added —
+ * is an edit to the description and is reported as one.
+ *
+ * @param {string} before The stored description.
+ * @param {string} after The description being written.
+ * @returns {{ checked: boolean, item: string } | null}
+ */
+export function checklistToggleBetween(before, after) {
+  const from = String(before ?? '').replace(/\r\n?/g, '\n').split('\n');
+  const to = String(after ?? '').replace(/\r\n?/g, '\n').split('\n');
+  if (from.length !== to.length) return null;
+  let changed = -1;
+  for (let index = 0; index < from.length; index += 1) {
+    if (from[index] === to[index]) continue;
+    if (changed !== -1) return null;
+    changed = index;
+  }
+  if (changed === -1) return null;
+  const was = from[changed].match(TASK_LINE);
+  const now = to[changed].match(TASK_LINE);
+  if (!was || !now) return null;
+  if (was[1] !== now[1] || was[3] !== now[3] || was[4] !== now[4]) return null;
+  const wasChecked = was[2] !== ' ';
+  const nowChecked = now[2] !== ' ';
+  if (wasChecked === nowChecked) return null;
+  return { checked: nowChecked, item: now[4].trim() };
+}

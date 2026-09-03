@@ -43,8 +43,8 @@ import { issueCompletionBlockers } from '@/lib/utils/issueExecution.mjs';
 import { issueParticipants } from '@/lib/utils/issueParticipants.mjs';
 import {
   AUDITED_ISSUE_FIELDS,
-  FACT_ONLY_AUDITED_FIELDS,
   auditValue,
+  auditedChange,
 } from '@/lib/utils/issueAuditEvents.mjs';
 import { compareIssues, pickPatchableFields, planDrop } from '@/lib/utils/optimistic.mjs';
 import { isRoutableIssuePatch } from '@/lib/utils/issueContentFields.mjs';
@@ -231,6 +231,10 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
     const optimistic = pickPatchableFields(data);
     if (optimistic) applyPatch({ [issueId]: optimistic });
 
+    // Decided once and read twice: below, to pick the door, and after the
+    // write, to know whether the history line is already written behind it.
+    const routeThisPatch = writesThroughContentApi || isRoutableIssuePatch(directData);
+
     try {
       if (hasStatusUpdate) {
         await transitionIssueStatusViaApi({
@@ -255,7 +259,6 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
       // patches it cannot express — an `arrayUnion` of a new attachment and the
       // `arrayUnion`/`arrayRemove` of a watcher — which `isRoutableIssuePatch`
       // recognises by the sentinel rather than by the field name.
-      const routeThisPatch = writesThroughContentApi || isRoutableIssuePatch(directData);
       if (Object.keys(directData).length > 0 && routeThisPatch) {
         await patchIssueContentViaApi(issueId, directData);
       } else if (Object.keys(directData).length > 0) {
@@ -298,22 +301,21 @@ export function useIssues(projectId, { includeLinks = true, includeSetAside = fa
     // to say five, so a moved deadline or a task dropped into another sprint left
     // no trace anywhere in the product.
     for (const field of AUDITED_ISSUE_FIELDS) {
-      // `audit/` is refused to a client role by the rules, deliberately — the
-      // route above wrote these entries with the admin credential instead.
-      if (writesThroughContentApi) break;
+      // The route writes the history of what it wrote, whoever asked, so a
+      // patch that went through it is already on record and this loop is for
+      // the direct writes alone. The guard used to be on the *reader* — a
+      // client had to use the route, support did not — and when support's
+      // edits were moved through the route it stayed there, so every support
+      // edit was recorded twice: once by the transaction and once here, half a
+      // second later. The desk read each of its own changes as two lines and
+      // the customer, reading the mirror, as one.
+      if (routeThisPatch) break;
       if (directData[field] === undefined || !current) continue;
-      const from = auditValue(current[field]);
-      const to = auditValue(directData[field]);
-      if (from === to) continue;
-      // A description is logged as a fact. Both versions of a task's body inside
-      // one log entry is a document nobody reads in a feed.
-      const factOnly = FACT_ONLY_AUDITED_FIELDS.includes(field);
+      if (auditValue(current[field]) === auditValue(directData[field])) continue;
       await writeAudit(issueId, {
         userId: userId || currentUserId,
         userName,
-        action: `changed_${field}`,
-        from: factOnly ? null : from,
-        to: factOnly ? null : to,
+        ...auditedChange(field, current[field], directData[field]),
       });
     }
   }, [issues, projectId, applyPatch, revertPatch, currentUser, currentUserId, writesThroughContentApi]);

@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
+  checklistToggleBetween,
   continueMarkdownList,
   formatHeading,
   formatInline,
@@ -85,4 +86,20 @@ test('GFM task list items expose stable source lines for interactive toggles', (
     },
   }, 'intro\n\n- [ ] first\n\ntext\n\n- [x] second'));
   assert.deepEqual(sourceLines, [3, 7]);
+});
+
+test('one ticked box is recognised as such, and anything more is an edit', () => {
+  const content = 'intro\n- [ ] first\ntext\n- [x] second';
+  assert.deepEqual(checklistToggleBetween(content, setTaskChecked(content, 2, true)), { checked: true, item: 'first' });
+  assert.deepEqual(checklistToggleBetween(content, setTaskChecked(content, 4, false)), { checked: false, item: 'second' });
+  // The same box in the same state: nothing was toggled.
+  assert.equal(checklistToggleBetween(content, setTaskChecked(content, 4, true)), null);
+  // Two boxes at once, a reworded item, a new line — all edits to the text.
+  assert.equal(checklistToggleBetween(content, setTaskChecked(setTaskChecked(content, 2, true), 4, false)), null);
+  assert.equal(checklistToggleBetween(content, content.replace('first', 'first!')), null);
+  assert.equal(checklistToggleBetween(content, `${content}\n- [ ] third`), null);
+  assert.equal(checklistToggleBetween('', ''), null);
+  assert.equal(checklistToggleBetween(undefined, '- [x] a'), null);
+  // Windows line endings do not hide the one line that changed.
+  assert.deepEqual(checklistToggleBetween('- [ ] a\r\n- [ ] b', '- [x] a\r\n- [ ] b'), { checked: true, item: 'a' });
 });
