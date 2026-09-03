@@ -6,10 +6,12 @@ import {
   Alert,
   AssigneePicker,
   Button,
+  ContextMenu,
   DetailSection,
   DistributionBar,
   EmptyState,
   FilterBar,
+  IconAction,
   KpiCard,
   ListRow,
   LoadingSpinner,
@@ -20,6 +22,7 @@ import {
   Tabs,
   TaskListView,
   UserAvatar,
+  useConfirm,
 } from '@/components/ui';
 import {
   AlarmClock,
@@ -34,7 +37,10 @@ import {
   Plus,
   Settings2,
   Shapes,
+  MoreHorizontal,
+  UserMinus,
   UserPlus,
+  UserRound,
   UsersRound,
 } from 'lucide-react';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
@@ -50,6 +56,7 @@ import { useBulkIssueActions } from '@/lib/hooks/useBulkIssueActions';
 import { usePublishLocalSearchResults } from '@/lib/hooks/usePublishLocalSearchResults';
 import { canWhileRoleLoads, can, isClientRole } from '@/lib/utils/can';
 import { isOnProjectTeam } from '@/lib/utils/projectAccess.mjs';
+import { removeProjectMember } from '@/lib/services/members';
 import { INCIDENT_TERMS_TABLE } from '@/lib/content/incidentTerms.mjs';
 import { timestampMillis } from '@/lib/utils/issueReadState.mjs';
 import { issuePath } from '@/lib/utils/issueKeys.mjs';
@@ -123,7 +130,14 @@ const SCOPE_OPTIONS = [
 // names — not doors: a support profile carries the projects that person is on,
 // which is every other customer of this desk. So the client's own colleagues
 // open, and the agents answering them do not.
-function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
+//
+// `menuFor` is the row's kebab: what the reader may do to this person, or
+// `null` for nothing. Arthur asked for a kebab rather than a dialog behind the
+// row — a roster is a list, and one action on a person does not need a screen.
+// A row that has a menu is drawn as a plain row: the kebab is a button, and a
+// button inside a button is not markup, so «Профіль» moves into the menu and
+// the door the row used to be is still one click away.
+function MemberList({ members, emptyTitle, emptyDescription, onOpen, menuFor }) {
   if (members.length === 0) {
     return (
       <EmptyState
@@ -147,12 +161,19 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
     <div className="flex flex-col gap-2">
       {members.map(member => {
         const memberId = member.id || member.uid;
+        const menu = menuFor ? menuFor(member) : null;
+        const items = menu
+          ? [
+            ...(onOpen ? [{ label: 'Профіль', icon: UserRound, onClick: () => onOpen(memberId) }] : []),
+            ...menu,
+          ]
+          : null;
         return (
           <ListRow
             key={memberId}
             shape="card"
             density="roomy"
-            onClick={onOpen ? () => onOpen(memberId) : undefined}
+            onClick={!items && onOpen ? () => onOpen(memberId) : undefined}
             className="flex items-center gap-3"
           >
             <UserAvatar user={member} size="md" />
@@ -167,6 +188,14 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
             <Pill tone="neutral" size="sm" shape="badge">
               {organizationRoleLabel(member.role)}
             </Pill>
+            {items ? (
+              <ContextMenu
+                align="end"
+                dropdownClassName="w-[220px]"
+                trigger={<IconAction label="Дії з учасником" icon={MoreHorizontal} size="sm" />}
+                items={items}
+              />
+            ) : null}
           </ListRow>
         );
       })}
@@ -177,6 +206,7 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen }) {
 export default function ProjectBoardClient({ projectId, resourceOrganizationId }) {
   const router = useRouter();
   const showToast = useWorkspaceStore(state => state.showToast);
+  const confirm = useConfirm();
   const {
     projects,
     projectsLoading,
@@ -602,6 +632,36 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
     && isOnProjectTeam(project, currentUser?.uid || currentUser?.id);
   const isArchived = project?.status === 'archived';
   const isReadOnly = isArchived;
+  // Who may take whom off this project. The desk, anyone on the client's team;
+  // a client administrator, their own colleagues — never another
+  // administrator, never themselves. The route re-derives all of it
+  // (`resolveProjectTeamRemoval`); this only decides whether the kebab item
+  // is drawn.
+  const canRemoveClientMember = member => {
+    const memberId = member?.id || member?.uid;
+    const me = currentUser?.uid || currentUser?.id;
+    if (!memberId || memberId === me || isArchived) return false;
+    if (!isClientRole(member.role) || !can(orgRole, 'remove:client_member')) return false;
+    if (orgRole !== 'client_admin') return true;
+    return member.role === 'client_member' && isOnProjectTeam(project, me);
+  };
+  const handleRemoveFromProject = async member => {
+    const memberId = member.id || member.uid;
+    const name = member.name || member.displayName || member.email || 'Учасник';
+    const confirmed = await confirm({
+      title: 'Вилучити з проєкту?',
+      message: `${name} більше не побачить проєкт «${project.name}» і його звернення. Усе, що ця людина написала, лишиться на місці. Якщо це був її єдиний проєкт, доступ до порталу закриється; повернути його можна новим запрошенням.`,
+      confirmText: 'Вилучити',
+      danger: true,
+    });
+    if (!confirmed) return;
+    try {
+      await removeProjectMember(activeOrgId, project.id, memberId);
+      showToast(`${name} вилучено з проєкту`, 'success');
+    } catch (error) {
+      showToast(error.message || 'Не вдалося вилучити з проєкту', 'error');
+    }
+  };
   // Only a client opens a request. Support receives it, works it and closes it —
   // an agent filing a customer's request on their behalf is how a support desk
   // stops being able to say who asked for what. The composer is therefore the
@@ -1064,6 +1124,14 @@ export default function ProjectBoardClient({ projectId, resourceOrganizationId }
                         ? 'Запросити колегу можна в розділі «Співробітники».'
                         : 'Додайте адміністратора клієнта. Після входу він зможе запросити своїх співробітників.'}
                       onOpen={openProfileOverlay}
+                      menuFor={member => (canRemoveClientMember(member)
+                        ? [{
+                          label: 'Вилучити з проєкту',
+                          icon: UserMinus,
+                          isDanger: true,
+                          onClick: () => handleRemoveFromProject(member),
+                        }]
+                        : null)}
                     />
                     </DetailSection>
                   </Surface>

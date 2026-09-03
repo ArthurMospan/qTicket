@@ -108,6 +108,7 @@ test('a route names the permission it enforces instead of listing roles', async 
 const NAMED = [
   ['organizations/[organizationId]/members/[memberId]/route.js', 'manage:member_roles'],
   ['invitations/route.js', 'invite:client_member'],
+  ['projects/[projectId]/team/[memberId]/route.js', 'remove:client_member'],
 ];
 
 test('roles and invitations authorise exactly what the matrix says', async () => {

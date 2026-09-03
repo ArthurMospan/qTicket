@@ -68,6 +68,14 @@ export const PERMISSIONS = {
   // scope and `invitedRoleFor` enforces the single role; this permission must
   // never be used as a substitute for `manage:team`.
   'invite:client_member': ['owner', 'admin', 'client_admin'],
+  // The other half of inviting. A client administrator may take a
+  // `client_member` off a project they are on themselves — their own
+  // colleague, from their own space — and nothing else: not an administrator,
+  // not themselves (that is «Вийти з організації»), never a support seat,
+  // which is QuickTeam's. The desk removes any client seat. The route behind
+  // `DELETE /api/projects/[projectId]/team/[memberId]` re-derives every one of
+  // those limits (`resolveProjectTeamRemoval`); this entry only opens the door.
+  'remove:client_member': ['owner', 'admin', 'client_admin'],
   'manage:member_roles': ['owner', 'admin'],  // member ↔ admin, /api/organizations/[id]/members/[memberId]
   'deactivate:member': ['owner', 'admin'],    // Забрати доступ, лишивши дані
 

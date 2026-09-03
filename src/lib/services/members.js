@@ -130,3 +130,19 @@ export async function reactivateOrganizationMember(organizationId, memberId) {
   invalidateOrganizationMembers(organizationId);
   return result;
 }
+
+/**
+ * Takes one person off one client project — «Вилучити з проєкту» on the
+ * project's «Учасники» tab. Whether that was their last project, and so
+ * whether the seat is archived with it, is the server's decision; the caller
+ * only names the pair.
+ */
+export async function removeProjectMember(organizationId, projectId, memberId) {
+  const result = await authenticatedRequest(
+    `/api/projects/${encodeURIComponent(projectId)}/team/${encodeURIComponent(memberId)}`,
+    { method: 'DELETE' },
+    'Не вдалося вилучити з проєкту',
+  );
+  invalidateOrganizationMembers(organizationId);
+  return result;
+}
