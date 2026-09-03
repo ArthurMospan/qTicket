@@ -358,6 +358,20 @@ const SectionBackContext = createContext(null);
 
 function Section({ title, desc, rightAction, children }) {
   const mobileBack = useContext(SectionBackContext);
+  // QuickTeam стакає цю шапку нижче md — заголовок з описом ідуть окремим
+  // рядком на всю ширину, — бо там опис ділить рядок із кнопкою праворуч і йому
+  // лишається колонка завширшки з півтора слова.
+  //
+  // Тут та поправка не застосовна, і портована умова (`desc && rightAction`)
+  // не могла спрацювати жодного разу: `rightAction` не передає жоден із
+  // викликів <Section> у цьому форку, а `icon`, на який QuickTeam має запасний
+  // варіант, тут узагалі немає такого пропа. Єдине, що справді ділить рядок, —
+  // MobilePaneBack: 26px стрілки з полями, мінус її власні -4px, плюс проміжок
+  // 10px. Це 32px із 361px, які телефон завширшки 393px дає цій колонці, і
+  // забирає вона їх однаково в заголовка й опису — обидва лежать у тому самому
+  // `min-w-0 flex-1` нижче. Заголовок із відступом на стрілку — не той дефект,
+  // який лагодив QuickTeam: щоб повернути ті 9% ширини, довелося б додати
+  // рядок і лишити стрілку саму на лінії.
   return (
     <div className="flex flex-col">
       {/* One control, one place, at every width. */}
@@ -532,7 +546,7 @@ function WorkflowItem({ item, onSave, onDelete, canDelete = true, locked = false
     <div
       ref={provided?.innerRef}
       {...provided?.draggableProps}
-      data-ui-surface="local" className="flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
+      data-ui-surface="local" className="flex items-center gap-3 max-md:gap-2 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     >
       {provided?.dragHandleProps && (
         <div {...provided.dragHandleProps} className="shrink-0 text-faint hover:text-ink cursor-grab active:cursor-grabbing">
@@ -617,10 +631,19 @@ function WorkflowItem({ item, onSave, onDelete, canDelete = true, locked = false
           )}
         </div>
       ) : (
-        <span className="flex-1 text-[13px] font-semibold text-ink">{item.label}</span>
+        // Назва двічі в одному рядку — і на телефоні за це платить кнопка.
+        //
+        // Праворуч стоїть пігулка, яка друкує рівно цей самий рядок, і вона не
+        // стискається. На 393px довга назва разом із власною копією не влазила
+        // в картку, і зайве виштовхувало останній нестисливий блок — олівець із
+        // урною — за білий край, на сіре тло. Нижче 768px лишається одна назва,
+        // та, що в пігулці: у ній ще й іконка та колір.
+        <span className="flex-1 text-[13px] font-semibold text-ink max-md:hidden">{item.label}</span>
       )}
 
-      {/* Badge preview */}
+      {/* Badge preview — `workflow-preview` is the kit preset that lets a pill
+          wrap below md; the wrapping itself is declared in globals.css beside
+          the rest of the pill family, not spelled out here. */}
       {!editing && variant === 'type' && (
         <Pill
           label={label}
@@ -630,11 +653,16 @@ function WorkflowItem({ item, onSave, onDelete, canDelete = true, locked = false
           size="lg"
           shape="badge"
           weight="medium"
+          preset="workflow-preview"
           className="backdrop-blur-[2px]"
         />
       )}
       {!editing && variant === 'priority' && (
-        <PriorityBadge priority={{ ...priorityConfig, label, color }} priorities={priorityItems} />
+        <PriorityBadge
+          priority={{ ...priorityConfig, label, color }}
+          priorities={priorityItems}
+          preset="workflow-preview"
+        />
       )}
       {!editing && variant !== 'type' && variant !== 'priority' && (
         <Pill
@@ -645,6 +673,7 @@ function WorkflowItem({ item, onSave, onDelete, canDelete = true, locked = false
           size="lg"
           shape="badge"
           weight="medium"
+          preset="workflow-preview"
           className="backdrop-blur-[2px]"
         />
       )}

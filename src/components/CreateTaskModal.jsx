@@ -406,7 +406,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, teamMembers
               className="mr-auto self-center"
             />
           )}
-          <Button style="secondary" size="md" onClick={closeAndReset} type="button">
+          <Button style="secondary" size="md" onClick={closeAndReset} type="button" dismiss>
             Скасувати
           </Button>
           <Button

@@ -6,8 +6,8 @@
   },
   "totals": {
     "components": 92,
-    "props": 682,
-    "documentedProps": 682,
+    "props": 684,
+    "documentedProps": 684,
     "undocumentedProps": 0,
     "componentsWithoutSummary": 0
   },
@@ -652,6 +652,7 @@
           "default": "",
           "type": "string",
           "values": [
+            "attribute-field",
             "auth-close",
             "chat-composer-action",
             "chat-composer-cancel",
@@ -681,6 +682,13 @@
           "type": "boolean",
           "values": [],
           "description": "Unavailable: dimmed, not clickable, still readable."
+        },
+        {
+          "name": "dismiss",
+          "default": "false",
+          "type": "boolean",
+          "values": [],
+          "description": "This button only closes the dialog it sits in — nothing is reverted, reset or stepped back. Where that dialog's header already draws an ×, its footer stops drawing this one below md."
         },
         {
           "name": "icon",
@@ -1433,7 +1441,21 @@
           "name": "composition",
           "default": "",
           "type": "string",
-          "values": [],
+          "values": [
+            "attribute-field",
+            "color-hex",
+            "duration-hours",
+            "duration-minutes",
+            "inline-add-action",
+            "inline-edit",
+            "metric-editor",
+            "metric-text",
+            "project-name",
+            "settings-row-action",
+            "status-entry",
+            "status-submit",
+            "workspace-guard"
+          ],
           "description": "Named size contract for a specific place, resolved in globals.css."
         },
         {
@@ -2388,6 +2410,7 @@
           "default": "",
           "type": "string",
           "values": [
+            "attribute-field",
             "color-hex",
             "duration-hours",
             "duration-minutes",
@@ -3612,7 +3635,8 @@
           "type": "string",
           "values": [
             "avatar-counter",
-            "avatar-counter-xs"
+            "avatar-counter-xs",
+            "workflow-preview"
           ],
           "description": "A named pairing of tone, size and shape used in more than one place."
         },
@@ -3779,6 +3803,17 @@
           "type": "string",
           "values": [],
           "description": "Placement in the parent only."
+        },
+        {
+          "name": "preset",
+          "default": "",
+          "type": "string",
+          "values": [
+            "avatar-counter",
+            "avatar-counter-xs",
+            "workflow-preview"
+          ],
+          "description": "Named `Pill` preset, passed straight through to the pill this badge is."
         },
         {
           "name": "priorities",

@@ -23,6 +23,23 @@ test('the bar states its footprint once, and nothing reserves a strip for it', a
   assert.match(layout, /w-full p-0 md:p-\[12px\]/);
 });
 
+test('the JS half of the md gate is the same query as the CSS half', async () => {
+  const hook = await read('../src/lib/hooks/useIsMobile.js');
+  const layout = await read('../src/app/(app)/layout.js');
+
+  // `(width < 48rem)` is character for character what Tailwind 4.3 compiles
+  // `max-md:` into, and the exact complement of what it compiles `md:` into.
+  // `(max-width: 767px)` is a different query at 767.5px — ordinary under browser
+  // zoom or a fractional device pixel ratio — and the shell is where the two
+  // spellings cost the most: the rail is mounted on `isMobile === false` and then
+  // hidden by its own `hidden md:flex`, the bar is mounted on `isMobile === true`
+  // inside a `md:hidden`, so in that band the workspace had no navigation at all.
+  assert.match(hook, /matchMedia\('\(width < 48rem\)'\)/);
+  assert.doesNotMatch(hook, /matchMedia\('\(max-width: 767px\)'\)/);
+  assert.match(layout, /isMobile === false && \(\s*\n\s*<div className="print:hidden shrink-0 h-full hidden md:flex/);
+  assert.match(layout, /isMobile === true && !isFocusedRoute && \(\s*\n\s*<div className="print:hidden md:hidden"/);
+});
+
 test('a screen ends its own scroller with the footprint the shell stopped reserving', async () => {
   const css = await read('../src/app/globals.css');
 
@@ -48,11 +65,29 @@ test('a screen ends its own scroller with the footprint the shell stopped reserv
     'src/app/(app)/[projectId]/ProjectBoardClient.jsx',
     'src/components/workspace/AgileBoard.jsx',
     'src/components/ui/Navigation/MemberRail.jsx',
+    // Below md the settings rail *is* the screen and is the element that
+    // scrolls — `SidebarLayout` locks the pane's height — so its last entry was
+    // the one sitting under the glass.
+    'src/components/ui/Navigation/InnerNavigation.jsx',
     'src/components/profile/ProfileView.jsx',
   ];
   for (const screen of screens) {
     assert.match(await read(`../${screen}`), /qt-nav-scroll/, `${screen} scrolls under the bar`);
   }
+
+  // The tail belongs to whichever box scrolls vertically. A board with one
+  // swimlane scrolls inside each column; with several the columns grow and the
+  // outer box is the scroller, and there the tail was on neither.
+  const board = await read('../src/components/workspace/AgileBoard.jsx');
+  assert.match(board, /swimlanes\.length === 1 \? 'overflow-y-hidden pb-2 flex flex-col' : 'qt-nav-scroll pb-6'/);
+  assert.match(board, /swimlanes\.length === 1 \? 'qt-nav-scroll rounded-b-\[16px\] overflow-y-auto' : 'rounded-\[12px\]'/);
+
+  // And the gate is spelled the way Tailwind emits `max-md:`, so it is the exact
+  // complement of the `md:hidden` the shell wraps the bar in. `(max-width: 767px)`
+  // is a different query at 767.5px, and there the bar is drawn while no scroller
+  // reserves its footprint.
+  assert.match(css, /@media \(width < 48rem\) \{\s*\n\s*\/\* What a screen does instead/);
+  assert.match(css, /@media \(width < 48rem\) \{\s*\n\s*\.ui-toast-layer \{/);
 });
 
 // The bar and the rail are two navigations of one product, so they answer the
@@ -176,7 +211,11 @@ test('every --qt-nav variable read in the stylesheet is one that exists', async 
   // by nobody, so it had been silently falling back to a 64px guess — a fallback
   // is a default for a value somebody supplies, not a place for a typo to live.
   assert.deepEqual([...consumed].filter(name => !declared.has(name)), []);
-  assert.match(css, /bottom: calc\(var\(--qt-nav-space\) \+ 16px\);/);
+  // Two things float above the bar — the toast layer and the bulk-action card —
+  // and they clear it by the same 8px, so the three of them read as one stack at
+  // the bottom of the screen rather than as slabs at unrelated heights. The bulk
+  // bar used to sit 16px up, and the extra void was what made it a second object.
+  assert.equal((css.match(/bottom: calc\(var\(--qt-nav-space\) \+ 8px\);/g) || []).length, 2);
 });
 
 test('the bar floats with real corners instead of sitting on the viewport edge', async () => {
@@ -226,12 +265,65 @@ test('the keyboard is watched by the shell, and the bar reacts to it', async () 
   // render no bar at all, and they are the two screens with the most typing on
   // them; while the hook lived in MobileNav those two went unmeasured.
   assert.match(layout, /const keyboardOpen = useKeyboardOpen\(\)/);
-  assert.match(layout, /<MobileNav keyboardOpen=\{keyboardOpen\} \/>/);
+  assert.match(layout, /<MobileNav keyboardOpen=\{keyboardOpen\} composerFocused=\{composerFocused\} \/>/);
   assert.doesNotMatch(nav, /useKeyboardOpen/);
-  assert.match(nav, /keyboardOpen \? 'pointer-events-none translate-y-\[140%\] opacity-0'/);
-  assert.match(nav, /aria-hidden=\{keyboardOpen\}/);
+  assert.match(nav, /const navHidden = keyboardOpen \|\| composerFocused;/);
+  assert.match(nav, /navHidden \? 'pointer-events-none translate-y-\[140%\] opacity-0'/);
+  assert.match(nav, /aria-hidden=\{navHidden\}/);
   // And the space it reserved collapses with it, so the composer gains the room.
   assert.match(css, /body\[data-keyboard='open'\] \{\s*\n\s*--qt-nav-space: 0px;/);
+});
+
+test('the keyboard shortens the shell, not the document', async () => {
+  const layout = await read('../src/app/(app)/layout.js');
+  const css = await read('../src/app/globals.css');
+
+  // iOS covers the layout viewport rather than shrinking it, so a <body> made
+  // shorter than the box the browser can pan across leaves that many pixels of
+  // bare page canvas below it: invisible while the keys are down, and dragged
+  // into view the moment somebody pans, with the composer's focus shadow on the
+  // seam. Below md the document reaches the bottom again…
+  assert.match(css, /@media \(width < 48rem\) \{\s*\n\s*body\[data-keyboard='open'\] \{\s*\n\s*height: 100dvh;/);
+  // …and if a strip is still pannable it is the shell's own white, not canvas.
+  assert.match(
+    css,
+    /body\[data-keyboard='open'\] \{[\s\S]*?background-color: var\(--color-surface\);/,
+  );
+  // …while the overlap becomes the shell's own padding, so the column still ends
+  // exactly on the keys. `max-md:`, which is the same query as the block above.
+  assert.match(layout, /max-md:pb-\[var\(--qt-keyboard-inset,0px\)\]/);
+});
+
+test('a caret in a composer takes the bar away, from the cause rather than the consequence', async () => {
+  const hook = await read('../src/lib/hooks/useComposerFocus.js');
+  const layout = await read('../src/app/(app)/layout.js');
+  const nav = await read('../src/components/MobileNav.jsx');
+  const css = await read('../src/app/globals.css');
+
+  // One listener, keyed on the shelf every composer already sits on — here the
+  // request conversation's, and whatever conversation is added next — so a
+  // composer is covered by being a composer rather than by being wired up.
+  assert.match(hook, /'\.chat-composer-dock'/);
+  assert.match(hook, /addEventListener\('focusin'/);
+  assert.match(hook, /addEventListener\('focusout'/);
+  // Removing a focused element fires no focusout, so a dock that unmounts under
+  // the caret would strand the flag; the next touch anywhere corrects it.
+  assert.match(hook, /addEventListener\('pointerdown'/);
+  // And a client navigation, which need not fire any of the three.
+  assert.match(hook, /queueMicrotask\(\(\) => setFocused\(false\)\); \}, \[pathname\]\)/);
+  assert.match(hook, /document\.body\.dataset\.composer/);
+  // The dock the selector names is the one the product actually renders.
+  const dock = await read('../src/components/ui/ChatComposerDock.jsx');
+  assert.match(dock, /chat-composer-dock/);
+
+  // Watched by the shell, like the keyboard, and for the same reason.
+  assert.match(layout, /const composerFocused = useComposerFocus\(pathname\)/);
+  assert.doesNotMatch(nav, /useComposerFocus/);
+  // Off screen and aria-hidden is not out of the tab order.
+  assert.match(nav, /inert=\{navHidden \|\| undefined\}/);
+
+  // The space collapses with the bar, and only below md.
+  assert.match(css, /@media \(width < 48rem\) \{\s*\n\s*body\[data-composer='focused'\] \{\s*\n\s*--qt-nav-space: 0px;/);
 });
 
 test('the active tab is announced, not only tinted', async () => {

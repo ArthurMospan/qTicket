@@ -611,10 +611,17 @@ export default function IncidentQueuePage() {
           presentation="sheet"
           bodyPadding="spacious"
           footer={(
+            // The picker below writes through `updateHiddenCategories` as each
+            // box is ticked, so there is nothing here left to apply: «Готово»
+            // only closes, which is what the × in the header already does.
+            // Marked, so below md the button goes and — this being the only
+            // thing in the bar — the bar goes with it rather than staying on as
+            // ~65px of border, padding and canvas with nothing inside.
             <Button
               style="primary"
               size="md"
               onClick={() => setShowSettingsModal(false)}
+              dismiss
             >
               Готово
             </Button>

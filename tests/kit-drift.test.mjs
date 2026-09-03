@@ -173,9 +173,24 @@ test('the variant matrix renders every component that can stand alone', () => {
 // `Textarea surface="white"`. All three stay declared for the same reason as
 // the rest of this list: they are the components' own vocabulary, and the
 // components still ship.
+//
+// Raised 166 -> 171 when DatePicker joined the `.ui-control[data-ui-composition]`
+// namespace, and this one is arithmetic rather than a deletion. The picker's
+// trigger is a `readonly` input wearing `.ui-control`, so it declares that whole
+// namespace exactly as Button, IconAction and Input do — the same entry
+// QuickTeam carries, kept identical on purpose so the two repositories do not
+// start describing the same component differently. Seven of the namespace's
+// values have no reader anywhere in this fork: `color-hex`, `status-entry`,
+// `status-submit`, `metric-editor`, `metric-text`, `duration-hours` and
+// `duration-minutes`, all already on this list under the components that lost
+// them in the raises above. `variantNamespaces()` can only stop a value ONE
+// declaring component uses from being counted as ANOTHER's dead variant; a value
+// nobody uses is dead for each of them, so a fourth declarer adds seven rows and
+// no information. Nothing left the scan's view — the count of distinct orphaned
+// values is unchanged — which is what this ceiling actually watches for.
 test('promoting a component to the kit does not orphan the variants it used', () => {
   assert.ok(
-    committed.totals.declaredUnused <= 166,
+    committed.totals.declaredUnused <= 171,
     `declaredUnused grew to ${committed.totals.declaredUnused}: a call site that evidenced a variant has gone out of the scan's view`,
   );
   // The three status-dialog variants this loop used to guard are gone with the

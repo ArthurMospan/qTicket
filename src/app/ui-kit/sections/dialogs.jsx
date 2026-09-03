@@ -199,7 +199,7 @@ export default function DialogsSection() {
 
       <PreviewBlock
         title="Project Settings Dialog"
-        description="Точний shared organism з екрана клієнта: правий sm sheet, як форма створення клієнта."
+        description="Точний shared organism з екрана клієнта: правий sm sheet, як форма створення клієнта. «Скасувати» позначена `dismiss` — вона нічого не робить, крім того, що робить × у шапці, тому нижче md футер її не малює: на телефоні футер — це стовпчик рядків на всю ширину, і дві однакові відповіді коштували б два з них. Тут поряд стоїть «Зберегти», тож смуга футера лишається. Якби така кнопка була в футері одна, нижче md зникла б і сама смуга: інакше від неї лишався б порожній бордюр заввишки ~65px, дорожчий за рядок, який правило прибирало. `dismiss` — це обіцянка, і `tests/dialog-dismiss-contract.test.mjs` перевіряє її: кнопка має бути у футері діалогу, шапка того діалогу має малювати ×, а обробник має бути тим самим onClose."
         filePath="src/components/ui/TaskManagement/ProjectSettingsForm.jsx"
       >
         <Button style="secondary" size="lg" icon={Settings} onClick={() => setProjectSettingsOpen(true)}>
@@ -212,7 +212,7 @@ export default function DialogsSection() {
           size="sm"
           footer={(
             <>
-              <Button style="secondary" size="md" onClick={() => setProjectSettingsOpen(false)}>
+              <Button style="secondary" size="md" onClick={() => setProjectSettingsOpen(false)} dismiss>
                 Скасувати
               </Button>
               <Button style="primary" size="md" onClick={() => setProjectSettingsOpen(false)}>

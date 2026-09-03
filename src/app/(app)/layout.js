@@ -8,6 +8,7 @@ import WorkspaceHeader  from '@/components/WorkspaceHeader';
 import MobileNav from '@/components/MobileNav';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useKeyboardOpen } from '@/lib/hooks/useKeyboardOpen';
+import { useComposerFocus } from '@/lib/hooks/useComposerFocus';
 import WorkspaceToastHost from '@/components/WorkspaceToastHost';
 import { ConfirmProvider } from '@/components/ui/ConfirmProvider';
 import OrgSwitcherScreen from '@/components/OrgSwitcherScreen';
@@ -163,6 +164,13 @@ export default function WorkspaceLayout({ children }) {
   const signOutAndReturn = async () => { await signOut(); router.replace('/login'); };
 
   const pathname = usePathname();
+  // And the signal the keyboard measurement is a proxy for. A caret in a
+  // composer is somebody writing, which is true before the keys arrive, stays
+  // true when they are dismissed with the field still focused, and is true on a
+  // tablet or an external keyboard where no overlap is ever measured. It sits
+  // here rather than beside `useKeyboardOpen` only because it needs `pathname`,
+  // and still above every early return, so hook order is stable.
+  const composerFocused = useComposerFocus(pathname);
   // The spaces this person actually holds — the boundary needs the ids, not the
   // shape of the address. While they are still loading nothing is denied yet:
   // deciding on an empty list would bounce a client off their own space every
@@ -321,8 +329,12 @@ export default function WorkspaceLayout({ children }) {
     {/* The grey is the gutter *between* the floating panels, and on a phone
         there are no floating panels: the content fills the width edge to edge.
         Below md the shell is the same white as the pane, so the bar floats over
-        the page instead of over a wall of its own. */}
-    <div className="w-full h-full flex overflow-hidden bg-white md:bg-canvas">
+        the page instead of over a wall of its own — and while the keyboard is
+        up the shell also carries its overlap as its own padding, rather than the
+        document being cut short by it and the page canvas showing underneath.
+        `h-full` is border-box, so the flex children still end exactly at the
+        keys; the white simply runs to the bottom of the layout viewport. */}
+    <div className="w-full h-full flex overflow-hidden bg-white md:bg-canvas max-md:pb-[var(--qt-keyboard-inset,0px)]">
       {/* The first stop for Tab, invisible until it is focused. */}
       <a href="#qt-main" className="qt-skip-link rounded-[10px] bg-ink px-[14px] py-[8px] text-[13px] font-bold text-white">
         Перейти до вмісту
@@ -364,7 +376,7 @@ export default function WorkspaceLayout({ children }) {
       {/* Mobile bottom navigation */}
       {isMobile === true && !isFocusedRoute && (
         <div className="print:hidden md:hidden">
-          <MobileNav keyboardOpen={keyboardOpen} />
+          <MobileNav keyboardOpen={keyboardOpen} composerFocused={composerFocused} />
         </div>
       )}
 

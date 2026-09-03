@@ -79,7 +79,7 @@ export default function StatusTransitionPicker({
       bodyPadding="flush"
       footer={(
         <>
-          <Button style="secondary" size="md" disabled={busy} onClick={onClose}>
+          <Button style="secondary" size="md" disabled={busy} onClick={onClose} dismiss>
             Скасувати
           </Button>
           <Button

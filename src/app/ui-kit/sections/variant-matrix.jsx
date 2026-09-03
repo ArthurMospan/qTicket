@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Forms/Textarea';
 import { Select, MultiSelect } from '@/components/ui/Select';
 import Surface from '@/components/ui/Surface';
-import { AttributeTrigger, DetailSection, FormGroup, IconAction, Label, Pill, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, MarkdownViewer, SelectableChip, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
+import { AttributeTrigger, DatePicker, DetailSection, FormGroup, IconAction, Label, Pill, PriorityBadge, Tag, Counter, ToggleSwitch, Alert, LoadingSpinner, Skeleton, EmptyState, Popover, Card, Segmented, UserAvatar, MarkdownViewer, SelectableChip, ColorSwatch, ListRow, Tabs, FileThumb } from '@/components/ui';
 import MentionMenu from '@/components/ui/Chat/MentionMenu';
 import MobilePaneBack from '@/components/ui/Navigation/MobilePaneBack';
 import AvatarButton from '@/components/ui/DataDisplay/AvatarButton';
@@ -15,6 +15,7 @@ import kitDrift from '../kit-drift.generated.json';
 import { Plus, Settings2, Folder } from 'lucide-react';
 import { KitContext } from '../preview';
 import { KIT_MENTION_MEMBERS } from '../demo-data';
+import { DEFAULT_PRIORITIES } from '@/lib/hooks/useWorkflowConfig';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT MATRIX
@@ -39,6 +40,9 @@ const VARIANT_BASE = {
   IconAction: (props) => <IconAction label="Дія" icon={Settings2} size="md" {...props} />,
   Input: (props) => <Input placeholder="Текст" {...props} />,
   Textarea: (props) => <Textarea placeholder="Текст" rows={2} {...props} />,
+  // Given a date so the cell shows the trigger the product shows, value and
+  // all, rather than an empty placeholder.
+  DatePicker: (props) => <DatePicker value="2026-08-07" onChange={() => {}} {...props} />,
   Select: (props) => (
     <Select value="a" onChange={() => {}} options={[{ value: 'a', label: 'Обрано' }]} {...props} />
   ),
@@ -47,6 +51,10 @@ const VARIANT_BASE = {
   ),
   Surface: (props) => <Surface padding="md" {...props}><span className="text-[11px] text-muted">Поверхня</span></Surface>,
   Pill: (props) => <Pill {...props}>Мітка</Pill>,
+  // The badge is a Pill wearing a priority's colour and name, so it takes the
+  // pill's presets. Given a real priority here so the cell shows the mark and
+  // the label the product shows, rather than an empty pill.
+  PriorityBadge: (props) => <PriorityBadge priority="high" priorities={DEFAULT_PRIORITIES} {...props} />,
   UserAvatar: (props) => <UserAvatar user={{ id: 'kit', name: 'Артур Моспан' }} {...props} />,
   Counter: (props) => <Counter value={3} {...props} />,
   Alert: (props) => <Alert {...props}>Повідомлення</Alert>,

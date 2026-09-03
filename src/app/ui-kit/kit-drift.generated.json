@@ -8,14 +8,14 @@
     "usedWithoutPreview": "Every variant the product ships should be visible somewhere in /ui-kit. Tracked against a baseline, not zero."
   },
   "totals": {
-    "componentsWithVariants": 38,
-    "declaredValues": 347,
+    "componentsWithVariants": 40,
+    "declaredValues": 367,
     "undeclaredValues": 0,
     "unknownProps": 0,
     "chromeOverrides": 0,
-    "usedAndPreviewed": 167,
+    "usedAndPreviewed": 170,
     "usedWithoutPreview": 0,
-    "declaredUnused": 164
+    "declaredUnused": 171
   },
   "undeclaredValues": [],
   "unknownProps": [],
@@ -285,6 +285,48 @@
       "prop": "variant",
       "value": "count",
       "namespace": null
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "color-hex",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "duration-hours",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "duration-minutes",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "metric-editor",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "metric-text",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "status-entry",
+      "namespace": ".ui-control[data-ui-composition]"
+    },
+    {
+      "component": "DatePicker",
+      "prop": "composition",
+      "value": "status-submit",
+      "namespace": ".ui-control[data-ui-composition]"
     },
     {
       "component": "DetailLayout",
@@ -1044,6 +1086,7 @@
         "red"
       ],
       "composition": [
+        "attribute-field",
         "auth-close",
         "chat-composer-action",
         "chat-composer-cancel",
@@ -1095,6 +1138,7 @@
         "tight"
       ],
       "composition": [
+        "attribute-field",
         "auth-close",
         "chat-composer-action",
         "chat-composer-cancel",
@@ -1124,6 +1168,7 @@
         "sm"
       ],
       "composition": [
+        "attribute-field",
         "color-hex",
         "duration-hours",
         "duration-minutes",
@@ -1152,6 +1197,23 @@
       "surface": [
         "canvas",
         "white"
+      ]
+    },
+    "DatePicker": {
+      "composition": [
+        "attribute-field",
+        "color-hex",
+        "duration-hours",
+        "duration-minutes",
+        "inline-add-action",
+        "inline-edit",
+        "metric-editor",
+        "metric-text",
+        "project-name",
+        "settings-row-action",
+        "status-entry",
+        "status-submit",
+        "workspace-guard"
       ]
     },
     "Select": {
@@ -1265,11 +1327,19 @@
       ],
       "preset": [
         "avatar-counter",
-        "avatar-counter-xs"
+        "avatar-counter-xs",
+        "workflow-preview"
       ],
       "weight": [
         "bold",
         "medium"
+      ]
+    },
+    "PriorityBadge": {
+      "preset": [
+        "avatar-counter",
+        "avatar-counter-xs",
+        "workflow-preview"
       ]
     },
     "UserAvatar": {
@@ -1589,6 +1659,7 @@
     "IconAction.composition": ".ui-control[data-ui-composition]",
     "Input.composition": ".ui-control[data-ui-composition]",
     "Textarea.composition": ".ui-textarea[data-ui-composition]",
+    "DatePicker.composition": ".ui-control[data-ui-composition]",
     "Surface.padding": ".ui-surface[data-ui-padding]",
     "Surface.composition": ".ui-surface[data-ui-composition]",
     "Pill.tone": "*[data-ui-pill-tone]",
@@ -1596,6 +1667,7 @@
     "Pill.shape": "*[data-ui-pill-shape]",
     "Pill.appearance": "*[data-ui-pill-appearance]",
     "Pill.preset": "*[data-ui-pill-preset]",
+    "PriorityBadge.preset": "*[data-ui-pill-preset]",
     "Skeleton.preset": "*[data-ui-skeleton-preset]",
     "Skeleton.width": "*[data-ui-skeleton-width]",
     "Skeleton.tone": "*[data-ui-skeleton-tone]",
@@ -1667,6 +1739,8 @@
     "Input.size.sm": 1,
     "Pill.size.lg": 5,
     "Pill.weight.medium": 11,
+    "Pill.preset.workflow-preview": 2,
+    "PriorityBadge.preset.workflow-preview": 1,
     "Button.size.icon": 12,
     "Card.preset.borderless": 12,
     "Card.padding.lg": 8,
@@ -1741,6 +1815,7 @@
     "Tabs.composition.pane-switch": 1,
     "Popover.align.start": 1,
     "Popover.padding.default": 1,
+    "DatePicker.composition.attribute-field": 2,
     "MarkdownViewer.size.lg": 1,
     "Surface.preset.compact-bordered-card": 1,
     "Button.composition.inline-add-action": 3,
@@ -1793,6 +1868,7 @@
     "AvatarButton.size.xs",
     "Button.color.dark",
     "Button.color.red",
+    "Button.composition.attribute-field",
     "Button.composition.auth-close",
     "Button.composition.chat-composer-action",
     "Button.composition.chat-composer-cancel",
@@ -1861,6 +1937,19 @@
     "Counter.status.success",
     "Counter.variant.count",
     "Counter.variant.dot",
+    "DatePicker.composition.attribute-field",
+    "DatePicker.composition.color-hex",
+    "DatePicker.composition.duration-hours",
+    "DatePicker.composition.duration-minutes",
+    "DatePicker.composition.inline-add-action",
+    "DatePicker.composition.inline-edit",
+    "DatePicker.composition.metric-editor",
+    "DatePicker.composition.metric-text",
+    "DatePicker.composition.project-name",
+    "DatePicker.composition.settings-row-action",
+    "DatePicker.composition.status-entry",
+    "DatePicker.composition.status-submit",
+    "DatePicker.composition.workspace-guard",
     "DetailLayout.context.event",
     "DetailLayout.context.task",
     "DetailSection.density.group",
@@ -1907,6 +1996,7 @@
     "IconAction.appearance.surface",
     "IconAction.appearance.surface-danger",
     "IconAction.appearance.surface-plain",
+    "IconAction.composition.attribute-field",
     "IconAction.composition.auth-close",
     "IconAction.composition.chat-composer-action",
     "IconAction.composition.chat-composer-cancel",
@@ -1939,6 +2029,7 @@
     "IconAction.size.sm",
     "IconAction.size.xl",
     "IconAction.size.xs",
+    "Input.composition.attribute-field",
     "Input.composition.color-hex",
     "Input.composition.duration-hours",
     "Input.composition.duration-minutes",
@@ -1990,6 +2081,7 @@
     "Pill.appearance.soft-outline",
     "Pill.preset.avatar-counter",
     "Pill.preset.avatar-counter-xs",
+    "Pill.preset.workflow-preview",
     "Pill.shape.badge",
     "Pill.shape.capsule",
     "Pill.size.chat-day",
@@ -2017,6 +2109,9 @@
     "Popover.align.start",
     "Popover.padding.default",
     "Popover.padding.tight",
+    "PriorityBadge.preset.avatar-counter",
+    "PriorityBadge.preset.avatar-counter-xs",
+    "PriorityBadge.preset.workflow-preview",
     "Segmented.composition.billing-selection",
     "Segmented.composition.dialog-tabs",
     "Segmented.surface.canvas",

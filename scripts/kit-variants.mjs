@@ -47,6 +47,17 @@ const SOURCES = {
     composition: { css: ['.ui-textarea', 'data-ui-composition'] },
     surface: { map: ['Forms/Textarea.jsx', 'SURFACES'] },
   },
+  // A DatePicker's trigger is a `readonly` text input wearing `.ui-control`, so
+  // its compositions come from the namespace Button, IconAction and Input
+  // already share — read the same way, and kept honest the same way by
+  // `variantNamespaces()` below, which is what stops a value one of the four
+  // uses from being reported as another's dead variant. `attribute-field` is
+  // the one the picker itself asks for, and a component with no entry here is a
+  // component the drift check skips outright (`if (!declared) continue`), so
+  // without this line nothing would ever check it.
+  DatePicker: {
+    composition: { css: ['.ui-control', 'data-ui-composition'] },
+  },
   Select: {
     size: { literal: ['sm', 'md', 'lg'] },
     variant: { literal: ['default', 'ghost', 'inline'] },
@@ -69,6 +80,18 @@ const SOURCES = {
     appearance: { css: ['', 'data-ui-pill-appearance'] },
     preset: { css: ['', 'data-ui-pill-preset'] },
     weight: { literal: ['bold', 'medium'] },
+  },
+  // A PriorityBadge *is* a Pill — the priority's mark and its configured name —
+  // and the `preset` it takes is handed straight to that pill, so it is read
+  // from the pill namespace rather than given a second declaration that could
+  // drift from it. `variantNamespaces()` below then keeps it honest exactly as
+  // it does for DatePicker: a preset one of the two uses is not the other's dead
+  // variant. `workflow-preview` is the one «Налаштування» asks for, and a
+  // component with no entry here is a component the drift check skips outright
+  // (`if (!declared) continue`), so without this line nothing would ever check
+  // it.
+  PriorityBadge: {
+    preset: { css: ['', 'data-ui-pill-preset'] },
   },
   UserAvatar: {
     size: { map: ['DataDisplay/UserAvatar.jsx', 'AVATAR_SIZES'] },

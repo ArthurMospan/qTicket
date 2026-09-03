@@ -1240,7 +1240,13 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
         </>
       ) : (
         <>
-          {!isArchived && canEditContent && <Button style="secondary" size="icon-lg" icon={Pencil} onClick={enterEdit} aria-label="Редагувати звернення" title="Редагувати звернення" />}
+          {/* Not on a phone. Four 36px squares beside the title left it 185px
+              at a 393px viewport, and a normal-length request name wrapped to
+              five lines under them — so below md the two rarest of the four
+              move into the kebab under this one, and the row is [•••][✕].
+              A responsive variant, not a bare `hidden`: same-layer utilities,
+              and `hidden` cannot beat Button's own `inline-flex` (Button.jsx). */}
+          {!isArchived && canEditContent && <Button style="secondary" size="icon-lg" icon={Pencil} onClick={enterEdit} aria-label="Редагувати звернення" title="Редагувати звернення" className="max-md:hidden" />}
           <ContextMenu
             trigger={(
               <Button
@@ -1253,6 +1259,36 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             )}
             dropdownClassName="w-[210px]"
             items={[
+              // The menu is where an action goes when the row cannot hold it.
+              // These two are the row's own buttons below md, not new abilities:
+              // above md they are the pencil and the ⤢ beside this kebab, and
+              // this array is byte-identical to what it was.
+              //
+              // `!== false`, not `=== true`: the CSS half of this gate
+              // (`max-md:hidden` on the pencil and the ⤢) is decided at the
+              // first paint, while `useIsMobile` answers `null` until its
+              // effect runs. Asking for a strict `true` means that for as long
+              // as the answer is unresolved the phone has neither the button
+              // nor its replacement row — and if the answer never resolves
+              // (matchMedia unavailable, hydration that never lands) it stays
+              // that way. Present-while-unknown is the safe default here and
+              // costs the desktop nothing: `ContextMenu` only portals its
+              // items while the menu is open, so a closed kebab renders none
+              // of them, and above md the rows are gone the moment the effect
+              // resolves — long before a pointer can reach the trigger.
+              ...(isMobile !== false && !isArchived && canEditContent
+                ? [{ label: 'Редагувати', icon: Pencil, onClick: enterEdit }]
+                : []),
+              ...(isMobile !== false && isModal && onClose
+                ? [{
+                  label: 'Відкрити на повній сторінці',
+                  icon: Maximize2,
+                  onClick: () => {
+                    onClose();
+                    navigateAfterOverlayClose(() => router.push(canonicalIssuePath));
+                  },
+                }]
+                : []),
               { label: 'Копіювати посилання', icon: Copy, onClick: copyIssueLink },
               ...(SHOW_INHERITED_TASK_SHORTCUTS && !isArchived && canEditIssue
                 ? [{ label: 'Дублювати', icon: CopyPlus, onClick: handleDuplicate }]
@@ -1330,8 +1366,19 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
             }}
             aria-label="Відкрити на повній сторінці"
             title="Відкрити на повній сторінці"
+            className="max-md:hidden"
           />
-          <Button style="secondary" size="icon" icon={X} onClick={onClose} aria-label="Закрити" title="Закрити" />
+          {/* This block sits outside the isEditing branch above, so while
+              editing it drew a third and a fourth button on top of «Скасувати»
+              and «Зберегти» — and below sm those two are icon-only, which put
+              two ✕ of two different sizes side by side, meaning two different
+              things, in the 176px this row was taking from the title field.
+              Below md the closing ✕ steps aside while an edit is open: the way
+              out of an open edit is to cancel it, and the ✕ comes back the
+              moment you do. (Not "tap the backdrop" — on a phone the quick view
+              leaves only a strip of it, there is no Escape key, and both of
+              those routes discard the edit with no unsaved-work prompt.) */}
+          <Button style="secondary" size="icon" icon={X} onClick={onClose} aria-label="Закрити" title="Закрити" className={isEditing ? 'max-md:hidden' : undefined} />
         </>
       )}
     </>
@@ -1906,6 +1953,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                     <span className={attributeLabelClass}>Термін вирішення</span>
                     <DatePicker
                       compact
+                      composition="attribute-field"
                       disabled={isArchived}
                       hideIcon
                       inputClassName={`${compactInputClass} ${isOverdue ? 'text-danger' : dueStr ? 'text-ink' : 'text-faint'}`}
@@ -1960,6 +2008,7 @@ export default function IssueDetail({ issueId: issueLocator, projectId, isModal,
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
                           <DatePicker
                             compact
+                            composition="attribute-field"
                             disabled={isArchived}
                             textTone={isOverdue ? 'danger' : dueStr ? 'default' : 'faint'}
                             value={isEditing ? (draft.dueDate || '') : (issue.dueDate || '')}

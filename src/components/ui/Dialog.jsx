@@ -187,7 +187,15 @@ export default function Dialog({
 
         {/* Footer */}
         {footer && (
-          <div className="ui-dialog-footer flex shrink-0 flex-wrap justify-end gap-3 border-t border-line bg-canvas px-5 py-4 sm:px-6">
+          <div
+            className="ui-dialog-footer flex shrink-0 flex-wrap justify-end gap-3 border-t border-line bg-canvas px-5 py-4 sm:px-6"
+            // Whether the header above actually drew an ×. The footer's mobile
+            // branch drops a button that only closes — and it may only do that
+            // where there is something else that closes. The header exists at
+            // all only when there is a title (see above), and `showCloseButton`
+            // can take the × away from one that has.
+            data-ui-close-in-header={title && showCloseButton ? 'true' : undefined}
+          >
             {footer}
           </div>
         )}

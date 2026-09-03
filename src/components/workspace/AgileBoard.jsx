@@ -491,11 +491,17 @@ export default function AgileBoard({
 
         {/* Scrollable swimlanes area. The gutter is padding *inside* the
             scroller, so the outer columns rest on the page margin and then
-            travel all the way to the panel edge when the board is scrolled. */}
+            travel all the way to the panel edge when the board is scrolled.
+
+            Which element ends with the tab bar's footprint depends on which one
+            scrolls vertically. With one swimlane this box is `overflow-y-hidden`
+            and each column scrolls on its own, so the tail belongs to the column
+            (below). With several, the columns grow and *this* box is the
+            vertical scroller, so the tail belongs here. */}
         <div
           ref={boardScrollRef}
           onScroll={measureBoardOverflow}
-          className={`flex-1 overflow-auto snap-x snap-mandatory md:snap-none bleed-gutter ${swimlanes.length === 1 ? 'overflow-y-hidden pb-2 flex flex-col' : 'pb-6'}`}
+          className={`flex-1 overflow-auto snap-x snap-mandatory md:snap-none bleed-gutter ${swimlanes.length === 1 ? 'overflow-y-hidden pb-2 flex flex-col' : 'qt-nav-scroll pb-6'}`}
         >
           {swimlanes.map(lane => (
             <div key={lane.id} className={`mb-4 ${swimlanes.length === 1 ? 'flex-1 min-h-0 flex flex-col' : ''}`}>
@@ -659,7 +665,7 @@ export default function AgileBoard({
                               <div
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`qt-nav-scroll flex-1 p-[8px] flex flex-col transition-colors hide-scrollbar ${swimlanes.length === 1 ? 'rounded-b-[16px] overflow-y-auto' : 'rounded-[12px]'} ${
+                                className={`flex-1 p-[8px] flex flex-col transition-colors hide-scrollbar ${swimlanes.length === 1 ? 'qt-nav-scroll rounded-b-[16px] overflow-y-auto' : 'rounded-[12px]'} ${
                                   snapshot.isDraggingOver ? 'bg-chart-track/50' : ''
                                 }`}
                               >

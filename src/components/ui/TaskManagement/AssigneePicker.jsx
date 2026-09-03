@@ -88,7 +88,7 @@ export default function AssigneePicker({
       bodyPadding="flush"
       footer={(
         <>
-          <Button style="secondary" size="md" disabled={busy} onClick={onClose}>
+          <Button style="secondary" size="md" disabled={busy} onClick={onClose} dismiss>
             Скасувати
           </Button>
           <Button

@@ -26,8 +26,15 @@ export function InnerNavigation({
     return acc;
   }, []);
 
+  // Below md the rail *is* the screen, and it is the element that scrolls: the
+  // shell around it is height-locked (`SidebarLayout` gives the pane
+  // `overflow-hidden` and the rail column a fixed height), so the page cannot
+  // scroll on the rail's behalf and its last entries sat behind the floating tab
+  // bar. It therefore ends with the bar's footprint, exactly as MemberRail
+  // already does. Inside a dialog globals.css zeroes that tail, so this is safe
+  // wherever the rail is embedded, and above md the class matches no rule at all.
   return (
-    <aside className={`flex-1 overflow-y-auto custom-scrollbar px-[16px] py-[32px] ${className}`}>
+    <aside className={`qt-nav-scroll flex-1 overflow-y-auto custom-scrollbar px-[16px] py-[32px] ${className}`}>
       {groups.map(group => (
         <div key={group} className="mb-[24px] last:mb-0">
           <p className="px-3 pb-[8px] text-[10px] font-bold text-muted uppercase tracking-widest">

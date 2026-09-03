@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 180,
-    "parsedFiles": 180,
+    "productFiles": 181,
+    "parsedFiles": 181,
     "parseErrors": 0,
     "nativeControls": 15,
     "structures": {
@@ -95,7 +95,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:221",
+      "location": "src/components/MobileNav.jsx:235",
       "className": "relative flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors active:bg-[var(--sb-active)] ${…}",
       "text": "",
       "childElements": [
@@ -111,7 +111,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:286",
+      "location": "src/components/MobileNav.jsx:300",
       "className": "flex min-w-0 items-center gap-[6px] text-left",
       "text": "",
       "childElements": [
@@ -127,7 +127,7 @@
     },
     {
       "tag": "button",
-      "location": "src/components/MobileNav.jsx:364",
+      "location": "src/components/MobileNav.jsx:378",
       "className": "flex items-center gap-[14px] h-[40px] px-[12px] rounded-[10px] text-left text-[var(--sb-muted)] transition-colors hover:text-[var(--sb-hover)] active:bg-[var(--sb-active)]",
       "text": "",
       "childElements": [
@@ -337,7 +337,7 @@
       "context": "auth-footer-support"
     },
     {
-      "location": "src/components/MobileNav.jsx:364",
+      "location": "src/components/MobileNav.jsx:378",
       "tag": "button",
       "context": "navigation-sheet-row"
     },
@@ -388,17 +388,17 @@
       "className": "rounded-full bg-white flex items-center justify-center border-2 border-canvas"
     },
     {
-      "location": "src/app/(app)/settings/page.js:532",
+      "location": "src/app/(app)/settings/page.js:546",
       "tag": "div",
-      "className": "flex items-center gap-3 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
+      "className": "flex items-center gap-3 max-md:gap-2 py-[8px] px-[8px] -mx-[8px] rounded-[12px] hover:bg-canvas transition-colors group bg-white"
     },
     {
-      "location": "src/app/(app)/settings/page.js:552",
+      "location": "src/app/(app)/settings/page.js:566",
       "tag": "div",
       "className": "absolute left-0 top-[22px] z-20 bg-white border border-line rounded-[10px] p-[10px] shadow-lg grid grid-cols-5 gap-[6px] w-[148px]"
     },
     {
-      "location": "src/app/(app)/settings/page.js:596",
+      "location": "src/app/(app)/settings/page.js:610",
       "tag": "div",
       "className": "absolute left-0 right-0 top-[36px] z-30 rounded-[10px] border border-line bg-white p-1 shadow-lg"
     },
@@ -418,7 +418,7 @@
       "className": "flex flex-col items-center justify-start w-[48px] shrink-0 pt-4 pb-2 bg-canvas rounded-t-[12px] cursor-pointer hover:bg-zone-hover transition-colors"
     },
     {
-      "location": "src/components/workspace/AgileBoard.jsx:507",
+      "location": "src/components/workspace/AgileBoard.jsx:513",
       "tag": "div",
       "className": "sticky left-0 flex items-center bg-canvas rounded-[6px] px-3 py-[6px] mb-2 w-max min-w-[200px]"
     },

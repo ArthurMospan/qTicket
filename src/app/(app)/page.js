@@ -485,7 +485,7 @@ function NewProjectModal({ onClose, orgId, members = [], statuses = [] }) {
   return (
     <Dialog isOpen={true} onClose={onClose} title="Новий проєкт" size="sm" footer={
       <>
-        <Button onClick={onClose} style="secondary" size="md">Скасувати</Button>
+        <Button onClick={onClose} style="secondary" size="md" dismiss>Скасувати</Button>
         <Button onClick={handleCreate} disabled={saving} loading={saving} style="primary" size="md">Створити проєкт</Button>
       </>
     }>

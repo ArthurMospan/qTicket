@@ -81,6 +81,7 @@ export default function TaskAttributesSection() {
                   <span className={attributeLabelClass}>Термін вирішення</span>
                   <DatePicker
                     compact
+                    composition="attribute-field"
                     hideIcon
                     inputClassName={compactInputClass}
                     value={dueDate}
@@ -112,7 +113,15 @@ export default function TaskAttributesSection() {
                   <div className="flex w-[248px] max-w-full flex-col gap-4">
                     <div className="flex flex-col gap-1.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Термін вирішення</span>
-                      <DatePicker compact value={dueDate} onChange={setDueDate} placeholder="Без терміну" />
+                      {/* Ті самі props, що в IssueDetail: тут дата стоїть у стовпчику
+                          Select-тригерів, і без `composition` нижче md вона одна
+                          піднімалася до 16px — правило проти iOS-зуму бачить `input`
+                          і не бачить кастомного селекта. Прев'ю самого варіанта
+                          composition="attribute-field" — не тут, а в «Матриці
+                          варіантів»: його рендерить маніфест із правила
+                          .ui-control[data-ui-composition='attribute-field'] у
+                          globals.css. */}
+                      <DatePicker compact composition="attribute-field" value={dueDate} onChange={setDueDate} placeholder="Без терміну" />
                     </div>
                     <div className="flex flex-col gap-1.5 sm:hidden">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Пріоритет</span>

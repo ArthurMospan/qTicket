@@ -187,6 +187,7 @@ export const STYLES = {
  * @param {string} props.surface Which background the button sits on, where that changes its contrast.
  * @param {string} props.composition Named size contract for a specific place, resolved in globals.css.
  * @param {number} props.collapseAt Viewport width below which the label is hidden and only the icon remains.
+ * @param {boolean} props.dismiss This button only closes the dialog it sits in — nothing is reverted, reset or stepped back. Where that dialog's header already draws an ×, its footer stops drawing this one below md.
  * @param {React.Ref} props.buttonRef Ref to the underlying button, for popovers anchored to it.
  * @param {string} props.variant Legacy alias for `style`, kept for existing call sites.
  * @param {string} props.className Placement in the parent only — never its own height, padding or type.
@@ -204,6 +205,7 @@ export function Button({
   type      = 'button',
   className = '',
   collapseAt,
+  dismiss = false,
   composition,
   shape = 'default',
   surface = 'default',
@@ -239,6 +241,10 @@ export function Button({
       disabled={disabled || loading}
       data-ui-size={UI_SIZES[size] ?? 'lg'}
       data-ui-composition={composition}
+      // Stated, not styled: what this button is, so a footer can decide below
+      // md whether it is worth a row of its own. The rule is in globals.css,
+      // keyed on this and on the footer saying whether the header drew an ×.
+      data-ui-dismiss={dismiss ? 'true' : undefined}
       className={`ui-control ui-button ${baseClasses} ${sizeClass} ${collapseClass} ${styleClass} ${SHAPES[shape] ?? ''} ${SURFACES[surface] ?? ''} ${className}`}
       {...props}
     >

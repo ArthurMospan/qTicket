@@ -157,12 +157,13 @@ test('bulk toolbar remains usable at phone width and opens its confirm flow', as
   // every control disabled. This flow is about the idle one.
   const toolbar = page.getByRole('toolbar', { name: 'Дії з вибраними зверненнями: 4' });
   await expect(toolbar).toBeVisible();
-  expect(await toolbar.evaluate(element => element.scrollWidth >= element.clientWidth)).toBe(true);
-  // On a phone the less-frequent actions are intentionally reachable by
-  // horizontal scrolling. Exercise that path instead of force-clicking a
-  // clipped, off-screen coordinate in the catalogue preview.
+  // Nothing here scrolls. On a phone the bar is two fixed rows — the count and
+  // the ✕, then one glyph per attribute ending in the overflow kebab — so the
+  // menu is on screen without a scroll, a swipe or any other interaction, and
+  // that is what the assertions below check. (It used to be a single row inside
+  // an invisible horizontal scroller, then a wrapping row; a `scrollLeft`
+  // nudge and a `scrollWidth >= clientWidth` assertion outlived both.)
   await toolbar.scrollIntoViewIfNeeded();
-  await toolbar.evaluate(element => { element.scrollLeft = element.scrollWidth; });
   const moreActions = toolbar.getByRole('button', { name: 'Інші масові дії' });
   await expect(moreActions).toBeInViewport();
   await moreActions.click();

@@ -10,9 +10,10 @@ import { priorityPresentation } from '@/lib/utils/priorities.mjs';
  *
  * @param {object|string} props.priority Priority item or id.
  * @param {object[]} props.priorities Ordered workflow priorities.
+ * @param {string} props.preset Named `Pill` preset, passed straight through to the pill this badge is.
  * @param {string} props.className Placement in the parent only.
  */
-export default function PriorityBadge({ priority = 'none', priorities = [], className = '' }) {
+export default function PriorityBadge({ priority = 'none', priorities = [], preset, className = '' }) {
   const config = priorityPresentation(priority, priorities);
   const textColor = config.isNoPriority ? '#737373' : config.color;
 
@@ -23,6 +24,7 @@ export default function PriorityBadge({ priority = 'none', priorities = [], clas
       size="lg"
       shape="badge"
       weight="medium"
+      preset={preset}
       className={`backdrop-blur-[2px] ${className}`.trim()}
     >
       <PriorityIcon priority={config} priorities={priorities} />

@@ -237,11 +237,51 @@
     --qt-nav-space: 0px;
   }
 
-  /* And on the two screens that do without the bar entirely — a task, an event
-     — nothing should reserve room for it either. Set from the workspace layout,
+  /* And the document stops being shorter than the box the browser can pan
+     across. iOS does not resize the layout viewport for the keyboard, it covers
+     it, so subtracting the overlap from the document's own height leaves that
+     many pixels of bare page canvas under <body> — painted --color-canvas,
+     because there is no `html` rule and a body background propagates to the
+     page. Nothing shows it while the keys are down; the moment you drag, iOS
+     pans the visual viewport down the layout viewport and the grey comes up
+     from the bottom edge, with the composer's focus shadow lying on the seam.
+     A Dialog never had this, because `fixed inset-0` is the whole layout
+     viewport and a pan only ever finds more backdrop. The shell has the same
+     box here and carries the overlap as its own padding instead — see the
+     workspace layout. The bound is `48rem`, not `767px`, because the padding
+     that pairs with it is a `max-md:` utility, which Tailwind 4.3 emits as
+     `(width < 48rem)`: at any width where the two disagree the keyboard would
+     be subtracted twice and the composer would end a whole keyboard above the
+     keys. */
+  @media (width < 48rem) {
+    body[data-keyboard='open'] {
+      height: 100dvh;
+      /* Below md the shell is white edge to edge. If the browser still finds a
+         strip to pan into, it reads as the page continuing, not as a floor. */
+      background-color: var(--color-surface);
+    }
+  }
+
+  /* And on the screen that does without the bar entirely — a request —
+     nothing should reserve room for it either. Set from the workspace layout,
      which is the one place that knows which route is on screen. */
   body[data-mobile-nav='hidden'] {
     --qt-nav-space: 0px;
+  }
+
+  /* And while the caret is in a composer, whether or not a keyboard followed it
+     in. `MobileNav` takes the bar away from the same signal; this is the room it
+     was floating in, handed to the composer instead of left as a gap above an
+     empty edge. Nothing reserves a band either way — the bar is glass and the
+     page runs under it.
+
+     Media-gated, unlike its two siblings above: the attribute is published on
+     every viewport, and while `--qt-nav-space` is only ever read below md, this
+     one is not allowed to depend on that holding. */
+  @media (width < 48rem) {
+    body[data-composer='focused'] {
+      --qt-nav-space: 0px;
+    }
   }
 
   /* A hand on anything that can be pressed.
@@ -317,8 +357,15 @@
   /* On a phone the bottom of the screen already belongs to the tab bar. The
      toast clears it rather than landing on it; with the keyboard open
      `--qt-nav-space` is 0 and the toast drops back to the bottom edge, which is
-     where there is room. */
-  @media (max-width: 767px) {
+     where there is room.
+
+     The query is the range syntax Tailwind 4.3 compiles `max-md:` to, which is
+     also the exact complement of the `md:hidden` the shell wraps `MobileNav` in.
+     `(max-width: 767px)` is a different query at 767.5px — ordinary under
+     browser zoom or a fractional device pixel ratio — and there the bar is drawn
+     while nothing above it clears its 78px. At 767 both are true and at 768 both
+     are false, so nothing at or above md moves. */
+  @media (width < 48rem) {
     .ui-toast-layer {
       bottom: calc(var(--qt-nav-space) + 8px);
     }
@@ -382,7 +429,11 @@
     );
   }
 
-  @media (max-width: 767px) {
+  /* The same gate as the toast layer above, and for the same reason: this block
+     is the other half of the `md:hidden` that hides the bar, so the two have to
+     be spelled the way Tailwind emits it — a screen whose tail stopped one
+     fractional pixel before the bar did is a last row under the glass. */
+  @media (width < 48rem) {
     /* What a screen does instead of having room reserved for it: its own
        scroller ends with the bar's footprint after the content.
 
@@ -508,6 +559,23 @@
      the user types. Previously `font-mono` at the call site. */
   .ui-control[data-ui-composition='color-hex'] {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  /* A date dressed as the value in a row of Select triggers — the request's
+     attribute strip and the «Деталі» drawer under it. The contract is the type
+     size: 13px, the same as the Selects it stands in line with, and it is
+     stated here rather than only implied by the `:not()` at the end of this
+     file, so `kit-variants` can read the composition and «Матриця варіантів»
+     can render it.
+
+     13px is what the control already is at every width; what the composition
+     buys is below md, where the iOS-zoom guard raises every text field to 16px
+     and cannot see a Select, because a Select's label is a <span>. The guard
+     names this composition in its `:not()` chain and steps aside for it; this
+     is the size it steps aside to. Where a call site replaces the trigger's
+     whole class list (`inputClassName={compactInputClass}`, the strip's own
+     22px cell) the same 13px travels with that class. */
+  .ui-control[data-ui-composition='attribute-field'] {
+    font-size: 13px;
   }
 
   /* Surface size contracts.
@@ -650,6 +718,15 @@
     flex: 1;
     min-width: 0;
   }
+  /* `min-width: 0` is what lets a tab be narrower than its own content, which
+     on a phone it can be. One consumer draws this composition here — the
+     standalone request page's Звернення/Чат strip (IssueDetail.jsx) — and its
+     two tabs do fit below md; the overflow the mobile half answers was measured
+     in QuickTeam, which draws tabs from this same component. That half is at
+     the very end of this file, unlayered, because the padding it sets is
+     fighting the `px-[16px]` utility Tabs writes, and the widths for this fork
+     are worked out beside it. The icon is held at full size by
+     `max-md:shrink-0` in Tabs.jsx, which needs no stylesheet at all. */
   /* A dialog's actions are a row that ends at the right edge, which is a row
      built for a cursor: on a phone it leaves two 90px targets in the corner and
      a wrapped switch above them. Below md the same actions become a stack of
@@ -1265,6 +1342,31 @@
     font-size: 8px;
     box-shadow: 0 0 0 2px var(--color-surface);
   }
+  /* The one place a pill is a row's elastic column instead of a fixed mark
+     beside one: the workflow preview in «Налаштування», where the pill prints
+     the status/type/priority name the row is editing. A pill is `flex-shrink: 0`
+     and `white-space: nowrap`, so on a 393px card a name of any real length
+     pushed the last non-shrinking block — the pencil and the bin — past the
+     white edge of the card. Below md this preview wraps instead.
+
+     Named here rather than written at the three call sites: `justify-content`,
+     `white-space` and `flex-shrink` are declarations `.ui-pill` above makes for
+     itself, and a className that re-makes them is a second copy of the kit's
+     geometry living where nothing can propagate to it.
+
+     The range syntax is the one Tailwind 4.3 compiles `max-md:` to, so this
+     gate flips at exactly the width the `max-md:hidden` on the row's plain
+     copy of the same name does — the copy this pill takes over from. */
+  @media (width < 48rem) {
+    .ui-pill[data-ui-pill-preset='workflow-preview'] {
+      justify-content: flex-start;
+      min-width: 0;
+      flex-shrink: 1;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-align: left;
+    }
+  }
   .ui-pill[data-ui-pill-shape='badge'] { border-radius: 5px; }
   .ui-pill[data-ui-pill-shape='capsule'] { border-radius: 999px; }
   .ui-pill[data-ui-pill-tone='neutral'] {
@@ -1701,12 +1803,203 @@
   .ui-bulk-actions__control > button svg {
     opacity: 0.7;
   }
+  /* The pickers are wrapped in one box so that below md they can be a row of
+     the card on their own. At every other width the box is not there at all:
+     `display: contents` drops it out of the layout and out of the a11y tree,
+     leaving the pickers the same direct flex children of the bar — in the same
+     order, under the same `gap` — that they have always been.
+
+     This is deliberately a CSS rule and not a `md:contents` utility. `md:` is
+     `min-width: 768px` and the block below is `max-width: 767px`, which are not
+     complements: a viewport reported as 767.5px (ordinary at browser zoom, or
+     with a fractional device pixel ratio) matches neither, and the wrapper
+     would fall back to a plain `display: block` — five pickers stacked in a
+     column inside the black bar. Declared here, the box has no width at which
+     it is a block. */
+  .ui-bulk-actions__rail {
+    display: contents;
+  }
+  /* Below md this is not a toolbar, it is a small card at the bottom of the
+     screen. Wrapped rows of labelled pickers grew with every attribute a
+     workspace happens to configure — three of them, 114px tall on a 500px
+     viewport, measured in QuickTeam, which draws this bar from the same markup
+     with one picker more — while the ✕ fell onto a row of its own, centred
+     under nothing. Two fixed rows instead: what is selected and the way out of
+     it, then one glyph per attribute spread across the width. The glyph is the
+     one the filter bar already draws for the same attribute (Select's
+     FILTER_ROLE_ICONS), and `ariaLabel` on every trigger keeps the name the
+     visible label was carrying; tapping a chip still opens a fully labelled
+     list. The height no longer depends on how many pickers there are.
+
+     These rules are in `@layer utilities` — the same layer Tailwind emits into,
+     and that is what makes them reach anything. `--ui-control-height` works
+     because no utility ever writes a custom property, so it is not a contest;
+     `width` and `padding` on the triggers are contests, and they are won on
+     specificity inside that layer — a two- or three-class selector against the
+     single class of `.w-\[28px\]` or `.px-\[10px\]`. Nothing here needs
+     `!important`, and nothing here would survive one at the call site: the
+     `!w-auto` that used to sit in `triggerClass` had to go before the chips
+     could fill their share of the glyph row, and it went without changing a
+     pixel above md because `.ui-bulk-actions__control > button` already said
+     the same thing. */
   @media (max-width: 767px) {
     .ui-bulk-actions[data-ui-composition='bulk-actions'] {
-      /* `--qt-nav-bottom-height` was never declared anywhere, so this had been
-         silently falling back to 64px and clearing a 78px bar by guesswork. */
-      bottom: calc(var(--qt-nav-space) + 16px);
-      max-width: calc(100vw - 16px);
+      /* `--qt-nav-space` is the nav's whole footprint; a `--qt-nav-bottom-height`
+         that was never declared anywhere used to stand here and fall back to
+         64px, clearing a 78px bar by guesswork. 8px above it rather than 16:
+         the wider void made the card and the nav pill read as two separate
+         black slabs stacked at the bottom of the screen instead of one piece of
+         furniture, and that stack is half of what the bar was doing wrong. */
+      bottom: calc(var(--qt-nav-space) + 8px);
+      left: 8px;
+      right: 8px;
+      width: auto;
+      max-width: none;
+      transform: none;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 6px;
+      border-radius: var(--ui-radius-surface);
+    }
+    /* A line of its own, which is also what stops the running message
+       («Виконуємо: 150 із 320», 168px) from competing with a picker for the
+       same row. It clips rather than ellipsises: the count is an inline-flex
+       box, so its text is an anonymous flex item and `text-overflow` has
+       nothing to act on — `min-width: 0` with `overflow: hidden` is the part
+       that actually keeps it out of the ✕'s column. */
+    .ui-bulk-actions__count {
+      grid-column: 1;
+      grid-row: 1;
+      min-width: 0;
+      padding-inline: 4px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .ui-bulk-actions__clear {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    /* A vertical hairline between two rows is a mark, not a divider. */
+    .ui-bulk-actions__divider {
+      display: none;
+    }
+    .ui-bulk-actions__rail {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Equal shares of the row, but never wider than a chip needs to be: with
+       only status, assignee and priority configured, three unbounded chips
+       would grow to 80px each around a 14px glyph. The cap is what makes the
+       chip the same object whatever the workspace has turned on. */
+    .ui-bulk-actions__control {
+      flex: 1 1 0;
+      max-width: 56px;
+    }
+    /* `width: 100%`, because a `<button>` with `width: auto` is shrink-to-fit:
+       left at `auto` (which is what the rule above the media query gives it,
+       and what the desk needs) the chip drew itself 36px wide — its glyph plus
+       its padding — and sat against the left edge of the share the flex row had
+       just handed it. The row looked evenly divided in the box model and ragged
+       on screen. */
+    .ui-bulk-actions__control > button {
+      --ui-control-height: 32px;
+      width: 100%;
+    }
+    /* The trigger's inner box grows and centres, so the glyph sits in the
+       middle of the chip instead of against its left padding. */
+    .ui-bulk-actions__control > button > div {
+      flex: 1;
+      justify-content: center;
+    }
+    /* The label and the chevron are what made five pickers three rows tall. */
+    .ui-bulk-actions__control > button > div > span,
+    .ui-bulk-actions__control > button > svg {
+      display: none;
+    }
+    /* A glyph that IS the control is not a decoration beside a word. */
+    .ui-bulk-actions__control > button svg {
+      opacity: 1;
+    }
+    /* Both icon buttons are `size="icon-sm"`, i.e. `w-[28px]` from Button's own
+       size table. Left at that they would be 28×32 rectangles standing beside
+       square-ended chips of the same height — so the width is restated here
+       with the height, at a specificity that outweighs the utility.
+
+       `__trigger` is not the kebab's own name: the five pickers wear it too, for
+       the chip colours a few rules above. The kebab is the one trigger in this
+       bar that is not a combobox, and that is what names it here — without the
+       `:not()` this rule would be handing every picker a 32px width and getting
+       away with it only because `!w-auto` happened to be in the way. */
+    .ui-bulk-actions[data-ui-composition='bulk-actions'] .ui-bulk-actions__clear,
+    .ui-bulk-actions[data-ui-composition='bulk-actions'] .ui-bulk-actions__trigger:not([role='combobox']) {
+      --ui-control-height: 32px;
+      width: 32px;
+      flex-shrink: 0;
+    }
+    /* The overflow menu keeps the right edge of the glyph row even when only
+       three attributes are configured and the capped chips leave slack, so it
+       stands in the same column as the ✕ above it whatever the workspace has
+       turned on — a fixed place rather than one that drifts with the number of
+       pickers. The margin goes on the rail's last child and not on the button:
+       ContextMenu wraps its trigger in an `inline-flex` box of its own, and
+       that box, not the button inside it, is the flex item this row is
+       distributing. */
+    .ui-bulk-actions__rail > :last-child {
+      margin-left: auto;
+    }
+  }
+
+  /* ── A tab's label ───────────────────────────────────────────────────────
+     Below md a tab can be narrower than its own content — `pane-switch` is
+     `flex: 1; min-width: 0` — and then something in the row has to give way.
+     The label is the right thing to give: `overflow: hidden` is what makes a
+     flex item's automatic minimum size resolve to zero, so the label absorbs
+     the squeeze and ellipsises instead of the icon handing over its whole
+     width and scaling its glyph to nothing. That needs the label to be an
+     element, so Tabs.jsx wraps it in one.
+
+     At every other width that wrapper is not there at all. `display: contents`
+     drops it out of box generation, so whatever the label holds stays the same
+     direct flex children of the tab button — same order, same `gap: 6px` —
+     that it was before the wrapper existed. A label is not required to be a
+     string, and the ungated `<span>` this replaces is not a hypothetical: in
+     QuickTeam, which draws tabs from the same component, it met a label of
+     three nodes (a 6px status dot, a name, an optional lock) and the dot went
+     6px → 0px wide (an inline non-replaced box ignores width and height), both
+     6px gaps closed, and preflight's `svg { display: block }` dropped the lock
+     onto a line of its own — the tab measured 30px → 41px tall. Every strip in
+     this product passes a plain string today; `display: contents` is what keeps
+     that from being the reason this works.
+
+     Which is why the override below names `pane-switch` rather than every
+     strip. Only that composition can squeeze a tab — it alone is `flex: 1;
+     min-width: 0`, and its one consumer here is the standalone request page's
+     Звернення/Чат strip (IssueDetail.jsx). That strip's two tabs do fit on a
+     phone — the widths are worked out with the padding rule at the end of this
+     file — and the squeeze this answers was measured in QuickTeam, on the same
+     component. Every other strip sizes its tabs to their content — `raised` is
+     `shrink-0`, `underline` is `min-w-max` inside a horizontal scroller — so an
+     ellipsis there buys nothing and costs a fragment label its parts.
+
+     Ungated plus an override, not an `md:contents` variant, for the reason
+     `.ui-bulk-actions__rail` gives above: `md:` and a `max-width` block are not
+     complements, and a viewport reported as 767.5px would match neither and
+     fall back to a plain block. The override is written in the range syntax
+     Tailwind 4.3 compiles `max-md:` to, so this gate and the `max-md:shrink-0`
+     on the icon beside it flip at exactly the same width. ── */
+  .ui-tab-label {
+    display: contents;
+  }
+  @media (width < 48rem) {
+    .ui-tabs[data-ui-composition='pane-switch'] .ui-tab-label {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -1901,12 +2194,180 @@
    Must stay outside @layer, and for the reason the block above gives: the size
    classes are Tailwind utilities, and only an unlayered rule beats them. The
    :not() chain skips the controls that are not text entry — a checkbox or a
-   range slider never triggers the zoom and would only be resized for nothing. */
+   range slider never triggers the zoom and would only be resized for nothing.
+
+   `attribute-field` is the last link in that chain and the only one that is not
+   an input type. A DatePicker's trigger is a `readonly` text input that opens
+   the kit's own calendar in a portal. It is still focusable, but iOS raises no
+   software keyboard for a readonly input and there is no platform picker wheel
+   either, so the focus auto-zoom has nothing to fire for. Where the picker is a
+   form field it keeps 16px like every other field — «Термін вирішення» in the
+   new-request sheet stands in a column of Inputs and must not disagree with
+   them. Where it is dressed as the value in a row of Select triggers — the
+   request's attribute strip and the «Деталі» drawer under it — it was the one
+   control a size larger than its neighbours, because a Select's label is a
+   <span> this rule cannot see. That named composition, and only it, steps out
+   of this rule; the 13px it steps out to is declared where the rest of the
+   named geometry is, as `.ui-control[data-ui-composition='attribute-field']`
+   in `@layer components` above, which is also what lets `kit-variants` read the
+   composition and the variant matrix render it. A negation declares nothing on
+   its own, so this chain is the opt-out and never the definition.
+   `maximum-scale=1` (IOS_FOCUS_ZOOM_SCRIPT in app/layout.js) remains the outer
+   guard either way. */
 @media (max-width: 767px) {
-  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']),
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']):not([readonly][data-ui-composition='attribute-field']),
   textarea,
   select,
   [contenteditable]:not([contenteditable='false']) {
     font-size: 16px;
+  }
+}
+
+/* A `pane-switch` tab strip is the whole navigation of the screen it sits on,
+   and it is the one composition whose tabs are `flex: 1; min-width: 0` — so
+   below md a tab can be handed less width than its own label. The tab gives up
+   padding it does not need: the content is centred, so the smaller inset is
+   invisible for as long as the label fits, and when it does not the label
+   ellipsises (`.ui-tab-label`, in @layer utilities above) instead of the icon
+   shrinking to nothing.
+
+   Nothing on this fork needs that yet, and nobody measured one here that did.
+   qTicket draws exactly one pane-switch strip — the standalone request page's
+   Звернення/Чат switch, inside a `lg:hidden` lead in IssueDetail.jsx — and it
+   is two tabs wide. The arithmetic is all in this file: at a 393px viewport
+   `.page-gutter` leaves the strip 361px, its own 4px inset and the 2px between
+   the tabs leave 351px, and each tab takes 175px — against a 14px icon, a 6px
+   gap, «Звернення» at 13px and 32px of inset. At 320px, the narrowest phone
+   this product is drawn for, a tab still has 139px. The rule is inert here; it
+   changes nothing anyone can see on this fork.
+
+   It is kept because the padding is one third of a mechanism rather than a
+   local patch: it, the `.ui-tab-label` override above and the `max-md:shrink-0`
+   on the icon in Tabs.jsx are one fix, and this stylesheet is shared with
+   QuickTeam, whose strip is the same component and does overflow — a tab icon
+   there came out 7.6px wide at 393px and nothing at all at 375, which is a
+   measurement, taken there and quoted in Tabs.jsx. Dropping the third that
+   happens to be idle on this fork would leave the next strip qTicket adds to
+   rediscover two thirds of a fix that is already written.
+
+   Outside @layer for the reason the two blocks above give: `padding-inline` is
+   fighting the `px-[16px]` utility Tabs writes, and only an unlayered rule beats
+   Tailwind's last layer. The icon's half of this fix needs no rule at all — it
+   is `max-md:shrink-0` in Tabs.jsx, where nothing has to out-specify anything.
+
+   The query is the range syntax Tailwind 4.3 compiles `max-md:` to, because the
+   three parts of this one strip have to flip together: this padding, the
+   `.ui-tab-label` override in @layer utilities above, and that `max-md:shrink-0`
+   on the icon. `(max-width: 767px)` is a different query at 767.5px — ordinary
+   under browser zoom or a fractional device pixel ratio — and there a tab would
+   keep the wide inset while its label had already been told it may ellipsise.
+   At 767 all three are true and at 768 all three are false, so nothing at or
+   above md moves. */
+@media (width < 48rem) {
+  .ui-tabs[data-ui-composition='pane-switch'] > [role='tab'] {
+    padding-inline: 10px;
+  }
+}
+
+/* Two answers to one question, one of them free. Below md a dialog's footer is a
+   stack of full-width rows (`.ui-dialog-footer`, in @layer components above), and
+   «Скасувати» spent one of those rows saying exactly what the × in the header
+   already says — under a «Створити ще одне» switch, that made the new-request
+   sheet three rows of footer on a phone. So where the header draws that ×, the
+   footer stops drawing the button that only closes. A dialog without one keeps
+   its «Скасувати», which is what the attribute on the footer is for: the rule
+   asks the shell whether there is another way out, rather than carrying a list
+   of modal names.
+
+   A button marked `dismiss` must do nothing except what the × does. The one in
+   this product that deliberately is not marked, and must not become so, is a
+   confirm dialog's «Скасувати» (ConfirmProvider): it is one of the two answers
+   the dialog is asking for, not a way out of being asked.
+
+   Outside @layer: `display` here is fighting Button's own `inline-flex`, and only
+   an unlayered rule beats Tailwind's last layer — the same reason
+   `.hide-scrollbar` and the 16px field rule sit up there.
+
+   The query is the range syntax Tailwind 4.3 compiles `max-md:` to, and all
+   three rules keyed on `dismiss` — the two here and the footer-collapse one
+   below them — use it, because the last of them hides the bar that holds the
+   button the first two hide. `(max-width: 767px)` is not the same query — at a
+   viewport of 767.5px, ordinary under browser zoom or a fractional device pixel
+   ratio, one fires and the other does not — and the bar and its only occupant
+   must never disagree about which side of md they are on. At 767 all three are
+   true and at 768 all three are false, so nothing at or above md moves.
+
+   The footer's own geometry — the column and the full-width rows this comment
+   opens by quoting — is a separate `(max-width: 767px)` block up in @layer
+   components, and is deliberately not one of the three. It decides how the bar
+   lays out, never whether the bar or the button is drawn, so the sliver between
+   the two queries leaves a footer still shaped as a row with the dismiss
+   already gone: the wide arrangement minus one button, which is coherent rather
+   than broken. A rule that starts deciding what exists belongs in the range
+   query beside these three. */
+@media (width < 48rem) {
+  .ui-dialog-footer[data-ui-close-in-header='true'] > [data-ui-dismiss='true'] {
+    display: none;
+  }
+}
+
+/* And the same for a dismiss that is wrapped in something. `.ui-dialog-footer > *`
+   is `width: 100%` above, so hiding a nested button would leave its wrapper as an
+   empty full-width row still eating one `gap-3` — the exact row the rule above
+   exists to remove.
+
+   One footer in this product *is* wrapped: QuickTeamTransferDialog puts its two
+   buttons in a `div`. That div holds a real action as well, so its «Скасувати»
+   is deliberately left unmarked — marking it would take «Створити» down with the
+   wrapper. The rule is right and the markup is what has to change first: flatten
+   that footer to a fragment, or move `dismiss` onto a wrapper that holds nothing
+   else.
+
+   Its own rule, not a second selector on the one above: one selector a build step
+   or a browser will not parse takes the whole selector list down with it —
+   including the direct-child case that is doing all of the actual work. */
+@media (width < 48rem) {
+  .ui-dialog-footer[data-ui-close-in-header='true'] > *:has(> [data-ui-dismiss='true']) {
+    display: none;
+  }
+}
+
+/* And where that button was the only thing in the footer, the footer goes with
+   it. Hiding the button alone would leave `.ui-dialog-footer` itself behind: its
+   border-top, its `py-4` and the `bg-canvas` under them are a ~65px bar with
+   nothing in it, which costs a phone more than the row it was meant to save.
+
+   Two dialogs in qTicket are that shape, and both were already on screen when
+   this rule arrived — they had simply not been marked, which is why the port
+   read as "no dialog here is shaped like this": the claim was true of the
+   marked buttons and of nothing else. The mobile «Фільтри» sheet
+   (`PageHeader.jsx`, and a client-portal user can open it) and the
+   column-visibility sheet on My Tasks (`my/page.js`) each hold one «Готово»
+   over controls that have already applied themselves, so each was a whole bar
+   drawn to repeat the ×. Every *other* marked «Скасувати» here does have a
+   «Зберегти», a «Створити» or a «Призначити» beside it, and those bars stay.
+   QuickTeam has four of the lone kind (a calendar event a member may only read,
+   an unexportable invoice, a timesheet day), which is where this rule was
+   written and measured; the two stylesheets are one contract, and
+   `tests/dialog-dismiss-contract.test.mjs` names the qTicket footers it now
+   applies to so a third one cannot arrive unnoticed.
+
+   Read the selector as "a footer with no child that is not a dismiss". One real
+   action anywhere in the bar keeps the whole bar, which is what stops this from
+   touching the footers the rules above serve. The dismiss inside still goes;
+   only the bar stays, because it still has something to carry.
+
+   `:has()` may not be nested inside `:has()`, so the wrapped case the rule above
+   covers is out of reach here — a footer whose one child is a wrapper round a
+   dismiss keeps its empty bar. Nothing in the product is shaped that way; when
+   something is, the wrapper is what carries `dismiss`, and this rule sees it.
+
+   `:has()` is asked of the browser here for the same reason the rule above asks
+   it: every `max-md:` utility in the bundle is already emitted as a range query,
+   so a browser too old to parse `:has()` (pre-2023) has no phone layout to gate
+   and lands on the footer it had before any of this. */
+@media (width < 48rem) {
+  .ui-dialog-footer[data-ui-close-in-header='true']:not(:has(> :not([data-ui-dismiss='true']))) {
+    display: none;
   }
 }
