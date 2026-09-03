@@ -222,7 +222,13 @@
        whatever is last in the column, which in a conversation is the composer,
        under the keys with no way to scroll to it. `--qt-keyboard-inset` is the
        measured overlap, published by useKeyboardOpen and 0px everywhere else,
-       including on every desktop. */
+       including on every desktop.
+
+       Read at md and above only. The block further down puts the document back
+       to a full `100dvh` below that line, and nothing below it subtracts the
+       overlap from anything any more. What is left here is the tablet case: an
+       iPad in portrait is 768pt wide, past the `md:` line, and its keyboard
+       does trip the fraction the hook measures. */
     height: calc(100dvh - var(--qt-keyboard-inset, 0px));
     margin: 0;
     padding: 0;
@@ -246,13 +252,16 @@
      pans the visual viewport down the layout viewport and the grey comes up
      from the bottom edge, with the composer's focus shadow lying on the seam.
      A Dialog never had this, because `fixed inset-0` is the whole layout
-     viewport and a pan only ever finds more backdrop. The shell has the same
-     box here and carries the overlap as its own padding instead — see the
-     workspace layout. The bound is `48rem`, not `767px`, because the padding
-     that pairs with it is a `max-md:` utility, which Tailwind 4.3 emits as
-     `(width < 48rem)`: at any width where the two disagree the keyboard would
-     be subtracted twice and the composer would end a whole keyboard above the
-     keys. */
+     viewport and a pan only ever finds more backdrop. Below md the shell is
+     that same box, and nothing inside it reserves the overlap either: WebKit
+     has already panned the window down by exactly that much to get the focused
+     field out from under the keys, and an app that shortens the shell one frame
+     later corrects for the same keyboard a second time — the field lands a
+     keyboard above the visible window and the space it vacated is the strip a
+     drag finds. See the workspace layout and useKeyboardOpen. The bound is
+     `48rem`, not `767px`, because that is what Tailwind 4.3 emits for `md:`,
+     and a phone-only rule that disagreed with the utilities it pairs with by
+     one fractional pixel is a band of the wrong thing at exactly that width. */
   @media (width < 48rem) {
     /* The shell is white edge to edge below md, so the page behind it is
        only ever seen in the strip iOS leaves when it pans for the keyboard.
@@ -454,6 +463,19 @@
        promise to `scrollIntoView` and to the focus ring following a keyboard. */
     .qt-nav-scroll {
       scroll-padding-bottom: var(--qt-nav-space);
+    }
+    /* While the keyboard is up the bar is gone, so `--qt-nav-space` is 0 —
+       and since the shell stopped reserving the overlap, this scroller now
+       runs to the bottom of the layout viewport with its last rows under the
+       keys. Scroll padding is the one thing that may still read the overlap
+       below md: it moves no box and paints nothing, it only tells the browser
+       where "visible" ends, so it cannot correct a second time for a keyboard
+       the browser has already paid for. Without it `scrollIntoView` and any
+       scroll-to-latest park the newest row under the keyboard.
+       `body[data-keyboard=...]` rather than the bare variable, so the
+       declaration exists only in the state it is written for. */
+    body[data-keyboard='open'] .qt-nav-scroll {
+      scroll-padding-bottom: var(--qt-keyboard-inset, 0px);
     }
     .qt-nav-scroll::after {
       content: '';

@@ -329,12 +329,12 @@ export default function WorkspaceLayout({ children }) {
     {/* The grey is the gutter *between* the floating panels, and on a phone
         there are no floating panels: the content fills the width edge to edge.
         Below md the shell is the same white as the pane, so the bar floats over
-        the page instead of over a wall of its own — and while the keyboard is
-        up the shell also carries its overlap as its own padding, rather than the
-        document being cut short by it and the page canvas showing underneath.
-        `h-full` is border-box, so the flex children still end exactly at the
-        keys; the white simply runs to the bottom of the layout viewport. */}
-    <div className="w-full h-full flex overflow-hidden bg-white md:bg-canvas max-md:pb-[var(--qt-keyboard-inset,0px)]">
+        the page instead of over a wall of its own. And the shell reserves
+        nothing for the keyboard: it used to carry the overlap as `padding-bottom`
+        a frame after WebKit had already panned the window down by that same
+        overlap, which put the field you had just tapped above the top edge and
+        left the vacated padding as the strip a drag finds. See useKeyboardOpen. */}
+    <div className="w-full h-full flex overflow-hidden bg-white md:bg-canvas">
       {/* The first stop for Tab, invisible until it is focused. */}
       <a href="#qt-main" className="qt-skip-link rounded-[10px] bg-ink px-[14px] py-[8px] text-[13px] font-bold text-white">
         Перейти до вмісту

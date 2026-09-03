@@ -58,14 +58,23 @@ export function useKeyboardOpen() {
   // Published on <body> as well, so CSS can collapse the space the bar reserves
   // without every screen subscribing to this hook.
   //
-  // `--qt-keyboard-inset` is the second half of that, and it is what makes a
-  // chat usable on a phone at all. The app shell is `height: 100dvh` with
-  // `overflow: hidden`, and `dvh` accounts for the browser's chrome but not for
-  // the keyboard: on iOS the shell stays full height while a third of it is
-  // covered, which puts the composer — the last thing in the column — under the
-  // keys, where it cannot be seen and cannot be scrolled to. Subtracting the
-  // measured overlap from the shell's height is what stands the column back up:
-  // the field ends exactly where the keyboard begins.
+  // `--qt-keyboard-inset` is the second half of that: the measured overlap, for
+  // the one box still entitled to subtract it.
+  //
+  // Below md nothing subtracts it any more, and that is deliberate. `dvh`
+  // accounts for the browser's chrome but not for the keyboard, so on iOS a
+  // full-height shell keeps its box while the bottom third of it is covered —
+  // and WebKit already knows that. On focus it scrolls the ancestor scrollers
+  // and pans the visual viewport down until the field is out from under the
+  // keys. A shell that then shortens itself by the same overlap corrects a
+  // second time for a keyboard that has already been paid for: the field lands
+  // a keyboard's height above the visible window, and the overlap it vacated is
+  // a bare strip any drag can find. A Dialog does neither, which is why the same
+  // editor behaves inside one; below md the shell now does neither either.
+  //
+  // At md and above the subtraction stays, on `body` (globals.css). That is the
+  // tablet case — an iPad in portrait is 768pt wide, past this line, and its
+  // keyboard does trip the fraction above.
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
     document.body.dataset.keyboard = open ? 'open' : 'closed';

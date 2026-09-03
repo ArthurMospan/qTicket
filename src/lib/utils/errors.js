@@ -14,6 +14,26 @@ export function isQuotaExceededError(error) {
 // it the one place that can notice the daily free quota being spent — and the
 // read that gets refused is usually not the one whose failure reaches a screen,
 // so noticing has to happen where the failure is, not where it surfaces.
+// A tab left open across a deploy asks for chunks that no longer exist.
+//
+// The route JavaScript this page was served with is addressed by a build id.
+// Deploy again and those files leave the CDN, so the pages already rendered
+// keep working while every navigation out of them fails — which reads as
+// "half the site stopped loading", is fixed by reopening the tab, and is
+// therefore reported as a mystery. It is not one: it is the client and the
+// server disagreeing about which build they are in.
+//
+// The message is not standardised, so this matches what each engine actually
+// throws rather than a single name: `ChunkLoadError` (webpack), the two
+// dynamic-import failures Chrome and Firefox word differently, and Safari's
+// own phrasing.
+const STALE_DEPLOYMENT = /ChunkLoadError|Loading chunk [\w-]+ failed|Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i;
+
+export function isStaleDeploymentError(error) {
+  if (!error) return false;
+  if (error.name === 'ChunkLoadError') return true;
+  return STALE_DEPLOYMENT.test(String(error.message || error));
+}
 export function reportLoadError(scope, error) {
   if (isQuotaExceededError(error) || error?.status === 503) {
     noteQuotaRefusal();
