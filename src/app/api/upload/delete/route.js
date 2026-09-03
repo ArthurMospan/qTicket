@@ -12,10 +12,12 @@ import { v2 as cloudinary } from 'cloudinary';
 import { authenticateRequest, enforceRateLimit } from '@/lib/server/firebaseAdmin';
 import { readJsonBody, routeErrorResponse } from '@/lib/server/apiErrors';
 import {
-  callerBelongsToPathOrganization,
+  callerMembershipInPathOrganization,
+  clientMayDeleteStoragePath,
   isSafeStoragePath,
   organizationIdFromPath,
 } from '@/lib/server/uploadPaths';
+import { isClientRole } from '@/lib/utils/can';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -46,7 +48,16 @@ export async function POST(req) {
       // of ownership, so nobody may delete them through this route.
       return NextResponse.json({ error: 'Storage path is not organization-scoped' }, { status: 403 });
     }
-    if (!(await callerBelongsToPathOrganization(authorization.user.uid, organizationId))) {
+    const membership = await callerMembershipInPathOrganization(authorization.user.uid, organizationId);
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    // Membership in the tenant is the whole check for the desk's own people.
+    // A customer is a member of the tenant too, and the same check let them
+    // name the desk's logo or a support agent's avatar — the public id is in
+    // every URL they are shown. Their reach is the folders their own files go
+    // to.
+    if (isClientRole(membership.role) && !clientMayDeleteStoragePath(storagePath)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -15,7 +15,13 @@ import {
   auditedChange,
 } from '@/lib/utils/issueAuditEvents.mjs';
 import { pickIssueContentFields, pickIssueDeskFields } from '@/lib/utils/issueContentFields.mjs';
-import { projectWriteError } from '@/lib/utils/projectAccess.mjs';
+import { assigneesOutsideProject, projectWriteError } from '@/lib/utils/projectAccess.mjs';
+import {
+  DEFAULT_LABEL_IDS,
+  DEFAULT_PRIORITY_IDS,
+  workflowIds,
+} from '@/lib/utils/workflowDefaults.mjs';
+import { NO_PRIORITY_ID } from '@/lib/utils/priorities.mjs';
 import {
   issueTombstoneId,
   issueUndoExpiresAt,
@@ -140,6 +146,43 @@ export async function PATCH(request, context) {
         }, { status: 400 });
       }
     }
+    // The same bounds the create route holds. A patch used to take any value
+    // for a whitelisted key — a title that was an object, a description of any
+    // length, twenty thousand attachments — and a customer could grow their own
+    // request toward the document limit, after which support's replies, which
+    // update the same document in one transaction, failed too.
+    if (patch.title !== undefined) {
+      if (typeof patch.title !== 'string' || patch.title.trim().length > 240) {
+        return NextResponse.json({ error: 'Некоректне значення поля', code: 'INVALID_FIELD', field: 'title' }, { status: 400 });
+      }
+      patch.title = patch.title.trim();
+    }
+    if (patch.description !== undefined) {
+      if (typeof patch.description !== 'string') {
+        return NextResponse.json({ error: 'Некоректне значення поля', code: 'INVALID_FIELD', field: 'description' }, { status: 400 });
+      }
+      patch.description = patch.description.slice(0, 50_000);
+    }
+    if (patch.attachments !== undefined && patch.attachments.length > 50) {
+      return NextResponse.json({ error: 'Некоректне значення поля', code: 'INVALID_FIELD', field: 'attachments' }, { status: 400 });
+    }
+    if (patch.type === 'epic' && issue.type !== 'epic') {
+      return NextResponse.json({
+        error: 'Цей тип застарілий і недоступний для нових звернень',
+        code: 'LEGACY_EPIC_TYPE',
+      }, { status: 400 });
+    }
+    if (patch.clientAssigneeIds !== undefined) {
+      patch.clientAssigneeIds = [...new Set(patch.clientAssigneeIds)]
+        .filter(uid => typeof uid === 'string' && uid)
+        .slice(0, 10);
+    }
+    if (deskPatch.assigneeIds !== undefined) {
+      deskPatch.assigneeIds = [...new Set(deskPatch.assigneeIds)]
+        .filter(uid => typeof uid === 'string' && uid)
+        .slice(0, 20);
+      patch.assigneeIds = deskPatch.assigneeIds;
+    }
     if (issue.archivedAt || issue.cancelledAt) {
       return NextResponse.json({
         error: 'Звернення відкладено — поверніть його, щоб редагувати',
@@ -183,6 +226,56 @@ export async function PATCH(request, context) {
           projectAccessError === 'Ви не входите до команди цього проєкту' ? 403 : 409,
           projectAccessError,
         );
+      }
+      const project = { ...projectSnap.data(), id: projectSnap.id };
+
+      // What the create route checks, checked here too — against the project
+      // and the workflow the transaction itself read, so a patch cannot name a
+      // priority or a label the workflow does not have, a customer cannot put
+      // somebody off their space in charge of their request, and support
+      // cannot assign a request to somebody who cannot open it.
+      if (patch.priority !== undefined || patch.labelIds !== undefined) {
+        const workflowSnap = await transaction.get(
+          db.collection('organizations').doc(current.organizationId).collection('settings').doc('workflow'),
+        );
+        const workflow = workflowSnap.exists ? workflowSnap.data() || {} : {};
+        if (patch.priority !== undefined) {
+          const priorityIds = new Set(workflowIds(workflow.priorities, DEFAULT_PRIORITY_IDS));
+          priorityIds.add(NO_PRIORITY_ID);
+          if (!priorityIds.has(patch.priority)) {
+            throw apiTransactionError('INVALID_FIELD', 400, 'Некоректне значення поля', { field: 'priority' });
+          }
+        }
+        if (patch.labelIds !== undefined) {
+          const labelIds = new Set(workflowIds(workflow.labels, DEFAULT_LABEL_IDS));
+          patch.labelIds = patch.labelIds.filter(id => labelIds.has(id)).slice(0, 20);
+        }
+      }
+      if (patch.clientAssigneeIds !== undefined) {
+        const roster = Array.isArray(project.team) ? project.team : [];
+        if (patch.clientAssigneeIds.some(uid => !roster.includes(uid))) {
+          throw apiTransactionError(
+            'CLIENT_ASSIGNEE_OUTSIDE_PROJECT',
+            400,
+            'Відповідальний не входить до цього проєкту',
+          );
+        }
+      }
+      if (patch.assigneeIds !== undefined && patch.assigneeIds.length) {
+        const memberships = await transaction.getAll(
+          ...patch.assigneeIds.map(uid => db.collection('orgMemberships').doc(`${current.organizationId}_${uid}`)),
+        );
+        if (memberships.some((snap, index) => !snap.exists || snap.data().userId !== patch.assigneeIds[index])) {
+          throw apiTransactionError('ASSIGNEE_NOT_MEMBER', 400, 'Виконавець не є учасником організації');
+        }
+        const roleByUid = new Map(patch.assigneeIds.map((uid, index) => [uid, memberships[index].data().role || null]));
+        if (assigneesOutsideProject(project, patch.assigneeIds, uid => roleByUid.get(uid) || null).length) {
+          throw apiTransactionError(
+            'ASSIGNEE_OUTSIDE_PROJECT',
+            403,
+            'Виконавець не входить до складу проєкту. Попросіть власника або адміністратора додати його.',
+          );
+        }
       }
 
       // The same history the browser writes for a support edit, written here

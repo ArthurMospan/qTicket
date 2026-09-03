@@ -9,12 +9,15 @@ import { REQUESTABLE_NOTIFICATION_TYPES, shouldDeliver } from '@/lib/utils/notif
 import { deliverTelegramNotification } from '@/lib/server/telegram';
 import { OUTBOX_COLLECTION, nextAttemptDelayMs } from '@/lib/utils/notificationOutbox.mjs';
 import { hasProjectAccess } from '@/lib/utils/projectAccess.mjs';
+import { isClientRole } from '@/lib/utils/can';
 
 // What a caller holding a user's token may ask for. Anything the sweep writes
 // on its own is deliberately absent: those go through the Admin SDK, and nobody
 // should be able to address the whole organization on a colleague's behalf from
 // a browser.
 const ALLOWED_TYPES = new Set(REQUESTABLE_NOTIFICATION_TYPES);
+// The two the conversation sends on a customer's behalf — see UnifiedTimeline.
+const CLIENT_REQUESTABLE_TYPES = new Set(['commented', 'mentioned']);
 const cleanText = (value, maxLength) => typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 
 // Delivery (provider choice, no-op without keys) lives in lib/server/email.
@@ -103,6 +106,19 @@ export async function POST(request) {
     const issueId = cleanText(payload.issueId, 128);
     const dedupeKey = cleanText(payload.dedupeKey, 180);
     if (!userIds.length || !ALLOWED_TYPES.has(type) || !title || !body) return NextResponse.json({ error: 'Missing or invalid fields' }, { status: 400 });
+    // What a customer's browser may say happened. A client's screens send two
+    // kinds — «відповів» and «згадав» from the conversation — and every other
+    // kind is the desk's: an assignment, a status, a deadline, an alarm. The
+    // route used to take any of them from anybody, with any words, to fifty
+    // people, on every channel — a customer could ring an «аварія» in every
+    // agent's Telegram under any name their profile carried.
+    if (isClientRole(authorization.membership?.role) && !CLIENT_REQUESTABLE_TYPES.has(type)) {
+      return NextResponse.json({ error: 'Forbidden', code: 'NOTIFICATION_TYPE_FORBIDDEN' }, { status: 403 });
+    }
+    // A test notification is addressed to oneself, or it is not a test.
+    if (type === 'test' && (userIds.length !== 1 || userIds[0] !== authorization.user.uid)) {
+      return NextResponse.json({ error: 'Forbidden', code: 'NOTIFICATION_TYPE_FORBIDDEN' }, { status: 403 });
+    }
     const scopedLink = link ? withNotificationOrganization(link, organizationId) : '';
     if (link && !scopedLink) {
       return NextResponse.json({ error: 'Invalid notification link' }, { status: 400 });

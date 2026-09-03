@@ -1449,6 +1449,38 @@ test('a profile keeps its own address and never a binding the server owns', asyn
   await assertFails(updateDoc(doc(bareDb, 'users', 'member-a'), { email: 'owner@example.com' }));
 });
 
+// ── The conversation stamp names its author ─────────────────────────────
+
+test('a participant cannot stamp the conversation as somebody else', async () => {
+  const db = environment.authenticatedContext('client-admin-a').firestore();
+  await assertFails(sendClientReply(db, 'client-admin-a', 'stamped-as-owner', { lastActivityActorId: 'owner-a' }));
+  await assertFails(sendClientReply(db, 'client-admin-a', 'signed-as-owner', { lastCommentAuthorId: 'owner-a' }));
+  await assertFails(sendClientReply(db, 'client-admin-a', 'read-for-owner', { lastCommentReadBy: ['client-admin-a', 'owner-a'] }));
+  // The real reply, stamped as its author, still goes through.
+  await assertSucceeds(sendClientReply(db, 'client-admin-a', 'own-reply'));
+});
+
+test('reading a conversation marks only the reader', async () => {
+  const db = environment.authenticatedContext('client-member-a').firestore();
+  const issue = doc(db, 'issues', 'issue-a');
+  await assertSucceeds(updateDoc(issue, { lastCommentReadBy: arrayUnion('client-member-a') }));
+  await assertFails(updateDoc(issue, { lastCommentReadBy: arrayUnion('owner-a') }));
+  await assertFails(updateDoc(issue, { lastCommentReadBy: ['client-member-a', 'member-a'] }));
+});
+
+test('an author edits the words of a comment and nothing about who said it or when', async () => {
+  const memberDb = environment.authenticatedContext('member-a').firestore();
+  const own = doc(memberDb, 'issues', 'issue-a', 'comments', 'member-comment');
+  await assertSucceeds(updateDoc(own, { text: 'Виправлено', editedAt: serverTimestamp() }));
+  await assertFails(updateDoc(own, { text: 'Давно', createdAt: new Date('2020-01-01T00:00:00Z') }));
+  await assertFails(updateDoc(own, { authorName: 'Owner' }));
+  await assertFails(updateDoc(own, { replyTo: { id: 'owner-comment', authorName: 'Owner', text: 'Повернення погоджено' } }));
+  // A receipt names its reader only.
+  const staff = doc(memberDb, 'issues', 'issue-a', 'comments', 'owner-comment');
+  await assertFails(updateDoc(staff, { readBy: arrayUnion('client-admin-a') }));
+  await assertFails(updateDoc(staff, { readBy: arrayUnion('member-a'), 'readAt.owner-a': serverTimestamp() }));
+});
+
 test('a first sign-in seeds a profile with the token address and no identity binding', async () => {
   // The shape useAuth writes on first sign-in, address included.
   const newcomerDb = environment.authenticatedContext('newcomer', { email: 'newcomer@example.com' }).firestore();

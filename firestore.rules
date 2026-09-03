@@ -353,6 +353,24 @@ service cloud.firestore {
 
     // ── issues/{issueId} ─────────────────────────────────────────────────
     match /issues/{issueId} {
+      // The conversation stamp names its author. `lastActivityActorId` and
+      // `lastCommentAuthorId` are who a card says spoke last, and
+      // `lastCommentReadBy` is who has read it — a participant could write
+      // anybody into all three without sending a message, so a request's card
+      // could read «Owner: refund approved» and show every agent's receipt.
+      // The rules comment above `allow update` accepts that a stamp may arrive
+      // without its comment; what it must not do is arrive as somebody else.
+      function conversationStampIsOwn() {
+        let touched = request.resource.data.diff(resource.data).affectedKeys();
+        return (!touched.hasAny(['lastActivityActorId']) ||
+            request.resource.data.lastActivityActorId == request.auth.uid) &&
+          (!touched.hasAny(['lastCommentAuthorId']) ||
+            request.resource.data.lastCommentAuthorId == request.auth.uid) &&
+          (!touched.hasAny(['lastCommentReadBy']) ||
+            request.resource.data.get('lastCommentReadBy', []).toSet()
+              .difference(resource.data.get('lastCommentReadBy', []).toSet())
+              .hasOnly([request.auth.uid]));
+      }
       allow read: if canAccessIssueData(resource.data);
       allow create: if false; // Created through /api/issues or trusted integrations.
       allow update: if issueAcceptsNestedWrites(issueId) &&
@@ -460,7 +478,7 @@ service cloud.firestore {
             'lastCommentMentionIds',
             'lastCommentReadBy',
             'unreadMentions'
-          ]) ||
+          ]) && conversationStampIsOwn() ||
         clientMaintainsOwnAssignees(resource.data));
       allow delete: if false; // Server route enforces hierarchy and cascades.
 
@@ -474,14 +492,24 @@ service cloud.firestore {
         allow create: if issueAcceptsNestedWrites(issueId) &&
           canAccessIssueProject(issueId) &&
           request.resource.data.authorId == request.auth.uid;
-        // The author may edit their own comment; any org member may mark it read
-        // (read receipts) — that write touches only `readBy` and the `readAt`
-        // stamp beside it, and nothing else.
+        // The author may edit the words of their own comment — the text, the
+        // edit stamp, the files and the tasks it names — and nothing about who
+        // said it or when: `authorName`, `createdAt` and the quoted `replyTo`
+        // are drawn as they are stored, so a rewrite there is a quote support
+        // never gave, dated to suit. Any org member may mark it read, and a
+        // receipt names its reader only: `readBy` grows by the caller's own
+        // uid and `readAt` is stamped under that uid, never under another's.
         allow update: if issueAcceptsNestedWrites(issueId) &&
           canAccessIssueProject(issueId) && (
           (resource.data.authorId == request.auth.uid &&
-           request.resource.data.authorId == resource.data.authorId) ||
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'readAt'])
+           request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['text', 'editedAt', 'attachments', 'issueMentions'])) ||
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'readAt']) &&
+           request.resource.data.get('readBy', []).toSet()
+             .difference(resource.data.get('readBy', []).toSet())
+             .hasOnly([request.auth.uid]) &&
+           request.resource.data.get('readAt', {}).diff(resource.data.get('readAt', {}))
+             .affectedKeys().hasOnly([request.auth.uid]))
         );
         // Moderation: the author, or an owner/admin of the organization. Editing
         // is deliberately NOT extended — an edited comment still carries the

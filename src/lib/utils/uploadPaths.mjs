@@ -27,3 +27,13 @@ export function isSafeUploadFolder(folder) {
 export function isSafeStoragePath(storagePath) {
   return typeof storagePath === 'string' && SAFE_PUBLIC_ID.test(storagePath);
 }
+
+// The folders a customer's own files live in. A client role uploads into
+// `attachments` (their requests) and `comments` (their replies) and nowhere
+// else; the desk's logo and the staff's avatars are elsewhere under the same
+// organization prefix and are not theirs to remove.
+const CLIENT_DELETABLE_FOLDER = /^quickteam\/organizations\/[A-Za-z0-9_-]{1,128}\/(attachments|comments)\/[A-Za-z0-9/_-]+$/;
+
+export function clientMayDeleteStoragePath(storagePath) {
+  return typeof storagePath === 'string' && CLIENT_DELETABLE_FOLDER.test(storagePath);
+}
