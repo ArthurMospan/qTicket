@@ -283,11 +283,15 @@ test('the keyboard shortens the shell, not the document', async () => {
   // bare page canvas below it: invisible while the keys are down, and dragged
   // into view the moment somebody pans, with the composer's focus shadow on the
   // seam. Below md the document reaches the bottom again…
-  assert.match(css, /@media \(width < 48rem\) \{\s*\n\s*body\[data-keyboard='open'\] \{\s*\n\s*height: 100dvh;/);
+  assert.match(css, /@media \(width < 48rem\) \{[\s\S]*?body\[data-keyboard='open'\] \{\s*\n\s*height: 100dvh;/);
   // …and if a strip is still pannable it is the shell's own white, not canvas.
+  // The colour is on `body` itself rather than on the keyboard attribute: that
+  // attribute is written by a script after it measures, and a background that
+  // waits for a script shows canvas grey until the script lands — which is what
+  // a reader photographed.
   assert.match(
     css,
-    /body\[data-keyboard='open'\] \{[\s\S]*?background-color: var\(--color-surface\);/,
+    /@media \(width < 48rem\) \{\s*\n(?:[^}]*\n)*?\s*body \{\s*\n\s*background-color: var\(--color-surface\);/,
   );
   // …while the overlap becomes the shell's own padding, so the column still ends
   // exactly on the keys. `max-md:`, which is the same query as the block above.

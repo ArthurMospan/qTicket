@@ -254,6 +254,16 @@
      be subtracted twice and the composer would end a whole keyboard above the
      keys. */
   @media (width < 48rem) {
+    /* The shell is white edge to edge below md, so the page behind it is
+       only ever seen in the strip iOS leaves when it pans for the keyboard.
+       That strip was `bg-canvas` and read as a grey floor under the app.
+       The colour sits here, on `body` itself, rather than on the attribute
+       below: the attribute is written by a script after measurement, and a
+       background must not wait for one — if the write is late, or never
+       happens on some browser, the grey is what the reader gets. */
+    body {
+      background-color: var(--color-surface);
+    }
     body[data-keyboard='open'] {
       height: 100dvh;
       /* Below md the shell is white edge to edge. If the browser still finds a
@@ -602,6 +612,17 @@
   /* Timeline/QuickTeam+ chat composer padding. */
   .chat-composer-dock[data-ui-composition='timeline-composer'] {
     padding: 12px 16px calc(20px + var(--sab));
+  }
+  /* The conversation page mounts the dock with no composition and no
+     padding, so its field ran to the screen edges on a phone. The gutter is
+     the page gutter; the bottom clears the home indicator. Top stays zero —
+     the dock deliberately overlaps the scroll area and paints its own
+     gradient there. Only below md: on a desktop the column is centred and
+     the edges are nowhere near the field. */
+  @media (width < 48rem) {
+    .chat-composer-dock:not([data-ui-composition]) {
+      padding: 0 16px calc(16px + var(--sab));
+    }
   }
   /* The four duration presets and the metric fields declared their own right
      padding to keep the value clear of the unit label. `Input` has carried the
