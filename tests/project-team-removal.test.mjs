@@ -166,10 +166,12 @@ test('the «Учасники» tab offers the removal from a kebab, to the reade
   assert.match(board, /member\.role === 'client_member' && isOnProjectTeam\(project, me\)/);
   assert.match(board, /label: 'Вилучити з проєкту'/);
   assert.match(board, /removeProjectMember\(activeOrgId, project\.id, memberId\)/);
-  // A row with a menu is a plain row: a kebab is a button, and a button inside
-  // a button is not markup. «Профіль» moves into the menu instead.
-  assert.match(board, /onClick=\{!items && onOpen \? \(\) => onOpen\(memberId\) : undefined\}/);
-  assert.match(board, /label: 'Профіль'/);
+  // The row still opens on a click, as it always has. The kebab is a button
+  // and the row is a button, so the kebab is a sibling drawn over the row's
+  // edge — never a menu item standing in for the click.
+  assert.match(board, /onClick=\{onOpen \? \(\) => onOpen\(memberId\) : undefined\}/);
+  assert.doesNotMatch(board, /label: 'Профіль'/);
+  assert.match(board, /<div className="absolute right-3 top-1\/2 -translate-y-1\/2">\s*<ContextMenu/);
 
   const help = await read('../src/lib/content/helpArticles.mjs');
   assert.match(help, /«Вилучити з проєкту»/);

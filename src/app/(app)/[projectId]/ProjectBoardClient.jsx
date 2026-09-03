@@ -40,7 +40,6 @@ import {
   MoreHorizontal,
   UserMinus,
   UserPlus,
-  UserRound,
   UsersRound,
 } from 'lucide-react';
 import TaskRow from '@/components/ui/TaskManagement/TaskRow';
@@ -134,9 +133,12 @@ const SCOPE_OPTIONS = [
 // `menuFor` is the row's kebab: what the reader may do to this person, or
 // `null` for nothing. Arthur asked for a kebab rather than a dialog behind the
 // row — a roster is a list, and one action on a person does not need a screen.
-// A row that has a menu is drawn as a plain row: the kebab is a button, and a
-// button inside a button is not markup, so «Профіль» moves into the menu and
-// the door the row used to be is still one click away.
+// The row still opens the profile on a click, as every row here always has;
+// the kebab is not inside it, because the row is a button and a button inside
+// a button is not markup. It is a sibling drawn over the row's right edge,
+// with room reserved for it inside — the first cut put «Профіль» in the menu
+// and made the row inert, and the owner asked, rightly, why he had to open a
+// menu to do what a click had always done.
 function MemberList({ members, emptyTitle, emptyDescription, onOpen, menuFor }) {
   if (members.length === 0) {
     return (
@@ -162,18 +164,12 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen, menuFor }) 
       {members.map(member => {
         const memberId = member.id || member.uid;
         const menu = menuFor ? menuFor(member) : null;
-        const items = menu
-          ? [
-            ...(onOpen ? [{ label: 'Профіль', icon: UserRound, onClick: () => onOpen(memberId) }] : []),
-            ...menu,
-          ]
-          : null;
         return (
+          <div key={memberId} className="relative">
           <ListRow
-            key={memberId}
             shape="card"
             density="roomy"
-            onClick={!items && onOpen ? () => onOpen(memberId) : undefined}
+            onClick={onOpen ? () => onOpen(memberId) : undefined}
             className="flex items-center gap-3"
           >
             <UserAvatar user={member} size="md" />
@@ -188,15 +184,20 @@ function MemberList({ members, emptyTitle, emptyDescription, onOpen, menuFor }) 
             <Pill tone="neutral" size="sm" shape="badge">
               {organizationRoleLabel(member.role)}
             </Pill>
-            {items ? (
+            {/* The seat the kebab beside the row is drawn over. */}
+            {menu ? <span className="w-8 shrink-0" aria-hidden="true" /> : null}
+          </ListRow>
+          {menu ? (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
               <ContextMenu
                 align="end"
                 dropdownClassName="w-[220px]"
                 trigger={<IconAction label="Дії з учасником" icon={MoreHorizontal} size="sm" />}
-                items={items}
+                items={menu}
               />
-            ) : null}
-          </ListRow>
+            </div>
+          ) : null}
+          </div>
         );
       })}
     </div>

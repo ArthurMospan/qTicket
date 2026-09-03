@@ -18,7 +18,7 @@ import WorkspaceNotificationBridge from '@/components/WorkspaceNotificationBridg
 import IssueReadStateBridge from '@/components/IssueReadStateBridge';
 import WorkspaceDocumentTitle from '@/components/WorkspaceDocumentTitle';
 import WorkspaceCommandPalette from '@/components/WorkspaceCommandPalette';
-import { ConnectionBanner, EmptyState, Surface } from '@/components/ui';
+import { ConnectionBanner } from '@/components/ui';
 import { useOnlineStatus } from '@/lib/hooks/useOnlineStatus';
 import { useRecordAccountSession } from '@/lib/hooks/useAccountSessions';
 import WorkspaceOrganizationRouteGuard from '@/components/WorkspaceOrganizationRouteGuard';
@@ -62,7 +62,18 @@ function useLoadStalled(loading) {
  * One card for every way the workspace can fail to open, so the three of them
  * cannot drift apart in what they claim. `error` decides which sentence it is.
  */
-function WorkspaceLoadFailure({ error, onRetry, onSignOut }) {
+/**
+ * The error `WorkspaceLoadFailure` is handed when there is no organization to
+ * load at all — an account with no verified membership: a client taken off
+ * their last project, an address that was never invited, a staff account that
+ * did not arrive through QuickTeam. It reads as the same closed door as a
+ * membership that was refused, because to the person in front of it that is
+ * what it is. It used to be a screen of its own, with a paragraph explaining
+ * how tenants are provisioned to somebody who had just lost access to one.
+ */
+const NO_ORGANIZATION_ACCESS = Object.freeze({ code: 'permission-denied', message: 'no organization' });
+
+function WorkspaceLoadFailure({ error, email, onRetry, onSignOut }) {
   const kind = organizationLoadErrorKind(error);
   const accessFailure = kind === 'permission-denied' || kind === 'not-found';
   const quotaSpent = isQuotaExceededError(error) || (!accessFailure && isQuotaRefused());
@@ -82,7 +93,9 @@ function WorkspaceLoadFailure({ error, onRetry, onSignOut }) {
   const description = quotaSpent
     ? QUOTA_FAILURE_COPY.description
     : kind === 'permission-denied'
-      ? 'Ваш обліковий запис не має доступу до цієї організації. Якщо ви входили іншим способом — Google, GitHub чи OneB — це інший акаунт, і дані організації на місці.'
+      ? (email
+        ? `Для акаунта ${email} доступу не знайдено. Якщо ви входили іншим способом — Google, GitHub чи OneB — це інший акаунт.`
+        : 'Ваш обліковий запис не має доступу до цієї організації. Якщо ви входили іншим способом — Google, GitHub чи OneB — це інший акаунт, і дані організації на місці.')
       : kind === 'not-found'
         ? 'Організацію видалено або посилання застаріло.'
         : 'Не вдалося прочитати дані організації. Ваші дані не видалені.';
@@ -121,35 +134,6 @@ function WorkspaceLoadFailure({ error, onRetry, onSignOut }) {
         )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function NoOrganizationAccess({ email, onRetry, onSignOut }) {
-  return (
-    <div className="w-full h-full bg-white p-0 md:bg-canvas md:p-[12px]">
-      <Surface preset="card" padding="none" className="flex h-full flex-col overflow-hidden">
-        <EmptyState
-          icon={LockKeyhole}
-          title="Доступ до qTicket не надано"
-          description="qTicket не створює окремих організацій. Клієнт входить лише після запрошення до конкретного проєкту, а працівник відкриває qTicket через QuickTeam."
-          context="flexible"
-        >
-          {email && (
-            <p className="mx-auto mb-5 max-w-[480px] text-[13px] leading-relaxed text-ink-soft">
-              Для акаунта {email} активного доступу не знайдено.
-            </p>
-          )}
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button onClick={onRetry} size="lg" style="secondary">
-              Перевірити доступ
-            </Button>
-            <Button onClick={onSignOut} size="lg">
-              Увійти іншим акаунтом
-            </Button>
-          </div>
-        </EmptyState>
-      </Surface>
     </div>
   );
 }
@@ -264,11 +248,14 @@ export default function WorkspaceLayout({ children }) {
   }
 
   // An authenticated account without a verified membership is not a new
-  // tenant. It is either an uninvited client or a staff account that did not
-  // arrive through QuickTeam, so the only safe result is a closed door.
+  // tenant. It is either an uninvited client, a client taken off their last
+  // project, or a staff account that did not arrive through QuickTeam, so the
+  // only safe result is a closed door — the same closed door as a refused
+  // membership, not a screen of its own.
   if (noOrg) {
     return (
-      <NoOrganizationAccess
+      <WorkspaceLoadFailure
+        error={NO_ORGANIZATION_ACCESS}
         email={currentUser.email}
         onRetry={retryLoad}
         onSignOut={signOutAndReturn}

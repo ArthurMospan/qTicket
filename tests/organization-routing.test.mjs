@@ -421,8 +421,13 @@ test('a short organizations read is asked again, of the server', async () => {
   // A closed access screen follows only from a server-confirmed empty
   // membership list, never from an empty cache.
   assert.match(context, /if \(organizations\.length === 0\) \{[\s\S]*if \(!authoritative\) \{[\s\S]*setNoOrg\(true\);/);
-  assert.match(layout, /function NoOrganizationAccess/);
-  assert.match(layout, /if \(noOrg\) \{[\s\S]*<NoOrganizationAccess/);
+  // One closed door, not two: an account with no organization reads the same
+  // card as a membership that was refused. The owner met the second screen
+  // the night a client seat was taken off its last project and asked why a
+  // new one existed.
+  assert.doesNotMatch(layout, /NoOrganizationAccess|Доступ до qTicket не надано/);
+  assert.match(layout, /if \(noOrg\) \{[\s\S]*<WorkspaceLoadFailure[\s\S]{0,80}error=\{NO_ORGANIZATION_ACCESS\}/);
+  assert.match(layout, /NO_ORGANIZATION_ACCESS = Object\.freeze\(\{ code: 'permission-denied'/);
   assert.doesNotMatch(layout, /router\.replace\('\/onboarding'/);
 });
 
