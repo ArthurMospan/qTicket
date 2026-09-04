@@ -367,3 +367,6 @@ The rules live in [src/lib/utils/statusCategories.mjs](src/lib/utils/statusCateg
 - [Product guardrails and open work](docs/ROADMAP.md)
 - [Data migration runbooks](docs/MIGRATIONS.md)
 - [The QuickTeam contract](docs/integrations/QTICKET.md) — the one cross-repository seam there is
+- Перенесення обох продуктів на власний сервер описане один раз на двох, у
+  репозиторії QuickTeam: `docs/DEPLOYMENT.md`. Там зовнішні сервіси, змінні
+  оточення, планові завдання і порядок кроків — для qTicket теж.
