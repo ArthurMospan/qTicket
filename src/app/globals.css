@@ -635,17 +635,12 @@
   .chat-composer-dock[data-ui-composition='timeline-composer'] {
     padding: 12px 16px calc(20px + var(--sab));
   }
-  /* The conversation page mounts the dock with no composition and no
-     padding, so its field ran to the screen edges on a phone. The gutter is
-     the page gutter; the bottom clears the home indicator. Top stays zero —
-     the dock deliberately overlaps the scroll area and paints its own
-     gradient there. Only below md: on a desktop the column is centred and
-     the edges are nowhere near the field. */
-  @media (width < 48rem) {
-    .chat-composer-dock:not([data-ui-composition]) {
-      padding: 0 16px calc(16px + var(--sab));
-    }
-  }
+  /* The sibling has a second dock — the conversation page mounts one with no
+     composition — and its padding rule was ported here with the rest of that
+     night's work. It matched nothing: every dock in this fork passes
+     `timeline-composer`, because there is no workspace chat here. Removed
+     rather than kept in step, since a rule that cannot fire is a rule the
+     next reader has to disprove. */
   /* The four duration presets and the metric fields declared their own right
      padding to keep the value clear of the unit label. `Input` has carried the
      `suffix` prop since — it measures the label and writes the room as an
@@ -2137,6 +2132,16 @@
      showing underneath, and what makes it stand perfectly still: pinned it
      covers the last stretch of the scrollport, and at the end of the scroll it
      arrives at exactly the blank it was holding. */
+  /* The bottom fade says "there is more below" to a reader who scrolls with a
+     wheel and never sees the scrollbar move. A thumb already knows: the
+     content moves under it. On a phone it is one more grey edge on a screen
+     that is mostly edges, so it stays on the desktop, where it earns its
+     keep. The start/end fades on horizontal rails are untouched. */
+  @media (width < 48rem) {
+    .scroll-shadow--bottom {
+      display: none;
+    }
+  }
   .scroll-shadow--bottom {
     position: sticky;
     bottom: 0;

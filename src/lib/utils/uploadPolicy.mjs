@@ -85,7 +85,17 @@ export const MAX_UPLOAD_MB = Math.round(MAX_UPLOAD_BYTES / (1024 * 1024));
 // Below this a logo is visibly soft on a retina screen at its largest use, the
 // 64px settings preview at 2×. It is advice, not a rule the uploader enforces.
 export const RECOMMENDED_IMAGE_MIN_PX = 256;
-export const ATTACHMENT_UPLOAD_ACCEPT = acceptFor(Object.entries(FORMAT_POLICY));
+// `image/*` and `video/*` are here for one reason: iOS decides whether the
+// picker may offer «Камера» from this attribute, and with a long list of
+// explicit types and no wildcard it offers the camera and then hands back a
+// black frame. The wildcards make it a proper capture target. They widen only
+// what the picker will let somebody CHOOSE — `uploadFilePolicy` still decides
+// what is accepted, on both sides, from the same table.
+export const ATTACHMENT_UPLOAD_ACCEPT = [
+  acceptFor(Object.entries(FORMAT_POLICY)),
+  'image/*',
+  'video/*',
+].join(',');
 
 function normalizedMimeType(value) {
   return typeof value === 'string' ? value.split(';', 1)[0].trim().toLowerCase() : '';
