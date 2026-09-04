@@ -169,7 +169,7 @@ function sortLocations(entries) {
 // section in /ui-kit for the same reason chat does: a control only makes
 // sense next to the others it works with.
 const STRUCTURES = [
-  { id: 'chat', label: 'Чат', file: /(?:\/chat\/|Chat[A-Z]|ChatAttachments|MessageContent|UnifiedTimeline|HoverCard)/ },
+  { id: 'chat', label: 'Чат', file: /(?:\/chat\/|Chat[A-Z]|ChatAttachments|UnifiedTimeline|HoverCard)/ },
   { id: 'ai-call', label: 'AI-дзвінок', file: /(?:ai-call|AudioTask)/i },
   { id: 'tasks', label: 'Задачі', file: /(?:IssueDetail|IssueCard|CreateTaskModal|TaskRow|TaskListView|AttachmentViewer|Markdown)/ },
   { id: 'board', label: 'Дошка й проєкт', file: /(?:AgileBoard|BoardConfig|\(app\)\/\[projectId\]|\(app\)\/page\.js)/ },

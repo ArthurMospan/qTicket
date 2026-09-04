@@ -193,7 +193,6 @@ test('nothing that renders per element resolves itself through search', () => {
   const renderers = [
     'components/workspace/IssueMentionChip.jsx',
     'components/workspace/HoverCard.jsx',
-    'components/workspace/MessageContent.jsx',
     'components/workspace/MentionText.jsx',
   ];
   for (const file of renderers) {

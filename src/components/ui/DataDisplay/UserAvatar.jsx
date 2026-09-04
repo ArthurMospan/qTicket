@@ -40,7 +40,6 @@ function resolveAvatarSize(size) {
   return AVATAR_SIZES[size] ?? AVATAR_SIZES.md;
 }
 
-// src/components/UserAvatar.jsx — Fixed: uses size prop, supports avatar/photoURL
 // `stacked` is the overlapping-avatars ring. It was previously written at the
 // call site as `border-2 border-white` in one place and `ring-2 ring-white` in
 // AvatarGroup — the same visual idea, spelled two different ways, neither of

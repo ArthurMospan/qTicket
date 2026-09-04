@@ -235,9 +235,9 @@ test('the conversation reads back the incident mentions its own composer writes'
 // sentence that matched nothing — into a capsule naming somebody called
 // « у розмові».
 test('a message draws capsules only where something actually matched', async () => {
-  const content = await read('../src/components/workspace/MessageContent.jsx');
+  const content = await read('../src/components/workspace/MentionText.jsx');
 
-  assert.match(content, /tokenizeMessageLine\(line, \{ memberNames \}\)/);
+  assert.match(content, /tokenizeMessageLine\(text, \{ memberNames, formatting: false \}\)/);
   assert.doesNotMatch(content, /part\.startsWith\('@'\)/);
   assert.match(content, /<IssueMentionChip/);
 });

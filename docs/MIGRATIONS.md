@@ -116,45 +116,6 @@ chat, notifications, email, or browser history.
 
 ---
 
-## Private chat attachments
-
-New chat attachments are uploaded with Cloudinary delivery type
-`authenticated`. Firestore stores only the organization-owned public id and
-format, not a delivery URL. The client asks
-`POST /api/chat/attachments/access` for a five-minute signed URL; that route
-checks Firebase authentication, organization membership, direct-message or
-channel membership, and the exact attachment on the message before signing.
-
-Existing chat files remain public until they are converted. Run the migration
-once per organization. Dry-run is the default and does not call Cloudinary or
-write Firestore:
-
-```powershell
-npm run migrate:chat-attachments -- --project quickteam-prod --organization org-id
-```
-
-Review every planned source and destination, freeze chat writes for that
-organization, then apply with exact confirmations:
-
-```powershell
-npm run migrate:chat-attachments -- --project quickteam-prod --organization org-id --apply `
-  --confirm-project quickteam-prod --confirm-organization org-id `
-  --confirm-writes-frozen
-```
-
-The script requires Firebase Admin credentials and, for apply,
-`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
-Destinations are deterministic. On a retry, an already-authenticated
-destination is reused, and a Firestore document is updated only when its live
-attachments still exactly match the reviewed value.
-
-After apply, run dry-run again. `attachmentsPlanned`,
-`otherOrganizationSkipped`, `unsupportedPathSkipped`, and
-`missingFormatSkipped` must be zero before lifting the write freeze. This
-repository does not run the migration during login or deployment.
-
----
-
 ## Organization-scoped image assets
 
 Legacy profile avatars and organization logos were uploaded below
@@ -318,87 +279,6 @@ materialise-пасі). Скрипт потрібен для першого за�
 
 ---
 
-## Сирий запис імпорту з задачі (`issues/{id}/import/source`)
-
-`scripts/trim-issue-import-metadata.mjs` переносить сирий запис імпорту з
-документа задачі в підколекцію.
-
-Замір на проді 27.08.2026: 720 задач, 2 729 KiB документів, 672 з них імпортовані
-з YouTrack. `importMetadata` важив 840 KiB — найважче поле в колекції, важче за
-всі описи разом узяті, — і продукт читає з нього **три підполя, 40 KiB**. Решта
-800 KiB доставлялась кожному браузеру при кожному відкритті дошки і не читалась
-нічим:
-
-| Підполе | Вага | Частка корпусу | Хто читає |
-| --- | --- | --- | --- |
-| `customFields` | 479 KiB | 17.4% | ніхто |
-| `externalReporter` | 113 KiB | 4.1% | ніхто |
-| `externalAssignees` | 17 KiB | 0.6% | ніхто |
-| `tags` | 11 KiB | 0.4% | ніхто |
-| `externalWatchers` | 0 KiB | 0.0% | ніхто |
-
-**Читань це не економить нікілька.** Firestore рахує читання по документах, і
-дошка читає ті самі документи. Це трафік, час парсингу і пам'ять браузера — не
-денна стеля. Це варто казати вголос, бо саме стеля була причиною обох падінь, і
-цю зміну легко помилково записати туди ж.
-
-Перенесення, а не видалення: це дані з чужої системи, і відтворити їх можна лише
-повторним імпортом. Вони їдуть у `issues/{issueId}/import/source` — підколекцію,
-якої не описує жодне правило Firestore, тож із браузера вона недосяжна взагалі
-(так само закриті `errorReports`). Ніщо на неї не підписане, тож тримати її
-безкоштовно. Що лишається на задачі й чому — у
-`src/lib/utils/issueImportRecord.mjs`.
-
-Ідемпотентний: задача, чий запис уже переїхав, не має жодного з важких підполів,
-тож другий прохід не знаходить роботи. Це і є аудит.
-
-### 1. Dry run
-
-```powershell
-npm run trim:import-metadata -- --project quickteam-me
-```
-
-### 2. Apply
-
-Спершу на одній задачі — прохід ідемпотентний, тож це та сама операція, а не
-окремий режим:
-
-```powershell
-npm run trim:import-metadata -- --project quickteam-me --apply --confirm-project quickteam-me --limit 1
-```
-
-Перевірити цю задачу в консолі (`importMetadata` без важких підполів,
-`import/source` із ними) — і далі решта:
-
-```powershell
-npm run trim:import-metadata -- --project quickteam-me --apply --confirm-project quickteam-me --report C:\tmp\import-metadata.json
-```
-
-Копія пишеться **до** очищення полів, в одному батчі: батч лягає цілком або не
-лягає взагалі, тож моменту, коли запис не існує ніде, немає.
-
-### 3. Повторний dry run — це і є підтвердження
-
-Має надрукувати `Нічого рухати. Міграція завершена.`
-
-### Описи задач лишаються на місці
-
-Це те, з чого розслідування почалось, і відповідь — ні. Середній опис 783
-символи, сумарно 769 KiB (28% корпусу), розподілені рівно (топ-50 документів —
-38% ваги). Винесення їх у підколекцію:
-
-- **не зекономило б жодного читання** — дошка читає ті самі документи;
-- **зламало б пошук по тексту**: `searchRanking.mjs` ранжує за
-  `issue.description`, а `/api/search` читає його через `.select()` на сервері.
-  Підколекція перетворила б це на N додаткових читань на кожен пошук — тобто
-  зробила б гірше рівно тому лімітові, заради якого все затівалось;
-- коштувала б змін у `firestore.rules`, прогону емулятора і міграції 720
-  документів.
-
-Ціна висока, виграш — той самий трафік, який дешевше забрати з `importMetadata`.
-
----
-
 ## Курсор замість позначки в кожному повідомленні (міграції немає)
 
 Цей розділ існує саме тому, що скрипта тут немає, і це треба було перевірити, а
@@ -441,48 +321,6 @@ firebase deploy --only firestore:indexes --project quickteam-prod
 просто нічого не видалить — доставка сповіщень від цього не залежить і не
 зупиняється. Тому індекс варто розкотити перед кодом, але зворотний порядок не є
 аварією: наступний повільний прохід підбере те саме.
-
-## API-ключі: з документа організації в приватний, з тексту в хеш
-
-`npm run migrate:api-keys`
-
-### Що і навіщо
-
-Ключі, створені до переходу на хеші, лежали двома способами одразу неправильно:
-значенням самого токена (а не його відбитка) і на документі
-`organizations/{orgId}`, який **читає будь-який учасник організації**. Через
-`/api/v1/tasks` такий ключ дає те, чого учасник із роллю `member` не має.
-Порівнювався він до того ж через `===`, а не в сталий час.
-
-Конвертація існувала, але спрацьовувала лише коли власник чи адміністратор
-відкриє екран «API-ключі». Міграція безпеки, привʼязана до візиту, не має способу
-дізнатися, чи вона завершилась — саме тому вона тут.
-
-Ключ зберігає свій `id`, назву, `createdAt` і `createdBy`, тож нічого
-перевипускати не треба: на екрані все лишається як було, змінюється тільки те, як
-воно зберігається.
-
-### Порядок
-
-```powershell
-# 1. Побачити, що зміниться (нічого не пише)
-node --env-file=.env.local scripts/migrate-api-keys.mjs --project quickteam-me
-
-# 2. Застосувати
-node --env-file=.env.local scripts/migrate-api-keys.mjs --project quickteam-me `
-  --apply --confirm-project quickteam-me
-```
-
-Повторний запуск безпечний: він пише те саме обчислене значення.
-
-### Стан на 26.08.2026
-
-Dry-run проти `quickteam-me` показав **0 legacy-ключів у всіх 7 організаціях**.
-Тому гілку `if (key.token) return key.token === token` у
-`src/lib/server/firebaseAdmin.js` видалено разом із фолбеком на `apiKeys`
-документа організації. Перед розгортанням на будь-який інший Firebase-проєкт
-спершу проженіть цей скрипт: після видалення гілки ключ у відкритому вигляді
-просто перестане автентифікувати.
 
 ## Лічильники обмеження частоти
 
