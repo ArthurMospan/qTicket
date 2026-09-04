@@ -85,8 +85,18 @@ const nextConfig = {
       { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       {
+        // `camera=(self)`, not `camera=()`. An empty allowlist refuses the
+        // camera to every origin INCLUDING this one, and iOS applies it to
+        // the capture behind a file input as well as to getUserMedia: the
+        // system camera opens, because that is the OS picker, and hands back
+        // a black frame, because the page it would deliver to is not allowed
+        // to receive it. That is «Камера» in the attachment sheet, reported
+        // as broken for a long time and never traced past the picker.
+        // `self` is the narrowest value that lets somebody take a photo to
+        // attach: this origin only, still nothing for a framed third party.
+        // Geolocation stays refused to everyone — nothing here asks for it.
         key: 'Permissions-Policy',
-        value: 'camera=(), geolocation=(), browsing-topics=()',
+        value: 'camera=(self), geolocation=(), browsing-topics=()',
       },
       { key: 'Content-Security-Policy-Report-Only', value: CONTENT_SECURITY_POLICY },
     ];

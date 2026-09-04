@@ -11,7 +11,13 @@ test('every route receives the baseline browser security headers', async () => {
   assert.equal(headers.get('X-Content-Type-Options'), 'nosniff');
   assert.equal(headers.get('X-Frame-Options'), 'SAMEORIGIN');
   assert.equal(headers.get('Referrer-Policy'), 'strict-origin-when-cross-origin');
-  assert.match(headers.get('Permissions-Policy'), /camera=\(\)/);
+  // `self`, and deliberately not `()`. An empty allowlist refuses the camera
+  // to this origin too, and iOS extends that to the capture behind a file
+  // input — the camera opens and returns a black frame. Somebody attaching a
+  // photo is the one thing here that needs it, so the allowlist is this
+  // origin and nothing else; widening it to `*` fails the line below.
+  assert.match(headers.get('Permissions-Policy'), /camera=\(self\)/);
+  assert.doesNotMatch(headers.get('Permissions-Policy'), /camera=\*/);
   assert.match(headers.get('Permissions-Policy'), /geolocation=\(\)/);
 });
 
