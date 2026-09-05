@@ -24,6 +24,7 @@ import {
   organizationPortalBackground,
   resolveOrganizationPortalBrand,
 } from '@/lib/utils/organizationBranding.mjs';
+import { isResolvedOrganization } from '@/lib/utils/organizationList.mjs';
 
 /**
  * The two lines beside the mark, and there is one of them.
@@ -164,24 +165,38 @@ export default function WorkspaceSidebar() {
   // and saw it on the client's rail only. The invitation landing page paints
   // itself from the same two functions, so the front door and the rail are the
   // same shade of the same company.
-  const portalBrand = useMemo(
-    () => resolveOrganizationPortalBrand(activeOrg),
-    [activeOrg],
+  // Заглушка, яку список публікує за членство без документа, тут не
+  // організація: у ній немає ні назви, ні логотипа, ні кольору — і саме з неї
+  // малювався кут рейки, поки документ їхав. Слово «Підтримка» на стандартному
+  // чорному — це вона.
+  const resolvedOrg = isResolvedOrganization(activeOrg) ? activeOrg : null;
+  const liveBrand = useMemo(
+    () => resolveOrganizationPortalBrand(resolvedOrg),
+    [resolvedOrg],
   );
   const orgBrand = useCachedOrgBranding(activeOrgId, activeOrg);
-  const { sidebarTheme, sidebarColor } = orgBrand || portalBrand;
+  // Кеш — не запасний варіант, а той самий бренд, збережений минулого разу. Він
+  // покриває ту саму мить, і покриває її цілком: колір, назву й логотип, а не
+  // самий колір, як було. Живі дані повертають ті ж чотири поля, тож коли вони
+  // приходять — це той самий об'єкт, і жодна з них не «перемагає» іншу.
+  const portalBrand = orgBrand ? { ...liveBrand, ...orgBrand } : liveBrand;
+  const { sidebarTheme, sidebarColor } = portalBrand;
   const theme = useMemo(
     () => computeSidebarTheme(organizationPortalBackground({ sidebarTheme, sidebarColor })),
     [sidebarTheme, sidebarColor],
   );
 
-  // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня.
-  useSidebarThemeBoot(theme, Boolean(activeOrg), activeOrgId);
+  // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня. «Справжня» —
+  // це живий документ і тільки він: записати сюди дефолт із заглушки означало
+  // отруїти анти-мигання на наступне завантаження.
+  useSidebarThemeBoot(theme, Boolean(resolvedOrg), activeOrgId);
 
   // Поки не приїхав документ організації — лого й назва невідомі. Замість
   // того щоб на мить показати биту картинку чи чужу назву, показуємо скелетон;
-  // знак рендериться лише коли готово.
-  const brandingReady = Boolean(activeOrg);
+  // знак рендериться лише коли готово. Кешований бренд теж готовий: він уже
+  // належить цій організації, і показати його краще, ніж скелетон на місці
+  // назви, яка не змінилась.
+  const brandingReady = Boolean(resolvedOrg) || Boolean(orgBrand);
 
   const isActive = (href, exact, section) => {
     const targetPath = href.split('?')[0];

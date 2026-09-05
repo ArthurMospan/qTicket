@@ -1845,7 +1845,7 @@
             "src/app/(app)/settings/page.js:700",
             "src/app/(app)/settings/page.js:706",
             "src/app/(app)/settings/page.js:713",
-            "src/components/MobileNav.jsx:400",
+            "src/components/MobileNav.jsx:407",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/profile/ProfileView.jsx:183",
             "src/components/workspace/IssueDetail.jsx:1359",
@@ -1999,7 +1999,7 @@
             "src/app/(app)/settings/page.js:713",
             "src/app/(app)/team/page.js:178",
             "src/app/(app)/team/page.js:187",
-            "src/components/MobileNav.jsx:400",
+            "src/components/MobileNav.jsx:407",
             "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceHeader.jsx:380",
             "src/components/WorkspaceHelpMenu.jsx:89",
@@ -2072,7 +2072,7 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:317",
             "src/components/InviteMemberDialog.jsx:335",
-            "src/components/MobileNav.jsx:400",
+            "src/components/MobileNav.jsx:407",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80",
@@ -2186,7 +2186,7 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:317",
             "src/components/InviteMemberDialog.jsx:335",
-            "src/components/MobileNav.jsx:400",
+            "src/components/MobileNav.jsx:407",
             "src/components/WorkspaceHelpMenu.jsx:89",
             "src/components/WorkspaceInfoCenter.jsx:102",
             "src/components/WorkspaceInfoCenter.jsx:162",
@@ -2284,7 +2284,7 @@
             "src/components/InviteLinkSection.jsx:140",
             "src/components/InviteMemberDialog.jsx:317",
             "src/components/InviteMemberDialog.jsx:335",
-            "src/components/MobileNav.jsx:400",
+            "src/components/MobileNav.jsx:407",
             "src/components/WorkspaceHeader.jsx:364",
             "src/components/WorkspaceHeader.jsx:380",
             "src/components/WorkspaceHelpMenu.jsx:89",
@@ -2466,7 +2466,7 @@
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:400",
+            "src/components/MobileNav.jsx:407",
             "src/components/WorkspaceHelpMenu.jsx:89"
           ]
         },
@@ -2511,7 +2511,7 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:195",
-            "src/components/MobileNav.jsx:319"
+            "src/components/MobileNav.jsx:326"
           ]
         },
         "md": {
@@ -2579,7 +2579,7 @@
           ],
           "files": [
             "src/app/(app)/page.js:212",
-            "src/components/MobileNav.jsx:319",
+            "src/components/MobileNav.jsx:326",
             "src/components/workspace/UnifiedTimeline.jsx:1551",
             "src/components/workspace/UnifiedTimeline.jsx:1552",
             "src/components/workspace/UnifiedTimeline.jsx:1687",
@@ -2658,7 +2658,7 @@
             "src/app/(app)/page.js:212",
             "src/app/(app)/settings/page.js:428",
             "src/app/(app)/settings/page.js:429",
-            "src/components/MobileNav.jsx:319",
+            "src/components/MobileNav.jsx:326",
             "src/components/WorkspaceHeader.jsx:456",
             "src/components/WorkspaceHeader.jsx:474"
           ]
@@ -2701,7 +2701,7 @@
             "src/app/(app)/page.js:212",
             "src/app/(app)/settings/page.js:428",
             "src/app/(app)/settings/page.js:429",
-            "src/components/MobileNav.jsx:319",
+            "src/components/MobileNav.jsx:326",
             "src/components/WorkspaceHeader.jsx:456",
             "src/components/WorkspaceHeader.jsx:474",
             "src/components/profile/ProfileModal.jsx:41",
@@ -4053,10 +4053,10 @@
           "count": 4,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:250",
-            "src/components/MobileNav.jsx:309",
-            "src/components/WorkspaceSidebar.jsx:103",
-            "src/components/WorkspaceSidebar.jsx:513"
+            "src/components/MobileNav.jsx:257",
+            "src/components/MobileNav.jsx:316",
+            "src/components/WorkspaceSidebar.jsx:104",
+            "src/components/WorkspaceSidebar.jsx:528"
           ]
         },
         "md": {
@@ -4072,10 +4072,10 @@
           "count": 4,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:250",
-            "src/components/MobileNav.jsx:309",
-            "src/components/WorkspaceSidebar.jsx:103",
-            "src/components/WorkspaceSidebar.jsx:513"
+            "src/components/MobileNav.jsx:257",
+            "src/components/MobileNav.jsx:316",
+            "src/components/WorkspaceSidebar.jsx:104",
+            "src/components/WorkspaceSidebar.jsx:528"
           ]
         },
         "(default)": {
@@ -4091,17 +4091,17 @@
           "count": 4,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:250",
-            "src/components/MobileNav.jsx:309",
+            "src/components/MobileNav.jsx:257",
+            "src/components/MobileNav.jsx:316",
             "src/components/OrgSwitcherScreen.jsx:75",
-            "src/components/WorkspaceSidebar.jsx:103"
+            "src/components/WorkspaceSidebar.jsx:104"
           ]
         },
         "info": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:513"
+            "src/components/WorkspaceSidebar.jsx:528"
           ]
         }
       },
@@ -4110,9 +4110,9 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/MobileNav.jsx:250",
-            "src/components/MobileNav.jsx:309",
-            "src/components/WorkspaceSidebar.jsx:103"
+            "src/components/MobileNav.jsx:257",
+            "src/components/MobileNav.jsx:316",
+            "src/components/WorkspaceSidebar.jsx:104"
           ]
         },
         "inverse-outline": {
@@ -4126,7 +4126,7 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:513"
+            "src/components/WorkspaceSidebar.jsx:528"
           ]
         }
       }
@@ -4515,15 +4515,15 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:311"
+            "src/components/WorkspaceSidebar.jsx:326"
           ]
         },
         "caption": {
           "count": 2,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:317",
-            "src/components/WorkspaceSidebar.jsx:320"
+            "src/components/WorkspaceSidebar.jsx:332",
+            "src/components/WorkspaceSidebar.jsx:335"
           ]
         }
       },
@@ -4532,21 +4532,21 @@
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:311"
+            "src/components/WorkspaceSidebar.jsx:326"
           ]
         },
         "wide": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:317"
+            "src/components/WorkspaceSidebar.jsx:332"
           ]
         },
         "half": {
           "count": 1,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:320"
+            "src/components/WorkspaceSidebar.jsx:335"
           ]
         }
       },
@@ -4555,9 +4555,9 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/components/WorkspaceSidebar.jsx:311",
-            "src/components/WorkspaceSidebar.jsx:317",
-            "src/components/WorkspaceSidebar.jsx:320"
+            "src/components/WorkspaceSidebar.jsx:326",
+            "src/components/WorkspaceSidebar.jsx:332",
+            "src/components/WorkspaceSidebar.jsx:335"
           ]
         }
       }

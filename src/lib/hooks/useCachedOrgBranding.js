@@ -9,8 +9,38 @@
 import { useEffect, useState } from 'react';
 import { SIDEBAR_THEME_VERSION } from '@/lib/utils/sidebarTheme';
 import { resolveOrganizationPortalBrand } from '@/lib/utils/organizationBranding.mjs';
+import { isResolvedOrganization } from '@/lib/utils/organizationList.mjs';
 
 const cacheKey = orgId => `qt_sidebar_brand_${orgId}`;
+
+// Версія записів у кеші бренду.
+//
+// Кеш існує проти мигання, а якийсь час сам його й спричиняв: активною
+// вважалась заглушка на час читання, з неї виходив дефолтний бренд — «Підтримка»
+// на стандартному чорному, — і саме він лягав у кеш поверх справжнього. Отруєні
+// записи вже лежать у браузерах, і без версії перше завантаження після
+// виправлення показало б рівно те, що виправляли. Підняти число — викинути всі
+// записи старого зразка разом; замість них один раз буде скелетон, а далі кеш
+// наповниться правильним.
+const BRAND_CACHE_VERSION = 1;
+
+function readCachedBrand(orgId) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(cacheKey(orgId)) || 'null');
+    if (!stored || stored.v !== BRAND_CACHE_VERSION) return null;
+    return stored.brand ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// `brand` може бути й `null` — це теж відповідь («бренду немає»), тож вона
+// загорнута, а не збережена як є.
+function writeCachedBrand(orgId, brand) {
+  try {
+    localStorage.setItem(cacheKey(orgId), JSON.stringify({ v: BRAND_CACHE_VERSION, brand }));
+  } catch { /* storage may be disabled */ }
+}
 
 // One tenant, one brand, one reader.
 //
@@ -38,32 +68,28 @@ function normalizeBrand(org) {
 
 export function useCachedOrgBranding(activeOrgId, activeOrg) {
   const [cached, setCached] = useState(null);
+  // Заглушка, яку список публікує за членство без документа, не є організацією
+  // тут. Вона не має ні назви, ні логотипа, ні кольору — а живі дані вона
+  // заступала: кеш віддавали лише «поки організації немає», і заглушка цю
+  // умову закривала. Тому бренд зникав саме в ту мить, для якої кеш і є, а
+  // ефект нижче ще й записував дефолт поверх нього.
+  const organization = isResolvedOrganization(activeOrg) ? activeOrg : null;
 
   // Читаємо кеш, щойно відомий orgId — ще до приходу документа організації.
   useEffect(() => {
     queueMicrotask(() => {
-      if (!activeOrgId) {
-        setCached(null);
-        return;
-      }
-      try {
-        setCached(JSON.parse(localStorage.getItem(cacheKey(activeOrgId)) || 'null'));
-      } catch {
-        setCached(null);
-      }
+      setCached(activeOrgId ? readCachedBrand(activeOrgId) : null);
     });
   }, [activeOrgId]);
 
   // Живі дані оновлюють кеш: наступне перезавантаження стартує з того бренду,
   // який QuickTeam надіслав останнім.
   useEffect(() => {
-    if (!activeOrgId || !activeOrg) return;
-    try {
-      localStorage.setItem(cacheKey(activeOrgId), JSON.stringify(normalizeBrand(activeOrg)));
-    } catch {}
-  }, [activeOrgId, activeOrg]);
+    if (!activeOrgId || !organization) return;
+    writeCachedBrand(activeOrgId, normalizeBrand(organization));
+  }, [activeOrgId, organization]);
 
-  if (activeOrg) return normalizeBrand(activeOrg);
+  if (organization) return normalizeBrand(organization);
   return cached;
 }
 

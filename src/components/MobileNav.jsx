@@ -25,6 +25,7 @@ import {
   organizationPortalBackground,
   resolveOrganizationPortalBrand,
 } from '@/lib/utils/organizationBranding.mjs';
+import { isResolvedOrganization } from '@/lib/utils/organizationList.mjs';
 
 // The bar is glass: the organization's colour at this much opacity over a blur
 // of whatever is scrolling underneath. It is a request rather than a setting —
@@ -134,12 +135,17 @@ export default function MobileNav({ keyboardOpen = false, composerFocused = fals
   // organization document arrives. No `clientViewer` in it — the corner of the
   // sheet named the organization to staff and the desk to a customer, so the
   // owner who set a desk name in QuickTeam saw it on the customer's phone only.
-  const portalBrand = useMemo(
-    () => resolveOrganizationPortalBrand(activeOrg),
-    [activeOrg],
+  // The same rule the rail follows: a membership whose organization document
+  // has not arrived is published as a placeholder, and a placeholder has no
+  // name, no logo and no colour to read.
+  const resolvedOrg = isResolvedOrganization(activeOrg) ? activeOrg : null;
+  const liveBrand = useMemo(
+    () => resolveOrganizationPortalBrand(resolvedOrg),
+    [resolvedOrg],
   );
   const orgBrand = useCachedOrgBranding(activeOrgId, activeOrg);
-  const { sidebarTheme, sidebarColor } = orgBrand || portalBrand;
+  const portalBrand = orgBrand ? { ...liveBrand, ...orgBrand } : liveBrand;
+  const { sidebarTheme, sidebarColor } = portalBrand;
   const theme = useMemo(
     () => computeSidebarTheme(organizationPortalBackground({ sidebarTheme, sidebarColor })),
     [sidebarTheme, sidebarColor],
@@ -153,8 +159,9 @@ export default function MobileNav({ keyboardOpen = false, composerFocused = fals
     [theme.bg],
   );
 
-  // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня.
-  useSidebarThemeBoot(theme, Boolean(activeOrg), activeOrgId);
+  // Кеш теми + зняття boot-стилю з layout.js, щойно тема справжня — тобто
+  // живий документ, а не заглушка на час читання.
+  useSidebarThemeBoot(theme, Boolean(resolvedOrg), activeOrgId);
 
   // Close the sheet on navigation.
   useEffect(() => { queueMicrotask(() => setMoreOpen(false)); }, [pathname]);

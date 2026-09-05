@@ -138,7 +138,23 @@ const IOS_FOCUS_ZOOM_SCRIPT = `(function(){try{var ua=navigator.userAgent;var iO
 // Тепер boot задає лише змінні, а фарбують себе поверхні: обидві малюють
 // background з var(--sb-bg), тож !important на змінній так само перебиває
 // інлайновий стиль React і анти-мигання лишається тим самим.
-const SIDEBAR_BOOT_SCRIPT = `(function(){try{var o=sessionStorage.getItem('qt_active_org_id');if(!o)return;var t=JSON.parse(localStorage.getItem('qt_sidebar_theme:'+o)||'null');if(!t)return;if(t.v!==${SIDEBAR_THEME_VERSION})return;var ok=function(v){return typeof v==='string'&&/^(#[0-9a-fA-F]{3,8}|rgba?\\([0-9.,%\\s]+\\))$/.test(v)};if(!ok(t.bg))return;var map={text:'--sb-text',muted:'--sb-muted',hover:'--sb-hover',active:'--sb-active',border:'--sb-border',mutedProject:'--sb-muted-project',mutedHeader:'--sb-muted-header'};var css='--sb-bg:'+t.bg+' !important;';for(var k in map){if(ok(t[k]))css+=map[k]+':'+t[k]+' !important;'}var s=document.createElement('style');s.id='sb-boot-theme';s.textContent='[data-app-sb]{'+css+'}';document.head.appendChild(s)}catch(e){}})();`;
+// Яку організацію фарбувати, поки на сторінці ще нічого немає.
+//
+// Порядок той самий, за яким її обирає застосунок: адреса важить більше за
+// вкладку, вкладка — більше за пам'ять браузера. Третій крок новий, і він
+// закриває єдиний випадок, у якому анти-мигання не працювало взагалі, — нову
+// вкладку. Вибір організації живе в `sessionStorage`, тобто нова вкладка його
+// не має, скрипт виходив ні з чим, і рейка спалахувала стандартною темною
+// темою. Зі старої вкладки — ні, і саме тому це виглядало як «раніше бренд
+// вантажився одразу». `qt_last_org_id:<uid>` — той простір, у якому акаунт
+// працював востаннє; з нього ж стартує й `OrgContext`.
+//
+// Тільки коли такий ключ рівно один. Два акаунти в одному браузері — це два
+// ключі й жодної підстави вгадувати, чий зараз відкривають; кадр стандартної
+// теми кращий за кадр чужого кольору.
+const BOOT_ORGANIZATION = `var m=/[?&]org=([^&#]+)/.exec(location.search);var o=m?decodeURIComponent(m[1]):sessionStorage.getItem('qt_active_org_id');if(!o){var p='qt_last_org_id:',f=null,n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(p)===0){n++;f=localStorage.getItem(k)}}if(n===1)o=f}`;
+
+const SIDEBAR_BOOT_SCRIPT = `(function(){try{${BOOT_ORGANIZATION}if(!o)return;var t=JSON.parse(localStorage.getItem('qt_sidebar_theme:'+o)||'null');if(!t)return;if(t.v!==${SIDEBAR_THEME_VERSION})return;var ok=function(v){return typeof v==='string'&&/^(#[0-9a-fA-F]{3,8}|rgba?\\([0-9.,%\\s]+\\))$/.test(v)};if(!ok(t.bg))return;var map={text:'--sb-text',muted:'--sb-muted',hover:'--sb-hover',active:'--sb-active',border:'--sb-border',mutedProject:'--sb-muted-project',mutedHeader:'--sb-muted-header'};var css='--sb-bg:'+t.bg+' !important;';for(var k in map){if(ok(t[k]))css+=map[k]+':'+t[k]+' !important;'}var s=document.createElement('style');s.id='sb-boot-theme';s.textContent='[data-app-sb]{'+css+'}';document.head.appendChild(s)}catch(e){}})();`;
 
 export default function RootLayout({ children }) {
   return (
