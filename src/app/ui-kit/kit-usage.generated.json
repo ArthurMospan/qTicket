@@ -1746,8 +1746,8 @@
           ],
           "files": [
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:768",
-            "src/app/(app)/layout.js:128",
-            "src/app/(app)/layout.js:132",
+            "src/app/(app)/layout.js:143",
+            "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:530",
             "src/app/(app)/overview/page.js:258",
             "src/app/(app)/page.js:787",
@@ -1966,8 +1966,8 @@
           "count": 4,
           "routes": [],
           "files": [
-            "src/app/(app)/layout.js:128",
-            "src/app/(app)/layout.js:132",
+            "src/app/(app)/layout.js:143",
+            "src/app/(app)/layout.js:147",
             "src/components/WorkspaceInfoCenter.jsx:162",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80"
           ]
@@ -2033,8 +2033,8 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:768",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:867",
             "src/app/(app)/error.js:110",
-            "src/app/(app)/layout.js:128",
-            "src/app/(app)/layout.js:132",
+            "src/app/(app)/layout.js:143",
+            "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:508",
             "src/app/(app)/my/page.js:530",
             "src/app/(app)/my/page.js:558",
@@ -2147,8 +2147,8 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:768",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:867",
             "src/app/(app)/error.js:110",
-            "src/app/(app)/layout.js:128",
-            "src/app/(app)/layout.js:132",
+            "src/app/(app)/layout.js:143",
+            "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:508",
             "src/app/(app)/my/page.js:530",
             "src/app/(app)/my/page.js:558",
@@ -2252,8 +2252,8 @@
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:758",
             "src/app/(app)/[projectId]/ProjectBoardClient.jsx:867",
             "src/app/(app)/error.js:110",
-            "src/app/(app)/layout.js:128",
-            "src/app/(app)/layout.js:132",
+            "src/app/(app)/layout.js:143",
+            "src/app/(app)/layout.js:147",
             "src/app/(app)/my/page.js:508",
             "src/app/(app)/my/page.js:530",
             "src/app/(app)/my/page.js:558",
@@ -2446,8 +2446,8 @@
           "count": 3,
           "routes": [],
           "files": [
-            "src/app/(app)/layout.js:128",
-            "src/app/(app)/layout.js:132",
+            "src/app/(app)/layout.js:143",
+            "src/app/(app)/layout.js:147",
             "src/components/WorkspaceOrganizationRouteGuard.jsx:80"
           ]
         },

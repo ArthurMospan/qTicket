@@ -93,3 +93,27 @@ test('a pasted link unfurls as something', async () => {
   assert.match(layout, /metadataBase: new URL\(SITE_URL\)/);
   assert.match(layout, /card: 'summary_large_image'/);
 });
+
+// The one screen most likely to be a customer's first impression, and it was
+// signed by somebody else's product.
+//
+// qTicket was forked from QuickTeam, and the card the workspace shows when it
+// cannot open came across with the parent's name hardcoded into it: «QuickTeam
+// тимчасово недоступний», on qticket-qt.vercel.app, to a client of a support
+// desk who has never heard of QuickTeam and has no account in it. Staff arrive
+// through QuickTeam and its name belongs on the screens about that handoff;
+// an outage is not one of them.
+test('a workspace that will not open is signed by this product', async () => {
+  const layout = await read('../src/app/(app)/layout.js');
+
+  assert.match(layout, /import \{ PRODUCT_NAME \} from '@\/lib\/content\/product\.mjs';/);
+  assert.match(layout, /\$\{PRODUCT_NAME\} тимчасово недоступний/);
+  assert.match(layout, /Не вдалося відкрити \$\{PRODUCT_NAME\}/);
+  assert.doesNotMatch(layout, /'QuickTeam тимчасово недоступний'/);
+
+  // And it no longer blames a read that never happened. The stall timer renders
+  // this card with no error at all — the boot did not finish — which is a
+  // different sentence from an organization that answered «no».
+  assert.match(layout, /const stalled = !error;/);
+  assert.match(layout, /Завантаження не завершилося\./);
+});

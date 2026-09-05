@@ -8,8 +8,8 @@
     "catalogContract": "Only source files reachable from src/app/(app) belong to the UI Kit product catalog."
   },
   "totals": {
-    "productFiles": 181,
-    "parsedFiles": 181,
+    "productFiles": 182,
+    "parsedFiles": 182,
     "parseErrors": 0,
     "nativeControls": 15,
     "structures": {

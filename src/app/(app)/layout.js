@@ -30,6 +30,7 @@ import { isQuotaExceededError } from '@/lib/utils/errors';
 import { isQuotaRefused, QUOTA_FAILURE_COPY } from '@/lib/utils/quotaState.mjs';
 import { isClientRole } from '@/lib/utils/can';
 import { isClientPortalRoute } from '@/lib/utils/clientPortalRoutes.mjs';
+import { PRODUCT_NAME } from '@/lib/content/product.mjs';
 
 // A spinner is a promise that something is coming. When nothing is, it is the
 // worst screen the product has: it asks the reader to keep waiting and never
@@ -78,14 +79,26 @@ function WorkspaceLoadFailure({ error, email, onRetry, onSignOut }) {
   const kind = organizationLoadErrorKind(error);
   const accessFailure = kind === 'permission-denied' || kind === 'not-found';
   const quotaSpent = isQuotaExceededError(error) || (!accessFailure && isQuotaRefused());
+  // The stall timer above renders this card with nothing to show for it: no
+  // read was refused, the boot simply never finished. That is a different
+  // sentence from a read that came back «no», and it used to borrow that one —
+  // so a page that never got as far as asking about an organization announced
+  // that it had failed to read one.
+  const stalled = !error;
 
+  // Whose outage this is. qTicket is opened from QuickTeam and its staff arrive
+  // through it, but a customer signing in to a support desk has never heard of
+  // QuickTeam, and this card is the one screen they are most likely to meet on
+  // a bad day. It names the product they came to.
   const title = quotaSpent
     ? QUOTA_FAILURE_COPY.title
     : kind === 'permission-denied'
       ? 'Немає доступу до організації'
       : kind === 'not-found'
         ? 'Організацію не знайдено'
-        : 'QuickTeam тимчасово недоступний';
+        : stalled
+          ? `Не вдалося відкрити ${PRODUCT_NAME}`
+          : `${PRODUCT_NAME} тимчасово недоступний`;
 
   // Google, GitHub and OneB are three separate accounts unless they have been
   // linked in settings, so «no access» is far more often «signed in as somebody
@@ -99,7 +112,9 @@ function WorkspaceLoadFailure({ error, email, onRetry, onSignOut }) {
         : 'Ваш обліковий запис не має доступу до цієї організації. Якщо ви входили іншим способом — Google, GitHub чи OneB — це інший акаунт, і дані організації на місці.')
       : kind === 'not-found'
         ? 'Організацію видалено або посилання застаріло.'
-        : 'Не вдалося прочитати дані організації. Ваші дані не видалені.';
+        : stalled
+          ? 'Завантаження не завершилося. Перезавантажте сторінку — ваші дані на місці.'
+          : 'Не вдалося прочитати дані організації. Ваші дані не видалені.';
 
   // The workspace's own shape, not a card floating on grey. Every other screen
   // in the product is a white pane inset from a grey shell, and this one dropped

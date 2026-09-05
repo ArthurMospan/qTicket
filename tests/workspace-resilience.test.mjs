@@ -110,3 +110,31 @@ test('a materialisation larger than one Firestore batch still commits', async ()
   // quiet period is exactly when there are most of them.
   assert.match(source, /index \+= BATCH_LIMIT/);
 });
+
+// A tab that opens behind the current one, or comes back with a restored
+// session, boots with `document.visibilityState === 'hidden'`. firebase-auth's
+// IndexedDB persistence refuses to open in that state — «Database is
+// closing/hidden» — and the refusal lands inside the SDK's own
+// `initializeCurrentUser()`, which does not catch it. The initialization
+// promise rejects, `onAuthStateChanged` hangs off it with no rejection handler
+// and is never called, `authStateReady()` never settles, and the workspace sat
+// on a spinner until its stall timer gave up and announced an outage. Only a
+// reload repaired it, so the fault looked random and self-healing.
+test('a tab that boots hidden still finds its signed-in session', async () => {
+  const firebase = await read('../src/lib/firebase.js');
+
+  // localStorage first: synchronous, no lifecycle of its own, never «hiding».
+  // IndexedDB stays behind it only so a session written there by an earlier
+  // build is migrated across on the next load.
+  assert.match(
+    firebase,
+    /const AUTH_PERSISTENCE = \[\s*browserLocalPersistence,\s*indexedDBLocalPersistence,\s*browserSessionPersistence,\s*\];/,
+  );
+  assert.match(firebase, /initializeAuth\(app, \{\s*\n\s*persistence: AUTH_PERSISTENCE,/);
+  // `getAuth()` carries the popup resolver; `initializeAuth()` does not, and
+  // without it every `signInWithPopup(auth, provider)` in the product throws.
+  assert.match(firebase, /popupRedirectResolver: browserPopupRedirectResolver,/);
+  // The browser instance must never fall back to the SDK's own hierarchy.
+  assert.match(firebase, /^export const auth = createAuth\(\);$/m);
+  assert.doesNotMatch(firebase, /^export const auth = getAuth\(app\);$/m);
+});
