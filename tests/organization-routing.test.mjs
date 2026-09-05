@@ -36,6 +36,44 @@ test('each browser tab owns its organization selection and keeps it in the URL',
   assert.doesNotMatch(switcher, /router\.push\('\/'\)/);
 });
 
+test('a tab that has never chosen a workspace starts in the last one this account used', async () => {
+  const context = await read('../src/lib/context/OrgContext.js');
+
+  // Owning the selection per tab left a new tab with nothing to prefer: an
+  // empty sessionStorage and a bare address fell through to organizations[0],
+  // the first membership the query returns and therefore the same workspace
+  // every time. Typing the address into a new tab moved you out of the
+  // workspace you were working in, and nothing you clicked had asked for it.
+  assert.match(context, /const LAST_ORG_STORAGE_PREFIX = 'qt_last_org_id:'/);
+  assert.match(context, /function adoptLastOrganization\(accountId\)/);
+  assert.match(context, /adoptLastOrganization\(uid\);/);
+  assert.match(context, /if \(sessionStorage\.getItem\(TAB_STORAGE_KEY\)\) return;/);
+  assert.match(context, /const lastUsed = localStorage\.getItem\(lastKey\);/);
+  assert.match(context, /if \(lastUsed\) sessionStorage\.setItem\(TAB_STORAGE_KEY, lastUsed\);/);
+
+  // The memory is written for the account that made the choice, so two people
+  // signing in on one browser do not inherit each other's last workspace, and
+  // it is written on every selection — the switcher, a link carrying `?org=`,
+  // the QuickTeam handoff and an accepted invitation all arrive through this
+  // one place.
+  assert.match(context, /const lastKey = lastOrganizationKey\(accountId\);/);
+  assert.match(context, /localStorage\.setItem\(lastKey, orgId\)/);
+  assert.match(context, /persistTabOrganization\(orgData\.id, accountId\)/);
+  assert.match(context, /persistTabOrganization\(chosen\.id, uid\)/);
+
+  // Reading it is a seed, not a rule: it goes into the tab's own storage, so
+  // the tab owns it from then on and a workspace switched in another tab still
+  // leaves this one alone.
+  assert.doesNotMatch(context, /localStorage\.(?:getItem|setItem)\(TAB_STORAGE_KEY/);
+
+  // A tab held on the loader because the browser cache is short of the
+  // workspace it carries waits only while a verified answer is still coming.
+  // Without this it waited on a loader nothing was going to end.
+  assert.match(context, /awaitingVerifiedSelection = true;/);
+  assert.match(context, /awaitingVerifiedSelection = false;/);
+  assert.match(context, /publishedOrgs\.length === 0 \|\| awaitingVerifiedSelection/);
+});
+
 test('project and issue routes derive organization scope from the project resource', async () => {
   const [access, projectPage, issuePage, projectClient] = await Promise.all([
     read('../src/lib/server/workspaceProjectAccess.js'),
@@ -138,7 +176,7 @@ test('an organization list published late cannot overwrite a newer one', async (
   assert.match(context, /const requestedOrganization = requested && organizations\.find\(o => o\.id === requested\);/);
   assert.match(context, /const explicitOrganizationId = requested \|\| stored;/);
   assert.match(context, /if \(!authoritative && explicitOrganizationId && !preferred\) \{[\s\S]*setOrgLoading\(true\);[\s\S]*return;/);
-  assert.match(context, /if \(!requested \|\| requestedOrganization\) persistTabOrganization\(chosen\.id\);/);
+  assert.match(context, /if \(!requested \|\| requestedOrganization\) persistTabOrganization\(chosen\.id, uid\);/);
 
   // The list itself is still built from memberships alone — access is
   // `orgMemberships` and nothing else — so the guard protects the right thing.

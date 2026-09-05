@@ -27,6 +27,23 @@ import {
 import { firestoreDocumentData } from '@/lib/utils/firestoreDocument.mjs';
 
 const TAB_STORAGE_KEY = 'qt_active_org_id';
+// The workspace this account last worked in on this browser, shared by every
+// tab and read exactly once per tab: to give a tab that has never chosen a
+// workspace somewhere to start.
+//
+// A tab owns its selection, and that is worth keeping — two workspaces open
+// side by side is the whole point of it. But a *new* tab starts with an empty
+// `sessionStorage`, and with nothing to prefer it fell through to
+// `organizations[0]`: the first membership the query returns, which is the same
+// workspace every time. So typing the address into a new tab silently moved you
+// out of the workspace you had been in a minute earlier, and no click of yours
+// had asked for it. The choice used to live in `localStorage`, which is why
+// this only started happening when each tab got its own.
+//
+// Kept per account, so two people signing in on one browser do not inherit each
+// other's last workspace. A membership is still what decides whether the
+// remembered id may be applied at all.
+const LAST_ORG_STORAGE_PREFIX = 'qt_last_org_id:';
 const ORG_LOAD_RETRY_LIMIT = 3;
 // How often returning to the tab may re-verify the organization directory.
 // See `refreshOnFocus` below for why this is a repair path and not a refresh.
@@ -40,9 +57,30 @@ const DIRECTORY_RECHECK_MS = 30 * 60 * 1000;
 const REFUSAL_REVALIDATION_WINDOW_MS = 5 * 1000;
 const OrgContext = createContext(null);
 
-function persistTabOrganization(orgId) {
+function lastOrganizationKey(accountId) {
+  return accountId ? `${LAST_ORG_STORAGE_PREFIX}${accountId}` : null;
+}
+
+// Hand a tab that has never chosen a workspace the one this account was last
+// working in. It is written into the tab's own storage, so from that moment it
+// is this tab's choice like any other: switching workspaces in another tab
+// leaves it alone, and so does this function on every later load.
+function adoptLastOrganization(accountId) {
+  if (typeof window === 'undefined') return;
+  const lastKey = lastOrganizationKey(accountId);
+  if (!lastKey) return;
+  try {
+    if (sessionStorage.getItem(TAB_STORAGE_KEY)) return;
+    const lastUsed = localStorage.getItem(lastKey);
+    if (lastUsed) sessionStorage.setItem(TAB_STORAGE_KEY, lastUsed);
+  } catch { /* storage may be disabled */ }
+}
+
+function persistTabOrganization(orgId, accountId) {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(TAB_STORAGE_KEY, orgId);
+  const lastKey = lastOrganizationKey(accountId);
+  if (lastKey) localStorage.setItem(lastKey, orgId);
   // Stop legacy versions in another tab from reviving the shared selection.
   localStorage.removeItem(TAB_STORAGE_KEY);
   const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -85,20 +123,22 @@ export function OrgProvider({ user, children }) {
   // слухач. Вікно коротке: це не обмеження частоти, а склеювання сплеску.
   const lastDirectoryRevalidationRef = useRef(0);
 
+  const accountId = user?.id || user?.uid || null;
+
   // ── Apply an org as active (Internal helper) ─────────────────────────
   const applyOrg = useCallback((orgData, role) => {
     // The list listener already read the membership and published its role.
     // Reading the same document again here used the cache-preferred `getDoc`,
     // which could turn a role we had just verified into null in the one browser
     // whose cache did not contain that membership.
-    persistTabOrganization(orgData.id);
+    persistTabOrganization(orgData.id, accountId);
     setActiveOrgId(orgData.id);
     setActiveOrg(orgData);
     setOrgRole(role ?? null);
     setNoOrg(false);
     setOrgError(null);
     setOrgLoading(false);
-  }, []);
+  }, [accountId]);
 
   // ── Load all orgs when user changes ─────────────────────────────────────
   useEffect(() => {
@@ -118,6 +158,11 @@ export function OrgProvider({ user, children }) {
     }
 
     const uid = user.id || user.uid;
+
+    // Before anything is read: a tab with no workspace of its own starts in the
+    // one this account left off in, rather than in whichever workspace the
+    // membership query happens to return first.
+    adoptLastOrganization(uid);
 
     queueMicrotask(() => setOrgDirectoryVerified(false));
 
@@ -141,6 +186,10 @@ export function OrgProvider({ user, children }) {
     // "newer" merely by arriving later.
     const membershipSnapshotGate = createMembershipSnapshotGate();
     let hasVerifiedDirectory = false;
+    // True while the screen is held on the loader because the browser cache is
+    // short of the workspace this tab actually carries, waiting for the server
+    // directory to settle it.
+    let awaitingVerifiedSelection = false;
     let directoryRequest = 0;
     let directoryRetryAttempt = 0;
     let directoryRetryTimer = null;
@@ -263,6 +312,7 @@ export function OrgProvider({ user, children }) {
         // membership or authoritatively says it is gone.
         const explicitOrganizationId = requested || stored;
         if (!authoritative && explicitOrganizationId && !preferred) {
+          awaitingVerifiedSelection = true;
           setNoOrg(false);
           setOrgLoading(true);
           return;
@@ -270,6 +320,7 @@ export function OrgProvider({ user, children }) {
         const chosen = preferred || storedOrganization || organizations[0];
 
         // Apply org (bypassing members array logic)
+        awaitingVerifiedSelection = false;
         setActiveOrgId(chosen.id);
         setActiveOrg(chosen);
         setOrgRole(roles[chosen.id] ?? null);
@@ -282,7 +333,7 @@ export function OrgProvider({ user, children }) {
         // membership, leave that URL untouched for the route guard to render
         // the real denial. Rewriting it to a fallback organization would turn
         // a broken/deauthorized link into a silent wrong-workspace navigation.
-        if (!requested || requestedOrganization) persistTabOrganization(chosen.id);
+        if (!requested || requestedOrganization) persistTabOrganization(chosen.id, uid);
         retryAttempt = 0;
       } catch (err) {
         handleLoadError('[OrgContext] organizations', err);
@@ -386,7 +437,12 @@ export function OrgProvider({ user, children }) {
         // A cache-only empty list is not permission to create a replacement
         // organization. If the server cannot verify it after retries, show the
         // recoverable load error instead of silently claiming there is no org.
-        if (!hasVerifiedDirectory && publishedOrgs.length === 0) {
+        //
+        // The same is true of a tab held on the loader waiting for a workspace
+        // the cache is short of: that wait is worth it only while a verified
+        // answer is still on its way. Once it is not, the screen says so and
+        // offers a retry, rather than spinning on a loader nothing will end.
+        if (!hasVerifiedDirectory && (publishedOrgs.length === 0 || awaitingVerifiedSelection)) {
           setOrgError(err);
           setOrgLoading(false);
         }
