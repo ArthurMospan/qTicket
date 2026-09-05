@@ -24,6 +24,12 @@ const cacheKey = orgId => `qt_sidebar_brand_${orgId}`;
 // наповниться правильним.
 const BRAND_CACHE_VERSION = 1;
 
+// Скільки боронити колір, намальований до першого кадру, поки живий документ
+// організації ще їде. Довше за холодний старт серверної функції й коротше за
+// будь-яке терпіння: якщо за цей час документ не приїхав, він і не приїде, і
+// далі рейку веде React.
+const BOOT_THEME_HOLD_MS = 15_000;
+
 function readCachedBrand(orgId) {
   try {
     const stored = JSON.parse(localStorage.getItem(cacheKey(orgId)) || 'null');
@@ -98,16 +104,33 @@ export function useCachedOrgBranding(activeOrgId, activeOrg) {
 // приїхали живі дані організації — записуємо застосовану тему в кеш для
 // наступного перезавантаження і прибираємо boot-стиль, віддаючи владу React.
 export function useSidebarThemeBoot(theme, ready, activeOrgId) {
-  // Handing the rail back to React is not the same decision as trusting what it
-  // is painting. The style has to go the moment this component renders — React
-  // always has a theme, even before the organization document arrives, and an
-  // `!important` copy of an older one sitting over it wins for as long as it is
-  // there. Waiting for `ready` meant that on any load where the organization
-  // never arrived — a refused read, a spent quota — the browser kept painting a
-  // cached theme for ever, and a change to the colours simply never appeared.
+  // Коли віддавати рейку назад React — і чому не одразу.
+  //
+  // Знімати boot-стиль на монтуванні здавалось безпечним: React же завжди має
+  // якусь тему. Має — але поки документ організації не приїхав, це стандартна
+  // темна. А рейка монтується не тоді, коли організація готова, а тоді, коли
+  // список організацій перестав вантажитись, — тобто вже на заглушках. Тож
+  // намальоване до першого кадру жило кілька мілісекунд, після чого його
+  // прибирали, і далі колір був стандартний рівно доти, доки не відповість
+  // `/api/organizations`. На холодній функції це десять секунд, і всі десять
+  // людина дивиться на дефолт, який анти-мигання й мало прибрати.
+  //
+  // Причина, з якої стиль знімали одразу, лишається чинною: `!important` поверх
+  // React-змінних перемагає, і на завантаженні, де організація не приїде ніколи
+  // — відмова в правах, вичерпана квота, — кешована тема лишалась би назавжди,
+  // а зміна кольору не з'явилась би взагалі.
+  //
+  // Обидві умови сумісні. Стиль іде тієї миті, коли є чим його замінити, і
+  // сходить сам, якщо замінити нічим і замінити вже не буде чим.
   useEffect(() => {
-    document.getElementById('sb-boot-theme')?.remove();
-  }, []);
+    const releaseRail = () => document.getElementById('sb-boot-theme')?.remove();
+    if (ready) {
+      releaseRail();
+      return undefined;
+    }
+    const timer = window.setTimeout(releaseRail, BOOT_THEME_HOLD_MS);
+    return () => window.clearTimeout(timer);
+  }, [ready]);
 
   // Writing the cache is the decision that needs the data to be real: caching a
   // default dark rail for a branded workspace would put the flash back.
